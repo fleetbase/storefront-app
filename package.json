@@ -1,0 +1,54 @@
+{
+  "name": "storefrontapp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@fleetbase/sdk": "../fleetbase-js",
+    "@fleetbase/storefront": "../storefront-js",
+    "@freakycoder/react-native-bounceable": "^0.2.5",
+    "@react-native-async-storage/async-storage": "^1.15.5",
+    "@react-native-community/masked-view": "^0.1.11",
+    "@react-navigation/bottom-tabs": "^5.11.11",
+    "@react-navigation/native": "^5.9.4",
+    "@react-navigation/stack": "^5.14.5",
+    "autoprefixer": "^10.2.6",
+    "postcss": "^8.3.5",
+    "react": "17.0.1",
+    "react-native": "0.64.2",
+    "react-native-animated-radio-button": "^2.0.6",
+    "react-native-bouncy-checkbox": "^2.1.2",
+    "react-native-config": "^1.4.2",
+    "react-native-device-info": "^8.1.3",
+    "react-native-gesture-handler": "^1.10.3",
+    "react-native-reanimated": "^2.2.0",
+    "react-native-safe-area-context": "^3.2.0",
+    "react-native-screens": "^3.4.0",
+    "react-native-snap-carousel": "^3.9.1",
+    "tailwind-rn": "^3.0.1",
+    "tailwindcss": "^2.2.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/runtime": "^7.12.5",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/react-native-fontawesome": "^0.2.6",
+    "@react-native-community/eslint-config": "^2.0.0",
+    "babel-jest": "^26.6.3",
+    "eslint": "7.14.0",
+    "jest": "^26.6.3",
+    "metro-react-native-babel-preset": "^0.64.0",
+    "react-native-svg": "^12.1.1",
+    "react-test-renderer": "17.0.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
