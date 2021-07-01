@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://flb-assets.s3.ap-southeast-1.amazonaws.com/static/fleetbase-logo-svg.svg" width="380" height="100" />
+  <img src="https://flb-assets.s3.ap-southeast-1.amazonaws.com/static/storefront-logo.svg" width="380" height="100" />
 </p>
 <p align="center">
 Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketplace or shop.
