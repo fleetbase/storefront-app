@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, Image, Dimensions, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { getUniqueId } from 'react-native-device-info';
+import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency, isLastIndex } from '../utils';
@@ -43,6 +44,11 @@ const ProductScreen = ({ navigation, route }) => {
     const cannotAddToCart = !canAddToCart;
     const canDecreaseQuantity = quantity > 1;
     const canIncreaseQuantity = quantity < 99;
+
+    const updateCart = (cart) => {
+        setCart(cart);
+        EventRegister.emit('cart.changed', cart);
+    };
 
     const decreaseQuantity = () => {
         if (!canDecreaseQuantity) {
@@ -148,7 +154,7 @@ const ProductScreen = ({ navigation, route }) => {
             }
 
             return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-                setCart(cart);
+                updateCart(cart);
                 resolve(cart);
             });
         });
@@ -166,8 +172,7 @@ const ProductScreen = ({ navigation, route }) => {
                 // if item already exists in cart update item
                 if (cartItem) {
                     return cart.update(cartItem, quantity, { addons, variants }).then((cart) => {
-                        console.log(cart);
-                        setCart(cart);
+                        updateCart(cart);
                         setIsAddingToCart(false);
                         checkInCart();
                     });
@@ -175,8 +180,7 @@ const ProductScreen = ({ navigation, route }) => {
 
                 // add new item to cart
                 return cart.add(product.id, quantity, { addons, variants }).then((cart) => {
-                    console.log(cart);
-                    setCart(cart);
+                    updateCart(cart);
                     setIsAddingToCart(false);
                     checkInCart();
                     

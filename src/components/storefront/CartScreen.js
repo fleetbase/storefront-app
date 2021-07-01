@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View, ScrollView, Text, TouchableOpacity, Image, ImageBackground } from 'react-native';
+import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import tailwind from '../../tailwind';
 import Storefront from '@fleetbase/storefront';
 import { formatCurrency, isLastIndex } from '../../utils';
 
 const StorefrontCartScreen = ({ navigation, route }) => {
-    const { info, key } = route.params;
+    const { info, key, loadedCart } = route.params;
     const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
-    const [cart, setCart] = useState(null);
+    const [cart, setCart] = useState(loadedCart);
     const [isLoading, setIsLoading] = useState(true);
+
+    const updateCart = (cart) => {
+        setCart(cart);
+        EventRegister.emit('cart.changed', cart);
+    };
 
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-            setCart(cart);
+            updateCart(cart);
 
             return cart;
         });
@@ -25,7 +31,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         getCart().then((cart) => {
             cart.empty().then((cart) => {
                 setIsLoading(false);
-                setCart(cart);
+                updateCart(cart);
             });
         });
     };
@@ -40,7 +46,21 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         return subtotal;
     };
 
-    useEffect(() => getCart(), []);
+    if (cart === null) {
+        getCart();
+    }
+
+    useEffect(() => {
+        // Listen for cart changed event
+        const cartChangedListener = EventRegister.addEventListener('cart.changed', (cart) => {
+            setCart(cart);
+        });
+
+        return () => {
+            // Remove cart.changed event listener
+            EventRegister.removeEventListener(cartChangedListener);
+        }
+    }, []);
 
     return (
         <View>
