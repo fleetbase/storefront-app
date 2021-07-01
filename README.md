@@ -22,6 +22,10 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
   <a href="https://fleetbase.io">fleetbase.io</a> | <a href="https://twitter.com/fleetbase_io">@fleetbase_io</a> | <a href="https://discord.gg/Q78hkXNK">Discord</a>
 </p>
 
+<p align="center">
+  <img src="https://flb-assets.s3.ap-southeast-1.amazonaws.com/static/storefront-app-preview.png" width="224" height="385" />
+</p>
+
 ## Powered by Fleetbase & Storefront SDK
 
 ### Installation

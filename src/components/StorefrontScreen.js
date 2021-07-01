@@ -25,6 +25,8 @@ const StorefrontScreen =  ({ route }) => {
     const updateCartTabBadge = (cart) => {
         cartTabOptions.tabBarBadge = cart.getAttribute('total_unique_items');
         setCartTabOptions(cartTabOptions);
+
+        console.log(`🚨 Cart tab badge should refelect ${cart.getAttribute('total_unique_items')} items in cart`);
     };
 
     const updateCartState = (cart) => {
@@ -42,6 +44,7 @@ const StorefrontScreen =  ({ route }) => {
     useEffect(() => {
         // Listen for cart changed event
         const cartChangedListener = EventRegister.addEventListener('cart.changed', (cart) => {
+            console.log('🚨 Cart state changed!');
             updateCartState(cart);
         });
 
