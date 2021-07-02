@@ -3,7 +3,7 @@ import { SafeAreaView, View, Text, TouchableOpacity, Image, Dimensions, ScrollVi
 import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faAsterisk, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency, isLastIndex } from '../utils';
 import tailwind from '../tailwind';
 import Storefront, { Product } from '@fleetbase/storefront';
@@ -11,25 +11,20 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
 import RadioButton from 'react-native-animated-radio-button';
 
-const renderImage = ({ item, index }) => {
-    return (
-        <View key={index} style={tailwind('flex items-center justify-center')}>
-            <Image source={{ uri: item }} style={tailwind('h-56 w-56 rounded-md shadow-sm')} />
-        </View>
-    );
-};
+const { isArray } = Array;
 
 const ProductScreen = ({ navigation, route }) => {
-    const { attributes, key } = route.params;
+    const { attributes, cartItemAttributes, key } = route.params;
     const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
     const product = new Product(attributes);
-    const images = product.getAttribute('images');
+    // const images = product.getAttribute('images');
     // const videos = product.getAttribute('videos');
     const fullWidth = Dimensions.get('window').width;
     const fullHeight = Dimensions.get('window').height;
     const scrollViewMinHeight = fullHeight / 2;
 
-    const [activeSlide, setActiveSlide] = useState(Math.round(images.length / 2));
+    const [images, setImages] = useState(product.getAttribute('images'));
+    const [activeSlide, setActiveSlide] = useState(0);
     const [subtotal, setSubtotal] = useState(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
     const [selectedVariations, setSelectedVariations] = useState({});
     const [selectedAddons, setSelectedAddons] = useState({});
@@ -38,12 +33,20 @@ const ProductScreen = ({ navigation, route }) => {
     const [isValid, setIsValid] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [cart, setCart] = useState(null);
-    const [cartItem, setCartItem] = useState(null);
+    const [cartItem, setCartItem] = useState(cartItemAttributes);
 
     const canAddToCart = isValid && !isAddingToCart;
     const cannotAddToCart = !canAddToCart;
     const canDecreaseQuantity = quantity > 1;
     const canIncreaseQuantity = quantity < 99;
+
+    const renderImages = ({ item, index }) => {
+        return (
+            <View key={index} style={tailwind('flex items-center justify-center w-56 h-56')}>
+                <Image source={{ uri: item }} style={tailwind('h-56 w-56')} />
+            </View>
+        );
+    };
 
     const updateCart = (cart) => {
         setCart(cart);
@@ -56,25 +59,25 @@ const ProductScreen = ({ navigation, route }) => {
         }
 
         setQuantity(quantity - 1);
-    }
+    };
 
     const increaseQuantity = () => {
         if (!canIncreaseQuantity) {
             return;
         }
-        
+
         setQuantity(quantity + 1);
-    }
+    };
 
     const selectAddon = (isChecked, addonCategory, addon) => {
         if (isChecked) {
-            if (!Array.isArray(selectedAddons[addonCategory.id])) {
+            if (!isArray(selectedAddons[addonCategory.id])) {
                 selectedAddons[addonCategory.id] = [];
             }
 
             selectedAddons[addonCategory.id].push(addon);
         } else {
-            if (!Array.isArray(selectedAddons[addonCategory.id])) {
+            if (!isArray(selectedAddons[addonCategory.id])) {
                 selectedAddons[addonCategory.id] = [];
             }
 
@@ -90,13 +93,61 @@ const ProductScreen = ({ navigation, route }) => {
         calculateSubtotal();
     };
 
-    const selectVariation = (variation, variantOption) => {
-        selectedVariations[variation.id] = variantOption;
+    const selectVariation = (variation, variant) => {
+        selectedVariations[variation.id] = variant;
 
         setSelectedVariations(selectedVariations);
         validate();
         calculateSubtotal();
     };
+
+    const isAddonSelected = (addon, addonCategory = null) => {
+        if (addonCategory && selectedAddons && selectedAddons[addonCategory.id]) {
+            const index = selectedAddons[addonCategory.id].findIndex((selectedAddon) => selectedAddon.id === addon.id);
+
+            return index > -1;
+        }
+
+        return (cartItem && isArray(cartItem.addons) && cartItem.addons.findIndex(cartItemAddon => cartItemAddon.id === addon.id) > -1);
+    }
+
+    const isVariantSelected = (variant, variation = null) => {
+        if (variation && selectedVariations && selectedVariations[variation.id]) {
+            return selectedVariations[variation.id].id === variant.id;
+        }
+
+        return (cartItem && isArray(cartItem.variants) && cartItem.variants.findIndex(cartItemVariant => cartItemVariant.id === variant.id) > -1);
+    }
+
+    const restoreSelections = () => {
+        if (cartItem) {
+            for(let i = 0; i < product.variants().length; i++) {
+                const variation = product.variants()[i];
+
+                // check variation options
+                for (let j = 0; j < variation.options.length; j++) {
+                    const variant = variation.options[j];
+
+                    if (isVariantSelected(variant)) {
+                        selectVariation(variation, variant);
+                    }
+                }
+            }
+
+            for(let i = 0; i < product.addons().length; i++) {
+                const addonCategory = product.addons()[i];
+
+                // check addonCategory addons
+                for (let j = 0; j < addonCategory.addons.length; j++) {
+                    const addon = addonCategory.addons[j];
+
+                    if (isAddonSelected(addon)) {
+                        selectAddon(true, addonCategory, addon);
+                    }
+                }
+            }
+        }
+    }
 
     const calculateSubtotal = () => {
         let sum = parseInt(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
@@ -171,7 +222,7 @@ const ProductScreen = ({ navigation, route }) => {
 
                 // if item already exists in cart update item
                 if (cartItem) {
-                    return cart.update(cartItem, quantity, { addons, variants }).then((cart) => {
+                    return cart.update(cartItem.id, quantity, { addons, variants }).then((cart) => {
                         updateCart(cart);
                         setIsAddingToCart(false);
                         checkInCart();
@@ -183,11 +234,12 @@ const ProductScreen = ({ navigation, route }) => {
                     updateCart(cart);
                     setIsAddingToCart(false);
                     checkInCart();
-                    
+
                     const lastEvent = cart.getAttribute('last_event');
 
-                    if (lastEvent && lastEvent.event === 'cart.line_item_added') {
-                        setCartItem(lastEvent.line_item_id);
+                    if (lastEvent && lastEvent.event === 'cart.item_added') {
+                        // setCartItem(lastEvent.cart_item_id);
+                        setCartItem(cart.contents().find(cartItem => cartItem.id === lastEvent.cart_item_id));
                     }
                 });
             })
@@ -221,6 +273,7 @@ const ProductScreen = ({ navigation, route }) => {
 
     useEffect(() => checkInCart(), []);
     useEffect(() => validate(), []);
+    useEffect(() => restoreSelections(), []);
 
     return (
         <SafeAreaView style={tailwind('bg-white')}>
@@ -228,7 +281,7 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                            <FontAwesomeIcon icon={faArrowLeft} />
+                            {cartItemAttributes ? (<FontAwesomeIcon icon={faTimes} />) : (<FontAwesomeIcon icon={faArrowLeft} />)}
                         </View>
                     </TouchableOpacity>
                     <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
@@ -237,13 +290,14 @@ const ProductScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex flex-col justify-center w-full')}>
                         <View>
                             <Carousel
-                                layout={'default'}
+                                layout={'stack'}
                                 data={images}
-                                renderItem={renderImage}
+                                renderItem={renderImages}
                                 sliderWidth={fullWidth}
                                 itemWidth={225}
                                 onSnapToItem={(index) => setActiveSlide(index)}
                                 firstItem={activeSlide}
+                                enableMomentum={true}
                             />
                             <Pagination
                                 dotsLength={images.length}
@@ -282,34 +336,34 @@ const ProductScreen = ({ navigation, route }) => {
                                 <Text style={tailwind('mb-3')}>{product.getAttribute('description')}</Text>
                             </View>
                             <View style={tailwind('bg-gray-100')}>
-                                {product.getAttribute('variants').map((variant) => (
-                                    <View key={variant.id} style={tailwind('my-2 bg-white w-full p-4')}>
+                                {product.variants().map((variation, i) => (
+                                    <View key={i} style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-start mb-2')}>
-                                            <Text style={tailwind('font-semibold text-lg mr-1')}>{variant.name}</Text>
-                                            {variant.is_required && (
+                                            <Text style={tailwind('font-semibold text-lg mr-1')}>{variation.name}</Text>
+                                            {variation.is_required && (
                                                 <View style={tailwind('mt-1.5')}>
                                                     <FontAwesomeIcon icon={faAsterisk} size={8} style={tailwind('text-red-500')} />
                                                 </View>
                                             )}
                                         </View>
-                                        {variant.options.map((variantOption, index) => (
+                                        {variation.options.map((variant, j) => (
                                             <View
-                                                key={index}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variant.options, index) ? '' : 'border-b'} border-gray-100`)}>
+                                                key={j}
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}>
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     <View style={tailwind('mr-4')}>
                                                         <RadioButton
                                                             innerBackgroundColor="#3B82F6"
                                                             style={tailwind('rounded-full border-2 border-blue-500 w-6 h-6')}
                                                             innerContainerStyle={tailwind('rounded-full w-4 h-4')}
-                                                            onPress={() => selectVariation(variant, variantOption)}
-                                                            isActive={selectedVariations[variant.id] === variantOption}
+                                                            isActive={isVariantSelected(variant, variation) === true}
+                                                            onPress={() => selectVariation(variation, variant)}
                                                         />
                                                     </View>
-                                                    <Text style={tailwind('text-sm text-gray-700')}>{variantOption.name}</Text>
+                                                    <Text style={tailwind('text-sm text-gray-700')}>{variant.name}</Text>
                                                 </View>
                                                 <View>
-                                                    <Text style={tailwind('text-gray-400')}>+{formatCurrency(variantOption.additional_cost / 100, product.getAttribute('currency'))}</Text>
+                                                    <Text style={tailwind('text-gray-400')}>+{formatCurrency(variant.additional_cost / 100, product.getAttribute('currency'))}</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -317,17 +371,17 @@ const ProductScreen = ({ navigation, route }) => {
                                 ))}
                             </View>
                             <View style={tailwind('bg-gray-100')}>
-                                {product.getAttribute('addon_categories').map((addonCategory) => (
-                                    <View key={addonCategory.id} style={tailwind('my-2 bg-white w-full p-4')}>
+                                {product.addons().map((addonCategory, i) => (
+                                    <View key={i} style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <Text style={tailwind('font-semibold text-lg mr-2')}>{addonCategory.name}</Text>
                                             <Text style={tailwind('text-gray-400 text-xs')}>Optional, max {addonCategory.addons.length}</Text>
                                         </View>
-                                        {addonCategory.addons.map((addon, index) => (
+                                        {addonCategory.addons.map((addon, j) => (
                                             <View
-                                                key={index}
+                                                key={j}
                                                 style={tailwind(
-                                                    `flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, index) ? '' : 'border-b'} border-gray-100`
+                                                    `flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`
                                                 )}>
                                                 <View>
                                                     <View style={tailwind('flex flex-row items-center')}>
@@ -336,6 +390,7 @@ const ProductScreen = ({ navigation, route }) => {
                                                             fillColor="#3B82F6"
                                                             unfillColor="#ffffff"
                                                             iconStyle={{ ...tailwind('rounded-md border border-blue-500') }}
+                                                            isChecked={isAddonSelected(addon, addonCategory) === true}
                                                             onPress={(isChecked) => selectAddon(isChecked, addonCategory, addon)}
                                                         />
                                                         <Text style={tailwind('text-sm text-gray-700')}>{addon.name}</Text>
@@ -368,7 +423,7 @@ const ProductScreen = ({ navigation, route }) => {
                                 `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`
                             )}>
                             {isAddingToCart && <ActivityIndicator color="#3B82F6" style={tailwind('mr-3')} />}
-                            <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{`${cartItem ? 'Update in Cart' : (isInCart ? 'Add Another' : 'Add to Cart')} - ${formatCurrency(
+                            <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{`${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(
                                 subtotal / 100,
                                 product.getAttribute('currency')
                             )}`}</Text>

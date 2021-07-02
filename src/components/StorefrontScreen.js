@@ -8,7 +8,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
 import Storefront from '@fleetbase/storefront';
 import StorefrontAccountScreen from './storefront/AccountScreen';
-import StorefrontCartScreen from './storefront/CartScreen';
+// import StorefrontCartScreen from './storefront/CartScreen';
+import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
 
 const Tab = createBottomTabNavigator();
@@ -54,7 +55,7 @@ const StorefrontScreen =  ({ route }) => {
         }
     }, []);
 
-    if (cart === null) {
+    if (!cart) {
         getCart();
     }
 
@@ -89,7 +90,7 @@ const StorefrontScreen =  ({ route }) => {
             }}
         >
             <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info, key }} />
-            <Tab.Screen key="cart" name="Cart" component={StorefrontCartScreen} options={cartTabOptions} initialParams={{ info, key, loadedCart: cart }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, key, loadedCart: cart }} />
             <Tab.Screen key="account" name="Account" component={StorefrontAccountScreen} initialParams={{ info, key }} />
         </Tab.Navigator>
     );

@@ -1,14 +1,25 @@
 import React from 'react';
-import { SafeAreaView, View, Text } from 'react-native';
+import {  View, Text, ImageBackground } from 'react-native';
 import tailwind from '../../tailwind';
 
 const StorefrontAccountScreen = ({ navigation }) => {
+    const { info, key, loadedCart } = route.params;
+    
     return (
-        <SafeAreaView style={tailwind('bg-white')}>
-            <View style={tailwind('flex items-center justify-center w-full h-full bg-white')}>
-                <Text>Account Screen</Text>
+        <View>
+            <View style={tailwind('flex h-32 overflow-hidden')}>
+                <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
+                    <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
+                        <View>
+                            <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
+                                <Text style={tailwind('text-white')}>{info.name}</Text>
+                            </View>
+                        </View>
+                        <View></View>
+                    </View>
+                </ImageBackground>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
