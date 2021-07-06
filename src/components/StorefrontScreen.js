@@ -11,6 +11,7 @@ import StorefrontAccountScreen from './storefront/AccountScreen';
 // import StorefrontCartScreen from './storefront/CartScreen';
 import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
+import AccountStack from './storefront/AccountStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -92,7 +93,7 @@ const StorefrontScreen =  ({ route }) => {
         >
             <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info, key }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, key, loadedCart: cart }} />
-            <Tab.Screen key="account" name="Account" component={StorefrontAccountScreen} initialParams={{ info, key }} />
+            <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info, key }} />
         </Tab.Navigator>
     );
 };
