@@ -32,6 +32,7 @@
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.4.0",
     "react-native-snap-carousel": "^3.9.1",
+    "react-native-swipe-list-view": "^3.2.9",
     "tailwind-rn": "^3.0.1",
     "tailwindcss": "^2.2.4"
   },

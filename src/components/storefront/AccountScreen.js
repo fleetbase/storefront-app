@@ -2,9 +2,9 @@ import React from 'react';
 import {  View, Text, ImageBackground } from 'react-native';
 import tailwind from '../../tailwind';
 
-const StorefrontAccountScreen = ({ navigation }) => {
+const StorefrontAccountScreen = ({ navigation, route }) => {
     const { info, key, loadedCart } = route.params;
-    
+
     return (
         <View>
             <View style={tailwind('flex h-32 overflow-hidden')}>

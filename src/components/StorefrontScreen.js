@@ -28,6 +28,7 @@ const StorefrontScreen =  ({ route }) => {
         setCartTabOptions(cartTabOptions);
 
         console.log(`🚨 Cart tab badge should refelect ${cart.getAttribute('total_unique_items')} items in cart`);
+        console.log(cartTabOptions);
     };
 
     const updateCartState = (cart) => {
