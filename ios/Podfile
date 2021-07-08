@@ -12,6 +12,13 @@ target 'StorefrontApp' do
     :hermes_enabled => false
   )
 
+  # Permissions handlers
+  permissions_path = '../node_modules/react-native-permissions/ios'
+
+  pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
+  pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
+  pod 'Permission-Contacts', :path => "#{permissions_path}/Contacts"
+
   target 'StorefrontAppTests' do
     inherit! :complete
     # Pods for testing

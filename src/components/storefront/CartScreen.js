@@ -112,7 +112,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View>
+        <View style={tailwind('h-full')}>
             <View style={tailwind('flex h-32 overflow-hidden')}>
                 <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
                     <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
@@ -240,19 +240,21 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                         )
                     }
                     ListEmptyComponent={
-                        <View style={tailwind('mt-20 flex items-center justify-center')}>
-                            <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
-                                <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
-                            </View>
-                            <View style={tailwind('flex items-center justify-center mb-10')}>
-                                <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Your Cart is Empty</Text>
-                                <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't added anything to your cart yet.</Text>
-                            </View>
-                            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-                                <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white shadow-sm')}>
-                                    <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Start Shopping</Text>
+                        <View style={tailwind('h-full w-full flex items-center justify-center')}>
+                            <View style={tailwind('flex items-center justify-center w-full px-8')}>
+                                <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
+                                    <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
                                 </View>
-                            </TouchableOpacity>
+                                <View style={tailwind('flex items-center justify-center mb-10')}>
+                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Your Cart is Empty</Text>
+                                    <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't added anything to your cart yet.</Text>
+                                </View>
+                                <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('Home')}>
+                                    <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
+                                        <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Start Shopping</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     }
                     ListFooterComponent={

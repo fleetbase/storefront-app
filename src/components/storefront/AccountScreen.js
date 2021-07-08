@@ -19,8 +19,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                 return;
             }
 
-            const customer = new Customer(attributes).setAdapter(storefront.getAdapter());
-            setCustomer(customer);
+            setCustomer(new Customer(attributes, storefront.getAdapter()));
         });
     };
 
@@ -82,7 +81,6 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                     <View style={tailwind('p-4 mb-4 bg-white')}>
                         <View style={tailwind('flex flex-row')}>
                             <View style={tailwind('mr-4')}>
-                                {console.log('customer jsx', customer.getAttribute('photo_url'), customer)}
                                 <Image source={{ uri: customer.getAttribute('photo_url') }} style={tailwind('w-12 h-12 rounded-full')} />
                             </View>
                             <View>
@@ -112,11 +110,22 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('AddressBook')}>
+                            <TouchableOpacity onPress={() => navigation.navigate('OrderHistory')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faBox} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Orders</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('SavedPlaces', { attributes: customer.serialize(), key })}>
                                 <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faMapMarked} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                        <Text style={tailwind('text-gray-700 text-base')}>Addresses</Text>
+                                        <Text style={tailwind('text-gray-700 text-base')}>Places</Text>
                                     </View>
                                     <View>
                                         <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
@@ -128,17 +137,6 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faCreditCard} size={18} style={tailwind('mr-3 text-gray-600')} />
                                         <Text style={tailwind('text-gray-700 text-base')}>Payment Methods</Text>
-                                    </View>
-                                    <View>
-                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('OrderHistory')}>
-                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
-                                    <View style={tailwind('flex flex-row items-center')}>
-                                        <FontAwesomeIcon icon={faBox} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                        <Text style={tailwind('text-gray-700 text-base')}>Orders</Text>
                                     </View>
                                     <View>
                                         <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />

@@ -14,6 +14,7 @@
 		67645E408F3552F2E5478C2E /* libPods-StorefrontApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96A859EB5B568259B9BD3FA9 /* libPods-StorefrontApp.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		C3CCC92698644AECB80B2AD1 /* libPods-StorefrontApp-StorefrontAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D2AA564C91BA79CD0C46DBF /* libPods-StorefrontApp-StorefrontAppTests.a */; };
+		E4E31EBE26970A7F001BAF0A /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E31EBD26970A7F001BAF0A /* Header.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +43,8 @@
 		815DF1CB3D6857C41F059218 /* Pods-StorefrontApp-StorefrontAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp-StorefrontAppTests.release.xcconfig"; path = "Target Support Files/Pods-StorefrontApp-StorefrontAppTests/Pods-StorefrontApp-StorefrontAppTests.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = StorefrontApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		96A859EB5B568259B9BD3FA9 /* libPods-StorefrontApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StorefrontApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4E31EBC26970A7F001BAF0A /* StorefrontApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StorefrontApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		E4E31EBD26970A7F001BAF0A /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		E50DF5D08DDC645C3E4EC312 /* Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig"; path = "Target Support Files/Pods-StorefrontApp-StorefrontAppTests/Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -127,12 +130,14 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				E4E31EBD26970A7F001BAF0A /* Header.swift */,
 				13B07FAE1A68108700A75B9A /* StorefrontApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* StorefrontAppTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				1EBA3890EB69DCE7FE109E94 /* Pods */,
+				E4E31EBC26970A7F001BAF0A /* StorefrontApp-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -207,7 +212,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1250;
 					};
 				};
 			};
@@ -411,6 +416,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				E4E31EBE26970A7F001BAF0A /* Header.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -430,6 +436,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E50DF5D08DDC645C3E4EC312 /* Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -457,6 +464,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 815DF1CB3D6857C41F059218 /* Pods-StorefrontApp-StorefrontAppTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = StorefrontAppTests/Info.plist;
@@ -499,6 +507,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.fleetbase.storefrontapp;
 				PRODUCT_NAME = StorefrontApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -526,6 +535,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.fleetbase.storefrontapp;
 				PRODUCT_NAME = StorefrontApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
