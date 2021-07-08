@@ -25,13 +25,17 @@ const get = async (key) => {
         value = JSON.parse(value);
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         if (!value) {
-            reject(null);
+            resolve(null);
         }
 
         resolve(value);
     });
 };
 
-export { get, set, isJson };
+const remove = (key) => {
+    return AsyncStorage.removeItem(key);
+};
+
+export { get, set, remove, isJson };

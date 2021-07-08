@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ImageBackground, Image, TouchableOpacity } from 'react-native';
 import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../../tailwind';
 import Storefront, { Customer } from '@fleetbase/storefront';
-import { get, set } from '../../utils/storage';
+import { get, set, remove } from '../../utils/storage';
 
 const StorefrontAccountScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
@@ -13,8 +15,18 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
     
     const resolveCustomer = () => {
         get('customer').then((attributes) => {
+            if (!attributes) {
+                return;
+            }
+
             const customer = new Customer(attributes).setAdapter(storefront.getAdapter());
             setCustomer(customer);
+        });
+    };
+
+    const signOut = () => {
+        remove('customer').then(() => {
+            setCustomer(null);
         });
     };
     
@@ -49,17 +61,17 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                 </ImageBackground>
             </View>
             {!customer && (
-                <View style={tailwind('flex items-center w-full h-full py-20')}>
-                    <Text style={tailwind('text-lg font-semibold mb-6')}>Create an account or login</Text>
-                    <View style={tailwind('flex')}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={tailwind('mb-6')}>
-                            <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white shadow-sm')}>
-                                <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Login</Text>
+                <View style={tailwind('w-full h-full py-20')}>
+                    <Text style={tailwind('text-lg text-center font-semibold mb-6')}>Create an account or login</Text>
+                    <View style={tailwind('px-6')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={tailwind('mb-5')}>
+                            <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                <Text style={tailwind('font-semibold text-black text-base')}>Login</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                            <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white shadow-sm')}>
-                                <Text style={tailwind('font-semibold text-green-500 text-lg')}>Create Account</Text>
+                            <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                <Text style={tailwind('font-semibold text-black text-base')}>Create Account</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -84,14 +96,71 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                             <Text style={tailwind('font-semibold text-base')}>Recent Orders</Text>
                         </View>
                     </View>
-                    <View style={tailwind('p-4 mb-4 bg-white')}>
-                        <View style={tailwind('flex flex-row')}>
-                            <Text style={tailwind('font-semibold text-base')}>Quick Links</Text>
+                    <View style={tailwind('mb-4 bg-white')}>
+                        <View style={tailwind('flex flex-row p-4')}>
+                            <Text style={tailwind('font-semibold text-base')}>My Account</Text>
+                        </View>
+                        <View>
+                            <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faUser} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Profile</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('AddressBook')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faMapMarked} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Addresses</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('PaymentMethods')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faCreditCard} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Payment Methods</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('OrderHistory')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faBox} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Orders</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')}>
+                                <View style={tailwind('flex flex-row items-center justify-between p-4')}>
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <FontAwesomeIcon icon={faLockOpen} size={18} style={tailwind('mr-3 text-gray-600')} />
+                                        <Text style={tailwind('text-gray-700 text-base')}>Change Password</Text>
+                                    </View>
+                                    <View>
+                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={tailwind('p-4')}>
                         <View style={tailwind('flex flex-row items-center justify-center')}>
-                            <TouchableOpacity style={tailwind('flex-1')} onPress={() => navigation.navigate('CreateAccount')}>
+                            <TouchableOpacity style={tailwind('flex-1')} onPress={signOut}>
                                 <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
                                     <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
                                 </View>
