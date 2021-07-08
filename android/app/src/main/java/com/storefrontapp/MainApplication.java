@@ -10,7 +10,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import com.storefrontapp.CustomRNMMKVJSIModulePackage;
+import com.storefrontapp.CustomMMKVJSIModulePackage;
 import com.facebook.react.bridge.JSIModulePackage;
 
 public class MainApplication extends Application implements ReactApplication {
@@ -38,7 +38,7 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected JSIModulePackage getJSIModulePackage() {
-            return new CustomRNMMKVJSIModulePackage();
+            return new CustomMMKVJSIModulePackage();
         }
       };
 

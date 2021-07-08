@@ -4,31 +4,20 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import tailwind from '../../tailwind';
 import Storefront, { Customer } from '@fleetbase/storefront';
-import MMKVStorage from 'react-native-mmkv-storage';
-
-const DataStore = new MMKVStorage.Loader().withInstanceID(getUniqueId()).initialize();
+import { get, set } from '../../utils/storage';
 
 const StorefrontAccountScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
     const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
-    const [customer, setCustomer] = useState(null);
-
-    const getCustomer = () => {
-        const attributes = DataStore.getMap('customer');
-
-        console.log('getCustomer', attributes);
-
-        if (attributes) {
-            const _customer = new Customer(attributes);
-            _customer.setAdapter(storefront.getAdapter());
-            setCustomer(_customer);
-        }
+    const [ customer, setCustomer ] = useState(null);
+    
+    const resolveCustomer = () => {
+        get('customer').then((attributes) => {
+            const customer = new Customer(attributes).setAdapter(storefront.getAdapter());
+            setCustomer(customer);
+        });
     };
-
-    if (customer === null) {
-        getCustomer();
-    }
-
+    
     useEffect(() => {
         // Listen for customer created event
         const customerCreatedListener = EventRegister.addEventListener('customer.created', (customer) => {
@@ -40,6 +29,10 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
             EventRegister.removeEventListener(customerCreatedListener);
         };
     }, []);
+
+    if (customer === null) {
+        resolveCustomer();
+    }
 
     return (
         <View>
@@ -74,15 +67,35 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
             )}
             {customer && (
                 <View style={tailwind('w-full h-full')}>
-                    <View style={tailwind('p-4')}>
+                    <View style={tailwind('p-4 mb-4 bg-white')}>
                         <View style={tailwind('flex flex-row')}>
                             <View style={tailwind('mr-4')}>
+                                {console.log('customer jsx', customer.getAttribute('photo_url'), customer)}
                                 <Image source={{ uri: customer.getAttribute('photo_url') }} style={tailwind('w-12 h-12 rounded-full')} />
                             </View>
                             <View>
                                 <Text style={tailwind('text-lg font-semibold')}>Hello, {customer.getAttribute('name')}</Text>
                                 <Text style={tailwind('text-gray-500')}>{customer.getAttribute('phone')}</Text>
                             </View>
+                        </View>
+                    </View>
+                    <View style={tailwind('p-4 mb-4 bg-white')}>
+                        <View style={tailwind('flex flex-row')}>
+                            <Text style={tailwind('font-semibold text-base')}>Recent Orders</Text>
+                        </View>
+                    </View>
+                    <View style={tailwind('p-4 mb-4 bg-white')}>
+                        <View style={tailwind('flex flex-row')}>
+                            <Text style={tailwind('font-semibold text-base')}>Quick Links</Text>
+                        </View>
+                    </View>
+                    <View style={tailwind('p-4')}>
+                        <View style={tailwind('flex flex-row items-center justify-center')}>
+                            <TouchableOpacity style={tailwind('flex-1')} onPress={() => navigation.navigate('CreateAccount')}>
+                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                    <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
+                                </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>

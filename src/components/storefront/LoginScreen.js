@@ -6,9 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../../tailwind';
 import Storefront from '@fleetbase/storefront';
-import MMKVStorage from "react-native-mmkv-storage";
-
-const DataStore = new MMKVStorage.Loader().withInstanceID(getUniqueId()).initialize();
+import { set } from '../../utils/storage';
 
 const StorefrontLoginScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
@@ -25,12 +23,8 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
 
     const verifyCode = () => {
         storefront.customers.verifySmsCode(phone, code).then((customer) => {
-            console.log('code verified!', customer);
-            console.log('inserting to mmkv', customer.serialize());
-            // save customer in data store
-            DataStore.setMap('customer', customer.serialize());
+            set('customer', customer.serialize());
             EventRegister.emit('customer.created', customer);
-            // go back
             navigation.goBack();
         });
     }
