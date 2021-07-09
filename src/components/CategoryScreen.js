@@ -5,10 +5,11 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../tailwind';
 import Storefront, { Category } from '@fleetbase/storefront';
 import formatCurrency from '../utils/format-currency';
+import { useStorefrontSdk } from '../utils';
 
 const CategoryScreen = ({ navigation, route }) => {
     const { attributes, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
     const category = new Category(attributes);
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

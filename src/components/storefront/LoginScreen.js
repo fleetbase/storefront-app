@@ -1,33 +1,38 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
+import { SafeAreaView, View, Text, ImageBackground, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { getUniqueId } from 'react-native-device-info';
-import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import tailwind from '../../tailwind';
-import Storefront from '@fleetbase/storefront';
+import { useStorefrontSdk, updateCustomer } from '../../utils';
 import { set } from '../../utils/storage';
+import tailwind from '../../tailwind';
 
 const StorefrontLoginScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
     const [phone, setPhone] = useState(null);
     const [code, setCode] = useState(null);
     const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const storefront = useStorefrontSdk();
 
     const sendVerificationCode = () => {
+        setIsLoading(true);
+
         storefront.customers.login(phone).then((response) => {
             setIsAwaitingVerification(true);
+            setIsLoading(false);
         });
     };
 
     const verifyCode = () => {
+        setIsLoading(true);
+
         storefront.customers.verifySmsCode(phone, code).then((customer) => {
-            set('customer', customer.serialize());
-            EventRegister.emit('customer.created', customer);
+            updateCustomer(customer);
+            setIsLoading(false);
             navigation.goBack();
         });
-    }
+    };
 
     return (
         <SafeAreaView style={tailwind('bg-white')}>
@@ -43,19 +48,31 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                 <View style={tailwind('px-4 py-6')}>
                     {!isAwaitingVerification && (
                         <View>
-                            <TextInput onChangeText={setPhone} keyboardType={'phone-pad'} placeholder={'Your mobile #'} style={tailwind('border border-gray-700 rounded-md px-4 py-4 text-base leading-6 mb-6')} />
+                            <View style={tailwind('mb-6')}>
+                                <TextInput
+                                    onChangeText={setPhone}
+                                    keyboardType={'phone-pad'}
+                                    placeholder={'Your mobile #'}
+                                    placeholderTextColor={'rgba(107, 114, 128, 1)'}
+                                    style={tailwind('form-input')}
+                                />
+                            </View>
                             <TouchableOpacity onPress={sendVerificationCode}>
-                                <View style={tailwind('rounded-md px-8 py-2 bg-white border border-green-500')}>
-                                    <Text style={tailwind('font-semibold text-green-500 text-lg text-center')}>Send Verification Code</Text>
+                                <View style={tailwind('btn border border-blue-500')}>
+                                    {isLoading && <ActivityIndicator color={'rgba(59, 130, 246, 1)'} style={tailwind('mr-2')} />}
+                                    <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>Send Verification Code</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
                     )}
                     {isAwaitingVerification && (
                         <View>
-                            <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} style={tailwind('border border-gray-700 rounded-md px-4 py-4 text-base leading-6 mb-6')} />
+                            <View style={tailwind('mb-6')}>
+                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} style={tailwind('form-input text-center')} />
+                            </View>
                             <TouchableOpacity onPress={verifyCode}>
-                                <View style={tailwind('rounded-md px-8 py-2 bg-white border border-green-500')}>
+                                <View style={tailwind('btn border border-green-500')}>
+                                    {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
                                     <Text style={tailwind('font-semibold text-green-500 text-lg text-center')}>Verify Code</Text>
                                 </View>
                             </TouchableOpacity>

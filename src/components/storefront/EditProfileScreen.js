@@ -1,13 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { getCustomer, updateCustomer } from '../../utils';
+import { getLocation } from '../../utils/location';
+import { set } from '../../utils/storage';
 import tailwind from '../../tailwind';
+import PhoneInput from '../ui/PhoneInput';
 
-const StorefrontEditProfileScreen = ({ navigation, route }) => {
+const StorefrontEditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
+    const customer = getCustomer();
+    const location = getLocation();
+    const [name, setName] = useState(customer.getAttribute('name'));
+    const [email, setEmail] = useState(customer.getAttribute('email'));
+    const [phone, setPhone] = useState(customer.getAttribute('phone'));
+
+    const saveProfile = () => {
+        return customer.setAttributes({
+            name, email
+        }).saveDirty().then(customer => {
+            updateCustomer(customer);
+            navigation.goBack();
+        });
+    };
+
+    console.log(location);
 
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
@@ -20,8 +40,45 @@ const StorefrontEditProfileScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                     <Text style={tailwind('text-xl font-semibold')}>Your profile</Text>
                 </View>
-                <View style={tailwind('flex items-center justify-center w-full h-full')}>
-                    <Text>Edit Profile Screen</Text>
+                <View style={tailwind('flex w-full h-full')}>
+                    <View style={tailwind('p-4')}>
+                        <View style={tailwind('mb-4')}>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your name</Text>
+                            <TextInput
+                                value={name}
+                                onChangeText={setName}
+                                keyboardType={'default'}
+                                placeholder={'Your display name'}
+                                placeholderTextColor={'rgba(107, 114, 128, 1)'}
+                                style={tailwind('form-input')}
+                            />
+                        </View>
+                        <View style={tailwind('mb-4')}>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your email address</Text>
+                            <TextInput
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType={'email-address'}
+                                placeholder={'Your email address'}
+                                placeholderTextColor={'rgba(107, 114, 128, 1)'}
+                                style={tailwind('form-input')}
+                            />
+                        </View>
+                        <View style={tailwind('mb-4')}>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your mobile number</Text>
+                            <PhoneInput
+                                value={phone}
+                                onChangeText={setPhone}
+                                defaultCountry={location?.country}
+                            />
+                        </View>
+                        <TouchableOpacity onPress={saveProfile}>
+                            <View style={tailwind('btn border border-gray-500')}>
+                                {customer.isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
+                                <Text style={tailwind('font-semibold text-lg text-center')}>Save Profile</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </View>

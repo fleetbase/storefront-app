@@ -1,43 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ImageBackground, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../../tailwind';
-import Storefront, { Customer } from '@fleetbase/storefront';
+import { Customer } from '@fleetbase/storefront';
+import { useStorefrontSdk } from '../../utils';
 import { get, set, remove } from '../../utils/storage';
 
 const StorefrontAccountScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
-    const [ customer, setCustomer ] = useState(null);
-    
-    const resolveCustomer = () => {
-        get('customer').then((attributes) => {
-            if (!attributes) {
-                return;
-            }
+    const storefront = useStorefrontSdk();
+    const [customer, setCustomer] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-            setCustomer(new Customer(attributes, storefront.getAdapter()));
-        });
+    const resolveCustomer = () => {
+        const attributes = get('customer');
+
+        if (!attributes) {
+            return;
+        }
+
+        setCustomer(new Customer(attributes, storefront.getAdapter()));
     };
 
     const signOut = () => {
-        remove('customer').then(() => {
-            setCustomer(null);
-        });
+        setIsLoading(true);
+
+        remove('customer');
+        setIsLoading(false);
+        setCustomer(null);
     };
-    
+
     useEffect(() => {
         // Listen for customer created event
-        const customerCreatedListener = EventRegister.addEventListener('customer.created', (customer) => {
+        const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
             setCustomer(customer);
         });
 
         return () => {
             // Remove cart.changed event listener
-            EventRegister.removeEventListener(customerCreatedListener);
+            EventRegister.removeEventListener(customerUpdatedListener);
         };
     }, []);
 
@@ -60,19 +64,24 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                 </ImageBackground>
             </View>
             {!customer && (
-                <View style={tailwind('w-full h-full py-20')}>
-                    <Text style={tailwind('text-lg text-center font-semibold mb-6')}>Create an account or login</Text>
-                    <View style={tailwind('px-6')}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={tailwind('mb-5')}>
-                            <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
-                                <Text style={tailwind('font-semibold text-black text-base')}>Login</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                            <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
-                                <Text style={tailwind('font-semibold text-black text-base')}>Create Account</Text>
-                            </View>
-                        </TouchableOpacity>
+                <View style={tailwind('w-full h-full')}>
+                    <View style={tailwind('flex items-center justify-center w-full')}>
+                        <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
+                            <FontAwesomeIcon icon={faIdBadge} size={88} style={tailwind('text-gray-600')} />
+                        </View>
+                        <Text style={tailwind('text-lg text-center font-semibold mb-6')}>Create an account or login</Text>
+                        <View style={tailwind('px-6 w-full')}>
+                            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={tailwind('mb-5')}>
+                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                    <Text style={tailwind('font-semibold text-black text-base')}>Login</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                    <Text style={tailwind('font-semibold text-black text-base')}>Create Account</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             )}
@@ -99,7 +108,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                             <Text style={tailwind('font-semibold text-base')}>My Account</Text>
                         </View>
                         <View>
-                            <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+                            <TouchableOpacity onPress={() => navigation.navigate('EditProfile', { attributes: customer.serialize() })}>
                                 <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faUser} size={18} style={tailwind('mr-3 text-gray-600')} />
@@ -121,7 +130,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('SavedPlaces', { attributes: customer.serialize(), key })}>
+                            <TouchableOpacity onPress={() => navigation.navigate('SavedPlaces', { attributes: customer.serialize() })}>
                                 <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faMapMarked} size={18} style={tailwind('mr-3 text-gray-600')} />
@@ -159,7 +168,8 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                     <View style={tailwind('p-4')}>
                         <View style={tailwind('flex flex-row items-center justify-center')}>
                             <TouchableOpacity style={tailwind('flex-1')} onPress={signOut}>
-                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
+                                <View style={tailwind('btn border border-gray-400')}>
+                                    {isLoading && (<ActivityIndicator style={tailwind('mr-2')} />)}
                                     <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
                                 </View>
                             </TouchableOpacity>

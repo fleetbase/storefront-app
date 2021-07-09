@@ -7,11 +7,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../../tailwind';
 import Storefront from '@fleetbase/storefront';
-import { formatCurrency, isLastIndex } from '../../utils';
+import { formatCurrency, isLastIndex, useStorefrontSdk } from '../../utils';
 
 const StorefrontCartScreen = ({ navigation, route }) => {
     const { info, key, loadedCart } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
     const [cart, setCart] = useState(loadedCart);
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);

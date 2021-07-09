@@ -4,45 +4,29 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked } from '@fortawesome/free-solid-svg-icons';
-import tailwind from '../../tailwind';
-import Storefront, { Customer } from '@fleetbase/storefront';
+import { Customer } from '@fleetbase/storefront';
+import { useStorefrontSdk, getCustomer } from '../../utils';
 import { get } from '../../utils/storage';
+import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
     const { attributes, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
-    const insets = useSafeAreaInsets();
-    const [customer, setCustomer] = useState(null);
+    const [customer, setCustomer] = useState(getCustomer());
     const [places, setPlaces] = useState([]);
+    const storefront = useStorefrontSdk();
+    const insets = useSafeAreaInsets();
 
-    const resolveCustomer = () => {
-        if (attributes) {
-            const customer = new Customer(attributes).setAdapter(storefront.getAdapter());
-            setCustomer(customer);
-            return;
+    const loadPlaces = () => {
+        if (customer) {
+            return customer.getAddresses().then((places) => {
+                setPlaces(places);
+            });
         }
-
-        get('customer').then((attrs) => {
-            if (!attrs) {
-                return;
-            }
-
-            const customer = new Customer(attrs).setAdapter(storefront.getAdapter());
-            setCustomer(customer);
-        });
-    };
-
-    if (customer === null) {
-        resolveCustomer();
     }
 
     // get addresses
     useEffect(() => {
-        if (customer) {
-            customer.getAddresses().then((places) => {
-                setPlaces(places);
-            });
-        }
+        loadPlaces();
     }, []);
 
     return (

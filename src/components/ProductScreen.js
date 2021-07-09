@@ -4,9 +4,9 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { formatCurrency, isLastIndex } from '../utils';
+import { formatCurrency, isLastIndex, useStorefrontSdk } from '../utils';
 import tailwind from '../tailwind';
-import Storefront, { Product } from '@fleetbase/storefront';
+import { Product } from '@fleetbase/storefront';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
 import RadioButton from 'react-native-animated-radio-button';
@@ -15,7 +15,7 @@ const { isArray } = Array;
 
 const ProductScreen = ({ navigation, route }) => {
     const { attributes, cartItemAttributes, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
     const product = new Product(attributes);
     // const images = product.getAttribute('images');
     // const videos = product.getAttribute('videos');

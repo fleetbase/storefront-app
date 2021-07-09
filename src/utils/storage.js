@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MMKV } from 'react-native-mmkv';
 
 const isJson = (string) => {
     try {
@@ -15,27 +16,25 @@ const set = (key, value) => {
         value = JSON.stringify(value);
     }
 
-    return AsyncStorage.setItem(key, value);
+    return MMKV.set(key, value);
 };
 
-const get = async (key) => {
-    let value = await AsyncStorage.getItem(key);
+const get = (key) => {
+    let value = MMKV.getString(key);
+
+    if (!value) {
+        return null;
+    }
 
     if (isJson(value)) {
         value = JSON.parse(value);
     }
 
-    return new Promise((resolve) => {
-        if (!value) {
-            resolve(null);
-        }
-
-        resolve(value);
-    });
+    return value;
 };
 
 const remove = (key) => {
-    return AsyncStorage.removeItem(key);
+    return MMKV.delete(key);
 };
 
 export { get, set, remove, isJson };

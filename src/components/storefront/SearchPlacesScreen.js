@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { getUniqueId } from 'react-native-device-info';
-import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMap } from '@fortawesome/free-solid-svg-icons';
 import { Place, GoogleAddress } from '@fleetbase/sdk';
-import Storefront from '@fleetbase/storefront';
+import { useStorefrontSdk } from '../../utils';
 import Config from 'react-native-config';
 import tailwind from '../../tailwind';
 
 navigator.geolocation = require('react-native-geolocation-service');
+const { GOOGLE_MAPS_KEY } = Config;
 
 const StorefrontSearchPlacesScreen = ({ navigation, route }) => {
-    const storefront = new Storefront(Config.STOREFRONT_KEY, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
 
     const selectEditingPlace = (result) => {
@@ -51,7 +50,7 @@ const StorefrontSearchPlacesScreen = ({ navigation, route }) => {
                     fetchDetails={true}
                     onPress={(data, details = null) => selectEditingPlace(details)}
                     query={{
-                        key: Config.GOOGLE_MAPS_KEY,
+                        key: GOOGLE_MAPS_KEY,
                         language: 'en',
                     }}
                     styles={{

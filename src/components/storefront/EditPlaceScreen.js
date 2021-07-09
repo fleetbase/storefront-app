@@ -7,14 +7,13 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Place, GoogleAddress } from '@fleetbase/sdk';
-import Storefront from '@fleetbase/storefront';
-import Config from 'react-native-config';
+import { useStorefrontSdk } from '../../utils';
 import tailwind from '../../tailwind';
 
 navigator.geolocation = require('react-native-geolocation-service');
 
 const StorefrontEditPlaceScreen = ({ navigation, route }) => {
-    const storefront = new Storefront(Config.STOREFRONT_KEY, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
     const { attributes, title } = route.params;
     const [editingPlace, setEditingPlace] = useState(null);

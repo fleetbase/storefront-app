@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
-// import { SafeAreaView, View, Text } from 'react-native';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { tailwind } from '../tailwind';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
-import Storefront from '@fleetbase/storefront';
+import { useStorefrontSdk, getCurrentLocation } from '../utils';
 import StorefrontAccountScreen from './storefront/AccountScreen';
 import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
 import AccountStack from './storefront/AccountStack';
+import { MMKV } from 'react-native-mmkv';
 
 const Tab = createBottomTabNavigator();
 
 const StorefrontScreen = ({ route }) => {
     const { info, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
+    const [isRequestingPermission, setIsRequestingPermission] = useState(false);
     const [cart, setCart] = useState(null);
     const [cartTabOptions, setCartTabOptions] = useState({
         tabBarBadge: 2,
@@ -45,7 +46,10 @@ const StorefrontScreen = ({ route }) => {
             console.log('🚨 Cart state changed!');
             updateCartState(cart);
         });
-        
+
+        // set location
+        getCurrentLocation();
+
         return () => {
             // Remove cart.changed event listener
             EventRegister.removeEventListener(cartChangedListener);
@@ -61,21 +65,17 @@ const StorefrontScreen = ({ route }) => {
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, size }) => {
                     let icon;
-
                     switch (route.name) {
                         case 'Home':
                             icon = faStore;
                             break;
-
                         case 'Cart':
                             icon = faShoppingCart;
                             break;
-
                         case 'Account':
                             icon = faUser;
                             break;
                     }
-
                     // You can return any component that you like here!
                     return <FontAwesomeIcon icon={icon} size={size} color={focused ? '#93C5FD' : '#6B7280'} />;
                 },
@@ -93,3 +93,9 @@ const StorefrontScreen = ({ route }) => {
 };
 
 export default StorefrontScreen;
+
+// <Modal animationType={'slide'} transparent={true} visible={isRequestingPermission} onRequestClose={() => setIsRequestingPermission(false)}>
+//                 <View style={tailwind('bg-white rounded-md shadow-sm p-4 border')}>
+//                     <Text>Testing</Text>
+//                 </View>
+//             </Modal>

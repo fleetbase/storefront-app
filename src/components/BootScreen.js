@@ -2,11 +2,11 @@ import React from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
 import Config from 'react-native-config';
 import tailwind from '../tailwind';
-import Storefront from '@fleetbase/storefront';
+import { useStorefrontSdk } from '../utils';
 
 const BootScreen = ({ navigation }) => {
     const key = Config.STOREFRONT_KEY;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
+    const storefront = useStorefrontSdk();
 
     storefront.about().then((info) => {
         if (info.is_store) {

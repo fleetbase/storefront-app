@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import tailwind from '../../tailwind';
-import Storefront from '@fleetbase/storefront';
+import { useStorefrontSdk } from '../../utils';
 
 const StorefrontHomeScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
-    const storefront = new Storefront(key, { host: 'https://v2api.fleetbase.engineering' });
-    const [ categories, setCategories ] = useState([]);
-    
+    const storefront = useStorefrontSdk();
+    const [categories, setCategories] = useState([]);
+
     // get categories
     useEffect(() => {
         storefront.categories.findAll().then((categories) => {
