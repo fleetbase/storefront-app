@@ -5,8 +5,10 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
+import { Place } from '@fleetbase/sdk';
 import { useStorefrontSdk, getCustomer } from '../../utils';
-import { get } from '../../utils/storage';
+import { adapter } from '../../utils/use-fleetbase-sdk';
+import { get, set } from '../../utils/storage';
 import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
@@ -17,12 +19,18 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
 
-    const loadPlaces = () => {
+    const loadPlaces = (initialize = false) => {
+        const places = get('places');
+        if (places) {
+            setPlaces(places.map(place => new Place(place, adapter)));
+        }
+
         if (customer) {
-            setIsLoading(true);
+            setIsLoading(initialize ? false : true);
 
             return customer.getAddresses().then((places) => {
                 setPlaces(places);
+                set('places', places.map(place => place.serialize()));
                 setIsLoading(false);
             });
         }
@@ -30,7 +38,7 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
 
     // get addresses
     useEffect(() => {
-        loadPlaces();
+        loadPlaces(true);
     }, []);
 
     return (

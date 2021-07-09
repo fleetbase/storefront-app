@@ -32,7 +32,7 @@ const PhoneInput = (props) => {
         setValue(input);
 
         if (typeof props.onChangeText === 'function') {
-            props.onChangeText(`+${country.phone}${input}`);
+            props.onChangeText(`+${country?.phone || '1'}${input}`);
         }
     };
 

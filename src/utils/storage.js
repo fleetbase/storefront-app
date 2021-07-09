@@ -37,4 +37,8 @@ const remove = (key) => {
     return MMKV.delete(key);
 };
 
-export { get, set, remove, isJson };
+const clear = () => {
+    return MMKV.deleteAllKeys();
+}
+
+export { get, set, remove, clear, isJson };

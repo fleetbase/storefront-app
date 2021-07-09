@@ -173,7 +173,7 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
                     </View>
                     <View style={tailwind('mb-10')}>
                         <TouchableOpacity onPress={deletePlace} disabled={isDeleting || isLoading}>
-                            <View style={tailwind('btn border bg-red-50 border-green-50')}>
+                            <View style={tailwind('btn border bg-red-50 border-red-50')}>
                                 {isDeleting && <ActivityIndicator color={'rgba(127, 29, 29, 1)'} style={tailwind('mr-2')} />}
                                 <Text style={tailwind('font-semibold text-red-900 text-lg text-center')}>Delete place</Text>
                             </View>

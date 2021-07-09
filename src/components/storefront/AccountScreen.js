@@ -7,11 +7,11 @@ import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, f
 import tailwind from '../../tailwind';
 import { Customer } from '@fleetbase/storefront';
 import { useStorefrontSdk } from '../../utils';
-import { get, set, remove } from '../../utils/storage';
+import { get, set, clear } from '../../utils/storage';
 
 const StorefrontAccountScreen = ({ navigation, route }) => {
-    const { info, key } = route.params;
     const storefront = useStorefrontSdk();
+    const { info } = route.params;
     const [customer, setCustomer] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -27,8 +27,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
 
     const signOut = () => {
         setIsLoading(true);
-
-        remove('customer');
+        clear();
         setIsLoading(false);
         setCustomer(null);
     };
