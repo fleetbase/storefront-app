@@ -4,8 +4,10 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useStorefrontSdk, updateCustomer } from '../../utils';
+import { getLocation } from '../../utils/location';
 import { set } from '../../utils/storage';
 import tailwind from '../../tailwind';
+import PhoneInput from '../ui/PhoneInput';
 
 const StorefrontLoginScreen = ({ navigation, route }) => {
     const { info, key } = route.params;
@@ -14,6 +16,7 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
     const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const storefront = useStorefrontSdk();
+    const location = getLocation();
 
     const sendVerificationCode = () => {
         setIsLoading(true);
@@ -49,13 +52,7 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                     {!isAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-6')}>
-                                <TextInput
-                                    onChangeText={setPhone}
-                                    keyboardType={'phone-pad'}
-                                    placeholder={'Your mobile #'}
-                                    placeholderTextColor={'rgba(107, 114, 128, 1)'}
-                                    style={tailwind('form-input')}
-                                />
+                                <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
                             </View>
                             <TouchableOpacity onPress={sendVerificationCode}>
                                 <View style={tailwind('btn border border-blue-500')}>

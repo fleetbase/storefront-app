@@ -12,6 +12,23 @@ const PhoneInput = (props) => {
     const pickerRef = useRef();
 
     const updatePhoneNumber = (input) => {
+        // if manually entering country code
+        if (isString(input) && input.startsWith('+')) {
+            const manuallySetCountry = getCountries().find((country) => {
+                // get default coutnry from value if starting with country code
+                if (isString(input) && input.startsWith(`+${country.phone}`)) {
+                    return country;
+                }
+            });
+
+            if (manuallySetCountry) {
+                setCountry(manuallySetCountry);
+
+                // patch input
+                input = input.replace(`+${manuallySetCountry.phone}`, '');
+            }
+        }
+
         setValue(input);
 
         if (typeof props.onChangeText === 'function') {
@@ -47,7 +64,7 @@ const PhoneInput = (props) => {
         const defaultCountry = getDefaultCountry();
         setCountry(defaultCountry);
 
-        if (defaultCountry) {
+        if (defaultCountry && isString(value)) {
             setValue(value.replace(`+${defaultCountry.phone}`, ''));
         }
     }, []);

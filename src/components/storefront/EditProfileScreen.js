@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -17,17 +17,19 @@ const StorefrontEditProfileScreen = ({ navigation }) => {
     const [name, setName] = useState(customer.getAttribute('name'));
     const [email, setEmail] = useState(customer.getAttribute('email'));
     const [phone, setPhone] = useState(customer.getAttribute('phone'));
+    const [isLoading, setIsLoading] = useState(false);
 
     const saveProfile = () => {
+        setIsLoading(true);
+
         return customer.setAttributes({
-            name, email
+            name, email, phone
         }).saveDirty().then(customer => {
             updateCustomer(customer);
+            setIsLoading(false);
             navigation.goBack();
         });
     };
-
-    console.log(location);
 
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
@@ -72,9 +74,9 @@ const StorefrontEditProfileScreen = ({ navigation }) => {
                                 defaultCountry={location?.country}
                             />
                         </View>
-                        <TouchableOpacity onPress={saveProfile}>
+                        <TouchableOpacity onPress={saveProfile} disabled={isLoading}>
                             <View style={tailwind('btn border border-gray-500')}>
-                                {customer.isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
+                                {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
                                 <Text style={tailwind('font-semibold text-lg text-center')}>Save Profile</Text>
                             </View>
                         </TouchableOpacity>

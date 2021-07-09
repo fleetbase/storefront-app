@@ -18,7 +18,7 @@ const StorefrontSearchPlacesScreen = ({ navigation, route }) => {
 
     const selectEditingPlace = (result) => {
         const googleAddress = new GoogleAddress(result);
-        const place = Place.fromGoogleAddress(googleAddress, storefront.getAdapter());
+        const place = Place.fromGoogleAddress(googleAddress);
 
         navigation.navigate('EditPlace', { attributes: place.serialize() });
     };

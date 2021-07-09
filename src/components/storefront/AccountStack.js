@@ -16,7 +16,7 @@ const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
 const PlacesStack = createStackNavigator();
 
-const EditPlaceStackScreen = ({ route }) => {
+const PlaceStackScreen = ({ route }) => {
     const { info, key } = route.params;
 
     return (
@@ -50,7 +50,8 @@ const AccountStack = ({ route }) => {
                 <RootStack.Screen name="CreateAccount" component={StorefrontCreateAccountScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
                 <RootStack.Screen name="EditProfile" component={StorefrontEditProfileScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
                 <RootStack.Screen name="SavedPlaces" component={StorefrontSavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
-                <RootStack.Screen name="EditPlace" component={EditPlaceStackScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
+                <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
+                <MainStack.Screen name="EditPlaceForm" component={StorefrontEditPlaceScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
                 <RootStack.Screen name="PaymentMethods" component={StorefrontPaymentMethodsScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
                 <RootStack.Screen name="OrderHistory" component={StorefrontOrderHistoryScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
                 <RootStack.Screen name="ChangePassword" component={StorefrontChangePasswordScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
