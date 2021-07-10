@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, ImageBackground, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../../tailwind';
 
 const StorefrontCreateAccountScreen = ({ navigation, route }) => {
-    const { info, key } = route.params;
+    const { info } = route.params;
+    const insets = useSafeAreaInsets();
 
     return (
-        <SafeAreaView style={tailwind('bg-white')}>
+        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <View style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -19,7 +21,7 @@ const StorefrontCreateAccountScreen = ({ navigation, route }) => {
                     <Text style={tailwind('text-xl font-semibold')}>Create Account</Text>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

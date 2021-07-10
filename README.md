@@ -34,9 +34,16 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 git clone git@github.com:fleetbase/storefront-app.git
 cd storefront-app
 yarn
+npx pod-install
 ```
 
-### Running the App in Simulator
+### Running the App in iOS Simulator
+
+```
+npx react-native run-ios
+```
+
+### Running the App in Android Simulator
 
 ```
 npx react-native run-ios

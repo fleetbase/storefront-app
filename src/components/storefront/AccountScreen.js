@@ -63,21 +63,21 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                 </ImageBackground>
             </View>
             {!customer && (
-                <View style={tailwind('w-full h-full')}>
+                <View style={tailwind('w-full bg-white h-full')}>
                     <View style={tailwind('flex items-center justify-center w-full')}>
-                        <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
+                        <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-100 w-60 h-60')}>
                             <FontAwesomeIcon icon={faIdBadge} size={88} style={tailwind('text-gray-600')} />
                         </View>
                         <Text style={tailwind('text-lg text-center font-semibold mb-6')}>Create an account or login</Text>
                         <View style={tailwind('px-6 w-full')}>
                             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={tailwind('mb-5')}>
-                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
-                                    <Text style={tailwind('font-semibold text-black text-base')}>Login</Text>
+                                <View style={tailwind('btn border border-gray-100 bg-gray-100')}>
+                                    <Text style={tailwind('font-semibold text-gray-900 text-base')}>Login</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                                <View style={tailwind('flex flex-row items-center justify-center rounded-md px-8 py-3 bg-white border border-gray-400 w-full')}>
-                                    <Text style={tailwind('font-semibold text-black text-base')}>Create Account</Text>
+                                <View style={tailwind('btn border border-gray-100 bg-gray-100')}>
+                                    <Text style={tailwind('font-semibold text-gray-900 text-base')}>Create Account</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>

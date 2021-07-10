@@ -15,7 +15,7 @@ import { MMKV } from 'react-native-mmkv';
 const Tab = createBottomTabNavigator();
 
 const StorefrontScreen = ({ route }) => {
-    const { info, key } = route.params;
+    const { info } = route.params;
     const storefront = useStorefrontSdk();
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
     const [cart, setCart] = useState(null);
@@ -85,9 +85,9 @@ const StorefrontScreen = ({ route }) => {
                 tabStyle: tailwind('bg-black border-black'),
                 showLabel: false,
             }}>
-            <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info, key }} />
-            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, key, loadedCart: cart }} />
-            <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info, key }} />
+            <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, loadedCart: cart }} />
+            <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>
     );
 };

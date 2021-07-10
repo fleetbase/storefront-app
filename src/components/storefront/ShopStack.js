@@ -7,11 +7,11 @@ import StorefrontHomeScreen from './HomeScreen';
 const Stack = createStackNavigator();
 
 const ShopStack = ({ route }) => {
-    const { info, key } = route.params;
+    const { info } = route.params;
 
     return (
         <Stack.Navigator>
-            <Stack.Screen name="HomeScreen" component={StorefrontHomeScreen} options={{ headerShown: false }} initialParams={{ info, key }} />
+            <Stack.Screen name="HomeScreen" component={StorefrontHomeScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <Stack.Screen name="CategoryScreen" component={CategoryScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ProductScreen" component={ProductScreen} options={{ headerShown: false }} />
         </Stack.Navigator>

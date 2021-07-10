@@ -8,7 +8,7 @@ import formatCurrency from '../utils/format-currency';
 import { useStorefrontSdk } from '../utils';
 
 const CategoryScreen = ({ navigation, route }) => {
-    const { attributes, key } = route.params;
+    const { attributes } = route.params;
     const storefront = useStorefrontSdk();
     const category = new Category(attributes);
     const [products, setProducts] = useState([]);
@@ -39,8 +39,8 @@ const CategoryScreen = ({ navigation, route }) => {
                     )}
                 </View>
                 <View style={tailwind('flex flex-row')}>
-                    {products.map((product) => (
-                        <TouchableOpacity key={product.id} style={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), key })}>
+                    {products.map((product, index) => (
+                        <TouchableOpacity key={index} style={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize() })}>
                             <View>
                                 <View style={tailwind('p-2')}>
                                     <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>

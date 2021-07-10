@@ -1,17 +1,21 @@
 import React from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
-import Config from 'react-native-config';
+import { useStorefrontSdk, hasRequiredKeys } from '../utils';
 import tailwind from '../tailwind';
-import { useStorefrontSdk } from '../utils';
+import SetupWarningScreen from './SetupWarningScreen';
 
 const BootScreen = ({ navigation }) => {
-    const key = Config.STOREFRONT_KEY;
+    // make sure keys are set
+    if (!hasRequiredKeys()) {
+        return (<SetupWarningScreen />);
+    }
+
     const storefront = useStorefrontSdk();
 
     storefront.about().then((info) => {
         if (info.is_store) {
             // go to storefront view
-            return navigation.navigate('StorefrontScreen', { info, key });
+            return navigation.navigate('StorefrontScreen', { info });
         }
     });
 

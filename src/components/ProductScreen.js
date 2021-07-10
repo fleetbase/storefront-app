@@ -14,7 +14,7 @@ import RadioButton from 'react-native-animated-radio-button';
 const { isArray } = Array;
 
 const ProductScreen = ({ navigation, route }) => {
-    const { attributes, cartItemAttributes, key } = route.params;
+    const { attributes, cartItemAttributes } = route.params;
     const storefront = useStorefrontSdk();
     const product = new Product(attributes);
     // const images = product.getAttribute('images');
@@ -241,6 +241,8 @@ const ProductScreen = ({ navigation, route }) => {
                         // setCartItem(lastEvent.cart_item_id);
                         setCartItem(cart.contents().find(cartItem => cartItem.id === lastEvent.cart_item_id));
                     }
+
+                    return navigation.goBack();
                 });
             })
             .catch((error) => {

@@ -1,6 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
+ * Storefront Ecommerce for On-Demand
  *
  * @format
  * @flow strict-local
@@ -15,6 +14,7 @@ import BootScreen from './src/components/BootScreen';
 import StorefrontScreen from './src/components/StorefrontScreen';
 import CategoryScreen from './src/components/CategoryScreen';
 import ProductScreen from './src/components/ProductScreen';
+import SetupWarningScreen from './src/components/SetupWarningScreen';
 
 const Stack = createStackNavigator();
 

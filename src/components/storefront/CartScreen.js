@@ -10,7 +10,7 @@ import Storefront from '@fleetbase/storefront';
 import { formatCurrency, isLastIndex, useStorefrontSdk } from '../../utils';
 
 const StorefrontCartScreen = ({ navigation, route }) => {
-    const { info, key, loadedCart } = route.params;
+    const { info, loadedCart } = route.params;
     const storefront = useStorefrontSdk();
     const [cart, setCart] = useState(loadedCart);
     const [products, setProducts] = useState({});
@@ -112,7 +112,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={tailwind('h-full')}>
+        <View style={tailwind(`h-full ${cart && cart.isEmpty ? 'bg-white' : ''}`)}>
             <View style={tailwind('flex h-32 overflow-hidden')}>
                 <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
                     <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
@@ -240,9 +240,9 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                         )
                     }
                     ListEmptyComponent={
-                        <View style={tailwind('h-full w-full flex items-center justify-center')}>
+                        <View style={tailwind('h-full w-full bg-white flex items-center justify-center')}>
                             <View style={tailwind('flex items-center justify-center w-full px-8')}>
-                                <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
+                                <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-100 w-60 h-60')}>
                                     <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
                                 </View>
                                 <View style={tailwind('flex items-center justify-center mb-10')}>

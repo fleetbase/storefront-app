@@ -8,5 +8,6 @@ import updateCustomer from './update-customer';
 import getCountries from './get-countries';
 import getCurrentLocation from './location';
 import haversine from './haversine';
+import hasRequiredKeys from './has-required-keys';
 
-export { isLastIndex, formatCurrency, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCustomer, updateCustomer, getCountries, getCurrentLocation, haversine };
+export { isLastIndex, formatCurrency, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCustomer, updateCustomer, getCountries, getCurrentLocation, haversine, hasRequiredKeys };
