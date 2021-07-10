@@ -26,7 +26,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             product = await storefront.products.findRecord(cartItem.product_id);
         }
 
-        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), cartItemAttributes: cartItem, key });
+        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), cartItemAttributes: cartItem });
     };
 
     const preloadCartItems = async (cart) => {
