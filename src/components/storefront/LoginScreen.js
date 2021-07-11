@@ -4,11 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useStorefrontSdk, updateCustomer } from '../../utils';
+import { useStorefrontSdk } from '../../utils';
+import { updateCustomer } from '../../utils/customer';
 import { getLocation } from '../../utils/location';
 import { set } from '../../utils/storage';
 import tailwind from '../../tailwind';
-import PhoneInput from '../ui/PhoneInput';
+import PhoneInput from '../shared/PhoneInput';
 
 const StorefrontLoginScreen = ({ navigation, route }) => {
     const { info } = route.params;
@@ -39,6 +40,12 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
         });
     };
 
+    const retry = () => {
+        setIsLoading(false);
+        setPhone(null);
+        setIsAwaitingVerification(false);
+    };
+
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <View style={tailwind('w-full h-full bg-white relative')}>
@@ -67,7 +74,12 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                     {isAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-6')}>
-                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} style={tailwind('form-input text-center')} />
+                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} style={tailwind('form-input text-center mb-2')} />
+                                <View style={tailwind('flex flex-row justify-end')}>
+                                    <TouchableOpacity onPress={retry}>
+                                        <Text style={tailwind('text-blue-900 font-semibold')}>Retry?</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                             <TouchableOpacity onPress={verifyCode}>
                                 <View style={tailwind('btn border border-green-50 bg-green-50')}>

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EventRegister } from 'react-native-event-listeners';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSave, faTimes, faStar } from '@fortawesome/free-solid-svg-icons';
 import { Place, GoogleAddress } from '@fleetbase/sdk';
 import { adapter } from '../../utils/use-fleetbase-sdk';
-import { getCustomer } from '../../utils';
+import { getCustomer } from '../../utils/customer';
+import { set } from '../../utils/storage';
 import useStorefrontSdk from '../../utils/use-storefront-sdk';
 import tailwind from '../../tailwind';
-import PhoneInput from '../ui/PhoneInput';
+import PhoneInput from '../shared/PhoneInput';
 
 navigator.geolocation = require('react-native-geolocation-service');
 
@@ -31,8 +33,9 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const savePlace = () => {
+        const isNew = place.isNew;
         setIsLoading(true);
-
+        
         return place
             .setAttributes({
                 owner: customer.id,
@@ -47,6 +50,11 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
             })
             .save()
             .then(() => {
+                // if new place added fire event
+                if (isNew) {
+                    EventRegister.emit('places.mutated', place);
+                }
+
                 setIsLoading(false);
                 navigation.navigate('SavedPlaces');
             });
@@ -55,11 +63,16 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
     const deletePlace = () => {
         setIsDeleting(true);
 
-        return place.destroy().then(() => {
+        return place.destroy().then((place) => {
             setIsDeleting(false);
+            EventRegister.emit('places.mutated', place);
             navigation.navigate('SavedPlaces');
         });
-    }
+    };
+
+    const makeDefault = () => {
+        set('deliver_to', place.serialize());
+    };
 
     return (
         <View style={[tailwind('w-full h-full bg-white relative'), { paddingTop: insets.top }]}>
@@ -72,7 +85,14 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                     <Text style={tailwind('text-xl font-semibold')}>{title || 'Save new place'}</Text>
                 </View>
-                <View>
+                <View style={tailwind('flex flex-row')}>
+                    {!place.isNew && (
+                        <TouchableOpacity onPress={makeDefault} disabled={isDeleting || isLoading}>
+                            <View style={tailwind('rounded-full bg-yellow-50 w-10 h-10 flex items-center justify-center mr-2')}>
+                                <FontAwesomeIcon icon={faStar} style={tailwind('text-yellow-900')} />
+                            </View>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity onPress={savePlace} disabled={isDeleting || isLoading}>
                         <View style={tailwind('rounded-full bg-green-50 w-10 h-10 flex items-center justify-center')}>
                             {isLoading ? <ActivityIndicator color={'rgba(6, 78, 59, 1)'} /> : <FontAwesomeIcon icon={faSave} style={tailwind('text-green-900')} />}
@@ -171,14 +191,25 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
                             </View>
                         </TouchableOpacity>
                     </View>
-                    <View style={tailwind('mb-10')}>
-                        <TouchableOpacity onPress={deletePlace} disabled={isDeleting || isLoading}>
-                            <View style={tailwind('btn border bg-red-50 border-red-50')}>
-                                {isDeleting && <ActivityIndicator color={'rgba(127, 29, 29, 1)'} style={tailwind('mr-2')} />}
-                                <Text style={tailwind('font-semibold text-red-900 text-lg text-center')}>Delete place</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
+                    {!place.isNew && (
+                        <View style={tailwind('mb-4')}>
+                            <TouchableOpacity onPress={makeDefault} disabled={isDeleting || isLoading}>
+                                <View style={tailwind('btn border bg-yellow-50 border-yellow-50')}>
+                                    <Text style={tailwind('font-semibold text-yellow-900 text-lg text-center')}>Make default</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {!place.isNew && (
+                        <View style={tailwind('mb-10')}>
+                            <TouchableOpacity onPress={deletePlace} disabled={isDeleting || isLoading}>
+                                <View style={tailwind('btn border bg-red-50 border-red-50')}>
+                                    {isDeleting && <ActivityIndicator color={'rgba(127, 29, 29, 1)'} style={tailwind('mr-2')} />}
+                                    <Text style={tailwind('font-semibold text-red-900 text-lg text-center')}>Delete place</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
         </View>

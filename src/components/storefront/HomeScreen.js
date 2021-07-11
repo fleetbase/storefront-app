@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ImageBackground, TouchableOpacity } from 'react-native';
-import tailwind from '../../tailwind';
 import { useStorefrontSdk } from '../../utils';
+import tailwind from '../../tailwind';
+import Header from './Header';
 
 const StorefrontHomeScreen = ({ navigation, route }) => {
     const { info } = route.params;
@@ -11,24 +12,14 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
     // get categories
     useEffect(() => {
         storefront.categories.findAll().then((categories) => {
+            console.log(categories);
             setCategories(categories);
         });
     }, []);
 
     return (
         <View style={tailwind('bg-white h-full')}> 
-            <View style={tailwind('flex h-32 overflow-hidden')}>
-                <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
-                    <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
-                        <View>
-                            <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
-                                <Text style={tailwind('text-white')}>{info.name}</Text>
-                            </View>
-                        </View>
-                        <View></View>
-                    </View>
-                </ImageBackground>
-            </View>
+            <Header info={info} />
             <View style={tailwind('p-4')}>
                 <Text style={tailwind('text-lg font-semibold mb-3')}>Shop by category</Text>
                 <View style={tailwind('flex flex-row')}>

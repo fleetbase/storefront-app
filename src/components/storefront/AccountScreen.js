@@ -4,26 +4,18 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
-import tailwind from '../../tailwind';
 import { Customer } from '@fleetbase/storefront';
 import { useStorefrontSdk } from '../../utils';
-import { get, set, clear } from '../../utils/storage';
+import { useStorage, get, set, clear } from '../../utils/storage';
+import { useCustomer } from '../../utils/customer';
+import Header from './Header';
+import tailwind from '../../tailwind';
 
 const StorefrontAccountScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const { info } = route.params;
-    const [customer, setCustomer] = useState(null);
+    const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
-
-    const resolveCustomer = () => {
-        const attributes = get('customer');
-
-        if (!attributes) {
-            return;
-        }
-
-        setCustomer(new Customer(attributes, storefront.getAdapter()));
-    };
 
     const signOut = () => {
         setIsLoading(true);
@@ -44,24 +36,9 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
         };
     }, []);
 
-    if (customer === null) {
-        resolveCustomer();
-    }
-
     return (
         <View>
-            <View style={tailwind('flex h-32 overflow-hidden')}>
-                <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
-                    <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
-                        <View>
-                            <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
-                                <Text style={tailwind('text-white')}>{info.name}</Text>
-                            </View>
-                        </View>
-                        <View></View>
-                    </View>
-                </ImageBackground>
-            </View>
+            <Header info={info} />
             {!customer && (
                 <View style={tailwind('w-full bg-white h-full')}>
                     <View style={tailwind('flex items-center justify-center w-full')}>
@@ -168,7 +145,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                         <View style={tailwind('flex flex-row items-center justify-center')}>
                             <TouchableOpacity style={tailwind('flex-1')} onPress={signOut}>
                                 <View style={tailwind('btn border border-gray-400')}>
-                                    {isLoading && (<ActivityIndicator style={tailwind('mr-2')} />)}
+                                    {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
                                     <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
                                 </View>
                             </TouchableOpacity>

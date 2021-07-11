@@ -4,11 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { getCustomer, updateCustomer } from '../../utils';
+import { getCustomer, updateCustomer } from '../../utils/customer';
 import { getLocation } from '../../utils/location';
 import { set } from '../../utils/storage';
 import tailwind from '../../tailwind';
-import PhoneInput from '../ui/PhoneInput';
+import PhoneInput from '../shared/PhoneInput';
 
 const StorefrontEditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();

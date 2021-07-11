@@ -5,40 +5,59 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
-import { Place } from '@fleetbase/sdk';
-import { useStorefrontSdk, getCustomer } from '../../utils';
+import { Place, isResource } from '@fleetbase/sdk';
+import { useStorefrontSdk } from '../../utils';
+import { getCustomer } from '../../utils/customer';
 import { adapter } from '../../utils/use-fleetbase-sdk';
-import { get, set } from '../../utils/storage';
+import { useResourceStorage, get, set } from '../../utils/storage';
 import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
     const { attributes, key } = route.params;
-    const [customer, setCustomer] = useState(getCustomer());
-    const [places, setPlaces] = useState([]);
+    const [places, setPlaces] = useResourceStorage('places', Place, adapter);
     const [isLoading, setIsLoading] = useState(false);
+    const customer = getCustomer();
     const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
 
     const loadPlaces = (initialize = false) => {
-        const places = get('places');
-        if (places) {
-            setPlaces(places.map(place => new Place(place, adapter)));
-        }
-
         if (customer) {
             setIsLoading(initialize ? false : true);
 
             return customer.getAddresses().then((places) => {
                 setPlaces(places);
-                set('places', places.map(place => place.serialize()));
                 setIsLoading(false);
             });
+        }
+    };
+
+    // fn to check if deliverTo location is indeed the place
+    const isDeliverTo = (place) => {
+        const deliverTo = get('deliver_to');
+
+        if (deliverTo) {
+            return deliverTo.id === place.id;
         }
     };
 
     // get addresses
     useEffect(() => {
         loadPlaces(true);
+
+        // Listen for places collection mutate events
+        const placesMutatedListener = EventRegister.addEventListener('places.mutated', (place) => {
+            if (place.isSaved) {
+                setPlaces(places.pushObject(place));
+            } else if (place.isDeleted) {
+                const index = places.findIndex(p => p.id === place.id);
+                setPlaces(places.removeAt(index));
+            }
+        });
+
+        return () => {
+            // Remove places.mutated event listener
+            EventRegister.removeEventListener(placesMutatedListener);
+        };
     }, []);
 
     return (

@@ -1,44 +1,54 @@
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MMKV } from 'react-native-mmkv';
+import MMKVStorage, { create, useMMKVStorage } from "react-native-mmkv-storage";
+import { isResource, Collection } from '@fleetbase/sdk';
 
-const isJson = (string) => {
-    try {
-        JSON.parse(string);
-    } catch (e) {
-        return false;
+const storage = new MMKVStorage.Loader().initialize(); 
+const useStorage = create(storage);
+
+const useResourceStorage = (key, ResourceType, adapter) => {
+    const [value, setValue] = useMMKVStorage(key, storage);
+
+    const setResource = (resource) => {
+        if (isResource(resource)) {
+            setValue(resource.serialize());
+            return;
+        }
+
+        if (resource instanceof Collection) {
+            setValue(resource.invoke('serialize'));
+            return;
+        }
+
+        setValue(resource);
     }
 
-    return true;
+    if (value && value.length) {
+        return [new Collection(value.map(r => new ResourceType(r, adapter))), setResource];
+    }
+
+    if (value) {
+        return [new ResourceType(value, adapter), setResource];
+    }
+
+    return [value, setResource];
 };
 
 const set = (key, value) => {
-    if (typeof value === 'object') {
-        value = JSON.stringify(value);
-    }
-
-    return MMKV.set(key, value);
+    return storage.setMap(key, value);
 };
 
 const get = (key) => {
-    let value = MMKV.getString(key);
-
-    if (!value) {
-        return null;
-    }
-
-    if (isJson(value)) {
-        value = JSON.parse(value);
-    }
-
-    return value;
+    return storage.getMap(key);
 };
 
 const remove = (key) => {
-    return MMKV.delete(key);
+    return storage.removeItem(key);
 };
 
 const clear = () => {
-    return MMKV.deleteAllKeys();
+    return storage.clearStore();
 }
 
-export { get, set, remove, clear, isJson };
+const { getString, setString, getInt, setInt, getBool, setBool, getArray, setArray } = storage;
+
+export default storage;
+export { useMMKVStorage, useStorage, useResourceStorage, get, set, remove, clear, getString, setString, getInt, setInt, getBool, setBool, getArray, setArray };

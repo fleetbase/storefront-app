@@ -1,6 +1,7 @@
 import React from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
 import { useStorefrontSdk, hasRequiredKeys } from '../utils';
+import { set } from '../utils/storage';
 import tailwind from '../tailwind';
 import SetupWarningScreen from './SetupWarningScreen';
 
@@ -13,10 +14,13 @@ const BootScreen = ({ navigation }) => {
     const storefront = useStorefrontSdk();
 
     storefront.about().then((info) => {
+        // if is single store only go to storefront screens
         if (info.is_store) {
-            // go to storefront view
+            set('info', info);
             return navigation.navigate('StorefrontScreen', { info });
         }
+
+        // @todo handle networks (mutli shop apps/ marketplaces)
     });
 
     return (
