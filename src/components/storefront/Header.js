@@ -1,21 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground } from 'react-native';
+import { View, Text, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
 import LocationPicker from '../shared/LocationPicker';
 import tailwind from '../../tailwind';
 
 const Header = (props) => {
     return (
         <View>
-            <View style={tailwind('flex h-32 overflow-hidden')}>
+            <View style={tailwind('flex h-40 overflow-hidden')}>
                 <ImageBackground source={{ uri: props.info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
-                    <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
-                        <View>
-                            <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
-                                <Text style={tailwind('text-white')}>{props.info.name}</Text>
+                    <View style={tailwind('h-full p-2 flex justify-end')}>
+                        <View style={tailwind('flex flex-row justify-between items-end w-full mb-2')}>
+                            <View>
+                                <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
+                                    <Text style={tailwind('text-white')}>{props.info.name}</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <LocationPicker />
                             </View>
                         </View>
                         <View>
-                            <LocationPicker />
+                            <View style={tailwind('flex flex-row items-center justify-between px-3 py-2 bg-white w-full shadow-sm rounded-md')}>
+                                <View style={tailwind('flex-1')}>
+                                    <TextInput style={tailwind('h-7 text-left w-full text-gray-500')} placeholder={'Search for anything'} />
+                                </View>
+                                <View>
+                                    <TouchableOpacity onPress={() => setIsSelecting(false)}>
+                                        <View style={tailwind('rounded-full bg-red-50 w-6 h-6 flex items-center justify-center')}>
+                                            <FontAwesomeIcon size={12} icon={faTimes} style={tailwind('text-red-900')} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         </View>
                     </View>
                 </ImageBackground>

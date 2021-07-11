@@ -145,10 +145,10 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                     <View style={tailwind('w-36')}>
                                         <TouchableOpacity onPress={() => editCartItem(item)}>
                                             <View>
-                                                <Text style={tailwind('text-base font-semibold -mt-1')} numberOfLines={1}>
+                                                <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                     {item.name}
                                                 </Text>
-                                                <Text style={tailwind('text-xs text-gray-500 -mt-1 mb-1')}>{item.description}</Text>
+                                                <Text style={tailwind('text-xs text-gray-500 mb-1')}>{item.description}</Text>
                                                 <View>
                                                     {item.variants.map((variant) => (
                                                         <View key={variant.id}>
