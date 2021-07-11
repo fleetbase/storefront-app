@@ -12,7 +12,6 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
     // get categories
     useEffect(() => {
         storefront.categories.findAll().then((categories) => {
-            console.log(categories);
             setCategories(categories);
         });
     }, []);

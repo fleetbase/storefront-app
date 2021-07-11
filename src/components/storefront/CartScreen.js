@@ -5,9 +5,9 @@ import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import tailwind from '../../tailwind';
-import Storefront from '@fleetbase/storefront';
 import { formatCurrency, isLastIndex, useStorefrontSdk } from '../../utils';
+import tailwind from '../../tailwind';
+import Header from './Header';
 
 const StorefrontCartScreen = ({ navigation, route }) => {
     const { info, loadedCart } = route.params;
@@ -113,18 +113,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind(`h-full ${cart && cart.isEmpty ? 'bg-white' : ''}`)}>
-            <View style={tailwind('flex h-32 overflow-hidden')}>
-                <ImageBackground source={{ uri: info.backdrop_url }} style={tailwind('flex-1 relative')} imageStyle={tailwind('bg-cover absolute -bottom-12')}>
-                    <View style={tailwind('flex flex-row justify-between items-end w-full h-full p-2')}>
-                        <View>
-                            <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
-                                <Text style={tailwind('text-white')}>{info.name}</Text>
-                            </View>
-                        </View>
-                        <View></View>
-                    </View>
-                </ImageBackground>
-            </View>
+            <Header info={info} />
             {!cart && (
                 <View style={tailwind('mt-20 flex items-center justify-center')}>
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>

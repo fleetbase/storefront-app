@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapMarked, faPlus, faEdit, faStar } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Place, isResource } from '@fleetbase/sdk';
 import { useStorefrontSdk } from '../../utils';
@@ -38,6 +38,8 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
         if (deliverTo) {
             return deliverTo.id === place.id;
         }
+
+        return false;
     };
 
     // get addresses
@@ -46,12 +48,17 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
 
         // Listen for places collection mutate events
         const placesMutatedListener = EventRegister.addEventListener('places.mutated', (place) => {
-            if (place.isSaved) {
-                setPlaces(places.pushObject(place));
-            } else if (place.isDeleted) {
-                const index = places.findIndex(p => p.id === place.id);
-                setPlaces(places.removeAt(index));
+            const index = places.findIndex((p) => p.id === place.id);
+
+            if (place.isDeleted) {
+                return setPlaces(places.removeAt(index));
             }
+
+            if (index === -1) {
+                return setPlaces(places.pushObject(place));
+            }
+
+            return setPlaces(places.replaceAt(index, place));
         });
 
         return () => {
@@ -72,7 +79,14 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
                             <View style={tailwind('p-4 border-b border-gray-100')}>
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     <View style={tailwind('flex-1')}>
-                                        <Text style={tailwind('font-semibold uppercase')}>{item.getAttribute('name')}</Text>
+                                        <View style={tailwind('flex flex-row items-center mb-1')}>
+                                            {isDeliverTo(item) && (
+                                                <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-1')}>
+                                                    <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
+                                                </View>
+                                            )}
+                                            <Text style={tailwind('font-semibold uppercase')}>{item.getAttribute('name')}</Text>
+                                        </View>
                                         <Text style={tailwind('uppercase')}>{item.getAttribute('street1')}</Text>
                                         <Text style={tailwind('uppercase')}>{item.getAttribute('postal_code')}</Text>
                                     </View>

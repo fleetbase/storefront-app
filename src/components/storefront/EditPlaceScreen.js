@@ -8,12 +8,14 @@ import { faArrowLeft, faSave, faTimes, faStar } from '@fortawesome/free-solid-sv
 import { Place, GoogleAddress } from '@fleetbase/sdk';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { getCustomer } from '../../utils/customer';
-import { set } from '../../utils/storage';
+import { set, remove } from '../../utils/storage';
 import useStorefrontSdk from '../../utils/use-storefront-sdk';
 import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';
 
 navigator.geolocation = require('react-native-geolocation-service');
+
+const { emit } = EventRegister;
 
 const StorefrontEditPlaceScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
@@ -33,7 +35,6 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const savePlace = () => {
-        const isNew = place.isNew;
         setIsLoading(true);
         
         return place
@@ -51,10 +52,7 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
             .save()
             .then(() => {
                 // if new place added fire event
-                if (isNew) {
-                    EventRegister.emit('places.mutated', place);
-                }
-
+                emit('places.mutated', place);
                 setIsLoading(false);
                 navigation.navigate('SavedPlaces');
             });
@@ -63,15 +61,26 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
     const deletePlace = () => {
         setIsDeleting(true);
 
+        const deliverTo = get('deliver_to');
+
+        // if saved as delivery address remove it
+        if (deliverTo && deliverTo.id === place.id) {
+            remove('deliver_to');
+            emit('deliver_to.changed', null);
+        } 
+
         return place.destroy().then((place) => {
             setIsDeleting(false);
-            EventRegister.emit('places.mutated', place);
+            emit('places.mutated', place);
             navigation.navigate('SavedPlaces');
         });
     };
 
     const makeDefault = () => {
         set('deliver_to', place.serialize());
+        emit('deliver_to.changed', place);
+        emit('places.mutated', place);
+        navigation.navigate('SavedPlaces');
     };
 
     return (
