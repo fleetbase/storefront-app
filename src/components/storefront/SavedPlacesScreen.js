@@ -24,7 +24,7 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
         if (customer) {
             setIsLoading(initialize ? false : true);
 
-            return customer.getAddresses().then((places) => {
+            return customer.getSavedPlaces().then((places) => {
                 setPlaces(places);
                 setIsLoading(false);
             });
