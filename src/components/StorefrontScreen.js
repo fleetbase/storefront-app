@@ -5,20 +5,23 @@ import { faStore, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-ico
 import { tailwind } from '../tailwind';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
-import { useStorefrontSdk, getCurrentLocation } from '../utils';
+import { getCurrentLocation } from '../utils';
+import { useResourceStorage } from '../utils/storage';
+import useStorefrontSdk, { adapter } from '../utils/use-storefront-sdk';
+import { Cart } from '@fleetbase/storefront';
 import StorefrontAccountScreen from './storefront/AccountScreen';
 import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
 import AccountStack from './storefront/AccountStack';
-import { MMKV } from 'react-native-mmkv';
 
+const { addEventListener, removeEventListener } = EventRegister;
 const Tab = createBottomTabNavigator();
 
 const StorefrontScreen = ({ route }) => {
     const { info } = route.params;
     const storefront = useStorefrontSdk();
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
-    const [cart, setCart] = useState(null);
+    const [cart, setCart] = useResourceStorage('cart', Cart, adapter, new Cart({}, adapter));
     const [cartTabOptions, setCartTabOptions] = useState({
         tabBarBadge: 2,
         tabBarBadgeStyle: tailwind('bg-blue-500 ml-1'),
@@ -41,9 +44,11 @@ const StorefrontScreen = ({ route }) => {
     };
 
     useEffect(() => {
+        // Always fetch latest cart
+        getCart();
+        
         // Listen for cart changed event
-        const cartChangedListener = EventRegister.addEventListener('cart.changed', (cart) => {
-            console.log('🚨 Cart state changed!');
+        const cartChanged = addEventListener('cart.changed', (cart) => {
             updateCartState(cart);
         });
 
@@ -52,13 +57,9 @@ const StorefrontScreen = ({ route }) => {
 
         return () => {
             // Remove cart.changed event listener
-            EventRegister.removeEventListener(cartChangedListener);
+            removeEventListener(cartChanged);
         };
     }, []);
-
-    if (!cart) {
-        getCart();
-    }
 
     return (
         <Tab.Navigator
@@ -86,16 +87,10 @@ const StorefrontScreen = ({ route }) => {
                 showLabel: false,
             }}>
             <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info }} />
-            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, loadedCart: cart }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, loadedCart: cart.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>
     );
 };
 
 export default StorefrontScreen;
-
-// <Modal animationType={'slide'} transparent={true} visible={isRequestingPermission} onRequestClose={() => setIsRequestingPermission(false)}>
-//                 <View style={tailwind('bg-white rounded-md shadow-sm p-4 border')}>
-//                     <Text>Testing</Text>
-//                 </View>
-//             </Modal>

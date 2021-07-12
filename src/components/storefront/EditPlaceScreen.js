@@ -8,7 +8,7 @@ import { faArrowLeft, faSave, faTimes, faStar } from '@fortawesome/free-solid-sv
 import { Place, GoogleAddress } from '@fleetbase/sdk';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { getCustomer } from '../../utils/customer';
-import { set, remove } from '../../utils/storage';
+import { get, set, remove } from '../../utils/storage';
 import useStorefrontSdk from '../../utils/use-storefront-sdk';
 import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';

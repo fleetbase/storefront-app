@@ -5,14 +5,19 @@ import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { formatCurrency, isLastIndex, useStorefrontSdk } from '../../utils';
+import { formatCurrency, isLastIndex } from '../../utils';
+import { useResourceStorage } from '../../utils/storage';
+import useStorefrontSdk, { adapter } from '../../utils/use-storefront-sdk';
+import { Cart } from '@fleetbase/storefront';
 import tailwind from '../../tailwind';
 import Header from './Header';
 
+const { emit, addEventListener, removeEventListener } = EventRegister;
+
 const StorefrontCartScreen = ({ navigation, route }) => {
-    const { info, loadedCart } = route.params;
     const storefront = useStorefrontSdk();
-    const [cart, setCart] = useState(loadedCart);
+    const { info, loadedCart } = route.params;
+    const [cart, setCart] = useResourceStorage('cart', Cart, adapter, loadedCart);
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +51,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
 
     const updateCart = (cart) => {
         setCart(cart);
-        EventRegister.emit('cart.changed', cart);
+        emit('cart.changed', cart);
     };
 
     const getCart = () => {
@@ -96,8 +101,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     }
 
     useEffect(() => {
-        // Listen for cart changed event
-        const cartChangedListener = EventRegister.addEventListener('cart.changed', (cart) => {
+        const cartChanged = addEventListener('cart.changed', (cart) => {
             setCart(cart);
 
             if (Object.keys(products).length === 0) {
@@ -106,8 +110,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         });
 
         return () => {
-            // Remove cart.changed event listener
-            EventRegister.removeEventListener(cartChangedListener);
+            removeEventListener(cartChanged);
         };
     }, []);
 

@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faTimes, faStar } from '@fortawesome/free-solid-svg-icons';
 import { EventRegister } from 'react-native-event-listeners';
-import { isLastIndex } from '../../utils';
 import { useResourceStorage, get, set } from '../../utils/storage';
 import { getCustomer } from '../../utils/customer';
 import { adapter } from '../../utils/use-fleetbase-sdk';
-import { Place, GoogleAddress } from '@fleetbase/sdk';
+import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import tailwind from '../../tailwind';
 
 const { addEventListener, removeEventListener } = EventRegister;
 
 const LocationPicker = (props) => {
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, adapter);
-    const [places, setPlaces] = useResourceStorage('places', Place, adapter);
+    const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
     const [isSelecting, setIsSelecting] = useState(false);
     const customer = getCustomer();
     const insets = useSafeAreaInsets();
@@ -26,6 +25,17 @@ const LocationPicker = (props) => {
                 setPlaces(places);
             });
         }
+    };
+
+    // fn to check if deliverTo location is indeed the place
+    const isDeliverTo = (place) => {
+        const deliverTo = get('deliver_to');
+
+        if (deliverTo) {
+            return deliverTo.id === place.id;
+        }
+
+        return false;
     };
 
     if (!deliverTo) {
@@ -44,8 +54,18 @@ const LocationPicker = (props) => {
     useEffect(() => {
         loadPlaces();
 
-        // Listen for places collection mutate events
-        const placesMutatedListener = EventRegister.addEventListener('places.mutated', (place) => {
+        const locationChanged = addEventListener('location.changed', (place) => {
+            // if no default location set, set to location from event
+            if (!deliverTo) {
+                setDeliverTo(place);
+            }
+        });
+
+        const placesMutated = addEventListener('places.mutated', (place) => {
+            if (!places) {
+                return;
+            }
+
             const index = places.findIndex((p) => p.id === place.id);
 
             if (place.isDeleted) {
@@ -60,21 +80,23 @@ const LocationPicker = (props) => {
         });
 
         return () => {
-            // Remove places.mutated event listener
-            EventRegister.removeEventListener(placesMutatedListener);
+            removeEventListener(placesMutated);
+            removeEventListener(locationChanged);
         };
     }, []);
 
     return (
         <View style={[props.wrapperStyle || {}]}>
             <TouchableOpacity onPress={() => setIsSelecting(true)}>
-                <View style={[tailwind('flex flex-row items-center rounded-full bg-blue-50 flex items-center px-3 py-2'), props.wrapperStyle || {}]}>
+                <View style={[tailwind('flex flex-row items-center rounded-full bg-blue-50 px-3 py-2'), props.wrapperStyle || {}]}>
                     <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-900 mr-2')} />
                     <Text style={tailwind('text-blue-900 font-semibold mr-1')}>Deliver to:</Text>
-                    {deliverTo && (
+                    {deliverTo ? (
                         <Text style={tailwind('text-blue-900')} numberOfLines={1}>
                             {deliverTo.getAttribute('name') || deliverTo.getAttribute('street1')}
                         </Text>
+                    ) : (
+                        <ActivityIndicator color={'rgba(30, 58, 138, 1)'} />
                     )}
                 </View>
             </TouchableOpacity>
@@ -107,7 +129,14 @@ const LocationPicker = (props) => {
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             <View style={tailwind('flex-1')}>
-                                                <Text style={tailwind('font-semibold uppercase')}>{place.getAttribute('name')}</Text>
+                                                <View style={tailwind('flex flex-row items-center mb-1')}>
+                                                    {isDeliverTo(place) && (
+                                                        <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-1')}>
+                                                            <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
+                                                        </View>
+                                                    )}
+                                                    <Text style={tailwind('font-semibold uppercase')}>{place.getAttribute('name')}</Text>
+                                                </View>
                                                 <Text style={tailwind('uppercase')}>{place.getAttribute('street1')}</Text>
                                                 <Text style={tailwind('uppercase')}>{place.getAttribute('postal_code')}</Text>
                                             </View>

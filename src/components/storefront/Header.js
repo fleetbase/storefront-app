@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import LocationPicker from '../shared/LocationPicker';
+import StorePicker from '../shared/StorePicker';
 import tailwind from '../../tailwind';
 
 const Header = (props) => {
@@ -18,9 +19,7 @@ const Header = (props) => {
                     <View style={tailwind('h-full p-2 flex justify-end')}>
                         <View style={tailwind('flex flex-row justify-between items-end w-full mb-2')}>
                             <View>
-                                <View style={tailwind('rounded-full px-3 py-2 bg-gray-900')}>
-                                    <Text style={tailwind('text-white')}>{props.info.name}</Text>
-                                </View>
+                                <StorePicker info={props.info} />
                             </View>
                             <View>
                                 <LocationPicker />

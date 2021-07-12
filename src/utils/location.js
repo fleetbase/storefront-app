@@ -1,13 +1,15 @@
 import Geolocation from 'react-native-geolocation-service';
 import Config from 'react-native-config';
 import { Platform } from 'react-native';
+import { EventRegister } from 'react-native-event-listeners';
 import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { set, get } from './storage';
-import { GoogleAddress } from '@fleetbase/sdk';
+import { GoogleAddress, Place } from '@fleetbase/sdk';
 import haversine from './haversine';
 import axios from 'axios';
 
 const { GOOGLE_MAPS_KEY } = Config;
+const { emit } = EventRegister;
 const isAndroid = Platform.OS === 'android';
 
 const geocode = (latitude, longitude) => {
@@ -37,13 +39,13 @@ const checkHasLocationPermission = () => {
     return new Promise((resolve) => {
         return checkMultiple([PERMISSIONS.IOS.LOCATION_WHEN_IN_USE, PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]).then((statuses) => {
             if (isAndroid && statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.DENIED) {
-                request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION).then((result) => {
+                return request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION).then((result) => {
                     resolve(result === 'granted');
                 });
             }
 
             if (!isAndroid && statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.DENIED) {
-                request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE).then((result) => {
+                return request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE).then((result) => {
                     resolve(result === 'granted');
                 });
             }
@@ -77,6 +79,7 @@ const getCurrentLocation = async () => {
 
                         // save last known location
                         set('location', googleAddress.all());
+                        emit('location.changed', Place.fromGoogleAddress(googleAddress));
 
                         resolve(googleAddress.all());
                     });

@@ -3,6 +3,8 @@ import { Customer } from '@fleetbase/storefront';
 import storage, { get, set, useMMKVStorage } from './storage';
 import { adapter } from './use-storefront-sdk';
 
+const { emit } = EventRegister;
+
 const getCustomer = () => {
     const attributes = get('customer');
 
@@ -16,7 +18,7 @@ const getCustomer = () => {
 const updateCustomer = (customer) => {
      if (customer instanceof Customer) {
         set('customer', customer.serialize());
-        EventRegister.emit('customer.updated', customer);
+        emit('customer.updated', customer);
     }
 };
 

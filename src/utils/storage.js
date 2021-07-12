@@ -1,10 +1,11 @@
 import MMKVStorage, { create, useMMKVStorage } from "react-native-mmkv-storage";
 import { isResource, Collection } from '@fleetbase/sdk';
 
+const { isArray } = Array;
 const storage = new MMKVStorage.Loader().initialize(); 
 const useStorage = create(storage);
 
-const useResourceStorage = (key, ResourceType, adapter) => {
+const useResourceStorage = (key, ResourceType, adapter, defaultValue = null) => {
     const [value, setValue] = useMMKVStorage(key, storage);
 
     const setResource = (resource) => {
@@ -21,12 +22,16 @@ const useResourceStorage = (key, ResourceType, adapter) => {
         setValue(resource);
     }
 
-    if (value && value.length) {
+    if (value && isArray(value)) {
         return [new Collection(value.map(r => new ResourceType(r, adapter))), setResource];
     }
 
     if (value) {
         return [new ResourceType(value, adapter), setResource];
+    }
+
+    if (value === null && defaultValue !== null) {
+        return [defaultValue, setResource];
     }
 
     return [value, setResource];

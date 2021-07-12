@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faPlus, faEdit, faStar } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
-import { Place, isResource } from '@fleetbase/sdk';
+import { Place, Collection, isResource } from '@fleetbase/sdk';
 import { useStorefrontSdk } from '../../utils';
 import { getCustomer } from '../../utils/customer';
 import { adapter } from '../../utils/use-fleetbase-sdk';
@@ -14,21 +14,30 @@ import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
     const { attributes, key } = route.params;
-    const [places, setPlaces] = useResourceStorage('places', Place, adapter);
+    const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
     const [isLoading, setIsLoading] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
     const customer = getCustomer();
     const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
 
     const loadPlaces = (initialize = false) => {
-        if (customer) {
-            setIsLoading(initialize ? false : true);
+        return new Promise((resolve) => {
+            if (customer) {
+                setIsInitializing(initialize === true);
+                setIsLoading(initialize ? false : true);
 
-            return customer.getSavedPlaces().then((places) => {
-                setPlaces(places);
-                setIsLoading(false);
-            });
-        }
+                return customer.getSavedPlaces().then((places) => {
+                    setPlaces(places);
+                    setIsLoading(false);
+                    setIsInitializing(false);
+
+                    resolve(places);
+                });
+            }
+
+            resolve(new Collection());
+        });
     };
 
     // fn to check if deliverTo location is indeed the place
@@ -48,6 +57,11 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
 
         // Listen for places collection mutate events
         const placesMutatedListener = EventRegister.addEventListener('places.mutated', (place) => {
+            // if no places loaded
+            if (!places) {
+                return;
+            }
+
             const index = places.findIndex((p) => p.id === place.id);
 
             if (place.isDeleted) {
@@ -124,17 +138,24 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
                     <View style={tailwind('h-full bg-white flex items-center justify-center')}>
                         <View style={tailwind('flex items-center justify-center w-full px-8')}>
                             <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
-                                <FontAwesomeIcon icon={faMapMarked} size={88} style={tailwind('text-gray-600')} />
+                                {isInitializing ? <ActivityIndicator /> : <FontAwesomeIcon icon={faMapMarked} size={88} style={tailwind('text-gray-600')} />}
                             </View>
-                            <View style={tailwind('flex items-center justify-center mb-10')}>
-                                <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Your address book is empty</Text>
-                                <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't saved any addresses.</Text>
-                            </View>
-                            <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('AddNewPlace')}>
-                                <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                                    <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Add new address</Text>
+
+                            <View style={tailwind('w-full')}>
+                                <View style={tailwind('flex items-center justify-center mb-10')}>
+                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>
+                                        {isInitializing ? 'Loading your saved places' : 'You have no saved places'}
+                                    </Text>
+                                    {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't saved any addresses.</Text>}
                                 </View>
-                            </TouchableOpacity>
+                                {!isInitializing && (
+                                    <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('AddNewPlace')}>
+                                        <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
+                                            <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Add new address</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
                     </View>
                 }
