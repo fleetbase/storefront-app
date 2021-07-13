@@ -74,11 +74,11 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                     </View>
-                    <View style={tailwind('p-4 mb-4 bg-white')}>
+                    {/* <View style={tailwind('p-4 mb-4 bg-white')}>
                         <View style={tailwind('flex flex-row')}>
                             <Text style={tailwind('font-semibold text-base')}>Recent Orders</Text>
                         </View>
-                    </View>
+                    </View> */}
                     <View style={tailwind('mb-4 bg-white')}>
                         <View style={tailwind('flex flex-row p-4')}>
                             <Text style={tailwind('font-semibold text-base')}>My Account</Text>

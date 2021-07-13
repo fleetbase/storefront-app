@@ -92,9 +92,11 @@ const LocationPicker = (props) => {
                     <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-900 mr-2')} />
                     <Text style={tailwind('text-blue-900 font-semibold mr-1')}>Deliver to:</Text>
                     {deliverTo ? (
-                        <Text style={tailwind('text-blue-900')} numberOfLines={1}>
-                            {deliverTo.getAttribute('name') || deliverTo.getAttribute('street1')}
-                        </Text>
+                        <View style={{maxWidth: 100}}>
+                            <Text style={tailwind('text-blue-900')} numberOfLines={1}>
+                                {deliverTo.getAttribute('name') || deliverTo.getAttribute('street1')}
+                            </Text>
+                        </View>
                     ) : (
                         <ActivityIndicator color={'rgba(30, 58, 138, 1)'} />
                     )}

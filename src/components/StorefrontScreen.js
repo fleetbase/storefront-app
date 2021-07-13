@@ -23,7 +23,7 @@ const StorefrontScreen = ({ route }) => {
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
     const [cart, setCart] = useResourceStorage('cart', Cart, adapter, new Cart({}, adapter));
     const [cartTabOptions, setCartTabOptions] = useState({
-        tabBarBadge: 2,
+        tabBarBadge: cart instanceof Cart ? cart.getAttribute('total_unique_items') : 0,
         tabBarBadgeStyle: tailwind('bg-blue-500 ml-1'),
     });
 

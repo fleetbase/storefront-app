@@ -44,7 +44,10 @@ const StorefrontSearchPlacesScreen = ({ navigation, route }) => {
             </View>
             <View style={tailwind('flex items-center justify-center w-full h-full bg-gray-200')}>
                 <GooglePlacesAutocomplete
-                    placeholder="Enter Address"
+                    placeholder={'Enter address...'}
+                    placeholderTextColor={'rgba(156, 163, 175, 1)'}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
                     currentLocation={true}
                     enableHighAccuracyLocation={true}
                     fetchDetails={true}

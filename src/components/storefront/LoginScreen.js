@@ -74,7 +74,7 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                     {isAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-6')}>
-                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} style={tailwind('form-input text-center mb-2')} />
+                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} placeholderTextColor={'rgba(156, 163, 175, 1)'} style={tailwind('form-input text-center mb-2')} />
                                 <View style={tailwind('flex flex-row justify-end')}>
                                     <TouchableOpacity onPress={retry}>
                                         <Text style={tailwind('text-blue-900 font-semibold')}>Retry?</Text>

@@ -75,9 +75,9 @@ const StorefrontEditProfileScreen = ({ navigation }) => {
                             />
                         </View>
                         <TouchableOpacity onPress={saveProfile} disabled={isLoading}>
-                            <View style={tailwind('btn border border-gray-500')}>
-                                {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
-                                <Text style={tailwind('font-semibold text-lg text-center')}>Save Profile</Text>
+                            <View style={tailwind('btn bg-green-50 border border-green-50')}>
+                                {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
+                                <Text style={tailwind('font-semibold text-lg text-green-900 text-center')}>Save Profile</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

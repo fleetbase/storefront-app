@@ -34,7 +34,7 @@ const StorePicker = (props) => {
 
     const selectStoreLocation = (selectedStoreLocation) => {
         if (!storeLocation && selectedStoreLocation === undefined) {
-            const defaultStoreLocation = selectedStoreLocation.first;
+            const defaultStoreLocation = storeLocations.first;
 
             if (defaultStoreLocation) {
                 setStoreLocation(defaultStoreLocation);
@@ -47,14 +47,39 @@ const StorePicker = (props) => {
     };
 
     const getCoordinates = (location) => {
+        if (!location) {
+            return [];
+        }
+
+        if (location instanceof Place) {
+            return location.coordinates;
+        }
+
+        if (location instanceof StoreLocation) {
+            const point = location.getAttribute('place.location');
+            const [ longitude, latitude ] = point.coordinates;
+            const coordinates = [ latitude, longitude ];
+
+            return coordinates;
+        }
+
         if (isArray(location)) {
             return location;
         }
 
         if (typeof location === 'object' && location?.type === 'Point') {
-            // fleetbase Point returns (longitude, latitude) -- so we reverse
-            return location.coordinates.reverse();
+            const [ longitude, latitude ] = location.coordinates;
+            const coordinates = [ latitude, longitude ];
+
+            return coordinates;
         }
+    }
+
+    const getDistance = (origin, destination) => {
+        const originCoordinates = getCoordinates(origin);
+        const destinationCoordinates = getCoordinates(destination);
+
+        return haversine(originCoordinates, destinationCoordinates);
     }
 
     const isCurrentStoreLocation = (idxStoreLocation) => idxStoreLocation.id === storeLocation?.id;
@@ -63,6 +88,7 @@ const StorePicker = (props) => {
 
     useEffect(() => {
         loadLocations();
+        selectStoreLocation();
     }, []);
 
     return (
@@ -70,7 +96,9 @@ const StorePicker = (props) => {
             <TouchableOpacity onPress={() => setIsSelecting(true)}>
                 <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2 '), props.wrapperStyle || {}]}>
                     <FontAwesomeIcon icon={faInfoCircle} style={tailwind('text-white mr-2')} />
-                    <Text style={tailwind('text-white')}>{props.info.name}</Text>
+                    <View style={{maxWidth: 100}}>
+                        <Text style={tailwind('text-white')} numberOfLines={1}>{props.info.name}</Text>
+                    </View>
                 </View>
             </TouchableOpacity>
 
@@ -119,7 +147,7 @@ const StorePicker = (props) => {
                                                 </View>
                                             </View>
                                             <View>
-                                                {deliverTo && <Text>{formatKm(haversine(getCoordinates(deliverTo.getAttribute('location')), getCoordinates(storeLocation.getAttribute('place.location'))))}</Text>}
+                                                {deliverTo && <Text>{formatKm(getDistance(storeLocation, deliverTo))}</Text>}
                                             </View>
                                         </View>
                                     </View>

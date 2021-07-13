@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, Image, Dimensions, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -22,6 +23,7 @@ const ProductScreen = ({ navigation, route }) => {
     const fullWidth = Dimensions.get('window').width;
     const fullHeight = Dimensions.get('window').height;
     const scrollViewMinHeight = fullHeight / 2;
+    const insets = useSafeAreaInsets();
 
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);
@@ -278,7 +280,7 @@ const ProductScreen = ({ navigation, route }) => {
     useEffect(() => restoreSelections(), []);
 
     return (
-        <SafeAreaView style={tailwind('bg-white')}>
+        <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
             <View style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -454,7 +456,7 @@ const ProductScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

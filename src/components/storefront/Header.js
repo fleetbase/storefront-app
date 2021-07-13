@@ -28,7 +28,7 @@ const Header = (props) => {
                         <View>
                             <View style={tailwind('flex flex-row items-center justify-between px-3 py-2 bg-white w-full shadow-sm rounded-md')}>
                                 <View style={tailwind('flex-1')}>
-                                    <TextInput value={searchQuery} onChangeText={setSearchQuery} style={tailwind('h-7 text-left w-full text-gray-500')} placeholder={'Search for anything'} />
+                                    <TextInput value={searchQuery} onChangeText={setSearchQuery} autoCapitalize={'none'} autoCorrect={false} style={tailwind('h-7 text-left w-full text-gray-500')} placeholderTextColor={'rgba(156, 163, 175, 1)'} placeholder={'Search for anything...'} />
                                 </View>
                                 <View>
                                     {searchQuery.length > 0 && (
