@@ -114,7 +114,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         const subtotal = cart.subtotal();
 
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
-    }
+    };
 
     useEffect(() => {
         getCart();
@@ -142,6 +142,23 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     return (
         <View style={tailwind(`h-full ${cart && cart.isEmpty ? 'bg-white' : ''}`)}>
             <Header info={info} />
+            {cart && (
+                <View style={tailwind('z-30 absolute w-full bottom-0')}>
+                    <View style={tailwind('w-full bg-white shadow-sm px-4 py-6')}>
+                        <View style={tailwind('flex flex-row justify-between mb-2')}>
+                            <View>
+                                <Text style={tailwind('text-gray-400')}>Total</Text>
+                                <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize() })}>
+                                <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600')}>
+                                    <Text style={tailwind('font-semibold text-green-600 text-lg')}>Checkout</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
             {!cart && (
                 <View style={tailwind('mt-20 flex items-center justify-center')}>
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
@@ -284,7 +301,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                         <Text style={tailwind('font-semibold text-gray-400')}>Cost</Text>
                                     </View>
                                 </View>
-                                <View style={tailwind('mt-2 mb-4 bg-white w-full')}>
+                                <View style={tailwind('mt-2 mb-36 bg-white w-full')}>
                                     <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100  h-14 px-4')}>
                                         <View>
                                             <Text>Subtotal</Text>
@@ -309,13 +326,6 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                             <Text style={tailwind('font-bold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                                         </View>
                                     </View>
-                                </View>
-                                <View style={tailwind('flex flex-row p-4 mb-4')}>
-                                    <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize() })}>
-                                        <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600')}>
-                                            <Text style={tailwind('font-semibold text-green-600 text-lg')}>Checkout</Text>
-                                        </View>
-                                    </TouchableOpacity>
                                 </View>
                             </View>
                         )
