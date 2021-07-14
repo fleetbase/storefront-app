@@ -10,7 +10,7 @@ import { adapter } from '../../utils/use-fleetbase-sdk';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import tailwind from '../../tailwind';
 
-const { addEventListener, removeEventListener } = EventRegister;
+const { addEventListener, removeEventListener, emit } = EventRegister;
 
 const LocationPicker = (props) => {
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, adapter);
@@ -25,6 +25,12 @@ const LocationPicker = (props) => {
                 setPlaces(places);
             });
         }
+    };
+
+    const changeDeliverTo = (place) => {
+        setDeliverTo(place);
+        emit('deliver_to.changed', place);
+        setIsSelecting(false);
     };
 
     // fn to check if deliverTo location is indeed the place
@@ -124,10 +130,7 @@ const LocationPicker = (props) => {
                             {places.map((place, index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    onPress={() => {
-                                        setDeliverTo(place);
-                                        setIsSelecting(false);
-                                    }}>
+                                    onPress={() => changeDeliverTo(place)}>
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             <View style={tailwind('flex-1')}>

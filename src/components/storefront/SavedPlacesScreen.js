@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faPlus, faEdit, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapMarked, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Place, Collection, isResource } from '@fleetbase/sdk';
 import { useStorefrontSdk } from '../../utils';
@@ -13,7 +13,7 @@ import { useResourceStorage, get, set } from '../../utils/storage';
 import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
-    const { attributes, key } = route.params;
+    const { attributes, key, useLeftArrow } = route.params;
     const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
@@ -120,7 +120,7 @@ const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
                         <View style={tailwind('flex flex-row items-center')}>
                             <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                                 <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                                    <FontAwesomeIcon icon={faTimes} />
+                                    <FontAwesomeIcon icon={useLeftArrow === true ? faArrowLeft : faTimes} />
                                 </View>
                             </TouchableOpacity>
                             <Text style={tailwind('text-xl font-semibold')}>Your saved places</Text>

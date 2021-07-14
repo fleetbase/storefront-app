@@ -17,9 +17,9 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={tailwind('bg-white h-full')}> 
+        <View style={tailwind('bg-white h-full z-10')}> 
             <Header info={info} />
-            <View style={tailwind('p-4')}>
+            <View style={tailwind('p-4 z-10')}>
                 <Text style={tailwind('text-lg font-semibold mb-3')}>Shop by category</Text>
                 <View style={tailwind('flex flex-row')}>
                     {categories.map((category) => {

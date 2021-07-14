@@ -9,6 +9,7 @@ import { Place, GoogleAddress } from '@fleetbase/sdk';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { getCustomer } from '../../utils/customer';
 import { get, set, remove } from '../../utils/storage';
+import MapView, { Marker } from 'react-native-maps';
 import useStorefrontSdk from '../../utils/use-storefront-sdk';
 import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';
@@ -36,7 +37,7 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
 
     const savePlace = () => {
         setIsLoading(true);
-        
+
         return place
             .setAttributes({
                 owner: customer.id,
@@ -54,7 +55,7 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
                 // if new place added fire event
                 emit('places.mutated', place);
                 setIsLoading(false);
-                navigation.navigate('SavedPlaces');
+                navigation.goBack();
             });
     };
 
@@ -67,12 +68,12 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
         if (deliverTo && deliverTo.id === place.id) {
             remove('deliver_to');
             emit('deliver_to.changed', null);
-        } 
+        }
 
         return place.destroy().then((place) => {
             setIsDeleting(false);
             emit('places.mutated', place);
-            navigation.navigate('SavedPlaces');
+            navigation.goBack();
         });
     };
 
@@ -80,7 +81,7 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
         set('deliver_to', place.serialize());
         emit('deliver_to.changed', place);
         emit('places.mutated', place);
-        navigation.navigate('SavedPlaces');
+        navigation.goBack();
     };
 
     return (
@@ -111,6 +112,20 @@ const StorefrontEditPlaceScreen = ({ navigation, route }) => {
             </View>
             <ScrollView style={tailwind('w-full h-full bg-white pb-60')}>
                 <View style={tailwind('p-4')}>
+                    <View style={tailwind('mb-4')}>
+                        <MapView
+                            zoom={10}
+                            style={tailwind('w-full h-40 rounded-md shadow-sm')}
+                            initialRegion={{
+                                latitude: place.latitude,
+                                longitude: place.longitude,
+                                latitudeDelta: 0.0922,
+                                longitudeDelta: 0.0421,
+                            }}
+                    >
+                        <Marker coordinate={{ latitude: place.latitude, longitude: place.longitude }} />
+                    </MapView>
+                    </View>
                     <View style={tailwind('mb-4')}>
                         <Text style={tailwind('font-semibold text-base text-black mb-2')}>Name</Text>
                         <TextInput

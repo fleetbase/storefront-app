@@ -18,16 +18,16 @@ const { emit, addEventListener, removeEventListener } = EventRegister;
 
 const StorefrontCartScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
-    const { info, loadedCart } = route.params;
+    const { info, serializedCart } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
-    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(loadedCart || {}));
+    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
     const [serviceQuote, setServiceQuote] = useState(null);
 
-    const getDeliveryQuote = () => {
+    const getDeliveryQuote = (place = null) => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
@@ -39,7 +39,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
          */
 
         setIsFetchingServiceQuote(true);
-        quote.fromCart(storeLocation, deliverTo, cart).then((serviceQuote) => {
+        quote.fromCart(storeLocation, place || deliverTo, cart).then((serviceQuote) => {
             setServiceQuote(serviceQuote);
             setIsFetchingServiceQuote(false);
         });
@@ -110,18 +110,8 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         });
     };
 
-    const calculateSubtotal = () => {
-        let subtotal = 0;
-
-        cart.contents().forEach((cartItem) => {
-            subtotal += cartItem.subtotal;
-        });
-
-        return subtotal;
-    };
-
     const calculateTotal = () => {
-        const subtotal = calculateSubtotal();
+        const subtotal = cart.subtotal();
 
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     }
@@ -130,7 +120,6 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         getCart();
 
         const cartChanged = addEventListener('cart.changed', (cart) => {
-            console.log('! [cart.changed]', cart);
             setCart(cart);
             getDeliveryQuote();
 
@@ -139,24 +128,16 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             }
         });
 
+        const locationChanged = addEventListener('deliver_to.changed', (place) => {
+            // update delivery quote
+            getDeliveryQuote(place);
+        });
+
         return () => {
             removeEventListener(cartChanged);
+            removeEventListener(locationChanged);
         };
     }, []);
-
-    // if (cart) {
-    //     console.log('[cart]', cart);
-
-    //     if (!(cart instanceof Cart)) {
-    //         console.log('cart is not an instance of Cart!');
-    //     }
-
-    //     if (cart instanceof Cart) {
-    //         console.log('[cart contents]', cart.contents());
-    //     }
-    // }
-
-    console.log('render()');
 
     return (
         <View style={tailwind(`h-full ${cart && cart.isEmpty ? 'bg-white' : ''}`)}>
@@ -234,12 +215,12 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                     )}
                     renderHiddenItem={({ item, index }) => (
                         <View style={tailwind('flex flex-1 items-center bg-white flex-1 flex-row justify-end')}>
-                            <TouchableOpacity onPress={() => editCartItem(item)} style={tailwind('flex bg-blue-300 w-28 h-full items-center justify-center')}>
+                            <TouchableOpacity onPress={() => editCartItem(item)} style={tailwind('flex bg-blue-50 w-28 h-full items-center justify-center')}>
                                 <View>
                                     <FontAwesomeIcon icon={faPencilAlt} size={22} style={tailwind('text-blue-900')} />
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => removeFromCart(item)} style={tailwind('flex bg-red-300 w-28 h-full items-center justify-center')}>
+                            <TouchableOpacity onPress={() => removeFromCart(item)} style={tailwind('flex bg-red-50 w-28 h-full items-center justify-center')}>
                                 <View>
                                     <FontAwesomeIcon icon={faTrash} size={22} style={tailwind('text-red-900')} />
                                 </View>
@@ -251,7 +232,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                     disableRightSwipe={true}
                     ListHeaderComponent={
                         cart.isNotEmpty && (
-                            <View style={tailwind('bg-gray-100')}>
+                            <View>
                                 <View style={tailwind('px-4 py-2 bg-white mb-2')}>
                                     <View>
                                         <Text style={tailwind('text-lg font-bold mb-2')}>{cart.getAttribute('total_items')} items in your cart</Text>
@@ -304,21 +285,23 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                                 <View style={tailwind('mt-2 mb-4 bg-white w-full')}>
-                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 p-4')}>
+                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100  h-14 px-4')}>
                                         <View>
                                             <Text>Subtotal</Text>
                                         </View>
                                         <View>
-                                            <Text style={tailwind('font-bold')}>{formatCurrency(calculateSubtotal() / 100, cart.getAttribute('currency'))}</Text>
+                                            <Text style={tailwind('font-bold')}>{formatCurrency(cart.subtotal() / 100, cart.getAttribute('currency'))}</Text>
                                         </View>
                                     </View>
-                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 p-4')}>
+                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                                         <View>
                                             <Text>Delivery Fee</Text>
                                         </View>
-                                        <View>{isFetchingServiceQuote ? <ActivityIndicator /> : <Text style={tailwind('font-bold')}>{serviceQuote.formattedAmount}</Text>}</View>
+                                        <View>
+                                            <Text style={tailwind('font-bold')}>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
+                                        </View>
                                     </View>
-                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 p-4')}>
+                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                                         <View>
                                             <Text style={tailwind('font-bold')}>Total</Text>
                                         </View>
@@ -327,8 +310,8 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                         </View>
                                     </View>
                                 </View>
-                                <View style={tailwind('flex flex-row p-4')}>
-                                    <TouchableOpacity style={tailwind('w-full')}>
+                                <View style={tailwind('flex flex-row p-4 mb-4')}>
+                                    <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize() })}>
                                         <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600')}>
                                             <Text style={tailwind('font-semibold text-green-600 text-lg')}>Checkout</Text>
                                         </View>

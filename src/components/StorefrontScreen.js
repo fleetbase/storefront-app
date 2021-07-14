@@ -87,7 +87,7 @@ const StorefrontScreen = ({ route }) => {
                 showLabel: false,
             }}>
             <Tab.Screen key="home" name="Home" component={ShopStack} initialParams={{ info }} />
-            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, loadedCart: cart.serialize() }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>
     );

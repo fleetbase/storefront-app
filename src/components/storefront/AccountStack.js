@@ -61,3 +61,5 @@ const AccountStack = ({ route }) => {
 };
 
 export default AccountStack;
+
+export { PlaceStackScreen };
