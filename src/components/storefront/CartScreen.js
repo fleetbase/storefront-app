@@ -78,6 +78,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     };
 
     const getCart = () => {
+        console.log('getCart() called !!!');
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
             updateCart(cart);
             getDeliveryQuote();
@@ -113,8 +114,15 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const calculateTotal = () => {
         const subtotal = cart.subtotal();
 
+        if (cart.isEmpty) {
+            return 0;
+        }
+
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
+
+    const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
+    const isCheckoutDisabled = isFetchingServiceQuote || isLoading;
 
     useEffect(() => {
         getCart();
@@ -142,7 +150,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     return (
         <View style={tailwind(`h-full ${cart && cart.isEmpty ? 'bg-white' : ''}`)}>
             <Header info={info} />
-            {cart && (
+            {isCartLoaded && cart.isNotEmpty && (
                 <View style={tailwind('z-30 absolute w-full bottom-0')}>
                     <View style={tailwind('w-full bg-white shadow-sm px-4 py-6')}>
                         <View style={tailwind('flex flex-row justify-between mb-2')}>
@@ -150,23 +158,23 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                 <Text style={tailwind('text-gray-400')}>Total</Text>
                                 <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                             </View>
-                            <TouchableOpacity onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize() })}>
-                                <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600')}>
-                                    <Text style={tailwind('font-semibold text-green-600 text-lg')}>Checkout</Text>
+                            <TouchableOpacity disabled={isCheckoutDisabled} onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize() })}>
+                                <View style={tailwind(`flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600 ${isCheckoutDisabled ? 'bg-opacity-50 border-opacity-50' : ''}`)}>
+                                    <Text style={tailwind(`font-semibold text-green-600 text-lg ${isCheckoutDisabled ? 'text-opacity-50' : ''}`)}>Checkout</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             )}
-            {!cart && (
+            {!isCartLoaded && (
                 <View style={tailwind('mt-20 flex items-center justify-center')}>
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
                         <ActivityIndicator />
                     </View>
                 </View>
             )}
-            {cart && (
+            {isCartLoaded && (
                 <SwipeListView
                     data={cart.contents()}
                     keyExtractor={(item) => item.id}
@@ -218,11 +226,11 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 </View>
                                 <View style={tailwind('flex items-end')}>
-                                    <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
+                                    <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, item.currency)}</Text>
                                     {item.quantity > 1 && (
                                         <View>
                                             <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                                                (each {formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency'))})
+                                                (each {formatCurrency(item.subtotal / item.quantity / 100, item.currency)})
                                             </Text>
                                         </View>
                                     )}

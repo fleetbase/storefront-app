@@ -13,7 +13,7 @@ import { useResourceStorage, get, set } from '../../utils/storage';
 import tailwind from '../../tailwind';
 
 const StorefrontSavedPlacesScreen = ({ navigation, route }) => {
-    const { attributes, key, useLeftArrow } = route.params;
+    const { attributes, useLeftArrow } = route.params;
     const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);

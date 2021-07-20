@@ -5,14 +5,17 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { formatCurrency, isLastIndex, useStorefrontSdk } from '../utils';
+import { formatCurrency, isLastIndex } from '../utils';
 import tailwind from '../tailwind';
-import { Product } from '@fleetbase/storefront';
+import { Product, Cart } from '@fleetbase/storefront';
+import { useResourceStorage } from '../utils/storage';
+import useStorefrontSdk, { adapter as StorefrontAdapter } from '../utils/use-storefront-sdk';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
 import RadioButton from 'react-native-animated-radio-button';
 
 const { isArray } = Array;
+const { emit } = EventRegister;
 
 const ProductScreen = ({ navigation, route }) => {
     const { attributes, cartItemAttributes } = route.params;
@@ -34,7 +37,7 @@ const ProductScreen = ({ navigation, route }) => {
     const [isInCart, setIsInCart] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [quantity, setQuantity] = useState(1);
-    const [cart, setCart] = useState(null);
+    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart());
     const [cartItem, setCartItem] = useState(cartItemAttributes);
 
     const canAddToCart = isValid && !isAddingToCart;
@@ -52,7 +55,7 @@ const ProductScreen = ({ navigation, route }) => {
 
     const updateCart = (cart) => {
         setCart(cart);
-        EventRegister.emit('cart.changed', cart);
+        emit('cart.changed', cart);
     };
 
     const decreaseQuantity = () => {

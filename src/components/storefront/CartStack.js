@@ -3,8 +3,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import StorefrontCartScreen from './CartScreen';
 import StorefrontCheckoutScreen from './CheckoutScreen';
 import StorefrontSavedPlacesScreen from './SavedPlacesScreen';
+import StorefrontPaymentMethodsScreen from './PaymentMethodsScreen';
 import ProductScreen from '../ProductScreen';
 import StorefrontEditPlaceScreen from './EditPlaceScreen';
+import StorefrontAddPaymentMethodScreen from './AddPaymentMethodScreen';
+import StorefrontOrderCompletedScreen from './OrderCompletedScreen';
 import { PlaceStackScreen } from './AccountStack';
 
 const MainStack = createStackNavigator();
@@ -18,6 +21,8 @@ const MainStackScreen = ({ route }) => {
             <MainStack.Screen name="CartScreen" component={StorefrontCartScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutScreen" component={StorefrontCheckoutScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutSavedPlaces" component={StorefrontSavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <MainStack.Screen name="CheckoutPaymentMethods" component={StorefrontPaymentMethodsScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <MainStack.Screen name="OrderCompleted" component={StorefrontOrderCompletedScreen} options={{ headerShown: false }} initialParams={{ info }} />
         </MainStack.Navigator>
     );
 };
@@ -31,6 +36,7 @@ const CartStack = ({ route }) => {
             <RootStack.Screen name="CartItemScreen" component={ProductScreen} options={{ headerShown: false }} />
             <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="EditPlaceForm" component={StorefrontEditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <RootStack.Screen name="AddPaymentMethod" component={StorefrontAddPaymentMethodScreen} options={{ headerShown: false }} initialParams={{ info }} />
         </RootStack.Navigator>
     );
 };

@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
+import { initStripe } from '@stripe/stripe-react-native';
 import { useStorefrontSdk, hasRequiredKeys } from '../utils';
 import { set } from '../utils/storage';
 import tailwind from '../tailwind';
 import SetupWarningScreen from './SetupWarningScreen';
+import Config from 'react-native-config';
+
+const { STRIPE_KEY } = Config;
 
 const BootScreen = ({ navigation }) => {
     // make sure keys are set
@@ -22,6 +26,13 @@ const BootScreen = ({ navigation }) => {
 
         // @todo handle networks (mutli shop apps/ marketplaces)
     });
+
+    useEffect(() => {
+        initStripe({
+            publishableKey: STRIPE_KEY,
+            merchantIdentifier: 'io.fleetbase.storefrontapp',
+        });
+    }, []);
 
     return (
         <SafeAreaView style={tailwind('bg-white')}>

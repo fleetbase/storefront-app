@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
@@ -13,24 +13,110 @@ import { adapter as FleetbaseAdapter } from '../../utils/use-fleetbase-sdk';
 import { getCustomer } from '../../utils/customer';
 import { Cart, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
 import { Place, ServiceQuote } from '@fleetbase/sdk';
+import { useStripe } from '@stripe/stripe-react-native';
 import tailwind from '../../tailwind';
 import Header from './Header';
 
 const { addEventListener, removeEventListener } = EventRegister;
+// put your gateway code here
+const GATEWAY_CODE = 'stripe';
 
 const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const customer = getCustomer();
     const insets = useSafeAreaInsets();
+    const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
     const { info, serializedCart, quote } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
     const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
     const [isLoading, setIsLoading] = useState(false);
+    const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote || {}));
+    const [paymentMethod, setPaymentMethod] = useState({ image: '', label: '' });
+    const [checkoutToken, setCheckoutToken] = useState(null);
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+
+    const fetchBeforeCheckout = async () => {
+        const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE);
+
+        setCheckoutToken(token);
+
+        return {
+            paymentIntent,
+            ephemeralKey,
+            customerId,
+        };
+    };
+
+    const initializePaymentSheet = async () => {
+        setIsLoading(true);
+
+        try {
+            const { paymentIntent, ephemeralKey, customerId } = await fetchBeforeCheckout();
+
+            const { error, paymentOption } = await initPaymentSheet({
+                customerId,
+                customerEphemeralKeySecret: ephemeralKey,
+                paymentIntentClientSecret: paymentIntent,
+                customFlow: true,
+                merchantDisplayName: info.name,
+                applePay: true,
+                merchantCountryCode: 'US',
+                style: 'alwaysLight',
+                googlePay: true,
+                testEnv: true,
+            });
+
+            if (!error) {
+                setPaymentSheetEnabled(true);
+            }
+            if (paymentOption) {
+                setPaymentMethod(paymentOption);
+            }
+        } catch (error) {
+            console.log('error', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const choosePaymentOption = async () => {
+        const { error, paymentOption } = await presentPaymentSheet({
+            confirmPayment: false,
+        });
+
+        if (error) {
+            console.log('error', error);
+        } else if (paymentOption) {
+            setPaymentMethod({
+                label: paymentOption.label,
+                image: paymentOption.image,
+            });
+        } else {
+            setPaymentMethod(null);
+        }
+    };
+
+    const placeOrder = async () => {
+        setIsLoading(true);
+        const { error } = await confirmPaymentSheetPayment();
+
+        if (error) {
+            console.log(`Error code: ${error.code}`, error.message);
+            setIsLoading(false);
+        } else {
+            console.log('Success', 'The payment was confirmed successfully!');
+
+            setPaymentSheetEnabled(false);
+            storefront.checkout.captureOrder(checkoutToken).then((order) => {
+                setIsLoading(false);
+                navigation.navigate('OrderCompleted', { orderJson: order.serialize() });
+            });
+        }
+    };
 
     const getDeliveryQuote = (place = null) => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
@@ -57,6 +143,8 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     };
 
     useEffect(() => {
+        initializePaymentSheet();
+
         const cartChanged = addEventListener('cart.changed', (cart) => {
             setCart(cart);
             getDeliveryQuote();
@@ -88,68 +176,87 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
 
             <ScrollView>
                 <View style={tailwind('p-4')}>
-                    <View style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}>
-                        <View style={tailwind('flex flex-row justify-between mb-3')}>
-                            <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
-                            {isInvalidDeliveryPlace && <FaIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
-                        </View>
+                    <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
-                                <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
-                                <Text>{deliverTo.getAttribute('street1')}</Text>
-                                {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
-                                <Text>
-                                    {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
-                                </Text>
-                                {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                                <View style={tailwind('flex flex-row justify-between mb-3')}>
+                                    <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
+                                    {isInvalidDeliveryPlace && <FaIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
+                                </View>
+                                <View>
+                                    <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
+                                    <Text>{deliverTo.getAttribute('street1')}</Text>
+                                    {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
+                                    <Text>
+                                        {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
+                                    </Text>
+                                    {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                                </View>
                             </View>
-                            <View style={tailwind('flex items-center justify-center')}>
-                                <TouchableOpacity onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
+                            <View style={tailwind('flex justify-center')}>
+                                <View style={tailwind('flex items-end justify-center w-12')}>
                                     <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
-                                </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}>
-                        <View style={tailwind('flex flex-row justify-between mb-3')}>
-                            <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
-                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={choosePaymentOption}>
                         <View style={tailwind('flex flex-row justify-between')}>
-                            <View></View>
-                            <View style={tailwind('flex items-center justify-center')}>
-                                <TouchableOpacity>
-                                    <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}>
-                        <View style={tailwind('flex flex-row justify-between mb-3')}>
-                            <Text style={tailwind('font-semibold text-base')}>Cart ({cart.getAttribute('total_unique_items')})</Text>
-                        </View>
-                        <View style={tailwind('flex flex-row justify-between')}>
-                            <View style={tailwind('flex-1 flex flex-row')}>
-                                {cart.contents().map((cartItem, index) => (
-                                    <View key={index} style={tailwind('mr-2 flex items-center justify-center w-16')}>
-                                        <View style={tailwind('border border-gray-200 flex items-center justify-center w-16 h-16 mb-2')}>
-                                            <Image source={{ uri: cartItem.product_image_url }} style={tailwind('w-10 h-10')} />
-                                        </View>
-                                        <Text style={tailwind('text-center text-xs mb-1')} numberOfLines={1}>
-                                            {cartItem.name}
-                                        </Text>
-                                        <Text style={tailwind('text-center text-xs')} numberOfLines={1}>
-                                            x{cartItem.quantity}
-                                        </Text>
+                            <View>
+                                <View style={tailwind('flex flex-row justify-between mb-3')}>
+                                    <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
+                                </View>
+                                <View style={tailwind('flex flex-row justify-between')}>
+                                    {isLoading && !paymentMethod.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
+                                    <View style={tailwind('flex flex-row items-center')}>
+                                        <Image
+                                            source={{
+                                                uri: `data:image/png;base64,${paymentMethod.image}`,
+                                            }}
+                                            style={[{ width: 35, height: 22, marginRight: 10 }]}
+                                        />
+                                        <Text>{paymentMethod.label}</Text>
                                     </View>
-                                ))}
+                                </View>
                             </View>
-                            <View style={tailwind('flex items-center justify-center')}>
-                                <TouchableOpacity>
+                            <View style={tailwind('flex justify-center')}>
+                                <View style={tailwind('flex items-end justify-center w-12')}>
                                     <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
-                                </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}>
+                        <View style={tailwind('flex flex-row justify-between')}>
+                            <View>
+                                <View style={tailwind('flex flex-row justify-between mb-3')}>
+                                    <Text style={tailwind('font-semibold text-base')}>Cart ({cart.getAttribute('total_unique_items')})</Text>
+                                </View>
+                                <View style={tailwind('flex flex-row justify-between')}>
+                                    <View style={tailwind('flex-1 flex flex-row')}>
+                                        {cart.contents().map((cartItem, index) => (
+                                            <View key={index} style={tailwind('mr-2 flex items-center justify-center w-16')}>
+                                                <View style={tailwind('border border-gray-200 flex items-center justify-center w-16 h-16 mb-2')}>
+                                                    <Image source={{ uri: cartItem.product_image_url }} style={tailwind('w-10 h-10')} />
+                                                </View>
+                                                <Text style={tailwind('text-center text-xs mb-1')} numberOfLines={1}>
+                                                    {cartItem.name}
+                                                </Text>
+                                                <Text style={tailwind('text-center text-xs')} numberOfLines={1}>
+                                                    x{cartItem.quantity}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={tailwind('flex justify-center')}>
+                                <View style={tailwind('flex items-end justify-center w-12')}>
+                                    <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
                 </View>
                 <View style={tailwind('p-4 w-full h-full bg-gray-50')}>
                     <View style={tailwind('flex flex-row justify-between mb-3')}>
@@ -166,7 +273,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                         </View>
                         <View style={tailwind('flex flex-row items-center justify-between mt-2 pt-4 border-t-2 border-gray-900')}>
                             <Text style={tailwind('font-semibold')}>Order Total</Text>
-                            <Text  style={tailwind('font-semibold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
+                            <Text style={tailwind('font-semibold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
                     </View>
                 </View>
@@ -179,9 +286,15 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                             <Text style={tailwind('text-gray-400')}>Total</Text>
                             <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
-                        <TouchableOpacity>
-                            <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500')}>
-                                <Text style={tailwind('font-semibold text-white text-lg')}>Place Order</Text>
+                        <TouchableOpacity onPress={placeOrder} disabled={isLoading}>
+                            <View
+                                style={tailwind(
+                                    `flex flex-row items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500 ${
+                                        isLoading ? 'bg-opacity-50 border-opacity-50' : ''
+                                    }`
+                                )}>
+                                {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
+                                <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>Place Order</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

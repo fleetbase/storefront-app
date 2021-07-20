@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
+    "@stripe/stripe-react-native": "^0.1.5",
     "autoprefixer": "^10.2.6",
     "axios": "^0.21.1",
     "countries-list": "^2.6.1",

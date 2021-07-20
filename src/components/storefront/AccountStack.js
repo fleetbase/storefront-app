@@ -11,6 +11,7 @@ import StorefrontChangePasswordScreen from './ChangePasswordScreen';
 import StorefrontSavedPlacesScreen from './SavedPlacesScreen';
 import StorefrontSearchPlaceScreen from './SearchPlacesScreen';
 import StorefrontEditPlaceScreen from './EditPlaceScreen';
+import StorefrontAddPaymentMethodScreen from './AddPaymentMethodScreen';
 
 const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
@@ -53,6 +54,7 @@ const AccountStack = ({ route }) => {
                 <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <MainStack.Screen name="EditPlaceForm" component={StorefrontEditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="PaymentMethods" component={StorefrontPaymentMethodsScreen} options={{ headerShown: false }} initialParams={{ info }} />
+                <RootStack.Screen name="AddPaymentMethod" component={StorefrontAddPaymentMethodScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="OrderHistory" component={StorefrontOrderHistoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="ChangePassword" component={StorefrontChangePasswordScreen} options={{ headerShown: false }} initialParams={{ info }} />
             </RootStack.Navigator>
