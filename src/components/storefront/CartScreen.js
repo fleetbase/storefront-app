@@ -27,6 +27,9 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
     const [serviceQuote, setServiceQuote] = useState(null);
 
+    const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
+    const isCheckoutDisabled = isFetchingServiceQuote || isLoading;
+
     const getDeliveryQuote = (place = null) => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
@@ -121,9 +124,6 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
 
-    const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
-    const isCheckoutDisabled = isFetchingServiceQuote || isLoading;
-
     useEffect(() => {
         getCart();
 
@@ -202,18 +202,18 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text style={tailwind('text-sm text-gray-500 mb-1')}>{item.description}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')}>{item.description}</Text>
                                                     <View>
                                                         {item.variants.map((variant) => (
                                                             <View key={variant.id}>
-                                                                <Text style={tailwind('text-sm')}>{variant.name}</Text>
+                                                                <Text style={tailwind('text-xs')}>{variant.name}</Text>
                                                             </View>
                                                         ))}
                                                     </View>
                                                     <View>
                                                         {item.addons.map((addon) => (
                                                             <View key={addon.id}>
-                                                                <Text style={tailwind('text-sm')}>+ {addon.name}</Text>
+                                                                <Text style={tailwind('text-xs')}>+ {addon.name}</Text>
                                                             </View>
                                                         ))}
                                                     </View>

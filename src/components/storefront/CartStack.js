@@ -22,7 +22,7 @@ const MainStackScreen = ({ route }) => {
             <MainStack.Screen name="CheckoutScreen" component={StorefrontCheckoutScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutSavedPlaces" component={StorefrontSavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutPaymentMethods" component={StorefrontPaymentMethodsScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="OrderCompleted" component={StorefrontOrderCompletedScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <MainStack.Screen name="OrderCompleted" component={StorefrontOrderCompletedScreen} options={{ headerShown: false, gestureEnabled: false }} initialParams={{ info }} />
         </MainStack.Navigator>
     );
 };

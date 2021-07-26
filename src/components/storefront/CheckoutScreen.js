@@ -17,7 +17,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 import tailwind from '../../tailwind';
 import Header from './Header';
 
-const { addEventListener, removeEventListener } = EventRegister;
+const { addEventListener, removeEventListener, emit } = EventRegister;
 // put your gateway code here
 const GATEWAY_CODE = 'stripe';
 
@@ -38,6 +38,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const [checkoutToken, setCheckoutToken] = useState(null);
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+
+    const updateCart = (cart) => {
+        setCart(cart);
+        emit('cart.changed', cart);
+    };
 
     const fetchBeforeCheckout = async () => {
         const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE);
@@ -113,7 +118,10 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
             setPaymentSheetEnabled(false);
             storefront.checkout.captureOrder(checkoutToken).then((order) => {
                 setIsLoading(false);
-                navigation.navigate('OrderCompleted', { orderJson: order.serialize() });
+                cart.empty().then((cart) => {
+                    updateCart(cart);
+                });
+                navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
             });
         }
     };
@@ -235,7 +243,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     <View style={tailwind('flex-1 flex flex-row')}>
                                         {cart.contents().map((cartItem, index) => (
-                                            <View key={index} style={tailwind('mr-2 flex items-center justify-center w-16')}>
+                                            <View key={index} style={tailwind('mr-2 flex items-center justify-center w-20')}>
                                                 <View style={tailwind('border border-gray-200 flex items-center justify-center w-16 h-16 mb-2')}>
                                                     <Image source={{ uri: cartItem.product_image_url }} style={tailwind('w-10 h-10')} />
                                                 </View>
@@ -243,7 +251,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                                     {cartItem.name}
                                                 </Text>
                                                 <Text style={tailwind('text-center text-xs')} numberOfLines={1}>
-                                                    x{cartItem.quantity}
+                                                    x{cartItem.quantity} {formatCurrency(cartItem.subtotal / 100, cart.getAttribute('currency'))}
                                                 </Text>
                                             </View>
                                         ))}
