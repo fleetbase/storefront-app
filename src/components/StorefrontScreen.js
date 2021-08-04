@@ -6,8 +6,10 @@ import { tailwind } from '../tailwind';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
 import { getCurrentLocation } from '../utils';
-import { useResourceStorage } from '../utils/storage';
+import { useResourceStorage, get } from '../utils/storage';
 import useStorefrontSdk, { adapter } from '../utils/use-storefront-sdk';
+import useFleetbaseSdk from '../utils/use-fleetbase-sdk';
+import { getCustomer } from '../utils/customer';
 import { Cart } from '@fleetbase/storefront';
 import StorefrontAccountScreen from './storefront/AccountScreen';
 import CartStack from './storefront/CartStack';
@@ -17,15 +19,25 @@ import AccountStack from './storefront/AccountStack';
 const { addEventListener, removeEventListener } = EventRegister;
 const Tab = createBottomTabNavigator();
 
-const StorefrontScreen = ({ route }) => {
+const StorefrontScreen = ({ navigation, route }) => {
     const { info } = route.params;
     const storefront = useStorefrontSdk();
+    const fleetbase = useFleetbaseSdk();
+    const customer = getCustomer();
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
     const [cart, setCart] = useResourceStorage('cart', Cart, adapter, new Cart({}, adapter));
     const [cartTabOptions, setCartTabOptions] = useState({
         tabBarBadge: cart instanceof Cart ? cart.getAttribute('total_unique_items') : 0,
         tabBarBadgeStyle: tailwind('bg-blue-500 ml-1'),
     });
+
+    const syncDevice = (customer) => {
+        const token = get('token');
+
+        if (customer && token) {
+            customer.syncDevice(token);
+        }
+    };
 
     const updateCartTabBadge = (cart) => {
         setCartTabOptions({ ...cartTabOptions, tabBarBadge: cart.getAttribute('total_unique_items') });
@@ -43,21 +55,42 @@ const StorefrontScreen = ({ route }) => {
         });
     };
 
+    const navigateToOrder = (orderId) => {
+        fleetbase.orders.findRecord(orderId).then((order) => {
+            navigation.navigate('StorefrontOrderScreen', { serializedOrder: order.serialize(), info });
+        });
+    };
+
     useEffect(() => {
         // Always fetch latest cart
         getCart();
-        
+
         // Listen for cart changed event
         const cartChanged = addEventListener('cart.changed', (cart) => {
             updateCartState(cart);
         });
 
-        // set location
+        // Listen for incoming remote notification events
+        const watchNotifications = addEventListener('onNotification', (notification) => {
+            const { data } = notification;
+            const { id, type } = data;
+
+            if (type.startsWith('order_')) {
+                navigateToOrder(id);
+            }
+        });
+
+        // Set location
         getCurrentLocation();
+
+        // Sync device
+        syncDevice(customer);
 
         return () => {
             // Remove cart.changed event listener
             removeEventListener(cartChanged);
+            // Remove onNotification event listener
+            removeEventListener(watchNotifications);
         };
     }, []);
 

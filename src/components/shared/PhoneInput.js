@@ -84,6 +84,7 @@ const PhoneInput = (props) => {
                     placeholder={props.placeholder || '+0 (000) 000 - 000'}
                     placeholderTextColor={'rgba(107, 114, 128, 1)'}
                     style={tailwind('w-full')}
+                    disabled={props.disabled}
                 />
             </View>
             <ReactNativePickerModule

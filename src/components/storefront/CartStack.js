@@ -1,5 +1,6 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { Platform } from 'react-native';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import StorefrontCartScreen from './CartScreen';
 import StorefrontCheckoutScreen from './CheckoutScreen';
 import StorefrontSavedPlacesScreen from './SavedPlacesScreen';
@@ -10,6 +11,7 @@ import StorefrontAddPaymentMethodScreen from './AddPaymentMethodScreen';
 import StorefrontOrderCompletedScreen from './OrderCompletedScreen';
 import { PlaceStackScreen } from './AccountStack';
 
+const isAndroid = Platform.OS === 'android';
 const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
 
@@ -22,7 +24,17 @@ const MainStackScreen = ({ route }) => {
             <MainStack.Screen name="CheckoutScreen" component={StorefrontCheckoutScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutSavedPlaces" component={StorefrontSavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutPaymentMethods" component={StorefrontPaymentMethodsScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="OrderCompleted" component={StorefrontOrderCompletedScreen} options={{ headerShown: false, gestureEnabled: false }} initialParams={{ info }} />
+            <MainStack.Screen
+                name="OrderCompleted"
+                component={StorefrontOrderCompletedScreen}
+                options={{
+                    headerShown: false,
+                    gestureEnabled: false,
+                    gestureDirection: 'vertical',
+                    ...(isAndroid ? TransitionPresets.RevealFromBottomAndroid : TransitionPresets.ModalSlideFromBottomIOS),
+                }}
+                initialParams={{ info }}
+            />
         </MainStack.Navigator>
     );
 };

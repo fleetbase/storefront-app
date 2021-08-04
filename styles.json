@@ -8841,7 +8841,8 @@
 		"borderRightColor": "rgba(229, 231, 235, var(--tw-bg-opacity))",
 		"borderBottomColor": "rgba(229, 231, 235, var(--tw-bg-opacity))",
 		"borderLeftColor": "rgba(229, 231, 235, var(--tw-bg-opacity))",
-		"color": "rgba(0, 0, 0, 1)"
+		"color": "rgba(0, 0, 0, 1)",
+		"height": 52
 	},
 	"btn": {
 		"--tw-bg-opacity": 1,

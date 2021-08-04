@@ -21,16 +21,18 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
             <Header info={info} />
             <View style={tailwind('p-4 z-10')}>
                 <Text style={tailwind('text-lg font-semibold mb-3')}>Shop by category</Text>
-                <View style={tailwind('flex flex-row')}>
-                    {categories.map((category) => {
-                        return (
-                            <TouchableOpacity key={category.id} onPress={() => navigation.navigate('CategoryScreen', { attributes: category.serialize() })}>
-                                <View style={tailwind('rounded-full px-4 py-2 bg-gray-200 mr-3')}>
-                                    <Text>{category.getAttribute('name')}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        );
-                    })}
+                <View style={tailwind('w-full')}>
+                    <View style={tailwind('flex flex-row flex-wrap')}>
+                        {categories.map((category) => {
+                            return (
+                                <TouchableOpacity key={category.id} onPress={() => navigation.navigate('CategoryScreen', { attributes: category.serialize() })}>
+                                    <View style={tailwind('rounded-full px-4 py-2 bg-gray-200 mr-3 mb-3')}>
+                                        <Text>{category.getAttribute('name')}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
                 </View>
             </View>
         </View>

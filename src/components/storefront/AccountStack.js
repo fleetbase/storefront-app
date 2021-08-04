@@ -12,6 +12,7 @@ import StorefrontSavedPlacesScreen from './SavedPlacesScreen';
 import StorefrontSearchPlaceScreen from './SearchPlacesScreen';
 import StorefrontEditPlaceScreen from './EditPlaceScreen';
 import StorefrontAddPaymentMethodScreen from './AddPaymentMethodScreen';
+import StorefrontOrderScreen from './OrderScreen';
 
 const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
@@ -57,6 +58,7 @@ const AccountStack = ({ route }) => {
                 <RootStack.Screen name="AddPaymentMethod" component={StorefrontAddPaymentMethodScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="OrderHistory" component={StorefrontOrderHistoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="ChangePassword" component={StorefrontChangePasswordScreen} options={{ headerShown: false }} initialParams={{ info }} />
+                <RootStack.Screen name="Order" component={StorefrontOrderScreen} options={{ headerShown: false }} initialParams={{ info }} />
             </RootStack.Navigator>
         </SafeAreaProvider>
     );

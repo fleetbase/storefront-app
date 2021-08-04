@@ -128,17 +128,6 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')}>
-                                <View style={tailwind('flex flex-row items-center justify-between p-4')}>
-                                    <View style={tailwind('flex flex-row items-center')}>
-                                        <FontAwesomeIcon icon={faLockOpen} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                        <Text style={tailwind('text-gray-700 text-base')}>Change Password</Text>
-                                    </View>
-                                    <View>
-                                        <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={tailwind('p-4')}>

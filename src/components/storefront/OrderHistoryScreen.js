@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapMarked, faBox, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Order, Collection, isResource } from '@fleetbase/sdk';
 import { useStorefrontSdk } from '../../utils';
 import { getCustomer } from '../../utils/customer';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { useResourceStorage, get, set } from '../../utils/storage';
+import { format } from 'date-fns';
 import tailwind from '../../tailwind';
 
 const StorefrontOrderHistoryScreen = ({ navigation, route }) => {
-    const { attributes, useLeftArrow } = route.params;
+    const { useLeftArrow, info } = route.params;
     const [orders, setOrders] = useResourceStorage('order', Order, adapter, new Collection());
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
@@ -32,6 +33,8 @@ const StorefrontOrderHistoryScreen = ({ navigation, route }) => {
                     setIsLoading(false);
                     setIsInitializing(false);
 
+                    console.log('[Orders Loaded]');
+
                     resolve(orders);
                 });
             }
@@ -43,7 +46,7 @@ const StorefrontOrderHistoryScreen = ({ navigation, route }) => {
     useEffect(() => {
         loadOrders(true);
     }, []);
-    
+
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <FlatList
@@ -52,11 +55,20 @@ const StorefrontOrderHistoryScreen = ({ navigation, route }) => {
                 refreshing={isLoading}
                 renderItem={({ item, index }) => (
                     <View key={index}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('Order', { serializedOrder: item.serialize(), info })}>
                             <View style={tailwind('p-4 border-b border-gray-100')}>
                                 <View style={tailwind('flex flex-row justify-between')}>
-                                    <Text>{item.id}</Text>
-                                    <Text>{item.status}</Text>
+                                    <View style={tailwind('flex flex-row')}>
+                                        <View style={tailwind('mr-3')}>
+                                            <Image source={{ uri: info.logo_url }} style={tailwind('w-10 h-10')} />
+                                        </View>
+                                        <View style={tailwind('flex')}>
+                                            <Text style={tailwind('text-sm font-bold')}>{item.getAttribute('meta.storefront')}</Text>
+                                            <Text style={tailwind('text-sm text-gray-500')}>{item.id}</Text>
+                                            <Text style={tailwind('text-sm text-gray-500')}>{format(item.createdAt, 'PPp')}</Text>
+                                        </View>
+                                    </View>
+                                    <Text>{item.getAttribute('status')}</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -79,14 +91,12 @@ const StorefrontOrderHistoryScreen = ({ navigation, route }) => {
                     <View style={tailwind('h-full bg-white flex items-center justify-center')}>
                         <View style={tailwind('flex items-center justify-center w-full px-8')}>
                             <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-200 w-60 h-60')}>
-                                {isInitializing ? <ActivityIndicator /> : <FontAwesomeIcon icon={faMapMarked} size={88} style={tailwind('text-gray-600')} />}
+                                {isInitializing ? <ActivityIndicator /> : <FontAwesomeIcon icon={faBox} size={88} style={tailwind('text-gray-600')} />}
                             </View>
 
                             <View style={tailwind('w-full')}>
                                 <View style={tailwind('flex items-center justify-center mb-10')}>
-                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>
-                                        {isInitializing ? 'Loading your order history' : 'You have no orders'}
-                                    </Text>
+                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{isInitializing ? 'Loading your order history' : 'You have no orders'}</Text>
                                     {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't made any orders.</Text>}
                                 </View>
                             </View>

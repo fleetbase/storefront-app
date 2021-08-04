@@ -7,7 +7,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useStorefrontSdk } from '../../utils';
 import { updateCustomer } from '../../utils/customer';
 import { getLocation } from '../../utils/location';
-import { set } from '../../utils/storage';
+import { set, get } from '../../utils/storage';
 import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';
 
@@ -17,9 +17,19 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
     const [code, setCode] = useState(null);
     const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(false);
     const storefront = useStorefrontSdk();
     const location = getLocation();
     const insets = useSafeAreaInsets();
+    const isNotAwaitingVerification = isAwaitingVerification === false;
+
+    const syncDevice = (customer) => {
+        const token = get('token');
+
+        if (customer && token) {
+            customer.syncDevice(token);
+        }
+    };
 
     const sendVerificationCode = () => {
         setIsLoading(true);
@@ -33,11 +43,18 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
     const verifyCode = () => {
         setIsLoading(true);
 
-        storefront.customers.verifySmsCode(phone, code).then((customer) => {
-            updateCustomer(customer);
-            setIsLoading(false);
-            navigation.goBack();
-        });
+        storefront.customers
+            .verifyCode(phone, code)
+            .then((customer) => {
+                updateCustomer(customer);
+                syncDevice(customer);
+                setIsLoading(false);
+                navigation.goBack();
+            })
+            .catch((error) => {
+                setError(error.message);
+                retry();
+            });
     };
 
     const retry = () => {
@@ -58,7 +75,12 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                     <Text style={tailwind('text-xl font-semibold')}>Login</Text>
                 </View>
                 <View style={tailwind('px-4 py-6')}>
-                    {!isAwaitingVerification && (
+                    {error && (
+                        <View style={tailwind('mb-8')}>
+                            <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
+                        </View>
+                    )}
+                    {isNotAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-6')}>
                                 <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
@@ -74,7 +96,13 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                     {isAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-6')}>
-                                <TextInput onChangeText={setCode} keyboardType={'phone-pad'} placeholder={'Enter verification code'} placeholderTextColor={'rgba(156, 163, 175, 1)'} style={tailwind('form-input text-center mb-2')} />
+                                <TextInput
+                                    onChangeText={setCode}
+                                    keyboardType={'phone-pad'}
+                                    placeholder={'Enter verification code'}
+                                    placeholderTextColor={'rgba(156, 163, 175, 1)'}
+                                    style={tailwind('form-input text-center mb-2')}
+                                />
                                 <View style={tailwind('flex flex-row justify-end')}>
                                     <TouchableOpacity onPress={retry}>
                                         <Text style={tailwind('text-blue-900 font-semibold')}>Retry?</Text>
