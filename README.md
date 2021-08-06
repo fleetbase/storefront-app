@@ -54,3 +54,10 @@ npx react-native run-ios
 See the [documentation webpage](https://fleetbase.io/docs).
 
 If you would like to make contributions to the Fleetbase Javascript SDK documentation source, here is a [guide](https://github.com/fleetbase/fleetbase-js/blob/master/CONTRIBUTING.md) in doing so.
+
+## Roadmap
+
+ - Global state management with redux
+ - Write proper react hooks for sdks
+ - Add debounce on products search
+ - Add network/marketplace views

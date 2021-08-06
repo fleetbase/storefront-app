@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import { useStorefrontSdk } from '../../utils';
 import tailwind from '../../tailwind';
+import CategoryProductSlider from '../shared/CategoryProductSlider';
 import Header from './Header';
 
 const StorefrontHomeScreen = ({ navigation, route }) => {
@@ -17,9 +18,9 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={tailwind('bg-white h-full z-10')}> 
+        <View style={tailwind('bg-white h-full z-10')}>
             <Header info={info} />
-            <View style={tailwind('p-4 z-10')}>
+            <ScrollView style={tailwind('p-4 z-10')}>
                 <Text style={tailwind('text-lg font-semibold mb-3')}>Shop by category</Text>
                 <View style={tailwind('w-full')}>
                     <View style={tailwind('flex flex-row flex-wrap')}>
@@ -33,8 +34,13 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
                             );
                         })}
                     </View>
+                    <View style={tailwind('flex flex-row flex-wrap pb-40')}>
+                        {categories.map((category, index) => (
+                            <CategoryProductSlider key={index} category={category} style={tailwind('w-full my-4')} />
+                        ))}
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </View>
     );
 };

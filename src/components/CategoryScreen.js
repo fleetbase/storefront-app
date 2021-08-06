@@ -4,8 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import tailwind from '../tailwind';
 import Storefront, { Category } from '@fleetbase/storefront';
-import formatCurrency from '../utils/format-currency';
-import { useStorefrontSdk } from '../utils';
+import { useStorefrontSdk, formatCurrency } from '../utils';
 
 const CategoryScreen = ({ navigation, route }) => {
     const { attributes } = route.params;
