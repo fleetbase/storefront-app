@@ -7,7 +7,7 @@ import tailwind from '../tailwind';
 import SetupWarningScreen from './SetupWarningScreen';
 import Config from 'react-native-config';
 
-const { STRIPE_KEY } = Config;
+const { STRIPE_KEY, APP_IDENTIFIER } = Config;
 
 const BootScreen = ({ navigation }) => {
     // make sure keys are set
@@ -30,7 +30,7 @@ const BootScreen = ({ navigation }) => {
     useEffect(() => {
         initStripe({
             publishableKey: STRIPE_KEY,
-            merchantIdentifier: 'io.fleetbase.storefrontapp',
+            merchantIdentifier: APP_IDENTIFIER
         });
     }, []);
 

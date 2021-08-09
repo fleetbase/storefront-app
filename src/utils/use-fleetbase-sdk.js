@@ -5,7 +5,7 @@ const { FLEETBASE_KEY } = Config;
 let fleetbase, adapter;
 
 try {
-    fleetbase = new Fleetbase(FLEETBASE_KEY, { host: 'https://v2api.fleetbase.engineering' });
+    fleetbase = new Fleetbase(FLEETBASE_KEY);
     adapter = fleetbase.getAdapter();
 } catch (error) {
     // console.log(error);
