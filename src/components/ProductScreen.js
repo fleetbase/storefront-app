@@ -13,6 +13,7 @@ import useStorefrontSdk, { adapter as StorefrontAdapter } from '../utils/use-sto
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
 import RadioButton from 'react-native-animated-radio-button';
+import RenderHtml from 'react-native-render-html';
 
 const { isArray } = Array;
 const { emit } = EventRegister;
@@ -340,7 +341,7 @@ const ProductScreen = ({ navigation, route }) => {
                                     )}
                                     <Text style={tailwind('text-sm text-gray-500')}>Base Price</Text>
                                 </View>
-                                <Text style={tailwind('mb-3')}>{product.getAttribute('description')}</Text>
+                                <RenderHtml contentWidth={fullWidth} source={{ html: product.getAttribute('description')}} />
                             </View>
                             <View style={tailwind('bg-gray-100')}>
                                 {product.variants().map((variation, i) => (
