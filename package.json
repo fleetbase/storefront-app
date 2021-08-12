@@ -43,6 +43,7 @@
     "react-native-picker-module": "^2.0.4",
     "react-native-push-notification": "^7.4.0",
     "react-native-reanimated": "^2.2.0",
+    "react-native-render-html": "^6.0.5",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.4.0",
     "react-native-snap-carousel": "^3.9.1",

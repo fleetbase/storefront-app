@@ -19,7 +19,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
     <img src="https://img.shields.io/github/license/fleetbase/fleetbase-js" alt="License" />
   </a>
   <br>
-  <a href="https://fleetbase.io">fleetbase.io</a> | <a href="https://twitter.com/fleetbase_io">@fleetbase_io</a> | <a href="https://discord.gg/Q78hkXNK">Discord</a>
+  <a href="https://fleetbase.io">fleetbase.io</a> | <a href="https://twitter.com/fleetbase_io">@fleetbase_io</a> | <a href="https://discord.gg/fjP4sReEvH">Discord</a>
 </p>
 
 <p align="center">
@@ -35,6 +35,23 @@ git clone git@github.com:fleetbase/storefront-app.git
 cd storefront-app
 yarn
 npx pod-install
+touch .env
+```
+
+### Configure Environment
+
+In your .env file supply your Storefront store key, your Fleetbase API secret key, your google maps api key. 
+Currently the Storefront app can only use the Stripe payment gateway, to use the Stripe gateway plug your Stripe 
+api key. You'll also need to supply your app/bundle identifier. 
+
+```
+# .env
+
+STOREFRONT_KEY=
+FLEETBASE_KEY=
+GOOGLE_MAPS_KEY=
+STRIPE_KEY=
+APP_IDENTIFIER=
 ```
 
 ### Running the App in iOS Simulator
