@@ -830,15 +830,27 @@
     cross-spawn "^6.0.5"
 
 "@fleetbase/sdk@../fleetbase-js":
-  version "1.1.1"
+  version "1.1.2"
   dependencies:
     axios "^0.21.1"
     cross-fetch "^3.1.4"
     global "^4.4.0"
     rollup "^2.50.5"
 
-"@fleetbase/storefront@../storefront-js":
-  version "1.0.0"
+"@fleetbase/sdk@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@fleetbase/sdk/-/sdk-1.1.2.tgz#f462907de9440c9177ecaf32042fc59bb169b6c7"
+  integrity sha512-GLW+mNK8d7A/LnzEFk+YfL2j1hb6tqkYcIVyCb20fRjX/B+vpP5k/lCFApyHiFjlZcNZrzw415Vmh6ZDV7o2Eg==
+  dependencies:
+    axios "^0.21.1"
+    cross-fetch "^3.1.4"
+    global "^4.4.0"
+    rollup "^2.50.5"
+
+"@fleetbase/storefront@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@fleetbase/storefront/-/storefront-1.0.1.tgz#a636eed7cf3894e1e18b3679675b9ad2f6608e6e"
+  integrity sha512-B8ePSNTI0uY+0tktgB+CcbCKSi5MeNlkCfHFEnBu0W0nxaP9rhbuLKY9DOKm3sXT+saRkUYDM/t9mUQ8451P8w==
   dependencies:
     "@fleetbase/sdk" "../fleetbase-js"
     date-fns "^2.22.1"
