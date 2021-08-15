@@ -829,14 +829,6 @@
   dependencies:
     cross-spawn "^6.0.5"
 
-"@fleetbase/sdk@../fleetbase-js":
-  version "1.1.2"
-  dependencies:
-    axios "^0.21.1"
-    cross-fetch "^3.1.4"
-    global "^4.4.0"
-    rollup "^2.50.5"
-
 "@fleetbase/sdk@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@fleetbase/sdk/-/sdk-1.1.2.tgz#f462907de9440c9177ecaf32042fc59bb169b6c7"
@@ -848,11 +840,11 @@
     rollup "^2.50.5"
 
 "@fleetbase/storefront@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@fleetbase/storefront/-/storefront-1.0.1.tgz#a636eed7cf3894e1e18b3679675b9ad2f6608e6e"
-  integrity sha512-B8ePSNTI0uY+0tktgB+CcbCKSi5MeNlkCfHFEnBu0W0nxaP9rhbuLKY9DOKm3sXT+saRkUYDM/t9mUQ8451P8w==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@fleetbase/storefront/-/storefront-1.0.2.tgz#186a3a0f921e7e0b449ff66398c362d0bfc9f4e4"
+  integrity sha512-+s4oPBrJbsK1aRJ+/QyhdjNFne3l5HbJsgf1rYkNCX4dWqOqWsFoWfVo7HqXVZ/pTg4B24uOUooxgnYb2JxMCA==
   dependencies:
-    "@fleetbase/sdk" "../fleetbase-js"
+    "@fleetbase/sdk" "^1.1.2"
     date-fns "^2.22.1"
 
 "@fortawesome/fontawesome-common-types@^0.2.35":
@@ -7178,9 +7170,9 @@ rimraf@~2.2.6:
   integrity sha1-5Dm+Kq7jJzIZUnMPmaiSnk/FBYI=
 
 rollup@^2.50.5:
-  version "2.55.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.55.1.tgz#66a444648e2fb603d8e329e77a61c608a6510fda"
-  integrity sha512-1P9w5fpb6b4qroePh8vHKGIvPNxwoCQhjJpIqfZGHLKpZ0xcU2/XBmFxFbc9697/6bmHpmFTLk5R1dAQhFSo0g==
+  version "2.56.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.56.2.tgz#a045ff3f6af53ee009b5f5016ca3da0329e5470f"
+  integrity sha512-s8H00ZsRi29M2/lGdm1u8DJpJ9ML8SUOpVVBd33XNeEeL3NVaTiUcSBHzBdF3eAyR0l7VSpsuoVUGrRHq7aPwQ==
   optionalDependencies:
     fsevents "~2.3.2"
 
