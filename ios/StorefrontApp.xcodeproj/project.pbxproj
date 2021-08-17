@@ -44,6 +44,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = StorefrontApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		96A859EB5B568259B9BD3FA9 /* libPods-StorefrontApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StorefrontApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E433B8C026AE740200D2388C /* StorefrontApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = StorefrontApp.entitlements; path = StorefrontApp/StorefrontApp.entitlements; sourceTree = "<group>"; };
+		E4516E7726CBAE3200A186F7 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		E4E31EBC26970A7F001BAF0A /* StorefrontApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StorefrontApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		E4E31EBD26970A7F001BAF0A /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		E50DF5D08DDC645C3E4EC312 /* Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig"; path = "Target Support Files/Pods-StorefrontApp-StorefrontAppTests/Pods-StorefrontApp-StorefrontAppTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -132,6 +133,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				E4516E7726CBAE3200A186F7 /* Config.xcconfig */,
 				E4E31EBD26970A7F001BAF0A /* Header.swift */,
 				13B07FAE1A68108700A75B9A /* StorefrontApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -549,6 +551,7 @@
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4516E7726CBAE3200A186F7 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -610,6 +613,7 @@
 		};
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4516E7726CBAE3200A186F7 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

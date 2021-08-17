@@ -47,11 +47,12 @@ api key. You'll also need to supply your app/bundle identifier.
 ```
 # .env
 
+APP_NAME=
+APP_IDENTIFIER=
 STOREFRONT_KEY=
 FLEETBASE_KEY=
 GOOGLE_MAPS_KEY=
 STRIPE_KEY=
-APP_IDENTIFIER=
 ```
 
 ### Running the App in iOS Simulator
