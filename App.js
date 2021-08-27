@@ -17,6 +17,7 @@ import CategoryScreen from './src/components/CategoryScreen';
 import ProductScreen from './src/components/ProductScreen';
 import SetupWarningScreen from './src/components/SetupWarningScreen';
 import StorefrontOrderScreen from './src/components/storefront/OrderScreen';
+import StorefrontHeader from './src/components/storefront/Header';
 
 const isAndroid = Platform.OS === 'android';
 const Stack = createStackNavigator();

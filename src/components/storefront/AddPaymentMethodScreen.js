@@ -35,7 +35,7 @@ const StorefrontAddPaymentMethodScreen = ({ navigation, route }) => {
             return;
         }
 
-        console.log('savePaymentMethod() card', card.number);
+        // console.log('savePaymentMethod() card', card.number);
 
         // createPaymentMethod({ card: { number: }, type: 'card' })
         //     .then((response) => {

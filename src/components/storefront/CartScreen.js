@@ -5,12 +5,12 @@ import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { formatCurrency, isLastIndex } from '../../utils';
+import { formatCurrency, isLastIndex, stripHtml } from '../../utils';
 import { useResourceStorage } from '../../utils/storage';
 import useStorefrontSdk, { adapter as StorefrontAdapter } from '../../utils/use-storefront-sdk';
 import { adapter as FleetbaseAdapter } from '../../utils/use-fleetbase-sdk';
 import { Cart, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
-import { Place, ServiceQuote } from '@fleetbase/sdk';
+import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import tailwind from '../../tailwind';
 import Header from './Header';
 
@@ -41,10 +41,21 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             });
          */
 
+        let customerLocation = place || deliverTo;
+
+        /**
+            ! If customer location is not saved in fleetbase just send the location coordinates !
+        */
+        if (!customerLocation.id) {
+            customerLocation = customerLocation.coordinates;
+        }
+
         setIsFetchingServiceQuote(true);
-        quote.fromCart(storeLocation, place || deliverTo, cart).then((serviceQuote) => {
+        quote.fromCart(storeLocation, customerLocation, cart).then((serviceQuote) => {
             setServiceQuote(serviceQuote);
             setIsFetchingServiceQuote(false);
+        }).catch((error) => {
+            console.log(error);
         });
     };
 
@@ -81,7 +92,6 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     };
 
     const getCart = () => {
-        console.log('getCart() called !!!');
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
             updateCart(cart);
             getDeliveryQuote();
@@ -202,7 +212,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')}>{item.description}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')}>{stripHtml(item.description)}</Text>
                                                     <View>
                                                         {item.variants.map((variant) => (
                                                             <View key={variant.id}>

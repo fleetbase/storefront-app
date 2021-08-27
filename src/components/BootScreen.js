@@ -8,6 +8,7 @@ import SetupWarningScreen from './SetupWarningScreen';
 import Config from 'react-native-config';
 
 const { STRIPE_KEY, APP_IDENTIFIER } = Config;
+let storefront;
 
 const BootScreen = ({ navigation }) => {
     // make sure keys are set
@@ -15,7 +16,11 @@ const BootScreen = ({ navigation }) => {
         return (<SetupWarningScreen />);
     }
 
-    const storefront = useStorefrontSdk();
+    try {
+        storefront = useStorefrontSdk();
+    } catch (error) {
+        return (<SetupWarningScreen error={error} />);
+    }
 
     storefront.about().then((info) => {
         // if is single store only go to storefront screens
