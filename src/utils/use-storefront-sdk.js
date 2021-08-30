@@ -1,10 +1,16 @@
 import Storefront from '@fleetbase/storefront';
 import Config from 'react-native-config';
 
-const { STOREFRONT_KEY } = Config;
+const { STOREFRONT_KEY, FLEETBASE_HOST } = Config;
+let storefront, adapter;
 
-const storefront = new Storefront(STOREFRONT_KEY, { host: 'https://v2api.fleetbase.engineering' });
-const adapter = storefront.getAdapter();
+try {
+    storefront = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
+} catch (error) {
+    throw error;
+}
+
+adapter = storefront.getAdapter();
 
 const useStorefrontSdk = () => {
     return storefront;

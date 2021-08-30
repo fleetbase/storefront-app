@@ -7,10 +7,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
 import { getCurrentLocation } from '../utils';
 import { useResourceStorage, get } from '../utils/storage';
-import useStorefrontSdk, { adapter } from '../utils/use-storefront-sdk';
+import useStorefrontSdk, { adapter as StorefrontAdapter } from '../utils/use-storefront-sdk';
 import useFleetbaseSdk from '../utils/use-fleetbase-sdk';
 import { getCustomer } from '../utils/customer';
-import { Cart } from '@fleetbase/storefront';
+import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
 import StorefrontAccountScreen from './storefront/AccountScreen';
 import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
@@ -24,8 +24,10 @@ const StorefrontScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const fleetbase = useFleetbaseSdk();
     const customer = getCustomer();
+    const store = new Store(info, StorefrontAdapter);
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
-    const [cart, setCart] = useResourceStorage('cart', Cart, adapter, new Cart({}, adapter));
+    const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
+    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart({}, StorefrontAdapter));
     const [cartTabOptions, setCartTabOptions] = useState({
         tabBarBadge: cart instanceof Cart ? cart.getAttribute('total_unique_items') : 0,
         tabBarBadgeStyle: tailwind('bg-blue-500 ml-1'),
@@ -61,6 +63,16 @@ const StorefrontScreen = ({ navigation, route }) => {
         });
     };
 
+    const setDefaultStoreLocation = () => {
+        store.getLocations().then((locations) => {
+            const defaultStoreLocation = locations.first;
+
+            if (defaultStoreLocation) {
+                setStoreLocation(defaultStoreLocation);
+            }
+        });
+    };
+
     useEffect(() => {
         // Always fetch latest cart
         getCart();
@@ -79,6 +91,9 @@ const StorefrontScreen = ({ navigation, route }) => {
                 navigateToOrder(id);
             }
         });
+
+        // Set default store
+        setDefaultStoreLocation();
 
         // Set location
         getCurrentLocation();

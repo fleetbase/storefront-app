@@ -20,10 +20,10 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
     return (
         <View style={tailwind('bg-white h-full z-10')}>
             <Header info={info} />
-            <ScrollView style={tailwind('p-4 z-10')}>
-                <Text style={tailwind('text-lg font-semibold mb-3')}>Shop by category</Text>
-                <View style={tailwind('w-full')}>
-                    <View style={tailwind('flex flex-row flex-wrap')}>
+            <View style={tailwind('border-b border-gray-100')}>
+                <Text style={tailwind('text-lg font-semibold mb-3 p-4')}>Shop by category</Text>
+                <View style={tailwind('pb-2')}>
+                    <ScrollView horizontal={true} style={tailwind('flex flex-row')}>
                         {categories.map((category) => {
                             return (
                                 <TouchableOpacity key={category.id} onPress={() => navigation.navigate('CategoryScreen', { attributes: category.serialize() })}>
@@ -33,12 +33,14 @@ const StorefrontHomeScreen = ({ navigation, route }) => {
                                 </TouchableOpacity>
                             );
                         })}
-                    </View>
-                    <View style={tailwind('flex flex-row flex-wrap pb-40')}>
-                        {categories.map((category, index) => (
-                            <CategoryProductSlider key={index} category={category} style={tailwind('w-full my-4')} />
-                        ))}
-                    </View>
+                    </ScrollView>
+                </View>
+            </View>
+            <ScrollView style={tailwind('z-10')}>
+                <View style={tailwind('flex flex-row flex-wrap px-4 pb-40')}>
+                    {categories.map((category, index) => (
+                        <CategoryProductSlider key={index} category={category} style={tailwind('w-full my-4')} />
+                    ))}
                 </View>
             </ScrollView>
         </View>
