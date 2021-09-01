@@ -96,6 +96,8 @@ Coming soon...
 ### Installation
 Installation and setup is fairly quick, all you need is your Storefront and Fleetbase API Key, and a few commands and your app will be up and running in minutes. Follow the directions below to get started.
 
+📺 If you like videos better, [here is a walkthrough video](https://youtu.be/ERsO0lNufRI).
+
 *Notice: Ideally you should fork this project so it's easier to merge updates in the future, but you can also clone this project - whichever method works best for you.*
 
 Run the commands below; first clone the project, use npm or yarn to install the dependencies, then run `npx pod-install` to install the iOS dependencies. Lastly, create a `.env` file to configure the app.
