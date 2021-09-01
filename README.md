@@ -389,3 +389,4 @@ If you would like to make contributions to the Fleetbase Javascript SDK document
  - Write proper react hooks for sdks
  - Add debounce on products search
  - Add network/marketplace views
+ - Shopify & Woocommerce adapters
