@@ -12,7 +12,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
   <a href="https://www.npmjs.com/package/@fleetbase/storefront">
     <img src="https://img.shields.io/npm/dw/@fleetbase/storefront" alt="Downloads/week" />
   </a>
-  <a href="https://bundlephobia.com/package/@fleetbase/storefront@1.0.0">
+  <a href="https://bundlephobia.com/package/@fleetbase/storefront@1.0.3">
     <img src="https://img.shields.io/bundlephobia/min/@fleetbase/storefront" alt="Bundle Size" />
   </a>
   <a href="https://github.com/fleetbase/storefront-js/blob/master/LICENSE.md">
