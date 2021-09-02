@@ -23,9 +23,9 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 </p>
 
 <p align="center">
-	<img src="https://user-images.githubusercontent.com/816371/131815361-ba85b208-e92b-4470-bba3-f87dde747a40.png" width="300" height="567" />
-	<img src="https://user-images.githubusercontent.com/816371/131815221-b704d013-cc5d-41c3-9fde-36ca7af21a57.png" width="300" height="567" />
-	<img src="https://user-images.githubusercontent.com/816371/131815186-b641a613-4aba-4064-ba28-4e610aba56b4.png" width="300" height="567" />
+	<img src="https://user-images.githubusercontent.com/816371/131815361-ba85b208-e92b-4470-bba3-f87dde747a40.png" width="220" height="416" />
+	<img src="https://user-images.githubusercontent.com/816371/131815221-b704d013-cc5d-41c3-9fde-36ca7af21a57.png" width="220" height="416" />
+	<img src="https://user-images.githubusercontent.com/816371/131815186-b641a613-4aba-4064-ba28-4e610aba56b4.png" width="220" height="416" />
 </p>
 
 ## Table of Contents
