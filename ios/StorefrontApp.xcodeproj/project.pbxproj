@@ -511,7 +511,11 @@
 					"-ObjC",
 					"-lc++",
 				);
+<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.thenewvegan.storefrontapp;
+=======
+				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
+>>>>>>> fc305d88692ae84d09eee9db69537e9d8e31d1b7
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -541,7 +545,11 @@
 					"-ObjC",
 					"-lc++",
 				);
+<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.thenewvegan.storefrontapp;
+=======
+				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
+>>>>>>> fc305d88692ae84d09eee9db69537e9d8e31d1b7
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
