@@ -50,9 +50,9 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation.coordinates;
         }
 
-        if (!cart) {
-            return getCart();
-        }
+        // if (!cart) {
+        //     return getCart();
+        // }
 
         setIsFetchingServiceQuote(true);
         quote.fromCart(storeLocation, customerLocation, cart).then((serviceQuote) => {
