@@ -11,7 +11,7 @@ import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';
 
 const StorefrontCreateAccountScreen = ({ navigation, route }) => {
-    const { info } = route.params;
+    const { info, redirectTo } = route.params;
     const [name, setName] = useState(null);
     const [phone, setPhone] = useState(null);
     const [code, setCode] = useState(null);
@@ -49,6 +49,11 @@ const StorefrontCreateAccountScreen = ({ navigation, route }) => {
                 updateCustomer(customer);
                 syncDevice(customer);
                 setIsLoading(false);
+
+                if (redirectTo) {
+                    return navigation.navigate(redirectTo);
+                }
+
                 navigation.goBack();
             })
             .catch((error) => {

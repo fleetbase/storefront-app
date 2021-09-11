@@ -5,11 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-<<<<<<< HEAD
 	<string>$(APP_NAME)</string>
-=======
-	<string>${APP_NAME}</string>
->>>>>>> 705a6ee18bb412ac6454598e626486fde79aecfd
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconName</key>

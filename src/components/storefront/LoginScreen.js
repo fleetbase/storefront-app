@@ -12,7 +12,7 @@ import tailwind from '../../tailwind';
 import PhoneInput from '../shared/PhoneInput';
 
 const StorefrontLoginScreen = ({ navigation, route }) => {
-    const { info } = route.params;
+    const { info, redirectTo } = route.params;
     const [phone, setPhone] = useState(null);
     const [code, setCode] = useState(null);
     const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
@@ -49,6 +49,11 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                 updateCustomer(customer);
                 syncDevice(customer);
                 setIsLoading(false);
+
+                if (redirectTo) {
+                    return navigation.navigate(redirectTo);
+                }
+
                 navigation.goBack();
             })
             .catch((error) => {
@@ -85,10 +90,15 @@ const StorefrontLoginScreen = ({ navigation, route }) => {
                             <View style={tailwind('mb-6')}>
                                 <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
                             </View>
-                            <TouchableOpacity onPress={sendVerificationCode}>
+                            <TouchableOpacity style={tailwind('mb-3')} onPress={sendVerificationCode}>
                                 <View style={tailwind('btn border border-blue-50 bg-blue-50')}>
                                     {isLoading && <ActivityIndicator color={'rgba(59, 130, 246, 1)'} style={tailwind('mr-2')} />}
                                     <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>Send Verification Code</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity disabled={isLoading} onPress={() => navigation.navigate('CreateAccountScreen', { redirectTo })}>
+                                <View style={tailwind('btn border border-green-50 bg-green-50')}>
+                                    <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>or Create Account</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
