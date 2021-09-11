@@ -496,7 +496,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorefrontApp/StorefrontApp.entitlements;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = U3672ND9W7;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = StorefrontApp/Info.plist;
@@ -511,11 +511,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.thenewvegan.storefrontapp;
-=======
-				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
->>>>>>> fc305d88692ae84d09eee9db69537e9d8e31d1b7
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -531,7 +527,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorefrontApp/StorefrontApp.entitlements;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = U3672ND9W7;
 				INFOPLIST_FILE = StorefrontApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -545,11 +541,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.thenewvegan.storefrontapp;
-=======
-				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
->>>>>>> fc305d88692ae84d09eee9db69537e9d8e31d1b7
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
