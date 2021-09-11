@@ -8,5 +8,6 @@ import getCurrentLocation from './location';
 import haversine from './haversine';
 import hasRequiredKeys from './has-required-keys';
 import stripHtml from './strip-html';
+import signOut from './sign-out';
 
-export { isLastIndex, formatCurrency, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCountries, getCurrentLocation, haversine, hasRequiredKeys, stripHtml };
+export { isLastIndex, formatCurrency, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCountries, getCurrentLocation, haversine, hasRequiredKeys, stripHtml, signOut };

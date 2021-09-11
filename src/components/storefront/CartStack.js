@@ -9,6 +9,8 @@ import ProductScreen from '../ProductScreen';
 import StorefrontEditPlaceScreen from './EditPlaceScreen';
 import StorefrontAddPaymentMethodScreen from './AddPaymentMethodScreen';
 import StorefrontOrderCompletedScreen from './OrderCompletedScreen';
+import StorefrontLoginScreen from './LoginScreen';
+import StorefrontCreateAccountScreen from './CreateAccountScreen';
 import { PlaceStackScreen } from './AccountStack';
 
 const isAndroid = Platform.OS === 'android';
@@ -49,6 +51,8 @@ const CartStack = ({ route }) => {
             <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="EditPlaceForm" component={StorefrontEditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <RootStack.Screen name="AddPaymentMethod" component={StorefrontAddPaymentMethodScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <RootStack.Screen name="LoginScreen" component={StorefrontLoginScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <RootStack.Screen name="CreateAccountScreen" component={StorefrontCreateAccountScreen} options={{ headerShown: false }} initialParams={{ info }} />
         </RootStack.Navigator>
     );
 };

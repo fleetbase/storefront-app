@@ -117,7 +117,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('PaymentMethods')}>
+                            {/* <TouchableOpacity onPress={() => navigation.navigate('PaymentMethods')}>
                                 <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faCreditCard} size={18} style={tailwind('mr-3 text-gray-600')} />
@@ -127,7 +127,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                                         <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
                                     </View>
                                 </View>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                     </View>
                     <View style={tailwind('p-4')}>

@@ -41,13 +41,17 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             });
          */
 
-        let customerLocation = place || deliverTo;
+        let customerLocation = place ?? deliverTo;
 
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
         */
         if (!customerLocation.id) {
             customerLocation = customerLocation.coordinates;
+        }
+
+        if (!cart) {
+            return getCart();
         }
 
         setIsFetchingServiceQuote(true);
@@ -94,7 +98,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
             updateCart(cart);
-            getDeliveryQuote();
+            // getDeliveryQuote(cart);
 
             return cart;
         });
@@ -138,6 +142,10 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         getCart();
 
         const cartChanged = addEventListener('cart.changed', (cart) => {
+            if (!cart instanceof Cart) {
+                return getCart();
+            }
+            
             setCart(cart);
             getDeliveryQuote();
 
@@ -212,7 +220,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')}>{stripHtml(item.description)}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={2}>{stripHtml(item.description)}</Text>
                                                     <View>
                                                         {item.variants.map((variant) => (
                                                             <View key={variant.id}>

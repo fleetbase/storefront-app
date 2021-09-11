@@ -105,7 +105,7 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View style={tailwind('flex-1')}>
                                                     <Text style={tailwind('font-semibold')}>{entity.name}</Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')}>{entity.description}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>{entity.description}</Text>
                                                     <View>
                                                         {entity.meta.variants.map((variant) => (
                                                             <View key={variant.id}>
