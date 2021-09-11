@@ -59,7 +59,6 @@ const StorePicker = (props) => {
             const point = location.getAttribute('place.location');
 
             if (!point) {
-                loadLocations();
                 return [0, 0];
             }
 
