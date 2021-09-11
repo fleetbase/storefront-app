@@ -52,6 +52,10 @@ const StorefrontScreen = ({ navigation, route }) => {
 
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
+            console.log('[cart:id]', cart.id);
+            console.log('[cart:subtotal]', cart.getAttribute('subtotal'));
+            console.log('[cart:total_items]', cart.getAttribute('total_items'));
+            console.log('[cart:currency]', cart.getAttribute('currency'));
             updateCartState(cart);
             return cart;
         });

@@ -252,7 +252,7 @@ const ProductScreen = ({ navigation, route }) => {
                 });
             })
             .catch((error) => {
-                Alert.alert(error.message);
+                console.log(error);
                 setIsAddingToCart(false);
             });
     };

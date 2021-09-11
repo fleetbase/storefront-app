@@ -6,6 +6,7 @@ import { faMapMarkerAlt, faTimes, faStar } from '@fortawesome/free-solid-svg-ico
 import { EventRegister } from 'react-native-event-listeners';
 import { useResourceStorage, get, set } from '../../utils/storage';
 import { getCustomer } from '../../utils/customer';
+import { signOut } from '../../utils';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import tailwind from '../../tailwind';
@@ -23,6 +24,9 @@ const LocationPicker = (props) => {
         if (customer) {
             return customer.getSavedPlaces().then((places) => {
                 setPlaces(places);
+            }).catch((error) => {
+                // logout user
+                signOut();
             });
         }
     };

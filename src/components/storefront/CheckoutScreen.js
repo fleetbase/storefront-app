@@ -10,8 +10,8 @@ import { formatCurrency, isLastIndex } from '../../utils';
 import { useResourceStorage } from '../../utils/storage';
 import useStorefrontSdk, { adapter as StorefrontAdapter } from '../../utils/use-storefront-sdk';
 import { adapter as FleetbaseAdapter } from '../../utils/use-fleetbase-sdk';
-import { getCustomer } from '../../utils/customer';
-import { Cart, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
+import { useCustomer } from '../../utils/customer';
+import { Cart, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
 import { Place, ServiceQuote } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
 import tailwind from '../../tailwind';
@@ -23,7 +23,6 @@ const GATEWAY_CODE = 'stripe';
 
 const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
-    const customer = getCustomer();
     const insets = useSafeAreaInsets();
     const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
     const { info, serializedCart, quote } = route.params;
@@ -36,16 +35,29 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote || {}));
     const [paymentMethod, setPaymentMethod] = useState({ image: '', label: '' });
     const [checkoutToken, setCheckoutToken] = useState(null);
+    const [customer, setCustomer] = useCustomer();
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+    const canPlaceOrder =
+        !isLoading && customer instanceof Customer && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
 
     const updateCart = (cart) => {
         setCart(cart);
         emit('cart.changed', cart);
     };
 
+    const login = () => navigation.navigate('LoginScreen', { redirectTo: 'CheckoutScreen' });
+
     const fetchBeforeCheckout = async () => {
-        const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE);
+        if (!customer) {
+            // user needs to login first
+            return login();
+        }
+
+        const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE).catch((error) => {
+            Alert.alert(error.message, null, () => navigation.goBack());
+            console.log(error);
+        });
 
         setCheckoutToken(token);
 
@@ -153,17 +165,25 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     useEffect(() => {
         initializePaymentSheet();
 
+        // Listen for customer created event
+        const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
+            setCustomer(customer);
+        });
+
+        // Listen for changes to cart
         const cartChanged = addEventListener('cart.changed', (cart) => {
             setCart(cart);
             getDeliveryQuote();
         });
 
+        // Listen for changes to customer delivery location
         const locationChanged = addEventListener('deliver_to.changed', (place) => {
             // update delivery quote
             getDeliveryQuote(place);
         });
 
         return () => {
+            removeEventListener(customerUpdatedListener);
             removeEventListener(cartChanged);
             removeEventListener(locationChanged);
         };
@@ -184,22 +204,41 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
 
             <ScrollView>
                 <View style={tailwind('p-4')}>
+                    {!customer && (
+                        <View style={tailwind('p-4 rounded-md bg-red-50 mb-4')}>
+                            <View style={tailwind('flex flex-col overflow-hidden')}>
+                                <View style={tailwind('flex flex-row items-center mb-3 w-full')}>
+                                    <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-2')} />
+                                    <Text style={tailwind('text-red-600 text-sm font-semibold')} numberOfLines={1}>
+                                        You must login or signup to checkout
+                                    </Text>
+                                </View>
+                                <TouchableOpacity style={tailwind('w-full')} disabled={isLoading} onPress={login}>
+                                    <View style={tailwind('btn border border-red-100 bg-red-100 w-full')}>
+                                        <Text style={tailwind('font-semibold text-red-900')}>Login</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
                     <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
                                     <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
-                                    {isInvalidDeliveryPlace && <FaIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
+                                    {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
                                 </View>
-                                <View>
-                                    <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
-                                    <Text>{deliverTo.getAttribute('street1')}</Text>
-                                    {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
-                                    <Text>
-                                        {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
-                                    </Text>
-                                    {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
-                                </View>
+                                {deliverTo && (
+                                    <View>
+                                        <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
+                                        <Text>{deliverTo.getAttribute('street1')}</Text>
+                                        {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
+                                        <Text>
+                                            {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
+                                        </Text>
+                                        {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                                    </View>
+                                )}
                             </View>
                             <View style={tailwind('flex justify-center')}>
                                 <View style={tailwind('flex items-end justify-center w-12')}>
@@ -216,6 +255,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                 </View>
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     {isLoading && !paymentMethod.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
+                                    {!isLoading && !paymentMethod?.label && <Text>No payment method</Text>}
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <Image
                                             source={{
@@ -294,13 +334,14 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                             <Text style={tailwind('text-gray-400')}>Total</Text>
                             <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
-                        <TouchableOpacity onPress={placeOrder} disabled={isLoading}>
+                        <TouchableOpacity onPress={placeOrder} disabled={!canPlaceOrder}>
                             <View
                                 style={tailwind(
                                     `flex flex-row items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500 ${
-                                        isLoading ? 'bg-opacity-50 border-opacity-50' : ''
+                                        isLoading || !canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
                                     }`
-                                )}>
+                                )}
+                            >
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
                                 <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>Place Order</Text>
                             </View>
