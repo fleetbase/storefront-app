@@ -54,8 +54,15 @@ const StorefrontScreen = ({ navigation, route }) => {
 
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-            updateCartState(cart);
-            return cart;
+            if (cart instanceof Cart) {
+                updateCartState(cart);
+
+                return cart;
+            }
+            
+            throw new Error('Cart failed to load via SDK!');
+        }).catch((error) => {
+            console.log('[Error fetching cart!]', error);
         });
     };
 

@@ -4,8 +4,9 @@ import { isResource, Collection } from '@fleetbase/sdk';
 const { isArray } = Array;
 const storage = new MMKVStorage.Loader().initialize(); 
 const useStorage = create(storage);
+const { getString, setString, getInt, setInt, getBool, setBool, getArray, setArray } = storage;
 
-const useResourceStorage = (key, ResourceType, adapter, defaultValue = null) => {
+const useResourceStorage = (key, ResourceType, adapter, defaultValue) => {
     const [value, setValue] = useMMKVStorage(key, storage);
 
     const setResource = (resource) => {
@@ -28,9 +29,9 @@ const useResourceStorage = (key, ResourceType, adapter, defaultValue = null) => 
 
     if (value) {
         return [new ResourceType(value, adapter), setResource];
-    }
+    }    
 
-    if (value === null && defaultValue !== null) {
+    if ((value === undefined || value === null) && defaultValue !== undefined) {
         return [defaultValue, setResource];
     }
 
@@ -52,8 +53,6 @@ const remove = (key) => {
 const clear = () => {
     return storage.clearStore();
 }
-
-const { getString, setString, getInt, setInt, getBool, setBool, getArray, setArray } = storage;
 
 export default storage;
 export { useMMKVStorage, useStorage, useResourceStorage, get, set, remove, clear, getString, setString, getInt, setInt, getBool, setBool, getArray, setArray };
