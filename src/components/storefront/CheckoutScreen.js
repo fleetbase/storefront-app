@@ -134,6 +134,8 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                     updateCart(cart);
                 });
                 navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
+            }).catch((error) => {
+                console.log('[Failed to capture order!]', error);
             });
         }
     };
@@ -150,9 +152,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
          */
 
         setIsFetchingServiceQuote(true);
-        quote.fromCart(storeLocation, place || deliverTo, cart).then((serviceQuote) => {
+        quote.fromCart(storeLocation, place ?? deliverTo, cart).then((serviceQuote) => {
             setServiceQuote(serviceQuote);
             setIsFetchingServiceQuote(false);
+        }).catch((error) => {
+            console.log('[Error fetching service quote!]', error);
         });
     };
 
@@ -254,16 +258,16 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                     <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
                                 </View>
                                 <View style={tailwind('flex flex-row justify-between')}>
-                                    {isLoading && !paymentMethod.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
+                                    {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
                                     {!isLoading && !paymentMethod?.label && <Text>No payment method</Text>}
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <Image
                                             source={{
-                                                uri: `data:image/png;base64,${paymentMethod.image}`,
+                                                uri: `data:image/png;base64,${paymentMethod?.image}`,
                                             }}
                                             style={[{ width: 35, height: 22, marginRight: 10 }]}
                                         />
-                                        <Text>{paymentMethod.label}</Text>
+                                        <Text>{paymentMethod?.label}</Text>
                                     </View>
                                 </View>
                             </View>
