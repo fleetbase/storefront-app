@@ -68,7 +68,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             product = products[cartItem.product_id];
         } else {
             product = await storefront.products.findRecord(cartItem.product_id).catch((error) => {
-                console.log('[Error fetchingproduct record!]', error);
+                console.log('[Error fetching product record!]', error);
             });
         }
 
@@ -210,9 +210,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                 </View>
             )}
             {!isCartLoaded && (
-                <View style={tailwind('mt-20 flex items-center justify-center')}>
+                <View style={tailwind(`mt-20 flex items-center justify-center ${(isLoading || isEmptying) ? 'opacity-50' : ''}`)}>
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
                         <ActivityIndicator />
+                        <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
+                            <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
+                                <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Not loading? Press to reload!</Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
             )}
