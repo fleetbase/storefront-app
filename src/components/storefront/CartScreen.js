@@ -21,7 +21,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const { info, serializedCart } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
-    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
+    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart ?? {}));
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isEmptying, setIsEmptying] = useState(false);
@@ -49,6 +49,10 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         */
         if (!customerLocation.id) {
             customerLocation = customerLocation.coordinates;
+        }
+
+        if ((!cart || (!cart instanceof Cart)) || (!storeLocation || (!storeLocation instanceof StoreLocation)) || !customerLocation) {
+            return;
         }
 
         setIsFetchingServiceQuote(true);
@@ -96,10 +100,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
 
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-            updateCart(cart);
-            getDeliveryQuote(cart);
+            if (cart instanceof Cart) {
+                updateCart(cart);
+                getDeliveryQuote();
 
-            return cart;
+                return cart;
+            }
+            
+            throw new Error('Cart failed to load via SDK!');
         }).catch((error) => {
             console.log('[Error fetching cart!]', error);
         });
@@ -214,8 +222,8 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
                         <ActivityIndicator />
                         <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
-                            <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                                <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Not loading? Press to reload!</Text>
+                            <View style={tailwind('flex items-center justify-center text-center rounded-md px-3 py-2 bg-white border border-blue-500 shadow-sm')}>
+                                <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>Not loading? Reload!</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
