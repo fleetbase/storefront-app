@@ -20,6 +20,7 @@
     "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
+    "@reduxjs/toolkit": "^1.6.1",
     "@stripe/stripe-react-native": "^0.1.5",
     "autoprefixer": "^10.2.6",
     "axios": "^0.21.1",
@@ -48,6 +49,7 @@
     "react-native-screens": "^3.4.0",
     "react-native-snap-carousel": "^3.9.1",
     "react-native-swipe-list-view": "^3.2.9",
+    "react-redux": "^7.2.5",
     "tailwind-rn": "^3.0.1",
     "tailwindcss": "^2.2.4"
   },

@@ -37,7 +37,9 @@ const StorefrontScreen = ({ navigation, route }) => {
         const token = get('token');
 
         if (customer && token) {
-            customer.syncDevice(token);
+            customer.syncDevice(token).catch((error) => {
+                console.log('[Error syncing customer device!]', error);
+            });
         }
     };
 
@@ -52,10 +54,6 @@ const StorefrontScreen = ({ navigation, route }) => {
 
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-            console.log('[cart:id]', cart.id);
-            console.log('[cart:subtotal]', cart.getAttribute('subtotal'));
-            console.log('[cart:total_items]', cart.getAttribute('total_items'));
-            console.log('[cart:currency]', cart.getAttribute('currency'));
             updateCartState(cart);
             return cart;
         });
@@ -64,6 +62,8 @@ const StorefrontScreen = ({ navigation, route }) => {
     const navigateToOrder = (orderId) => {
         fleetbase.orders.findRecord(orderId).then((order) => {
             navigation.navigate('StorefrontOrderScreen', { serializedOrder: order.serialize(), info });
+        }).catch((error) => {
+            console.log('[Error fetching order record!]', error);
         });
     };
 
@@ -74,6 +74,8 @@ const StorefrontScreen = ({ navigation, route }) => {
             if (defaultStoreLocation) {
                 setStoreLocation(defaultStoreLocation);
             }
+        }).catch((error) => {
+            console.log('[Error fetching store locations!]', error);
         });
     };
 

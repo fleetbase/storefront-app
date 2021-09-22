@@ -30,6 +30,8 @@ const BootScreen = ({ navigation }) => {
         }
 
         // @todo handle networks (mutli shop apps/ marketplaces)
+    }).catch((error) => {
+        console.log('[Error fetching storefront info!]', error);
     });
 
     useEffect(() => {
