@@ -24,13 +24,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [isEmptying, setIsEmptying] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
     const [serviceQuote, setServiceQuote] = useState(null);
 
     const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
-    const isCheckoutDisabled = isFetchingServiceQuote || isLoading;
+    const isCheckoutDisabled = isFetchingServiceQuote || isLoading || isEmptying;
 
-    const getDeliveryQuote = (place = null) => {
+    const getDeliveryQuote = () => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
@@ -41,7 +42,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             });
          */
 
-        let customerLocation = place ?? deliverTo;
+        let customerLocation = deliverTo;
 
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
@@ -50,16 +51,12 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation.coordinates;
         }
 
-        // if (!cart) {
-        //     return getCart();
-        // }
-
         setIsFetchingServiceQuote(true);
         quote.fromCart(storeLocation, customerLocation, cart).then((serviceQuote) => {
             setServiceQuote(serviceQuote);
             setIsFetchingServiceQuote(false);
         }).catch((error) => {
-            console.log(error);
+            console.log('[Error fetching service quote!]', error);
         });
     };
 
@@ -70,7 +67,9 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         if (products[cartItem.product_id]) {
             product = products[cartItem.product_id];
         } else {
-            product = await storefront.products.findRecord(cartItem.product_id);
+            product = await storefront.products.findRecord(cartItem.product_id).catch((error) => {
+                console.log('[Error fetchingproduct record!]', error);
+            });
         }
 
         return navigation.navigate('CartItemScreen', { attributes: product.serialize(), cartItemAttributes: cartItem });
@@ -98,9 +97,11 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const getCart = () => {
         return storefront.cart.retrieve(getUniqueId()).then((cart) => {
             updateCart(cart);
-            // getDeliveryQuote(cart);
+            getDeliveryQuote(cart);
 
             return cart;
+        }).catch((error) => {
+            console.log('[Error fetching cart!]', error);
         });
     };
 
@@ -115,17 +116,36 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     };
 
     const removeFromCart = (cartItem) => {
-        cart.remove(cartItem.id).then((cart) => {
+        setIsEmptying(true);
+
+        return cart.remove(cartItem.id).then((cart) => {
+            setIsEmptying(false);
             updateCart(cart);
+        }).catch((error) => {
+            setIsEmptying(false);
+            console.log('[Error removing item from cart!]', error);
         });
     };
 
     const emptyCart = () => {
-        getCart().then((cart) => {
-            cart.empty().then((cart) => {
+        // create action
+        const emptyCartAction = (cart) => {
+            setIsEmptying(true);
+
+            return cart.empty().then((cart) => {
+                setIsEmptying(false);
                 updateCart(cart);
+            }).catch((error) => {
+                setIsEmptying(false);
+                console.log('[Error emptying cart!]', error);
             });
-        });
+        };
+        
+        if (cart instanceof Cart) {
+            return emptyCartAction(cart);
+        }
+
+        return getCart().then(emptyCartAction);
     };
 
     const calculateTotal = () => {
@@ -147,7 +167,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             }
             
             setCart(cart);
-            getDeliveryQuote();
+            // getDeliveryQuote();
 
             if (Object.keys(products).length === 0) {
                 preloadCartItems(cart);
@@ -155,8 +175,12 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         });
 
         const locationChanged = addEventListener('deliver_to.changed', (place) => {
+            // update state in cart
+            if (place instanceof Place) {
+                setDeliverTo(place);
+            }
             // update delivery quote
-            getDeliveryQuote(place);
+            getDeliveryQuote();
         });
 
         return () => {
@@ -196,11 +220,11 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                 <SwipeListView
                     data={cart.contents()}
                     keyExtractor={(item) => item.id}
-                    style={tailwind(`h-full ${isLoading ? 'opacity-50' : ''}`)}
+                    style={tailwind(`h-full ${(isLoading || isEmptying) ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
                     renderItem={({ item, index }) => (
-                        <View key={index} style={tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`)}>
+                        <View key={index} style={tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white h-28`)}>
                             <View style={tailwind('flex flex-1 flex-row justify-between')}>
                                 <View style={tailwind('flex flex-row items-start')}>
                                     <View>
@@ -208,7 +232,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                             <Text style={tailwind('font-semibold text-blue-500 text-sm')}>{item.quantity}x</Text>
                                         </View>
                                     </View>
-                                    <TouchableOpacity style={tailwind('flex flex-row items-start')} onPress={() => editCartItem(item)}>
+                                    <View style={tailwind('flex flex-row items-start')}>
                                         <View style={tailwind('mr-3')}>
                                             <View>
                                                 <Image source={{ uri: item.product_image_url }} style={tailwind('w-16 h-16')} />
@@ -220,7 +244,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={2}>{stripHtml(item.description)}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>{stripHtml(item.description)}</Text>
                                                     <View>
                                                         {item.variants.map((variant) => (
                                                             <View key={variant.id}>
@@ -241,7 +265,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                 <Text style={tailwind('text-blue-600 text-sm font-semibold')}>Edit</Text>
                                             </TouchableOpacity>
                                         </View>
-                                    </TouchableOpacity>
+                                    </View>
                                 </View>
                                 <View style={tailwind('flex items-end')}>
                                     <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, item.currency)}</Text>
@@ -258,14 +282,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                     )}
                     renderHiddenItem={({ item, index }) => (
                         <View style={tailwind('flex flex-1 items-center bg-white flex-1 flex-row justify-end')}>
-                            <TouchableOpacity onPress={() => editCartItem(item)} style={tailwind('flex bg-blue-50 w-28 h-full items-center justify-center')}>
+                            <TouchableOpacity onPress={() => editCartItem(item)} style={tailwind('flex bg-blue-500 w-28 h-full items-center justify-center')}>
                                 <View>
-                                    <FontAwesomeIcon icon={faPencilAlt} size={22} style={tailwind('text-blue-900')} />
+                                    <FontAwesomeIcon icon={faPencilAlt} size={22} style={tailwind('text-white')} />
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => removeFromCart(item)} style={tailwind('flex bg-red-50 w-28 h-full items-center justify-center')}>
+                            <TouchableOpacity onPress={() => removeFromCart(item)} style={tailwind('flex bg-red-500 w-28 h-full items-center justify-center')}>
                                 <View>
-                                    <FontAwesomeIcon icon={faTrash} size={22} style={tailwind('text-red-900')} />
+                                    <FontAwesomeIcon icon={faTrash} size={22} style={tailwind('text-white')} />
                                 </View>
                             </TouchableOpacity>
                         </View>

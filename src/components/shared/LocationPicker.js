@@ -25,6 +25,7 @@ const LocationPicker = (props) => {
             return customer.getSavedPlaces().then((places) => {
                 setPlaces(places);
             }).catch((error) => {
+                console.log('[Error fetching customer locations]', error);
                 // logout user
                 signOut();
             });
