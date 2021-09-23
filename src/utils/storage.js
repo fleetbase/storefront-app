@@ -1,5 +1,5 @@
 import MMKVStorage, { create, useMMKVStorage } from "react-native-mmkv-storage";
-import { isResource, Collection } from '@fleetbase/sdk';
+import { Collection } from '@fleetbase/sdk';
 
 const { isArray } = Array;
 const storage = new MMKVStorage.Loader().initialize(); 
@@ -10,15 +10,15 @@ const useResourceStorage = (key, ResourceType, adapter, defaultValue) => {
     const [value, setValue] = useMMKVStorage(key, storage);
 
     const setResource = (resource) => {
-        if (isResource(resource)) {
-            setValue(resource.serialize());
-            return;
-        }
-
         if (resource instanceof Collection) {
             setValue(resource.invoke('serialize'));
             return;
         }
+
+        if (typeof resource?.serialize === 'function') {
+            setValue(resource.serialize());
+            return;
+        }        
 
         setValue(resource);
     }
