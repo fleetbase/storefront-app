@@ -24,7 +24,7 @@ const useResourceStorage = (key, ResourceType, adapter, defaultValue) => {
     }
 
     if (value && isArray(value)) {
-        return [new Collection(value.map(r => new ResourceType(r, adapter))), setResource];
+        return [new Collection(value.map(attributes => new ResourceType(attributes, adapter))), setResource];
     }
 
     if (value) {
