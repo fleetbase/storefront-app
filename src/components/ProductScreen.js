@@ -232,6 +232,8 @@ const ProductScreen = ({ navigation, route }) => {
                         updateCart(cart);
                         setIsAddingToCart(false);
                         checkInCart();
+
+                        return navigation.goBack();
                     });
                 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Switch } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
@@ -26,10 +26,34 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isEmptying, setIsEmptying] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
+    const [isPickupOrder, setIsPickupOrder] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(null);
+    const [serviceQuoteError, setServiceQuoteError] = useState(false);
 
+    const codEnabled = info?.options?.cod_enabled === true;
+    const pickupEnabled = info?.options?.pickup_enabled === true;
+    const hasOptions = pickupEnabled;
     const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
-    const isCheckoutDisabled = isFetchingServiceQuote || isLoading || isEmptying;
+    const isCheckoutDisabled = (() => {
+        if (isPickupOrder) {
+            return isLoading || isEmptying;
+        }
+
+        return isFetchingServiceQuote || isLoading || isEmptying || serviceQuoteError !== false;
+    })();
+    const deliveryFee = (() => {
+        let deliveryFee = <ActivityIndicator />;
+
+        if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
+            deliveryFee = serviceQuote.formattedAmount;
+        }
+
+        if (serviceQuoteError) {
+            deliveryFee = <Text style={tailwind('text-red-500')}>{serviceQuoteError}</Text>;
+        }
+
+        return deliveryFee;
+    })();
 
     const getDeliveryQuote = () => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
@@ -51,17 +75,24 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation.coordinates;
         }
 
-        if ((!cart || (!cart instanceof Cart)) || (!storeLocation || (!storeLocation instanceof StoreLocation)) || !customerLocation) {
+        if (!cart || !cart instanceof Cart || !storeLocation || !storeLocation instanceof StoreLocation || !customerLocation) {
             return;
         }
 
         setIsFetchingServiceQuote(true);
-        quote.fromCart(storeLocation, customerLocation, cart).then((serviceQuote) => {
-            setServiceQuote(serviceQuote);
-            setIsFetchingServiceQuote(false);
-        }).catch((error) => {
-            console.log('[Error fetching service quote!]', error);
-        });
+        setServiceQuoteError(false);
+
+        quote
+            .fromCart(storeLocation, customerLocation, cart)
+            .then((serviceQuote) => {
+                setServiceQuote(serviceQuote);
+                setIsFetchingServiceQuote(false);
+            })
+            .catch((error) => {
+                console.log('[Error fetching service quote!]', error);
+                setIsFetchingServiceQuote(false);
+                setServiceQuoteError(error.message);
+            });
     };
 
     const editCartItem = async (cartItem) => {
@@ -99,18 +130,21 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     };
 
     const getCart = () => {
-        return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-            if (cart instanceof Cart) {
-                updateCart(cart);
-                getDeliveryQuote();
+        return storefront.cart
+            .retrieve(getUniqueId())
+            .then((cart) => {
+                if (cart instanceof Cart) {
+                    updateCart(cart);
+                    getDeliveryQuote();
 
-                return cart;
-            }
-            
-            throw new Error('Cart failed to load via SDK!');
-        }).catch((error) => {
-            console.log('[Error fetching cart!]', error);
-        });
+                    return cart;
+                }
+
+                throw new Error('Cart failed to load via SDK!');
+            })
+            .catch((error) => {
+                console.log('[Error fetching cart!]', error);
+            });
     };
 
     const refreshCart = () => {
@@ -126,13 +160,16 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const removeFromCart = (cartItem) => {
         setIsEmptying(true);
 
-        return cart.remove(cartItem.id).then((cart) => {
-            setIsEmptying(false);
-            updateCart(cart);
-        }).catch((error) => {
-            setIsEmptying(false);
-            console.log('[Error removing item from cart!]', error);
-        });
+        return cart
+            .remove(cartItem.id)
+            .then((cart) => {
+                setIsEmptying(false);
+                updateCart(cart);
+            })
+            .catch((error) => {
+                setIsEmptying(false);
+                console.log('[Error removing item from cart!]', error);
+            });
     };
 
     const emptyCart = () => {
@@ -140,15 +177,18 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         const emptyCartAction = (cart) => {
             setIsEmptying(true);
 
-            return cart.empty().then((cart) => {
-                setIsEmptying(false);
-                updateCart(cart);
-            }).catch((error) => {
-                setIsEmptying(false);
-                console.log('[Error emptying cart!]', error);
-            });
+            return cart
+                .empty()
+                .then((cart) => {
+                    setIsEmptying(false);
+                    updateCart(cart);
+                })
+                .catch((error) => {
+                    setIsEmptying(false);
+                    console.log('[Error emptying cart!]', error);
+                });
         };
-        
+
         if (cart instanceof Cart) {
             return emptyCartAction(cart);
         }
@@ -163,6 +203,10 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             return 0;
         }
 
+        if (isPickupOrder) {
+            return subtotal;
+        }
+
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
 
@@ -173,7 +217,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             if (!cart instanceof Cart) {
                 return getCart();
             }
-            
+
             setCart(cart);
             // getDeliveryQuote();
 
@@ -208,8 +252,17 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                 <Text style={tailwind('text-gray-400')}>Total</Text>
                                 <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                             </View>
-                            <TouchableOpacity disabled={isCheckoutDisabled} onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize() })}>
-                                <View style={tailwind(`flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600 ${isCheckoutDisabled ? 'bg-opacity-50 border-opacity-50' : ''}`)}>
+                            <TouchableOpacity
+                                disabled={isCheckoutDisabled}
+                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder })}
+                            >
+                                <View
+                                    style={tailwind(
+                                        `flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600 ${
+                                            isCheckoutDisabled ? 'bg-opacity-50 border-opacity-50' : ''
+                                        }`
+                                    )}
+                                >
                                     <Text style={tailwind(`font-semibold text-green-600 text-lg ${isCheckoutDisabled ? 'text-opacity-50' : ''}`)}>Checkout</Text>
                                 </View>
                             </TouchableOpacity>
@@ -218,7 +271,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                 </View>
             )}
             {!isCartLoaded && (
-                <View style={tailwind(`mt-20 flex items-center justify-center ${(isLoading || isEmptying) ? 'opacity-50' : ''}`)}>
+                <View style={tailwind(`mt-20 flex items-center justify-center ${isLoading || isEmptying ? 'opacity-50' : ''}`)}>
                     <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
                         <ActivityIndicator />
                         <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
@@ -233,11 +286,11 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                 <SwipeListView
                     data={cart.contents()}
                     keyExtractor={(item) => item.id}
-                    style={tailwind(`h-full ${(isLoading || isEmptying) ? 'opacity-50' : ''}`)}
+                    style={tailwind(`h-full ${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
                     renderItem={({ item, index }) => (
-                        <View key={index} style={tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white h-28`)}>
+                        <View key={index} style={tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white min-h-28 max-h-36`)}>
                             <View style={tailwind('flex flex-1 flex-row justify-between')}>
                                 <View style={tailwind('flex flex-row items-start')}>
                                     <View>
@@ -257,7 +310,9 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>{stripHtml(item.description)}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>
+                                                        {stripHtml(item.description) ?? 'No description'}
+                                                    </Text>
                                                     <View>
                                                         {item.variants.map((variant) => (
                                                             <View key={variant.id}>
@@ -314,13 +369,15 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                         cart.isNotEmpty && (
                             <View>
                                 <View style={tailwind('px-4 py-2 bg-white mb-2')}>
-                                    <View>
-                                        <Text style={tailwind('text-lg font-bold mb-2')}>{cart.getAttribute('total_items')} items in your cart</Text>
-                                        {cart.isNotEmpty && (
-                                            <TouchableOpacity style={tailwind('mb-2')} onPress={emptyCart}>
-                                                <Text style={tailwind('underline text-red-400 text-sm font-semibold')}>Remove All Items</Text>
-                                            </TouchableOpacity>
-                                        )}
+                                    <View style={tailwind('flex flex-row items-start justify-between')}>
+                                        <View style={tailwind('flex-1')}>
+                                            <Text style={tailwind('text-lg font-bold mb-2')}>{cart.getAttribute('total_items')} items in your cart</Text>
+                                            {cart.isNotEmpty && (
+                                                <TouchableOpacity style={tailwind('mb-2')} onPress={emptyCart}>
+                                                    <Text style={tailwind('underline text-red-400 text-sm font-semibold')}>Remove All Items</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
                                     </View>
                                 </View>
                                 <View style={tailwind('pb-2')}>
@@ -359,13 +416,40 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                     ListFooterComponent={
                         cart.isNotEmpty && (
                             <View style={tailwind('bg-gray-100 pt-2')}>
+                                {hasOptions && (
+                                    <View>
+                                        <View style={tailwind('flex px-4 py-2')}>
+                                            <View>
+                                                <Text style={tailwind('font-semibold text-gray-400')}>Options</Text>
+                                            </View>
+                                        </View>
+                                        {pickupEnabled && (
+                                            <View style={tailwind('my-2 bg-white w-full')}>
+                                                <View style={tailwind('flex flex-row items-center border-b border-gray-100 h-14 px-4')}>
+                                                    <View style={tailwind('w-16')}>
+                                                        <Switch
+                                                            trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
+                                                            thumbColor={'#f4f3f4'}
+                                                            ios_backgroundColor="#3e3e3e"
+                                                            onValueChange={() => setIsPickupOrder(!isPickupOrder)}
+                                                            value={isPickupOrder}
+                                                        />
+                                                    </View>
+                                                    <View>
+                                                        <Text style={tailwind('font-semibold')}>Pickup Order</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
                                 <View style={tailwind('flex px-4 py-2')}>
                                     <View>
                                         <Text style={tailwind('font-semibold text-gray-400')}>Cost</Text>
                                     </View>
                                 </View>
                                 <View style={tailwind('mt-2 mb-36 bg-white w-full')}>
-                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100  h-14 px-4')}>
+                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                                         <View>
                                             <Text>Subtotal</Text>
                                         </View>
@@ -373,14 +457,16 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                             <Text style={tailwind('font-bold')}>{formatCurrency(cart.subtotal() / 100, cart.getAttribute('currency'))}</Text>
                                         </View>
                                     </View>
-                                    <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
-                                        <View>
-                                            <Text>Delivery Fee</Text>
+                                    {!isPickupOrder && (
+                                        <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
+                                            <View>
+                                                <Text>Delivery Fee</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={tailwind('font-bold')}>{deliveryFee}</Text>
+                                            </View>
                                         </View>
-                                        <View>
-                                            <Text style={tailwind('font-bold')}>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
-                                        </View>
-                                    </View>
+                                    )}
                                     <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                                         <View>
                                             <Text style={tailwind('font-bold')}>Total</Text>
