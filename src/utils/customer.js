@@ -16,7 +16,7 @@ const getCustomer = () => {
 };
 
 const updateCustomer = (customer) => {
-     if (customer instanceof Customer) {
+     if (typeof customer?.serialize === 'function') {
         set('customer', customer.serialize());
         emit('customer.updated', customer);
     }
@@ -26,7 +26,7 @@ const useCustomer = () => {
     const [value, setValue] = useMMKVStorage('customer', storage);
 
     const setCustomer = (customer) => {
-        if (customer instanceof Customer) {
+        if (typeof customer?.serialize === 'function') {
             setValue(customer.serialize());
             return;
         }

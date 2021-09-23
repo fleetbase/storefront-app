@@ -4309,6 +4309,108 @@
 	"min-h-0": {
 		"minHeight": 0
 	},
+	"min-h-1": {
+		"minHeight": 4
+	},
+	"min-h-2": {
+		"minHeight": 8
+	},
+	"min-h-3": {
+		"minHeight": 12
+	},
+	"min-h-4": {
+		"minHeight": 16
+	},
+	"min-h-5": {
+		"minHeight": 20
+	},
+	"min-h-6": {
+		"minHeight": 24
+	},
+	"min-h-7": {
+		"minHeight": 28
+	},
+	"min-h-8": {
+		"minHeight": 32
+	},
+	"min-h-9": {
+		"minHeight": 36
+	},
+	"min-h-10": {
+		"minHeight": 40
+	},
+	"min-h-11": {
+		"minHeight": 44
+	},
+	"min-h-12": {
+		"minHeight": 48
+	},
+	"min-h-14": {
+		"minHeight": 56
+	},
+	"min-h-16": {
+		"minHeight": 64
+	},
+	"min-h-20": {
+		"minHeight": 80
+	},
+	"min-h-24": {
+		"minHeight": 96
+	},
+	"min-h-28": {
+		"minHeight": 112
+	},
+	"min-h-32": {
+		"minHeight": 128
+	},
+	"min-h-36": {
+		"minHeight": 144
+	},
+	"min-h-40": {
+		"minHeight": 160
+	},
+	"min-h-44": {
+		"minHeight": 176
+	},
+	"min-h-48": {
+		"minHeight": 192
+	},
+	"min-h-52": {
+		"minHeight": 208
+	},
+	"min-h-56": {
+		"minHeight": 224
+	},
+	"min-h-60": {
+		"minHeight": 240
+	},
+	"min-h-64": {
+		"minHeight": 256
+	},
+	"min-h-72": {
+		"minHeight": 288
+	},
+	"min-h-80": {
+		"minHeight": 320
+	},
+	"min-h-96": {
+		"minHeight": 384
+	},
+	"min-h-px": {
+		"minHeight": 1
+	},
+	"min-h-0.5": {
+		"minHeight": 2
+	},
+	"min-h-1.5": {
+		"minHeight": 6
+	},
+	"min-h-2.5": {
+		"minHeight": 10
+	},
+	"min-h-3.5": {
+		"maxHeight": 14
+	},
 	"min-h-full": {
 		"minHeight": "100%"
 	},

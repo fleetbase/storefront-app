@@ -20,8 +20,6 @@ const StorefrontSearchPlacesScreen = ({ navigation, route }) => {
         const googleAddress = new GoogleAddress(result);
         const place = Place.fromGoogleAddress(googleAddress);
 
-        console.log(place);
-
         navigation.navigate('EditPlace', { attributes: place.serialize() });
     };
 

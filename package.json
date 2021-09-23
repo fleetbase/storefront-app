@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fleetbase/sdk": "1.1.6",
-    "@fleetbase/storefront": "1.0.4",
+    "@fleetbase/storefront": "1.0.5",
     "@freakycoder/react-native-bounceable": "^0.2.5",
     "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/masked-view": "^0.1.11",

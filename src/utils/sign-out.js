@@ -1,8 +1,11 @@
-import { clear, set } from './storage';
+import { set } from './storage';
+import getCurrentLocation from './location';
 
 const signOut = () => {
     set('customer', null);
-    clear();
+    set('location', null);
+
+    getCurrentLocation();
 };
 
 export default signOut;

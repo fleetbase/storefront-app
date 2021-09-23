@@ -15,9 +15,7 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
     const customer = getCustomer();
     const { serializedOrder, info } = route.params;
     const [order, setOrder] = useState(new Order(serializedOrder || {}));
-
-    console.log(`[StorefrontOrderCompletedScreen] order`, order);
-    console.log(`[StorefrontOrderCompletedScreen] info`, info);
+    const isPickupOrder = order.getAttribute('meta.is_pickup');
 
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
@@ -57,34 +55,81 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
                             </View>
                             <View style={tailwind('my-2 bg-white')}>
                                 <View style={tailwind('flex flex-col items-center')}>
-                                    <View style={tailwind('w-full p-4 border-b border-gray-200 relative')}>
-                                        <View style={tailwind('w-2 h-full absolute top-4 w-16 flex items-center justify-center')}>
-                                            <View style={tailwind('h-full -ml-1 w-1 bg-blue-200')}></View>
+                                    {!isPickupOrder && (
+                                        <View style={tailwind('w-full p-4 border-b border-gray-200 relative')}>
+                                            <View style={tailwind('w-2 h-full absolute top-4 w-16 flex items-center justify-center')}>
+                                                <View style={tailwind('h-full -ml-1 w-1 bg-blue-200')}></View>
+                                            </View>
+                                            <View style={tailwind('flex flex-row items-center mb-4')}>
+                                                <View style={tailwind('flex items-center justify-center rounded-full bg-blue-500 w-7 h-7 mr-4')}>
+                                                    <FontAwesomeIcon icon={faStoreAlt} size={16} color={'#fff'} />
+                                                </View>
+                                                <View>
+                                                    <Text style={tailwind('text-sm')}>
+                                                        {order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code')}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <View style={tailwind('flex flex-row items-center')}>
+                                                <View style={tailwind('flex items-center justify-center rounded-full bg-red-500 w-7 h-7 mr-4')}>
+                                                    <FontAwesomeIcon icon={faMapMarkerAlt} size={16} color={'#fff'} />
+                                                </View>
+                                                <View>
+                                                    <Text style={tailwind('text-sm')}>
+                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')},{' '}
+                                                        {order.getAttribute('payload.dropoff.postal_code')}
+                                                    </Text>
+                                                </View>
+                                            </View>
                                         </View>
-                                        <View style={tailwind('flex flex-row items-center mb-4')}>
-                                            <View style={tailwind('flex items-center justify-center rounded-full bg-blue-500 w-7 h-7 mr-4')}>
-                                                <FontAwesomeIcon icon={faStoreAlt} size={16} color={'#fff'} />
-                                            </View>
-                                            <View>
-                                                <Text style={tailwind('text-sm')}>
-                                                    {order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code')}
-                                                </Text>
+                                    )}
+                                    {isPickupOrder && (
+                                        <View style={tailwind('w-full p-4 border-b border-gray-200 relative')}>
+                                            <View style={tailwind('rounded-md bg-blue-50')}>
+                                                <View style={tailwind('rounded-t-md bg-blue-100 px-4 py-2 mb-3')}>
+                                                    <Text style={tailwind('text-blue-500 font-semibold')}>Pickup order from</Text>
+                                                </View>
+                                                <View style={tailwind('flex flex-row items-center mb-4 px-4')}>
+                                                    <View style={tailwind('flex items-center justify-center rounded-full bg-blue-500 w-7 h-7 mr-3')}>
+                                                        <FontAwesomeIcon icon={faStoreAlt} size={16} color={'#fff'} />
+                                                    </View>
+                                                    <View>
+                                                        <View>
+                                                            <Text style={tailwind('text-sm text-blue-900')}>{order.getAttribute('payload.pickup.street1')}</Text>
+                                                        </View>
+                                                        <View style={tailwind('flex flex-row')}>
+                                                            {order.getAttribute('payload.pickup.city') && (
+                                                                <Text style={tailwind('text-sm text-blue-900')}>{order.getAttribute('payload.pickup.city')}</Text>
+                                                            )}
+                                                            {order.getAttribute('payload.pickup.neighborhood') && (
+                                                                <Text style={tailwind('text-sm text-blue-900')}>, {order.getAttribute('payload.pickup.neighborhood')}</Text>
+                                                            )}
+                                                            {order.getAttribute('payload.pickup.province') && (
+                                                                <Text style={tailwind('text-sm text-blue-900')}>, {order.getAttribute('payload.pickup.province')}</Text>
+                                                            )}
+                                                            {order.getAttribute('payload.pickup.postal_code') && (
+                                                                <Text style={tailwind('text-sm text-blue-900')}>, {order.getAttribute('payload.pickup.postal_code')}</Text>
+                                                            )}
+                                                        </View>
+                                                        <View style={tailwind('flex flex-row')}>
+                                                            {order.getAttribute('payload.pickup.country') && (
+                                                                <Text style={tailwind('text-sm text-blue-900')}>{order.getAttribute('payload.pickup.country')}</Text>
+                                                            )}
+                                                        </View>
+                                                    </View>
+                                                </View>
                                             </View>
                                         </View>
-                                        <View style={tailwind('flex flex-row items-center')}>
-                                            <View style={tailwind('flex items-center justify-center rounded-full bg-red-500 w-7 h-7 mr-4')}>
-                                                <FontAwesomeIcon icon={faMapMarkerAlt} size={16} color={'#fff'} />
-                                            </View>
-                                            <View>
-                                                <Text style={tailwind('text-sm')}>
-                                                    {order.getAttribute('payload.dropoff.name') || `${order.getAttribute('street1')}, ${order.getAttribute('postal_code')}`}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    </View>
-                                    <View style={tailwind('w-full bg-white p-4')}>
+                                    )}
+                                    <View style={tailwind('w-full bg-white p-4 border-b border-gray-200')}>
                                         <Text style={tailwind('font-semibold mb-2')}>Order Notes</Text>
                                         <Text style={tailwind('text-gray-600')}>{order.notes || 'N/A'}</Text>
+                                    </View>
+                                    <View style={tailwind('w-full bg-white p-4')}>
+                                        <Text style={tailwind('font-semibold mb-2')}>QR Code</Text>
+                                        <View style={tailwind('flex items-center justify-center py-2')}>
+                                            <Image style={tailwind('w-32 h-32')} source={{uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}`}}/>
+                                        </View>
                                     </View>
                                 </View>
                             </View>
@@ -105,7 +150,9 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View style={tailwind('flex-1')}>
                                                     <Text style={tailwind('font-semibold')}>{entity.name}</Text>
-                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>{entity.description}</Text>
+                                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>
+                                                        {entity.description}
+                                                    </Text>
                                                     <View>
                                                         {entity.meta.variants.map((variant) => (
                                                             <View key={variant.id}>
@@ -136,10 +183,12 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
                                             <Text>Subtotal</Text>
                                             <Text>{formatCurrency(order.getAttribute('meta.subtotal') / 100, order.getAttribute('meta.currency'))}</Text>
                                         </View>
-                                        <View style={tailwind('flex flex-row items-center justify-between')}>
-                                            <Text>Delivery fee</Text>
-                                            <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
-                                        </View>
+                                        {!isPickupOrder && (
+                                            <View style={tailwind('flex flex-row items-center justify-between')}>
+                                                <Text>Delivery fee</Text>
+                                                <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
+                                            </View>
+                                        )}
                                     </View>
                                     <View style={tailwind('w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center justify-between')}>
