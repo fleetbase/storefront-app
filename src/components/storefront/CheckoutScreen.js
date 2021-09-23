@@ -25,21 +25,42 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
     const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
-    const { info, serializedCart, quote } = route.params;
+    const { info, serializedCart, isPickupOrder, quote } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
     const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
     const [isLoading, setIsLoading] = useState(false);
+    const [paymentSheetError, setPaymentSheetError] = useState(false);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote || {}));
+    const [serviceQuoteError, setServiceQuoteError] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState({ image: '', label: '' });
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [customer, setCustomer] = useCustomer();
-
+    const codEnabled = info?.options?.cod_enabled === true;
+    const pickupEnabled = info?.options?.pickup_enabled === true;
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
-    const canPlaceOrder =
-        !isLoading && customer instanceof Customer && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
+    const canPlaceOrder = (() => {
+        if (isPickupOrder) {
+            return !isLoading && typeof customer?.serialize === 'function' && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
+        }
+
+        return !isLoading && typeof customer?.serialize === 'function' && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
+    })();
+    const deliveryFee = (() => {
+        let deliveryFee = <ActivityIndicator />;
+
+        if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
+            deliveryFee = serviceQuote.formattedAmount;
+        }
+
+        if (serviceQuoteError) {
+            deliveryFee = <Text style={tailwind('text-red-500')}>{serviceQuoteError}</Text>;
+        }
+
+        return deliveryFee;
+    })();
 
     const updateCart = (cart) => {
         setCart(cart);
@@ -51,12 +72,20 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const fetchBeforeCheckout = async () => {
         if (!customer) {
             // user needs to login first
-            return login();
+            // return login();
+            return;
         }
 
-        const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE).catch((error) => {
+        // order options can include pickup, or cash
+        const orderOptions = {};
+
+        if (isPickupOrder) {
+            orderOptions.pickup = true;
+        }
+
+        const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, GATEWAY_CODE, orderOptions).catch((error) => {
+            console.log('[Error initializing checkout token!]', error);
             Alert.alert(error.message, null, () => navigation.goBack());
-            console.log(error);
         });
 
         setCheckoutToken(token);
@@ -89,7 +118,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
 
             if (!error) {
                 setPaymentSheetEnabled(true);
+            } else {
+                setPaymentSheetError(error.localizedMessage);
+                console.log('[Error enabling stripe payment sheet!]', error);
             }
+
             if (paymentOption) {
                 setPaymentMethod(paymentOption);
             }
@@ -106,7 +139,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         });
 
         if (error) {
-            console.log('error', error);
+            console.log('[Error loading stripe payment sheet!]', error);
         } else if (paymentOption) {
             setPaymentMethod({
                 label: paymentOption.label,
@@ -128,19 +161,22 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
             console.log('Success', 'The payment was confirmed successfully!');
 
             setPaymentSheetEnabled(false);
-            storefront.checkout.captureOrder(checkoutToken).then((order) => {
-                setIsLoading(false);
-                cart.empty().then((cart) => {
-                    updateCart(cart);
+            storefront.checkout
+                .captureOrder(checkoutToken)
+                .then((order) => {
+                    setIsLoading(false);
+                    cart.empty().then((cart) => {
+                        updateCart(cart);
+                    });
+                    navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
+                })
+                .catch((error) => {
+                    console.log('[Failed to capture order!]', error);
                 });
-                navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
-            }).catch((error) => {
-                console.log('[Failed to capture order!]', error);
-            });
         }
     };
 
-    const getDeliveryQuote = (place = null) => {
+    const getDeliveryQuote = () => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
@@ -151,17 +187,41 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
             });
          */
 
+        let customerLocation = deliverTo;
+
+        /**
+            ! If customer location is not saved in fleetbase just send the location coordinates !
+        */
+        if (!customerLocation.id) {
+            customerLocation = customerLocation.coordinates;
+        }
+
+        if (!cart || !cart instanceof Cart || !storeLocation || !storeLocation instanceof StoreLocation || !customerLocation) {
+            return;
+        }
+
         setIsFetchingServiceQuote(true);
-        quote.fromCart(storeLocation, place ?? deliverTo, cart).then((serviceQuote) => {
-            setServiceQuote(serviceQuote);
-            setIsFetchingServiceQuote(false);
-        }).catch((error) => {
-            console.log('[Error fetching service quote!]', error);
-        });
+        setServiceQuoteError(false);
+
+        quote
+            .fromCart(storeLocation, customerLocation, cart)
+            .then((serviceQuote) => {
+                setServiceQuote(serviceQuote);
+                setIsFetchingServiceQuote(false);
+            })
+            .catch((error) => {
+                console.log('[Error fetching service quote!]', error);
+                setIsFetchingServiceQuote(false);
+                setServiceQuoteError(error.message);
+            });
     };
 
     const calculateTotal = () => {
         const subtotal = cart.subtotal();
+
+        if (isPickupOrder) {
+            return subtotal;
+        }
 
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
@@ -172,6 +232,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         // Listen for customer created event
         const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
             setCustomer(customer);
+            initializePaymentSheet();
         });
 
         // Listen for changes to cart
@@ -183,7 +244,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         // Listen for changes to customer delivery location
         const locationChanged = addEventListener('deliver_to.changed', (place) => {
             // update delivery quote
-            getDeliveryQuote(place);
+            getDeliveryQuote();
         });
 
         return () => {
@@ -225,51 +286,66 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                     )}
-                    <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
-                        <View style={tailwind('flex flex-row justify-between')}>
-                            <View>
-                                <View style={tailwind('flex flex-row justify-between mb-3')}>
-                                    <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
-                                    {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
-                                </View>
-                                {deliverTo && (
-                                    <View>
-                                        <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
-                                        <Text>{deliverTo.getAttribute('street1')}</Text>
-                                        {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
-                                        <Text>
-                                            {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
-                                        </Text>
-                                        {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                    {!isPickupOrder && (
+                        <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
+                            <View style={tailwind('flex flex-row justify-between')}>
+                                <View>
+                                    <View style={tailwind('flex flex-row justify-between mb-3')}>
+                                        <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
+                                        {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
                                     </View>
-                                )}
-                            </View>
-                            <View style={tailwind('flex justify-center')}>
-                                <View style={tailwind('flex items-end justify-center w-12')}>
-                                    <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
+                                    {deliverTo && (
+                                        <View>
+                                            <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
+                                            <Text>{deliverTo.getAttribute('street1')}</Text>
+                                            {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
+                                            <Text>
+                                                {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
+                                            </Text>
+                                            {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                                        </View>
+                                    )}
+                                </View>
+                                <View style={tailwind('flex justify-center')}>
+                                    <View style={tailwind('flex items-end justify-center w-12')}>
+                                        <FontAwesomeIcon icon={faChevronRight} style={tailwind('text-gray-400')} />
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={choosePaymentOption}>
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
-                                    <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
+                                    <View>
+                                        <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
+                                    </View>
                                 </View>
+
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
                                     {!isLoading && !paymentMethod?.label && <Text>No payment method</Text>}
-                                    <View style={tailwind('flex flex-row items-center')}>
-                                        <Image
-                                            source={{
-                                                uri: `data:image/png;base64,${paymentMethod?.image}`,
-                                            }}
-                                            style={[{ width: 35, height: 22, marginRight: 10 }]}
-                                        />
-                                        <Text>{paymentMethod?.label}</Text>
-                                    </View>
+                                    {paymentMethod?.label !== null && (
+                                        <View style={tailwind('flex flex-row items-center')}>
+                                            <Image
+                                                source={{
+                                                    uri: `data:image/png;base64,${paymentMethod?.image}`,
+                                                }}
+                                                style={[{ width: 35, height: 22, marginRight: 10 }]}
+                                            />
+                                            <Text>{paymentMethod?.label}</Text>
+                                        </View>
+                                    )}
                                 </View>
+                                {paymentSheetError !== false && (
+                                    <View style={tailwind('mt-2 bg-red-50 px-2 py-1 w-9/12 flex flex-row')}>
+                                        <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-1')} />
+                                        <Text style={tailwind('text-red-500')} numberOfLines={1}>
+                                            {paymentSheetError}
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
                             <View style={tailwind('flex justify-center')}>
                                 <View style={tailwind('flex items-end justify-center w-12')}>
@@ -319,10 +395,12 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                             <Text>Subtotal</Text>
                             <Text>{formatCurrency(cart.subtotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
-                        <View style={tailwind('flex flex-row items-center justify-between py-2')}>
-                            <Text>Delivery Fee</Text>
-                            <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
-                        </View>
+                        {!isPickupOrder && (
+                            <View style={tailwind('flex flex-row items-center justify-between py-2')}>
+                                <Text>Delivery Fee</Text>
+                                <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
+                            </View>
+                        )}
                         <View style={tailwind('flex flex-row items-center justify-between mt-2 pt-4 border-t-2 border-gray-900')}>
                             <Text style={tailwind('font-semibold')}>Order Total</Text>
                             <Text style={tailwind('font-semibold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>

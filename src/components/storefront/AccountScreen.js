@@ -133,7 +133,7 @@ const StorefrontAccountScreen = ({ navigation, route }) => {
                     <View style={tailwind('p-4')}>
                         <View style={tailwind('flex flex-row items-center justify-center')}>
                             <TouchableOpacity style={tailwind('flex-1')} onPress={signOut}>
-                                <View style={tailwind('btn border border-gray-400')}>
+                                <View style={tailwind('btn border border-gray-200')}>
                                     {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
                                     <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
                                 </View>
