@@ -25,11 +25,15 @@ const StorePicker = (props) => {
     const insets = useSafeAreaInsets();
 
     const loadLocations = (initialize = false) => {
-        if (store) {
-            return store.getLocations().then((locations) => {
-                setStoreLocations(locations);
-            });
+        if (!store || !store instanceof Store) {
+            return;
         }
+
+        return store.getLocations().then((locations) => {
+            setStoreLocations(locations);
+        }).catch((error) => {
+            console.log('[Error fetching store locations]', error);
+        });
     };
 
     const selectStoreLocation = (selectedStoreLocation) => {
