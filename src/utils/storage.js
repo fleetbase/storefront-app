@@ -10,7 +10,7 @@ const useResourceStorage = (key, ResourceType, adapter, defaultValue) => {
     const [value, setValue] = useMMKVStorage(key, storage);
 
     const setResource = (resource) => {
-        if (resource instanceof Collection) {
+        if (isArray(resource) && typeof resource?.invoke === 'function') {
             setValue(resource.invoke('serialize'));
             return;
         }
