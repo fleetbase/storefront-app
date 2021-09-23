@@ -44,12 +44,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const deliveryFee = (() => {
         let deliveryFee = <ActivityIndicator />;
 
-        if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
+        if (!isFetchingServiceQuote && serviceQuote?.formattedAmount) {
             deliveryFee = serviceQuote.formattedAmount;
+        } else if (!isFetchingServiceQuote) {
+            deliveryFee = <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>N/A</Text>;
         }
 
         if (serviceQuoteError) {
-            deliveryFee = <Text style={tailwind('text-red-500')}>{serviceQuoteError}</Text>;
+            deliveryFee = <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>{serviceQuoteError}</Text>;
         }
 
         return deliveryFee;
@@ -228,9 +230,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
 
         const locationChanged = addEventListener('deliver_to.changed', (place) => {
             // update state in cart
-            if (place instanceof Place) {
-                setDeliverTo(place);
-            }
+            setDeliverTo(place);
             // update delivery quote
             getDeliveryQuote();
         });
