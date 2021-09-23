@@ -9,6 +9,7 @@ import { getCustomer } from '../../utils/customer';
 import { signOut } from '../../utils';
 import { adapter } from '../../utils/use-fleetbase-sdk';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
+import { Customer } from '@fleetbase/storefront';
 import tailwind from '../../tailwind';
 
 const { addEventListener, removeEventListener, emit } = EventRegister;
@@ -21,15 +22,17 @@ const LocationPicker = (props) => {
     const insets = useSafeAreaInsets();
 
     const loadPlaces = (initialize = false) => {
-        if (customer) {
-            return customer.getSavedPlaces().then((places) => {
-                setPlaces(places);
-            }).catch((error) => {
-                console.log('[Error fetching customer locations]', error);
-                // logout user
-                signOut();
-            });
+        if (!customer || !customer instanceof Customer) {
+            return;
         }
+
+        return customer.getSavedPlaces().then((places) => {
+            setPlaces(places);
+        }).catch((error) => {
+            console.log('[Error fetching customer locations]', error);
+            // logout user
+            signOut();
+        });
     };
 
     const changeDeliverTo = (place) => {
