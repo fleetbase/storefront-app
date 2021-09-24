@@ -343,7 +343,7 @@ const ProductScreen = ({ navigation, route }) => {
                                     )}
                                     <Text style={tailwind('text-sm text-gray-500')}>Base Price</Text>
                                 </View>
-                                <RenderHtml contentWidth={fullWidth} source={{ html: product.getAttribute('description')}} />
+                                <RenderHtml contentWidth={fullWidth} source={{ html: product.getAttribute('description') ?? ''}} />
                             </View>
                             <View style={tailwind('bg-gray-100')}>
                                 {product.variants().map((variation, i) => (

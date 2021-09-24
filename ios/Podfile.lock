@@ -294,7 +294,7 @@ PODS:
     - React-Core
   - react-native-maps (0.28.0):
     - React-Core
-  - react-native-mmkv-storage (0.6.3):
+  - react-native-mmkv-storage (0.6.4):
     - MMKV (= 1.2.10)
     - React-Core
   - react-native-safe-area-context (3.3.2):
@@ -363,21 +363,21 @@ PODS:
     - React-cxxreact (= 0.64.2)
     - React-jsi (= 0.64.2)
     - React-perflogger (= 0.64.2)
-  - RNCAsyncStorage (1.15.7):
+  - RNCAsyncStorage (1.15.8):
     - React-Core
   - RNCMaskedView (0.1.11):
     - React
-  - RNCPicker (1.16.7):
+  - RNCPicker (1.16.8):
     - React-Core
-  - RNCPushNotificationIOS (1.10.0):
+  - RNCPushNotificationIOS (1.10.1):
     - React-Core
-  - RNDeviceInfo (8.3.1):
+  - RNDeviceInfo (8.3.3):
     - React-Core
   - RNGestureHandler (1.10.3):
     - React-Core
   - RNPermissions (3.0.5):
     - React-Core
-  - RNReanimated (2.2.0):
+  - RNReanimated (2.2.2):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -406,7 +406,7 @@ PODS:
     - React-RCTVibration
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.6.0):
+  - RNScreens (3.7.2):
     - React-Core
     - React-RCTImage
   - RNSVG (12.1.1):
@@ -652,7 +652,7 @@ SPEC CHECKSUMS:
   react-native-geolocation-service: 94c7d2ffdbbf4dd431241e0c8e37d491ebd41430
   react-native-google-maps: 46dea4aa4acb7300beff508f64d9f8c84e9fb106
   react-native-maps: 2d405b4e8cee0282e4c02bac434d81450dfea877
-  react-native-mmkv-storage: c9d4880c55b6c6728eeed49a4042043997cccf36
+  react-native-mmkv-storage: ef0108761e775232be39fda2f41fef040406d858
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
   React-RCTActionSheet: af7796ba49ffe4ca92e7277a5d992d37203f7da5
@@ -666,15 +666,15 @@ SPEC CHECKSUMS:
   React-RCTVibration: 24600e3b1aaa77126989bc58b6747509a1ba14f3
   React-runtimeexecutor: a9904c6d0218fb9f8b19d6dd88607225927668f9
   ReactCommon: 149906e01aa51142707a10665185db879898e966
-  RNCAsyncStorage: 7102fe8985f889579a3ae148d957bbb3f308122b
+  RNCAsyncStorage: e8b8d6320a0dd90eb610fb0d0b1ef90596697c69
   RNCMaskedView: 0e1bc4bfa8365eba5fbbb71e07fbdc0555249489
-  RNCPicker: 9865e85857650bbc553c660acc580ff86abd056a
-  RNCPushNotificationIOS: 5ee247e594d0b5df3cd7be74b51035a0d91807eb
-  RNDeviceInfo: 7b82d1467b87f7e74d1c7ba9439a9a57d0c68ee9
+  RNCPicker: 0991c56da7815c0cf946d6f63cf920b25296e5f6
+  RNCPushNotificationIOS: 87b8d16d3ede4532745e05b03c42cff33a36cc45
+  RNDeviceInfo: cc7de0772378f85d8f36ae439df20f05c590a651
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNPermissions: 7043bacbf928eae25808275cfe73799b8f618911
-  RNReanimated: 9c13c86454bfd54dab7505c1a054470bfecd2563
-  RNScreens: eb0dfb2d6b21d2d7f980ad46b14eb306d2f1062e
+  RNReanimated: 241c586663f44f19a53883c63375fdd041253960
+  RNScreens: 0591543e343c7444ea1756b6265d81a4295922c9
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   Stripe: 90596971ef49bade169f68bc59369a796b30a045
   stripe-react-native: f1b034cb702aa214078d9441b0a4313ac00c020d

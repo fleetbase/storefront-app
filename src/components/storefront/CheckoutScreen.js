@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Alert, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faExclamationTriangle, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency, isLastIndex } from '../../utils';
 import { useResourceStorage } from '../../utils/storage';
 import useStorefrontSdk, { adapter as StorefrontAdapter } from '../../utils/use-storefront-sdk';
@@ -25,7 +25,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
     const insets = useSafeAreaInsets();
     const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
-    const { info, serializedCart, isPickupOrder, quote } = route.params;
+    const { info, serializedCart, isPickupOrder, isTipping, isTippingDriver, tip, deliveryTip, quote } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
     const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart || {}));
@@ -33,20 +33,36 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     const [paymentSheetError, setPaymentSheetError] = useState(false);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
+    const [isSelectingPaymentMethod, setIsSelectingPaymentMethod] = useState(false);
+    const [shouldShowModalBg, setShouldShowModalBg] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote || {}));
     const [serviceQuoteError, setServiceQuoteError] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState({ image: '', label: '' });
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [customer, setCustomer] = useCustomer();
+
     const codEnabled = info?.options?.cod_enabled === true;
     const pickupEnabled = info?.options?.pickup_enabled === true;
+    const tipsEnabled = info?.options?.tips_enabled === true;
+    const deliveryTipsEnabled = info?.options?.delivery_tips_enabled === true;
+    const taxEnabled = info?.options?.tax_enabled === true;
+    const taxPercentage = info?.options?.tax_percentage ?? 0;
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+
     const canPlaceOrder = (() => {
         if (isPickupOrder) {
             return !isLoading && typeof customer?.serialize === 'function' && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
         }
 
-        return !isLoading && typeof customer?.serialize === 'function' && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && paymentSheetEnabled && paymentMethod?.label;
+        return (
+            !isLoading &&
+            typeof customer?.serialize === 'function' &&
+            !isInvalidDeliveryPlace &&
+            cart instanceof Cart &&
+            cart.contents().length > 0 &&
+            paymentSheetEnabled &&
+            paymentMethod?.label
+        );
     })();
     const deliveryFee = (() => {
         let deliveryFee = <ActivityIndicator />;
@@ -192,8 +208,8 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
         */
-        if (!customerLocation.id) {
-            customerLocation = customerLocation.coordinates;
+        if (!customerLocation?.id) {
+            customerLocation = customerLocation?.coordinates;
         }
 
         if (!cart || !cart instanceof Cart || !storeLocation || !storeLocation instanceof StoreLocation || !customerLocation) {
@@ -226,6 +242,19 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
 
+    const hidePaymentMethodSelection = () => {
+        setShouldShowModalBg(false);
+        setIsSelectingPaymentMethod(false);
+    };
+
+    const showPaymentMethodSelection = () => {
+        setIsSelectingPaymentMethod(true);
+
+        setTimeout(() => {
+            setShouldShowModalBg(true);
+        }, 600);
+    };
+
     useEffect(() => {
         initializePaymentSheet();
 
@@ -256,6 +285,24 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
 
     return (
         <View style={[tailwind('w-full h-full bg-white relative'), { paddingTop: insets.top }]}>
+            <Modal animationType={'slide'} transparent={true} visible={isSelectingPaymentMethod} onRequestClose={hidePaymentMethodSelection}>
+                <View style={tailwind(`${shouldShowModalBg ? 'bg-gray-900 bg-opacity-30' : ''} w-full h-full`)}>
+                    <View style={[tailwind('w-full h-full flex items-center justify-center'), { marginTop: 500 }]}>
+                        <View style={tailwind('bg-white rounded-t-3xl shadow-sm rounded-md w-full h-full')}>
+                            <View style={tailwind('p-4 flex bg-gray-50 rounded-t-3xl')}>
+                                <TouchableOpacity style={tailwind('mb-2')} onPress={hidePaymentMethodSelection}>
+                                    <View style={tailwind('rounded-full bg-red-50 w-10 h-10 flex items-center justify-center')}>
+                                        <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
+                                    </View>
+                                </TouchableOpacity>
+                                <Text style={tailwind('text-lg font-bold')}>Select your payment method</Text>
+                            </View>
+                            <View style={tailwind('h-full')}></View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
             <View style={tailwind('flex flex-row items-center justify-between p-4')}>
                 <View style={tailwind('flex flex-row items-center')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -314,6 +361,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                             </View>
                         </TouchableOpacity>
                     )}
+
+                    <TouchableOpacity onPress={showPaymentMethodSelection}>
+                        <Text>Select a payment method</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={choosePaymentOption}>
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>

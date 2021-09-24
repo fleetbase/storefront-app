@@ -13,8 +13,13 @@ import { Cart, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront
 import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import tailwind from '../../tailwind';
 import Header from './Header';
+import TipInput from '../shared/TipInput';
 
 const { emit, addEventListener, removeEventListener } = EventRegister;
+
+const calculatePercentage = (percentage, number) => {
+    return (percentage / 100) * number;
+};
 
 const StorefrontCartScreen = ({ navigation, route }) => {
     const storefront = useStorefrontSdk();
@@ -27,12 +32,20 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const [isEmptying, setIsEmptying] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
     const [isPickupOrder, setIsPickupOrder] = useState(false);
+    const [isTipping, setIsTipping] = useState(false);
+    const [isTippingDriver, setIsTippingDriver] = useState(false);
+    const [tip, setTip] = useState(100);
+    const [deliveryTip, setDeliveryTip] = useState(100);
     const [serviceQuote, setServiceQuote] = useState(null);
     const [serviceQuoteError, setServiceQuoteError] = useState(false);
 
     const codEnabled = info?.options?.cod_enabled === true;
     const pickupEnabled = info?.options?.pickup_enabled === true;
-    const hasOptions = pickupEnabled;
+    const tipsEnabled = info?.options?.tips_enabled === true;
+    const deliveryTipsEnabled = info?.options?.delivery_tips_enabled === true;
+    const taxEnabled = info?.options?.tax_enabled === true;
+    const hasOptions = pickupEnabled || tipsEnabled || deliveryTipsEnabled;
+    const taxPercentage = info?.options?.tax_percentage ?? 0;
     const isCartLoaded = cart && cart instanceof Cart && cart.isLoaded;
     const isCheckoutDisabled = (() => {
         if (isPickupOrder) {
@@ -47,14 +60,40 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         if (!isFetchingServiceQuote && serviceQuote?.formattedAmount) {
             deliveryFee = serviceQuote.formattedAmount;
         } else if (!isFetchingServiceQuote) {
-            deliveryFee = <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>N/A</Text>;
+            deliveryFee = (
+                <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>
+                    N/A
+                </Text>
+            );
         }
 
         if (serviceQuoteError) {
-            deliveryFee = <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>{serviceQuoteError}</Text>;
+            deliveryFee = (
+                <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>
+                    {serviceQuoteError}
+                </Text>
+            );
         }
 
         return deliveryFee;
+    })();
+    const formattedTip = (() => {
+        if (typeof tip === 'string' && tip.endsWith('%')) {
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), cart.subtotal()) / 100, cart.getAttribute('currency'));
+
+            return `${tip} (${tipAmount})`;
+        }
+
+        return formatCurrency(tip / 100, cart.getAttribute('currency'));
+    })();
+    const formattedDeliveryTip = (() => {
+        if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), cart.subtotal()) / 100, cart.getAttribute('currency'));
+
+            return `${deliveryTip} (${tipAmount})`;
+        }
+
+        return formatCurrency(deliveryTip / 100, cart.getAttribute('currency'));
     })();
 
     const getDeliveryQuote = () => {
@@ -73,8 +112,8 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
         */
-        if (!customerLocation.id) {
-            customerLocation = customerLocation.coordinates;
+        if (!customerLocation?.id) {
+            customerLocation = customerLocation?.coordinates;
         }
 
         if (!cart || !cart instanceof Cart || !storeLocation || !storeLocation instanceof StoreLocation || !customerLocation) {
@@ -199,10 +238,26 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     };
 
     const calculateTotal = () => {
-        const subtotal = cart.subtotal();
+        let subtotal = cart.subtotal();
 
         if (cart.isEmpty) {
             return 0;
+        }
+
+        if (isTipping) {
+            if (typeof tip === 'string' && tip.endsWith('%')) {
+                subtotal += calculatePercentage(parseInt(tip), cart.subtotal());
+            } else {
+                subtotal += tip;
+            }
+        }
+
+        if (isTippingDriver && !isPickupOrder) {
+            if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
+                subtotal += calculatePercentage(parseInt(deliveryTip), cart.subtotal());
+            } else {
+                subtotal += deliveryTip;
+            }
         }
 
         if (isPickupOrder) {
@@ -254,7 +309,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                             </View>
                             <TouchableOpacity
                                 disabled={isCheckoutDisabled}
-                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder })}
+                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder, isTipping, isTippingDriver, tip, deliveryTip })}
                             >
                                 <View
                                     style={tailwind(
@@ -417,26 +472,105 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                         cart.isNotEmpty && (
                             <View style={tailwind('bg-gray-100 pt-2')}>
                                 {hasOptions && (
-                                    <View>
+                                    <View style={tailwind('mb-2')}>
                                         <View style={tailwind('flex px-4 py-2')}>
                                             <View>
                                                 <Text style={tailwind('font-semibold text-gray-400')}>Options</Text>
                                             </View>
                                         </View>
                                         {pickupEnabled && (
-                                            <View style={tailwind('my-2 bg-white w-full')}>
+                                            <View style={tailwind('bg-white w-full')}>
                                                 <View style={tailwind('flex flex-row items-center border-b border-gray-100 h-14 px-4')}>
-                                                    <View style={tailwind('w-16')}>
+                                                    <View style={tailwind('w-14')}>
                                                         <Switch
                                                             trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
                                                             thumbColor={'#f4f3f4'}
                                                             ios_backgroundColor="#3e3e3e"
-                                                            onValueChange={() => setIsPickupOrder(!isPickupOrder)}
+                                                            onValueChange={() => {
+                                                                const is = !isPickupOrder;
+
+                                                                setIsPickupOrder(is);
+
+                                                                if (is) {
+                                                                    setIsTippingDriver(false);
+                                                                    setDeliveryTip(100);
+                                                                }
+                                                            }}
                                                             value={isPickupOrder}
+                                                            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                                                         />
                                                     </View>
                                                     <View>
-                                                        <Text style={tailwind('font-semibold')}>Pickup Order</Text>
+                                                        <Text style={tailwind('font-semibold')}>Pickup order</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        )}
+                                        {tipsEnabled && (
+                                            <View style={tailwind('bg-white w-full')}>
+                                                <View style={tailwind('flex flex-row items-center border-b border-gray-100 h-14 px-4')}>
+                                                    <View style={tailwind('w-14')}>
+                                                        <Switch
+                                                            trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
+                                                            thumbColor={'#f4f3f4'}
+                                                            ios_backgroundColor="#3e3e3e"
+                                                            onValueChange={() => {
+                                                                const is = !isTipping;
+
+                                                                setIsTipping(is);
+
+                                                                if (is) {
+                                                                    setTip(100);
+                                                                }
+                                                            }}
+                                                            value={isTipping}
+                                                            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+                                                        />
+                                                    </View>
+                                                    <View style={tailwind('flex-1 flex flex-row items-center justify-between')}>
+                                                        <View>
+                                                            <Text style={tailwind('font-semibold')}>Leave a tip</Text>
+                                                        </View>
+                                                        {isTipping && (
+                                                            <View style={tailwind('ml-2')}>
+                                                                <TipInput value={tip} onChange={(tip, isPercent) => setTip(isPercent ? `${tip}%` : tip)} />
+                                                            </View>
+                                                        )}
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        )}
+                                        {deliveryTipsEnabled && !isPickupOrder && (
+                                            <View style={tailwind('bg-white w-full')}>
+                                                <View style={tailwind('flex flex-row items-center border-b border-gray-100 h-14 px-4')}>
+                                                    <View style={tailwind('w-14')}>
+                                                        <Switch
+                                                            trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
+                                                            thumbColor={'#f4f3f4'}
+                                                            ios_backgroundColor="#3e3e3e"
+                                                            onValueChange={() => {
+                                                                const is = !isTippingDriver;
+
+                                                                setIsTippingDriver(is);
+
+                                                                if (is) {
+                                                                    setDeliveryTip(100);
+                                                                }
+                                                            }}
+                                                            value={isTippingDriver}
+                                                            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+                                                        />
+                                                    </View>
+                                                    <View style={tailwind('flex-1 flex flex-row items-center justify-between')}>
+                                                        <View>
+                                                            <Text style={tailwind('font-semibold')}>Tip delivery</Text>
+                                                        </View>
+                                                        {isTippingDriver && (
+                                                            <View style={tailwind('ml-2')}>
+                                                                {console.log('deliveryTip', deliveryTip)}
+                                                                <TipInput value={deliveryTip} onChange={(tip, isPercent) => setDeliveryTip(isPercent ? `${tip}%` : tip)} />
+                                                            </View>
+                                                        )}
                                                     </View>
                                                 </View>
                                             </View>
@@ -464,6 +598,26 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                             </View>
                                             <View>
                                                 <Text style={tailwind('font-bold')}>{deliveryFee}</Text>
+                                            </View>
+                                        </View>
+                                    )}
+                                    {isTipping && (
+                                        <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
+                                            <View>
+                                                <Text>Tip</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={tailwind('font-bold')}>{formattedTip}</Text>
+                                            </View>
+                                        </View>
+                                    )}
+                                    {isTippingDriver && !isPickupOrder && (
+                                        <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
+                                            <View>
+                                                <Text>Delivery Tip</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={tailwind('font-bold')}>{formattedDeliveryTip}</Text>
                                             </View>
                                         </View>
                                     )}
