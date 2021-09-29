@@ -362,9 +362,9 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                     )}
 
-                    <TouchableOpacity onPress={showPaymentMethodSelection}>
+                    {/* <TouchableOpacity onPress={showPaymentMethodSelection}>
                         <Text>Select a payment method</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={choosePaymentOption}>
                         <View style={tailwind('flex flex-row justify-between')}>

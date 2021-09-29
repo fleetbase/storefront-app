@@ -9,6 +9,12 @@ import Config from 'react-native-config';
 
 const { STRIPE_KEY, APP_IDENTIFIER } = Config;
 
+const sayHello = () => {
+    return new Promise((resolve) => {
+        resolve('Hello World!');
+    });
+};
+
 const BootScreen = ({ navigation }) => {
     // make sure keys are set
     if (!hasRequiredKeys()) {
@@ -24,7 +30,6 @@ const BootScreen = ({ navigation }) => {
     storefront
         .about()
         .then((info) => {
-            // console.log(' [ BootScreen -> storefront.about() -> response ] ', response);
             // if is single store only go to storefront screens
             if (info.is_store) {
                 set('info', info);
