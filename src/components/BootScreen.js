@@ -8,36 +8,44 @@ import SetupWarningScreen from './SetupWarningScreen';
 import Config from 'react-native-config';
 
 const { STRIPE_KEY, APP_IDENTIFIER } = Config;
-let storefront;
+
+const sayHello = () => {
+    return new Promise((resolve) => {
+        resolve('Hello World!');
+    });
+};
 
 const BootScreen = ({ navigation }) => {
     // make sure keys are set
     if (!hasRequiredKeys()) {
-        return (<SetupWarningScreen />);
+        return <SetupWarningScreen />;
     }
 
-    try {
-        storefront = useStorefrontSdk();
-    } catch (error) {
-        return (<SetupWarningScreen error={error} />);
+    const storefront = useStorefrontSdk();
+
+    if (storefront instanceof Error) {
+        return <SetupWarningScreen error={storefront} />;
     }
 
-    storefront.about().then((info) => {
-        // if is single store only go to storefront screens
-        if (info.is_store) {
-            set('info', info);
-            return navigation.navigate('StorefrontScreen', { info });
-        }
+    storefront
+        .about()
+        .then((info) => {
+            // if is single store only go to storefront screens
+            if (info.is_store) {
+                set('info', info);
+                return navigation.navigate('StorefrontScreen', { info });
+            }
 
-        // @todo handle networks (mutli shop apps/ marketplaces)
-    }).catch((error) => {
-        console.log('[Error fetching storefront info!]', error);
-    });
+            // @todo handle networks (mutli shop apps/ marketplaces)
+        })
+        .catch((error) => {
+            console.log('[Error fetching storefront info!]', error);
+        });
 
     useEffect(() => {
         initStripe({
             publishableKey: STRIPE_KEY,
-            merchantIdentifier: APP_IDENTIFIER
+            merchantIdentifier: APP_IDENTIFIER,
         });
     }, []);
 

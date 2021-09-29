@@ -7,10 +7,12 @@ let storefront, adapter;
 try {
     storefront = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
 } catch (error) {
-    throw error;
+    storefront = error;
 }
 
-adapter = storefront.getAdapter();
+if (storefront instanceof Storefront) {
+    adapter = storefront.getAdapter();
+}
 
 const useStorefrontSdk = () => {
     return storefront;

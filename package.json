@@ -6,12 +6,12 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
     "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@fleetbase/sdk": "1.1.6",
-    "@fleetbase/storefront": "1.0.5",
+    "@fleetbase/storefront": "^1.0.7",
     "@freakycoder/react-native-bounceable": "^0.2.5",
     "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/masked-view": "^0.1.11",

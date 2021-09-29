@@ -6,7 +6,7 @@ import { hasRequiredKeys } from '../utils';
 import Config from 'react-native-config';
 import tailwind from '../tailwind';
 
-const SetupWarningScreen = ({ navigation }) => {
+const SetupWarningScreen = (props) => {
     const keyMissing = (key) => {
         return !Config[key];
     };
@@ -37,6 +37,11 @@ const SetupWarningScreen = ({ navigation }) => {
                                 <Text style={tailwind('text-red-900')}>
                                     <Text style={tailwind('font-semibold')}>Storefront Key</Text> is missing from environment!
                                 </Text>
+                            </View>
+                        )}
+                        {props.error && (
+                            <View style={tailwind('rounded-md px-3 py-2 bg-red-50 flex flex-row items-center')}>
+                                <Text style={tailwind('text-red-900')}>{props.error.message}</Text>
                             </View>
                         )}
                     </View>

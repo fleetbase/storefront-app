@@ -8,7 +8,7 @@ try {
     fleetbase = new Fleetbase(FLEETBASE_KEY, { host: FLEETBASE_HOST });
     adapter = fleetbase.getAdapter();
 } catch (error) {
-    throw error;
+    fleetbase = error;
 }
 
 const useFleetbaseSdk = () => {
