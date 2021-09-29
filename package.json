@@ -6,7 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "reset:pods": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
+    "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
     "test": "jest",
     "lint": "eslint ."
   },
