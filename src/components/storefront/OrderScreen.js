@@ -3,10 +3,10 @@ import { ScrollView, View, Text, TouchableOpacity, TextInput, ActivityIndicator,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faCheck, faStoreAlt, faMapMarkerAlt, faCogs, faHandHoldingHeart, faSatelliteDish, faShippingFast, faCar } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faCheck, faStoreAlt, faMapMarkerAlt, faCogs, faHandHoldingHeart, faSatelliteDish, faShippingFast, faCar, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { getCustomer, updateCustomer } from '../../utils/customer';
 import { adapter as FleetbaseAdapter } from '../../utils/use-fleetbase-sdk';
-import { formatCurrency } from '../../utils';
+import { formatCurrency, calculatePercentage } from '../../utils';
 import { Order } from '@fleetbase/sdk';
 import { format, formatDistance, add } from 'date-fns';
 import MapView, { Marker } from 'react-native-maps';
@@ -35,8 +35,31 @@ const StorefrontOrderScreen = ({ navigation, route }) => {
     const { icon, color } = orderStatusMap[order.getAttribute('status')];
     const isEnroute = order.getAttribute('status') === 'driver_enroute';
     const isPickupOrder = order.getAttribute('meta.is_pickup');
-    // const pickup = order.getAttribute('payload.pickup');
-    // const dropoff = order.getAttribute('payload.dropoff');
+    const currency = order.getAttribute('meta.currency');
+    const subtotal = order.getAttribute('meta.subtotal');
+    const total = order.getAttribute('meta.total');
+    const tip = order.getAttribute('meta.tip');
+    const deliveryTip = order.getAttribute('meta.delivery_tip');
+    const isCod = order.getAttribute('payload.cod_amount') > 0;
+
+    const formattedTip = (() => {
+        if (typeof tip === 'string' && tip.endsWith('%')) {
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal) / 100, currency);
+
+            return `${tip} (${tipAmount})`;
+        }
+
+        return formatCurrency(tip / 100, currency);
+    })();
+    const formattedDeliveryTip = (() => {
+        if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), subtotal) / 100, currency);
+
+            return `${deliveryTip} (${tipAmount})`;
+        }
+
+        return formatCurrency(deliveryTip / 100, currency);
+    })();
 
     // deliver states -> created -> preparing -> dispatched -> driver_enroute -> completed
     // pickup states -> created -> preparing -> ready -> completed
@@ -236,17 +259,23 @@ const StorefrontOrderScreen = ({ navigation, route }) => {
                                     <View style={tailwind('w-full bg-white p-4')}>
                                         <Text style={tailwind('font-semibold mb-2')}>QR Code</Text>
                                         <View style={tailwind('flex items-center justify-center py-2')}>
-                                            <Image style={tailwind('w-32 h-32')} source={{uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}`}}/>
+                                            <Image style={tailwind('w-32 h-32')} source={{ uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}` }} />
                                         </View>
                                     </View>
                                 </View>
                             </View>
                             <View style={tailwind('my-2 bg-white')}>
                                 <View style={tailwind('flex flex-col items-center')}>
-                                    <View style={tailwind('w-full p-4 border-b border-gray-200')}>
+                                    <View style={tailwind('flex flex-row items-center justify-between w-full p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <Text style={tailwind('font-semibold')}>Order Summary</Text>
                                         </View>
+                                        {isCod && (
+                                            <View style={tailwind('flex flex-row items-center')}>
+                                                <FontAwesomeIcon icon={faMoneyBillWave} style={tailwind('text-green-500 mr-1')} />
+                                                <Text style={tailwind('text-green-500 font-semibold')}>Cash</Text>
+                                            </View>
+                                        )}
                                     </View>
                                     <View style={tailwind('w-full bg-white p-4')}>
                                         {order.getAttribute('payload.entities', []).map((entity, index) => (
@@ -292,9 +321,21 @@ const StorefrontOrderScreen = ({ navigation, route }) => {
                                             <Text>{formatCurrency(order.getAttribute('meta.subtotal') / 100, order.getAttribute('meta.currency'))}</Text>
                                         </View>
                                         {!isPickupOrder && (
-                                            <View style={tailwind('flex flex-row items-center justify-between')}>
+                                            <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
                                                 <Text>Delivery fee</Text>
                                                 <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
+                                            </View>
+                                        )}
+                                        {tip && (
+                                            <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
+                                                <Text>Tip</Text>
+                                                <Text>{formattedTip}</Text>
+                                            </View>
+                                        )}
+                                        {deliveryTip && !isPickupOrder && (
+                                            <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
+                                                <Text>Delivery Tip</Text>
+                                                <Text>{formattedDeliveryTip}</Text>
                                             </View>
                                         )}
                                     </View>

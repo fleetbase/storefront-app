@@ -71,7 +71,11 @@ const TipInput = (props) => {
     };
 
     useEffect(() => {
-        // do nothing for noe
+        // if default value is percentage, switch to isPercent true
+        if (typeof value === 'string' && value.endsWith('%')) {
+            setValue(parseInt(value));
+            setIsPercent(true);
+        }
     }, []);
 
     return (

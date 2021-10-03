@@ -309,7 +309,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                             </View>
                             <TouchableOpacity
                                 disabled={isCheckoutDisabled}
-                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder, isTipping, isTippingDriver, tip, deliveryTip })}
+                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder, isTipping, isTippingDriver, tipAmount: isTipping ? tip : 0, deliveryTipAmount: isTippingDriver ? deliveryTip : 0 })}
                             >
                                 <View
                                     style={tailwind(
@@ -514,15 +514,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                             trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
                                                             thumbColor={'#f4f3f4'}
                                                             ios_backgroundColor="#3e3e3e"
-                                                            onValueChange={() => {
-                                                                const is = !isTipping;
-
-                                                                setIsTipping(is);
-
-                                                                if (is) {
-                                                                    setTip(100);
-                                                                }
-                                                            }}
+                                                            onValueChange={() => setIsTipping(!isTipping)}
                                                             value={isTipping}
                                                             style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                                                         />
@@ -548,15 +540,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                             trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
                                                             thumbColor={'#f4f3f4'}
                                                             ios_backgroundColor="#3e3e3e"
-                                                            onValueChange={() => {
-                                                                const is = !isTippingDriver;
-
-                                                                setIsTippingDriver(is);
-
-                                                                if (is) {
-                                                                    setDeliveryTip(100);
-                                                                }
-                                                            }}
+                                                            onValueChange={() => setIsTippingDriver(!isTippingDriver)}
                                                             value={isTippingDriver}
                                                             style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                                                         />
@@ -567,7 +551,6 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                                                         </View>
                                                         {isTippingDriver && (
                                                             <View style={tailwind('ml-2')}>
-                                                                {console.log('deliveryTip', deliveryTip)}
                                                                 <TipInput value={deliveryTip} onChange={(tip, isPercent) => setDeliveryTip(isPercent ? `${tip}%` : tip)} />
                                                             </View>
                                                         )}
