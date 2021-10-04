@@ -30,7 +30,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     const [products, setProducts] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isEmptying, setIsEmptying] = useState(false);
-    const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(true);
+    const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
     const [isPickupOrder, setIsPickupOrder] = useState(false);
     const [isTipping, setIsTipping] = useState(false);
     const [isTippingDriver, setIsTippingDriver] = useState(false);
@@ -62,14 +62,14 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         } else if (!isFetchingServiceQuote) {
             deliveryFee = (
                 <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>
-                    N/A
+                    Error
                 </Text>
             );
         }
 
         if (serviceQuoteError) {
             deliveryFee = (
-                <Text numberOfLines={1} style={tailwind('text-red-500 w-3/4')}>
+                <Text numberOfLines={1} style={tailwind('text-red-500 w-1/2')}>
                     {serviceQuoteError}
                 </Text>
             );
@@ -97,6 +97,10 @@ const StorefrontCartScreen = ({ navigation, route }) => {
     })();
 
     const getDeliveryQuote = () => {
+        return getServiceQuoteFor(deliverTo);
+    };
+
+    const getServiceQuoteFor = (customerLocation) => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
@@ -105,9 +109,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             DeliveryServiceQuote.getFromCart(StorefrontAdapter, storeLocation, deliverTo, cart).then((serviceQuote) => {
                 ...
             });
-         */
-
-        let customerLocation = deliverTo;
+        */
 
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
@@ -267,6 +269,15 @@ const StorefrontCartScreen = ({ navigation, route }) => {
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
 
+    const calculateCartItemRowHeight = (cartItem) => {
+        let height = 112;
+
+        height += cartItem.variants.length * 12;
+        height += cartItem.addons.length * 12;
+
+        return height;
+    };
+
     useEffect(() => {
         getCart();
 
@@ -287,11 +298,16 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             // update state in cart
             setDeliverTo(place);
             // update delivery quote
-            getDeliveryQuote();
+            getServiceQuoteFor(place);
+        });
+
+        const customerSignedOut = addEventListener('customer.signedout', () => {
+            refreshCart();
         });
 
         return () => {
             removeEventListener(cartChanged);
+            removeEventListener(customerSignedOut);
             removeEventListener(locationChanged);
         };
     }, []);
@@ -309,7 +325,17 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                             </View>
                             <TouchableOpacity
                                 disabled={isCheckoutDisabled}
-                                onPress={() => navigation.navigate('CheckoutScreen', { serializedCart: cart.serialize(), quote: serviceQuote.serialize(), isPickupOrder, isTipping, isTippingDriver, tipAmount: isTipping ? tip : 0, deliveryTipAmount: isTippingDriver ? deliveryTip : 0 })}
+                                onPress={() =>
+                                    navigation.navigate('CheckoutScreen', {
+                                        serializedCart: cart.serialize(),
+                                        quote: serviceQuote.serialize(),
+                                        isPickupOrder,
+                                        isTipping,
+                                        isTippingDriver,
+                                        tipAmount: isTipping ? tip : 0,
+                                        deliveryTipAmount: isTippingDriver ? deliveryTip : 0,
+                                    })
+                                }
                             >
                                 <View
                                     style={tailwind(
@@ -331,7 +357,7 @@ const StorefrontCartScreen = ({ navigation, route }) => {
                         <ActivityIndicator />
                         <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
                             <View style={tailwind('flex items-center justify-center text-center rounded-md px-3 py-2 bg-white border border-blue-500 shadow-sm')}>
-                                <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>Not loading? Reload!</Text>
+                                <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>Reload!</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -339,13 +365,16 @@ const StorefrontCartScreen = ({ navigation, route }) => {
             )}
             {isCartLoaded && (
                 <SwipeListView
-                    data={cart.contents()}
+                    data={cart.contents() ?? []}
                     keyExtractor={(item) => item.id}
                     style={tailwind(`h-full ${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
                     renderItem={({ item, index }) => (
-                        <View key={index} style={tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white min-h-28 max-h-36`)}>
+                        <View
+                            key={index}
+                            style={[tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`), { height: calculateCartItemRowHeight(item) }]}
+                        >
                             <View style={tailwind('flex flex-1 flex-row justify-between')}>
                                 <View style={tailwind('flex flex-row items-start')}>
                                     <View>

@@ -1,4 +1,5 @@
 import isLastIndex from './is-last-index';
+import isVoid from './is-void';
 import formatCurrency from './format-currency';
 import calculatePercentage from './calculate-percentage';
 import GoogleAddress from './google-address';
@@ -11,4 +12,4 @@ import hasRequiredKeys from './has-required-keys';
 import stripHtml from './strip-html';
 import signOut from './sign-out';
 
-export { isLastIndex, formatCurrency, calculatePercentage, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCountries, getCurrentLocation, haversine, hasRequiredKeys, stripHtml, signOut };
+export { isLastIndex, isVoid, formatCurrency, calculatePercentage, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCountries, getCurrentLocation, haversine, hasRequiredKeys, stripHtml, signOut };

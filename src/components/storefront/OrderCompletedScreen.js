@@ -173,7 +173,7 @@ const StorefrontOrderCompletedScreen = ({ navigation, route }) => {
                                     </View>
                                     <View style={tailwind('w-full bg-white p-4')}>
                                         {order.getAttribute('payload.entities', []).map((entity, index) => (
-                                            <View key={index} style={tailwind('flex flex-row')}>
+                                            <View key={index} style={tailwind('flex flex-row mb-2')}>
                                                 <View style={tailwind('mr-3')}>
                                                     <View style={tailwind('rounded-md border border-gray-300 flex items-center justify-center w-7 h-7 mr-3')}>
                                                         <Text style={tailwind('font-semibold text-blue-500 text-sm')}>{entity.meta.quantity}x</Text>

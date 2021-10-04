@@ -91,7 +91,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         }
 
         if (serviceQuoteError) {
-            deliveryFee = <Text style={tailwind('text-red-500')}>{serviceQuoteError}</Text>;
+            deliveryFee = (
+                <Text style={tailwind('text-red-500')} numberOfLines={1}>
+                    {serviceQuoteError}
+                </Text>
+            );
         }
 
         return deliveryFee;
@@ -147,9 +151,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         return { ...orderOptions, ...setOptions };
     };
 
-    const setupStripeGateway = async (gateway) => {
+    const setupStripeGateway = async (gateway, c = null) => {
+        const currentCustomer = c ?? customer;
+
         // if no customer we can't setup the stripe gateway return null
-        if (!customer || !isPaymentGatewayResource(gateway)) {
+        if (!currentCustomer || !isPaymentGatewayResource(gateway)) {
             return null;
         }
 
@@ -157,7 +163,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         const fetchPaymentIntent = async () => {
             const options = getOrderOptions();
 
-            const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, gateway, options).catch((error) => {
+            const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
                 console.log('[Error initializing checkout token!]', error);
             });
 
@@ -221,14 +227,16 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         }
     };
 
-    const setupCashGateway = async (gateway) => {
-        if (!customer || !isPaymentGatewayResource(gateway)) {
+    const setupCashGateway = async (gateway, c = null) => {
+        const currentCustomer = c ?? customer;
+
+        if (!currentCustomer || !isPaymentGatewayResource(gateway)) {
             return null;
         }
 
         const options = getOrderOptions({ cash: true });
 
-        const { token } = await storefront.checkout.initialize(customer, cart, serviceQuote, gateway, options).catch((error) => {
+        const { token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
             console.log('[Error initializing checkout token!]', error);
         });
 
@@ -239,7 +247,7 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         gateway.setCheckoutToken(token);
     };
 
-    const setupGateways = async (gateways) => {
+    const setupGateways = async (gateways, c = null) => {
         setGatewayOptions(gateways);
 
         const _gateways = new Collection();
@@ -251,11 +259,11 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
             const gateway = gateways.objectAt(i);
 
             if (gateway.isStripeGateway) {
-                await setupStripeGateway(gateway);
+                await setupStripeGateway(gateway, c);
             }
 
             if (gateway.isCashGateway) {
-                await setupCashGateway(gateway);
+                await setupCashGateway(gateway, c);
             }
 
             console.log('[Gateway has initial token set]', gateway.getCheckoutToken());
@@ -266,12 +274,9 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
         setGatewayOptions(gateways);
     };
 
-    const fetchGateways = () => {
-        console.log('[Fetching payment gateways...]');
-
-        store
+    const fetchGateways = (c = null) => {        store
             .getPaymentGateways()
-            .then(setupGateways)
+            .then((gateways) => setupGateways(gateways, c))
             .catch((error) => {
                 console.log('[Error fetching payment gateways!]', error);
             });
@@ -366,6 +371,10 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     };
 
     const getDeliveryQuote = () => {
+        return getServiceQuoteFor(deliverTo);
+    };
+
+    const getServiceQuoteFor = (customerLocation) => {
         const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
@@ -375,8 +384,6 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                 ...
             });
          */
-
-        let customerLocation = deliverTo;
 
         /**
             ! If customer location is not saved in fleetbase just send the location coordinates !
@@ -434,22 +441,21 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
     useEffect(() => {
         fetchGateways();
 
-        // Listen for customer created event
+        // Listen for customer updated event
         const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
             setCustomer(customer);
-            fetchGateways();
+            fetchGateways(customer);
         });
 
         // Listen for changes to cart
         const cartChanged = addEventListener('cart.changed', (cart) => {
             setCart(cart);
-            getDeliveryQuote();
         });
 
         // Listen for changes to customer delivery location
         const locationChanged = addEventListener('deliver_to.changed', (place) => {
             // update delivery quote
-            getDeliveryQuote();
+            getServiceQuoteFor(place);
         });
 
         return () => {
@@ -522,22 +528,27 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                         </View>
                     )}
                     {!isPickupOrder && (
-                        <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
+                        <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} disabled={!customer} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
                             <View style={tailwind('flex flex-row justify-between')}>
                                 <View>
-                                    <View style={tailwind('flex flex-row justify-between mb-3')}>
+                                    <View style={tailwind('flex flex-row items-center mb-3')}>
                                         <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
-                                        {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-500')} />}
+                                        {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-400 ml-1')} />}
                                     </View>
                                     {deliverTo && (
                                         <View>
-                                            <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>
+                                            {deliverTo.isAttributeFilled('name') && <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>}
                                             <Text>{deliverTo.getAttribute('street1')}</Text>
                                             {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
                                             <Text>
                                                 {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
                                             </Text>
                                             {deliverTo.isAttributeFilled('phone') && <Text>{deliverTo.getAttribute('phone')}</Text>}
+                                        </View>
+                                    )}
+                                    {!deliverTo && (
+                                        <View>
+                                            <Text style={tailwind('font-semibold')}>Select a delivery location</Text>
                                         </View>
                                     )}
                                 </View>
@@ -597,14 +608,6 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                                 </View>
                                             )}
                                         </View>
-                                        {paymentSheetError !== false && (
-                                            <View style={tailwind('mt-2 bg-red-50 px-2 py-1 w-9/12 flex flex-row')}>
-                                                <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-1')} />
-                                                <Text style={tailwind('text-red-500')} numberOfLines={1}>
-                                                    {paymentSheetError}
-                                                </Text>
-                                            </View>
-                                        )}
                                     </View>
                                 )}
                             </View>
@@ -614,6 +617,14 @@ const StorefrontCheckoutScreen = ({ navigation, route }) => {
                                 </View>
                             </View>
                         </View>
+                        {gateway?.isStripeGateway && paymentSheetError !== false && (
+                            <View style={tailwind('mt-2 bg-red-50 px-2 py-1 flex flex-row')}>
+                                <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-1')} />
+                                <Text style={tailwind('text-red-500')} numberOfLines={2}>
+                                    {paymentSheetError}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
 
                     <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}>

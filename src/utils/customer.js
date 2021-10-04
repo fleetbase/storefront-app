@@ -27,8 +27,7 @@ const useCustomer = () => {
 
     const setCustomer = (customer) => {
         if (typeof customer?.serialize === 'function') {
-            setValue(customer.serialize());
-            return;
+            return setValue(customer.serialize());
         }
 
         setValue(customer);
