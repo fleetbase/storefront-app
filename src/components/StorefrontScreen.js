@@ -11,7 +11,6 @@ import useStorefrontSdk, { adapter as StorefrontAdapter } from '../utils/use-sto
 import useFleetbaseSdk from '../utils/use-fleetbase-sdk';
 import { getCustomer } from '../utils/customer';
 import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
-import StorefrontAccountScreen from './storefront/AccountScreen';
 import CartStack from './storefront/CartStack';
 import ShopStack from './storefront/ShopStack';
 import AccountStack from './storefront/AccountStack';

@@ -36,7 +36,11 @@ const BootScreen = ({ navigation }) => {
                 return navigation.navigate('StorefrontScreen', { info });
             }
 
-            // @todo handle networks (mutli shop apps/ marketplaces)
+            // if is network/multi-vendor
+            if (info.is_network) {
+                set('info', info);
+                return navigation.navigate('NetworkScreen', { info });
+            }
         })
         .catch((error) => {
             console.log('[Error fetching storefront info!]', error);

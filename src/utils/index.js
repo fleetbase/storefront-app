@@ -1,15 +1,7 @@
-import isLastIndex from './is-last-index';
-import isVoid from './is-void';
-import formatCurrency from './format-currency';
-import calculatePercentage from './calculate-percentage';
-import GoogleAddress from './google-address';
-import useStorefrontSdk from './use-storefront-sdk';
-import useFleetbaseSdk from './use-fleetbase-sdk';
-import getCountries from './get-countries';
-import getCurrentLocation from './location';
-import haversine from './haversine';
-import hasRequiredKeys from './has-required-keys';
-import stripHtml from './strip-html';
-import signOut from './sign-out';
+import { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, isAndroid, isApple, isVoid, endSession } from './Helper';
+import { calculatePercentage, haversine } from './Calculate';
+import { syncDevice } from './Customer';
+import { formatCurrency } from './Format';
+import { geocode, getCurrentLocation } from './Geo';
 
-export { isLastIndex, isVoid, formatCurrency, calculatePercentage, GoogleAddress, useStorefrontSdk, useFleetbaseSdk, getCountries, getCurrentLocation, haversine, hasRequiredKeys, stripHtml, signOut };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, isAndroid, isApple, isVoid, endSession, calculatePercentage, haversine, syncDevice, formatCurrency, geocode, getCurrentLocation };
