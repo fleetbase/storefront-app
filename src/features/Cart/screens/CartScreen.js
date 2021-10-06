@@ -294,7 +294,7 @@ const CartScreen = ({ navigation, route }) => {
             }
         });
 
-        const locationChanged = addEventListener('deliver_to.changed', (place) => {
+        const locationChanged = addEventListener('location.updated', (place) => {
             // update state in cart
             setDeliverTo(place);
             // update delivery quote

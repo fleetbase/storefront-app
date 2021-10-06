@@ -69,7 +69,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
         // if saved as delivery address remove it
         if (deliverTo && deliverTo.id === place.id) {
             remove('deliver_to');
-            emit('deliver_to.changed', null);
+            emit('location.updated', null);
         }
 
         return place.destroy().then((place) => {
@@ -81,7 +81,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
 
     const makeDefault = () => {
         set('deliver_to', place.serialize());
-        emit('deliver_to.changed', place);
+        emit('location.updated', place);
         emit('places.mutated', place);
         navigation.goBack();
     };

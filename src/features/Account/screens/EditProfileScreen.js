@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { getCustomer, updateCustomer } from 'utils/Customer';
+import { useCustomer } from 'hooks';
 import { getLocation } from 'utils/Geo';
 import { set } from 'utils/Storage';
 import tailwind from 'tailwind';
@@ -12,8 +12,8 @@ import PhoneInput from 'ui/PhoneInput';
 
 const EditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
-    const customer = getCustomer();
     const location = getLocation();
+    const [customer, setCustomer] = useCustomer();
     const [name, setName] = useState(customer.getAttribute('name'));
     const [email, setEmail] = useState(customer.getAttribute('email'));
     const [phone, setPhone] = useState(customer.getAttribute('phone'));
@@ -22,13 +22,19 @@ const EditProfileScreen = ({ navigation }) => {
     const saveProfile = () => {
         setIsLoading(true);
 
-        return customer.setAttributes({
-            name, email, phone
-        }).saveDirty().then(customer => {
-            updateCustomer(customer);
-            setIsLoading(false);
-            navigation.goBack();
-        });
+        return customer
+            .update({
+                name,
+                email,
+                phone,
+            })
+            .then((customer) => {
+                setCustomer(customer);
+                setIsLoading(false);
+                navigation.goBack();
+            }).catch((error) => {
+                console.log('[ Failed to update customer! ]', error);
+            })
     };
 
     return (
@@ -68,11 +74,7 @@ const EditProfileScreen = ({ navigation }) => {
                         </View>
                         <View style={tailwind('mb-4')}>
                             <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your mobile number</Text>
-                            <PhoneInput
-                                value={phone}
-                                onChangeText={setPhone}
-                                defaultCountry={location?.country}
-                            />
+                            <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
                         </View>
                         <TouchableOpacity onPress={saveProfile} disabled={isLoading}>
                             <View style={tailwind('btn bg-green-50 border border-green-50')}>

@@ -4,30 +4,14 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
-import { Customer } from '@fleetbase/storefront';
-import { useStorefront } from 'hooks';
-import { useStorage, get, set, clear } from 'utils/Storage';
 import { useCustomer, signOut } from 'utils/Customer';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import tailwind from 'tailwind';
 
 const AccountScreen = ({ navigation, route }) => {
-    const storefront = useStorefront();
     const { info } = route.params;
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        // Listen for customer created event
-        const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
-            setCustomer(customer);
-        });
-
-        return () => {
-            // Remove customer.updated event listener
-            EventRegister.removeEventListener(customerUpdatedListener);
-        };
-    }, []);
 
     return (
         <View>

@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
 import { getCurrentLocation } from 'utils/Geo';
 import { useResourceStorage, get } from 'utils/Storage';
-import { getCustomer } from 'utils/Customer';
+import { getCustomer, syncDevice } from 'utils/Customer';
 import { tailwind } from 'tailwind';
 import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
@@ -35,16 +35,6 @@ const StorefrontScreen = ({ navigation, route }) => {
         tabBarBadge: cart instanceof Cart ? cart.getAttribute('total_unique_items') : 0,
         tabBarBadgeStyle: tailwind('bg-blue-500 ml-1'),
     });
-
-    const syncDevice = (customer) => {
-        const token = get('token');
-
-        if (customer && token) {
-            customer.syncDevice(token).catch((error) => {
-                console.log('[ Error syncing customer device! ]', error);
-            });
-        }
-    };
 
     const updateCartTabBadge = (cart) => {
         setCartTabOptions({ ...cartTabOptions, tabBarBadge: cart.getAttribute('total_unique_items') });

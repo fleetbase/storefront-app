@@ -121,7 +121,7 @@ export default class GeoUtil {
 
                             // save last known location
                             set('location', googleAddress.all());
-                            emit('location.changed', Place.fromGoogleAddress(googleAddress));
+                            emit('location.updated', Place.fromGoogleAddress(googleAddress));
 
                             resolve(googleAddress.all());
                         });

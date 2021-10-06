@@ -12,7 +12,6 @@ const useDeliveryLocation = () => {
     const setDeliveryLocation = (location) => {
         if (typeof location?.serialize === 'function') {
             emit('location.updated', location);
-            emit('location.changed', location);
 
             return setValue(location.serialize());
         }

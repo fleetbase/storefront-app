@@ -451,7 +451,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         });
 
         // Listen for changes to customer delivery location
-        const locationChanged = addEventListener('deliver_to.changed', (place) => {
+        const locationChanged = addEventListener('location.updated', (place) => {
             // update delivery quote
             getServiceQuoteFor(place);
         });

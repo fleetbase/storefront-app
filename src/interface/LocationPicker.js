@@ -6,11 +6,11 @@ import { faMapMarkerAlt, faTimes, faStar, faExclamationCircle } from '@fortaweso
 import { EventRegister } from 'react-native-event-listeners';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useResourceStorage, get, set } from 'utils/Storage';
-import { getCustomer } from 'utils/Customer';
-import { signOut } from 'utils';
+import { getCustomer, signOut } from 'utils/Customer';
+import { isResource } from 'utils';
 import { adapter } from 'hooks/use-fleetbase';
+import { useDeliveryLocation, useCustomer } from 'hooks';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
-import { Customer } from '@fleetbase/storefront';
 import ActionSheet from 'react-native-actions-sheet';
 import Config from 'react-native-config';
 import tailwind from 'tailwind';
@@ -21,18 +21,17 @@ const actionSheetRef = createRef();
 const actionSheetRef2 = createRef();
 
 const LocationPicker = (props) => {
-    const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, adapter);
+    const insets = useSafeAreaInsets();
+
+    const [deliverTo, setDeliverTo] = useDeliveryLocation();
+    const [customer, setCustomer] = useCustomer();
     const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
     const [isSelecting, setIsSelecting] = useState(false);
     const [isEditingDeliveryLocation, setIsEditingDeliveryLocation] = useState(false);
-    const customer = getCustomer();
-    const insets = useSafeAreaInsets();
 
     const loadPlaces = (initialize = false) => {
-        if (!customer || !customer instanceof Customer) {
-            if (places.length) {
-                setPlaces(new Collection());
-            }
+        if (!isResource(customer) && places.length) {
+            setPlaces(new Collection());
             return;
         }
 
@@ -42,15 +41,13 @@ const LocationPicker = (props) => {
                 setPlaces(places);
             })
             .catch((error) => {
-                console.log('[Error fetching customer locations]', error);
-                // logout user
+                console.log('[ Error fetching customer locations ]', error);
                 signOut();
             });
     };
 
     const changeDeliverTo = (place) => {
         setDeliverTo(place);
-        emit('deliver_to.changed', place);
         setIsSelecting(false);
     };
 
@@ -84,8 +81,6 @@ const LocationPicker = (props) => {
 
     // fn to check if deliverTo location is indeed the place
     const isDeliverTo = (place) => {
-        const deliverTo = get('deliver_to');
-
         if (deliverTo) {
             return deliverTo.id === place.id;
         }
@@ -109,7 +104,7 @@ const LocationPicker = (props) => {
     useEffect(() => {
         loadPlaces();
 
-        const locationChanged = addEventListener('location.changed', (place) => {
+        const locationChanged = addEventListener('location.updated', (place) => {
             // if no default location set, set to location from event
             if (!deliverTo) {
                 setDeliverTo(place);

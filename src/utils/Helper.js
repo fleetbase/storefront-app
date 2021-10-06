@@ -133,6 +133,34 @@ export default class HelperUtil {
     }
 
     /**
+     * Determines if argument is a valid fleetbase resource.
+     *
+     * @static
+     * @param {*} mixed
+     * @return {boolean}
+     * @memberof HelperUtil
+     */
+    static isResource(mixed, type = null) {
+        if (typeof type === 'string') {
+            return HelperUtil.hasResouceProperties(mixed) && mixed.resource === type;
+        }
+
+        return HelperUtil.hasResouceProperties(mixed);
+    }
+
+    /**
+     * Determines if argument has valid resource properties.
+     *
+     * @static
+     * @param {*} mixed
+     * @return {boolean}
+     * @memberof HelperUtil
+     */
+    static hasResouceProperties(mixed) {
+        return !HelperUtil.isVoid(mixed) && mixed?.id && typeof mixed?.serialize === 'function' && typeof mixed?.resource === 'string';
+    }
+
+    /**
      * Ends the current session from storage, and resets user location.
      *
      * @static
@@ -155,6 +183,7 @@ const stripHtml = HelperUtil.stripHtml;
 const isAndroid = HelperUtil.isAndroid();
 const isApple = HelperUtil.isApple();
 const isVoid = HelperUtil.isVoid;
+const isResource = HelperUtil.isResource;
 const endSession = HelperUtil.endSession;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, isAndroid, isApple, isVoid, endSession };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, isAndroid, isApple, isVoid, isResource, endSession };
