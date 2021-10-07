@@ -5,12 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCompass, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { EventRegister } from 'react-native-event-listeners';
-import { getCurrentLocation } from 'utils';
+import { getCurrentLocation, logError } from 'utils';
 import { useResourceStorage, get } from 'utils/Storage';
 import { tailwind } from 'tailwind';
-import { getCustomer } from 'utils/Customer';
+import { getCustomer, syncDevice } from 'utils/Customer';
 import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
-import { useCart, useCartTabOptions } from 'hooks';
+import { useCart, useCartTabOptions, useCustomer } from 'hooks';
+import { CartService } from 'services';
 // import useStorefront from 'hooks/use-storefront';
 // import useFleetbase from 'hooks/use-fleetbase';
 import NetworkStack from 'network/NetworkStack';
@@ -25,10 +26,43 @@ const NetworkScreen = ({ navigation, route }) => {
 
     const [cart, setCart] = useCart();
     const [cartTabOptions, setCartTabOptions] = useCartTabOptions(cart);
+    const [customer, setCustomer] = useCustomer();
 
     useEffect(() => {
+        // Fetch latest cart
+        CartService.get()
+            .then((cart) => {
+                setCart(cart);
+                setCartTabOptions(cart);
+            })
+            .catch(logError);
 
-        return () => {};
+        // Sync device
+        syncDevice(customer);
+
+        // Set location
+        getCurrentLocation();
+
+        // Listen for incoming remote notification events
+        const watchNotifications = addEventListener('onNotification', (notification) => {
+            const { data } = notification;
+            const { id, type } = data;
+
+            if (type.startsWith('order_')) {
+                // navigateToOrder(id);
+                NavigationService.transitionToOrder(id);
+            }
+        });
+
+        // Listen for cart updated event
+        const cartChanged = addEventListener('cart.updated', (cart) => {
+            setCartTabOptions(cart);
+        });
+
+        return () => {
+            removeEventListener(watchNotifications);
+            removeEventListener(cartChanged);
+        };
     }, []);
 
     return (
