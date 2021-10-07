@@ -11,7 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@fleetbase/storefront": "1.0.8",
+    "@fleetbase/storefront": "0.0.9",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@freakycoder/react-native-bounceable": "^0.2.5",
     "@react-native-async-storage/async-storage": "^1.15.5",
@@ -62,6 +62,7 @@
     "@fortawesome/react-native-fontawesome": "^0.2.6",
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
+    "babel-plugin-module-resolver": "^4.1.0",
     "eslint": "7.14.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "^0.64.0",

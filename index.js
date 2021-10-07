@@ -9,7 +9,7 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 import DeviceInfo from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
-import { set } from './src/utils/storage';
+import { set } from 'utils/Storage';
 
 const { isEmulator } = DeviceInfo;
 const { emit } = EventRegister;

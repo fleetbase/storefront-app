@@ -538,7 +538,7 @@ SPEC CHECKSUMS:
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
   FBReactNativeSpec: b1fc60e236fb5b9b1144002d0eba44fb48bf6b16
-  glog: 22b712f1488aade5b69e11840176699663c517b9
+  glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 32ca02de09de357a10ac773f2c70f1986751392d
   MMKV: 76033b9ace2006623308910a3afcc0e25eba3140
