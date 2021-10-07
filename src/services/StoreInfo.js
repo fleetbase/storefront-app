@@ -1,6 +1,7 @@
-import { get } from 'utils/Storage';
+import { Store } from '@fleetbase/storefront';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useStoreLocation } from 'hooks';
+import { get } from 'utils/Storage';
 
 const info = get('info');
 
@@ -15,7 +16,7 @@ export default class StoreInfoService {
      * Returns an instance of the current Store.
      *
      * @static
-     * @return {*} 
+     * @return {*}
      * @memberof StoreInfoService
      */
     static instance() {
@@ -26,24 +27,25 @@ export default class StoreInfoService {
      * Fetches the current store locations then sets the first as the default.
      *
      * @static
-     * @return {Promise} 
+     * @return {Promise}
      * @memberof StoreInfoService
      */
-    static setDefaultLocation() {
-        const store = StoreInfoUtils.instance();
-        const [ storeLocation, setStoreLocation ] = useStoreLocation();
+    static getDefaultLocation() {
+        const store = StoreInfoService.instance();
 
-        return store
-            .getLocations()
-            .then((locations) => {
-                const defaultStoreLocation = locations.first;
+        return new Promise((resolve, reject) => {
+            store
+                .getLocations()
+                .then((locations) => {
+                    const defaultStoreLocation = locations.first;
 
-                if (defaultStoreLocation) {
-                    setStoreLocation(defaultStoreLocation);
-                }
-            })
-            .catch((error) => {
-                console.log('[ Error fetching store locations! ]', error);
-            });
+                    if (defaultStoreLocation) {
+                        resolve(defaultStoreLocation);
+                    } else {
+                        reject(new Error('Store has no locations defined!'));
+                    }
+                })
+                .catch(reject);
+        });
     }
 }

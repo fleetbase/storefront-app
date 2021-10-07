@@ -99,6 +99,22 @@ export default class HelperUtil {
     }
 
     /**
+     * Strips iframe tags from a string.
+     *
+     * @static
+     * @param {string} [html='']
+     * @return {string}
+     * @memberof HelperUtil
+     */
+    static stripIframeTags(html = '') {
+        if (typeof html === 'string') {
+            return html.replace(/\<iframe (.*)(\<\/iframe\>|\/>)/gm, '');
+        }
+
+        return html;
+    }
+
+    /**
      * Determines if device is android.
      *
      * @static
@@ -173,6 +189,35 @@ export default class HelperUtil {
         emit('customer.signedout', true);
         getCurrentLocation();
     }
+
+    /**
+     * Universal error logger
+     *
+     * @static
+     * @param {Error|string} error
+     * @param {null|string} message
+     * @return {void} 
+     * @memberof HelperUtil
+     */
+    static logError(error, message) {
+        if (error instanceof Error) {
+            console.log(`[ ${message ?? error.message} ]`, error);
+            return;
+        }
+
+        if (typeof error === 'string') {
+            let output = `[ ${error} ]`;
+
+            if (message) {
+                output += ` - [ ${message} ]`;
+            }
+
+            console.log(output);
+            return;
+        }
+
+        console.log(`[ ${message ?? 'Error Logged!'} ]`, error);
+    }
 }
 
 const listCountries = HelperUtil.listCountries;
@@ -180,10 +225,12 @@ const isArray = HelperUtil.isArray;
 const hasRequiredKeys = HelperUtil.hasRequiredKeys;
 const isLastIndex = HelperUtil.isLastIndex;
 const stripHtml = HelperUtil.stripHtml;
+const stripIframeTags = HelperUtil.stripIframeTags;
 const isAndroid = HelperUtil.isAndroid();
 const isApple = HelperUtil.isApple();
 const isVoid = HelperUtil.isVoid;
 const isResource = HelperUtil.isResource;
 const endSession = HelperUtil.endSession;
+const logError = HelperUtil.logError;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, isAndroid, isApple, isVoid, isResource, endSession };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError };

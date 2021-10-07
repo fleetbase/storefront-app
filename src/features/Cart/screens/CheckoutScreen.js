@@ -119,7 +119,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
     const updateCart = (cart) => {
         setCart(cart);
-        emit('cart.changed', cart);
+        emit('cart.updated', cart);
     };
 
     const login = () => {
@@ -446,7 +446,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         });
 
         // Listen for changes to cart
-        const cartChanged = addEventListener('cart.changed', (cart) => {
+        const cartChanged = addEventListener('cart.updated', (cart) => {
             setCart(cart);
         });
 

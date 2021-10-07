@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt, faTimes, faStar, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { useResourceStorage, get, set } from 'utils/Storage';
-import { getCustomer, signOut } from 'utils/Customer';
+import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
+import { isValidCustomer, signOut } from 'utils/Customer';
 import { isResource } from 'utils';
 import { adapter } from 'hooks/use-fleetbase';
 import { useDeliveryLocation, useCustomer } from 'hooks';
@@ -25,12 +25,12 @@ const LocationPicker = (props) => {
 
     const [deliverTo, setDeliverTo] = useDeliveryLocation();
     const [customer, setCustomer] = useCustomer();
-    const [places, setPlaces] = useResourceStorage('places', Place, adapter, new Collection());
+    const [places, setPlaces] = useResourceCollection('places', Place, adapter, new Collection());
     const [isSelecting, setIsSelecting] = useState(false);
     const [isEditingDeliveryLocation, setIsEditingDeliveryLocation] = useState(false);
 
-    const loadPlaces = (initialize = false) => {
-        if (!isResource(customer) && places.length) {
+    const loadPlaces = (customer) => {
+        if (!isValidCustomer(customer)) {
             setPlaces(new Collection());
             return;
         }
@@ -102,13 +102,17 @@ const LocationPicker = (props) => {
     }
 
     useEffect(() => {
-        loadPlaces();
+        loadPlaces(customer);
 
         const locationChanged = addEventListener('location.updated', (place) => {
             // if no default location set, set to location from event
             if (!deliverTo) {
                 setDeliverTo(place);
             }
+        });
+
+        const customerUpdated = addEventListener('customer.updated', (customer) => {
+            loadPlaces(customer);
         });
 
         const placesMutated = addEventListener('places.mutated', (place) => {

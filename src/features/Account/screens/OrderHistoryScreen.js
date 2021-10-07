@@ -5,22 +5,23 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faBox, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
-import { Order, Collection, isResource } from '@fleetbase/sdk';
-import { useStorefront } from 'hooks';
-import { getCustomer } from 'utils/Customer';
+import { Order, Collection } from '@fleetbase/sdk';
+import { useStorefront, useCustomer } from 'hooks';
 import { adapter } from 'hooks/use-fleetbase';
-import { useResourceStorage, get, set } from 'utils/Storage';
+import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import { format } from 'date-fns';
 import tailwind from 'tailwind';
 
 const OrderHistoryScreen = ({ navigation, route }) => {
     const { useLeftArrow, info } = route.params;
-    const [orders, setOrders] = useResourceStorage('order', Order, adapter, new Collection());
-    const [isLoading, setIsLoading] = useState(false);
-    const [isInitializing, setIsInitializing] = useState(false);
-    const customer = getCustomer();
+    
     const storefront = useStorefront();
     const insets = useSafeAreaInsets();
+
+    const [orders, setOrders] = useResourceCollection('order', Order, adapter, new Collection());
+    const [customer, setCustomer] = useCustomer();
+    const [isLoading, setIsLoading] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
 
     const loadOrders = (initialize = false) => {
         return new Promise((resolve) => {

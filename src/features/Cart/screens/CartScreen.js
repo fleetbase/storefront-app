@@ -169,7 +169,7 @@ const CartScreen = ({ navigation, route }) => {
     };
 
     const updateCart = (cart) => {
-        emit('cart.changed', cart);
+        emit('cart.updated', cart);
     };
 
     const getCart = () => {
@@ -281,7 +281,7 @@ const CartScreen = ({ navigation, route }) => {
     useEffect(() => {
         getCart();
 
-        const cartChanged = addEventListener('cart.changed', (cart) => {
+        const cartChanged = addEventListener('cart.updated', (cart) => {
             if (!cart instanceof Cart) {
                 return getCart();
             }
@@ -470,7 +470,7 @@ const CartScreen = ({ navigation, route }) => {
                                             <Text style={tailwind('font-semibold text-gray-400')}>Cart Summary</Text>
                                         </View>
                                         <View>
-                                            <TouchableOpacity style={tailwind('mt-2')} onPress={() => navigation.navigate('Home')}>
+                                            <TouchableOpacity style={tailwind('mt-2')} onPress={() => navigation.navigate('Browser')}>
                                                 <Text style={tailwind('text-blue-500 text-sm font-semibold')}>Add more</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -489,7 +489,7 @@ const CartScreen = ({ navigation, route }) => {
                                     <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Your Cart is Empty</Text>
                                     <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't added anything to your cart yet.</Text>
                                 </View>
-                                <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('Home')}>
+                                <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('Browser')}>
                                     <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
                                         <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Start Shopping</Text>
                                     </View>

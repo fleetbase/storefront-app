@@ -1,8 +1,8 @@
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
 import { get, set, storage, useMMKVStorage } from './Storage';
+import { endSession, isResource, isVoid } from './Helper';
 import useStorefront from 'hooks/use-storefront';
-import endSession from './Helper';
 
 const { emit } = EventRegister;
 
@@ -18,8 +18,8 @@ export default class CustomerUtil {
      * then will return null.
      *
      * @static
-     * @return {null|Customer} 
-     * @memberof Customer
+     * @return {null|Customer}
+     * @memberof CustomerUtil
      */
     static get() {
         const attributes = get('customer');
@@ -37,7 +37,7 @@ export default class CustomerUtil {
      *
      * @static
      * @param {Customer}
-     * @memberof Customer
+     * @memberof CustomerUtil
      */
     static update(customer) {
         if (typeof customer?.serialize === 'function') {
@@ -50,8 +50,8 @@ export default class CustomerUtil {
      * Hook for retrieving current customer from state.
      *
      * @static
-     * @return {Array} 
-     * @memberof Customer
+     * @return {Array}
+     * @memberof CustomerUtil
      */
     static use() {
         const [value, setValue] = useMMKVStorage('customer', storage);
@@ -64,7 +64,7 @@ export default class CustomerUtil {
             }
 
             setValue(customer);
-        }
+        };
 
         if (value) {
             return [new Customer(value, storefront.getAdapter()), setCustomer];
@@ -77,8 +77,8 @@ export default class CustomerUtil {
      * Ends session for customer, alias of signOut util.
      *
      * @static
-     * @return {void} 
-     * @memberof Customer
+     * @return {void}
+     * @memberof CustomerUtil
      */
     static signOut() {
         return endSession();
@@ -89,19 +89,31 @@ export default class CustomerUtil {
      *
      * @static
      * @param {Customer} customer
-     * @return {void} 
-     * @memberof Customer
+     * @return {void}
+     * @memberof CustomerUtil
      */
     static syncDevice(customer) {
-        customer = customer ?? Customer.get();
+        customer = customer ?? CustomerUtil.get();
 
         const token = get('token');
 
-        if (customer && token) {
+        if (CustomerUtil.isValid(customer) && token) {
             customer.syncDevice(token).catch((error) => {
                 console.log('[ Error syncing customer device! ]', error);
             });
         }
+    }
+
+    /**
+     * Checks if customer resource is valid.
+     *
+     * @static
+     * @param {Customer} customer
+     * @return {boolean} 
+     * @memberof CustomerUtil
+     */
+    static isValid(customer) {
+        return isResource(customer, 'customer') && !isVoid(customer.token);
     }
 }
 
@@ -110,5 +122,6 @@ const updateCustomer = CustomerUtil.update;
 const useCustomer = CustomerUtil.use;
 const syncDevice = CustomerUtil.syncDevice;
 const signOut = CustomerUtil.signOut;
+const isValidCustomer = CustomerUtil.isValid;
 
-export { updateCustomer, getCustomer, useCustomer, syncDevice, signOut };
+export { updateCustomer, getCustomer, useCustomer, syncDevice, signOut, isValidCustomer };

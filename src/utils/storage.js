@@ -36,7 +36,7 @@ export default class StorageUtil {
      * @memberof StorageUtil
      */
     static useResourceStorage(key, ResourceType, adapter, defaultValue) {
-        const [value, setValue] = useMMKVStorage(key, storage);
+        const [value, setValue] = useStorage(key, storage, defaultValue);
 
         const setResource = (resource) => {
             if (isArray(resource) && typeof resource?.invoke === 'function') {
@@ -58,6 +58,40 @@ export default class StorageUtil {
 
         if (value) {
             return [new ResourceType(value, adapter), setResource];
+        }
+
+        if ((value === undefined || value === null) && defaultValue !== undefined) {
+            return [defaultValue, setResource];
+        }
+
+        return [value, setResource];
+    }
+
+    /**
+     * Provides a hook for storing a collection of sdk resources in storage.
+     *
+     * @static
+     * @param {string} key
+     * @param {class} ResourceType
+     * @param {Adapter} adapter
+     * @param {*} defaultValue
+     * @return {array} 
+     * @memberof StorageUtil
+     */
+    static useResourceCollection(key, ResourceType, adapter, defaultValue) {
+        const value = getArray(key) ?? defaultValue;
+
+        const setResource = (resource) => {
+            if (isArray(resource) && typeof resource?.invoke === 'function') {
+                setArray(key, resource.invoke('serialize'));
+                return;
+            }
+
+            setArray(key, resource);
+        };
+
+        if (value && isArray(value)) {
+            return [new Collection(value.map((attributes) => new ResourceType(attributes, adapter))), setResource];
         }
 
         if ((value === undefined || value === null) && defaultValue !== undefined) {
@@ -121,5 +155,6 @@ const get = StorageUtil.get;
 const remove = StorageUtil.remove;
 const clear = StorageUtil.clear;
 const useResourceStorage = StorageUtil.useResourceStorage;
+const useResourceCollection = StorageUtil.useResourceCollection;
 
-export { set, get, remove, clear, storage, useMMKVStorage, useResourceStorage };
+export { set, get, remove, clear, storage, useMMKVStorage, useResourceStorage, useResourceCollection };

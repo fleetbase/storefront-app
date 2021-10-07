@@ -1,4 +1,5 @@
-import { useFleerbase } from 'hooks';
+import { useNavigation } from '@react-navigation/native';
+import { useFleetbase } from 'hooks';
 import { get } from 'utils/Storage';
 
 /**
@@ -19,7 +20,7 @@ export default class NavigationService {
      * @memberof CartService
      */
     static transitionToOrder(orderId) {
-        const fleetbase = useFleerbase();
+        const fleetbase = useFleetbase();
         const navigation = useNavigation();
         const info = get('info');
 

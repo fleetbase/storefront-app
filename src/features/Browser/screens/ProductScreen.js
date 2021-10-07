@@ -5,9 +5,9 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Product, Cart } from '@fleetbase/storefront';
-import { useStorefront } from 'hooks';
-import { formatCurrency, isLastIndex } from 'utils';
+import { Product } from '@fleetbase/storefront';
+import { useStorefront, useCart } from 'hooks';
+import { formatCurrency, isLastIndex, stripIframeTags } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
@@ -38,7 +38,7 @@ const ProductScreen = ({ navigation, route }) => {
     const [isInCart, setIsInCart] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [quantity, setQuantity] = useState(1);
-    const [cart, setCart] = useResourceStorage('cart', Cart, storefront.getAdapter(), new Cart());
+    const [cart, setCart] = useCart();
     const [cartItem, setCartItem] = useState(cartItemAttributes);
 
     const canAddToCart = isValid && !isAddingToCart;
@@ -56,7 +56,7 @@ const ProductScreen = ({ navigation, route }) => {
 
     const updateCart = (cart) => {
         setCart(cart);
-        emit('cart.changed', cart);
+        emit('cart.updated', cart);
     };
 
     const decreaseQuantity = () => {
@@ -343,7 +343,7 @@ const ProductScreen = ({ navigation, route }) => {
                                     )}
                                     <Text style={tailwind('text-sm text-gray-500')}>Base Price</Text>
                                 </View>
-                                <RenderHtml contentWidth={fullWidth} source={{ html: product.getAttribute('description') ?? ''}} />
+                                <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? ''}} />
                             </View>
                             <View style={tailwind('bg-gray-100')}>
                                 {product.variants().map((variation, i) => (

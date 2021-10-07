@@ -8,7 +8,7 @@ import { Customer } from '@fleetbase/storefront';
 import { Place, Collection, isResource } from '@fleetbase/sdk';
 import { useStorefront, useCustomer } from 'hooks';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useResourceStorage, get, set } from 'utils/Storage';
+import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import tailwind from 'tailwind';
 
 const SavedPlacesScreen = ({ navigation, route }) => {
@@ -18,7 +18,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
     const fleetbase = useFleetbase();
     const insets = useSafeAreaInsets();
 
-    const [places, setPlaces] = useResourceStorage('places', Place, FleetbaseAdapter, new Collection());
+    const [places, setPlaces] = useResourceCollection('places', Place, FleetbaseAdapter, new Collection());
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
