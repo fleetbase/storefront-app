@@ -4,11 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt, faTimes, faInfoCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { EventRegister } from 'react-native-event-listeners';
-import { haversine } from 'utils';
-import { useResourceStorage, get, set } from 'utils/Storage';
+import { haversine, isResource } from 'utils';
+import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { Place, GoogleAddress } from '@fleetbase/sdk';
+import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import { Store, StoreLocation } from '@fleetbase/storefront';
 import tailwind from 'tailwind';
 
@@ -18,14 +18,14 @@ const { isArray } = Array;
 const StorePicker = (props) => {
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
-    const [storeLocations, setStoreLocations] = useResourceStorage('locations', StoreLocation, StorefrontAdapter, []);
+    const [storeLocations, setStoreLocations] = useResourceCollection('store_locations', StoreLocation, StorefrontAdapter, new Collection());
     const [isSelecting, setIsSelecting] = useState(false);
     const { info } = props;
     const store = new Store(info, StorefrontAdapter);
     const insets = useSafeAreaInsets();
 
     const loadLocations = (initialize = false) => {
-        if (!store || !store instanceof Store) {
+        if (!store || !isResouce(store)) {
             return;
         }
 
@@ -132,7 +132,7 @@ const StorePicker = (props) => {
                             </View>
                         </View>
                         <ScrollView>
-                            {storeLocations.map((storeLocation, index) => (
+                            {(storeLocations ?? []).map((storeLocation, index) => (
                                 <TouchableOpacity
                                     key={index}
                                     onPress={() => {
