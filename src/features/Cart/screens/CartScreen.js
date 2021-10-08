@@ -328,7 +328,7 @@ const CartScreen = ({ navigation, route }) => {
                                 onPress={() =>
                                     navigation.navigate('CheckoutScreen', {
                                         serializedCart: cart.serialize(),
-                                        quote: serviceQuote.serialize(),
+                                        quote: serviceQuote?.serialize(),
                                         isPickupOrder,
                                         isTipping,
                                         isTippingDriver,
