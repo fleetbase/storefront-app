@@ -53,10 +53,12 @@ const BootScreen = ({ navigation }) => {
         });
 
     useEffect(() => {
-        initStripe({
-            publishableKey: STRIPE_KEY,
-            merchantIdentifier: APP_IDENTIFIER,
-        });
+        if (STRIPE_KEY) {
+            initStripe({
+                publishableKey: STRIPE_KEY,
+                merchantIdentifier: APP_IDENTIFIER,
+            });
+        }
     }, []);
 
     return (
