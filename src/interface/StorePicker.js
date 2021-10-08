@@ -25,7 +25,7 @@ const StorePicker = (props) => {
     const insets = useSafeAreaInsets();
 
     const loadLocations = (initialize = false) => {
-        if (!store || !isResouce(store)) {
+        if (!store || !isResource(store)) {
             return;
         }
 
