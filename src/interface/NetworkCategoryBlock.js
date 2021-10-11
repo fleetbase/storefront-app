@@ -41,7 +41,7 @@ const NetworkCategoryBlock = (props) => {
         <View style={[props.containerStyle ?? {}, tailwind('rounded-md border border-gray-200 p-4 drop-shadow-lg')]}>
             <View style={tailwind('flex flex-row justify-evenly')}>
                 {networkCategories.map((category) => (
-                    <TouchableOpacity onPress={() => onPress(category)} style={tailwind('w-1/4 flex items-center justify-center')}>
+                    <TouchableOpacity key={category.id} onPress={() => onPress(category)} style={tailwind('w-1/4 flex items-center justify-center')}>
                         <View style={tailwind('flex items-center justify-center mb-2')}>
                             <View style={tailwind('rounded-full flex items-center justify-center w-12 h-12 bg-blue-50')}>
                                 <FontAwesomeIcon icon={faFolder} size={23} style={tailwind('text-blue-900')} />

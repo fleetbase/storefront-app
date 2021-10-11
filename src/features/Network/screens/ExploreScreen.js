@@ -31,7 +31,7 @@ const ExploreScreen = ({ navigation, route }) => {
                     </View>
 
                     {stores.map((store) => (
-                        <View key={store.id} style={tailwind(`px-4`)}>
+                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>
                             <View style={tailwind(`border-b border-gray-100 py-3`)}>
                                 <View style={tailwind('flex flex-row')}>
                                     <View style={tailwind('mr-2')}>
@@ -44,7 +44,7 @@ const ExploreScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     ))}
                 </View>
             </ScrollView>
