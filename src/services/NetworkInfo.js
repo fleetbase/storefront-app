@@ -33,6 +33,6 @@ export default class NetworkInfoService {
     static getStores(params = {}) {
         const network = NetworkInfoService.instance();
 
-        return network.getStores();
+        return network.getStores(params);
     }
 }

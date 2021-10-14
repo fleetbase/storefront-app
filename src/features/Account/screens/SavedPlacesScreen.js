@@ -6,10 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Place, Collection, isResource } from '@fleetbase/sdk';
-import { useStorefront, useCustomer } from 'hooks';
+import { useStorefront, useCustomer, useDeliveryLocation } from 'hooks';
+import { mutatePlaces } from 'utils';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import tailwind from 'tailwind';
+
+const { emit, addEventListener, removeEventListener } = EventRegister;
 
 const SavedPlacesScreen = ({ navigation, route }) => {
     const { attributes, useLeftArrow } = route.params;
@@ -19,9 +22,11 @@ const SavedPlacesScreen = ({ navigation, route }) => {
     const insets = useSafeAreaInsets();
 
     const [places, setPlaces] = useResourceCollection('places', Place, FleetbaseAdapter, new Collection());
+    const [deliverTo, setDeliverTo] = useDeliveryLocation();
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
+    const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
     const loadPlaces = (initialize = false) => {
         return new Promise((resolve) => {
@@ -42,44 +47,20 @@ const SavedPlacesScreen = ({ navigation, route }) => {
         });
     };
 
-    // fn to check if deliverTo location is indeed the place
-    const isDeliverTo = (place) => {
-        const deliverTo = get('deliver_to');
-
-        if (deliverTo) {
-            return deliverTo.id === place.id;
-        }
-
-        return false;
-    };
-
     // get addresses
     useEffect(() => {
         loadPlaces(true);
 
         // Listen for places collection mutate events
-        const placesMutatedListener = EventRegister.addEventListener('places.mutated', (place) => {
-            // if no places loaded
-            if (!places) {
-                return;
-            }
-
-            const index = places.findIndex((p) => p.id === place.id);
-
-            if (place.isDeleted) {
-                return setPlaces(places.removeAt(index));
-            }
-
-            if (index === -1) {
-                return setPlaces(places.pushObject(place));
-            }
-
-            return setPlaces(places.replaceAt(index, place));
+        const placesMutated = addEventListener('places.mutated', (place) => {
+            mutatePlaces(places, place, (mutatedPlaces) => {
+                setPlaces(mutatedPlaces);
+            });
         });
 
         return () => {
             // Remove places.mutated event listener
-            EventRegister.removeEventListener(placesMutatedListener);
+            EventRegister.removeEventListener(placesMutated);
         };
     }, []);
 
@@ -96,7 +77,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     <View style={tailwind('flex-1')}>
                                         <View style={tailwind('flex flex-row items-center mb-1')}>
-                                            {isDeliverTo(item) && (
+                                            {isDefaultDeliveryLocation(item) && (
                                                 <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-1')}>
                                                     <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
                                                 </View>

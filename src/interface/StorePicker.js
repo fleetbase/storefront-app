@@ -6,6 +6,8 @@ import { faMapMarkerAlt, faTimes, faInfoCircle, faStar } from '@fortawesome/free
 import { EventRegister } from 'react-native-event-listeners';
 import { haversine, isResource } from 'utils';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
+import { getCoordinates, getDistance } from 'utils/Geo';
+import { formatKm } from 'utils/Format';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
@@ -16,129 +18,142 @@ const { addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
 
 const StorePicker = (props) => {
+    const {
+        info,
+        wrapperStyle,
+        buttonStyle,
+        buttonIconStyle,
+        buttonIconSize,
+        buttonTitleWrapperStyle,
+        buttonTitleStyle,
+        buttonTitleMaxLines,
+        displayAddressForTitle,
+        onStoreLocationSelected,
+    } = props;
+    const buttonIcon = props?.buttonIcon ?? faInfoCircle;
+
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
-    const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
-    const [storeLocations, setStoreLocations] = useResourceCollection('store_locations', StoreLocation, StorefrontAdapter, new Collection());
+    const [storeLocation, setStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter);
+    const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
-    const { info } = props;
+
     const store = new Store(info, StorefrontAdapter);
     const insets = useSafeAreaInsets();
+    const useAddressTitle = displayAddressForTitle && storeLocation?.id;
 
     const loadLocations = (initialize = false) => {
-        if (!store || !isResource(store)) {
+        if (typeof store !== 'object' && typeof store.getLocations !== 'function') {
             return;
         }
 
-        return store.getLocations().then((locations) => {
-            setStoreLocations(locations);
-        }).catch((error) => {
-            console.log('[Error fetching store locations]', error);
-        });
+        return store
+            .getLocations()
+            .then((locations) => {
+                setStoreLocations(locations);
+                selectStoreLocation(locations);
+            })
+            .catch((error) => {
+                console.log('[Error fetching store locations]', error);
+            });
     };
 
     const selectStoreLocation = (selectedStoreLocation) => {
-        if (!storeLocation && selectedStoreLocation === undefined) {
+        if (!storeLocation?.getAttribute('place') && isArray(selectedStoreLocation)) {
+            const defaultStoreLocation = selectedStoreLocation.first;
+
+            if (defaultStoreLocation) {
+                setStoreLocation(defaultStoreLocation);
+                sendStoreLocation(defaultStoreLocation);
+            }
+
+            return;
+        }
+
+        if (!storeLocation?.getAttribute('place') && selectedStoreLocation === undefined) {
             const defaultStoreLocation = storeLocations.first;
 
             if (defaultStoreLocation) {
                 setStoreLocation(defaultStoreLocation);
+                sendStoreLocation(defaultStoreLocation);
             }
+
+            return;
         }
 
         if (selectedStoreLocation instanceof StoreLocation) {
             setStoreLocation(selectedStoreLocation);
+            sendStoreLocation(selectedStoreLocation);
         }
     };
 
-    const getCoordinates = (location) => {
-        if (!location) {
-            return [];
+    const sendStoreLocation = (storeLocation) => {
+        if (typeof onStoreLocationSelected === 'function') {
+            onStoreLocationSelected(storeLocation);
         }
-
-        if (location instanceof Place) {
-            return location.coordinates;
-        }
-
-        if (location instanceof StoreLocation) {
-            const point = location.getAttribute('place.location');
-
-            if (!point) {
-                return [0, 0];
-            }
-
-            const [ longitude, latitude ] = point.coordinates;
-            const coordinates = [ latitude, longitude ];
-
-            return coordinates;
-        }
-
-        if (isArray(location)) {
-            return location;
-        }
-
-        if (typeof location === 'object' && location?.type === 'Point') {
-            const [ longitude, latitude ] = location.coordinates;
-            const coordinates = [ latitude, longitude ];
-
-            return coordinates;
-        }
-    }
-
-    const getDistance = (origin, destination) => {
-        const originCoordinates = getCoordinates(origin);
-        const destinationCoordinates = getCoordinates(destination);
-
-        return haversine(originCoordinates, destinationCoordinates);
-    }
+    };
 
     const isCurrentStoreLocation = (idxStoreLocation) => idxStoreLocation.id === storeLocation?.id;
 
-    const formatKm = (km) => `${Math.round(km)}km`;
+    const DialogHeader = ({ title, subtitle, icon, onCancel }) => (
+        <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
+            <View style={tailwind('flex flex-row items-center')}>
+                <FontAwesomeIcon icon={icon} style={tailwind('text-blue-400 mr-2')} />
+                <View>
+                    <Text style={tailwind('text-lg font-semibold')}>{title}</Text>
+                    <Text style={tailwind('text-sm text-gray-700 font-semibold')}>{subtitle}</Text>
+                </View>
+            </View>
+
+            <View>
+                <TouchableOpacity onPress={onCancel}>
+                    <View style={tailwind('rounded-full bg-red-50 w-8 h-8 flex items-center justify-center')}>
+                        <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
+                    </View>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 
     useEffect(() => {
         loadLocations();
-        selectStoreLocation();
+        // selectStoreLocation();
     }, []);
 
     return (
-        <View style={[props.wrapperStyle || {}]}>
-            <TouchableOpacity onPress={() => setIsSelecting(true)}>
-                <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2 '), props.wrapperStyle || {}]}>
-                    <FontAwesomeIcon icon={faInfoCircle} style={tailwind('text-white mr-2')} />
-                    <View style={{maxWidth: 100}}>
-                        <Text style={tailwind('text-white')} numberOfLines={1}>{props.info.name}</Text>
+        <View style={[wrapperStyle]}>
+            <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
+                <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2'), buttonStyle]}>
+                    <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('text-white mr-2'), buttonIconStyle]} />
+                    <View style={[buttonTitleWrapperStyle]}>
+                        {useAddressTitle && (
+                            <View>
+                                <Text style={tailwind('font-semibold uppercase')}>{storeLocation.getAttribute('name')}</Text>
+                                <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1')}</Text>
+                            </View>
+                        )}
+                        {!useAddressTitle && (
+                            <Text style={[tailwind('text-white'), buttonTitleStyle]} numberOfLines={buttonTitleMaxLines ?? 1}>
+                                {info.name}
+                            </Text>
+                        )}
                     </View>
                 </View>
             </TouchableOpacity>
 
-            <Modal animationType={'slide'} transparent={true} visible={isSelecting} onRequestClose={() => setIsSelecting(false)}>
-                <View style={[tailwind('w-full h-full flex items-center justify-center'), { paddingTop: insets.top }]}>
-                    <View style={tailwind('bg-white shadow-sm rounded-md w-full h-full')}>
-                        <View style={tailwind('p-4 flex flex-row items-start justify-between bg-gray-50 rounded-t-md')}>
-                            <View style={tailwind('flex flex-row items-start')}>
-                                <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-400 mt-2 mr-2')} />
-                                <View>
-                                    <Text style={tailwind('text-lg font-semibold')}>{info.name}</Text>
-                                    <Text style={tailwind('text-sm text-gray-700 font-semibold')}>Location and Hours</Text>
-                                </View>
-                            </View>
-
-                            <View>
-                                <TouchableOpacity onPress={() => setIsSelecting(false)}>
-                                    <View style={tailwind('rounded-full bg-red-50 w-10 h-10 flex items-center justify-center')}>
-                                        <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                        <ScrollView>
+            <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
+                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+                    <View>
+                        <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />
+                        <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                             {(storeLocations ?? []).map((storeLocation, index) => (
                                 <TouchableOpacity
                                     key={index}
                                     onPress={() => {
                                         selectStoreLocation(storeLocation);
                                         setIsSelecting(false);
-                                    }}>
+                                    }}
+                                >
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             <View style={tailwind('flex-1')}>
@@ -155,9 +170,7 @@ const StorePicker = (props) => {
                                                     </View>
                                                 </View>
                                             </View>
-                                            <View>
-                                                {deliverTo && <Text>{formatKm(getDistance(storeLocation, deliverTo))}</Text>}
-                                            </View>
+                                            <View>{deliverTo && <Text>{formatKm(getDistance(storeLocation, deliverTo))}</Text>}</View>
                                         </View>
                                     </View>
                                 </TouchableOpacity>

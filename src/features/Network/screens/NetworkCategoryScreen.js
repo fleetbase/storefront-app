@@ -9,42 +9,24 @@ import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
 import tailwind from 'tailwind';
 
-const ExploreScreen = ({ navigation, route }) => {
-    const { info } = route.params;
+const NetworkCategoryScreen = ({ navigation, route }) => {
+    const { info, data } = route.params;
 
-    const [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter, new Collection());
-    const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
-
-    const transitionToProduct = (product, close, timeout = 300) => {
-        if (typeof close === 'function') {
-            close();
-        }
-
-        setTimeout(() => {
-            navigation.navigate('ProductScreen', { attributes: product.serialize() });
-        }, timeout);
-    };
+    const [stores, setStores] = useResourceCollection(`${info.id}_${data.id}_stores`, Store, StorefrontAdapter, new Collection());
+    const category = new Category(data, StorefrontAdapter);
 
     useEffect(() => {
         // Load all stores from netwrk
-        NetworkInfoService.getStores().then((stores) => {
+        NetworkInfoService.getStores({ category: category.id }).then((stores) => {
             setStores(stores);
         });
     }, []);
 
     return (
         <View style={tailwind('bg-white')}>
-            <NetworkHeader info={info} onSearchResultPress={transitionToProduct} />
+            <NetworkHeader info={info} hideCategoryPicker={true} searchPlaceholder={`Search for ${category.getAttribute('name')}`} onBack={() => navigation.goBack()} />
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
-                    <View style={tailwind('p-4')}>
-                        <NetworkCategoryBlock
-                            containerStyle={tailwind('mb-2')}
-                            onCategoriesLoaded={setNetworkCategories}
-                            onPress={(category) => navigation.navigate('NetworkCategoryScreen', { data: category.serialize() })}
-                        />
-                    </View>
-
                     {stores.map((store) => (
                         <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>
                             <View style={tailwind(`border-b border-gray-100 py-3`)}>
@@ -70,4 +52,4 @@ const ExploreScreen = ({ navigation, route }) => {
     );
 };
 
-export default ExploreScreen;
+export default NetworkCategoryScreen;

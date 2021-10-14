@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { GoogleAddress, Place } from '@fleetbase/sdk';
+import { StoreLocation } from '@fleetbase/storefront';
 import { set, get } from './Storage';
 import { isAndroid } from './Helper';
 import { haversine } from './Calculate';
@@ -151,11 +152,78 @@ export default class GeoUtil {
 
         return location;
     }
+
+    /**
+     * Get coordinates from different types of objects
+     *
+     * @static
+     * @param {*} location
+     * @return {*} 
+     * @memberof GeoUtil
+     */
+    static getCoordinates(location) {
+        if (!location) {
+            return [];
+        }
+
+        if (location instanceof Place) {
+            if (!location?.coordinates) {
+                return [0, 0];
+            }
+
+            const [ longitude, latitude ] = location.coordinates;
+            const coordinates = [ latitude, longitude ];
+
+            return coordinates;
+        }
+
+        if (location instanceof StoreLocation) {
+            const point = location.getAttribute('place.location');
+
+            if (!point) {
+                return [0, 0];
+            }
+
+            const [ longitude, latitude ] = point.coordinates;
+            const coordinates = [ latitude, longitude ];
+
+            return coordinates;
+        }
+
+        if (isArray(location)) {
+            return location;
+        }
+
+        if (typeof location === 'object' && location?.type === 'Point') {
+            const [ longitude, latitude ] = location.coordinates;
+            const coordinates = [ latitude, longitude ];
+
+            return coordinates;
+        }
+    }
+
+    /**
+     * Get the distance between two locations.
+     *
+     * @static
+     * @param {*} origin
+     * @param {*} destination
+     * @return {*} 
+     * @memberof GeoUtil
+     */
+    static getDistance(origin, destination) {
+        const originCoordinates = GeoUtil.getCoordinates(origin);
+        const destinationCoordinates = GeoUtil.getCoordinates(destination);
+
+        return haversine(originCoordinates, destinationCoordinates);
+    }
 }
 
 const checkHasLocationPermission = GeoUtil.checkHasLocationPermission;
 const geocode = GeoUtil.geocode;
 const getCurrentLocation = GeoUtil.getCurrentLocation;
 const getLocation = GeoUtil.getLocation;
+const getCoordinates = GeoUtil.getCoordinates;
+const getDistance = GeoUtil.getDistance;
 
-export { checkHasLocationPermission, geocode, getLocation, getCurrentLocation };
+export { checkHasLocationPermission, geocode, getLocation, getCurrentLocation, getCoordinates, getDistance };

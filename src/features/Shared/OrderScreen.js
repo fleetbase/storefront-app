@@ -105,7 +105,7 @@ const OrderScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                     <Text style={tailwind('text-xl font-semibold')}>Order {order.getAttribute('status')}</Text>
                 </View>
-                <ScrollView>
+                <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                     <View style={tailwind('flex w-full h-full pb-60')}>
                         <View style={tailwind('flex flex-row items-center justify-center')}>
                             {isEnroute ? (

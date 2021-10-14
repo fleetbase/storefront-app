@@ -25,8 +25,21 @@ export default class FormatUtil {
 
         return new Intl.NumberFormat('en-US', { style: 'currency', currency, currencyDisplay }).format(amount);
     }
+
+    /**
+     * Format kilometers
+     *
+     * @static
+     * @param {*} km
+     * @return {*} 
+     * @memberof FormatUtil
+     */
+    static km(km) {
+        return `${Math.round(km)}km`;
+    }
 }
 
 const formatCurrency = FormatUtil.currency;
+const formatKm = FormatUtil.km;
 
-export { formatCurrency };
+export { formatCurrency, formatKm };

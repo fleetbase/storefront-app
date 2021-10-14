@@ -11,7 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@fleetbase/storefront": "1.0.9",
+    "@fleetbase/storefront": "1.1.0",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@freakycoder/react-native-bounceable": "^0.2.5",
     "@react-native-async-storage/async-storage": "^1.15.5",

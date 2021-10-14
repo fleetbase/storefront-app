@@ -47,6 +47,37 @@ export default class HelperUtil {
     }
 
     /**
+     * Handle mutation of places Collection, either remove, add, or update in collection.
+     * Allows user to send callback after mutation.
+     *
+     * @static
+     * @param {*} places
+     * @param {*} place
+     * @param {*} cb
+     * @return {*}
+     * @memberof HelperUtil
+     */
+    static mutatePlaces(places, place, cb) {
+        if (!HelperUtil.isArray(places)) {
+            return;
+        }
+
+        const index = places.findIndex((p) => p.id === place.id);
+
+        if (place.isDeleted) {
+            places = places.removeAt(index);
+        } else if (index === -1) {
+            places = places.pushObject(place);
+        } else {
+            places = places.replaceAt(index, place);
+        }
+
+        if (typeof cb === 'function') {
+            cb(places);
+        }
+    }
+
+    /**
      * Determines if argument is array.
      *
      * @static
@@ -196,7 +227,7 @@ export default class HelperUtil {
      * @static
      * @param {Error|string} error
      * @param {null|string} message
-     * @return {void} 
+     * @return {void}
      * @memberof HelperUtil
      */
     static logError(error, message) {
@@ -218,6 +249,44 @@ export default class HelperUtil {
 
         console.log(`[ ${message ?? 'Error Logged!'} ]`, error);
     }
+
+    /**
+     * Returns a function, that, as long as it continues to be invoked, will not
+     * be triggered. The function will be called after it stops being called for
+     * N milliseconds. If `immediate` is passed, trigger the function on the
+     * leading edge, instead of the trailing.
+     *
+     * @static
+     * @param {Function} callback
+     * @param {Number} wait in ms (`300`)
+     * @param {Boolean} immediate default false
+     * @memberof HelperUtil
+     */
+    static debounce(callback, wait = 300, immediate = false) {
+        let timeout;
+
+        return function () {
+            const context = this,
+                args = arguments;
+
+            const later = function () {
+                timeout = null;
+                if (!immediate) {
+                    callback.apply(context, args);
+                }
+            };
+
+            const callNow = immediate && !timeout;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(later, wait);
+
+            if (callNow) {
+                callback.apply(context, args);
+            }
+        };
+    }
 }
 
 const listCountries = HelperUtil.listCountries;
@@ -232,5 +301,7 @@ const isVoid = HelperUtil.isVoid;
 const isResource = HelperUtil.isResource;
 const endSession = HelperUtil.endSession;
 const logError = HelperUtil.logError;
+const mutatePlaces = HelperUtil.mutatePlaces;
+const debounce = HelperUtil.debounce;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce };

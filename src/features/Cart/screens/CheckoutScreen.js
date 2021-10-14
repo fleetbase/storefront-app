@@ -506,7 +506,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 </View>
             </View>
 
-            <ScrollView>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <View style={tailwind('p-4')}>
                     {!customer && (
                         <View style={tailwind('p-4 rounded-md bg-red-50 mb-4')}>

@@ -112,7 +112,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ScrollView style={tailwind('w-full h-full bg-white pb-60')}>
+            <ScrollView style={tailwind('w-full h-full bg-white pb-60')} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <View style={tailwind('p-4')}>
                     <View style={tailwind('mb-4')}>
                         <MapView

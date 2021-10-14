@@ -5,7 +5,7 @@ import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Product } from '@fleetbase/storefront';
+import { Product, StoreLocation } from '@fleetbase/storefront';
 import { useStorefront, useCart } from 'hooks';
 import { formatCurrency, isLastIndex, stripIframeTags } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
@@ -19,7 +19,7 @@ const { isArray } = Array;
 const { emit } = EventRegister;
 
 const ProductScreen = ({ navigation, route }) => {
-    const { attributes, cartItemAttributes } = route.params;
+    const { attributes, cartItemAttributes, store } = route.params;
     const storefront = useStorefront();
     const product = new Product(attributes);
     // const images = product.getAttribute('images');
@@ -29,6 +29,9 @@ const ProductScreen = ({ navigation, route }) => {
     const scrollViewMinHeight = fullHeight / 2;
     const insets = useSafeAreaInsets();
 
+    // only if store has been passed in
+    const [storeLocation, setStoreLocation] = useResourceStorage(store?.id ? `${store.id}_store_location` : 'store_location', StoreLocation, storefront.getAdapter());
+    // relevant product state
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);
     const [subtotal, setSubtotal] = useState(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
@@ -41,6 +44,8 @@ const ProductScreen = ({ navigation, route }) => {
     const [cart, setCart] = useCart();
     const [cartItem, setCartItem] = useState(cartItemAttributes);
 
+    console.log('[ storeLocation ]', storeLocation.getAttribute('place.address'));
+
     const canAddToCart = isValid && !isAddingToCart;
     const cannotAddToCart = !canAddToCart;
     const canDecreaseQuantity = quantity > 1;
@@ -52,11 +57,6 @@ const ProductScreen = ({ navigation, route }) => {
                 <Image source={{ uri: item }} style={tailwind('h-56 w-56')} />
             </View>
         );
-    };
-
-    const updateCart = (cart) => {
-        setCart(cart);
-        emit('cart.updated', cart);
     };
 
     const decreaseQuantity = () => {
@@ -114,20 +114,20 @@ const ProductScreen = ({ navigation, route }) => {
             return index > -1;
         }
 
-        return (cartItem && isArray(cartItem.addons) && cartItem.addons.findIndex(cartItemAddon => cartItemAddon.id === addon.id) > -1);
-    }
+        return cartItem && isArray(cartItem.addons) && cartItem.addons.findIndex((cartItemAddon) => cartItemAddon.id === addon.id) > -1;
+    };
 
     const isVariantSelected = (variant, variation = null) => {
         if (variation && selectedVariations && selectedVariations[variation.id]) {
             return selectedVariations[variation.id].id === variant.id;
         }
 
-        return (cartItem && isArray(cartItem.variants) && cartItem.variants.findIndex(cartItemVariant => cartItemVariant.id === variant.id) > -1);
-    }
+        return cartItem && isArray(cartItem.variants) && cartItem.variants.findIndex((cartItemVariant) => cartItemVariant.id === variant.id) > -1;
+    };
 
     const restoreSelections = () => {
         if (cartItem) {
-            for(let i = 0; i < product.variants().length; i++) {
+            for (let i = 0; i < product.variants().length; i++) {
                 const variation = product.variants()[i];
 
                 // check variation options
@@ -140,7 +140,7 @@ const ProductScreen = ({ navigation, route }) => {
                 }
             }
 
-            for(let i = 0; i < product.addons().length; i++) {
+            for (let i = 0; i < product.addons().length; i++) {
                 const addonCategory = product.addons()[i];
 
                 // check addonCategory addons
@@ -153,7 +153,7 @@ const ProductScreen = ({ navigation, route }) => {
                 }
             }
         }
-    }
+    };
 
     const calculateSubtotal = () => {
         let sum = parseInt(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
@@ -211,7 +211,7 @@ const ProductScreen = ({ navigation, route }) => {
             }
 
             return storefront.cart.retrieve(getUniqueId()).then((cart) => {
-                updateCart(cart);
+                setCart(cart);
                 resolve(cart);
             });
         });
@@ -226,10 +226,13 @@ const ProductScreen = ({ navigation, route }) => {
                 const variants = getVariations();
                 const addons = getAddons();
 
+                // get storelocation if applicable
+                const storeLocationId = storeLocation?.id;
+
                 // if item already exists in cart update item
                 if (cartItem) {
                     return cart.update(cartItem.id, quantity, { addons, variants }).then((cart) => {
-                        updateCart(cart);
+                        setCart(cart);
                         setIsAddingToCart(false);
                         checkInCart();
 
@@ -238,8 +241,8 @@ const ProductScreen = ({ navigation, route }) => {
                 }
 
                 // add new item to cart
-                return cart.add(product.id, quantity, { addons, variants }).then((cart) => {
-                    updateCart(cart);
+                return cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }).then((cart) => {
+                    setCart(cart);
                     setIsAddingToCart(false);
                     checkInCart();
 
@@ -247,7 +250,7 @@ const ProductScreen = ({ navigation, route }) => {
 
                     if (lastEvent && lastEvent.event === 'cart.item_added') {
                         // setCartItem(lastEvent.cart_item_id);
-                        setCartItem(cart.contents().find(cartItem => cartItem.id === lastEvent.cart_item_id));
+                        setCartItem(cart.contents().find((cartItem) => cartItem.id === lastEvent.cart_item_id));
                     }
 
                     return navigation.goBack();
@@ -281,9 +284,11 @@ const ProductScreen = ({ navigation, route }) => {
         return validated;
     };
 
-    useEffect(() => checkInCart(), []);
-    useEffect(() => validate(), []);
-    useEffect(() => restoreSelections(), []);
+    useEffect(() => {
+        checkInCart();
+        validate();
+        restoreSelections();
+    }, []);
 
     return (
         <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
@@ -291,7 +296,7 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                            {cartItemAttributes ? (<FontAwesomeIcon icon={faTimes} />) : (<FontAwesomeIcon icon={faArrowLeft} />)}
+                            {cartItemAttributes ? <FontAwesomeIcon icon={faTimes} /> : <FontAwesomeIcon icon={faArrowLeft} />}
                         </View>
                     </TouchableOpacity>
                     <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
@@ -320,7 +325,7 @@ const ProductScreen = ({ navigation, route }) => {
                             />
                         </View>
                     </View>
-                    <ScrollView style={{ minHeight: scrollViewMinHeight }}>
+                    <ScrollView style={{ minHeight: scrollViewMinHeight }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                         <View style={{ minHeight: scrollViewMinHeight, paddingBottom: scrollViewMinHeight + 80 }}>
                             <View style={tailwind('p-4')}>
                                 <View style={tailwind('mb-2')}>
@@ -343,7 +348,7 @@ const ProductScreen = ({ navigation, route }) => {
                                     )}
                                     <Text style={tailwind('text-sm text-gray-500')}>Base Price</Text>
                                 </View>
-                                <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? ''}} />
+                                <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? '' }} />
                             </View>
                             <View style={tailwind('bg-gray-100')}>
                                 {product.variants().map((variation, i) => (
@@ -359,7 +364,8 @@ const ProductScreen = ({ navigation, route }) => {
                                         {variation.options.map((variant, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}>
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}
+                                            >
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     <View style={tailwind('mr-4')}>
                                                         <RadioButton
@@ -390,9 +396,8 @@ const ProductScreen = ({ navigation, route }) => {
                                         {addonCategory.addons.map((addon, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(
-                                                    `flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`
-                                                )}>
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`)}
+                                            >
                                                 <View>
                                                     <View style={tailwind('flex flex-row items-center')}>
                                                         <Checkbox
@@ -429,9 +434,8 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={tailwind('absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white')}>
                     <TouchableOpacity style={tailwind('mb-2')} disabled={cannotAddToCart} onPress={addToCart}>
                         <View
-                            style={tailwind(
-                                `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`
-                            )}>
+                            style={tailwind(`rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`)}
+                        >
                             {isAddingToCart && <ActivityIndicator color="#3B82F6" style={tailwind('mr-3')} />}
                             <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{`${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(
                                 subtotal / 100,
@@ -444,7 +448,8 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canDecreaseQuantity ? 'opacity-50' : ''}`
-                                )}>
+                                )}
+                            >
                                 <FontAwesomeIcon icon={faMinus} size={15} />
                             </View>
                         </TouchableOpacity>
@@ -455,7 +460,8 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canIncreaseQuantity ? 'opacity-50' : ''}`
-                                )}>
+                                )}
+                            >
                                 <FontAwesomeIcon icon={faPlus} size={15} />
                             </View>
                         </TouchableOpacity>

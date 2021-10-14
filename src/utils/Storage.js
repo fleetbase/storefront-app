@@ -17,7 +17,7 @@ export default class StorageUtil {
      * Returns the initialized storage session from mmkv.
      *
      * @static
-     * @return {MMKVStorage} 
+     * @return {MMKVStorage}
      * @memberof StorageUtil
      */
     static instance() {
@@ -32,7 +32,7 @@ export default class StorageUtil {
      * @param {class} ResourceType
      * @param {Adapter} adapter
      * @param {*} defaultValue
-     * @return {array} 
+     * @return {array}
      * @memberof StorageUtil
      */
     static useResourceStorage(key, ResourceType, adapter, defaultValue) {
@@ -75,10 +75,10 @@ export default class StorageUtil {
      * @param {class} ResourceType
      * @param {Adapter} adapter
      * @param {*} defaultValue
-     * @return {array} 
+     * @return {array}
      * @memberof StorageUtil
      */
-    static useResourceCollection(key, ResourceType, adapter, defaultValue) {
+    static useResourceCollection(key, ResourceType, adapter, defaultValue = new Collection()) {
         const value = getArray(key) ?? defaultValue;
 
         const setResource = (resource) => {
@@ -107,7 +107,7 @@ export default class StorageUtil {
      * @static
      * @param {string} key
      * @param {*} value
-     * @return {void} 
+     * @return {void}
      * @memberof StorageUtil
      */
     static set(key, value) {
@@ -119,7 +119,7 @@ export default class StorageUtil {
      *
      * @static
      * @param {string} key
-     * @return {*} 
+     * @return {*}
      * @memberof StorageUtil
      */
     static get(key) {
@@ -131,7 +131,7 @@ export default class StorageUtil {
      *
      * @static
      * @param {string} key
-     * @return {*} 
+     * @return {*}
      * @memberof StorageUtil
      */
     static remove(key) {
@@ -142,7 +142,7 @@ export default class StorageUtil {
      * Clears all items from storage.
      *
      * @static
-     * @return {void} 
+     * @return {void}
      * @memberof StorageUtil
      */
     static clear() {

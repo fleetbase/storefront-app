@@ -30,6 +30,10 @@ const NetworkCategoryBlock = (props) => {
             .findAll()
             .then((categories) => {
                 setNetworkCategories(categories);
+
+                if (typeof props?.onCategoriesLoaded === 'function') {
+                    props.onCategoriesLoaded(categories);
+                }
             })
             .catch(logError)
             .finally(() => {

@@ -29,7 +29,7 @@ const CategoryProductSlider = (props) => {
     return (
         <View style={props.style}>
             <Text style={tailwind('font-bold mb-3 text-lg')}>{props.category.getAttribute('name')}</Text>
-            <ScrollView horizontal={true}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <View style={tailwind('flex flex-row py-4')}>
                     {products.map((product, index) => (
                         <TouchableOpacity key={index} style={tailwind('w-56 m-4')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize() })}>

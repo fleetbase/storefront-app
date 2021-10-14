@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
 import { useCustomer, signOut } from 'utils/Customer';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
+import NetworkHeader from 'ui/headers/NetworkHeader';
 import tailwind from 'tailwind';
 
 const AccountScreen = ({ navigation, route }) => {
@@ -13,9 +14,19 @@ const AccountScreen = ({ navigation, route }) => {
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
 
+    const RenderHeader = () => {
+        if (info.is_store) {
+            return <StorefrontHeader info={info} />;
+        }
+
+        if (info.is_network) {
+            return <NetworkHeader info={info} hideCategoryPicker={true} style={tailwind('bg-white')} />;
+        }
+    };
+
     return (
         <View>
-            <StorefrontHeader info={info} />
+            <RenderHeader />
             {!customer && (
                 <View style={tailwind('w-full bg-white h-full')}>
                     <View style={tailwind('flex items-center justify-center w-full')}>
