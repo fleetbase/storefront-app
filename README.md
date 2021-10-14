@@ -211,7 +211,7 @@ Coming soon...
 Fleetbase Storefront SDK provides a functional cart that can be used with a few simple methods. This will serve as a quick overview of how the cart operates. More documentation can be found at the [Fleetbase API Reference](https://fleetbase.io/docs/api#cart).
 
 **Initializing or retrieving a cart**.
-```
+```js
 // You can initialize or retrieve a cart using the retrieve() method. 
 // To initialize you can provide a unique identifier
 // To retrieve you can use either the cart id, or the initial unique identifier.
@@ -228,7 +228,7 @@ storefront.cart.retrieve(uniqueId).then((cart) => console.log(cart));
 ```
 
 **Adding a product/item to cart**
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -239,7 +239,7 @@ storefront.cart.retrieve('<cart id>').then((cart) => {
 ```
 
 **Removing a product/item from cart**
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -250,7 +250,7 @@ storefront.cart.retrieve('<cart id>').then((cart) => {
 ```
 
 **Updating an item from cart**
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -266,7 +266,7 @@ Customer authentication is design to be simple, it includes 2FA authentication b
 #### Creating a customer account
 Creating a customer account is a two step process. The first step is to request a creation code, the creation code is a code which will be sent to your customer for them to verify. There is two methods of sending a creation code. Creation code can be sent via sms or email. Below we show an example of requesting a creation code in Storefront.
 
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -279,7 +279,7 @@ storefront.customers.requestCreationCode('<identity>', '<mode>');
 
 Once the creation code is requested, your customer will either receive an email or sms with a verification code. Next you must verify the code with customer details in order to create their account. See the example below.
 
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -293,7 +293,7 @@ storefront.customers.create('<identity>', '<code>', { name, phone }).then((custo
 #### Logging in a customer
 Logging in a customer takes a similar approach to creating a new customer. Logging in can be done via 2FA sms, or the traditional email and password method. In this Storefront app we use the SMS method. Find the example below.
 
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -313,7 +313,7 @@ There is several ways to define a service rate, it just depends on how you would
 
 #### Location based quote
 To provide a location based quote Fleetbase Storefront needs to know from which store location, the customers location, and the cart. Querying for a quote will look something like this.
-```
+```js
 import Storefront, { DeliveryServiceQuote } from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -336,7 +336,7 @@ The checkout process is designed to be done within two API request which involve
 #### Creating a checkout token
 Creating a checkout token is dependent upon the cart and the gateway being used for the checkout. In this example we will show you how a checkout token is created using Stripe.
 
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
@@ -348,7 +348,7 @@ const { paymentIntent, ephemeralKey, customerId, token } = await  storefront.che
 #### Capture checkout
 Once you have a checkout token, you're ready to capture it and create an order. See the example below.
 
-```
+```js
 import Storefront from '@fleetbase/storefront';
 
 const storefront = new Storefront('<your store or network key>');
