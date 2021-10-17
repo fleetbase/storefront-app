@@ -37,13 +37,11 @@ const ExploreScreen = ({ navigation, route }) => {
             <NetworkHeader info={info} onSearchResultPress={transitionToProduct} />
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
-                    <View style={tailwind('p-4')}>
-                        <NetworkCategoryBlock
-                            containerStyle={tailwind('mb-2')}
-                            onCategoriesLoaded={setNetworkCategories}
-                            onPress={(category) => navigation.navigate('NetworkCategoryScreen', { data: category.serialize() })}
-                        />
-                    </View>
+                    <NetworkCategoryBlock
+                        containerStyle={tailwind('mb-2 p-4')}
+                        onCategoriesLoaded={setNetworkCategories}
+                        onPress={(category) => navigation.navigate('NetworkCategoryScreen', { data: category.serialize() })}
+                    />
 
                     {stores.map((store) => (
                         <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>

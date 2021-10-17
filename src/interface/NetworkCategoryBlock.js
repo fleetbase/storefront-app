@@ -41,6 +41,10 @@ const NetworkCategoryBlock = (props) => {
             });
     }, []);
 
+    if (!networkCategories || networkCategories?.length === 0) {
+        return <View />
+    }
+
     return (
         <View style={[props.containerStyle ?? {}, tailwind('rounded-md border border-gray-200 p-4 drop-shadow-lg')]}>
             <View style={tailwind('flex flex-row justify-evenly')}>

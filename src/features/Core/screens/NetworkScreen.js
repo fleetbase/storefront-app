@@ -91,7 +91,7 @@ const NetworkScreen = ({ navigation, route }) => {
                 showLabel: false,
             }}>
             <Tab.Screen key="network" name="Network" component={NetworkStack} initialParams={{ info }} />
-            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart.serialize() }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>
     );
