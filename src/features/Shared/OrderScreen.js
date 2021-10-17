@@ -75,7 +75,6 @@ const OrderScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         const watchNotifications = addEventListener('onNotification', (notification) => {
-            console.log('Reloading order', notification);
             order.reload().then(setOrder);
 
             // set distance and time

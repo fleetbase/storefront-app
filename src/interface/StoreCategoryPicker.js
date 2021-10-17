@@ -7,7 +7,6 @@ import { isResource, logError, mutatePlaces } from 'utils';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
 
-const actionSheetRef = createRef();
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
@@ -15,6 +14,8 @@ const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButton
     categories = categories ?? [];
     buttonTitle = buttonTitle ?? 'View Categories';
     buttonIcon = buttonIcon ?? faBars;
+
+    const actionSheetRef = createRef();
 
     const handleCategoryPress = (category) => {
         if (typeof onCategoryPress === 'function') {

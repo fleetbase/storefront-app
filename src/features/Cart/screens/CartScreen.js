@@ -9,7 +9,7 @@ import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/sto
 import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import { calculatePercentage } from 'utils/Calculate';
 import { useResourceStorage, useResourceCollection } from 'utils/Storage';
-import { formatCurrency, isLastIndex, stripHtml } from 'utils';
+import { formatCurrency, isLastIndex, stripHtml, logError } from 'utils';
 import { NetworkInfoService } from 'services';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
@@ -114,7 +114,7 @@ const CartScreen = ({ navigation, route }) => {
                 setIsFetchingServiceQuote(false);
             })
             .catch((error) => {
-                console.log('[ Error fetching service quote! ]', error);
+                logError(error, '[ Error fetching service quote! ]');
                 setIsFetchingServiceQuote(false);
                 setServiceQuoteError(error.message);
             });
@@ -169,7 +169,7 @@ const CartScreen = ({ navigation, route }) => {
             product = products[cartItem.product_id];
         } else {
             product = await storefront.products.findRecord(cartItem.product_id).catch((error) => {
-                console.log('[ Error fetching product record! ]', error);
+                logError(error, '[ Error fetching product record! ]');
             });
         }
 
@@ -205,7 +205,7 @@ const CartScreen = ({ navigation, route }) => {
                 throw new Error('Cart failed to load via SDK!');
             })
             .catch((error) => {
-                console.log('[ Error fetching cart! ]', error);
+                logError(error, '[ Error fetching cart! ]');
             });
     };
 
@@ -230,7 +230,7 @@ const CartScreen = ({ navigation, route }) => {
             })
             .catch((error) => {
                 setIsEmptying(false);
-                console.log('[ Error removing item from cart! ]', error);
+                logError(error, '[ Error removing item from cart! ]');
             });
     };
 
@@ -247,7 +247,7 @@ const CartScreen = ({ navigation, route }) => {
                 })
                 .catch((error) => {
                     setIsEmptying(false);
-                    console.log('[ Error emptying cart! ]', error);
+                    logError(error, '[ Error emptying cart! ]');
                 });
         };
 
@@ -476,7 +476,7 @@ const CartScreen = ({ navigation, route }) => {
                     rightOpenValue={-256}
                     stopRightSwipe={-256}
                     disableRightSwipe={true}
-                    ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length} onEmptyCart={emptyCart} onPressAddMore={shopForMore} />}
+                    ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} />}
                     ListEmptyComponent={RenderEmptyCartView}
                     ListFooterComponent={RenderCartFooter}
                 />
@@ -520,7 +520,7 @@ const CartScreen = ({ navigation, route }) => {
                         );
                     }}
                     ListEmptyComponent={RenderEmptyCartView}
-                    ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length} onEmptyCart={emptyCart} onPressAddMore={shopForMore} style={tailwind('border-b border-gray-100')} />}
+                    ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} style={tailwind('border-b border-gray-100')} />}
                     ListFooterComponent={RenderCartFooter}
                 />
             )}

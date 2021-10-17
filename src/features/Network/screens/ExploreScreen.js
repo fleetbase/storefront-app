@@ -65,6 +65,7 @@ const ExploreScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                     ))}
                 </View>
+                <View style={tailwind('w-full h-44')}></View>
             </ScrollView>
         </View>
     );

@@ -9,12 +9,13 @@ import { Order, Collection } from '@fleetbase/sdk';
 import { useStorefront, useCustomer } from 'hooks';
 import { adapter } from 'hooks/use-fleetbase';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
+import { logError } from 'utils';
 import { format } from 'date-fns';
 import tailwind from 'tailwind';
 
 const OrderHistoryScreen = ({ navigation, route }) => {
     const { useLeftArrow, info } = route.params;
-    
+
     const storefront = useStorefront();
     const insets = useSafeAreaInsets();
 
@@ -29,15 +30,15 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                 setIsInitializing(initialize === true);
                 setIsLoading(initialize ? false : true);
 
-                return customer.getOrderHistory().then((orders) => {
-                    setOrders(orders);
-                    setIsLoading(false);
-                    setIsInitializing(false);
-
-                    console.log('[ Orders Loaded ]');
-
-                    resolve(orders);
-                });
+                return customer
+                    .getOrderHistory()
+                    .then((orders) => {
+                        setOrders(orders);
+                        setIsLoading(false);
+                        setIsInitializing(false);
+                        resolve(orders);
+                    })
+                    .catch(logError);
             }
 
             resolve(new Collection());

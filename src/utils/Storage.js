@@ -1,6 +1,6 @@
 import MMKVStorage, { create, useMMKVStorage } from 'react-native-mmkv-storage';
 import { Collection } from '@fleetbase/sdk';
-import { isArray } from './Helper';
+import { isArray, isVoid } from './Helper';
 
 const storage = new MMKVStorage.Loader().initialize();
 const useStorage = create(storage);
@@ -78,27 +78,51 @@ export default class StorageUtil {
      * @return {array}
      * @memberof StorageUtil
      */
-    static useResourceCollection(key, ResourceType, adapter, defaultValue = new Collection()) {
-        const value = getArray(key) ?? defaultValue;
+    static useResourceCollection(key, resource, adapter, defaultValue = new Collection()) {
+        // const value = getArray(key) ?? defaultValue;
+        const [value, setCollection] = useStorage(key, storage, defaultValue);
 
-        const setResource = (resource) => {
-            if (isArray(resource) && typeof resource?.invoke === 'function') {
-                setArray(key, resource.invoke('serialize'));
-                return;
+        const toCollection = (arr, resource) => {
+            if (!isArray(arr)) {
+                return new Collection();
             }
 
-            setArray(key, resource);
+            return new Collection(arr?.map((attributes) => new resource(attributes, adapter)));
+        };
+
+        const setResource = (resource) => {
+            if (!isArray(resource)) {
+                return setCollection([resource]);
+            }
+
+            if (typeof resource?.invoke !== 'function') {
+                return setCollection(resource);
+            }
+
+            return setCollection(resource.invoke('serialize'));
         };
 
         if (value && isArray(value)) {
-            return [new Collection(value.map((attributes) => new ResourceType(attributes, adapter))), setResource];
+            return [toCollection(value, resource), setResource];
         }
 
-        if ((value === undefined || value === null) && defaultValue !== undefined) {
+        if (isVoid(value) || StorageUtil.isStorageObject(value)) {
             return [defaultValue, setResource];
         }
 
         return [value, setResource];
+    }
+
+    /**
+     * Checks if object is storage state object from mmkv.
+     *
+     * @static
+     * @param {object} obj
+     * @return {boolean}
+     * @memberof StorageUtil
+     */
+    static isStorageObject(obj) {
+        return typeof obj === 'object' && typeof obj?.instanceID === 'string' && typeof obj?.setMap === 'function';
     }
 
     /**

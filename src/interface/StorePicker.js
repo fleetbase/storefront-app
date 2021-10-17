@@ -8,6 +8,7 @@ import { haversine, isResource } from 'utils';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import { getCoordinates, getDistance } from 'utils/Geo';
 import { formatKm } from 'utils/Format';
+import { useMountedState } from 'hooks';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
@@ -37,6 +38,7 @@ const StorePicker = (props) => {
     const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
+    const isMounted = useMountedState();
 
     const store = new Store(info, StorefrontAdapter);
     const insets = useSafeAreaInsets();
@@ -50,6 +52,10 @@ const StorePicker = (props) => {
         return store
             .getLocations()
             .then((locations) => {
+                if (!isMounted()) {
+                    return;
+                }
+                
                 setStoreLocations(locations);
                 selectStoreLocation(locations);
             })
@@ -117,8 +123,7 @@ const StorePicker = (props) => {
 
     useEffect(() => {
         loadLocations();
-        // selectStoreLocation();
-    }, []);
+    }, [isMounted]);
 
     return (
         <View style={[wrapperStyle]}>

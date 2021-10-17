@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, View, Text, TextInput, Image, ImageBackground, TouchableOpacity } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBars, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category, Product } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import { useMountedState } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { formatCurrency } from 'utils';
+import { formatCurrency, logError } from 'utils';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import CategoryProductSlider from 'ui/CategoryProductSlider';
 import StoreCategoryPicker from 'ui/StoreCategoryPicker';
@@ -20,12 +21,33 @@ const StoreScreen = ({ navigation, route }) => {
     const { info, data } = route.params;
 
     const storefront = useStorefront();
+    const isMounted = useMountedState();
     const store = new Store(data);
 
-    const [categories, setCategories] = useResourceCollection(`${store.id}_categories`, Category, StorefrontAdapter, new Collection());
+    const [categories, setCategories] = useResourceCollection(`${store.id}_categories`, Category, StorefrontAdapter);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState(new Collection());
+    const shouldDisplayLoader = categories?.length === 0 && isLoading;
+
+    const loadCategories = () => {
+        setIsLoading(true);
+
+        storefront.categories
+            .query({ store: store.id, with_products: true })
+            .then((categories) => {
+                if (isMounted()) {
+                    setIsLoading(false);
+                    setCategories(categories);
+                }
+            })
+            .catch(logError)
+            .finally(() => {
+                if (isMounted()) {
+                    setIsLoading(false);
+                }
+            });
+    };
 
     const transitionToCategory = (category, actionSheet) => {
         navigation.navigate('CategoryScreen', { attributes: category.serialize(), store: data });
@@ -54,7 +76,9 @@ const StoreScreen = ({ navigation, route }) => {
                                 </View>
                             </View>
                             <View style={tailwind('w-3/4')}>
-                                <Text style={tailwind('font-bold text-lg mb-1')} numberOfLines={1}>{store.getAttribute('name')}</Text>
+                                <Text style={tailwind('font-bold text-lg mb-1')} numberOfLines={1}>
+                                    {store.getAttribute('name')}
+                                </Text>
                                 <Text style={tailwind('text-gray-400')}>{store.getAttribute('description')}</Text>
                             </View>
                         </View>
@@ -79,10 +103,8 @@ const StoreScreen = ({ navigation, route }) => {
 
     // get categories
     useEffect(() => {
-        storefront.categories.query({ store: store.id, with_products: true }).then((categories) => {
-            setCategories(categories);
-        });
-    }, []);
+        loadCategories();
+    }, [isMounted]);
 
     return (
         <View style={tailwind('bg-white h-full')}>
@@ -102,6 +124,12 @@ const StoreScreen = ({ navigation, route }) => {
             </View>
             <View style={tailwind('w-full h-full')}>
                 <ScrollView style={tailwind('pt-24 pb-40')} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+                    {shouldDisplayLoader && (
+                        <View style={tailwind('py-6 w-full flex flex-row items-center justify-center')}>
+                            <ActivityIndicator />
+                            <Text style={tailwind('ml-3 text-gray-500')}>Loading...</Text>
+                        </View>
+                    )}
                     {categories
                         .filter((category) => category.getAttribute('products.length') > 0)
                         .map((category) => (
@@ -114,7 +142,11 @@ const StoreScreen = ({ navigation, route }) => {
                                         .getAttribute('products')
                                         .map((product) => new Product(product, StorefrontAdapter))
                                         .map((product, index) => (
-                                            <TouchableOpacity key={index} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })} style={tailwind('w-1/2')}>
+                                            <TouchableOpacity
+                                                key={index}
+                                                onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
+                                                style={tailwind('w-1/2')}
+                                            >
                                                 <View>
                                                     <View style={tailwind('p-2')}>
                                                         <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>

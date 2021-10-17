@@ -8,7 +8,7 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { faStripe } from '@fortawesome/free-brands-svg-icons';
-import { formatCurrency, calculatePercentage, isLastIndex } from 'utils';
+import { formatCurrency, calculatePercentage, isLastIndex, logError } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
 import { useStorefront, useFleetbase, useCustomer } from 'hooks';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
@@ -162,7 +162,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             const options = getOrderOptions();
 
             const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
-                console.log('[ Error initializing checkout token! ]', error);
+                logError(error, '[ Error initializing checkout token! ]');
             });
 
             if (!token) {
@@ -211,14 +211,14 @@ const CheckoutScreen = ({ navigation, route }) => {
                 setPaymentSheetEnabled(true);
             } else {
                 setPaymentSheetError(error.localizedMessage);
-                console.log('[ Error enabling stripe payment sheet! ]', error);
+                logError(error, '[ Error enabling stripe payment sheet! ]');
             }
 
             if (paymentOption) {
                 setPaymentMethod(paymentOption);
             }
         } catch (error) {
-            console.log('[ Error enabling stripe payment sheet! ]', error);
+            logError(error, '[ Error enabling stripe payment sheet! ]');
             return null;
         } finally {
             setIsLoading(false);
@@ -235,7 +235,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         const options = getOrderOptions({ cash: true });
 
         const { token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
-            console.log('[ Error initializing checkout token! ]', error);
+            logError(error, '[ Error initializing checkout token! ]');
         });
 
         if (!token) {
@@ -276,7 +276,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             .getPaymentGateways()
             .then((gateways) => setupGateways(gateways, c))
             .catch((error) => {
-                console.log('[ Error fetching payment gateways! ]', error);
+                logError(error, '[ Error fetching payment gateways! ]');
             });
     };
 
@@ -286,7 +286,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         });
 
         if (error) {
-            console.log('[ Error loading stripe payment sheet! ]', error);
+            logError(error, '[ Error loading stripe payment sheet! ]');
         } else if (paymentOption) {
             setPaymentMethod({
                 label: paymentOption.label,
@@ -336,7 +336,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                     navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
                 })
                 .catch((error) => {
-                    console.log('[ Failed to capture order! ]', error);
+                    logError(error, '[ Failed to capture order! ]');
                 });
         }
     };
@@ -352,7 +352,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
             })
             .catch((error) => {
-                console.log('[ Failed to capture order! ]', error);
+                logError(error, '[ Failed to capture order! ]');
             });
     };
 
@@ -404,7 +404,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 setIsFetchingServiceQuote(false);
             })
             .catch((error) => {
-                console.log('[ Error fetching service quote! ]', error);
+                logError(error, '[ Error fetching service quote! ]');
                 setIsFetchingServiceQuote(false);
                 setServiceQuoteError(error.message);
             });

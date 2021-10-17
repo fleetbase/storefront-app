@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Product, StoreLocation } from '@fleetbase/storefront';
 import { useStorefront, useCart } from 'hooks';
-import { formatCurrency, isLastIndex, stripIframeTags } from 'utils';
+import { formatCurrency, isLastIndex, stripIframeTags, logError } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import Checkbox from 'react-native-bouncy-checkbox';
@@ -19,7 +19,7 @@ const { isArray } = Array;
 const { emit } = EventRegister;
 
 const ProductScreen = ({ navigation, route }) => {
-    const { attributes, cartItemAttributes, store } = route.params;
+    const { attributes, cartItemAttributes, store, info } = route.params;
     const storefront = useStorefront();
     const product = new Product(attributes);
     // const images = product.getAttribute('images');
@@ -35,8 +35,8 @@ const ProductScreen = ({ navigation, route }) => {
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);
     const [subtotal, setSubtotal] = useState(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
-    const [selectedVariations, setSelectedVariations] = useState({});
-    const [selectedAddons, setSelectedAddons] = useState({});
+    const [selectedVariations, s1e1tSelectedVariations] = useState({});
+    const [selectedAddons, setSele114ctedAddons] = useState({});
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
     const [isValid, setIsValid] = useState(false);
@@ -44,12 +44,21 @@ const ProductScreen = ({ navigation, route }) => {
     const [cart, setCart] = useCart();
     const [cartItem, setCartItem] = useState(cartItemAttributes);
 
-    console.log('[ storeLocation ]', storeLocation.getAttribute('place.address'));
-
     const canAddToCart = isValid && !isAddingToCart;
     const cannotAddToCart = !canAddToCart;
     const canDecreaseQuantity = quantity > 1;
     const canIncreaseQuantity = quantity < 99;
+    const isNetwork = info?.is_network === true;
+    const isMultiCartEnabled = info?.is_network === true && info?.options?.multi_cart_enabled === true;
+    const isMultiCartDisabled = !isMultiCartEnabled;
+
+    const checkIfCanAddToCart = () => {
+        if (isNetwork && isMultiCartDisabled && cart.isNotEmpty) {
+            return cart.contents().every((cartItem) => cartItem.store_id !== store?.id);
+        }
+
+        return false;
+    };
 
     const renderImages = ({ item, index }) => {
         return (
@@ -220,6 +229,30 @@ const ProductScreen = ({ navigation, route }) => {
     const addToCart = () => {
         setIsAddingToCart(true);
 
+        if (checkIfCanAddToCart()) {
+            return Alert.alert('Cart Has Items!', 'Your cart already has items from another store, if you continue your cart will be emptied.', [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                    onPress: () => {
+                        setIsAddingToCart(false);
+                    },
+                },
+                {
+                    text: 'Continue',
+                    onPress: () => {
+                        return cart
+                            .empty()
+                            .then((cart) => {
+                                setCart(cart);
+                                addToCart(true);
+                            })
+                            .catch(logError);
+                    },
+                },
+            ]);
+        }
+
         // get cart
         getCart()
             .then((cart) => {
@@ -257,7 +290,7 @@ const ProductScreen = ({ navigation, route }) => {
                 });
             })
             .catch((error) => {
-                console.log(error);
+                logError(error);
                 setIsAddingToCart(false);
             });
     };

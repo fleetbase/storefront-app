@@ -26,15 +26,14 @@ const LocationPicker = (props) => {
 
     const [deliverTo, setDeliverTo] = useDeliveryLocation();
     const [customer, setCustomer] = useCustomer();
-    const [places, setPlaces] = useResourceCollection('places', Place, adapter, new Collection());
+    const [places, setPlaces] = useResourceCollection('places', Place, adapter);
     const [isAddingDeliveryLocation, setIsAddingDeliveryLocation] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
     const loadPlaces = (customer) => {
         if (!isValidCustomer(customer)) {
-            setPlaces(new Collection());
-            return;
+            return setPlaces([]);
         }
 
         return customer

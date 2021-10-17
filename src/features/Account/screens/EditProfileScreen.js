@@ -7,6 +7,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useCustomer } from 'hooks';
 import { getLocation } from 'utils/Geo';
 import { set } from 'utils/Storage';
+import { logError } from 'utils';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
 
@@ -32,9 +33,8 @@ const EditProfileScreen = ({ navigation }) => {
                 setCustomer(customer);
                 setIsLoading(false);
                 navigation.goBack();
-            }).catch((error) => {
-                console.log('[ Failed to update customer! ]', error);
             })
+            .catch(logError);
     };
 
     return (

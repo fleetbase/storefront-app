@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
 import { initStripe } from '@stripe/stripe-react-native';
-import { hasRequiredKeys } from 'utils';
+import { hasRequiredKeys, logError } from 'utils';
 import { useStorefront } from 'hooks';
 import { set } from 'utils/Storage';
 import { tailwind } from 'tailwind';
@@ -49,7 +49,7 @@ const BootScreen = ({ navigation }) => {
             }
         })
         .catch((error) => {
-            console.log('[  Error fetching storefront info!  ]', error);
+            logError(error, '[  Error fetching storefront info!  ]');
         });
 
     useEffect(() => {
