@@ -15,6 +15,11 @@ const StorefrontHeader = (props) => {
     const storefront = useStorefront();
     const navigation = useNavigation();
 
+    const viewProduct = (product, closeDialog) => {
+        closeDialog();
+        navigation.navigate('ProductScreen', { attributes: product.serialize() });
+    };
+
     return (
         <View style={[tailwind('z-50'), props.style || {}]}>
             <View style={tailwind('flex h-40 overflow-hidden')}>
@@ -29,7 +34,7 @@ const StorefrontHeader = (props) => {
                             </View>
                         </View>
                         <View>
-                            <StoreSearch store={new Store(props.info)} buttonStyle={tailwind('flex flex-row items-center justify-start bg-gray-100 rounded-md px-3 pr-2 h-10')} />
+                            <StoreSearch store={new Store(props.info)} onResultPress={viewProduct} buttonStyle={tailwind('flex flex-row items-center justify-start bg-gray-100 rounded-md px-3 pr-2 h-10')} />
                         </View>
                     </View>
                 </ImageBackground>
