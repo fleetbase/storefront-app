@@ -13,7 +13,7 @@ const CartHeader = ({ style, wrapperStyle, cart, storeCount, onPressAddMore, onE
                 <View style={tailwind('flex flex-row items-start justify-between')}>
                     <View style={tailwind('flex-1')}>
                         <Text style={tailwind(`text-lg font-bold ${storeCount ? '' : 'mb-2'}`)}>{cart.getAttribute('total_items')} items in your cart</Text>
-                        {storeCount && <Text style={tailwind('text-sm text-gray-400 font-bold mb-2')}>from {storeCount} vendors</Text>}
+                        {storeCount > 0 && <Text style={tailwind('text-sm text-gray-400 font-bold mb-2')}>from {storeCount} vendors</Text>}
                         {cart.isNotEmpty && (
                             <TouchableOpacity style={tailwind('mb-2')} onPress={onEmptyCart}>
                                 <Text style={tailwind('underline text-red-400 text-sm font-semibold')}>Remove All Items</Text>

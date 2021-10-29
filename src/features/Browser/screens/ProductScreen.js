@@ -35,8 +35,8 @@ const ProductScreen = ({ navigation, route }) => {
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);
     const [subtotal, setSubtotal] = useState(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
-    const [selectedVariations, s1e1tSelectedVariations] = useState({});
-    const [selectedAddons, setSele114ctedAddons] = useState({});
+    const [selectedVariations, setSelectedVariations] = useState({});
+    const [selectedAddons, setSelectedAddons] = useState({});
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
     const [isValid, setIsValid] = useState(false);
