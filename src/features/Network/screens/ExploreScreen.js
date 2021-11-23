@@ -25,6 +25,11 @@ const ExploreScreen = ({ navigation, route }) => {
         }, timeout);
     };
 
+    const transitionToCategory = (category, actionSheet) => {
+        navigation.navigate('NetworkCategoryScreen', { data: category.serialize() });
+        actionSheet?.setModalVisible(false);
+    };
+
     useEffect(() => {
         // Load all stores from netwrk
         NetworkInfoService.getStores().then((stores) => {
@@ -34,14 +39,12 @@ const ExploreScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind('bg-white')}>
-            <NetworkHeader info={info} onSearchResultPress={transitionToProduct} />
+            <NetworkHeader info={info} onSearchResultPress={transitionToProduct} onCategoryPress={transitionToCategory} />
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
-                    <NetworkCategoryBlock
-                        containerStyle={tailwind('mb-2 p-4')}
-                        onCategoriesLoaded={setNetworkCategories}
-                        onPress={(category) => navigation.navigate('NetworkCategoryScreen', { data: category.serialize() })}
-                    />
+                    <View style={tailwind('py-2 px-4')}>
+                        <NetworkCategoryBlock containerStyle={tailwind('mb-2 p-2')} onCategoriesLoaded={setNetworkCategories} onPress={transitionToCategory} />
+                    </View>
 
                     {stores.map((store) => (
                         <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>

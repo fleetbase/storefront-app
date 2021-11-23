@@ -35,6 +35,7 @@ const ProductScreen = ({ navigation, route }) => {
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);
     const [subtotal, setSubtotal] = useState(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price'));
+    const [scrollY, setScrollY] = useState(0);
     const [selectedVariations, setSelectedVariations] = useState({});
     const [selectionCount, setSelectionCount] = useState(0);
     const [selectedAddons, setSelectedAddons] = useState({});
@@ -328,40 +329,46 @@ const ProductScreen = ({ navigation, route }) => {
 
     return (
         <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
-            <View style={tailwind('w-full h-full bg-white relative')}>
-                <View style={tailwind('flex flex-row items-center p-4')}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
-                        <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                            {cartItemAttributes ? <FontAwesomeIcon icon={faTimes} /> : <FontAwesomeIcon icon={faArrowLeft} />}
-                        </View>
-                    </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
-                </View>
-                <View style={tailwind('w-full relative')}>
-                    <View style={tailwind('flex flex-col justify-center w-full')}>
-                        <View>
-                            <Carousel
-                                layout={'stack'}
-                                data={images}
-                                renderItem={renderImages}
-                                sliderWidth={fullWidth}
-                                itemWidth={225}
-                                onSnapToItem={(index) => setActiveSlide(index)}
-                                firstItem={activeSlide}
-                                enableMomentum={true}
-                            />
-                            <Pagination
-                                dotsLength={images.length}
-                                activeDotIndex={activeSlide}
-                                containerStyle={tailwind('py-4 mt-2')}
-                                dotStyle={tailwind('rounded-full w-3 h-3 mx-2 bg-gray-600 border border-gray-600')}
-                                inactiveDotStyle={tailwind('rounded-full w-3 h-3 mx-2 bg-gray-100 border border-gray-900')}
-                                inactiveDotOpacity={0.4}
-                                inactiveDotScale={0.6}
-                            />
-                        </View>
+            <View style={tailwind('relative h-full')}>
+                <View style={tailwind('absolute top-0 w-full bg-white bg-opacity-50 z-20')}>
+                    <View style={tailwind('flex flex-row items-center p-4')}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
+                            <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
+                                {cartItemAttributes ? <FontAwesomeIcon icon={faTimes} /> : <FontAwesomeIcon icon={faArrowLeft} />}
+                            </View>
+                        </TouchableOpacity>
+                        <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
                     </View>
-                    <ScrollView style={{ minHeight: scrollViewMinHeight }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+                </View>
+                <ScrollView
+                    style={{ minHeight: scrollViewMinHeight, paddingTop: 72 }}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={tailwind('w-full relative')}>
+                        <View style={tailwind('flex flex-col justify-center w-full')}>
+                            <View>
+                                <Carousel
+                                    layout={'stack'}
+                                    data={images}
+                                    renderItem={renderImages}
+                                    sliderWidth={fullWidth}
+                                    itemWidth={225}
+                                    onSnapToItem={(index) => setActiveSlide(index)}
+                                    firstItem={activeSlide}
+                                    enableMomentum={true}
+                                />
+                                <Pagination
+                                    dotsLength={images.length}
+                                    activeDotIndex={activeSlide}
+                                    containerStyle={tailwind('py-4 mt-2')}
+                                    dotStyle={tailwind('rounded-full w-3 h-3 mx-2 bg-gray-600 border border-gray-600')}
+                                    inactiveDotStyle={tailwind('rounded-full w-3 h-3 mx-2 bg-gray-100 border border-gray-900')}
+                                    inactiveDotOpacity={0.4}
+                                    inactiveDotScale={0.6}
+                                />
+                            </View>
+                        </View>
                         <View style={{ minHeight: scrollViewMinHeight, paddingBottom: scrollViewMinHeight + 80 }}>
                             <View style={tailwind('p-4')}>
                                 <View style={tailwind('mb-2')}>
@@ -465,8 +472,8 @@ const ProductScreen = ({ navigation, route }) => {
                                 ))}
                             </View>
                         </View>
-                    </ScrollView>
-                </View>
+                    </View>
+                </ScrollView>
                 <View style={tailwind('absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white')}>
                     <TouchableOpacity style={tailwind('mb-2')} disabled={cannotAddToCart} onPress={addToCart}>
                         <View

@@ -15,7 +15,7 @@ import StoreCategoryPicker from '../StoreCategoryPicker';
 import tailwind from 'tailwind';
 
 const NetworkHeader = (props) => {
-    let { info, onBack, backButtonIcon, hideSearch, hideCategoryPicker, categories, searchPlaceholder, onSearchResultPress } = props;
+    let { info, onBack, backButtonIcon, hideSearch, hideCategoryPicker, categories, searchPlaceholder, onSearchResultPress, onCategoryPress } = props;
 
     searchPlaceholder = searchPlaceholder ?? 'Search';
 
@@ -55,7 +55,7 @@ const NetworkHeader = (props) => {
                         </View>
                         {!hideCategoryPicker && (
                             <View style={tailwind('ml-3')}>
-                                <StoreCategoryPicker categories={networkCategories} hideButtonTitle={true} buttonStyle={tailwind('h-10')} />
+                                <StoreCategoryPicker categories={networkCategories} hideButtonTitle={true} onCategoryPress={onCategoryPress} buttonStyle={tailwind('h-10')} />
                             </View>
                         )}
                     </View>
