@@ -3,7 +3,7 @@ import { EventRegister } from 'react-native-event-listeners';
 import { countries } from 'countries-list';
 import { set } from './Storage';
 import { getCurrentLocation } from './Geo';
-import config from 'config';
+import configuration from 'config';
 
 const { emit } = EventRegister;
 
@@ -97,7 +97,7 @@ export default class HelperUtil {
      * @memberof HelperUtil
      */
     static hasRequiredKeys() {
-        return 'FLEETBASE_KEY' in config && 'STOREFRONT_KEY' in config;
+        return 'FLEETBASE_KEY' in configuration && 'STOREFRONT_KEY' in configuration;
     }
 
     /**
@@ -232,8 +232,7 @@ export default class HelperUtil {
      */
     static logError(error, message) {
         if (error instanceof Error) {
-            console.log(`[ ${message ?? error.message} ]`, error);
-            return;
+            return console.log(`[ ${message ?? error.message} ]`, error);
         }
 
         if (typeof error === 'string') {
@@ -243,11 +242,10 @@ export default class HelperUtil {
                 output += ` - [ ${message} ]`;
             }
 
-            console.log(output);
-            return;
+            return console.log(output);
         }
 
-        console.log(`[ ${message ?? 'Error Logged!'} ]`, error);
+        return console.log(`[ ${message ?? 'Error Logged!'} ]`, error);
     }
 
     /**
@@ -287,6 +285,82 @@ export default class HelperUtil {
             }
         };
     }
+
+    /**
+     * Deep get a value from a target provided it's path.
+     *
+     * @static
+     * @param {*} object
+     * @param {*} path
+     * @return {*} 
+     * @memberof HelperUtil
+     */
+    static deepGet(object, path) {
+        let current = object;
+
+        const type = typeof object;
+        const isObject = type === 'object';
+        const isFunction = type === 'function';
+        const isArray = Array.isArray(object);
+
+        const pathType = typeof path;
+        const pathIsString = pathType === 'string';
+        const pathIsDotted = pathIsString && path.includes('.');
+        const pathArray = pathIsDotted ? path.split('.') : [path];
+
+        if (isArray || isObject) {
+            for (let i = 0; i < pathArray.length; i++) {
+                if (current && current[pathArray[i]] === undefined) {
+                    return null;
+                } else if (current) {
+                    current = current[pathArray[i]];
+
+                    // if is resource then return get on it's attributes
+                    if (HelperUtil.isResource(current) && pathArray[i + 1] !== undefined) {
+                        const newPath = pathArray.slice(i + 1).join('.');
+
+                        return HelperUtil.deepGet(current.attributes, newPath);
+                    }
+
+                    // resolve functions and continue
+                    if (typeof current === 'function') {
+                        const newPath = pathArray.slice(i + 1).join('.');
+                        return HelperUtil.getResolved(current, newPath);
+                    }
+                }
+            }
+            return current;
+        }
+
+        if (isFunction) {
+            return HelperUtil.getResolved(object, path);
+        }
+    }
+
+    /**
+     * Returns the value of a resolved function.
+     *
+     * @static
+     * @param {*} func
+     * @param {*} path
+     * @memberof HelperUtil
+     */
+    static getResolved = (func, path) => {
+        const resolved = func();
+        return Array.isArray(resolved) || typeof resolved === 'object' ? HelperUtil.deepGet(resolved, path) : null;
+    }
+
+    /**
+     * Returns a configuration value provided it's path.
+     *
+     * @static
+     * @param {*} path
+     * @return {*} 
+     * @memberof HelperUtil
+     */
+    static config(path) {
+        return HelperUtil.deepGet(configuration, path);
+    }
 }
 
 const listCountries = HelperUtil.listCountries;
@@ -303,5 +377,7 @@ const endSession = HelperUtil.endSession;
 const logError = HelperUtil.logError;
 const mutatePlaces = HelperUtil.mutatePlaces;
 const debounce = HelperUtil.debounce;
+const deepGet = HelperUtil.deepGet;
+const config = HelperUtil.config;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config };

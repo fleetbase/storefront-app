@@ -1,0 +1,236 @@
+{
+    "Account": {
+        "AccountScreen": {
+            "title": "Бүртгэл үүсгэх эсвэл нэвтрэх",
+            "loginButtonText": "Нэвтрэх",
+            "createAccountButtonText": "Данс Нээх ",
+            "userGreetingTitle": "Сайн байн уу, {{customerName}}",
+            "accountMenuTitle": "Миний Данс",
+            "profileLinkText": "Профиль",
+            "ordersLinkText": "Захиалга",
+            "placesLinkText": "Газарууд",
+            "signoutButtonText": "Буртгэлээс Гарах"
+        },
+        "ChangePasswordScreen": {
+            "title": " Нууц үг Солих"
+        },
+        "EditProfileScreen": {
+            "title": "Таны Профиль",
+            "nameLabelText": "Таны Нэр",
+            "emailLabelText": "Таны Э-мэйл Хаяг",
+            "phoneLabelText": "Таны Утасны Дугаар",
+            "saveButtonText": "Профиль Хадгалах"
+        },
+        "OrderHistoryScreen": {
+            "title": "Таны Захиалга",
+            "emptyStateText": "Та ямар ч захиалга хийгээгүй бололтой.",
+            "bodyTitle": " Танд захиалга алга",
+            "bodyTitleLoading": " Таны захиалгын түүхийг ачаалж байна"
+        },
+        "SavedPlacesScreen": {
+            "title": " Таны хадгалсан газрууд",
+            "emptyStateText": " Та ямар ч хаяг хадгалаагүй бололтой.",
+            "addNewButtonText": " Шинэ хаяг нэмнэ үү"
+        }
+    },
+    "Auth": {
+        "CreateAccountScreen": {
+            "title": " үртгэл үүсгэх",
+            "greetingTitle": "Сайн байна уу, тавтай морил {{infoName}}.",
+            "greetingSubtitle": "Доорх хэсэгт нэр болон утсаара буртгэл уусэгнүү",
+            "sendVerificationCodeButtonText": " Баталгаажуулах код илгээнэ үү",            
+            "awaitingVerificationTitle": " Баярлалаа, {{name}}!",
+            "awaitingVerificationSubtitle": " Одоо та утсандаа SMS-ээр код хүлээн авсан байх ёстой бөгөөд бүртгэлээ үүсгэхийн тулд кодыг баталгаажуулна уу!",
+            "retryButtonText": "Дахин оролдоно уу?",
+            "verifyCodeButtonText": " Баталгаажуулах код"
+        },
+        "LoginScreen": {
+            "title": "Нэвтрэх",
+            "sendVerificationCodeButtonText": "Баталгаажуулах код илгээнэ үү",
+            "createAccountButtonText": "Эсвэл Бүртгэл үүсгэх",
+            "retryButtonText": "Дахин оролдох уу?",
+            "verifyCodeButtonText": "Баталгаажуулах код"
+        }
+    },
+    "Browser": {
+        "CategoryScreen": {},
+        "HomeScreen": {
+            "categoryPickerHeaderTitle": "Ангилалаар дэлгүүр хэсээрэй"
+        },
+        "ProductScreen": {
+            "updateInCartActionText": "Сагсанд шинэчлэх",
+            "addAnotherActionText": "Өөр нэмэх",
+            "addToCartActionText": "Картанд нэмэх",
+            "basePriceLabel": "Үндсэн үнэ",
+            "optionalAddonLabel": "Нэмэлт, хамгийн их {{addonsCount}}"
+        }
+    },
+    "Сагс": {
+        "components": {
+            "CartCheckoutPanel": {
+                "cartTotalLabelText": "Нийт",
+                "checkoutButtonText": "Тооцоо хийх"
+            },
+            "CartFooter": {
+                "optionsLabelText": "Сонголтууд",
+                "pickupOrderLabelText": "Захиалга татаж авах",
+                "askTipLabelText": "Зөвлөгөө үлдээгээрэй",
+                "askDeliveryTipLabelText": "Тип өгөx xүргэлтэнд",
+                "costLabelText": "Зардал",
+                "deliveryFeeLabelText": "Хүргэлтийн хураамж",
+                "tipLabelText": "Тип",
+                "deliveryTipLabelText": "Хүргэлтийн Тип",
+                "cartTotalLabelText": "Нийт"
+            },
+            "CartHeader": {
+                "title": "{{cartItemsCount}} Таны сагсанд байгаа зүйлс",
+                "multiCartVendorsSubtitle": "Худалдагчдаас {{storeCount}}Борлуулагчид",
+                "removeAllItemsButtonText": "Бүх зүйлийг устгах",
+                "cartSummaryLabelText": "Сагсны хураангуй",
+                "addMoreButtonText": "Илүү нэмэх"
+            }
+        },
+        "CartScreen": {
+            "reloadCartButtonText": "Сагсыг дахин ачаалах",
+            "emptyStateTitle": "Таны карт хоосон байна",
+            "emptyStateSubtitle": " Та сагсандаа юу ч нэмээгүй бололтой.",
+            "goToBrowserButtonText": "Худалдаа эхлэх"
+        },
+        "CheckoutScreen": {
+            "gatewayDetails": {
+                "cash": {
+                    "title": "Бэлэн мөнгө",
+                    "description": "Хүргэлт эсвэл очиж авахдаа бэлэн мөнгө"
+                },
+                "stripe": {
+                    "title": "Stripe",
+                    "description": "Pay by card, powered by Stripe"
+                }
+            },
+            "selectPaymentMethodActionSheetTitle": "Төлбөрийн хэрэгслээ сонгоно уу",
+            "checkoutLabelText": "Тооцоо хийх",
+            "loginToCheckoutWarningText": "Тооцоо хийхийн тулд та нэвтрэх эсвэл бүртгүүлэх ёстой",
+            "loginButtonText": "Нэвтрэх ",
+            "addressLabelText": "Хүргэлтийн хаяг",
+            "selectAddressLabelText": "Хүргэлтийн байршлыг сонгоно уу",
+            "paymentMethodLabelText": "Төлбөрийн Хэрэгсэл",
+            "selectPaymentMethodLabelText": "Төлбөрийн аргыг сонгоно уу",
+            "cashGatewayName": "бэлэн мөнгө",
+            "noPaymentMethodLabelText": "Төлбөрийн арга байхгүй",
+            "cartLabelText": "Сагс ({{cartUniqueItemsCount}})",
+            "orderSummaryLabelText": "Захиалгын хураангуй",
+            "subtotalLabelText": "Дунд нийлбэр",
+            "deliveryFeeLabelText": "Хүргэлтийн Шимтгэл",
+            "tipLabelText": "Гарийн Мөнгө",
+            "deliveryTipLabelText": "Хүргэлтийн Гарийн Мөнгө",
+            "orderTotalLabelText": "Захиалгын нийт",
+            "submitOrderButtonText": "Захиалга өгөх"
+        }
+    },
+    "Core": {
+        "BootScreen": {},
+        "NetworkScreen": {},
+        "StorefrontScreen": {}
+    },
+    "Exceptions": {
+        "SetupWarningScreen": {
+            "title": "Configurations Missing!",
+            "subtitle": "Looks like you haven't properly configured your app.",
+            "envMissingText": "is missing from environment!"
+        }
+    },
+    "Network": {
+        "ExploreScreen": {},
+        "NetworkCategoryScreen": {},
+        "StoreScreen": {
+            "loadingText": "Loading..."
+        }
+    },
+    "Places": {
+        "EditPlaceScreen": {
+            "placeNameLabelText": "Нэр",
+            "placeStreetAddressLabelText": "Гудамжны хаяг эсвэл P.O. Хайрцаг",
+            "placeStreetAddressLine2LabelText": "Байр, люкс, нэгж, барилга, шал гэх мэт.",
+            "placeCityLabelText": "Хот",
+            "placeStateLabelText": "Улсын болон аймгийн",
+            "placePostalCodeLabelText": "Шуудангийн код",
+            "placeCountryLabelText": "Улс",
+            "placePhoneLabelText": "Утасны дугаар",
+            "savePlaceButtonText": "Газрын дэлгэрэнгүй мэдээллийг хадгалах",
+            "makeDefaultButtonText": "Үндсэн болгох",
+            "deletePlaceButtonText": "Газрыг устгах"
+        },
+        "SearchPlacesScreen": {
+            "title": "Шинэ газар нэмнэ үү"
+        }
+    },
+    "Shared": {
+        "OrderCompletedScreen": {
+            "title": "Захиалга хүлээн авлаа!",
+            "orderPickupAddressLabelText": "аас авах захиалга",
+            "orderNotesLabelText": "Захиалгын тэмдэглэл",
+            "orderQRCodeLabelText": "QR код",
+            "orderSummaryLabelText": "Захиалгын хураангуй",
+            "orderIsCashLabelText": "Бэлэн мөнгө",
+            "subtotalLabelText": "дэд нийлбэр",
+            "deliveryFeeLabelText": "Хүргэлтийн хураамж",
+            "tipLabelText": "Гарийн Мөнгө",
+            "deliveryTipLabelText": "Хүргэлтийн Бэлэн мөнгө",
+            "totalLabelText": "Нийт"
+        },
+        "OrderScreen": {
+            "title": "Order {{orderStatus}}",
+            "orderPickupAddressLabelText": "аас авах захиалга",
+            "orderNotesLabelText": "Захиалгын тэмдэглэл",
+            "orderQRCodeLabelText": "QR код",
+            "orderSummaryLabelText": "Захиалгын хураангуй",
+            "orderIsCashLabelText": "Бэлэн мөнгө",
+            "subtotalLabelText": "Дунд нийлбэр",
+            "deliveryFeeLabelText": "Хүргэлтийн хураамж",
+            "tipLabelText": "Гарийн Мөнгө",
+            "deliveryTipLabelText": "Хүргэлтийн Бэлэн мөнгө",
+            "totalLabelText": "Нийт"
+        }
+    },
+    "components": {
+        "interface": {
+            "headers": {
+                "NetworkHeader": {},
+                "StorefrontHeader": {}
+            },
+            "CartSubtotalView": {},
+            "CartTotalView": {},
+            "CategoryProductSlider": {},
+            "LocationPicker": {
+                "searchDeliveryLocationDialogHeaderText": "Хүргэлтийн байршлыг оруулна уу",
+                "autocompleteInputPlaceholderText": "Хаяг оруулна уу...",
+                "selectDeliveryLocationDialogHeaderText": "Хүргэлтийн байршлыг сонгоно уу",
+                "addNewDeliveryLocationButtonText": "Хүргэлтийн шинэ байршил нэмэхийн тулд товшино уу",
+                "editDeliveryLocationButtonText": "Өөрчлөхийн тулд товшино уу",
+                "addDeliveryLocationButtonText": "Хүргэлтийн байршлыг нэмэхийн тулд товшино уу",
+                "deliveryLocationLabelText": "Хаана хүргэж өгнө",
+                "selectLocationLabelText": "Байршлыг сонгоно уу"
+            },
+            "NetworkCategoryBlock": {},
+            "NetworkSearch": {
+                "loadingText": "Searching...",
+                "noDescriptionText": "Тодорхойлолт байхгүй"
+            },
+            "PhoneInput": {
+                "countrySelectTitle": "Улсыг сонгоно уу"
+            },
+            "ProductPriceView": {},
+            "ServiceQuoteFeeView": {},
+            "StoreCategoryPicker": {
+                "defaultButtonTitle": "Ангилалуудыг харах",
+                "categoriesActionSheetTitle": "Ангилал"
+            },
+            "StorePicker": {},
+            "StoreSearch": {
+                "inputPlaceholderText": "Search {{storeName}}"
+            },
+            "TipInput": {},
+            "TipView": {}
+        }
+    }
+}

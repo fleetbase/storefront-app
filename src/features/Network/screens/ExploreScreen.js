@@ -5,6 +5,7 @@ import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
+import { config } from 'utils';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
 import tailwind from 'tailwind';
@@ -26,6 +27,7 @@ const ExploreScreen = ({ navigation, route }) => {
     };
 
     const transitionToCategory = (category, actionSheet) => {
+        console.log('[ transitionToCategory() ]', category)
         navigation.navigate('NetworkCategoryScreen', { data: category.serialize() });
         actionSheet?.setModalVisible(false);
     };
@@ -43,7 +45,7 @@ const ExploreScreen = ({ navigation, route }) => {
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
                     <View style={tailwind('py-2 px-4')}>
-                        <NetworkCategoryBlock containerStyle={tailwind('mb-2 p-2')} onCategoriesLoaded={setNetworkCategories} onPress={transitionToCategory} />
+                        <NetworkCategoryBlock containerStyle={tailwind('mb-2 p-2')} onCategoriesLoaded={setNetworkCategories} onPress={transitionToCategory} {...config('ui.network.exploreScreen.defaultCategoryComponentProps')} />
                     </View>
 
                     {stores.map((store) => (

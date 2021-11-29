@@ -1,0 +1,236 @@
+{
+    "Account": {
+        "AccountScreen": {
+            "title": "Create an account or login",
+            "loginButtonText": "Login",
+            "createAccountButtonText": "Create Account",
+            "userGreetingTitle": "Hello, {{customerName}}",
+            "accountMenuTitle": "My Account",
+            "profileLinkText": "Profile",
+            "ordersLinkText": "Orders",
+            "placesLinkText": "Places",
+            "signoutButtonText": "Sign Out"
+        },
+        "ChangePasswordScreen": {
+            "title": "Change Password"
+        },
+        "EditProfileScreen": {
+            "title": "Your profile",
+            "nameLabelText": "Your name",
+            "emailLabelText": "Your email address",
+            "phoneLabelText": "Your mobile number",
+            "saveButtonText": "Save Profile"
+        },
+        "OrderHistoryScreen": {
+            "title": "Your Orders",
+            "emptyStateText": "Looks like you haven't made any orders.",
+            "bodyTitle": "You have no orders",
+            "bodyTitleLoading": "Loading your order history"
+        },
+        "SavedPlacesScreen": {
+            "title": "Your saved places",
+            "emptyStateText": "Looks like you haven't saved any addresses.",
+            "addNewButtonText": "Add new address"
+        }
+    },
+    "Auth": {
+        "CreateAccountScreen": {
+            "title": "Create Account",
+            "greetingTitle": "Hello, and welcome to {{infoName}}.",
+            "greetingSubtitle": "Create your account with only your phone and name below",
+            "sendVerificationCodeButtonText": "Send Verification Code",
+            "awaitingVerificationTitle": "Thank you, {{name}}!",
+            "awaitingVerificationSubtitle": "Now you should have received a code to your phone via SMS, verify the code to create your account!",
+            "retryButtonText": "Retry?",
+            "verifyCodeButtonText": "Verify Code"
+        },
+        "LoginScreen": {
+            "title": "Login",
+            "sendVerificationCodeButtonText": "Send Verification Code",
+            "createAccountButtonText": "or Create Account",
+            "retryButtonText": "Retry?",
+            "verifyCodeButtonText": "Verify Code"
+        }
+    },
+    "Browser": {
+        "CategoryScreen": {},
+        "HomeScreen": {
+            "categoryPickerHeaderTitle": "Shop by category"
+        },
+        "ProductScreen": {
+            "updateInCartActionText": "Update in Cart",
+            "addAnotherActionText": "Add Another",
+            "addToCartActionText": "Add to Cart",
+            "basePriceLabel": "Base Price",
+            "optionalAddonLabel": "Optional, max {{addonsCount}}"
+        }
+    },
+    "Cart": {
+        "components": {
+            "CartCheckoutPanel": {
+                "cartTotalLabelText": "Total",
+                "checkoutButtonText": "Checkout"
+            },
+            "CartFooter": {
+                "optionsLabelText": "Options",
+                "pickupOrderLabelText": "Pickup order",
+                "askTipLabelText": "Leave a tip",
+                "askDeliveryTipLabelText": "Tip delivery",
+                "costLabelText": "Cost",
+                "deliveryFeeLabelText": "Delivery fee",
+                "tipLabelText": "Tip",
+                "deliveryTipLabelText": "Delivery Tip",
+                "cartTotalLabelText": "Total"
+            },
+            "CartHeader": {
+                "title": "{{cartItemsCount}} items in your cart",
+                "multiCartVendorsSubtitle": "from {{storeCount}} vendors",
+                "removeAllItemsButtonText": "Remove All Items",
+                "cartSummaryLabelText": "Cart Summary",
+                "addMoreButtonText": "Add more"
+            }
+        },
+        "CartScreen": {
+            "reloadCartButtonText": "Reload Cart",
+            "emptyStateTitle": "Your Cart is Empty",
+            "emptyStateSubtitle": "Looks like you haven't added anything to your cart yet.",
+            "goToBrowserButtonText": "Start Shopping"
+        },
+        "CheckoutScreen": {
+            "gatewayDetails": {
+                "cash": {
+                    "title": "Cash",
+                    "description": "Cash on delivery or pickup"
+                },
+                "stripe": {
+                    "title": "Stripe",
+                    "description": "Pay by card, powered by Stripe"
+                }
+            },
+            "selectPaymentMethodActionSheetTitle": "Select your payment method",
+            "checkoutLabelText": "Checkout",
+            "loginToCheckoutWarningText": "You must login or signup to checkout",
+            "loginButtonText": "Login",
+            "addressLabelText": "Delivery Address",
+            "selectAddressLabelText": "Select a delivery location",
+            "paymentMethodLabelText": "Payment Method",
+            "selectPaymentMethodLabelText": "Select payment method",
+            "cashGatewayName": "Cash",
+            "noPaymentMethodLabelText": "No payment method",
+            "cartLabelText": "Cart ({{cartUniqueItemsCount}})",
+            "orderSummaryLabelText": "Order Summary",
+            "subtotalLabelText": "Subtotal",
+            "deliveryFeeLabelText": "Delivery Fee",
+            "tipLabelText": "Tip",
+            "deliveryTipLabelText": "Delivery Tip",
+            "orderTotalLabelText": "Order Total",
+            "submitOrderButtonText": "Place Order"
+        }
+    },
+    "Core": {
+        "BootScreen": {},
+        "NetworkScreen": {},
+        "StorefrontScreen": {}
+    },
+    "Exceptions": {
+        "SetupWarningScreen": {
+            "title": "Configurations Missing!",
+            "subtitle": "Looks like you haven't properly configured your app.",
+            "envMissingText": "is missing from environment!"
+        }
+    },
+    "Network": {
+        "ExploreScreen": {},
+        "NetworkCategoryScreen": {},
+        "StoreScreen": {
+            "loadingText": "Loading..."
+        }
+    },
+    "Places": {
+        "EditPlaceScreen": {
+            "placeNameLabelText": "Name",
+            "placeStreetAddressLabelText": "Street address or P.O. Box",
+            "placeStreetAddressLine2LabelText": "Apt, suite, unit, building, floor, etc.",
+            "placeCityLabelText": "City",
+            "placeStateLabelText": "State or province",
+            "placePostalCodeLabelText": "Postal code",
+            "placeCountryLabelText": "Country",
+            "placePhoneLabelText": "Phone number",
+            "savePlaceButtonText": "Save place details",
+            "makeDefaultButtonText": "Make default",
+            "deletePlaceButtonText": "Delete place"
+        },
+        "SearchPlacesScreen": {
+            "title": "Add a new place"
+        }
+    },
+    "Shared": {
+        "OrderCompletedScreen": {
+            "title": "Order received!",
+            "orderPickupAddressLabelText": "Pickup order from",
+            "orderNotesLabelText": "Order Notes",
+            "orderQRCodeLabelText": "QR Code",
+            "orderSummaryLabelText": "Order Summary",
+            "orderIsCashLabelText": "Cash",
+            "subtotalLabelText": "Subtotal",
+            "deliveryFeeLabelText": "Delivery Fee",
+            "tipLabelText": "Tip",
+            "deliveryTipLabelText": "Delivery Tip",
+            "totalLabelText": "Total"
+        },
+        "OrderScreen": {
+            "title": "Order {{orderStatus}}",
+            "orderPickupAddressLabelText": "Pickup order from",
+            "orderNotesLabelText": "Order Notes",
+            "orderQRCodeLabelText": "QR Code",
+            "orderSummaryLabelText": "Order Summary",
+            "orderIsCashLabelText": "Cash",
+            "subtotalLabelText": "Subtotal",
+            "deliveryFeeLabelText": "Delivery Fee",
+            "tipLabelText": "Tip",
+            "deliveryTipLabelText": "Delivery Tip",
+            "totalLabelText": "Total"
+        }
+    },
+    "components": {
+        "interface": {
+            "headers": {
+                "NetworkHeader": {},
+                "StorefrontHeader": {}
+            },
+            "CartSubtotalView": {},
+            "CartTotalView": {},
+            "CategoryProductSlider": {},
+            "LocationPicker": {
+                "searchDeliveryLocationDialogHeaderText": "Enter delivery location",
+                "autocompleteInputPlaceholderText": "Enter address...",
+                "selectDeliveryLocationDialogHeaderText": "Select delivery location",
+                "addNewDeliveryLocationButtonText": "Tap to add new delivery location",
+                "editDeliveryLocationButtonText": "Tap to change",
+                "addDeliveryLocationButtonText": "Tap to add delivery location",
+                "deliveryLocationLabelText": "Deliver to:",
+                "selectLocationLabelText": "Select location"
+            },
+            "NetworkCategoryBlock": {},
+            "NetworkSearch": {
+                "loadingText": "Searching...",
+                "noDescriptionText": "No description"
+            },
+            "PhoneInput": {
+                "countrySelectTitle": "Select Country"
+            },
+            "ProductPriceView": {},
+            "ServiceQuoteFeeView": {},
+            "StoreCategoryPicker": {
+                "defaultButtonTitle": "View Categories",
+                "categoriesActionSheetTitle": "Categories"
+            },
+            "StorePicker": {},
+            "StoreSearch": {
+                "inputPlaceholderText": "Search {{storeName}}"
+            },
+            "TipInput": {},
+            "TipView": {}
+        }
+    }
+}

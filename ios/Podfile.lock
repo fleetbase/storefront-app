@@ -326,6 +326,8 @@ PODS:
     - React-Core
   - RNGestureHandler (1.10.3):
     - React-Core
+  - RNLocalize (2.1.5):
+    - React-Core
   - RNPermissions (3.0.5):
     - React-Core
   - RNReanimated (2.2.2):
@@ -418,6 +420,7 @@ DEPENDENCIES:
   - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -520,6 +523,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNReanimated:
@@ -581,6 +586,7 @@ SPEC CHECKSUMS:
   RNCPushNotificationIOS: 87b8d16d3ede4532745e05b03c42cff33a36cc45
   RNDeviceInfo: cc7de0772378f85d8f36ae439df20f05c590a651
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+  RNLocalize: 74b82db20cc3895ccc25af992c644879bcec2815
   RNPermissions: 7043bacbf928eae25808275cfe73799b8f618911
   RNReanimated: 241c586663f44f19a53883c63375fdd041253960
   RNScreens: 6e1ea5787989f92b0671049b808aef64fa1ef98c

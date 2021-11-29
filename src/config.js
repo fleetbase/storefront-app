@@ -1,5 +1,5 @@
 import Environment from 'react-native-config';
-import InterfaceConfig from 'config/interface';
+import InterfaceConfig from '../config/interface';
 
 /** 
  * ----------------------------------------------------------

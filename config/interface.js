@@ -1,3 +1,6 @@
+import DefaultConfig, { configure } from './defaults';
+import { tailwind } from '../src/tailwind';
+
 /** 
  * ----------------------------------------------------------
  * Storefront App Interface Configuration
@@ -9,14 +12,6 @@
  *
  * @type {object} 
  */
-const InterfaceConfig = {
-    storefront: {
-        defaultHeaderComponent: 'ui/headers/StorefrontHeader'
-    },
-
-    network: {
-        defaultHeaderComponent: 'ui/headers/NetworkHeader'
-    }
-};
+const InterfaceConfig = configure('InterfaceConfig', {});
 
 export default InterfaceConfig;
