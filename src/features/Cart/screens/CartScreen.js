@@ -4,7 +4,7 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faShoppingCart, faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faTrash, faPencilAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import { calculatePercentage } from 'utils/Calculate';
@@ -15,6 +15,8 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { useCart } from 'hooks';
 import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
+import { format } from 'date-fns';
+import FastImage from 'react-native-fast-image';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import CartCheckoutPanel from '../components/CartCheckoutPanel';
@@ -263,6 +265,10 @@ const CartScreen = ({ navigation, route }) => {
 
         height += cartItem.variants.length * 12;
         height += cartItem.addons.length * 12;
+        
+        if (cartItem.scheduled_at) {
+            height += 12;
+        }
 
         return height;
     };
@@ -346,7 +352,7 @@ const CartScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex flex-row items-start')}>
                         <View style={tailwind('mr-3')}>
                             <View>
-                                <Image source={{ uri: item.product_image_url }} style={tailwind('w-16 h-16')} />
+                                <FastImage source={{ uri: item.product_image_url }} style={tailwind('w-16 h-16')} />
                             </View>
                         </View>
                         <View style={tailwind('w-36')}>
@@ -372,6 +378,12 @@ const CartScreen = ({ navigation, route }) => {
                                             </View>
                                         ))}
                                     </View>
+                                    {item.scheduled_at && (
+                                        <View style={tailwind('flex flex-row items-center mt-1')}>
+                                            <FontAwesomeIcon icon={faCalendarCheck} size={12} style={tailwind('text-green-600 mr-1')} />
+                                            <Text style={tailwind('text-xs font-semibold text-green-600')}>{format(new Date(item.scheduled_at), 'MMM do K:mmbbb')}</Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                             <TouchableOpacity style={tailwind('mt-2')} onPress={() => editCartItem(item)}>
@@ -497,7 +509,7 @@ const CartScreen = ({ navigation, route }) => {
                                     <TouchableOpacity onPress={() => navigation.navigate('StoreScreen', { data: item.serialize() })} style={tailwind('flex flex-row items-center')}>
                                         <View style={tailwind('mr-3')}>
                                             <View style={tailwind('border border-white rounded-md')}>
-                                                <Image source={{ uri: item.getAttribute('logo_url') }} style={tailwind('h-10 w-10 rounded-md')} />
+                                                <FastImage source={{ uri: item.getAttribute('logo_url') }} style={tailwind('h-10 w-10 rounded-md')} />
                                             </View>
                                         </View>
                                         <View style={tailwind('flex items-center')}>
@@ -520,7 +532,9 @@ const CartScreen = ({ navigation, route }) => {
                         );
                     }}
                     ListEmptyComponent={RenderEmptyCartView}
-                    ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} style={tailwind('border-b border-gray-100')} />}
+                    ListHeaderComponent={
+                        <CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} style={tailwind('border-b border-gray-100')} />
+                    }
                     ListFooterComponent={RenderCartFooter}
                 />
             )}

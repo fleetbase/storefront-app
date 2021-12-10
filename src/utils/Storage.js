@@ -36,7 +36,7 @@ export default class StorageUtil {
      * @memberof StorageUtil
      */
     static useResourceStorage(key, ResourceType, adapter, defaultValue) {
-        const [value, setValue] = useStorage(key, storage, defaultValue);
+        const [value, setValue] = useStorage(key, defaultValue);
 
         const setResource = (resource) => {
             if (isArray(resource) && typeof resource?.invoke === 'function') {
@@ -80,9 +80,21 @@ export default class StorageUtil {
      */
     static useResourceCollection(key, resource, adapter, defaultValue = new Collection()) {
         // const value = getArray(key) ?? defaultValue;
-        const [value, setCollection] = useStorage(key, storage, defaultValue);
+        const [value, setCollection] = useStorage(key, defaultValue);
 
         const toCollection = (arr, resource) => {
+            if (isVoid(arr)) {
+                return new Collection();
+            }
+
+            if (typeof arr === 'object' && !isArray(arr) && isArray(arr?.items)) {
+                return toCollection(arr.items, resource);
+            }
+
+            if (isArray(arr) && typeof arr?.invoke === 'function') {
+                return arr;
+            }
+
             if (!isArray(arr)) {
                 return new Collection();
             }
@@ -92,14 +104,14 @@ export default class StorageUtil {
 
         const setResource = (resource) => {
             if (!isArray(resource)) {
-                return setCollection([resource]);
+                return setCollection({ items: [resource] });
             }
 
             if (typeof resource?.invoke !== 'function') {
-                return setCollection(resource);
+                return setCollection({ items: resource });
             }
 
-            return setCollection(resource.invoke('serialize'));
+            return setCollection({ items: resource.invoke('serialize') });
         };
 
         if (value && isArray(value)) {
@@ -110,7 +122,7 @@ export default class StorageUtil {
             return [defaultValue, setResource];
         }
 
-        return [value, setResource];
+        return [toCollection(value, resource), setResource];
     }
 
     /**
@@ -181,4 +193,4 @@ const clear = StorageUtil.clear;
 const useResourceStorage = StorageUtil.useResourceStorage;
 const useResourceCollection = StorageUtil.useResourceCollection;
 
-export { set, get, remove, clear, storage, useMMKVStorage, useResourceStorage, useResourceCollection };
+export { set, get, remove, clear, storage, useMMKVStorage, useStorage, useResourceStorage, useResourceCollection };

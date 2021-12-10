@@ -30,12 +30,14 @@ const StorePicker = (props) => {
         buttonTitleMaxLines,
         displayAddressForTitle,
         onStoreLocationSelected,
+        onLoaded,
     } = props;
     const buttonIcon = props?.buttonIcon ?? faInfoCircle;
 
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter);
     const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
+    const [isInitialized, setIsInitialized] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
     const isMounted = useMountedState();
@@ -44,8 +46,8 @@ const StorePicker = (props) => {
     const insets = useSafeAreaInsets();
     const useAddressTitle = displayAddressForTitle && storeLocation?.id;
 
-    const loadLocations = (initialize = false) => {
-        if (typeof store !== 'object' && typeof store.getLocations !== 'function') {
+    const loadLocations = () => {
+        if (typeof store?.getLocations !== 'function') {
             return;
         }
 
@@ -55,9 +57,13 @@ const StorePicker = (props) => {
                 if (!isMounted()) {
                     return;
                 }
-                
+
                 setStoreLocations(locations);
                 selectStoreLocation(locations);
+
+                if (typeof onLoaded === 'function') {
+                    onLoaded(locations);
+                }
             })
             .catch((error) => {
                 console.log('[Error fetching store locations]', error);
@@ -122,7 +128,7 @@ const StorePicker = (props) => {
     );
 
     useEffect(() => {
-        loadLocations();
+        loadLocations(true);
     }, [isMounted]);
 
     return (
@@ -132,9 +138,9 @@ const StorePicker = (props) => {
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('text-white mr-2'), buttonIconStyle]} />
                     <View style={[buttonTitleWrapperStyle]}>
                         {useAddressTitle && (
-                            <View>
-                                <Text style={tailwind('font-semibold uppercase')}>{storeLocation.getAttribute('name')}</Text>
-                                <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1')}</Text>
+                            <View style={[props.addressContainerStyle]}>
+                                <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]}>{storeLocation.getAttribute('name')}</Text>
+                                <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]}>{storeLocation.getAttribute('place.street1')}</Text>
                             </View>
                         )}
                         {!useAddressTitle && (
@@ -168,7 +174,7 @@ const StorePicker = (props) => {
                                                             <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
                                                         </View>
                                                     )}
-                                                    <View>
+                                                    <View style={[props.addressRowContainerStyle]}>
                                                         <Text style={tailwind('font-semibold uppercase')}>{storeLocation.getAttribute('name')}</Text>
                                                         <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1')}</Text>
                                                         <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>

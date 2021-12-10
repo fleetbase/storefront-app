@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, createRef } from 'react';
+import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUniqueId } from 'react-native-device-info';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
 import { Product, StoreLocation } from '@fleetbase/storefront';
 import { useStorefront, useCart } from 'hooks';
 import { formatCurrency, isLastIndex, stripIframeTags, logError } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import FastImage from 'react-native-fast-image';
+import YouTube from 'react-native-youtube';
+import ActionSheet from 'react-native-actions-sheet';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Checkbox from 'react-native-bouncy-checkbox';
 import RadioButton from 'react-native-animated-radio-button';
 import RenderHtml from 'react-native-render-html';
@@ -17,6 +21,20 @@ import tailwind from 'tailwind';
 
 const { isArray } = Array;
 const { emit } = EventRegister;
+const windowHeight = Dimensions.get('window').height;
+const dialogHeight = windowHeight / 2;
+
+const getYoutubeId = (url) => {
+    const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
+    return match && match[7].length == 11 ? match[7] : false;
+};
+
+const getYoutubeThumbnail = (url) => {
+    const id = getYoutubeId(url);
+    return `https://i3.ytimg.com/vi/${id}/hqdefault.jpg`;
+};
+
+const isYoutubeUrl = (url) => typeof url === 'string' && url.includes('youtube.com');
 
 const ProductScreen = ({ navigation, route }) => {
     const { attributes, cartItemAttributes, store, info } = route.params;
@@ -28,6 +46,7 @@ const ProductScreen = ({ navigation, route }) => {
     const fullHeight = Dimensions.get('window').height;
     const scrollViewMinHeight = fullHeight / 2;
     const insets = useSafeAreaInsets();
+    const actionSheetRef = createRef();
 
     // only if store has been passed in
     const [storeLocation, setStoreLocation] = useResourceStorage(store?.id ? `${store.id}_store_location` : 'store_location', StoreLocation, storefront.getAdapter());
@@ -45,6 +64,11 @@ const ProductScreen = ({ navigation, route }) => {
     const [quantity, setQuantity] = useState(1);
     const [cart, setCart] = useCart();
     const [cartItem, setCartItem] = useState(cartItemAttributes);
+    const [bookingDate, setBookingDate] = useState(cartItem?.scheduled_at ? new Date(cartItem?.scheduled_at) : new Date());
+    const [bookingTime, setBookingTime] = useState(cartItem?.scheduled_at ? new Date(cartItem?.scheduled_at) : new Date());
+    const [isBookingConfirmed, setIsBookingConfirmed] = useState(false);
+    const [hasBookingChanged, setHasBookingChanged] = useState(false);
+    const [viewingMedia, setViewingMedia] = useState(null);
 
     const canAddToCart = isValid && !isAddingToCart;
     const cannotAddToCart = !canAddToCart;
@@ -53,6 +77,14 @@ const ProductScreen = ({ navigation, route }) => {
     const isNetwork = info?.is_network === true;
     const isMultiCartEnabled = info?.is_network === true && info?.options?.multi_cart_enabled === true;
     const isMultiCartDisabled = !isMultiCartEnabled;
+    const isService = product.getAttribute('is_service') === true;
+    const isBookable = isService && product.getAttribute('is_bookable') === true;
+
+    let actionButtonText = `${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+
+    if (isBookable) {
+        actionButtonText = `${cartItem ? 'Update Booking' : isInCart ? 'Book Another' : 'Book Service'} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+    }
 
     const checkIfCanAddToCart = () => {
         if (isNetwork && isMultiCartDisabled && cart.isNotEmpty) {
@@ -65,7 +97,7 @@ const ProductScreen = ({ navigation, route }) => {
     const renderImages = ({ item, index }) => {
         return (
             <View key={index} style={tailwind('flex items-center justify-center w-56 h-56')}>
-                <Image source={{ uri: item }} style={tailwind('h-56 w-56')} />
+                <FastImage source={{ uri: item }} style={tailwind('h-56 w-56')} />
             </View>
         );
     };
@@ -233,6 +265,19 @@ const ProductScreen = ({ navigation, route }) => {
     const addToCart = () => {
         setIsAddingToCart(true);
 
+        let bookingDateTime;
+
+        // for bookable services
+        if (isBookable && isBookingConfirmed === false && hasBookingChanged === false) {
+            // prompt user to select the booking slot
+            actionSheetRef.current?.show();
+            setIsAddingToCart(false);
+            return;
+        } else {
+            bookingDateTime = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate(), bookingTime.getHours(), bookingTime.getMinutes());
+            setIsBookingConfirmed(false);
+        }
+
         if (checkIfCanAddToCart()) {
             return Alert.alert('Cart Has Items!', 'Your cart already has items from another store, if you continue your cart will be emptied.', [
                 {
@@ -268,7 +313,7 @@ const ProductScreen = ({ navigation, route }) => {
 
                 // if item already exists in cart update item
                 if (cartItem) {
-                    return cart.update(cartItem.id, quantity, { addons, variants }).then((cart) => {
+                    return cart.update(cartItem.id, quantity, { addons, variants, scheduled_at: bookingDateTime }).then((cart) => {
                         setCart(cart);
                         setIsAddingToCart(false);
                         checkInCart();
@@ -278,7 +323,7 @@ const ProductScreen = ({ navigation, route }) => {
                 }
 
                 // add new item to cart
-                return cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }).then((cart) => {
+                return cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId, scheduled_at: bookingDateTime }).then((cart) => {
                     setCart(cart);
                     setIsAddingToCart(false);
                     checkInCart();
@@ -321,6 +366,27 @@ const ProductScreen = ({ navigation, route }) => {
         return validated;
     };
 
+    const updateBookingSchedule = (date, mode) => {
+        if (mode === 'time') {
+            setBookingTime(date);
+        }
+
+        if (mode === 'date') {
+            setBookingDate(date);
+        }
+
+        setHasBookingChanged(true);
+    };
+
+    const confirmBooking = () => {
+        actionSheetRef.current?.hide();
+        setIsBookingConfirmed(true);
+    };
+
+    if (isBookingConfirmed) {
+        return addToCart();
+    }
+
     useEffect(() => {
         checkInCart();
         validate();
@@ -337,14 +403,13 @@ const ProductScreen = ({ navigation, route }) => {
                                 {cartItemAttributes ? <FontAwesomeIcon icon={faTimes} /> : <FontAwesomeIcon icon={faArrowLeft} />}
                             </View>
                         </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
+                        <View style={tailwind('flex flex-row items-center')}>
+                            <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
+                            {isService && <Text style={tailwind('ml-1 text-xl text-blue-500')}>(Service)</Text>}
+                        </View>
                     </View>
                 </View>
-                <ScrollView
-                    style={{ minHeight: scrollViewMinHeight, paddingTop: 72 }}
-                    showsHorizontalScrollIndicator={false}
-                    showsVerticalScrollIndicator={false}
-                >
+                <ScrollView style={{ minHeight: scrollViewMinHeight, paddingTop: 72 }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                     <View style={tailwind('w-full relative')}>
                         <View style={tailwind('flex flex-col justify-center w-full')}>
                             <View>
@@ -393,6 +458,56 @@ const ProductScreen = ({ navigation, route }) => {
                                 </View>
                                 <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? '' }} />
                             </View>
+                            {product.getAttribute('youtube_urls', []).length > 0 && (
+                                <View style={tailwind('bg-gray-100')}>
+                                    <View style={tailwind('my-2 bg-white w-full p-4')}>
+                                        <View style={tailwind('flex flex-row items-center mb-2')}>
+                                            <Text style={tailwind('font-semibold text-lg')}>YouTube Videos</Text>
+                                        </View>
+                                        <View style={tailwind(`flex flex-row flex-wrap py-4`)}>
+                                            {product.getAttribute('youtube_urls').map((youtubeUrl, index) => (
+                                                <TouchableOpacity key={index} onPress={() => setViewingMedia(youtubeUrl)} style={tailwind('border border-black')}>
+                                                    <FastImage source={{ uri: getYoutubeThumbnail(youtubeUrl) }} style={tailwind('w-40 h-24')} />
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
+                            {isBookable && cartItem && (
+                                <View style={tailwind('bg-gray-100')}>
+                                    <View style={tailwind('my-2 bg-white w-full p-4')}>
+                                        <View style={tailwind('flex flex-row items-center mb-2')}>
+                                            <FontAwesomeIcon icon={faCalendarCheck} style={tailwind('mr-2 text-blue-600')} />
+                                            <Text style={tailwind('font-semibold text-lg text-blue-600')}>Your booking</Text>
+                                        </View>
+                                        <View style={tailwind(`flex flex-col py-4`)}>
+                                            <View style={tailwind('flex flex-row items-center mb-4')}>
+                                                <Text style={tailwind('font-bold text-black mr-2')}>Date:</Text>
+                                                <DateTimePicker
+                                                    value={bookingDate}
+                                                    minimumDate={new Date()}
+                                                    mode={'date'}
+                                                    display={'default'}
+                                                    onChange={(event, selectedDate) => updateBookingSchedule(selectedDate, 'date')}
+                                                    style={tailwind('w-24')}
+                                                />
+                                            </View>
+                                            <View style={tailwind('flex flex-row items-center')}>
+                                                <Text style={tailwind('font-bold text-black mr-2')}>Time:</Text>
+                                                <DateTimePicker
+                                                    value={bookingTime}
+                                                    mode={'time'}
+                                                    display={'default'}
+                                                    minuteInterval={30}
+                                                    onChange={(event, selectedDate) => updateBookingSchedule(selectedDate, 'time')}
+                                                    style={tailwind('w-24')}
+                                                />
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
                             <View style={tailwind('bg-gray-100')}>
                                 {product.variants().map((variation, i) => (
                                     <View key={i} style={tailwind('my-2 bg-white w-full p-4')}>
@@ -480,10 +595,7 @@ const ProductScreen = ({ navigation, route }) => {
                             style={tailwind(`rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`)}
                         >
                             {isAddingToCart && <ActivityIndicator color="#3B82F6" style={tailwind('mr-3')} />}
-                            <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{`${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(
-                                subtotal / 100,
-                                product.getAttribute('currency')
-                            )}`}</Text>
+                            <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{actionButtonText}</Text>
                         </View>
                     </TouchableOpacity>
                     <View style={tailwind('flex flex-row items-center justify-center my-2')}>
@@ -511,6 +623,70 @@ const ProductScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
+            <ActionSheet ref={actionSheetRef} containerStyle={[{ height: dialogHeight, zIndex: 99999 }]} gestureEnabled={true} bounceOnOpen={true}>
+                <View style={[tailwind('z-40 w-full relative'), { height: dialogHeight - 110 }]}>
+                    <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
+                        <View style={tailwind('flex flex-row items-center')}>
+                            <Text style={tailwind('text-lg font-semibold')}>Confirm booking date and time</Text>
+                        </View>
+                        <View>
+                            <TouchableOpacity onPress={() => actionSheetRef.current?.hide()}>
+                                <View style={tailwind('rounded-full bg-red-50 w-8 h-8 flex items-center justify-center')}>
+                                    <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={tailwind('h-full relative')}>
+                        <View style={tailwind('w-full flex px-6 my-4')}>
+                            <View style={tailwind('flex flex-row items-center')}>
+                                <Text style={tailwind('font-bold text-black mr-2')}>Date:</Text>
+                                <DateTimePicker
+                                    value={bookingDate}
+                                    minimumDate={new Date()}
+                                    mode={'date'}
+                                    display={'default'}
+                                    onChange={(event, selectedDate) => setBookingDate(selectedDate)}
+                                    style={tailwind('w-24')}
+                                />
+                            </View>
+                        </View>
+                        <View style={tailwind('w-full flex px-6 mt-2')}>
+                            <View style={tailwind('flex flex-row items-center')}>
+                                <Text style={tailwind('font-bold text-black mr-2')}>Time:</Text>
+                                <DateTimePicker
+                                    value={bookingTime}
+                                    mode={'time'}
+                                    display={'default'}
+                                    minuteInterval={30}
+                                    onChange={(event, selectedDate) => setBookingTime(selectedDate)}
+                                    style={tailwind('w-24')}
+                                />
+                            </View>
+                        </View>
+                        <View style={tailwind('w-full flex items-center justify-center p-4 absolute bottom-0 left-0 right-0')}>
+                            <TouchableOpacity onPress={confirmBooking} style={tailwind(`btn bg-blue-500 shadow-sm`)} disabled={!bookingDate || !bookingTime}>
+                                <Text style={tailwind('text-white text-lg font-semibold')}>Confirm Booking</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </ActionSheet>
+            <Modal visible={viewingMedia !== null} animationType={'slide'} transparent={true}>
+                <View style={[tailwind('bg-black'), { paddingTop: insets.top }]}>
+                    <View style={tailwind('flex flex-row items-center p-4 z-10')}>
+                        <TouchableOpacity onPress={() => setViewingMedia(null)} style={tailwind('mr-4')}>
+                            <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
+                                <FontAwesomeIcon icon={faTimes} />
+                            </View>
+                        </TouchableOpacity>
+                        <Text style={tailwind('text-xl font-bold text-white')}>Viewing media</Text>
+                    </View>
+                    <View style={tailwind('w-full h-full flex items-center mt-20')}>
+                        {isYoutubeUrl(viewingMedia) && <YouTube videoId={getYoutubeId(viewingMedia)} style={{ alignSelf: 'stretch', height: 400 }} />}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };

@@ -354,12 +354,28 @@ export default class HelperUtil {
      * Returns a configuration value provided it's path.
      *
      * @static
-     * @param {*} path
-     * @return {*} 
+     * @param {String} path
+     * @return {Mixed} 
      * @memberof HelperUtil
      */
     static config(path) {
         return HelperUtil.deepGet(configuration, path);
+    }
+
+    /**
+     * Returns the sum of array or parameters passed.
+     *
+     * @static
+     * @param {Array} sum
+     * @return {Integer} 
+     * @memberof HelperUtil
+     */
+    static sum(numbers = []) {
+        if (!isArray(numbers)) {
+            numbers = [ ...arguments ];
+        }
+
+        return numbers.reduce((sum, number) => sum + number, 0);
     }
 }
 
@@ -379,5 +395,6 @@ const mutatePlaces = HelperUtil.mutatePlaces;
 const debounce = HelperUtil.debounce;
 const deepGet = HelperUtil.deepGet;
 const config = HelperUtil.config;
+const sum = HelperUtil.sum;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config, sum };

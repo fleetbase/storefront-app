@@ -1,4 +1,4 @@
-import DefaultConfig, { configure } from './defaults';
+import { configure } from './defaults';
 import { tailwind } from '../src/tailwind';
 
 /** 

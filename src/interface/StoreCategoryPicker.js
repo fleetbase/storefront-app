@@ -10,7 +10,7 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButtonTitle, buttonStyle, buttonIcon, buttonIconStyle, onCategoryPress }) => {
+const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButtonTitle, buttonStyle, buttonTitleStyle, dialogIconStyle, buttonIcon, buttonIconSize, buttonIconStyle, numberOfLines, onCategoryPress }) => {
     categories = categories ?? [];
     buttonTitle = buttonTitle ?? 'View Categories';
     buttonIcon = buttonIcon ?? faBars;
@@ -27,8 +27,8 @@ const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButton
         <View style={[wrapperStyle]}>
             <TouchableOpacity onPress={() => actionSheetRef.current?.setModalVisible()}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-lg px-4 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
-                    <FontAwesomeIcon icon={buttonIcon} style={[tailwind(`text-gray-900 ${!hideButtonTitle ? 'mr-2' : ''}`), buttonIconStyle]} />
-                    {!hideButtonTitle && <Text style={[tailwind('text-gray-900 text-base'), buttonStyle]}>{buttonTitle}</Text>}
+                    <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind(`text-gray-900 ${!hideButtonTitle ? 'mr-2' : ''}`), buttonIconStyle]} />
+                    {!hideButtonTitle && <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>{buttonTitle}</Text>}
                 </View>
             </TouchableOpacity>
 
@@ -43,7 +43,7 @@ const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButton
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
-                            <FontAwesomeIcon icon={buttonIcon} style={[tailwind(`text-gray-900 mr-2`), buttonIconStyle]} />
+                            <FontAwesomeIcon icon={buttonIcon} style={[tailwind(`text-gray-900 mr-2`), dialogIconStyle]} />
                             <Text style={tailwind('text-lg font-semibold')}>Categories</Text>
                         </View>
 

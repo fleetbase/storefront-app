@@ -2,7 +2,6 @@ import React, { useEffect, useState, createRef } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
-import ActionSheet from 'react-native-actions-sheet';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -14,6 +13,8 @@ import { useStorefront, useFleetbase, useCustomer } from 'hooks';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Collection } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
+import ActionSheet from 'react-native-actions-sheet';
+import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
 const { addEventListener, removeEventListener, emit } = EventRegister;
@@ -596,7 +597,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                             {!isLoading && !paymentMethod?.label && <Text>No payment method</Text>}
                                             {paymentMethod?.label !== null && (
                                                 <View style={tailwind('flex flex-row items-center')}>
-                                                    <Image
+                                                    <FastImage
                                                         source={{
                                                             uri: `data:image/png;base64,${paymentMethod?.image}`,
                                                         }}

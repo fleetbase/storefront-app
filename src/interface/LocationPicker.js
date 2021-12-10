@@ -9,7 +9,7 @@ import { useResourceStorage, useResourceCollection, get, set } from 'utils/Stora
 import { isValidCustomer, signOut } from 'utils/Customer';
 import { isResource, logError, mutatePlaces } from 'utils';
 import { adapter } from 'hooks/use-fleetbase';
-import { useDeliveryLocation, useCustomer } from 'hooks';
+import { useDeliveryLocation, useCustomer, useMountedState } from 'hooks';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import ActionSheet from 'react-native-actions-sheet';
 import Config from 'react-native-config';
@@ -23,6 +23,7 @@ const dialogHeight = windowHeight / 2;
 
 const LocationPicker = (props) => {
     const insets = useSafeAreaInsets();
+    const isMounted = useMountedState();
 
     const [deliverTo, setDeliverTo] = useDeliveryLocation();
     const [customer, setCustomer] = useCustomer();
@@ -39,6 +40,10 @@ const LocationPicker = (props) => {
         return customer
             .getSavedPlaces()
             .then((places) => {
+                if (!isMounted) {
+                    return;
+                }
+
                 setPlaces(places);
             })
             .catch((error) => {
@@ -93,7 +98,7 @@ const LocationPicker = (props) => {
         if (!deliverTo) {
             const location = get('location');
 
-            if (location) {
+            if (location && isMounted) {
                 const googleAddress = new GoogleAddress().setAttributes(location);
                 const lastKnownPlace = Place.fromGoogleAddress(googleAddress);
 
@@ -121,7 +126,7 @@ const LocationPicker = (props) => {
             removeEventListener(customerUpdated);
             // removeEventListener(locationChanged);
         };
-    }, []);
+    }, [isMounted]);
 
     const DialogHeader = ({ title, icon, onCancel }) => (
         <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>

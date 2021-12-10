@@ -27,6 +27,18 @@ export default class FormatUtil {
     }
 
     /**
+     * Capitalize string
+     *
+     * @static
+     * @param {String} string
+     * @return {String} 
+     * @memberof FormatUtil
+     */
+    static capitalize([first, ...rest]) {
+        return first.toUpperCase() + rest.join('');
+    }
+
+    /**
      * Format kilometers
      *
      * @static
@@ -41,5 +53,6 @@ export default class FormatUtil {
 
 const formatCurrency = FormatUtil.currency;
 const formatKm = FormatUtil.km;
+const capitalize = FormatUtil.capitalize;
 
-export { formatCurrency, formatKm };
+export { formatCurrency, formatKm, capitalize };

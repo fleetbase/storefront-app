@@ -6,7 +6,7 @@ import { Collection } from '@fleetbase/sdk';
 import { Category } from '@fleetbase/storefront';
 import { useNavigation } from '@react-navigation/native';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { formatCurrency, logError } from 'utils';
+import { formatCurrency, capitalize, logError } from 'utils';
 import { useResourceCollection } from 'utils/Storage';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
@@ -23,7 +23,6 @@ const NetworkCategoryBlock = (props) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const on = (action = 'press', ...params) => {
-        const capitalize = ([first, ...rest]) => first.toUpperCase() + rest.join('');
         const actionName = `on${capitalize(action)}`;
         const fn = props[actionName];
 

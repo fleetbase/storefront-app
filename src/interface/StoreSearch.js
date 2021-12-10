@@ -11,7 +11,7 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitleStyle, buttonIcon, buttonIconStyle, onResultPress }) => {
+const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitleStyle, buttonIcon, buttonIconSize, buttonIconStyle, numberOfLines, onResultPress }) => {
     buttonTitle = buttonTitle ?? 'Search';
     buttonIcon = buttonIcon ?? faSearch;
 
@@ -56,8 +56,8 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
         <View style={[wrapperStyle]}>
             <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-lg px-4 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
-                    <FontAwesomeIcon icon={buttonIcon} style={[tailwind('mr-2 text-gray-900'), buttonIconStyle]} />
-                    <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]}>{buttonTitle}</Text>
+                    <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('mr-2 text-gray-900'), buttonIconStyle]} />
+                    <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>{buttonTitle}</Text>
                 </View>
             </TouchableOpacity>
 

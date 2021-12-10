@@ -10,6 +10,10 @@
  * @type {object}
  */
 const DefaultConfig = {
+    AppConfig: {
+        linkingPrefixes: []
+    },
+
     InterfaceConfig: {
         storefront: {
             defaultHeaderComponent: 'ui/headers/StorefrontHeader',

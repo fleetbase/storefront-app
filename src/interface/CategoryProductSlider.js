@@ -3,6 +3,7 @@ import { ScrollView, View, Text, TouchableOpacity, TextInput, Image } from 'reac
 import { useNavigation } from '@react-navigation/native';
 import { useStorefront } from 'hooks';
 import { formatCurrency } from 'utils';
+import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
 const isString = (string) => typeof string === 'string';
@@ -11,7 +12,7 @@ const { isArray } = Array;
 const CategoryProductSlider = (props) => {
     const navigation = useNavigation();
     const storefront = useStorefront();
-    
+
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -22,7 +23,7 @@ const CategoryProductSlider = (props) => {
         });
     }, []);
 
-    if (!isArray(products) ||  products.length === 0) {
+    if (!isArray(products) || products.length === 0) {
         return <View />;
     }
 
@@ -36,10 +37,13 @@ const CategoryProductSlider = (props) => {
                             <View>
                                 <View>
                                     <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>
-                                        <Image source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
+                                        <FastImage source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
                                     </View>
                                     <View style={tailwind('flex p-2')}>
-                                        <Text style={tailwind('font-semibold mb-1')}>{product.getAttribute('name')}</Text>
+                                        <View style={tailwind('mb-1.5 flex flex-row items-center')}>
+                                            <Text style={tailwind('font-semibold')}>{product.getAttribute('name')}</Text>
+                                            {product.getAttribute('is_service') === true && <Text style={tailwind('ml-1 text-blue-500 font-semibold')}>(Service)</Text>}
+                                        </View>
                                         {product.isOnSale && (
                                             <View style={tailwind('flex flex-row')}>
                                                 <Text style={tailwind('font-bold mr-1')}>{formatCurrency(product.getAttribute('sale_price') / 100, product.getAttribute('currency'))}</Text>

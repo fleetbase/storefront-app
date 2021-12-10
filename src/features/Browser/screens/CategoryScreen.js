@@ -5,6 +5,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useStorefront } from 'hooks';
 import { formatCurrency } from 'utils';
 import Storefront, { Category } from '@fleetbase/storefront';
+import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
 const CategoryScreen = ({ navigation, route }) => {
@@ -46,7 +47,7 @@ const CategoryScreen = ({ navigation, route }) => {
                             <View>
                                 <View style={tailwind('p-2')}>
                                     <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>
-                                        <Image source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
+                                        <FastImage source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
                                     </View>
                                     <View style={tailwind('flex p-2')}>
                                         <Text style={tailwind('font-semibold mb-1')}>{product.getAttribute('name')}</Text>
