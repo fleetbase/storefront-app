@@ -62,10 +62,27 @@
             "addAnotherActionText": "Өөр нэмэх",
             "addToCartActionText": "Картанд нэмэх",
             "basePriceLabel": "Үндсэн үнэ",
-            "optionalAddonLabel": "Нэмэлт, хамгийн их {{addonsCount}}"
+            "optionalAddonLabel": "Нэмэлт, хамгийн их {{addonsCount}}",
+            "hasItemsAlertTitle": "Cart Has Items!",
+            "hasItemsAlertDecription": "Your cart already has items from another store, if you continue your cart will be emptied.",
+            "hasItemsAlertCancelActionText": "Cancel",
+            "hasItemsAlertContinueActionText": "Continue",
+            "displayBookingDetailsTitle": "Your booking",
+            "displayBookingDateLabelText": "Date",
+            "displayBookingTimeLabelText": "Time",
+            "confirmBookingActionSheetTitle": "Confirm booking date and time",
+            "confirmBookingActionSheetDateLabelText": "Date",
+            "confirmBookingActionSheetTimeLabelText": "Time",
+            "confirmBookingActionSheetButtonText": "Confirm Booking",
+            "viewProductMediaTitle": "Viewing media",
+            "serviceIdentifierText": "(Service)",
+            "youtubeVidsSectionTitle": "YouTube Videos",
+            "updateBookingActionText": "Update Booking",
+            "addAnotherBookingActionText": "Book Another",
+            "bookServiceActionText": "Book Service"
         }
     },
-    "Сагс": {
+    "Саrt": {
         "components": {
             "CartCheckoutPanel": {
                 "cartTotalLabelText": "Нийт",
@@ -143,7 +160,32 @@
         "ExploreScreen": {},
         "NetworkCategoryScreen": {},
         "StoreScreen": {
-            "loadingText": "Loading..."
+            "loadingText": "Loading...",
+            "displayHoursToggleText": "Hours",
+            "displayHoursTodayLabel": "Today",
+            "weekdayMonday": "Monday",
+            "weekdayTuesday": "Tuesday",
+            "weekdayWednesday": "Wednesday",
+            "weekdayThursday": "Thursday",
+            "weekdayFriday": "Friday",
+            "weekdaySaturday": "Saturday",
+            "weekdaySunday": "Sunday",
+            "shareStoreTitleText": "{{storeName}} found on {{networkName}}",
+            "shareStoreSubjectText": "{{storeName}} found on {{networkName}}",
+            "shareStoreMessageText": "Hey look what I found on {{networkName}}! Checkout {{storeName}}!",
+            "photosButtonText": "Photos",
+            "reviewsButtonText": "Reviews",
+            "mapButtonText": "Map",
+            "websiteButtonText": "Website",
+            "contactButtonText": "Contact",
+            "shareButtonText": "Share",
+            "contactActionSheetTitle": "Contact {{storeName}}",
+            "contactActionSheetCallActionButtonText": "Call {{phone}}",
+            "contactActionSheetEmailActionButtonText": "Email {{email}}",
+            "contactActionSheetFacebookActionButtonText": "Facebook",
+            "contactActionSheetInstagramActionButtonText": "Instagram",
+            "contactActionSheetTwitterActionButtonText": "Twitter",
+            "serviceIndicatorText": "(Service)"
         }
     },
     "Places": {
@@ -190,6 +232,48 @@
             "tipLabelText": "Гарийн Мөнгө",
             "deliveryTipLabelText": "Хүргэлтийн Бэлэн мөнгө",
             "totalLabelText": "Нийт"
+        },
+        "StoreLocationScreen": {
+            "hideDirectionsActionText": "Hide Directions",
+            "displayDirectionsActionText": "Display Directions",
+            "focusStoreActionText": "Focus on {{storeName}}",
+            "callStoreActionText": "Call",
+            "displayDirectionsFromLabel": "From:",
+            "displayDirectionsToLabel": "To:",
+            "displayDirectionsDistanceLabel": "Distance:",
+            "displayDirectionsDistanceUnitLabel": "km",
+            "displayDirectionsDurationLabel": "Duration:",
+            "displayDirectionsDurationUnitLabel": "min",
+            "displayDirectionsLoadingIndicatorText": "Loading..."
+        },
+        "StorePhotosScreen": {
+            "title": "Photos ({{storeMediaCount}})",
+            "viewMediaModalTitle": "Viewing photo"
+        },
+        "StoreReviewsScreen": {
+            "title": "{{storeName}} Reviews",
+            "overallRatingTitle": "Overall rating",
+            "overallRatingSubtitle": "review",
+            "overallRatingSubtitlePlural": "reviews",
+            "writeReviewButtonText": "Write a Review",
+            "reviewCreatedAgoText": "{{reviewCreatedAgo}} ago",
+            "sortLabel": "Sort",
+            "filterLabel": "Filter",
+            "fileteredLabel": "{{filter}} star ratings",
+            "actionSheetTitle": "{{action}} reviews",
+            "filterOptionText": "{{rating}} stars",
+            "displayAllFilterOptionText": "All ratings",
+            "newestFirstSortOption": "Newest first",
+            "oldestFirstSortOption": "Oldest first",
+            "highestRatedSortOption": "Highest rated",
+            "lowestRatedSortOption": "Lowest rated",
+            "defaultSortOption": "{{networkName}} Sort"
+        },
+        "WriteReviewScreen": {
+            "loginToReviewWarningText": "You must login or signup to leave a review",
+            "loginToReviewWarningButtonText": "Login",
+            "reviewRatingLabelText": "Select your rating",
+            "submitReviewButtonText": "Submit Review"
         }
     },
     "components": {

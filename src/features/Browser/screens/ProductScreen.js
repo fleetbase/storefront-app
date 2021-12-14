@@ -273,7 +273,7 @@ const ProductScreen = ({ navigation, route }) => {
             actionSheetRef.current?.show();
             setIsAddingToCart(false);
             return;
-        } else {
+        } else if (isBookable && isBookingConfirmed) {
             bookingDateTime = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate(), bookingTime.getHours(), bookingTime.getMinutes());
             setIsBookingConfirmed(false);
         }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, View, Text, Image, ImageBackground, TouchableOpacity } from 'react-native';
+import { SafeAreaView, ScrollView, RefreshControl, View, Text, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
@@ -19,7 +19,8 @@ const ExploreScreen = ({ navigation, route }) => {
     const isMounted = useMountedState();
     const [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter, new Collection());
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
-    
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
     const isReviewsEnabled = info?.options?.reviews_enabled === true;
 
     const transitionToProduct = (product, close, timeout = 300) => {
@@ -37,17 +38,30 @@ const ExploreScreen = ({ navigation, route }) => {
         actionSheet?.setModalVisible(false);
     };
 
+    const refresh = () => {
+        setIsRefreshing(true);
+
+        NetworkInfoService.getStores()
+            .then(setStores)
+            .finally(() => {
+                setIsRefreshing(false);
+            });
+    };
+
     useEffect(() => {
         // Load all stores from netwrk
-        NetworkInfoService.getStores().then((stores) => {
-            setStores(stores);
-        });
+        NetworkInfoService.getStores().then(setStores);
     }, [isMounted]);
 
     return (
         <View style={tailwind('bg-white')}>
             <NetworkHeader info={info} onSearchResultPress={transitionToProduct} onCategoryPress={transitionToCategory} />
-            <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
+            <ScrollView
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
+                style={tailwind('w-full h-full')}
+            >
                 <View style={tailwind('py-2')}>
                     <View style={tailwind('py-2 px-4')}>
                         <NetworkCategoryBlock
