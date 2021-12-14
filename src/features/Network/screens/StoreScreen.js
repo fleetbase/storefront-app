@@ -25,7 +25,6 @@ import tailwind from 'tailwind';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
-let renderCount = 0;
 
 const StoreScreen = ({ navigation, route }) => {
     const { info, data } = route.params;
@@ -362,12 +361,12 @@ const StoreScreen = ({ navigation, route }) => {
                 >
                     <StoreHeader store={store} wrapperStyle={tailwind('bg-transparent pt-28')} />
                     {shouldDisplayLoader && (
-                        <View style={tailwind('py-6 w-full flex flex-row items-center justify-center')}>
+                        <View style={tailwind('py-6 w-full flex flex-row items-center justify-center bg-white')}>
                             <ActivityIndicator />
                             <Text style={tailwind('ml-3 text-gray-500')}>Loading...</Text>
                         </View>
                     )}
-                    <View style={tailwind('w-full h-full bg-white')}>
+                    <View style={tailwind('w-full h-full min-h-80 bg-white')}>
                         {categories
                             .filter((category) => category.getAttribute('products.length') > 0)
                             .map((category) => (
