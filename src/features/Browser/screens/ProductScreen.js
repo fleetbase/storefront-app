@@ -25,7 +25,11 @@ const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
 const getYoutubeId = (url) => {
-    const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
+    if (typeof url !== 'string') {
+        return false;
+    }
+    
+    const match = url?.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
     return match && match[7].length == 11 ? match[7] : false;
 };
 
@@ -79,6 +83,7 @@ const ProductScreen = ({ navigation, route }) => {
     const isMultiCartDisabled = !isMultiCartEnabled;
     const isService = product.getAttribute('is_service') === true;
     const isBookable = isService && product.getAttribute('is_bookable') === true;
+    const youtubeUrls = product.getAttribute('youtube_urls', []).filter((url) => typeof url === 'string').filter(Boolean);
 
     let actionButtonText = `${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
 
@@ -458,14 +463,14 @@ const ProductScreen = ({ navigation, route }) => {
                                 </View>
                                 <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? '' }} />
                             </View>
-                            {product.getAttribute('youtube_urls', []).length > 0 && (
+                            {youtubeUrls.length > 0 && (
                                 <View style={tailwind('bg-gray-100')}>
                                     <View style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center mb-2')}>
                                             <Text style={tailwind('font-semibold text-lg')}>YouTube Videos</Text>
                                         </View>
                                         <View style={tailwind(`flex flex-row flex-wrap py-4`)}>
-                                            {product.getAttribute('youtube_urls').map((youtubeUrl, index) => (
+                                            {youtubeUrls.map((youtubeUrl, index) => (
                                                 <TouchableOpacity key={index} onPress={() => setViewingMedia(youtubeUrl)} style={tailwind('border border-black')}>
                                                     <FastImage source={{ uri: getYoutubeThumbnail(youtubeUrl) }} style={tailwind('w-40 h-24')} />
                                                 </TouchableOpacity>
