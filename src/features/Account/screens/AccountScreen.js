@@ -10,15 +10,16 @@ import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import tailwind from 'tailwind';
 
-const displayHeaderComponent = config('ui.accountScreen.displayHeaderComponent');
 const fullHeight = Dimensions.get('window').height;
-const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
 
 const AccountScreen = ({ navigation, route }) => {
     const { info } = route.params;
 
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
+
+    const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? true;
+    const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
 
     const RenderHeader = ({ style }) => {
         if (info.is_store) {

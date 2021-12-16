@@ -5,6 +5,7 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useStorefront } from 'hooks';
+import { logError } from 'utils';
 import { updateCustomer } from 'utils/Customer';
 import { getLocation } from 'utils/Geo';
 import { set, get } from 'utils/Storage';
@@ -23,7 +24,7 @@ const LoginScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const location = getLocation();
     const insets = useSafeAreaInsets();
-    
+
     const isNotAwaitingVerification = isAwaitingVerification === false;
 
     const syncDevice = (customer) => {
@@ -37,10 +38,17 @@ const LoginScreen = ({ navigation, route }) => {
     const sendVerificationCode = () => {
         setIsLoading(true);
 
-        storefront.customers.login(phone).then((response) => {
-            setIsAwaitingVerification(true);
-            setIsLoading(false);
-        });
+        storefront.customers
+            .login(phone)
+            .then((response) => {
+                setIsAwaitingVerification(true);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                logError(error);
+                setIsLoading(false);
+                setError(error.message);
+            });
     };
 
     const verifyCode = () => {
@@ -99,7 +107,7 @@ const LoginScreen = ({ navigation, route }) => {
                                     <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>Send Verification Code</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity disabled={isLoading} onPress={() => navigation.navigate('CreateAccountScreen', { redirectTo })}>
+                            <TouchableOpacity disabled={isLoading} onPress={() => navigation.navigate('CreateAccount', { redirectTo })}>
                                 <View style={tailwind('btn border border-green-50 bg-green-50')}>
                                     <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>or Create Account</Text>
                                 </View>
