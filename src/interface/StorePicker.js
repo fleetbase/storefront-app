@@ -186,6 +186,7 @@ const StorePicker = (props) => {
                                     </View>
                                 </TouchableOpacity>
                             ))}
+                            <View style={tailwind('w-full h-44')}></View>
                         </ScrollView>
                     </View>
                 </View>

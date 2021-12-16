@@ -5,6 +5,8 @@ import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
+import { logError } from 'utils';
+import { useMountedState } from 'hooks';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
 import tailwind from 'tailwind';
@@ -12,14 +14,30 @@ import tailwind from 'tailwind';
 const NetworkCategoryScreen = ({ navigation, route }) => {
     const { info, data } = route.params;
 
+    const isMounted = useMountedState();
+
     const [stores, setStores] = useResourceCollection(`${info.id}_${data.id}_stores`, Store, StorefrontAdapter, new Collection());
     const category = new Category(data, StorefrontAdapter);
 
+    const transitionToStore = (store) => {
+        if (!store.getAttribute('online')) {
+            return;
+        }
+
+        navigation.navigate('StoreScreen', { data: store.serialize() });
+    }
+
     useEffect(() => {
         // Load all stores from netwrk
-        NetworkInfoService.getStores({ category: category.id }).then((stores) => {
-            setStores(stores);
-        });
+        NetworkInfoService.getStores({ category: category.id })
+            .then((stores) => {
+                if (!isMounted()) {
+                    return;
+                }
+
+                setStores(stores);
+            })
+            .catch(logError);
     }, []);
 
     return (
@@ -28,8 +46,8 @@ const NetworkCategoryScreen = ({ navigation, route }) => {
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
                     {stores.map((store) => (
-                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>
-                            <View style={tailwind(`border-b border-gray-100 py-3`)}>
+                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} disabled={!store.getAttribute('online')} onPress={() => transitionToStore(store)}>
+                            <View style={tailwind(`border-b border-gray-100 py-3 ${store.getAttribute('online') ? 'opacity-100' : 'opacity-30'}`)}>
                                 <View style={tailwind('flex flex-row')}>
                                     <View style={tailwind('mr-3')}>
                                         <Image source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-20 w-20 rounded-md')} />

@@ -133,7 +133,7 @@ const StoreScreen = ({ navigation, route }) => {
                                 <Text style={tailwind('font-bold text-lg text-white')} numberOfLines={1}>
                                     {store.getAttribute('name')}
                                 </Text>
-                                <Text style={tailwind('text-gray-100')}>{store.getAttribute('description')}</Text>
+                                <Text style={tailwind('text-gray-100')}>{store.getAttribute('description') ?? 'No description'}</Text>
                                 {isReviewsEnabled && (
                                     <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>
                                         <Rating value={store.getAttribute('rating')} readonly={true} />

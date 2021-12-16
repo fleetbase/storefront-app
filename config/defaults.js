@@ -28,6 +28,29 @@ const DefaultConfig = {
                 },
             },
         },
+
+        accountScreen: {
+            containerStyle: {},
+            headerContainerStyle: {},
+            headerComponentProps: {},
+            displayHeaderComponent: true,
+            displayEmptyStatePlaceholder: true,
+            emptyStatePlaceholderContainerStyle: {},
+            emptyStatePlaceholderIconContainerStyle: {},
+            emptyStatePlaceholderIconStyle: {},
+            emptyStatePlaceholderTextStyle: {},
+            actionButtonsContainerStyle: {},
+            loginButtonStyle: {},
+            loginButtonTextStyle: {},
+            createAccountButtonStyle: {},
+            createAccountButtonTextStyle: {},
+            signedOutContainerBackgroundImage: null,
+            signedInContainerBackgroundImage: null,
+            signedInContainerBackgroundImageStyle: {},
+            signedOutContainerBackgroundImageStyle: {},
+            signedInBackgroundResizeMode: 'cover',
+            signedOutBackgroundResizeMode: 'cover'
+        }
     },
 };
 
