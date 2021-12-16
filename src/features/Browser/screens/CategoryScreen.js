@@ -5,7 +5,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useStorefront } from 'hooks';
 import { formatCurrency } from 'utils';
 import Storefront, { Category } from '@fleetbase/storefront';
-import FastImage from 'react-native-fast-image';
+import ProductCard from 'ui/ProductCard';
 import tailwind from 'tailwind';
 
 const CategoryScreen = ({ navigation, route }) => {
@@ -43,31 +43,7 @@ const CategoryScreen = ({ navigation, route }) => {
                 </View>
                 <View style={tailwind('flex flex-row')}>
                     {products.map((product, index) => (
-                        <TouchableOpacity key={index} style={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize() })}>
-                            <View>
-                                <View style={tailwind('p-2')}>
-                                    <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>
-                                        <FastImage source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
-                                    </View>
-                                    <View style={tailwind('flex p-2')}>
-                                        <Text style={tailwind('font-semibold mb-1')}>{product.getAttribute('name')}</Text>
-                                        {product.isOnSale && (
-                                            <View style={tailwind('flex flex-row')}>
-                                                <Text style={tailwind('font-bold mr-1')}>{formatCurrency(product.getAttribute('sale_price') / 100, product.getAttribute('currency'))}</Text>
-                                                <Text style={tailwind('line-through text-xs text-gray-400')}>
-                                                    {formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {!product.isOnSale && (
-                                            <View style={tailwind('flex flex-row')}>
-                                                <Text style={tailwind('text-center font-bold')}>{formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}</Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
+                        <ProductCard key={index} product={product} containerStyle={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize() })} />
                     ))}
                 </View>
             </View>

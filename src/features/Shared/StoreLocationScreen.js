@@ -199,8 +199,8 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                         <View style={tailwind('mr-3')}>
                                             <Image source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-12 w-12 rounded')} />
                                         </View>
-                                        <View style={tailwind('flex')}>
-                                            <Text style={tailwind('font-bold text-lg -mt-4')} numberOfLines={1}>
+                                        <View style={tailwind('flex w-36')}>
+                                            <Text style={tailwind('font-bold text-base -mt-4')} numberOfLines={1}>
                                                 {store.getAttribute('name')}
                                             </Text>
                                             <Text style={tailwind('text-xs')} numberOfLines={1}>

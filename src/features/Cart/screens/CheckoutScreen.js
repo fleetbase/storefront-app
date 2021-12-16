@@ -9,7 +9,7 @@ import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBil
 import { faStripe } from '@fortawesome/free-brands-svg-icons';
 import { formatCurrency, calculatePercentage, isLastIndex, logError } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
-import { useStorefront, useFleetbase, useCustomer } from 'hooks';
+import { useStorefront, useFleetbase, useCustomer, useMountedState } from 'hooks';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Collection } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -39,6 +39,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const fleetbase = useFleetbase();
     const insets = useSafeAreaInsets();
+    const isMounted = useMountedState();
+
     const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
     const { info, serializedCart, isPickupOrder, isTipping, isTippingDriver, tipAmount, deliveryTipAmount, quote } = route.params;
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, fleetbase.getAdapter());
@@ -354,6 +356,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             })
             .catch((error) => {
                 logError(error, '[ Failed to capture order! ]');
+                setIsLoading(false);
             });
     };
 

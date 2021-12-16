@@ -6,7 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faCheck, faStoreAlt, faMapMarkerAlt, faCogs, faHandHoldingHeart, faSatelliteDish, faShippingFast, faCar, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { getCustomer, updateCustomer } from 'utils/Customer';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { formatCurrency, calculatePercentage } from 'utils';
+import { useMountedState } from 'hooks';
+import { formatCurrency, calculatePercentage, logError } from 'utils';
 import { Order } from '@fleetbase/sdk';
 import { format, formatDistance, add } from 'date-fns';
 import MapView, { Marker } from 'react-native-maps';
@@ -15,14 +16,18 @@ import tailwind from 'tailwind';
 const { addEventListener, removeEventListener } = EventRegister;
 
 const OrderScreen = ({ navigation, route }) => {
+    const { serializedOrder, info } = route.params;
+
     const insets = useSafeAreaInsets();
     const customer = getCustomer();
-    const { serializedOrder, info } = route.params;
+    const isMounted = useMountedState();
+
     const [order, setOrder] = useState(new Order(serializedOrder || {}, FleetbaseAdapter));
     const [matrix, setMatrix] = useState({
         distance: 0,
         time: 600,
     });
+
     const orderStatusMap = {
         created: { icon: faCheck, color: 'green' },
         preparing: { icon: faCogs, color: 'yellow' },
@@ -65,20 +70,34 @@ const OrderScreen = ({ navigation, route }) => {
     // pickup states -> created -> preparing -> ready -> completed
 
     const track = () => {
-        order.reload().then((order) => {
-            setOrder(order);
-            order.getDistanceAndTime().then((dt) => {
-                setMatrix(dt);
-            });
-        });
+        order
+            .reload()
+            .then((order) => {
+                if (!isMounted()) {
+                    return;
+                }
+                setOrder(order);
+
+                order
+                    .getDistanceAndTime()
+                    .then((dt) => {
+                        setMatrix(dt);
+                    })
+                    .catch(logError);
+            })
+            .catch(logError);
     };
 
     useEffect(() => {
         const watchNotifications = addEventListener('onNotification', (notification) => {
-            order.reload().then(setOrder);
+            order.reload().then(setOrder).catch(logError);
 
             // set distance and time
             order.getDistanceAndTime().then((dt) => {
+                if (!isMounted()) {
+                    return;
+                }
+
                 setMatrix(dt);
             });
         });
@@ -196,18 +215,30 @@ const OrderScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code')}
+                                                        {order.getAttribute('payload.pickup.name') ?? order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code') ?? order.getAttribute('payload.pickup.building') ?? order.getAttribute('payload.pickup.neighborhood') ?? order.getAttribute('payload.pickup.district') ?? order.getAttribute('payload.pickup.city')}
                                                     </Text>
                                                 </View>
                                             </View>
+                                            {order.getAttribute('payload.waypoints', []).length > 0 &&
+                                                order.getAttribute('payload.waypoints').map((waypoint, index) => (
+                                                    <View key={index} style={tailwind('flex flex-row items-center mb-4')}>
+                                                        <View style={tailwind('flex items-center justify-center rounded-full bg-indigo-500 w-7 h-7 mr-4')}>
+                                                            <FontAwesomeIcon icon={faStoreAlt} size={16} color={'#fff'} />
+                                                        </View>
+                                                        <View>
+                                                            <Text style={tailwind('text-sm')}>
+                                                                {waypoint.name ?? waypoint.street1}, {waypoint.postal_code ?? waypoint.building ?? waypoint.neighborhood ?? waypoint.district ?? waypoint.city}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                ))}
                                             <View style={tailwind('flex flex-row items-center')}>
                                                 <View style={tailwind('flex items-center justify-center rounded-full bg-red-500 w-7 h-7 mr-4')}>
                                                     <FontAwesomeIcon icon={faMapMarkerAlt} size={16} color={'#fff'} />
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')},{' '}
-                                                        {order.getAttribute('payload.dropoff.postal_code')}
+                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')}, {order.getAttribute('payload.dropoff.postal_code') ?? order.getAttribute('payload.dropoff.building') ?? order.getAttribute('payload.dropoff.neighborhood') ?? order.getAttribute('payload.dropoff.district') ?? order.getAttribute('payload.dropoff.city')}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -287,7 +318,7 @@ const OrderScreen = ({ navigation, route }) => {
                                                 <View style={tailwind('flex-1')}>
                                                     <Text style={tailwind('font-semibold')}>{entity.name}</Text>
                                                     <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>
-                                                        {entity.description}
+                                                        {entity.description ?? 'No description'}
                                                     </Text>
                                                     <View>
                                                         {entity.meta.variants.map((variant) => (

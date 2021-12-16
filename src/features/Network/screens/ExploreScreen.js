@@ -38,6 +38,14 @@ const ExploreScreen = ({ navigation, route }) => {
         actionSheet?.setModalVisible(false);
     };
 
+    const transitionToStore = (store) => {
+        if (!store.getAttribute('online')) {
+            return;
+        }
+
+        navigation.navigate('StoreScreen', { data: store.serialize() });
+    }
+
     const refresh = () => {
         setIsRefreshing(true);
 
@@ -73,18 +81,18 @@ const ExploreScreen = ({ navigation, route }) => {
                     </View>
 
                     {stores.map((store) => (
-                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} onPress={() => navigation.navigate('StoreScreen', { data: store.serialize() })}>
-                            <View style={tailwind(`border-b border-gray-100 py-3`)}>
+                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} disabled={!store.getAttribute('online')} onPress={() => transitionToStore(store)}>
+                            <View style={tailwind(`border-b border-gray-100 py-3 ${store.getAttribute('online') ? 'opacity-100' : 'opacity-30'}`)}>
                                 <View style={tailwind('flex flex-row')}>
                                     <View style={tailwind('mr-4')}>
                                         <FastImage source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-20 w-20 rounded-md')} />
                                     </View>
                                     <View style={tailwind('pr-2 w-3/4')}>
-                                        <Text style={tailwind('font-semibold text-base mb-1')} numberOfLines={1}>
+                                        <Text style={tailwind('font-semibold text-base')} numberOfLines={1}>
                                             {store.getAttribute('name')}
                                         </Text>
                                         <Text style={tailwind('text-sm text-gray-500')} numberOfLines={1}>
-                                            {store.getAttribute('description')}
+                                            {store.getAttribute('description') ?? 'No description'}
                                         </Text>
                                         {isReviewsEnabled && (
                                             <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>

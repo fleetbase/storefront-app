@@ -40,7 +40,7 @@ const LocationPicker = (props) => {
         return customer
             .getSavedPlaces()
             .then((places) => {
-                if (!isMounted) {
+                if (!isMounted()) {
                     return;
                 }
 
@@ -58,6 +58,10 @@ const LocationPicker = (props) => {
     };
 
     const setNewDeliveryLocation = (result) => {
+        if (!isMounted()) {
+            return;
+        }
+
         const googleAddress = new GoogleAddress(result);
         const place = Place.fromGoogleAddress(googleAddress, adapter);
 
@@ -95,10 +99,10 @@ const LocationPicker = (props) => {
     };
 
     const discoverDefaultLocation = () => {
-        if (!deliverTo) {
+        if (!deliverTo && isMounted()) {
             const location = get('location');
 
-            if (location && isMounted) {
+            if (location) {
                 const googleAddress = new GoogleAddress().setAttributes(location);
                 const lastKnownPlace = Place.fromGoogleAddress(googleAddress);
 
@@ -124,7 +128,6 @@ const LocationPicker = (props) => {
         return () => {
             removeEventListener(placesMutated);
             removeEventListener(customerUpdated);
-            // removeEventListener(locationChanged);
         };
     }, [isMounted]);
 

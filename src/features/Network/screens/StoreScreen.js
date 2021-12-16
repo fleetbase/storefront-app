@@ -18,7 +18,7 @@ import NetworkHeader from 'ui/headers/NetworkHeader';
 import CategoryProductSlider from 'ui/CategoryProductSlider';
 import StoreCategoryPicker from 'ui/StoreCategoryPicker';
 import StoreSearch from 'ui/StoreSearch';
-import ProductPriceView from 'ui/ProductPriceView';
+import ProductCard from 'ui/ProductCard';
 import StorePicker from 'ui/StorePicker';
 import Rating from 'ui/Rating';
 import tailwind from 'tailwind';
@@ -47,6 +47,7 @@ const StoreScreen = ({ navigation, route }) => {
     const shouldDisplayLoader = categories?.length === 0 && isLoading;
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const today = weekdays[new Date().getDay()];
+    const hasContactInformation = store.isAttributeFilled(['phone', 'email', 'facebook', 'instagram', 'twitter']);
 
     const loadCategories = (isRefreshing = false) => {
         setIsLoading(true);
@@ -158,40 +159,43 @@ const StoreScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            {storeLocation?.getAttribute('hours')?.length && (
-                <View style={tailwind('w-full bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
-                    <TouchableOpacity style={tailwind('p-4 w-full flex flex-row')} onPress={toggleHours}>
-                        <Text style={tailwind('font-bold')}>Hours</Text>
-                        {storeLocation?.schedule[today]?.length > 0 && (
-                            <View style={tailwind('')}>
-                                <Text style={tailwind('font-bold text-gray-500')}>
-                                    {' '}
-                                    Today: {format(storeLocation?.schedule[today][0].startDateInstance, 'hh:mm aaa')} -{' '}
-                                    {format(storeLocation?.schedule[today][0].endDateInstance, 'hh:mm aaa')}
-                                </Text>
+            <View>
+                {storeLocation?.getAttribute('hours')?.length > 0 && (
+                    <View style={tailwind('w-full bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
+                        <TouchableOpacity style={tailwind('p-4 w-full flex flex-row')} onPress={toggleHours}>
+                            <Text style={tailwind('font-bold')}>Hours</Text>
+                            {storeLocation?.schedule[today]?.length > 0 && (
+                                <View style={tailwind('ml-2')}>
+                                    <Text style={tailwind('font-bold text-gray-500')}>
+                                        {`Today: ${format(storeLocation?.schedule[today][0].startDateInstance, 'hh:mm aaa')} - ${format(
+                                            storeLocation?.schedule[today][0].endDateInstance,
+                                            'hh:mm aaa'
+                                        )}`}
+                                    </Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                        {isHoursVisible && (
+                            <View style={tailwind('px-4 pb-2 pt-4')}>
+                                <View style={tailwind('flex flex-row flex-wrap')}>
+                                    {weekdays.map((weekday) => (
+                                        <View key={weekday} style={tailwind('w-1/2 mb-2')}>
+                                            <Text style={tailwind('font-semibold mb-1')}>{weekday}</Text>
+                                            {storeLocation?.schedule[weekday].map((hour, hourIndex) => (
+                                                <View key={hourIndex} style={tailwind('mb-1')}>
+                                                    <Text>
+                                                        {format(hour.startDateInstance, 'hh:mm aaa')} - {format(hour.endDateInstance, 'hh:mm aaa')}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    ))}
+                                </View>
                             </View>
                         )}
-                    </TouchableOpacity>
-                    {isHoursVisible && (
-                        <View style={tailwind('px-4 pb-2 pt-4')}>
-                            <View style={tailwind('flex flex-row flex-wrap')}>
-                                {weekdays.map((weekday) => (
-                                    <View key={weekday} style={tailwind('w-1/2 mb-2')}>
-                                        <Text style={tailwind('font-semibold mb-1')}>{weekday}</Text>
-                                        {storeLocation?.schedule[weekday].map((hour, hourIndex) => (
-                                            <View key={hourIndex} style={tailwind('mb-1')}>
-                                                <Text>
-                                                    {format(hour.startDateInstance, 'hh:mm aaa')} - {format(hour.endDateInstance, 'hh:mm aaa')}
-                                                </Text>
-                                            </View>
-                                        ))}
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    )}
-                </View>
-            )}
+                    </View>
+                )}
+            </View>
             <View style={tailwind('w-full px-2 py-2 bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
                 <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
                     <TouchableOpacity onPress={transitionToPhotos} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
@@ -232,14 +236,16 @@ const StoreScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </View>
                 )}
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <TouchableOpacity onPress={contactStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                        <FontAwesomeIcon icon={faPhone} size={20} style={tailwind('text-gray-600 mb-2')} />
-                        <Text style={tailwind('text-xs')} numberOfLines={1}>
-                            Contact
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                {hasContactInformation && (
+                    <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                        <TouchableOpacity onPress={contactStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                            <FontAwesomeIcon icon={faPhone} size={20} style={tailwind('text-gray-600 mb-2')} />
+                            <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                Contact
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
                 <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
                     <TouchableOpacity onPress={shareStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
                         <FontAwesomeIcon icon={faShare} size={20} style={tailwind('text-gray-600 mb-2')} />
@@ -379,26 +385,7 @@ const StoreScreen = ({ navigation, route }) => {
                                             .getAttribute('products')
                                             .map((product) => new Product(product, StorefrontAdapter))
                                             .map((product, index) => (
-                                                <TouchableOpacity
-                                                    key={index}
-                                                    onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
-                                                    style={tailwind('w-1/2')}
-                                                >
-                                                    <View>
-                                                        <View style={tailwind('p-2')}>
-                                                            <View style={tailwind('bg-gray-50 py-2 px-3 flex items-center justify-center')}>
-                                                                <FastImage source={{ uri: product.getAttribute('primary_image_url') }} style={tailwind('h-28 w-28')} />
-                                                            </View>
-                                                            <View style={tailwind('flex p-2')}>
-                                                                <View style={tailwind('mb-1.5 flex flex-row items-center')}>
-                                                                    <Text style={tailwind('font-semibold')}>{product.getAttribute('name')}</Text>
-                                                                    {product.getAttribute('is_service') === true && <Text style={tailwind('ml-1 text-blue-500 font-semibold')}>(Service)</Text>}
-                                                                </View>
-                                                                <ProductPriceView product={product} textStyle={tailwind('font-bold')} />
-                                                            </View>
-                                                        </View>
-                                                    </View>
-                                                </TouchableOpacity>
+                                                <ProductCard key={index} product={product} containerStyle={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })} />
                                             ))}
                                     </View>
                                 </View>

@@ -13,7 +13,7 @@ import { formatCurrency, isLastIndex, stripHtml, logError } from 'utils';
 import { NetworkInfoService } from 'services';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useCart } from 'hooks';
+import { useCart, useMountedState } from 'hooks';
 import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
 import { format } from 'date-fns';
 import FastImage from 'react-native-fast-image';
@@ -30,8 +30,10 @@ const { isArray } = Array;
 const CartScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const fleetbase = useFleetbase();
+    const isMounted = useMountedState();
 
     const { info, data } = route.params;
+    const isNetwork = info.is_network === true;
 
     // declare stores and setStores from state
     let stores, setStores;
@@ -53,7 +55,7 @@ const CartScreen = ({ navigation, route }) => {
     const [yOffset, setYoffset] = useState(0);
 
     // if network load in stores to group cart items if multi store checkout is enabled
-    if (info.is_network) {
+    if (isNetwork) {
         [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter);
     }
 
@@ -102,7 +104,7 @@ const CartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation?.coordinates;
         }
 
-        if (!cart || !cart instanceof Cart || !storeLocation || !storeLocation instanceof StoreLocation || !customerLocation) {
+        if (!cart || !cart instanceof Cart || (!isNetwork && (!storeLocation || !storeLocation instanceof StoreLocation)) || !customerLocation) {
             return;
         }
 
@@ -265,7 +267,7 @@ const CartScreen = ({ navigation, route }) => {
 
         height += cartItem.variants.length * 12;
         height += cartItem.addons.length * 12;
-        
+
         if (cartItem.scheduled_at) {
             height += 12;
         }

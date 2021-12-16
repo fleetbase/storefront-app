@@ -91,18 +91,30 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code')}
+                                                        {order.getAttribute('payload.pickup.name') ?? order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code') ?? order.getAttribute('payload.pickup.building') ?? order.getAttribute('payload.pickup.neighborhood') ?? order.getAttribute('payload.pickup.district') ?? order.getAttribute('payload.pickup.city')}
                                                     </Text>
                                                 </View>
                                             </View>
+                                            {order.getAttribute('payload.waypoints', []).length > 0 &&
+                                                order.getAttribute('payload.waypoints').map((waypoint, index) => (
+                                                    <View key={index} style={tailwind('flex flex-row items-center mb-4')}>
+                                                        <View style={tailwind('flex items-center justify-center rounded-full bg-indigo-500 w-7 h-7 mr-4')}>
+                                                            <FontAwesomeIcon icon={faStoreAlt} size={16} color={'#fff'} />
+                                                        </View>
+                                                        <View>
+                                                            <Text style={tailwind('text-sm')}>
+                                                                {waypoint.name ?? waypoint.street1}, {waypoint.postal_code ?? waypoint.building ?? waypoint.neighborhood ?? waypoint.district ?? waypoint.city}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                ))}
                                             <View style={tailwind('flex flex-row items-center')}>
                                                 <View style={tailwind('flex items-center justify-center rounded-full bg-red-500 w-7 h-7 mr-4')}>
                                                     <FontAwesomeIcon icon={faMapMarkerAlt} size={16} color={'#fff'} />
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')},{' '}
-                                                        {order.getAttribute('payload.dropoff.postal_code')}
+                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')}, {order.getAttribute('payload.dropoff.postal_code') ?? order.getAttribute('payload.dropoff.building') ?? order.getAttribute('payload.dropoff.neighborhood') ?? order.getAttribute('payload.dropoff.district') ?? order.getAttribute('payload.dropoff.city')}
                                                     </Text>
                                                 </View>
                                             </View>
