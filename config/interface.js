@@ -12,17 +12,6 @@ import { tailwind } from '../src/tailwind';
  *
  * @type {object} 
  */
-const InterfaceConfig = configure('InterfaceConfig', {
-    accountScreen: {
-        containerStyle: tailwind('bg-transparent'),
-        displaySignedOutHeaderComponent: false,
-        displayEmptyStatePlaceholder: false,
-        actionButtonsContainerStyle: tailwind('absolute w-full bottom-0 left-0 right-0 pb-28 -mt-2'),
-        loginButtonStyle: tailwind('shadow-lg'),
-        createAccountButtonStyle: tailwind('shadow-lg'),
-        signedOutContainerBackgroundImage: require('../assets/emeel-login-bg.png'),
-        signedOutBackgroundResizeMode: 'cover'
-    }
-});
+const InterfaceConfig = configure('InterfaceConfig', {});
 
 export default InterfaceConfig;
