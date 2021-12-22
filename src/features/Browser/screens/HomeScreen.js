@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, ImageBackground, TouchableOpacity } from 'react-native';
-import { useStorefront } from 'hooks';
+import { useStorefront, useLocale } from 'hooks';
+import { translations } from 'utils';
 import CategoryProductSlider from 'ui/CategoryProductSlider';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import tailwind from 'tailwind';
 
 const HomeScreen = ({ navigation, route }) => {
     const { info } = route.params;
+
     const storefront = useStorefront();
+    const [locale, setLocale] = useLocale();
     const [categories, setCategories] = useState([]);
 
     // get categories
@@ -21,7 +24,7 @@ const HomeScreen = ({ navigation, route }) => {
         <View style={tailwind('bg-white h-full z-10')}>
             <StorefrontHeader info={info} />
             <View style={tailwind('border-b border-gray-100')}>
-                <Text style={tailwind('text-lg font-semibold mb-3 p-4')}>Shop by category</Text>
+                <Text style={tailwind('text-lg font-semibold mb-3 p-4')}>{translate('Browser.HomeScreen.categoryPickerHeaderTitle')}</Text>
                 <View style={tailwind('pb-2')}>
                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} style={tailwind('flex flex-row px-4')}>
                         {categories.map((category) => {

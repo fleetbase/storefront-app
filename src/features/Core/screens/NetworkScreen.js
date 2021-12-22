@@ -10,10 +10,8 @@ import { useResourceStorage, get } from 'utils/Storage';
 import { tailwind } from 'tailwind';
 import { getCustomer, syncDevice } from 'utils/Customer';
 import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
-import { useCart, useCartTabOptions, useCustomer } from 'hooks';
+import { useCart, useCartTabOptions, useCustomer, useMountedState, useLocale } from 'hooks';
 import { CartService } from 'services';
-// import useStorefront from 'hooks/use-storefront';
-// import useFleetbase from 'hooks/use-fleetbase';
 import NetworkStack from 'network/NetworkStack';
 import CartStack from 'cart/CartStack';
 import AccountStack from 'account/AccountStack';
@@ -27,6 +25,8 @@ const NetworkScreen = ({ navigation, route }) => {
     const [cart, setCart] = useCart();
     const [cartTabOptions, setCartTabOptions] = useCartTabOptions(cart);
     const [customer, setCustomer] = useCustomer();
+    const [locale, setLocale] = useLocale();
+    const isMounted = useMountedState();
 
     useEffect(() => {
         // Fetch latest cart
@@ -63,7 +63,7 @@ const NetworkScreen = ({ navigation, route }) => {
             removeEventListener(watchNotifications);
             removeEventListener(cartChanged);
         };
-    }, []);
+    }, [isMounted]);
 
     return (
         <Tab.Navigator
@@ -89,7 +89,8 @@ const NetworkScreen = ({ navigation, route }) => {
                 style: tailwind('bg-black border-black'),
                 tabStyle: tailwind('bg-black border-black'),
                 showLabel: false,
-            }}>
+            }}
+        >
             <Tab.Screen key="network" name="Network" component={NetworkStack} initialParams={{ info }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />

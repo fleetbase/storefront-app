@@ -9,6 +9,7 @@ import { Network, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useResourceCollection } from 'utils/Storage';
 import LocationPicker from '../LocationPicker';
+import LangPicker from '../LangPicker';
 import StorePicker from '../StorePicker';
 import NetworkSearch from '../NetworkSearch';
 import StoreCategoryPicker from '../StoreCategoryPicker';
@@ -44,10 +45,12 @@ const NetworkHeader = (props) => {
                         )}
                         <Text style={[tailwind('font-bold text-lg'), props.logoStyle ?? {}]}>{props.info.name}</Text>
                     </View>
-                    <View>
+                    <View style={tailwind('flex flex-row')}>
+                        <LangPicker wrapperStyle={tailwind('mr-2')} />
                         <LocationPicker />
                     </View>
                 </View>
+
                 {!hideSearch && (
                     <View style={tailwind('px-4 py-2 flex flex-row items-center')}>
                         <View style={tailwind('flex-1')}>

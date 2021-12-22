@@ -6,8 +6,8 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faAsterisk, faPlus, faMinus, faTimes, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
 import { Product, StoreLocation } from '@fleetbase/storefront';
-import { useStorefront, useCart } from 'hooks';
-import { formatCurrency, isLastIndex, stripIframeTags, logError } from 'utils';
+import { useStorefront, useCart, useLocale } from 'hooks';
+import { formatCurrency, isLastIndex, stripIframeTags, logError, translate } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import FastImage from 'react-native-fast-image';
@@ -73,6 +73,7 @@ const ProductScreen = ({ navigation, route }) => {
     const [isBookingConfirmed, setIsBookingConfirmed] = useState(false);
     const [hasBookingChanged, setHasBookingChanged] = useState(false);
     const [viewingMedia, setViewingMedia] = useState(null);
+    const [locale, setLocale] = useLocale();
 
     const canAddToCart = isValid && !isAddingToCart;
     const cannotAddToCart = !canAddToCart;
@@ -85,10 +86,10 @@ const ProductScreen = ({ navigation, route }) => {
     const isBookable = isService && product.getAttribute('is_bookable') === true;
     const youtubeUrls = product.getAttribute('youtube_urls', []).filter((url) => typeof url === 'string').filter(Boolean);
 
-    let actionButtonText = `${cartItem ? 'Update in Cart' : isInCart ? 'Add Another' : 'Add to Cart'} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+    let actionButtonText = `${cartItem ? translate('Browser.ProductScreen.updateInCartActionText') : isInCart ? translate('Browser.ProductScreen.addAnotherActionText') : translate('Browser.ProductScreen.addToCartActionText')} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
 
     if (isBookable) {
-        actionButtonText = `${cartItem ? 'Update Booking' : isInCart ? 'Book Another' : 'Book Service'} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+        actionButtonText = `${cartItem ? translate('Browser.ProductScreen.updateBookingActionText') : isInCart ? translate('Browser.ProductScreen.addAnotherBookingActionText') : translate('Browser.ProductScreen.bookServiceActionText')} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
     }
 
     const checkIfCanAddToCart = () => {
@@ -284,16 +285,16 @@ const ProductScreen = ({ navigation, route }) => {
         }
 
         if (checkIfCanAddToCart()) {
-            return Alert.alert('Cart Has Items!', 'Your cart already has items from another store, if you continue your cart will be emptied.', [
+            return Alert.alert(translate('Browser.ProductScreen.hasItemsAlertTitle'), translate('Browser.ProductScreen.hasItemsAlertDecription'), [
                 {
-                    text: 'Cancel',
+                    text: translate('Browser.ProductScreen.hasItemsAlertCancelActionText'),
                     style: 'cancel',
                     onPress: () => {
                         setIsAddingToCart(false);
                     },
                 },
                 {
-                    text: 'Continue',
+                    text: translate('Browser.ProductScreen.hasItemsAlertContinueActionText'),
                     onPress: () => {
                         return cart
                             .empty()
@@ -410,7 +411,7 @@ const ProductScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                         <View style={tailwind('flex flex-row items-center')}>
                             <Text style={tailwind('text-xl font-semibold')}>{product.getAttribute('name')}</Text>
-                            {isService && <Text style={tailwind('ml-1 text-xl text-blue-500')}>(Service)</Text>}
+                            {isService && <Text style={tailwind('ml-1 text-xl text-blue-500')}>{translate('Browser.ProductScreen.serviceIdentifierText')}</Text>}
                         </View>
                     </View>
                 </View>
@@ -459,7 +460,7 @@ const ProductScreen = ({ navigation, route }) => {
                                             </Text>
                                         </View>
                                     )}
-                                    <Text style={tailwind('text-sm text-gray-500')}>Base Price</Text>
+                                    <Text style={tailwind('text-sm text-gray-500')}>{translate('Browser.ProductScreen.basePriceLabel')}</Text>
                                 </View>
                                 <RenderHtml contentWidth={fullWidth} source={{ html: stripIframeTags(product.getAttribute('description')) ?? '' }} />
                             </View>
@@ -467,7 +468,7 @@ const ProductScreen = ({ navigation, route }) => {
                                 <View style={tailwind('bg-gray-100')}>
                                     <View style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center mb-2')}>
-                                            <Text style={tailwind('font-semibold text-lg')}>YouTube Videos</Text>
+                                            <Text style={tailwind('font-semibold text-lg')}>{translate('Browser.ProductScreen.youtubeVidsSectionTitle')}</Text>
                                         </View>
                                         <View style={tailwind(`flex flex-row flex-wrap py-4`)}>
                                             {youtubeUrls.map((youtubeUrl, index) => (
@@ -484,11 +485,11 @@ const ProductScreen = ({ navigation, route }) => {
                                     <View style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center mb-2')}>
                                             <FontAwesomeIcon icon={faCalendarCheck} style={tailwind('mr-2 text-blue-600')} />
-                                            <Text style={tailwind('font-semibold text-lg text-blue-600')}>Your booking</Text>
+                                            <Text style={tailwind('font-semibold text-lg text-blue-600')}>{translate('Browser.ProductScreen.displayBookingDetailsTitle')}</Text>
                                         </View>
                                         <View style={tailwind(`flex flex-col py-4`)}>
                                             <View style={tailwind('flex flex-row items-center mb-4')}>
-                                                <Text style={tailwind('font-bold text-black mr-2')}>Date:</Text>
+                                                <Text style={tailwind('font-bold text-black mr-2')}>{translate('Browser.ProductScreen.displayBookingDateLabelText')}:</Text>
                                                 <DateTimePicker
                                                     value={bookingDate}
                                                     minimumDate={new Date()}
@@ -499,7 +500,7 @@ const ProductScreen = ({ navigation, route }) => {
                                                 />
                                             </View>
                                             <View style={tailwind('flex flex-row items-center')}>
-                                                <Text style={tailwind('font-bold text-black mr-2')}>Time:</Text>
+                                                <Text style={tailwind('font-bold text-black mr-2')}>{translate('Browser.ProductScreen.displayBookingTimeLabelText')}:</Text>
                                                 <DateTimePicker
                                                     value={bookingTime}
                                                     mode={'time'}
@@ -554,7 +555,7 @@ const ProductScreen = ({ navigation, route }) => {
                                     <View key={i} style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <Text style={tailwind('font-semibold text-lg mr-2')}>{addonCategory.name}</Text>
-                                            <Text style={tailwind('text-gray-400 text-xs')}>Optional, max {addonCategory.addons.length}</Text>
+                                            <Text style={tailwind('text-gray-400 text-xs')}>{translate('Browser.ProductScreen.optionalAddonLabel', { addonsCount: addonCategory?.addons?.length })}</Text>
                                         </View>
                                         {addonCategory.addons.map((addon, j) => (
                                             <View
@@ -632,7 +633,7 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={[tailwind('z-40 w-full relative'), { height: dialogHeight - 110 }]}>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
-                            <Text style={tailwind('text-lg font-semibold')}>Confirm booking date and time</Text>
+                            <Text style={tailwind('text-lg font-semibold')}>{translate('Browser.ProductScreen.confirmBookingActionSheetTitle')}</Text>
                         </View>
                         <View>
                             <TouchableOpacity onPress={() => actionSheetRef.current?.hide()}>
@@ -645,7 +646,7 @@ const ProductScreen = ({ navigation, route }) => {
                     <View style={tailwind('h-full relative')}>
                         <View style={tailwind('w-full flex px-6 my-4')}>
                             <View style={tailwind('flex flex-row items-center')}>
-                                <Text style={tailwind('font-bold text-black mr-2')}>Date:</Text>
+                                <Text style={tailwind('font-bold text-black mr-2')}>{translate('Browser.ProductScreen.confirmBookingActionSheetDateLabelText')}:</Text>
                                 <DateTimePicker
                                     value={bookingDate}
                                     minimumDate={new Date()}
@@ -658,7 +659,7 @@ const ProductScreen = ({ navigation, route }) => {
                         </View>
                         <View style={tailwind('w-full flex px-6 mt-2')}>
                             <View style={tailwind('flex flex-row items-center')}>
-                                <Text style={tailwind('font-bold text-black mr-2')}>Time:</Text>
+                                <Text style={tailwind('font-bold text-black mr-2')}>{translate('Browser.ProductScreen.confirmBookingActionSheetTimeLabelText')}:</Text>
                                 <DateTimePicker
                                     value={bookingTime}
                                     mode={'time'}
@@ -671,7 +672,7 @@ const ProductScreen = ({ navigation, route }) => {
                         </View>
                         <View style={tailwind('w-full flex items-center justify-center p-4 absolute bottom-0 left-0 right-0')}>
                             <TouchableOpacity onPress={confirmBooking} style={tailwind(`btn bg-blue-500 shadow-sm`)} disabled={!bookingDate || !bookingTime}>
-                                <Text style={tailwind('text-white text-lg font-semibold')}>Confirm Booking</Text>
+                                <Text style={tailwind('text-white text-lg font-semibold')}>{translate('Browser.ProductScreen.confirmBookingActionSheetButtonText')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -685,7 +686,7 @@ const ProductScreen = ({ navigation, route }) => {
                                 <FontAwesomeIcon icon={faTimes} />
                             </View>
                         </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-bold text-white')}>Viewing media</Text>
+                        <Text style={tailwind('text-xl font-bold text-white')}>{translate('Browser.ProductScreen.viewProductMediaTitle')}</Text>
                     </View>
                     <View style={tailwind('w-full h-full flex items-center mt-20')}>
                         {isYoutubeUrl(viewingMedia) && <YouTube videoId={getYoutubeId(viewingMedia)} style={{ alignSelf: 'stretch', height: 400 }} />}

@@ -6,7 +6,8 @@ import { Collection } from '@fleetbase/sdk';
 import { Category } from '@fleetbase/storefront';
 import { useNavigation } from '@react-navigation/native';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { formatCurrency, capitalize, logError } from 'utils';
+import { formatCurrency, capitalize, logError, translate } from 'utils';
+import { useLocale } from 'hooks';
 import { useResourceCollection } from 'utils/Storage';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
@@ -21,6 +22,7 @@ const NetworkCategoryBlock = (props) => {
 
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isLoading, setIsLoading] = useState(true);
+    const [locale] = useLocale();
 
     const on = (action = 'press', ...params) => {
         const actionName = `on${capitalize(action)}`;
@@ -67,7 +69,7 @@ const NetworkCategoryBlock = (props) => {
                             </View>
                         </View>
                         <Text style={[tailwind('font-semibold flex items-center justify-center text-center w-20'), props.labelStyle]} numberOfLines={2}>
-                            {category.getAttribute('name')}
+                            {translate(category, 'name')}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -111,7 +113,7 @@ const NetworkCategoryBlock = (props) => {
                         {networkCategories.map((category, index) => (
                             <TouchableOpacity key={index} onPress={() => on('press', category, actionSheetRef?.current)}>
                                 <View style={tailwind('px-5 py-4 border-b border-gray-100')}>
-                                    <Text style={tailwind('font-semibold')}>{category.getAttribute('name')}</Text>
+                                    <Text style={tailwind('font-semibold')}>{translate(category, 'name')}</Text>
                                 </View>
                             </TouchableOpacity>
                         ))}

@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Place, Collection, isResource } from '@fleetbase/sdk';
-import { useStorefront, useCustomer, useDeliveryLocation } from 'hooks';
-import { mutatePlaces } from 'utils';
+import { useStorefront, useCustomer, useDeliveryLocation, useLocale } from 'hooks';
+import { mutatePlaces, translate } from 'utils';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import tailwind from 'tailwind';
@@ -23,6 +23,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
 
     const [places, setPlaces] = useResourceCollection('places', Place, FleetbaseAdapter, new Collection());
     const [deliverTo, setDeliverTo] = useDeliveryLocation();
+    const [locale, setLocale] = useLocale();
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
@@ -106,7 +107,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
                                     <FontAwesomeIcon icon={useLeftArrow === true ? faArrowLeft : faTimes} />
                                 </View>
                             </TouchableOpacity>
-                            <Text style={tailwind('text-xl font-semibold')}>Your saved places</Text>
+                            <Text style={tailwind('text-xl font-semibold')}>{translate('Account.SavedPlacesScreen.title')}</Text>
                         </View>
                         <View>
                             <TouchableOpacity onPress={() => navigation.navigate('AddNewPlace')}>
@@ -129,12 +130,12 @@ const SavedPlacesScreen = ({ navigation, route }) => {
                                     <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>
                                         {isInitializing ? 'Loading your saved places' : 'You have no saved places'}
                                     </Text>
-                                    {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't saved any addresses.</Text>}
+                                    {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Account.SavedPlacesScreen.emptyStateText')}</Text>}
                                 </View>
                                 {!isInitializing && (
                                     <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('AddNewPlace')}>
                                         <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                                            <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Add new address</Text>
+                                            <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Account.SavedPlacesScreen.addNewButtonText')}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 )}

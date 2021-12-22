@@ -193,4 +193,4 @@ const clear = StorageUtil.clear;
 const useResourceStorage = StorageUtil.useResourceStorage;
 const useResourceCollection = StorageUtil.useResourceCollection;
 
-export { set, get, remove, clear, storage, useMMKVStorage, useStorage, useResourceStorage, useResourceCollection };
+export { set, get, remove, clear, storage, useMMKVStorage, useStorage, useResourceStorage, useResourceCollection, getString, setString, getInt, setInt, getBool, setBool, getArray, setArray };

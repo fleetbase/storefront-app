@@ -75,8 +75,11 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
     "babel-plugin-module-resolver": "^4.1.0",
+    "babel-plugin-preval": "^5.0.0",
     "eslint": "7.14.0",
     "jest": "^26.6.3",
+    "language-name-map": "^0.3.0",
+    "locale-emoji": "^0.3.0",
     "metro-react-native-babel-preset": "^0.64.0",
     "react-native-svg": "^12.1.1",
     "react-test-renderer": "17.0.1"

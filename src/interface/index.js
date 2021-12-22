@@ -8,6 +8,7 @@ import StorePicker from './StorePicker';
 import PhoneInput from './PhoneInput';
 import StoreSearch from './StoreSearch';
 import ProductPriceView from './ProductPriceView';
+import LangPicker from './LangPicker';
 
 export {
     TipInput,
@@ -20,4 +21,5 @@ export {
     PhoneInput,
     StoreSearch,
     ProductPriceView,
+    LangPicker,
 }

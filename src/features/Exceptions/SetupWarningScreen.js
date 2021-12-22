@@ -2,7 +2,8 @@ import React from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faExclamationTriangle, faExclamation } from '@fortawesome/free-solid-svg-icons';
-import { hasRequiredKeys } from 'utils';
+import { hasRequiredKeys, translate } from 'utils';
+import { useLocale } from 'hooks';
 import { tailwind } from 'tailwind';
 import Config from 'react-native-config';
 
@@ -11,6 +12,9 @@ const keyMissing = (key) => {
 };
 
 const SetupWarningScreen = (props) => {
+
+    const [locale] = useLocale();
+
     return (
         <SafeAreaView style={tailwind('bg-white')}>
             <View style={tailwind('h-full w-full flex items-center justify-center')}>
@@ -19,15 +23,15 @@ const SetupWarningScreen = (props) => {
                         <FontAwesomeIcon icon={faExclamationTriangle} size={88} style={tailwind('text-yellow-500')} />
                     </View>
                     <View style={tailwind('flex items-center justify-center mb-6')}>
-                        <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Configurations Missing!</Text>
-                        <Text style={tailwind('w-60 text-center text-gray-600 font-semibold')}>Looks like you haven't properly configured storefront app.</Text>
+                        <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{translate('Exceptions.SetupWarningScreen.title')}</Text>
+                        <Text style={tailwind('w-60 text-center text-gray-600 font-semibold')}>{translate('Exceptions.SetupWarningScreen.subtitle')}</Text>
                     </View>
                     <View style={tailwind('px-5')}>
                         {keyMissing('FLEETBASE_KEY') && (
                             <View style={tailwind('rounded-md px-3 py-2 bg-red-50 flex flex-row items-center mb-2')}>
                                 <FontAwesomeIcon icon={faExclamation} size={12} style={tailwind('text-red-900 mr-2')} />
                                 <Text style={tailwind('text-red-900')}>
-                                    <Text style={tailwind('font-semibold')}>Fleetbase API Key</Text> is missing from environment!
+                                    <Text style={tailwind('font-semibold')}>Fleetbase API Key</Text> {translate('Exceptions.SetupWarningScreen.envMissingText')}
                                 </Text>
                             </View>
                         )}
@@ -35,7 +39,7 @@ const SetupWarningScreen = (props) => {
                             <View style={tailwind('rounded-md px-3 py-2 bg-red-50 flex flex-row items-center')}>
                                 <FontAwesomeIcon icon={faExclamation} size={12} style={tailwind('text-red-900 mr-2')} />
                                 <Text style={tailwind('text-red-900')}>
-                                    <Text style={tailwind('font-semibold')}>Storefront Key</Text> is missing from environment!
+                                    <Text style={tailwind('font-semibold')}>Storefront Key</Text> {translate('Exceptions.SetupWarningScreen.envMissingText')}
                                 </Text>
                             </View>
                         )}

@@ -3,21 +3,25 @@ import { SafeAreaView, View, Text, TextInput, ImageBackground, TouchableOpacity,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useStorefront } from 'hooks';
+import { useStorefront, useLocale } from 'hooks';
 import { updateCustomer } from 'utils/Customer';
 import { getLocation } from 'utils/Geo';
 import { get } from 'utils/Storage';
+import { translate } from 'utils';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
 
 const CreateAccountScreen = ({ navigation, route }) => {
     const { info, redirectTo } = route.params;
+
     const [name, setName] = useState(null);
     const [phone, setPhone] = useState(null);
     const [code, setCode] = useState(null);
     const [isAwaitingVerification, setIsAwaitingVerification] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [locale, setLocale] = useLocale();
+
     const storefront = useStorefront();
     const location = getLocation();
     const insets = useSafeAreaInsets();
@@ -77,14 +81,14 @@ const CreateAccountScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={faTimes} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Create Account</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Auth.CreateAccountScreen.title')}</Text>
                 </View>
                 <View style={tailwind('px-4 py-6')}>
                     {isNotAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-8')}>
-                                <Text style={tailwind('text-lg text-gray-600')}>Hello, and welcome to {info.name}.</Text>
-                                <Text style={tailwind('text-lg text-gray-500')}>Create your account with only your phone and name below.</Text>
+                                <Text style={tailwind('text-lg text-gray-600')}>{translate('Auth.CreateAccountScreen.greetingTitle', { infoName: info.name })}</Text>
+                                <Text style={tailwind('text-lg text-gray-500')}>{translate('Auth.CreateAccountScreen.greetingSubtitle')}</Text>
                             </View>
                             {error && (
                                 <View style={tailwind('mb-8')}>
@@ -99,7 +103,7 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                         onChangeText={setName}
                                         style={tailwind('form-input py-2 flex flex-row')}
                                         disabled={isAwaitingVerification}
-                                        placeholder={'Your name'}
+                                        placeholder={translate('Auth.CreateAccountScreen.nameInputPlaceholder')}
                                     />
                                 </View>
                                 <View style={tailwind('mb-6')}>
@@ -108,7 +112,7 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                 <TouchableOpacity onPress={sendVerificationCode}>
                                     <View style={tailwind('btn border border-blue-50 bg-blue-50')}>
                                         {isLoading && <ActivityIndicator color={'rgba(59, 130, 246, 1)'} style={tailwind('mr-2')} />}
-                                        <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>Send Verification Code</Text>
+                                        <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>{translate('Auth.CreateAccountScreen.sendVerificationCodeButtonText')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
@@ -117,8 +121,8 @@ const CreateAccountScreen = ({ navigation, route }) => {
                     {isAwaitingVerification && (
                         <View>
                             <View style={tailwind('mb-8')}>
-                                <Text style={tailwind('text-lg text-green-700')}>Thank you, {name}!</Text>
-                                <Text style={tailwind('text-lg text-green-500')}>Now you should have received a code to your phone via SMS, verify the code to create your account!</Text>
+                                <Text style={tailwind('text-lg text-green-700')}>{translate('Auth.CreateAccountScreen.awaitingVerificationTitle', { name  })}</Text>
+                                <Text style={tailwind('text-lg text-green-500')}>{translate('Auth.CreateAccountScreen.awaitingVerificationSubtitle')}</Text>
                             </View>
 
                             <View>
@@ -126,20 +130,20 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                     <TextInput
                                         onChangeText={setCode}
                                         keyboardType={'phone-pad'}
-                                        placeholder={'Enter verification code'}
+                                        placeholder={translate('Auth.CreateAccountScreen.codeInputPlaceholder')}
                                         placeholderTextColor={'rgba(156, 163, 175, 1)'}
                                         style={tailwind('form-input text-center mb-2')}
                                     />
                                     <View style={tailwind('flex flex-row justify-end')}>
                                         <TouchableOpacity onPress={retry}>
-                                            <Text style={tailwind('text-blue-900 font-semibold')}>Retry?</Text>
+                                            <Text style={tailwind('text-blue-900 font-semibold')}>{translate('Auth.CreateAccountScreen.retryButtonText')}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                                 <TouchableOpacity onPress={verifyCode}>
                                     <View style={tailwind('btn border border-green-50 bg-green-50')}>
                                         {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
-                                        <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>Verify Code</Text>
+                                        <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>{translate('Auth.CreateAccountScreen.verifyCodeButtonText')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>

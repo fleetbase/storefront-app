@@ -42,14 +42,17 @@
             "awaitingVerificationTitle": "Thank you, {{name}}!",
             "awaitingVerificationSubtitle": "Now you should have received a code to your phone via SMS, verify the code to create your account!",
             "retryButtonText": "Retry?",
-            "verifyCodeButtonText": "Verify Code"
+            "verifyCodeButtonText": "Verify Code",
+            "codeInputPlaceholder": "Enter verification code",
+            "nameInputPlaceholder": "Your name"
         },
         "LoginScreen": {
             "title": "Login",
             "sendVerificationCodeButtonText": "Send Verification Code",
             "createAccountButtonText": "or Create Account",
             "retryButtonText": "Retry?",
-            "verifyCodeButtonText": "Verify Code"
+            "verifyCodeButtonText": "Verify Code",
+            "codeInputPlaceholder": "Enter verification code"
         }
     },
     "Browser": {
@@ -97,6 +100,7 @@
                 "deliveryFeeLabelText": "Delivery fee",
                 "tipLabelText": "Tip",
                 "deliveryTipLabelText": "Delivery Tip",
+                "cartSubtotalLabelText": "Subtotal",
                 "cartTotalLabelText": "Total"
             },
             "CartHeader": {
@@ -111,7 +115,8 @@
             "reloadCartButtonText": "Reload Cart",
             "emptyStateTitle": "Your Cart is Empty",
             "emptyStateSubtitle": "Looks like you haven't added anything to your cart yet.",
-            "goToBrowserButtonText": "Start Shopping"
+            "goToBrowserButtonText": "Start Shopping",
+            "quantityExplenation": "(each {{cost}})"
         },
         "CheckoutScreen": {
             "gatewayDetails": {
@@ -179,13 +184,16 @@
             "websiteButtonText": "Website",
             "contactButtonText": "Contact",
             "shareButtonText": "Share",
+            "searchButtonText": "Search",
+            "browseButtonText": "Browse",
             "contactActionSheetTitle": "Contact {{storeName}}",
             "contactActionSheetCallActionButtonText": "Call {{phone}}",
             "contactActionSheetEmailActionButtonText": "Email {{email}}",
             "contactActionSheetFacebookActionButtonText": "Facebook",
             "contactActionSheetInstagramActionButtonText": "Instagram",
             "contactActionSheetTwitterActionButtonText": "Twitter",
-            "serviceIndicatorText": "(Service)"
+            "serviceIndicatorText": "(Service)",
+            "descriptionMissing": "No description"
         }
     },
     "Places": {
@@ -304,6 +312,10 @@
                 "countrySelectTitle": "Select Country"
             },
             "ProductPriceView": {},
+            "ProductCard": {
+                "serviceIndicator": "(Service)",
+                "unavailable": "Unavailable"
+            },
             "ServiceQuoteFeeView": {},
             "StoreCategoryPicker": {
                 "defaultButtonTitle": "View Categories",
@@ -316,5 +328,10 @@
             "TipInput": {},
             "TipView": {}
         }
+    },
+    "terms": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "loading": "Loading..."
     }
 }

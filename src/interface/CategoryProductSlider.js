@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useStorefront } from 'hooks';
-import { formatCurrency } from 'utils';
+import { useStorefront, useLocale } from 'hooks';
+import { formatCurrency, translate } from 'utils';
 import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
@@ -15,6 +15,9 @@ const CategoryProductSlider = (props) => {
 
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [locale] = useLocale();
+
+    const category = props.category;
 
     useEffect(() => {
         storefront.products.query({ category: props.category.id }).then((products) => {
@@ -29,7 +32,7 @@ const CategoryProductSlider = (props) => {
 
     return (
         <View style={props.style}>
-            <Text style={tailwind('font-bold mb-3 text-lg')}>{props.category.getAttribute('name')}</Text>
+            <Text style={tailwind('font-bold mb-3 text-lg')}>{translate(category, 'name')}</Text>
             <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <View style={tailwind('flex flex-row py-4')}>
                     {products.map((product, index) => (
@@ -41,7 +44,7 @@ const CategoryProductSlider = (props) => {
                                     </View>
                                     <View style={tailwind('flex p-2')}>
                                         <View style={tailwind('mb-1.5 flex flex-row items-center')}>
-                                            <Text style={tailwind('font-semibold')}>{product.getAttribute('name')}</Text>
+                                            <Text style={tailwind('font-semibold')}>{translate(product, 'name')}</Text>
                                             {product.getAttribute('is_service') === true && <Text style={tailwind('ml-1 text-blue-500 font-semibold')}>(Service)</Text>}
                                         </View>
                                         {product.isOnSale && (

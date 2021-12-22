@@ -5,7 +5,8 @@ import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
 import { useCustomer, signOut } from 'utils/Customer';
-import { config } from 'utils';
+import { config, translate } from 'utils';
+import { useLocale } from 'hooks';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import tailwind from 'tailwind';
@@ -16,8 +17,12 @@ const AccountScreen = ({ navigation, route }) => {
     const { info } = route.params;
 
     const [customer, setCustomer] = useCustomer();
+    const [locale, setLocale] = useLocale();
     const [isLoading, setIsLoading] = useState(false);
 
+    const imageBgSource = customer ? config('ui.accountScreen.signedInContainerBackgroundImage') : config('ui.accountScreen.signedOutContainerBackgroundImage');
+    const moreContainerStyle = customer ? config('ui.accountScreen.signedInContainerStyle') : config('ui.accountScreen.signedOutContainerStyle');
+    const moreHeaderContainerStyle = customer ? config('ui.accountScreen.signedInHeaderContainerStyle') : config('ui.accountScreen.signedOutHeaderContainerStyle');
     const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? true;
     const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
 
@@ -33,12 +38,12 @@ const AccountScreen = ({ navigation, route }) => {
 
     return (
         <ImageBackground
-            source={config(customer ? 'ui.accountScreen.signedInContainerBackgroundImage' : 'ui.accountScreen.signedOutContainerBackgroundImage') ?? {}}
+            source={imageBgSource}
             resizeMode={config(customer ? 'ui.accountScreen.signedInBackgroundResizeMode' : 'ui.accountScreen.signedOutBackgroundResizeMode') ?? 'cover'}
             style={[config(customer ? 'ui.accountScreen.signedInContainerBackgroundImageStyle' : 'ui.accountScreen.signedOutContainerBackgroundImageStyle')]}
         >
-            {displayHeaderComponent === true && <RenderHeader style={[tailwind('bg-white bg-opacity-50'), config('ui.accountScreen.headerContainerStyle')]} />}
-            <View style={[tailwind('bg-white'), config('ui.accountScreen.containerStyle'), { height: containerHeight }]}>
+            {displayHeaderComponent === true && <RenderHeader style={[tailwind('bg-white bg-opacity-50'), config('ui.accountScreen.headerContainerStyle'), moreHeaderContainerStyle]} />}
+            <View style={[tailwind('bg-white'), config('ui.accountScreen.containerStyle'), moreContainerStyle, { height: containerHeight }]}>
                 {!customer && (
                     <View style={tailwind('w-full h-full relative')}>
                         <View style={tailwind('flex items-center justify-center w-full h-full relative')}>
@@ -53,7 +58,7 @@ const AccountScreen = ({ navigation, route }) => {
                                         <FontAwesomeIcon icon={faIdBadge} size={88} style={[tailwind('text-gray-600'), config('ui.accountScreen.emptyStatePlaceholderIconStyle')]} />
                                     </View>
                                     <Text style={[tailwind('text-lg text-center font-semibold mb-10'), config('ui.accountScreen.emptyStatePlaceholderTextStyle')]}>
-                                        Create an account or login
+                                        {translate('Account.AccountScreen.title')}
                                     </Text>
                                 </View>
                             )}
@@ -62,7 +67,7 @@ const AccountScreen = ({ navigation, route }) => {
                                     <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                                         <View style={[tailwind('btn border border-gray-100 bg-gray-100'), config('ui.accountScreen.loginButtonStyle')]}>
                                             <Text style={[tailwind('font-semibold text-gray-900 text-sm'), config('ui.accountScreen.loginButtonTextStyle')]} numberOfLines={1}>
-                                                Login
+                                                {translate('Account.AccountScreen.loginButtonText')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -71,7 +76,7 @@ const AccountScreen = ({ navigation, route }) => {
                                     <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
                                         <View style={[tailwind('btn border border-gray-100 bg-gray-100'), config('ui.accountScreen.createAccountButtonStyle')]}>
                                             <Text style={[tailwind('font-semibold text-gray-900 text-sm'), config('ui.accountScreen.createAccountButtonTextStyle')]} numberOfLines={1}>
-                                                Create Account
+                                                {translate('Account.AccountScreen.createAccountButtonText')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -88,7 +93,11 @@ const AccountScreen = ({ navigation, route }) => {
                                     <Image source={{ uri: customer.getAttribute('photo_url') }} style={tailwind('w-12 h-12 rounded-full')} />
                                 </View>
                                 <View>
-                                    <Text style={tailwind('text-lg font-semibold')}>Hello, {customer.getAttribute('name')}</Text>
+                                    <Text style={tailwind('text-lg font-semibold')}>
+                                        {translate('Account.AccountScreen.userGreetingTitle', {
+                                            customerName: customer.getAttribute('name'),
+                                        })}
+                                    </Text>
                                     <Text style={tailwind('text-gray-500')}>{customer.getAttribute('phone')}</Text>
                                 </View>
                             </View>
@@ -100,14 +109,14 @@ const AccountScreen = ({ navigation, route }) => {
                         </View> */}
                         <View style={tailwind('mb-4 bg-white')}>
                             <View style={tailwind('flex flex-row p-4')}>
-                                <Text style={tailwind('font-semibold text-base')}>My Account</Text>
+                                <Text style={tailwind('font-semibold text-base')}>{translate('Account.AccountScreen.accountMenuTitle')}</Text>
                             </View>
                             <View>
                                 <TouchableOpacity onPress={() => navigation.navigate('EditProfile', { attributes: customer.serialize() })}>
                                     <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <FontAwesomeIcon icon={faUser} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                            <Text style={tailwind('text-gray-700 text-base')}>Profile</Text>
+                                            <Text style={tailwind('text-gray-700 text-base')}>{translate('Account.AccountScreen.profileLinkText')}</Text>
                                         </View>
                                         <View>
                                             <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
@@ -118,7 +127,7 @@ const AccountScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <FontAwesomeIcon icon={faBox} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                            <Text style={tailwind('text-gray-700 text-base')}>Orders</Text>
+                                            <Text style={tailwind('text-gray-700 text-base')}>{translate('Account.AccountScreen.ordersLinkText')}</Text>
                                         </View>
                                         <View>
                                             <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
@@ -129,7 +138,7 @@ const AccountScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center justify-between p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <FontAwesomeIcon icon={faMapMarked} size={18} style={tailwind('mr-3 text-gray-600')} />
-                                            <Text style={tailwind('text-gray-700 text-base')}>Places</Text>
+                                            <Text style={tailwind('text-gray-700 text-base')}>{translate('Account.AccountScreen.placesLinkText')}</Text>
                                         </View>
                                         <View>
                                             <FontAwesomeIcon icon={faChevronRight} size={18} style={tailwind('text-gray-600')} />
@@ -143,7 +152,7 @@ const AccountScreen = ({ navigation, route }) => {
                                 <TouchableOpacity style={tailwind('flex-1')} onPress={signOut}>
                                     <View style={tailwind('btn border border-gray-200')}>
                                         {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
-                                        <Text style={tailwind('font-semibold text-black text-base')}>Sign Out</Text>
+                                        <Text style={tailwind('font-semibold text-black text-base')}>{translate('Account.AccountScreen.signoutButtonText')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>

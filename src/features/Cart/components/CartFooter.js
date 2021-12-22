@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, Switch } from 'react-native';
 import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
-import { formatCurrency } from 'utils';
+import { formatCurrency, translate } from 'utils';
+import { useLocale } from 'hooks';
 import tailwind from 'tailwind';
 
 const capitalize = ([ first, ...rest ]) => `${first.toUpperCase()}${rest.join('')}`;
@@ -29,13 +30,15 @@ const CartFooter = (props) => {
     const hasOptions = pickupEnabled || tipsEnabled || deliveryTipsEnabled;
     // const taxPercentage = info?.options?.tax_percentage ?? 0;
 
+    const [locale] = useLocale();
+
     return (
         <View style={[tailwind('bg-gray-100 pt-2'), style]}>
             {hasOptions && (
                 <View style={tailwind('mb-2')}>
                     <View style={tailwind('flex px-4 py-2 mb-2')}>
                         <View>
-                            <Text style={tailwind('font-semibold text-gray-400')}>Options</Text>
+                            <Text style={tailwind('font-semibold text-gray-400')}>{translate('Cart.components.CartFooter.optionsLabelText')}</Text>
                         </View>
                     </View>
                     {pickupEnabled && (
@@ -61,7 +64,7 @@ const CartFooter = (props) => {
                                     />
                                 </View>
                                 <View>
-                                    <Text style={tailwind('font-semibold')}>Pickup order</Text>
+                                    <Text style={tailwind('font-semibold')}>{translate('Cart.components.CartFooter.pickupOrderLabelText')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -81,7 +84,7 @@ const CartFooter = (props) => {
                                 </View>
                                 <View style={tailwind('flex-1 flex flex-row items-center justify-between')}>
                                     <View>
-                                        <Text style={tailwind('font-semibold')}>Leave a tip</Text>
+                                        <Text style={tailwind('font-semibold')}>{translate('Cart.components.CartFooter.askTipLabelText')}</Text>
                                     </View>
                                     {isTipping && (
                                         <View style={tailwind('ml-2')}>
@@ -107,7 +110,7 @@ const CartFooter = (props) => {
                                 </View>
                                 <View style={tailwind('flex-1 flex flex-row items-center justify-between')}>
                                     <View>
-                                        <Text style={tailwind('font-semibold')}>Tip delivery</Text>
+                                        <Text style={tailwind('font-semibold')}>{translate('Cart.components.CartFooter.askDeliveryTipLabelText')}</Text>
                                     </View>
                                     {isTippingDriver && (
                                         <View style={tailwind('ml-2')}>
@@ -122,13 +125,13 @@ const CartFooter = (props) => {
             )}
             <View style={tailwind('flex px-4 py-2')}>
                 <View>
-                    <Text style={tailwind('font-semibold text-gray-400')}>Cost</Text>
+                    <Text style={tailwind('font-semibold text-gray-400')}>{translate('Cart.components.CartFooter.costLabelText')}</Text>
                 </View>
             </View>
             <View style={tailwind('mt-2 mb-36 bg-white w-full')}>
                 <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                     <View>
-                        <Text>Subtotal</Text>
+                        <Text>{translate('Cart.components.CartFooter.cartSubtotalLabelText')}</Text>
                     </View>
                     <View>
                         <CartSubtotalView cart={cart} style={tailwind('font-bold')} />
@@ -137,7 +140,7 @@ const CartFooter = (props) => {
                 {!isPickupOrder && (
                     <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                         <View>
-                            <Text>Delivery Fee</Text>
+                            <Text>{translate('Cart.components.CartFooter.deliveryFeeLabelText')}</Text>
                         </View>
                         <View>
                             <ServiceQuoteFeeView
@@ -152,7 +155,7 @@ const CartFooter = (props) => {
                 {isTipping && (
                     <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                         <View>
-                            <Text>Tip</Text>
+                            <Text>{translate('Cart.components.CartFooter.tipLabelText')}</Text>
                         </View>
                         <View>
                             <TipView tip={tip} subtotal={cart.subtotal()} currency={cart.getAttribute('currency')} style={tailwind('font-bold')} />
@@ -162,7 +165,7 @@ const CartFooter = (props) => {
                 {isTippingDriver && !isPickupOrder && (
                     <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                         <View>
-                            <Text>Delivery Tip</Text>
+                            <Text>{translate('Cart.components.CartFooter.deliveryTipLabelText')}</Text>
                         </View>
                         <View>
                             <TipView tip={deliveryTip} subtotal={cart.subtotal()} currency={cart.getAttribute('currency')} style={tailwind('font-bold')} />
@@ -171,7 +174,7 @@ const CartFooter = (props) => {
                 )}
                 <View style={tailwind('flex flex-row items-center justify-between border-b border-gray-100 h-14 px-4')}>
                     <View>
-                        <Text style={tailwind('font-bold')}>Total</Text>
+                        <Text style={tailwind('font-bold')}>{translate('Cart.components.CartFooter.cartTotalLabelText')}</Text>
                     </View>
                     <View>
                         <Text style={tailwind('font-bold')}>{formatCurrency(total / 100, cart.getAttribute('currency'))}</Text>

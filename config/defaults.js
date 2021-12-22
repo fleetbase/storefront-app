@@ -11,7 +11,9 @@
  */
 const DefaultConfig = {
     AppConfig: {
-        linkingPrefixes: []
+        linkingPrefixes: [],
+        enableTranslations: false,
+        enabledTranslations: []
     },
 
     InterfaceConfig: {
@@ -31,7 +33,11 @@ const DefaultConfig = {
 
         accountScreen: {
             containerStyle: {},
+            signedInContainerStyle: {},
+            signedOutContainerStyle: {},
             headerContainerStyle: {},
+            signedInHeaderContainerStyle: {},
+            signedOutHeaderContainerStyle: {},
             headerComponentProps: {},
             displayHeaderComponent: true,
             displayEmptyStatePlaceholder: true,

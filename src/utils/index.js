@@ -3,5 +3,6 @@ import { calculatePercentage, haversine } from './Calculate';
 import { syncDevice } from './Customer';
 import { formatCurrency, capitalize } from './Format';
 import { geocode, getCurrentLocation } from './Geo';
+import { translate } from './Localize';
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, calculatePercentage, haversine, syncDevice, formatCurrency, capitalize, geocode, getCurrentLocation, mutatePlaces, debounce, deepGet, config, sum };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, calculatePercentage, haversine, syncDevice, formatCurrency, capitalize, geocode, getCurrentLocation, mutatePlaces, debounce, deepGet, config, sum, translate };

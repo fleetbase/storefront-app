@@ -6,7 +6,8 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
 import { config } from 'utils';
-import { useMountedState } from 'hooks';
+import { useMountedState, useLocale } from 'hooks';
+import { translate, setLanguage, getLanguage } from 'utils/Localize';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
@@ -17,11 +18,12 @@ const ExploreScreen = ({ navigation, route }) => {
     const { info } = route.params;
 
     const isMounted = useMountedState();
+    const isReviewsEnabled = info?.options?.reviews_enabled === true;
+
     const [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter, new Collection());
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isRefreshing, setIsRefreshing] = useState(false);
-
-    const isReviewsEnabled = info?.options?.reviews_enabled === true;
+    const [locale, setLocale] = useLocale();
 
     const transitionToProduct = (product, close, timeout = 300) => {
         if (typeof close === 'function') {
@@ -44,7 +46,7 @@ const ExploreScreen = ({ navigation, route }) => {
         }
 
         navigation.navigate('StoreScreen', { data: store.serialize() });
-    }
+    };
 
     const refresh = () => {
         setIsRefreshing(true);

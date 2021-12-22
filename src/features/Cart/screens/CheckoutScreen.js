@@ -7,9 +7,9 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { faStripe } from '@fortawesome/free-brands-svg-icons';
-import { formatCurrency, calculatePercentage, isLastIndex, logError } from 'utils';
+import { formatCurrency, calculatePercentage, isLastIndex, logError, translate } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
-import { useStorefront, useFleetbase, useCustomer, useMountedState } from 'hooks';
+import { useStorefront, useFleetbase, useCustomer, useMountedState, useLocale } from 'hooks';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Collection } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -19,20 +19,6 @@ import tailwind from 'tailwind';
 
 const { addEventListener, removeEventListener, emit } = EventRegister;
 const actionSheetRef = createRef();
-
-const gatewayDetails = {
-    cash: {
-        name: 'Cash',
-        icon: <FontAwesomeIcon icon={faMoneyBillWave} size={26} style={tailwind('text-green-400')} />,
-        description: 'Cash on delivery or pickup',
-    },
-    stripe: {
-        name: 'Stripe',
-        icon: <FontAwesomeIcon icon={faStripe} size={30} style={tailwind('text-indigo-400')} />,
-        description: 'Pay by card, powered by Stripe',
-    },
-};
-
 const isPaymentGatewayResource = (gateway) => typeof gateway === 'object' && gateway?.resource === 'payment-gateway';
 
 const CheckoutScreen = ({ navigation, route }) => {
@@ -61,6 +47,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [tip, setTip] = useState(tipAmount ?? 0);
     const [deliveryTip, setDeliveryTip] = useState(deliveryTipAmount ?? 0);
     const [customer, setCustomer] = useCustomer();
+    const [locale] = useLocale();
     const store = new Store(info, storefront.getAdapter());
 
     const codEnabled = info?.options?.cod_enabled === true;
@@ -70,6 +57,19 @@ const CheckoutScreen = ({ navigation, route }) => {
     const taxEnabled = info?.options?.tax_enabled === true;
     const taxPercentage = info?.options?.tax_percentage ?? 0;
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+
+    const gatewayDetails = {
+        cash: {
+            name: translate('Cart.CheckoutScreen.gatewayDetails.cash.title'),
+            icon: <FontAwesomeIcon icon={faMoneyBillWave} size={26} style={tailwind('text-green-400')} />,
+            description: translate('Cart.CheckoutScreen.gatewayDetails.cash.description'),
+        },
+        stripe: {
+            name: translate('Cart.CheckoutScreen.gatewayDetails.stripe.title'),
+            icon: <FontAwesomeIcon icon={faStripe} size={30} style={tailwind('text-indigo-400')} />,
+            description: translate('Cart.CheckoutScreen.gatewayDetails.stripe.description'),
+        },
+    };
 
     const canPlaceOrder = (() => {
         let isGatewayValid = isPaymentGatewayResource(gateway);
@@ -275,7 +275,8 @@ const CheckoutScreen = ({ navigation, route }) => {
         setGatewayOptions(gateways);
     };
 
-    const fetchGateways = (c = null) => {        store
+    const fetchGateways = (c = null) => {
+        store
             .getPaymentGateways()
             .then((gateways) => setupGateways(gateways, c))
             .catch((error) => {
@@ -472,7 +473,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             <ActionSheet containerStyle={tailwind('h-80')} gestureEnabled={true} bounceOnOpen={true} ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('p-5 flex flex-row items-center justify-between')}>
-                        <Text style={tailwind('text-lg font-bold')}>Select your payment method</Text>
+                        <Text style={tailwind('text-lg font-bold')}>{translate('Cart.CheckoutScreen.selectPaymentMethodActionSheetTitle')}</Text>
                         <TouchableOpacity
                             onPress={() => {
                                 actionSheetRef.current?.setModalVisible(false);
@@ -506,7 +507,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Checkout</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Cart.CheckoutScreen.checkoutLabelText')}</Text>
                 </View>
             </View>
 
@@ -518,23 +519,27 @@ const CheckoutScreen = ({ navigation, route }) => {
                                 <View style={tailwind('flex flex-row items-center mb-3 w-full')}>
                                     <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-2')} />
                                     <Text style={tailwind('text-red-600 text-sm font-semibold')} numberOfLines={1}>
-                                        You must login or signup to checkout
+                                        {translate('Cart.CheckoutScreen.loginToCheckoutWarningText')}
                                     </Text>
                                 </View>
                                 <TouchableOpacity style={tailwind('w-full')} disabled={isLoading} onPress={login}>
                                     <View style={tailwind('btn border border-red-100 bg-red-100 w-full')}>
-                                        <Text style={tailwind('font-semibold text-red-900')}>Login</Text>
+                                        <Text style={tailwind('font-semibold text-red-900')}>{translate('Cart.CheckoutScreen.loginButtonText')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     )}
                     {!isPickupOrder && (
-                        <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} disabled={!customer} onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
+                        <TouchableOpacity
+                            style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}
+                            disabled={!customer}
+                            onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}
+                        >
                             <View style={tailwind('flex flex-row justify-between')}>
                                 <View>
                                     <View style={tailwind('flex flex-row items-center mb-3')}>
-                                        <Text style={tailwind('font-semibold text-base')}>Delivery Address</Text>
+                                        <Text style={tailwind('font-semibold text-base')}>{translate('Cart.CheckoutScreen.addressLabelText')}</Text>
                                         {isInvalidDeliveryPlace && <FontAwesomeIcon icon={faExclamationTriangle} style={tailwind('text-red-400 ml-1')} />}
                                     </View>
                                     {deliverTo && (
@@ -550,7 +555,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     )}
                                     {!deliverTo && (
                                         <View>
-                                            <Text style={tailwind('font-semibold')}>Select a delivery location</Text>
+                                            <Text style={tailwind('font-semibold')}>{translate('Cart.CheckoutScreen.selectAddressLabelText')}</Text>
                                         </View>
                                     )}
                                 </View>
@@ -572,14 +577,14 @@ const CheckoutScreen = ({ navigation, route }) => {
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
                                     <View>
-                                        <Text style={tailwind('font-semibold text-base')}>Payment Method</Text>
+                                        <Text style={tailwind('font-semibold text-base')}>{translate('Cart.CheckoutScreen.paymentMethodLabelText')}</Text>
                                     </View>
                                 </View>
 
                                 {gateway === null && (
                                     <View>
                                         <View style={tailwind('flex flex-row justify-between')}>
-                                            <Text>Select payment method</Text>
+                                            <Text>{translate('Cart.CheckoutScreen.selectPaymentMethodLabelText')}</Text>
                                         </View>
                                     </View>
                                 )}
@@ -588,7 +593,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     <View>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <FontAwesomeIcon icon={faMoneyBillWave} size={20} style={tailwind('text-green-400 mr-2')} />
-                                            <Text>Cash</Text>
+                                            <Text>{translate('Cart.CheckoutScreen.cashGatewayName')}</Text>
                                         </View>
                                     </View>
                                 )}
@@ -597,7 +602,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     <View>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
-                                            {!isLoading && !paymentMethod?.label && <Text>No payment method</Text>}
+                                            {!isLoading && !paymentMethod?.label && <Text>{translate('Cart.CheckoutScreen.noPaymentMethodLabelText')}</Text>}
                                             {paymentMethod?.label !== null && (
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     <FastImage
@@ -633,7 +638,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
-                                    <Text style={tailwind('font-semibold text-base')}>Cart ({cart.getAttribute('total_unique_items')})</Text>
+                                    <Text style={tailwind('font-semibold text-base')}>{translate('Cart.CheckoutScreen.cartLabelText', { cartUniqueItemsCount: cart.getAttribute('total_unique_items') })}</Text>
                                 </View>
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     <View style={tailwind('flex-1 flex flex-row')}>
@@ -664,33 +669,33 @@ const CheckoutScreen = ({ navigation, route }) => {
 
                 <View style={tailwind('p-4 w-full h-full bg-gray-50')}>
                     <View style={tailwind('flex flex-row justify-between mb-3')}>
-                        <Text style={tailwind('font-semibold text-base')}>Order Summary</Text>
+                        <Text style={tailwind('font-semibold text-base')}>{translate('Cart.CheckoutScreen.orderSummaryLabelText')}</Text>
                     </View>
                     <View style={tailwind('pb-40')}>
                         <View style={tailwind('flex flex-row items-center justify-between py-2')}>
-                            <Text>Subtotal</Text>
+                            <Text>{translate('Cart.CheckoutScreen.subtotalLabelText')}</Text>
                             <Text>{formatCurrency(cart.subtotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
                         {!isPickupOrder && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
-                                <Text>Delivery Fee</Text>
+                                <Text>{translate('Cart.CheckoutScreen.deliveryFeeLabelText')}</Text>
                                 <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
                             </View>
                         )}
                         {tip !== 0 && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
-                                <Text>Tip</Text>
+                                <Text>{translate('Cart.CheckoutScreen.tipLabelText')}</Text>
                                 <Text>{formattedTip}</Text>
                             </View>
                         )}
                         {deliveryTip !== 0 && !isPickupOrder && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
-                                <Text>Delivery Tip</Text>
+                                <Text>{translate('Cart.CheckoutScreen.deliveryTipLabelText')}</Text>
                                 <Text>{formattedDeliveryTip}</Text>
                             </View>
                         )}
                         <View style={tailwind('flex flex-row items-center justify-between mt-2 pt-4 border-t-2 border-gray-900')}>
-                            <Text style={tailwind('font-semibold')}>Order Total</Text>
+                            <Text style={tailwind('font-semibold')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
                             <Text style={tailwind('font-semibold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
                     </View>
@@ -701,7 +706,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 <View style={tailwind('w-full bg-white shadow-sm px-4 py-6')}>
                     <View style={tailwind('flex flex-row justify-between mb-2')}>
                         <View>
-                            <Text style={tailwind('text-gray-400')}>Total</Text>
+                            <Text style={tailwind('text-gray-400')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
                             <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
                         </View>
                         <TouchableOpacity onPress={placeOrder} disabled={!canPlaceOrder}>
@@ -713,7 +718,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                 )}
                             >
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
-                                <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>Place Order</Text>
+                                <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>{translate('Cart.CheckoutScreen.submitOrderButtonText')}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

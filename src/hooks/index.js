@@ -6,6 +6,7 @@ import useStoreLocation from './use-store-location';
 import useCart from './use-cart';
 import useCartTabOptions from './use-cart-tab-options';
 import useMountedState from './use-mounted-state';
+import useLocale from './use-locale';
 
 export {
     useFleetbase,
@@ -15,5 +16,6 @@ export {
     useStoreLocation,
     useCart,
     useCartTabOptions,
-    useMountedState
+    useMountedState,
+    useLocale
 }

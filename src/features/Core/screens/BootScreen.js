@@ -4,6 +4,7 @@ import { initStripe } from '@stripe/stripe-react-native';
 import { hasRequiredKeys, logError } from 'utils';
 import { useStorefront } from 'hooks';
 import { set } from 'utils/Storage';
+import { setI18nConfig } from 'utils/Localize';
 import { tailwind } from 'tailwind';
 import SetupWarningScreen from 'exceptions/SetupWarningScreen';
 import config from 'config';
@@ -30,6 +31,9 @@ const BootScreen = ({ navigation }) => {
     if (storefront instanceof Error) {
         return <SetupWarningScreen error={storefront} />;
     }
+
+    // Initialize i18n
+    setI18nConfig();
 
     // Fetch the about() information 
     storefront

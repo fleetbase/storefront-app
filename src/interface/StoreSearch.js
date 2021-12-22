@@ -3,8 +3,8 @@ import { ScrollView, View, Text, Image, TouchableOpacity, TextInput, ActivityInd
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { logError, debounce, stripHtml } from 'utils';
-import { useStorefront } from 'hooks';
+import { logError, debounce, stripHtml, translate } from 'utils';
+import { useStorefront, useLocale } from 'hooks';
 import ProductPriceView from './ProductPriceView';
 import tailwind from 'tailwind';
 
@@ -21,6 +21,7 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [results, setResults] = useState([]);
     const [query, setQuery] = useState(null);
+    const [locale] = useLocale();
 
     const closeDialog = () => setIsDialogOpen(false);
 
@@ -79,7 +80,7 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
                                     clearButtonMode={'while-editing'}
                                     textAlign={'left'}
                                     style={tailwind('bg-gray-100 rounded-md pl-10 pr-2 h-10')}
-                                    placeholder={`Search ${store.getAttribute('name')}`}
+                                    placeholder={translate('components.interface.StoreSearch.inputPlaceholderText')}
                                 />
                             </View>
                         </View>

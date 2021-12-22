@@ -6,10 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMapMarked, faBox, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Customer } from '@fleetbase/storefront';
 import { Order, Collection } from '@fleetbase/sdk';
-import { useStorefront, useCustomer } from 'hooks';
+import { useStorefront, useCustomer, useLocale } from 'hooks';
 import { adapter } from 'hooks/use-fleetbase';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
-import { logError } from 'utils';
+import { logError, translate } from 'utils';
 import { format } from 'date-fns';
 import tailwind from 'tailwind';
 
@@ -21,6 +21,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
 
     const [orders, setOrders] = useResourceCollection('order', Order, adapter, new Collection());
     const [customer, setCustomer] = useCustomer();
+    const [locale, setLocale] = useLocale();
     const [isLoading, setIsLoading] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
 
@@ -85,7 +86,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                                     <FontAwesomeIcon icon={useLeftArrow === true ? faArrowLeft : faTimes} />
                                 </View>
                             </TouchableOpacity>
-                            <Text style={tailwind('text-xl font-semibold')}>Your orders</Text>
+                            <Text style={tailwind('text-xl font-semibold')}>{translate('Account.OrderHistoryScreen.title')}</Text>
                         </View>
                     </View>
                 }
@@ -98,8 +99,8 @@ const OrderHistoryScreen = ({ navigation, route }) => {
 
                             <View style={tailwind('w-full')}>
                                 <View style={tailwind('flex items-center justify-center mb-10')}>
-                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{isInitializing ? 'Loading your order history' : 'You have no orders'}</Text>
-                                    {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't made any orders.</Text>}
+                                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{isInitializing ? translate('Account.OrderHistoryScreen.bodyTitleLoading') : translate('Account.OrderHistoryScreen.bodyTitle')}</Text>
+                                    {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Account.OrderHistoryScreen.emptyStateText')}</Text>}
                                 </View>
                             </View>
                         </View>

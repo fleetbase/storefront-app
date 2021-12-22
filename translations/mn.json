@@ -38,18 +38,21 @@
             "title": " үртгэл үүсгэх",
             "greetingTitle": "Сайн байна уу, тавтай морил {{infoName}}.",
             "greetingSubtitle": "Доорх хэсэгт нэр болон утсаара буртгэл уусэгнүү",
-            "sendVerificationCodeButtonText": " Баталгаажуулах код илгээнэ үү",            
+            "sendVerificationCodeButtonText": " Баталгаажуулах код илгээнэ үү",
             "awaitingVerificationTitle": " Баярлалаа, {{name}}!",
             "awaitingVerificationSubtitle": " Одоо та утсандаа SMS-ээр код хүлээн авсан байх ёстой бөгөөд бүртгэлээ үүсгэхийн тулд кодыг баталгаажуулна уу!",
             "retryButtonText": "Дахин оролдоно уу?",
-            "verifyCodeButtonText": " Баталгаажуулах код"
+            "verifyCodeButtonText": " Баталгаажуулах код",
+            "codeInputPlaceholder": "Enter verification code",
+            "nameInputPlaceholder": "Your name"
         },
         "LoginScreen": {
             "title": "Нэвтрэх",
             "sendVerificationCodeButtonText": "Баталгаажуулах код илгээнэ үү",
             "createAccountButtonText": "Эсвэл Бүртгэл үүсгэх",
             "retryButtonText": "Дахин оролдох уу?",
-            "verifyCodeButtonText": "Баталгаажуулах код"
+            "verifyCodeButtonText": "Баталгаажуулах код",
+            "codeInputPlaceholder": "Enter verification code"
         }
     },
     "Browser": {
@@ -97,6 +100,7 @@
                 "deliveryFeeLabelText": "Хүргэлтийн хураамж",
                 "tipLabelText": "Тип",
                 "deliveryTipLabelText": "Хүргэлтийн Тип",
+                "cartSubtotalLabelText": "Дунд нийлбэр",
                 "cartTotalLabelText": "Нийт"
             },
             "CartHeader": {
@@ -111,7 +115,8 @@
             "reloadCartButtonText": "Сагсыг дахин ачаалах",
             "emptyStateTitle": "Таны карт хоосон байна",
             "emptyStateSubtitle": " Та сагсандаа юу ч нэмээгүй бололтой.",
-            "goToBrowserButtonText": "Худалдаа эхлэх"
+            "goToBrowserButtonText": "Худалдаа эхлэх",
+            "quantityExplenation": "(each {{cost}})"
         },
         "CheckoutScreen": {
             "gatewayDetails": {
@@ -132,7 +137,7 @@
             "selectAddressLabelText": "Хүргэлтийн байршлыг сонгоно уу",
             "paymentMethodLabelText": "Төлбөрийн Хэрэгсэл",
             "selectPaymentMethodLabelText": "Төлбөрийн аргыг сонгоно уу",
-            "cashGatewayName": "бэлэн мөнгө",
+            "cashGatewayName": "Бэлэн мөнгө",
             "noPaymentMethodLabelText": "Төлбөрийн арга байхгүй",
             "cartLabelText": "Сагс ({{cartUniqueItemsCount}})",
             "orderSummaryLabelText": "Захиалгын хураангуй",
@@ -151,7 +156,7 @@
     },
     "Exceptions": {
         "SetupWarningScreen": {
-            "title": "Configurations Missing!",
+            "title": "Тохиргооны алдаа!",
             "subtitle": "Looks like you haven't properly configured your app.",
             "envMissingText": "is missing from environment!"
         }
@@ -160,27 +165,29 @@
         "ExploreScreen": {},
         "NetworkCategoryScreen": {},
         "StoreScreen": {
-            "loadingText": "Loading...",
-            "displayHoursToggleText": "Hours",
-            "displayHoursTodayLabel": "Today",
-            "weekdayMonday": "Monday",
-            "weekdayTuesday": "Tuesday",
-            "weekdayWednesday": "Wednesday",
-            "weekdayThursday": "Thursday",
-            "weekdayFriday": "Friday",
-            "weekdaySaturday": "Saturday",
-            "weekdaySunday": "Sunday",
+            "loadingText": "Уншиж байна...",
+            "displayHoursToggleText": "Цагууд",
+            "displayHoursTodayLabel": "Өдөрүүд",
+            "weekdayMonday": "Даваа ",
+            "weekdayTuesday": "Мягмар",
+            "weekdayWednesday": "Лхагва",
+            "weekdayThursday": "Пүрэв",
+            "weekdayFriday": "Баасан",
+            "weekdaySaturday": "Бямба",
+            "weekdaySunday": "Ням",
             "shareStoreTitleText": "{{storeName}} found on {{networkName}}",
             "shareStoreSubjectText": "{{storeName}} found on {{networkName}}",
             "shareStoreMessageText": "Hey look what I found on {{networkName}}! Checkout {{storeName}}!",
-            "photosButtonText": "Photos",
-            "reviewsButtonText": "Reviews",
-            "mapButtonText": "Map",
+            "photosButtonText": "Зурагнууд",
+            "reviewsButtonText": "Сэтгэгдэл",
+            "mapButtonText": "Газрын зураг",
             "websiteButtonText": "Website",
-            "contactButtonText": "Contact",
-            "shareButtonText": "Share",
-            "contactActionSheetTitle": "Contact {{storeName}}",
-            "contactActionSheetCallActionButtonText": "Call {{phone}}",
+            "contactButtonText": "Холбоо барих",
+            "shareButtonText": "Хуваалцах",
+            "searchButtonText": "Search",
+            "browseButtonText": "Browse",
+            "contactActionSheetTitle": "Холбоо барих {{storeName}}",
+            "contactActionSheetCallActionButtonText": "Залгах {{phone}}",
             "contactActionSheetEmailActionButtonText": "Email {{email}}",
             "contactActionSheetFacebookActionButtonText": "Facebook",
             "contactActionSheetInstagramActionButtonText": "Instagram",
@@ -221,7 +228,7 @@
             "totalLabelText": "Нийт"
         },
         "OrderScreen": {
-            "title": "Order {{orderStatus}}",
+            "title": "Захиалах {{orderStatus}}",
             "orderPickupAddressLabelText": "аас авах захиалга",
             "orderNotesLabelText": "Захиалгын тэмдэглэл",
             "orderQRCodeLabelText": "QR код",
@@ -234,46 +241,46 @@
             "totalLabelText": "Нийт"
         },
         "StoreLocationScreen": {
-            "hideDirectionsActionText": "Hide Directions",
-            "displayDirectionsActionText": "Display Directions",
+            "hideDirectionsActionText": "Чиглэлийг хаах",
+            "displayDirectionsActionText": "Чиглэлийг харах",
             "focusStoreActionText": "Focus on {{storeName}}",
-            "callStoreActionText": "Call",
-            "displayDirectionsFromLabel": "From:",
-            "displayDirectionsToLabel": "To:",
-            "displayDirectionsDistanceLabel": "Distance:",
+            "callStoreActionText": "Залгах",
+            "displayDirectionsFromLabel": "Хаанаас:",
+            "displayDirectionsToLabel": "Хаашаа:",
+            "displayDirectionsDistanceLabel": "Хоорондох зай:",
             "displayDirectionsDistanceUnitLabel": "km",
-            "displayDirectionsDurationLabel": "Duration:",
-            "displayDirectionsDurationUnitLabel": "min",
-            "displayDirectionsLoadingIndicatorText": "Loading..."
+            "displayDirectionsDurationLabel": "Явах хугацаа:",
+            "displayDirectionsDurationUnitLabel": "мин",
+            "displayDirectionsLoadingIndicatorText": "Ачаалаж байна!..."
         },
         "StorePhotosScreen": {
-            "title": "Photos ({{storeMediaCount}})",
-            "viewMediaModalTitle": "Viewing photo"
+            "title": "Зурагнууд  ({{storeMediaCount}})",
+            "viewMediaModalTitle": "Зураг үзэх "
         },
         "StoreReviewsScreen": {
-            "title": "{{storeName}} Reviews",
-            "overallRatingTitle": "Overall rating",
-            "overallRatingSubtitle": "review",
-            "overallRatingSubtitlePlural": "reviews",
-            "writeReviewButtonText": "Write a Review",
-            "reviewCreatedAgoText": "{{reviewCreatedAgo}} ago",
-            "sortLabel": "Sort",
-            "filterLabel": "Filter",
-            "fileteredLabel": "{{filter}} star ratings",
-            "actionSheetTitle": "{{action}} reviews",
-            "filterOptionText": "{{rating}} stars",
-            "displayAllFilterOptionText": "All ratings",
-            "newestFirstSortOption": "Newest first",
-            "oldestFirstSortOption": "Oldest first",
-            "highestRatedSortOption": "Highest rated",
-            "lowestRatedSortOption": "Lowest rated",
-            "defaultSortOption": "{{networkName}} Sort"
+            "title": "{{storeName}} Сэтгэгдэл",
+            "overallRatingTitle": "Үнэлгээ",
+            "overallRatingSubtitle": "Сэтгэгдэл",
+            "overallRatingSubtitlePlural": "Сэтгэгдэл",
+            "writeReviewButtonText": "Сэтгэгдэл бичих",
+            "reviewCreatedAgoText": "{{reviewCreatedAgo}} өмнө",
+            "sortLabel": "Эрэмблэх",
+            "filterLabel": "Ялгах",
+            "fileteredLabel": "{{filter}} Одоор үнэлэх",
+            "actionSheetTitle": "{{action}} Сэтгэгдэлүүд",
+            "filterOptionText": "{{rating}} Однууд",
+            "displayAllFilterOptionText": "Бүх үнэлгээ",
+            "newestFirstSortOption": "Шинэ нь эхэндээ",
+            "oldestFirstSortOption": "Хуучин нь эхэндээ",
+            "highestRatedSortOption": "Хамгийн өндөр үнэлгээтэй",
+            "lowestRatedSortOption": "Хамгийн бага үнэлгээтэй",
+            "defaultSortOption": "{{networkName}} Эрэмблэх"
         },
         "WriteReviewScreen": {
-            "loginToReviewWarningText": "You must login or signup to leave a review",
-            "loginToReviewWarningButtonText": "Login",
-            "reviewRatingLabelText": "Select your rating",
-            "submitReviewButtonText": "Submit Review"
+            "loginToReviewWarningText": "Та нэвтрэх эсвэл бүртгүүлсэнийхээ дараа сэтгэгдэл үлдээнэ үү !",
+            "loginToReviewWarningButtonText": "Нэвтрэх",
+            "reviewRatingLabelText": "Одоор үнэлэх",
+            "submitReviewButtonText": "Илгээх "
         }
     },
     "components": {
@@ -297,13 +304,17 @@
             },
             "NetworkCategoryBlock": {},
             "NetworkSearch": {
-                "loadingText": "Searching...",
+                "loadingText": "Хайж байна...",
                 "noDescriptionText": "Тодорхойлолт байхгүй"
             },
             "PhoneInput": {
                 "countrySelectTitle": "Улсыг сонгоно уу"
             },
             "ProductPriceView": {},
+            "ProductCard": {
+                "serviceIndicator": "(Service)",
+                "unavailable": "Unavailable"
+            },
             "ServiceQuoteFeeView": {},
             "StoreCategoryPicker": {
                 "defaultButtonTitle": "Ангилалуудыг харах",
@@ -311,10 +322,15 @@
             },
             "StorePicker": {},
             "StoreSearch": {
-                "inputPlaceholderText": "Search {{storeName}}"
+                "inputPlaceholderText": "Хайх {{storeName}}"
             },
             "TipInput": {},
             "TipView": {}
         }
+    },
+    "terms": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "loading": "Loading..."
     }
 }

@@ -9,11 +9,11 @@ import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/sto
 import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import { calculatePercentage } from 'utils/Calculate';
 import { useResourceStorage, useResourceCollection } from 'utils/Storage';
-import { formatCurrency, isLastIndex, stripHtml, logError } from 'utils';
+import { formatCurrency, isLastIndex, stripHtml, logError, translate } from 'utils';
 import { NetworkInfoService } from 'services';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useCart, useMountedState } from 'hooks';
+import { useCart, useMountedState, useLocale } from 'hooks';
 import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
 import { format } from 'date-fns';
 import FastImage from 'react-native-fast-image';
@@ -31,6 +31,7 @@ const CartScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const fleetbase = useFleetbase();
     const isMounted = useMountedState();
+    const [locale] = useLocale();
 
     const { info, data } = route.params;
     const isNetwork = info.is_network === true;
@@ -301,7 +302,7 @@ const CartScreen = ({ navigation, route }) => {
                 <ActivityIndicator />
                 <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
                     <View style={tailwind('flex items-center justify-center text-center rounded-md px-3 py-2 bg-white border border-blue-500 shadow-sm')}>
-                        <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>Reload Cart</Text>
+                        <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>{translate('Cart.CartScreen.reloadCartButtonText')}</Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -315,12 +316,12 @@ const CartScreen = ({ navigation, route }) => {
                     <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
                 </View>
                 <View style={tailwind('flex items-center justify-center mb-10')}>
-                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>Your Cart is Empty</Text>
-                    <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>Looks like you haven't added anything to your cart yet.</Text>
+                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{translate('Cart.CartScreen.emptyStateTitle')}</Text>
+                    <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Cart.CartScreen.emptyStateSubtitle')}</Text>
                 </View>
                 <TouchableOpacity style={tailwind('w-full')} onPress={shopForMore}>
                     <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                        <Text style={tailwind('font-semibold text-blue-500 text-lg')}>Start Shopping</Text>
+                        <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Cart.CartScreen.goToBrowserButtonText')}</Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -389,7 +390,7 @@ const CartScreen = ({ navigation, route }) => {
                                 </View>
                             </View>
                             <TouchableOpacity style={tailwind('mt-2')} onPress={() => editCartItem(item)}>
-                                <Text style={tailwind('text-blue-600 text-sm font-semibold')}>Edit</Text>
+                                <Text style={tailwind('text-blue-600 text-sm font-semibold')}>{translate('terms.edit')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -399,7 +400,7 @@ const CartScreen = ({ navigation, route }) => {
                     {item.quantity > 1 && (
                         <View>
                             <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                                (each {formatCurrency(item.subtotal / item.quantity / 100, item.currency)})
+                                {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, item.currency) })}
                             </Text>
                         </View>
                     )}

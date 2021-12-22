@@ -4,16 +4,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useCustomer } from 'hooks';
+import { useCustomer, useLocale } from 'hooks';
 import { getLocation } from 'utils/Geo';
 import { set } from 'utils/Storage';
-import { logError } from 'utils';
+import { logError, translate } from 'utils';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
 
 const EditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const location = getLocation();
+
+    const [locale, useLocale] = useLocale();
     const [customer, setCustomer] = useCustomer();
     const [name, setName] = useState(customer.getAttribute('name'));
     const [email, setEmail] = useState(customer.getAttribute('email'));
@@ -46,40 +48,40 @@ const EditProfileScreen = ({ navigation }) => {
                             <FontAwesomeIcon icon={faTimes} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Your profile</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Account.EditProfileScreen.title')}</Text>
                 </View>
                 <View style={tailwind('flex w-full h-full')}>
                     <View style={tailwind('p-4')}>
                         <View style={tailwind('mb-4')}>
-                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your name</Text>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Account.EditProfileScreen.nameLabelText')}</Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
                                 keyboardType={'default'}
-                                placeholder={'Your display name'}
+                                placeholder={translate('Account.EditProfileScreen.nameLabelText')}
                                 placeholderTextColor={'rgba(107, 114, 128, 1)'}
                                 style={tailwind('form-input')}
                             />
                         </View>
                         <View style={tailwind('mb-4')}>
-                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your email address</Text>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Account.EditProfileScreen.emailLabelText')}</Text>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType={'email-address'}
-                                placeholder={'Your email address'}
+                                placeholder={translate('Account.EditProfileScreen.emailLabelText')}
                                 placeholderTextColor={'rgba(107, 114, 128, 1)'}
                                 style={tailwind('form-input')}
                             />
                         </View>
                         <View style={tailwind('mb-4')}>
-                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>Your mobile number</Text>
+                            <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Account.EditProfileScreen.phoneLabelText')}</Text>
                             <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
                         </View>
                         <TouchableOpacity onPress={saveProfile} disabled={isLoading}>
                             <View style={tailwind('btn bg-green-50 border border-green-50')}>
                                 {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
-                                <Text style={tailwind('font-semibold text-lg text-green-900 text-center')}>Save Profile</Text>
+                                <Text style={tailwind('font-semibold text-lg text-green-900 text-center')}>{translate('Account.EditProfileScreen.saveButtonText')}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

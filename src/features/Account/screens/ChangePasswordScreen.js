@@ -4,10 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { useLocale } from 'hooks';
 import tailwind from 'tailwind';
 
 const ChangePasswordScreen = ({ navigation, route }) => {
     const insets = useSafeAreaInsets();
+    const [locale, setLocale] = useLocale();
     
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
@@ -18,7 +20,7 @@ const ChangePasswordScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={faTimes} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Change password</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Account.ChangePasswordScreen.title')}</Text>
                 </View>
                 <View style={tailwind('flex items-center justify-center w-full h-full')}>
                     <Text>Change Password Screen</Text>
