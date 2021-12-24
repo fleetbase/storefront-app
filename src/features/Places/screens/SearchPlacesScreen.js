@@ -51,6 +51,7 @@ const SearchPlacesScreen = ({ navigation, route }) => {
                     autoCapitalize={'none'}
                     autoCorrect={false}
                     currentLocation={true}
+                    currentLocationLabel={translate('Places.SearchPlacesScreen.currentLocationLabel')}
                     enableHighAccuracyLocation={true}
                     fetchDetails={true}
                     onPress={(data, details = null) => selectEditingPlace(details)}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Pressable, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -41,7 +41,7 @@ const EditProfileScreen = ({ navigation }) => {
 
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
-            <View style={tailwind('w-full h-full bg-white relative')}>
+            <Pressable onPress={Keyboard.dismiss} style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
@@ -51,7 +51,7 @@ const EditProfileScreen = ({ navigation }) => {
                     <Text style={tailwind('text-xl font-semibold')}>{translate('Account.EditProfileScreen.title')}</Text>
                 </View>
                 <View style={tailwind('flex w-full h-full')}>
-                    <View style={tailwind('p-4')}>
+                    <KeyboardAvoidingView style={tailwind('p-4')}>
                         <View style={tailwind('mb-4')}>
                             <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Account.EditProfileScreen.nameLabelText')}</Text>
                             <TextInput
@@ -84,9 +84,9 @@ const EditProfileScreen = ({ navigation }) => {
                                 <Text style={tailwind('font-semibold text-lg text-green-900 text-center')}>{translate('Account.EditProfileScreen.saveButtonText')}</Text>
                             </View>
                         </TouchableOpacity>
-                    </View>
+                    </KeyboardAvoidingView>
                 </View>
-            </View>
+            </Pressable>
         </View>
     );
 };

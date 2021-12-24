@@ -129,6 +129,10 @@
                 "stripe": {
                     "title": "Stripe",
                     "description": "Pay by card, powered by Stripe"
+                },
+                "qpay": {
+                    "title": "QPay",
+                    "description": "Pay by QPay bank transfer"
                 }
             },
             "selectPaymentMethodActionSheetTitle": "Select your payment method",
@@ -216,7 +220,8 @@
         },
         "SearchPlacesScreen": {
             "title": "Add a new place",
-            "enterAddress": "Enter address..."
+            "enterAddress": "Enter address...",
+            "currentLocationLabel": "Current Location"
         }
     },
     "Shared": {
@@ -311,6 +316,9 @@
                 "deliverTo": "Deliver to:",
                 "selectLocation": "Select location",
                 "currentLocation": "Current location"
+            },
+            "LangPicker": {
+                "title": "Select language"
             },
             "NetworkCategoryBlock": {},
             "NetworkSearch": {

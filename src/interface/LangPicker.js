@@ -4,7 +4,7 @@ import * as RNLocalize from 'react-native-localize';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { isResource, logError, mutatePlaces } from 'utils';
+import { isResource, logError, mutatePlaces, translate } from 'utils';
 import { useLocale, useMountedState } from 'hooks';
 import { activeTranslations } from 'utils/Localize';
 import ActionSheet from 'react-native-actions-sheet';
@@ -16,11 +16,11 @@ const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
 const LangPicker = ({ title, buttonStyle, wrapperStyle, dialogIconStyle, hideButtonTitle, onLangPress }) => {
-    title = title ?? 'Select language';
-
     const actionSheetRef = createRef();
     const isMounted = useMountedState();
     const [locale, setLocale] = useLocale();
+
+    title = title ?? translate('components.interface.LangPicker.title');
 
     const selectLanguage = (lang) => {
         if (!isMounted()) {

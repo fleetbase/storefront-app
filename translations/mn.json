@@ -3,7 +3,7 @@
         "AccountScreen": {
             "title": "Бүртгэл үүсгэх эсвэл нэвтрэх",
             "loginButtonText": "Нэвтрэх",
-            "createAccountButtonText": "Данс Нээх ",
+            "createAccountButtonText": "Бүртгүүлэх ",
             "userGreetingTitle": "Сайн байн уу, {{customerName}}",
             "accountMenuTitle": "Миний Данс",
             "profileLinkText": "Профиль",
@@ -29,15 +29,15 @@
         },
         "SavedPlacesScreen": {
             "title": "Таны хадгалсан газрууд",
-            "loadingYourSavedPlaces": "Loading your saved places",
-            "youHaveNoSavedPlaces": "You have no saved places",
+            "loadingYourSavedPlaces": "Хадгалсан газруудыг ачааллаж байна ",
+            "youHaveNoSavedPlaces": "Танд хадгалсан газар байхгүй байна ",
             "emptyStateText": "Та ямар ч хаяг хадгалаагүй бололтой.",
             "addNewAddress": "Шинэ хаяг нэмнэ үү"
         }
     },
     "Auth": {
         "CreateAccountScreen": {
-            "title": " үртгэл үүсгэх",
+            "title": " Бүртгэл үүсгэх",
             "greetingTitle": "Сайн байна уу, тавтай морил {{infoName}}.",
             "greetingSubtitle": "Доорх хэсэгт нэр болон утсаара буртгэл уусэгнүү",
             "sendVerificationCodeButtonText": " Баталгаажуулах код илгээнэ үү",
@@ -45,8 +45,8 @@
             "awaitingVerificationSubtitle": " Одоо та утсандаа SMS-ээр код хүлээн авсан байх ёстой бөгөөд бүртгэлээ үүсгэхийн тулд кодыг баталгаажуулна уу!",
             "retryButtonText": "Дахин оролдоно уу?",
             "verifyCodeButtonText": " Баталгаажуулах код",
-            "codeInputPlaceholder": "Enter verification code",
-            "nameInputPlaceholder": "Your name"
+            "codeInputPlaceholder": "Баталгаажуулалтүн кодоо оруулна уу ! ",
+            "nameInputPlaceholder": "Нэр "
         },
         "LoginScreen": {
             "title": "Нэвтрэх",
@@ -54,7 +54,7 @@
             "createAccountButtonText": "Эсвэл Бүртгэл үүсгэх",
             "retryButtonText": "Дахин оролдох уу?",
             "verifyCodeButtonText": "Баталгаажуулах код",
-            "codeInputPlaceholder": "Enter verification code"
+            "codeInputPlaceholder": "Баталгаажуулалтүн кодоо оруулна уу ! "
         }
     },
     "Browser": {
@@ -68,23 +68,23 @@
             "addToCartActionText": "Картанд нэмэх",
             "basePriceLabel": "Үндсэн үнэ",
             "optionalAddonLabel": "Нэмэлт, хамгийн их {{addonsCount}}",
-            "hasItemsAlertTitle": "Cart Has Items!",
-            "hasItemsAlertDecription": "Your cart already has items from another store, if you continue your cart will be emptied.",
-            "hasItemsAlertCancelActionText": "Cancel",
-            "hasItemsAlertContinueActionText": "Continue",
-            "displayBookingDetailsTitle": "Your booking",
-            "displayBookingDateLabelText": "Date",
-            "displayBookingTimeLabelText": "Time",
-            "confirmBookingActionSheetTitle": "Confirm booking date and time",
-            "confirmBookingActionSheetDateLabelText": "Date",
-            "confirmBookingActionSheetTimeLabelText": "Time",
-            "confirmBookingActionSheetButtonText": "Confirm Booking",
-            "viewProductMediaTitle": "Viewing media",
-            "serviceIdentifierText": "(Service)",
+            "hasItemsAlertTitle": "Таны сагсанд бараа байна ",
+            "hasItemsAlertDecription": "Таны сагсанд өөр дэлгүүрээс бараа бүртгэгдсэн байна. Та дараагийн цэсрүү орох таны бараа устна.",
+            "hasItemsAlertCancelActionText": "Болих ",
+            "hasItemsAlertContinueActionText": "Үргэжлүүлэх ",
+            "displayBookingDetailsTitle": "Таны захиалсан цаг ",
+            "displayBookingDateLabelText": "Өдөр",
+            "displayBookingTimeLabelText": "Цаг ",
+            "confirmBookingActionSheetTitle": "Захиалсан цагаа баталгаажуулах",
+            "confirmBookingActionSheetDateLabelText": "Өдөр",
+            "confirmBookingActionSheetTimeLabelText": "Цаг ",
+            "confirmBookingActionSheetButtonText": "Цагаа баталгаажуулах ",
+            "viewProductMediaTitle": "Зураг үзэх ",
+            "serviceIdentifierText": "Үйлчилгээ",
             "youtubeVidsSectionTitle": "YouTube Videos",
-            "updateBookingActionText": "Update Booking",
-            "addAnotherBookingActionText": "Book Another",
-            "bookServiceActionText": "Book Service"
+            "updateBookingActionText": "Цаг захиалга өөрчлөх ",
+            "addAnotherBookingActionText": "Өөр цаг захиалах ",
+            "bookServiceActionText": "Зах захиалах "
         }
     },
     "Cart": {
@@ -118,7 +118,7 @@
             "emptyStateTitle": "Таны карт хоосон байна",
             "emptyStateSubtitle": " Та сагсандаа юу ч нэмээгүй бололтой.",
             "goToBrowserButtonText": "Худалдаа эхлэх",
-            "quantityExplenation": "(each {{cost}})"
+            "quantityExplenation": "Нэг бүр {{cost}}"
         },
         "CheckoutScreen": {
             "gatewayDetails": {
@@ -129,6 +129,10 @@
                 "stripe": {
                     "title": "Stripe",
                     "description": "Pay by card, powered by Stripe"
+                },
+                "qpay": {
+                    "title": "QPay",
+                    "description": "QPay-p Төлөх"
                 }
             },
             "selectPaymentMethodActionSheetTitle": "Төлбөрийн хэрэгслээ сонгоно уу",
@@ -177,32 +181,32 @@
             "weekdayFriday": "Баасан",
             "weekdaySaturday": "Бямба",
             "weekdaySunday": "Ням",
-            "shareStoreTitleText": "{{storeName}} found on {{networkName}}",
-            "shareStoreSubjectText": "{{storeName}} found on {{networkName}}",
-            "shareStoreMessageText": "Hey look what I found on {{networkName}}! Checkout {{storeName}}!",
+            "shareStoreTitleText": "{{storeName}} Олдсон  {{networkName}}",
+            "shareStoreSubjectText": "{{storeName}} Олдсон {{networkName}}",
+            "shareStoreMessageText": "Сайн байна уу ?  Намайг эмээлээс юу олсоныг хардаа {{networkName}}! Үүнийг хардаа {{storeName}}!",
             "photosButtonText": "Зурагнууд",
             "reviewsButtonText": "Сэтгэгдэл",
             "mapButtonText": "Газрын зураг",
             "websiteButtonText": "Website",
             "contactButtonText": "Холбоо барих",
             "shareButtonText": "Хуваалцах",
-            "searchButtonText": "Search",
-            "browseButtonText": "Browse",
+            "searchButtonText": "Хайх ",
+            "browseButtonText": "Үзэх",
             "contactActionSheetTitle": "Холбоо барих {{storeName}}",
             "contactActionSheetCallActionButtonText": "Залгах {{phone}}",
             "contactActionSheetEmailActionButtonText": "Email {{email}}",
             "contactActionSheetFacebookActionButtonText": "Facebook",
             "contactActionSheetInstagramActionButtonText": "Instagram",
             "contactActionSheetTwitterActionButtonText": "Twitter",
-            "serviceIndicatorText": "(Service)",
-            "descriptionMissing": "No description"
+            "serviceIndicatorText": "Үйлчилгээ",
+            "descriptionMissing": "Тайлбар байхгүй "
         }
     },
     "Places": {
         "EditPlaceScreen": {
-            "title": "Save new place",
+            "title": "Шинэ хаяг хадгалах ",
             "name": "Нэр",
-            "namePlaceholder": "e.g. Home / Work / School",
+            "namePlaceholder": "Гэр, Ажил, Сургууль гэх мэт ",
             "streetAddress": "Гудамжны хаяг эсвэл P.O. Хайрцаг",
             "streetAddress2": "Байр, люкс, нэгж, барилга, шал гэх мэт.",
             "city": "Хот",
@@ -216,7 +220,8 @@
         },
         "SearchPlacesScreen": {
             "title": "Шинэ газар нэмнэ үү",
-            "enterAddress": "Enter address..."
+            "enterAddress": "Хаягаа оруулах ",
+            "currentLocationLabel": "Одоо байгаа хаяг "
         }
     },
     "Shared": {
@@ -235,7 +240,7 @@
         },
         "OrderScreen": {
             "title": "Захиалах {{orderStatus}}",
-            "arrivingIn": "Arriving in {{estimatedDuration}}",
+            "arrivingIn": "Ирж байна  {{estimatedDuration}}",
             "pickupOrderFrom": "аас авах захиалга",
             "orderNotes": "Захиалгын тэмдэглэл",
             "qrCode": "QR код",
@@ -250,7 +255,7 @@
         "StoreLocationScreen": {
             "hideDirections": "Чиглэлийг хаах",
             "displayDirections": "Чиглэлийг харах",
-            "focusOn": "Focus on {{storeName}}",
+            "focusOn": "Хаягруу буцах {{storeName}}",
             "call": "Залгах",
             "from": "Хаанаас:",
             "to": "Хаашаа:",
@@ -294,7 +299,7 @@
         "interface": {
             "headers": {
                 "NetworkHeader": {
-                    "search": "Search"
+                    "search": "Хайх "
                 },
                 "StorefrontHeader": {}
             },
@@ -305,12 +310,15 @@
                 "enterDeliveryLocation": "Хүргэлтийн байршлыг оруулна уу",
                 "enterAddress": "Хаяг оруулна уу...",
                 "selectDeliveryLocation": "Хүргэлтийн байршлыг сонгоно уу",
-                "tapToAddNewDeliveryLocation": "Хүргэлтийн шинэ байршил нэмэхийн тулд товшино уу",
-                "tapToChange": "Өөрчлөхийн тулд товшино уу",
-                "tapToAddDeliveryLocation": "Хүргэлтийн байршлыг нэмэхийн тулд товшино уу",
-                "deliverTo": "Хаана хүргэж өгнө",
+                "tapToAddNewDeliveryLocation": "Хүргэлтийн шинэ байршил нэмэх",
+                "tapToChange": "Өөрчлөх",
+                "tapToAddDeliveryLocation": "Хүргэлтийн байршил нэмэх",
+                "deliverTo": "Хаана",
                 "selectLocation": "Байршлыг сонгоно уу",
-                "currentLocation": "Current location"
+                "currentLocation": " Таны байршил"
+            },
+            "LangPicker": {
+                "title": "Хэл сонгох "
             },
             "NetworkCategoryBlock": {},
             "NetworkSearch": {
@@ -322,8 +330,8 @@
             },
             "ProductPriceView": {},
             "ProductCard": {
-                "serviceIndicator": "(Service)",
-                "unavailable": "Unavailable"
+                "serviceIndicator": "Үйлчилгээ",
+                "unavailable": "Боломжгүй "
             },
             "ServiceQuoteFeeView": {},
             "StoreCategoryPicker": {
@@ -339,17 +347,17 @@
         }
     },
     "terms": {
-        "edit": "Edit",
-        "delete": "Delete",
-        "loading": "Loading..."
+        "edit": "Өөрчлөх ",
+        "delete": "Устгах ",
+        "loading": "Ачаалаж байна "
     },
     "status": {
-        "created": "Created",
-        "preparing": "Preparing",
-        "dispatched": "Dispatched",
-        "driver_enroute": "Driver en-route",
-        "pending": "Pending",
-        "in_progress": "In progress",
-        "completed": "Completed"
+        "created": "Захиалга бүртгэгдсэн ",
+        "preparing": "Бэлдэж байна",
+        "dispatched": "Илгээгдсэн",
+        "driver_enroute": "Замдаа явж байна ",
+        "pending": "Хүлээгдэж байна ",
+        "in_progress": " Ачааллаж байна ",
+        "completed": "Хүргэгдсэн "
     }
 }
