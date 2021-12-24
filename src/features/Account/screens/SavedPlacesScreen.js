@@ -128,14 +128,14 @@ const SavedPlacesScreen = ({ navigation, route }) => {
                             <View style={tailwind('w-full')}>
                                 <View style={tailwind('flex items-center justify-center mb-10')}>
                                     <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>
-                                        {isInitializing ? 'Loading your saved places' : 'You have no saved places'}
+                                        {isInitializing ? translate('Account.SavedPlacesScreen.loadingYourSavedPlaces') : translate('Account.SavedPlacesScreen.youHaveNoSavedPlaces')}
                                     </Text>
                                     {!isInitializing && <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Account.SavedPlacesScreen.emptyStateText')}</Text>}
                                 </View>
                                 {!isInitializing && (
                                     <TouchableOpacity style={tailwind('w-full')} onPress={() => navigation.navigate('AddNewPlace')}>
                                         <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                                            <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Account.SavedPlacesScreen.addNewButtonText')}</Text>
+                                            <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Account.SavedPlacesScreen.addNewAddress')}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 )}

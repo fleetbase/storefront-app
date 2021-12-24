@@ -9,10 +9,10 @@ import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState } from 'hooks';
+import { useMountedState, useLocale } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { logError, getCurrentLocation, config } from 'utils';
+import { logError, getCurrentLocation, config, translate } from 'utils';
 import tailwind from 'tailwind';
 
 const { width, height } = Dimensions.get('window');
@@ -29,6 +29,7 @@ const StoreLocationScreen = ({ navigation, route }) => {
     const map = useRef();
     const store = new Store(data, StorefrontAdapter);
 
+    const [locale] = useLocale();
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDirections, setIsLoadingDirections] = useState(false);
     const [storeLocation, setStoreLocation] = useState(new StoreLocation(locationData, StorefrontAdapter));
@@ -114,7 +115,7 @@ const StoreLocationScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                         <View style={tailwind('flex flex-col items-start')}>
                             <Text style={tailwind('text-xl font-bold text-white')}>{store.getAttribute('name')}</Text>
-                            <Text style={tailwind('text-sm font-semibold text-white')}>{storeLocation?.getAttribute('name') ?? 'Loading...'}</Text>
+                            <Text style={tailwind('text-sm font-semibold text-white')}>{storeLocation?.getAttribute('name') ?? translate('Shared.StoreLocationScreen.loading')}</Text>
                         </View>
                         {isLoading && (
                             <View style={tailwind('ml-4')}>
@@ -132,15 +133,15 @@ const StoreLocationScreen = ({ navigation, route }) => {
                     <View>
                         <View style={tailwind('absolute z-20 bottom-0 w-full px-4 py-8 mt-24')}>
                             <TouchableOpacity onPress={toggleDirections} style={tailwind('btn bg-blue-500 shadow-lg border-blue-700 mb-2 flex flex-row')} disabled={isLoadingDirections}>
-                                <Text style={tailwind('font-bold text-white')}>{isDisplayingDirections ? 'Hide Directions' : 'Display Directions'}</Text>
+                                <Text style={tailwind('font-bold text-white')}>{isDisplayingDirections ? translate('Shared.StoreLocationScreen.hideDirections') : translate('Shared.StoreLocationScreen.displayDirections')}</Text>
                                 {isLoadingDirections && <ActivityIndicator color={'white'} style={tailwind('ml-2')} />}
                             </TouchableOpacity>
                             <TouchableOpacity onPress={focusStore} style={tailwind('btn shadow-lg mb-2')}>
-                                <Text style={tailwind('font-bold')}>Focus on {store.getAttribute('name')}</Text>
+                                <Text style={tailwind('font-bold')}>{translate('Shared.StoreLocationScreen.focusOn', { storeName: store.getAttribute('name') })}</Text>
                             </TouchableOpacity>
                             {store.isAttributeFilled('phone') && (
                                 <TouchableOpacity onPress={() => Linking.openURL(`tel:${store.getAttribute('phone')}`)} style={tailwind('btn shadow-lg')}>
-                                    <Text style={tailwind('font-bold')}>Call</Text>
+                                    <Text style={tailwind('font-bold')}>{translate('Shared.StoreLocationScreen.call')}</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -148,25 +149,25 @@ const StoreLocationScreen = ({ navigation, route }) => {
                             <View style={tailwind('absolute z-20 top-0 w-full px-4 py-2 mt-28')}>
                                 <View style={tailwind('bg-white bg-opacity-50 rounded-md shadow-lg p-2 border border-gray-300')}>
                                     <View style={tailwind('flex flex-row bg-white bg-opacity-75 border border-gray-500 rounded-md px-2 py-2 mb-1')}>
-                                        <Text style={tailwind('font-semibold w-12')}>From:</Text>
+                                        <Text style={tailwind('font-semibold w-12')}>{translate('Shared.StoreLocationScreen.from')}</Text>
                                         <Text>
                                             {userLocation.address}, {userLocation.city}
                                         </Text>
                                     </View>
                                     <View style={tailwind('flex flex-row bg-white bg-opacity-75 border border-gray-500 rounded-md px-2 py-2 mb-2')}>
-                                        <Text style={tailwind('font-semibold w-12')}>To:</Text>
+                                        <Text style={tailwind('font-semibold w-12')}>{translate('Shared.StoreLocationScreen.to')}</Text>
                                         <Text>
                                             {storeLocation.getAttribute('place.street1')}, {storeLocation.getAttribute('place.city')}
                                         </Text>
                                     </View>
                                     <View style={tailwind('flex flex-row px-1')}>
                                         <View style={tailwind('flex flex-row mr-3')}>
-                                            <Text style={tailwind('font-semibold mr-1')}>Distance:</Text>
-                                            <Text>{Math.round(directionsResult.distance)} km</Text>
+                                            <Text style={tailwind('font-semibold mr-1')}>{translate('Shared.StoreLocationScreen.distance')}</Text>
+                                            <Text>{Math.round(directionsResult.distance)} {translate('Shared.StoreLocationScreen.km')}</Text>
                                         </View>
                                         <View style={tailwind('flex flex-row')}>
-                                            <Text style={tailwind('font-semibold mr-1')}>Duration:</Text>
-                                            <Text>{Math.round(directionsResult.duration)} min</Text>
+                                            <Text style={tailwind('font-semibold mr-1')}>{translate('Shared.StoreLocationScreen.duration')}</Text>
+                                            <Text>{Math.round(directionsResult.duration)} {translate('Shared.StoreLocationScreen.min')}</Text>
                                         </View>
                                     </View>
                                 </View>

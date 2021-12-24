@@ -7,10 +7,10 @@ import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState } from 'hooks';
+import { useMountedState, useLocale } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { logError, getCurrentLocation, config } from 'utils';
+import { logError, getCurrentLocation, config, translate } from 'utils';
 import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
@@ -36,7 +36,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                     <View style={tailwind('flex flex-col items-start')}>
                         <Text style={tailwind('text-xl font-bold text-white')}>{store.getAttribute('name')}</Text>
-                        <Text style={tailwind('text-sm font-semibold text-white')}>Photos ({store.getAttribute('media', []).length})</Text>
+                        <Text style={tailwind('text-sm font-semibold text-white')}>{translate('Shared.StorePhotosScreen.title', { storeMediaCount: store.getAttribute('media', [])?.length })}</Text>
                     </View>
                 </View>
                 <View style={tailwind('flex flex-row flex-wrap')}>
@@ -55,7 +55,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                                 <FontAwesomeIcon icon={faTimes} />
                             </View>
                         </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-bold text-white')}>{viewingPhoto?.caption ?? 'Viewing photo'}</Text>
+                        <Text style={tailwind('text-xl font-bold text-white')}>{viewingPhoto?.caption ?? translate('Shared.StorePhotosScreen.viewingPhoto')}</Text>
                     </View>
                     <View style={tailwind('w-full h-3/4 flex items-center justify-center')}>
                         <FastImage source={{ uri: viewingPhoto?.url }} style={{ width: '100%', aspectRatio: 135 / 76 }} />

@@ -3,8 +3,8 @@ import { ScrollView, View, Text, Image, TouchableOpacity, TextInput, ActivityInd
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { logError, debounce, stripHtml } from 'utils';
-import { useStorefront } from 'hooks';
+import { logError, debounce, stripHtml, translate } from 'utils';
+import { useStorefront, useLocale } from 'hooks';
 import ProductPriceView from './ProductPriceView';
 import tailwind from 'tailwind';
 
@@ -18,6 +18,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
     const insets = useSafeAreaInsets();
     const storefront = useStorefront();
 
+    const [locale] = useLocale();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState([]);
@@ -101,7 +102,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
                     {isLoading && (
                         <View style={tailwind('w-full px-5 py-4 flex flex-row items-center')}>
                             <ActivityIndicator />
-                            <Text style={tailwind('ml-2 text-gray-400')}>Searching...</Text>
+                            <Text style={tailwind('ml-2 text-gray-400')}>{translate('components.interface.NetworkSearch.searching')}</Text>
                         </View>
                     )}
                     <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
@@ -119,7 +120,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
                                                 {product.getAttribute('name')}
                                             </Text>
                                             <Text style={tailwind('text-gray-400 mb-2')} numberOfLines={1}>
-                                                {stripHtml(product.getAttribute('description')) || 'No description'}
+                                                {stripHtml(product.getAttribute('description')) ?? translate('components.interface.NetworkSearch.noDescription')}
                                             </Text>
                                             <ProductPriceView product={product} />
                                         </View>

@@ -4,10 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventRegister } from 'react-native-event-listeners';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faCheck, faStoreAlt, faMapMarkerAlt, faCogs, faHandHoldingHeart, faSatelliteDish, faShippingFast, faCar, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
-import { getCustomer, updateCustomer } from 'utils/Customer';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useMountedState } from 'hooks';
-import { formatCurrency, calculatePercentage, logError } from 'utils';
+import { useMountedState, useLocale, useCustomer } from 'hooks';
+import { formatCurrency, calculatePercentage, translate, logError } from 'utils';
 import { Order } from '@fleetbase/sdk';
 import { format, formatDistance, add } from 'date-fns';
 import MapView, { Marker } from 'react-native-maps';
@@ -19,8 +18,9 @@ const OrderScreen = ({ navigation, route }) => {
     const { serializedOrder, info } = route.params;
 
     const insets = useSafeAreaInsets();
-    const customer = getCustomer();
     const isMounted = useMountedState();
+    const [customer] = useCustomer();
+    const [locale] = useLocale();
 
     const [order, setOrder] = useState(new Order(serializedOrder || {}, FleetbaseAdapter));
     const [matrix, setMatrix] = useState({
@@ -121,7 +121,7 @@ const OrderScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={faTimes} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Order {order.getAttribute('status')}</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Shared.OrderScreen.title', { orderStatus: translate(`status.${order.getAttribute('status')}`) })}</Text>
                 </View>
                 <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                     <View style={tailwind('flex w-full h-full pb-60')}>
@@ -182,7 +182,7 @@ const OrderScreen = ({ navigation, route }) => {
                         <View style={tailwind('flex flex-col items-center justify-center py-4')}>
                             {isEnroute && (
                                 <View style={tailwind('py-4')}>
-                                    <Text style={tailwind('text-lg font-semibold')}>Arriving in {formatDistance(new Date(), add(new Date(), { seconds: matrix.time }))}</Text>
+                                    <Text style={tailwind('text-lg font-semibold')}>{translate('Shared.OrderScreen.arrivingIn', { estimatedDuration: formatDistance(new Date(), add(new Date(), { seconds: matrix.time })) })}</Text>
                                 </View>
                             )}
                             <Text style={tailwind('text-xl font-bold mb-2')}>{order.id}</Text>
@@ -248,7 +248,7 @@ const OrderScreen = ({ navigation, route }) => {
                                         <View style={tailwind('w-full p-4 border-b border-gray-200 relative')}>
                                             <View style={tailwind('rounded-md bg-blue-50')}>
                                                 <View style={tailwind('rounded-t-md bg-blue-100 px-4 py-2 mb-3')}>
-                                                    <Text style={tailwind('text-blue-500 font-semibold')}>Pickup order from</Text>
+                                                    <Text style={tailwind('text-blue-500 font-semibold')}>{translate('Shared.OrderScreen.pickupOrderFrom')}</Text>
                                                 </View>
                                                 <View style={tailwind('flex flex-row items-center mb-4 px-4')}>
                                                     <View style={tailwind('flex items-center justify-center rounded-full bg-blue-500 w-7 h-7 mr-3')}>
@@ -283,11 +283,11 @@ const OrderScreen = ({ navigation, route }) => {
                                         </View>
                                     )}
                                     <View style={tailwind('w-full bg-white p-4 border-b border-gray-200')}>
-                                        <Text style={tailwind('font-semibold mb-2')}>Order Notes</Text>
+                                        <Text style={tailwind('font-semibold mb-2')}>{translate('Shared.OrderScreen.orderNotes')}</Text>
                                         <Text style={tailwind('text-gray-600')}>{order.notes || 'N/A'}</Text>
                                     </View>
                                     <View style={tailwind('w-full bg-white p-4')}>
-                                        <Text style={tailwind('font-semibold mb-2')}>QR Code</Text>
+                                        <Text style={tailwind('font-semibold mb-2')}>{translate('Shared.OrderScreen.qrCode')}</Text>
                                         <View style={tailwind('flex items-center justify-center py-2')}>
                                             <Image style={tailwind('w-32 h-32')} source={{ uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}` }} />
                                         </View>
@@ -298,12 +298,12 @@ const OrderScreen = ({ navigation, route }) => {
                                 <View style={tailwind('flex flex-col items-center')}>
                                     <View style={tailwind('flex flex-row items-center justify-between w-full p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center')}>
-                                            <Text style={tailwind('font-semibold')}>Order Summary</Text>
+                                            <Text style={tailwind('font-semibold')}>{translate('Shared.OrderScreen.orderSummary')}</Text>
                                         </View>
                                         {isCod && (
                                             <View style={tailwind('flex flex-row items-center')}>
                                                 <FontAwesomeIcon icon={faMoneyBillWave} style={tailwind('text-green-500 mr-1')} />
-                                                <Text style={tailwind('text-green-500 font-semibold')}>Cash</Text>
+                                                <Text style={tailwind('text-green-500 font-semibold')}>{translate('Shared.OrderScreen.cash')}</Text>
                                             </View>
                                         )}
                                     </View>
@@ -347,31 +347,31 @@ const OrderScreen = ({ navigation, route }) => {
                                 <View style={tailwind('flex flex-col items-center')}>
                                     <View style={tailwind('w-full p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
-                                            <Text>Subtotal</Text>
+                                            <Text>{translate('Shared.OrderScreen.subtotal')}</Text>
                                             <Text>{formatCurrency(order.getAttribute('meta.subtotal') / 100, order.getAttribute('meta.currency'))}</Text>
                                         </View>
                                         {!isPickupOrder && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
-                                                <Text>Delivery fee</Text>
+                                                <Text>{translate('Shared.OrderScreen.deliveryFee')}</Text>
                                                 <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
                                             </View>
                                         )}
                                         {tip && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
-                                                <Text>Tip</Text>
+                                                <Text>{translate('Shared.OrderScreen.tip')}</Text>
                                                 <Text>{formattedTip}</Text>
                                             </View>
                                         )}
                                         {deliveryTip && !isPickupOrder && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
-                                                <Text>Delivery Tip</Text>
+                                                <Text>{translate('Shared.OrderScreen.deliveryTip')}</Text>
                                                 <Text>{formattedDeliveryTip}</Text>
                                             </View>
                                         )}
                                     </View>
                                     <View style={tailwind('w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center justify-between')}>
-                                            <Text style={tailwind('font-semibold')}>Total</Text>
+                                            <Text style={tailwind('font-semibold')}>{translate('Shared.OrderScreen.total')}</Text>
                                             <Text style={tailwind('font-semibold')}>{formatCurrency(order.getAttribute('meta.total') / 100, order.getAttribute('meta.currency'))}</Text>
                                         </View>
                                     </View>

@@ -473,7 +473,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorefrontApp/StorefrontApp.entitlements;
 				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = W4M54N7H85;
+				DEVELOPMENT_TEAM = DR48FNTWCV;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StorefrontApp/Info.plist;
@@ -488,7 +488,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emeel.app;
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -505,7 +505,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorefrontApp/StorefrontApp.entitlements;
 				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = W4M54N7H85;
+				DEVELOPMENT_TEAM = DR48FNTWCV;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StorefrontApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -519,7 +519,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.storefront.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emeel.app;
 				PRODUCT_NAME = StorefrontApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "StorefrontApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

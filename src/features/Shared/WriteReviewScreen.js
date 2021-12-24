@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPhotoVideo, faTimes, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { Store, Product } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useCustomer } from 'hooks';
-import { logError } from 'hooks';
+import { useCustomer, useLocale } from 'hooks';
+import { logError, translate } from 'utils';
 import PhotoUpload from 'ui/PhotoUpload';
 import Rating from 'ui/Rating';
 import tailwind from 'tailwind';
@@ -17,6 +17,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const insets = useSafeAreaInsets();
 
+    const [locale] = useLocale();
     const [customer, setCustomer] = useCustomer();
     const [isLoading, setIsLoading] = useState(false);
     const [rating, setRating] = useState(0);
@@ -92,12 +93,12 @@ const WriteReviewScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center mb-3 w-full')}>
                                         <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-2')} />
                                         <Text style={tailwind('text-red-600 text-sm font-semibold')} numberOfLines={1}>
-                                            You must login or signup to leave a review
+                                            {translate('Shared.WriteReviewScreen.loginToReviewWarningText')}
                                         </Text>
                                     </View>
                                     <TouchableOpacity style={tailwind('w-full')} disabled={isLoading} onPress={login}>
                                         <View style={tailwind('btn border border-red-100 bg-red-100 w-full')}>
-                                            <Text style={tailwind('font-semibold text-red-900')}>Login</Text>
+                                            <Text style={tailwind('font-semibold text-red-900')}>{translate('Shared.WriteReviewScreen.login')}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 </View>
@@ -106,7 +107,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
                     )}
                     <View style={tailwind(`flex flex-row items-center py-4 px-5 ${!customer ? 'opacity-50' : ''}`)}>
                         <Rating value={rating} size={30} onRatingChange={setRating} readonly={!customer} />
-                        <Text style={tailwind('text-gray-500 text-base ml-3')}>Select your rating</Text>
+                        <Text style={tailwind('text-gray-500 text-base ml-3')}>{translate('Shared.WriteReviewScreen.selectYourRating')}</Text>
                     </View>
                     <View style={tailwind('flex flex-row items-center px-5 mb-4')}>
                         <TextInput
@@ -153,7 +154,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex flex-row items-center px-5')}>
                         <TouchableOpacity onPress={submitReview} style={tailwind(`btn bg-blue-500 shadow-sm ${!isValid ? 'bg-opacity-50' : ''}`)} disabled={!isValid || isLoading}>
                             {isLoading && <ActivityIndicator style={tailwind('mr-3')} color={'#ffffff'} size={'small'} />}
-                            <Text style={tailwind('text-white text-lg font-semibold')}>Submit Review</Text>
+                            <Text style={tailwind('text-white text-lg font-semibold')}>{translate('Shared.WriteReviewScreen.submitReview')}</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

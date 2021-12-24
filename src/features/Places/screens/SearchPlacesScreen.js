@@ -5,7 +5,8 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faMap } from '@fortawesome/free-solid-svg-icons';
 import { Place, GoogleAddress } from '@fleetbase/sdk';
-import { useStorefront } from 'hooks';
+import { useStorefront, useLocale } from 'hooks';
+import { translate } from 'utils';
 import config from 'config';
 import tailwind from 'tailwind';
 
@@ -15,6 +16,7 @@ const { GOOGLE_MAPS_KEY } = config;
 const SearchPlacesScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const insets = useSafeAreaInsets();
+    const [locale] = useLocale();
 
     const selectEditingPlace = (result) => {
         const googleAddress = new GoogleAddress(result);
@@ -32,7 +34,7 @@ const SearchPlacesScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={faTimes} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>Add a new place</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{translate('Places.SearchPlacesScreen.title')}</Text>
                 </View>
                 <View>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -44,7 +46,7 @@ const SearchPlacesScreen = ({ navigation, route }) => {
             </View>
             <View style={tailwind('flex items-center justify-center w-full h-full bg-gray-200')}>
                 <GooglePlacesAutocomplete
-                    placeholder={'Enter address...'}
+                    placeholder={translate('Places.SearchPlacesScreen.enterAddress')}
                     placeholderTextColor={'rgba(156, 163, 175, 1)'}
                     autoCapitalize={'none'}
                     autoCorrect={false}

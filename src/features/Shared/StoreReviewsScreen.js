@@ -6,8 +6,8 @@ import { faTimes, faSort, faFilter, faEllipsisH, faStar, faImage } from '@fortaw
 import { formatDistanceToNow } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Review } from '@fleetbase/storefront';
-import { useMountedState } from 'hooks';
-import { sum, capitalize, logError } from 'utils';
+import { useMountedState, useLocale } from 'hooks';
+import { sum, capitalize, logError, translate } from 'utils';
 import { useResourceCollection, useStorage } from 'utils/Storage';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import FastImage from 'react-native-fast-image';
@@ -24,6 +24,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const isMounted = useMountedState();
     const insets = useSafeAreaInsets();
+    const [locale] = useLocale();
 
     const store = new Store(storeData, StorefrontAdapter);
     const actionSheetRef = createRef();
@@ -154,18 +155,18 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                 <FontAwesomeIcon icon={faTimes} />
                             </View>
                         </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-semibold')}>{store.getAttribute('name')} Reviews</Text>
+                        <Text style={tailwind('text-xl font-semibold')}>{translate('Shared.StoreReviewsScreen.title', { storeName: store.getAttribute('name') })}</Text>
                     </View>
                 </View>
                 <View style={tailwind('p-4')}>
                     <View style={tailwind('flex flex-row')}>
                         <View style={tailwind('w-2/5 flex justify-center')}>
-                            <Text style={tailwind('text-base font-semibold mb-2')}>Overall rating</Text>
+                            <Text style={tailwind('text-base font-semibold mb-2')}>{translate('Shared.StoreReviewsScreen.overallRating')}</Text>
                             <View style={tailwind('mb-2 flex flex-row items-start')}>
                                 <Rating value={store.getAttribute('rating')} size={24} readonly={true} />
                             </View>
                             <Text style={tailwind('text-gray-600 text-lg')}>
-                                {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
+                                {totalCount} {totalCount === 1 ? translate('Shared.StoreReviewsScreen.review') : translate('Shared.StoreReviewsScreen.reviews')}
                             </Text>
                         </View>
                         <View style={tailwind('flex-1')}>
@@ -189,7 +190,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                     </View>
                     <TouchableOpacity onPress={startReview} style={tailwind('btn rounded-md bg-blue-500 px-4 py-3 shadow-sm mt-4')}>
                         <View style={tailwind('flex flex-row items-center')}>
-                            <Text style={tailwind('text-white font-semibold')}>Write a Review</Text>
+                            <Text style={tailwind('text-white font-semibold')}>{translate('Shared.StoreReviewsScreen.writeAReview')}</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -202,7 +203,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                             >
                                 <View style={tailwind('flex flex-row items-center')}>
                                     <FontAwesomeIcon icon={faSort} size={12} style={tailwind('text-gray-600 mr-1')} />
-                                    <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>{sort ? capitalize(sort) : 'Sort'}</Text>
+                                    <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>{sort ? capitalize(sort) : translate('Shared.StoreReviewsScreen.sort')}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -213,7 +214,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                             >
                                 <View style={tailwind('flex flex-row items-center')}>
                                     <FontAwesomeIcon icon={faFilter} size={10} style={tailwind('text-gray-600 mr-1')} />
-                                    <Text style={tailwind(`${filter ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>{filter ? `${filter} star ratings` : 'Filter'}</Text>
+                                    <Text style={tailwind(`${filter ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>{filter ? translate('Shared.StoreReviewsScreen.starRatings', { filter }) : translate('Shared.StoreReviewsScreen.filter')}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -257,7 +258,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                             </View>
                             <View style={tailwind('flex flex-row items-center mb-2')}>
                                 <Rating value={review.getAttribute('rating')} size={16} readonly={true} />
-                                <Text style={tailwind('text-gray-400 text-xs ml-2')}>{formatDistanceToNow(new Date(review.getAttribute('created_at')))} ago</Text>
+                                <Text style={tailwind('text-gray-400 text-xs ml-2')}>{translate('Shared.StoreReviewsScreen.createdAgo', { reviewCreatedAgo: formatDistanceToNow(new Date(review.getAttribute('created_at'))) })}</Text>
                             </View>
                             <View style={tailwind('flex flex-row items-center')}>
                                 <Text numberOfLines={4} style={tailwind('text-gray-900 text-sm')}>
@@ -286,7 +287,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
-                            <Text style={tailwind('text-lg font-semibold')}>{capitalize(actionSheetAction)} reviews</Text>
+                            <Text style={tailwind('text-lg font-semibold')}>{translate('Shared.StoreReviewScreen.actionSheetTitle', { action: capitalize(actionSheetAction) })}</Text>
                         </View>
 
                         <View>
@@ -305,13 +306,13 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                     .map((rating) => (
                                         <View key={rating} style={tailwind('flex flex-row border-b border-gray-100')}>
                                             <TouchableOpacity onPress={() => setFilter(rating)} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                                <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{rating} stars</Text>
+                                                <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.filterOptionText', { rating })}</Text>
                                             </TouchableOpacity>
                                         </View>
                                     ))}
                                 <View style={tailwind('flex flex-row')}>
                                     <TouchableOpacity onPress={() => setFilter(null)} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>All ratings</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.allRatings')}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -320,27 +321,27 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                             <View>
                                 <View style={tailwind('flex flex-row border-b border-gray-100')}>
                                     <TouchableOpacity onPress={() => setSort('newest first')} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>Newest first</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.newestFirst')}</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <View style={tailwind('flex flex-row w-full border-b border-gray-100')}>
                                     <TouchableOpacity onPress={() => setSort('oldest first')} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>Oldest first</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.oldestFirst')}</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <View style={tailwind('flex flex-row w-full border-b border-gray-100')}>
                                     <TouchableOpacity onPress={() => setSort('highest rated')} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>Highest rated</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.highestRated')}</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <View style={tailwind('flex flex-row w-full border-b border-gray-100')}>
                                     <TouchableOpacity onPress={() => setSort('lowest rated')} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>Lowest rated</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.lowestRated')}</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <View style={tailwind('flex flex-row w-full')}>
                                     <TouchableOpacity onPress={() => setSort(null)} style={tailwind('px-4 py-5 flex flex-row items-center justify-start w-full')}>
-                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{info.name} Sort</Text>
+                                        <Text style={tailwind('text-blue-500 font-semibold text-lg')}>{translate('Shared.StoreReviewScreen.defaultSortOption', { networkName: info.name })}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>

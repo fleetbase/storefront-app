@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { listCountries } from 'utils';
+import { listCountries, translate } from 'utils';
+import { useLocale } from 'hooks';
 import tailwind from 'tailwind';
 import ReactNativePickerModule from 'react-native-picker-module';
 
 const isString = (string) => typeof string === 'string';
 
 const PhoneInput = (props) => {
-    const [value, setValue] = useState(props.value || null);
-    const [country, setCountry] = useState(props.country || null);
     const pickerRef = useRef();
+
+    const [locale] = useLocale();
+    const [value, setValue] = useState(props.value ?? null);
+    const [country, setCountry] = useState(props.country ?? null);
 
     const updatePhoneNumber = (input) => {
         // if manually entering country code
@@ -90,7 +93,7 @@ const PhoneInput = (props) => {
             <ReactNativePickerModule
                 pickerRef={pickerRef}
                 value={null}
-                title={'Select Country'}
+                title={translate('components.interface.PhoneInput.selectCountry')}
                 items={listCountries().map((c) => ({ label: `${c.emoji} (+${c.phone}) ${c.name}`, value: c.iso2 }))}
                 selectedColor="#3485e2"
                 onValueChange={selectCountry}

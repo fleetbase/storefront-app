@@ -28,9 +28,11 @@
             "bodyTitleLoading": " Таны захиалгын түүхийг ачаалж байна"
         },
         "SavedPlacesScreen": {
-            "title": " Таны хадгалсан газрууд",
-            "emptyStateText": " Та ямар ч хаяг хадгалаагүй бололтой.",
-            "addNewButtonText": " Шинэ хаяг нэмнэ үү"
+            "title": "Таны хадгалсан газрууд",
+            "loadingYourSavedPlaces": "Loading your saved places",
+            "youHaveNoSavedPlaces": "You have no saved places",
+            "emptyStateText": "Та ямар ч хаяг хадгалаагүй бололтой.",
+            "addNewAddress": "Шинэ хаяг нэмнэ үү"
         }
     },
     "Auth": {
@@ -85,7 +87,7 @@
             "bookServiceActionText": "Book Service"
         }
     },
-    "Саrt": {
+    "Cart": {
         "components": {
             "CartCheckoutPanel": {
                 "cartTotalLabelText": "Нийт",
@@ -192,123 +194,131 @@
             "contactActionSheetFacebookActionButtonText": "Facebook",
             "contactActionSheetInstagramActionButtonText": "Instagram",
             "contactActionSheetTwitterActionButtonText": "Twitter",
-            "serviceIndicatorText": "(Service)"
+            "serviceIndicatorText": "(Service)",
+            "descriptionMissing": "No description"
         }
     },
     "Places": {
         "EditPlaceScreen": {
-            "placeNameLabelText": "Нэр",
-            "placeStreetAddressLabelText": "Гудамжны хаяг эсвэл P.O. Хайрцаг",
-            "placeStreetAddressLine2LabelText": "Байр, люкс, нэгж, барилга, шал гэх мэт.",
-            "placeCityLabelText": "Хот",
-            "placeStateLabelText": "Улсын болон аймгийн",
-            "placePostalCodeLabelText": "Шуудангийн код",
-            "placeCountryLabelText": "Улс",
-            "placePhoneLabelText": "Утасны дугаар",
-            "savePlaceButtonText": "Газрын дэлгэрэнгүй мэдээллийг хадгалах",
-            "makeDefaultButtonText": "Үндсэн болгох",
-            "deletePlaceButtonText": "Газрыг устгах"
+            "title": "Save new place",
+            "name": "Нэр",
+            "namePlaceholder": "e.g. Home / Work / School",
+            "streetAddress": "Гудамжны хаяг эсвэл P.O. Хайрцаг",
+            "streetAddress2": "Байр, люкс, нэгж, барилга, шал гэх мэт.",
+            "city": "Хот",
+            "state": "Улсын болон аймгийн",
+            "postalCode": "Шуудангийн код",
+            "country": "Улс",
+            "phoneNumber": "Утасны дугаар",
+            "savePlaceDetails": "Газрын дэлгэрэнгүй мэдээллийг хадгалах",
+            "makeDefault": "Үндсэн болгох",
+            "deletePlace": "Газрыг устгах"
         },
         "SearchPlacesScreen": {
-            "title": "Шинэ газар нэмнэ үү"
+            "title": "Шинэ газар нэмнэ үү",
+            "enterAddress": "Enter address..."
         }
     },
     "Shared": {
         "OrderCompletedScreen": {
             "title": "Захиалга хүлээн авлаа!",
-            "orderPickupAddressLabelText": "аас авах захиалга",
-            "orderNotesLabelText": "Захиалгын тэмдэглэл",
-            "orderQRCodeLabelText": "QR код",
-            "orderSummaryLabelText": "Захиалгын хураангуй",
-            "orderIsCashLabelText": "Бэлэн мөнгө",
-            "subtotalLabelText": "дэд нийлбэр",
-            "deliveryFeeLabelText": "Хүргэлтийн хураамж",
-            "tipLabelText": "Гарийн Мөнгө",
-            "deliveryTipLabelText": "Хүргэлтийн Бэлэн мөнгө",
-            "totalLabelText": "Нийт"
+            "pickupOrderFrom": "аас авах захиалга",
+            "orderNotes": "Захиалгын тэмдэглэл",
+            "qrCode": "QR код",
+            "orderSummary": "Захиалгын хураангуй",
+            "cash": "Бэлэн мөнгө",
+            "subtotal": "дэд нийлбэр",
+            "deliveryFee": "Хүргэлтийн хураамж",
+            "tip": "Гарийн Мөнгө",
+            "deliveryTip": "Хүргэлтийн Бэлэн мөнгө",
+            "total": "Нийт"
         },
         "OrderScreen": {
             "title": "Захиалах {{orderStatus}}",
-            "orderPickupAddressLabelText": "аас авах захиалга",
-            "orderNotesLabelText": "Захиалгын тэмдэглэл",
-            "orderQRCodeLabelText": "QR код",
-            "orderSummaryLabelText": "Захиалгын хураангуй",
-            "orderIsCashLabelText": "Бэлэн мөнгө",
-            "subtotalLabelText": "Дунд нийлбэр",
-            "deliveryFeeLabelText": "Хүргэлтийн хураамж",
-            "tipLabelText": "Гарийн Мөнгө",
-            "deliveryTipLabelText": "Хүргэлтийн Бэлэн мөнгө",
-            "totalLabelText": "Нийт"
+            "arrivingIn": "Arriving in {{estimatedDuration}}",
+            "pickupOrderFrom": "аас авах захиалга",
+            "orderNotes": "Захиалгын тэмдэглэл",
+            "qrCode": "QR код",
+            "orderSummary": "Захиалгын хураангуй",
+            "cash": "Бэлэн мөнгө",
+            "subtotal": "дэд нийлбэр",
+            "deliveryFee": "Хүргэлтийн хураамж",
+            "tip": "Гарийн Мөнгө",
+            "deliveryTip": "Хүргэлтийн Бэлэн мөнгө",
+            "total": "Нийт"
         },
         "StoreLocationScreen": {
-            "hideDirectionsActionText": "Чиглэлийг хаах",
-            "displayDirectionsActionText": "Чиглэлийг харах",
-            "focusStoreActionText": "Focus on {{storeName}}",
-            "callStoreActionText": "Залгах",
-            "displayDirectionsFromLabel": "Хаанаас:",
-            "displayDirectionsToLabel": "Хаашаа:",
-            "displayDirectionsDistanceLabel": "Хоорондох зай:",
-            "displayDirectionsDistanceUnitLabel": "km",
-            "displayDirectionsDurationLabel": "Явах хугацаа:",
-            "displayDirectionsDurationUnitLabel": "мин",
-            "displayDirectionsLoadingIndicatorText": "Ачаалаж байна!..."
+            "hideDirections": "Чиглэлийг хаах",
+            "displayDirections": "Чиглэлийг харах",
+            "focusOn": "Focus on {{storeName}}",
+            "call": "Залгах",
+            "from": "Хаанаас:",
+            "to": "Хаашаа:",
+            "distance": "Хоорондох зай:",
+            "km": "km",
+            "duration": "Явах хугацаа:",
+            "min": "мин",
+            "loading": "Ачаалаж байна!..."
         },
         "StorePhotosScreen": {
             "title": "Зурагнууд  ({{storeMediaCount}})",
-            "viewMediaModalTitle": "Зураг үзэх "
+            "viewingPhoto": "Зураг үзэх "
         },
         "StoreReviewsScreen": {
             "title": "{{storeName}} Сэтгэгдэл",
-            "overallRatingTitle": "Үнэлгээ",
-            "overallRatingSubtitle": "Сэтгэгдэл",
-            "overallRatingSubtitlePlural": "Сэтгэгдэл",
-            "writeReviewButtonText": "Сэтгэгдэл бичих",
-            "reviewCreatedAgoText": "{{reviewCreatedAgo}} өмнө",
-            "sortLabel": "Эрэмблэх",
-            "filterLabel": "Ялгах",
-            "fileteredLabel": "{{filter}} Одоор үнэлэх",
+            "overallRating": "Үнэлгээ",
+            "review": "Сэтгэгдэл",
+            "reviews": "Сэтгэгдэл",
+            "writeAReview": "Сэтгэгдэл бичих",
+            "createdAgo": "{{reviewCreatedAgo}} өмнө",
+            "sort": "Эрэмблэх",
+            "filter": "Ялгах",
+            "starRatings": "{{filter}} Одоор үнэлэх",
             "actionSheetTitle": "{{action}} Сэтгэгдэлүүд",
             "filterOptionText": "{{rating}} Однууд",
-            "displayAllFilterOptionText": "Бүх үнэлгээ",
-            "newestFirstSortOption": "Шинэ нь эхэндээ",
-            "oldestFirstSortOption": "Хуучин нь эхэндээ",
-            "highestRatedSortOption": "Хамгийн өндөр үнэлгээтэй",
-            "lowestRatedSortOption": "Хамгийн бага үнэлгээтэй",
+            "allRatings": "Бүх үнэлгээ",
+            "newestFirst": "Шинэ нь эхэндээ",
+            "oldestFirst": "Хуучин нь эхэндээ",
+            "highestRated": "Хамгийн өндөр үнэлгээтэй",
+            "lowestRated": "Хамгийн бага үнэлгээтэй",
             "defaultSortOption": "{{networkName}} Эрэмблэх"
         },
         "WriteReviewScreen": {
             "loginToReviewWarningText": "Та нэвтрэх эсвэл бүртгүүлсэнийхээ дараа сэтгэгдэл үлдээнэ үү !",
-            "loginToReviewWarningButtonText": "Нэвтрэх",
-            "reviewRatingLabelText": "Одоор үнэлэх",
-            "submitReviewButtonText": "Илгээх "
+            "login": "Нэвтрэх",
+            "selectYourRating": "Одоор үнэлэх",
+            "submitReview": "Илгээх "
         }
     },
     "components": {
         "interface": {
             "headers": {
-                "NetworkHeader": {},
+                "NetworkHeader": {
+                    "search": "Search"
+                },
                 "StorefrontHeader": {}
             },
             "CartSubtotalView": {},
             "CartTotalView": {},
             "CategoryProductSlider": {},
             "LocationPicker": {
-                "searchDeliveryLocationDialogHeaderText": "Хүргэлтийн байршлыг оруулна уу",
-                "autocompleteInputPlaceholderText": "Хаяг оруулна уу...",
-                "selectDeliveryLocationDialogHeaderText": "Хүргэлтийн байршлыг сонгоно уу",
-                "addNewDeliveryLocationButtonText": "Хүргэлтийн шинэ байршил нэмэхийн тулд товшино уу",
-                "editDeliveryLocationButtonText": "Өөрчлөхийн тулд товшино уу",
-                "addDeliveryLocationButtonText": "Хүргэлтийн байршлыг нэмэхийн тулд товшино уу",
-                "deliveryLocationLabelText": "Хаана хүргэж өгнө",
-                "selectLocationLabelText": "Байршлыг сонгоно уу"
+                "enterDeliveryLocation": "Хүргэлтийн байршлыг оруулна уу",
+                "enterAddress": "Хаяг оруулна уу...",
+                "selectDeliveryLocation": "Хүргэлтийн байршлыг сонгоно уу",
+                "tapToAddNewDeliveryLocation": "Хүргэлтийн шинэ байршил нэмэхийн тулд товшино уу",
+                "tapToChange": "Өөрчлөхийн тулд товшино уу",
+                "tapToAddDeliveryLocation": "Хүргэлтийн байршлыг нэмэхийн тулд товшино уу",
+                "deliverTo": "Хаана хүргэж өгнө",
+                "selectLocation": "Байршлыг сонгоно уу",
+                "currentLocation": "Current location"
             },
             "NetworkCategoryBlock": {},
             "NetworkSearch": {
-                "loadingText": "Хайж байна...",
-                "noDescriptionText": "Тодорхойлолт байхгүй"
+                "searching": "Хайж байна...",
+                "noDescription": "Тодорхойлолт байхгүй"
             },
             "PhoneInput": {
-                "countrySelectTitle": "Улсыг сонгоно уу"
+                "selectCountry": "Улсыг сонгоно уу"
             },
             "ProductPriceView": {},
             "ProductCard": {
@@ -317,8 +327,8 @@
             },
             "ServiceQuoteFeeView": {},
             "StoreCategoryPicker": {
-                "defaultButtonTitle": "Ангилалуудыг харах",
-                "categoriesActionSheetTitle": "Ангилал"
+                "viewCategories": "Ангилалуудыг харах",
+                "categories": "Ангилал"
             },
             "StorePicker": {},
             "StoreSearch": {
@@ -332,5 +342,14 @@
         "edit": "Edit",
         "delete": "Delete",
         "loading": "Loading..."
+    },
+    "status": {
+        "created": "Created",
+        "preparing": "Preparing",
+        "dispatched": "Dispatched",
+        "driver_enroute": "Driver en-route",
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "completed": "Completed"
     }
 }

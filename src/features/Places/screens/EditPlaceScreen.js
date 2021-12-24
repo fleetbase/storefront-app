@@ -6,9 +6,10 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faSave, faTimes, faStar } from '@fortawesome/free-solid-svg-icons';
 import { Place, GoogleAddress } from '@fleetbase/sdk';
-import { useStorefront, useCustomer } from 'hooks';
+import { useStorefront, useCustomer, useLocale } from 'hooks';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { get, set, remove } from 'utils/Storage';
+import { translate } from 'utils';
 import MapView, { Marker } from 'react-native-maps';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
@@ -95,7 +96,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
                             <FontAwesomeIcon icon={place.id ? faTimes : faArrowLeft} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>{title || 'Save new place'}</Text>
+                    <Text style={tailwind('text-xl font-semibold')}>{title ?? translate('Places.EditPlaceScreen.title')}</Text>
                 </View>
                 <View style={tailwind('flex flex-row')}>
                     {!place.isNew && (
@@ -129,91 +130,91 @@ const EditPlaceScreen = ({ navigation, route }) => {
                     </MapView>
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Name</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.name')}</Text>
                         <TextInput
                             value={name}
                             onChangeText={setName}
                             keyboardType={'default'}
-                            placeholder={'e.g. Home / Work / School'}
+                            placeholder={translate('Places.EditPlaceScreen.namePlaceholder')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Street address or P.O. Box</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.streetAddress')}</Text>
                         <TextInput
                             value={street1}
                             onChangeText={setStreet1}
                             keyboardType={'default'}
-                            placeholder={'Street address or P.O. Box'}
+                            placeholder={translate('Places.EditPlaceScreen.streetAddress')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Apt, suite, unit, building, floor, etc.</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.streetAddress2')}</Text>
                         <TextInput
                             value={street2}
                             onChangeText={setStreet2}
                             keyboardType={'default'}
-                            placeholder={'Apt, suite, unit, building, floor, etc.'}
+                            placeholder={translate('Places.EditPlaceScreen.streetAddress2')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>City</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.city')}</Text>
                         <TextInput
                             value={city}
                             onChangeText={setCity}
                             keyboardType={'default'}
-                            placeholder={'City'}
+                            placeholder={translate('Places.EditPlaceScreen.city')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>State or province</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.state')}</Text>
                         <TextInput
                             value={province}
                             onChangeText={setProvince}
                             keyboardType={'default'}
-                            placeholder={'State or province'}
+                            placeholder={translate('Places.EditPlaceScreen.state')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Postal code</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.postalCode')}</Text>
                         <TextInput
                             value={postalCode}
                             onChangeText={setPostalCode}
                             keyboardType={'default'}
-                            placeholder={'Postal code, zip'}
+                            placeholder={translate('Places.EditPlaceScreen.postalCode')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Country</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.country')}</Text>
                         <TextInput
                             value={country}
                             onChangeText={setCountry}
                             keyboardType={'default'}
-                            placeholder={'Country'}
+                            placeholder={translate('Places.EditPlaceScreen.country')}
                             placeholderTextColor={'rgba(107, 114, 128, 1)'}
                             style={tailwind('form-input')}
                         />
                     </View>
                     <View style={tailwind('mb-4')}>
-                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>Phone number</Text>
+                        <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.phoneNumber')}</Text>
                         <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={country} />
                     </View>
                     <View style={tailwind('mb-4')}>
                         <TouchableOpacity onPress={savePlace} disabled={isDeleting || isLoading}>
                             <View style={tailwind('btn border bg-green-50 border-green-50')}>
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, 1)'} style={tailwind('mr-2')} />}
-                                <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>Save place details</Text>
+                                <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>{translate('Places.EditPlaceScreen.savePlaceDetails')}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -221,7 +222,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
                         <View style={tailwind('mb-4')}>
                             <TouchableOpacity onPress={makeDefault} disabled={isDeleting || isLoading}>
                                 <View style={tailwind('btn border bg-yellow-50 border-yellow-50')}>
-                                    <Text style={tailwind('font-semibold text-yellow-900 text-lg text-center')}>Make default</Text>
+                                    <Text style={tailwind('font-semibold text-yellow-900 text-lg text-center')}>{translate('Places.EditPlaceScreen.makeDefault')}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -231,7 +232,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
                             <TouchableOpacity onPress={deletePlace} disabled={isDeleting || isLoading}>
                                 <View style={tailwind('btn border bg-red-50 border-red-50')}>
                                     {isDeleting && <ActivityIndicator color={'rgba(127, 29, 29, 1)'} style={tailwind('mr-2')} />}
-                                    <Text style={tailwind('font-semibold text-red-900 text-lg text-center')}>Delete place</Text>
+                                    <Text style={tailwind('font-semibold text-red-900 text-lg text-center')}>{translate('Places.EditPlaceScreen.deletePlace')}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>

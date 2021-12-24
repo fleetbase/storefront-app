@@ -29,8 +29,10 @@
         },
         "SavedPlacesScreen": {
             "title": "Your saved places",
+            "loadingYourSavedPlaces": "Loading your saved places",
+            "youHaveNoSavedPlaces": "You have no saved places",
             "emptyStateText": "Looks like you haven't saved any addresses.",
-            "addNewButtonText": "Add new address"
+            "addNewAddress": "Add new address"
         }
     },
     "Auth": {
@@ -198,118 +200,125 @@
     },
     "Places": {
         "EditPlaceScreen": {
-            "placeNameLabelText": "Name",
-            "placeStreetAddressLabelText": "Street address or P.O. Box",
-            "placeStreetAddressLine2LabelText": "Apt, suite, unit, building, floor, etc.",
-            "placeCityLabelText": "City",
-            "placeStateLabelText": "State or province",
-            "placePostalCodeLabelText": "Postal code",
-            "placeCountryLabelText": "Country",
-            "placePhoneLabelText": "Phone number",
-            "savePlaceButtonText": "Save place details",
-            "makeDefaultButtonText": "Make default",
-            "deletePlaceButtonText": "Delete place"
+            "title": "Save new place",
+            "name": "Name",
+            "namePlaceholder": "e.g. Home / Work / School",
+            "streetAddress": "Street address or P.O. Box",
+            "streetAddress2": "Apt, suite, unit, building, floor, etc.",
+            "city": "City",
+            "state": "State or province",
+            "postalCode": "Postal code",
+            "country": "Country",
+            "phoneNumber": "Phone number",
+            "savePlaceDetails": "Save place details",
+            "makeDefault": "Make default",
+            "deletePlace": "Delete place"
         },
         "SearchPlacesScreen": {
-            "title": "Add a new place"
+            "title": "Add a new place",
+            "enterAddress": "Enter address..."
         }
     },
     "Shared": {
         "OrderCompletedScreen": {
             "title": "Order received!",
-            "orderPickupAddressLabelText": "Pickup order from",
-            "orderNotesLabelText": "Order Notes",
-            "orderQRCodeLabelText": "QR Code",
-            "orderSummaryLabelText": "Order Summary",
-            "orderIsCashLabelText": "Cash",
-            "subtotalLabelText": "Subtotal",
-            "deliveryFeeLabelText": "Delivery Fee",
-            "tipLabelText": "Tip",
-            "deliveryTipLabelText": "Delivery Tip",
-            "totalLabelText": "Total"
+            "pickupOrderFrom": "Pickup order from",
+            "orderNotes": "Order Notes",
+            "qrCode": "QR Code",
+            "orderSummary": "Order Summary",
+            "cash": "Cash",
+            "subtotal": "Subtotal",
+            "deliveryFee": "Delivery Fee",
+            "tip": "Tip",
+            "deliveryTip": "Delivery Tip",
+            "total": "Total"
         },
         "OrderScreen": {
             "title": "Order {{orderStatus}}",
-            "orderPickupAddressLabelText": "Pickup order from",
-            "orderNotesLabelText": "Order Notes",
-            "orderQRCodeLabelText": "QR Code",
-            "orderSummaryLabelText": "Order Summary",
-            "orderIsCashLabelText": "Cash",
-            "subtotalLabelText": "Subtotal",
-            "deliveryFeeLabelText": "Delivery Fee",
-            "tipLabelText": "Tip",
-            "deliveryTipLabelText": "Delivery Tip",
-            "totalLabelText": "Total"
+            "arrivingIn": "Arriving in {{estimatedDuration}}",
+            "pickupOrderFrom": "Pickup order from",
+            "orderNotes": "Order Notes",
+            "qrCode": "QR Code",
+            "orderSummary": "Order Summary",
+            "cash": "Cash",
+            "subtotal": "Subtotal",
+            "deliveryFee": "Delivery Fee",
+            "tip": "Tip",
+            "deliveryTip": "Delivery Tip",
+            "total": "Total"
         },
         "StoreLocationScreen": {
-            "hideDirectionsActionText": "Hide Directions",
-            "displayDirectionsActionText": "Display Directions",
-            "focusStoreActionText": "Focus on {{storeName}}",
-            "callStoreActionText": "Call",
-            "displayDirectionsFromLabel": "From:",
-            "displayDirectionsToLabel": "To:",
-            "displayDirectionsDistanceLabel": "Distance:",
-            "displayDirectionsDistanceUnitLabel": "km",
-            "displayDirectionsDurationLabel": "Duration:",
-            "displayDirectionsDurationUnitLabel": "min",
-            "displayDirectionsLoadingIndicatorText": "Loading..."
+            "hideDirections": "Hide Directions",
+            "displayDirections": "Display Directions",
+            "focusOn": "Focus on {{storeName}}",
+            "call": "Call",
+            "from": "From:",
+            "to": "To:",
+            "distance": "Distance:",
+            "km": "km",
+            "duration": "Duration:",
+            "min": "min",
+            "loading": "Loading..."
         },
         "StorePhotosScreen": {
             "title": "Photos ({{storeMediaCount}})",
-            "viewMediaModalTitle": "Viewing photo"
+            "viewingPhoto": "Viewing photo"
         },
         "StoreReviewsScreen": {
             "title": "{{storeName}} Reviews",
-            "overallRatingTitle": "Overall rating",
-            "overallRatingSubtitle": "review",
-            "overallRatingSubtitlePlural": "reviews",
-            "writeReviewButtonText": "Write a Review",
-            "reviewCreatedAgoText": "{{reviewCreatedAgo}} ago",
-            "sortLabel": "Sort",
-            "filterLabel": "Filter",
-            "fileteredLabel": "{{filter}} star ratings",
+            "overallRating": "Overall rating",
+            "review": "review",
+            "reviews": "reviews",
+            "writeAReview": "Write a Review",
+            "createdAgo": "{{reviewCreatedAgo}} ago",
+            "sort": "Sort",
+            "filter": "Filter",
+            "starRatings": "{{filter}} star ratings",
             "actionSheetTitle": "{{action}} reviews",
             "filterOptionText": "{{rating}} stars",
-            "displayAllFilterOptionText": "All ratings",
-            "newestFirstSortOption": "Newest first",
-            "oldestFirstSortOption": "Oldest first",
-            "highestRatedSortOption": "Highest rated",
-            "lowestRatedSortOption": "Lowest rated",
+            "allRatings": "All ratings",
+            "newestFirst": "Newest first",
+            "oldestFirst": "Oldest first",
+            "highestRated": "Highest rated",
+            "lowestRated": "Lowest rated",
             "defaultSortOption": "{{networkName}} Sort"
         },
         "WriteReviewScreen": {
             "loginToReviewWarningText": "You must login or signup to leave a review",
-            "loginToReviewWarningButtonText": "Login",
-            "reviewRatingLabelText": "Select your rating",
-            "submitReviewButtonText": "Submit Review"
+            "login": "Login",
+            "selectYourRating": "Select your rating",
+            "submitReview": "Submit Review"
         }
     },
     "components": {
         "interface": {
             "headers": {
-                "NetworkHeader": {},
+                "NetworkHeader": {
+                    "search": "Search"
+                },
                 "StorefrontHeader": {}
             },
             "CartSubtotalView": {},
             "CartTotalView": {},
             "CategoryProductSlider": {},
             "LocationPicker": {
-                "searchDeliveryLocationDialogHeaderText": "Enter delivery location",
-                "autocompleteInputPlaceholderText": "Enter address...",
-                "selectDeliveryLocationDialogHeaderText": "Select delivery location",
-                "addNewDeliveryLocationButtonText": "Tap to add new delivery location",
-                "editDeliveryLocationButtonText": "Tap to change",
-                "addDeliveryLocationButtonText": "Tap to add delivery location",
-                "deliveryLocationLabelText": "Deliver to:",
-                "selectLocationLabelText": "Select location"
+                "enterDeliveryLocation": "Enter delivery location",
+                "enterAddress": "Enter address...",
+                "selectDeliveryLocation": "Select delivery location",
+                "tapToAddNewDeliveryLocation": "Tap to add new delivery location",
+                "tapToChange": "Tap to change",
+                "tapToAddDeliveryLocation": "Tap to add delivery location",
+                "deliverTo": "Deliver to:",
+                "selectLocation": "Select location",
+                "currentLocation": "Current location"
             },
             "NetworkCategoryBlock": {},
             "NetworkSearch": {
-                "loadingText": "Searching...",
-                "noDescriptionText": "No description"
+                "searching": "Searching...",
+                "noDescription": "No description"
             },
             "PhoneInput": {
-                "countrySelectTitle": "Select Country"
+                "selectCountry": "Select Country"
             },
             "ProductPriceView": {},
             "ProductCard": {
@@ -318,8 +327,8 @@
             },
             "ServiceQuoteFeeView": {},
             "StoreCategoryPicker": {
-                "defaultButtonTitle": "View Categories",
-                "categoriesActionSheetTitle": "Categories"
+                "viewCategories": "View Categories",
+                "categories": "Categories"
             },
             "StorePicker": {},
             "StoreSearch": {
@@ -333,5 +342,14 @@
         "edit": "Edit",
         "delete": "Delete",
         "loading": "Loading..."
+    },
+    "status": {
+        "created": "Created",
+        "preparing": "Preparing",
+        "dispatched": "Dispatched",
+        "driver_enroute": "Driver en-route",
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "completed": "Completed"
     }
 }

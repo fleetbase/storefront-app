@@ -13,7 +13,7 @@ const dialogHeight = windowHeight / 2;
 
 const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButtonTitle, buttonStyle, buttonTitleStyle, dialogIconStyle, buttonIcon, buttonIconSize, buttonIconStyle, numberOfLines, onCategoryPress }) => {
     categories = categories ?? [];
-    buttonTitle = buttonTitle ?? 'View Categories';
+    buttonTitle = buttonTitle ?? translate('components.interface.StoreCategoryPicker.viewCategories');
     buttonIcon = buttonIcon ?? faBars;
 
     const actionSheetRef = createRef();
@@ -46,7 +46,7 @@ const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButton
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
                             <FontAwesomeIcon icon={buttonIcon} style={[tailwind(`text-gray-900 mr-2`), dialogIconStyle]} />
-                            <Text style={tailwind('text-lg font-semibold')}>Categories</Text>
+                            <Text style={tailwind('text-lg font-semibold')}>{translate('components.interface.StoreCategoryPicker.categories')}</Text>
                         </View>
 
                         <View>

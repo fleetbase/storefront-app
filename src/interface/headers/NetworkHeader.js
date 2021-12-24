@@ -8,7 +8,8 @@ import { Collection } from '@fleetbase/sdk';
 import { Network, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useResourceCollection } from 'utils/Storage';
-import { config } from 'utils';
+import { useLocale } from 'hooks';
+import { config, translate } from 'utils';
 import LocationPicker from '../LocationPicker';
 import LangPicker from '../LangPicker';
 import StorePicker from '../StorePicker';
@@ -19,7 +20,7 @@ import tailwind from 'tailwind';
 const NetworkHeader = (props) => {
     let { info, onBack, backButtonIcon, hideSearch, hideCategoryPicker, categories, searchPlaceholder, onSearchResultPress, onCategoryPress } = props;
 
-    searchPlaceholder = searchPlaceholder ?? 'Search';
+    searchPlaceholder = searchPlaceholder ?? translate('components.interface.headers.NetworkHeader.search');
 
     const insets = useSafeAreaInsets();
     const storefront = useStorefront();
@@ -27,6 +28,7 @@ const NetworkHeader = (props) => {
 
     const network = new Network(info, storefront.getAdapter());
 
+    const [locale] = useLocale();
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState(new Collection());

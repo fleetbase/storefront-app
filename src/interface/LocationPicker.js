@@ -7,9 +7,9 @@ import { EventRegister } from 'react-native-event-listeners';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import { isValidCustomer, signOut } from 'utils/Customer';
-import { isResource, logError, mutatePlaces } from 'utils';
+import { isResource, logError, mutatePlaces, translate } from 'utils';
 import { adapter } from 'hooks/use-fleetbase';
-import { useDeliveryLocation, useCustomer, useMountedState } from 'hooks';
+import { useDeliveryLocation, useCustomer, useMountedState, useLocale } from 'hooks';
 import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import ActionSheet from 'react-native-actions-sheet';
 import Config from 'react-native-config';
@@ -25,11 +25,13 @@ const LocationPicker = (props) => {
     const insets = useSafeAreaInsets();
     const isMounted = useMountedState();
 
+    const [locale] = useLocale();
     const [deliverTo, setDeliverTo] = useDeliveryLocation();
     const [customer, setCustomer] = useCustomer();
     const [places, setPlaces] = useResourceCollection('places', Place, adapter);
     const [isAddingDeliveryLocation, setIsAddingDeliveryLocation] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    
     const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
     const loadPlaces = (customer) => {
@@ -150,10 +152,10 @@ const LocationPicker = (props) => {
 
     const SearchDevliveryLocationView = () => (
         <View>
-            <DialogHeader title={'Enter delivery location'} icon={faMapMarkerAlt} onCancel={endLocationSearch} />
+            <DialogHeader title={translate('components.interface.LocationPicker.enterDeliveryLocation')} icon={faMapMarkerAlt} onCancel={endLocationSearch} />
             <View style={tailwind('h-full')}>
                 <GooglePlacesAutocomplete
-                    placeholder={'Enter address...'}
+                    placeholder={translate('components.interface.LocationPicker.enterAddress')}
                     placeholderTextColor={'rgba(156, 163, 175, 1)'}
                     autoCapitalize={'none'}
                     autoCorrect={false}
@@ -178,13 +180,13 @@ const LocationPicker = (props) => {
 
     const SelectDeliveryLocationView = () => (
         <View>
-            <DialogHeader title={'Select delivery location'} icon={faMapMarkerAlt} onCancel={() => toggle(false)} />
+            <DialogHeader title={translate('components.interface.LocationPicker.selectDeliveryLocation')} icon={faMapMarkerAlt} onCancel={() => toggle(false)} />
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <TouchableOpacity onPress={startLocationSearch}>
                     <View style={tailwind(`flex flex-row items-center px-4 py-6 bg-blue-50 border-b border-gray-100`)}>
                         <View style={tailwind('flex flex-row')}>
                             <FontAwesomeIcon size={16} icon={faExclamationCircle} style={tailwind('text-blue-700 mr-1')} />
-                            <Text style={tailwind('text-blue-900')}>Tap to add new delivery location</Text>
+                            <Text style={tailwind('text-blue-900')}>{translate('components.interface.LocationPicker.tapToAddNewDeliveryLocation')}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -220,7 +222,7 @@ const LocationPicker = (props) => {
                                 <View style={tailwind('flex-1')}>
                                     <View style={tailwind('flex flex-row items-center mb-1')}>
                                         <Text numberOfLines={1} style={tailwind('font-semibold uppercase')}>
-                                            {deliverTo.getAttribute('name') ?? 'Current location'}
+                                            {deliverTo.getAttribute('name') ?? translate('components.interface.LocationPicker.currentLocation')}
                                         </Text>
                                     </View>
                                     <Text numberOfLines={1} style={tailwind('uppercase')}>
@@ -233,7 +235,7 @@ const LocationPicker = (props) => {
                                 <View style={tailwind('h-full flex items-center flex-row')}>
                                     <View style={tailwind('flex flex-row items-center justify-center bg-blue-100 px-3 py-2 rounded-full')}>
                                         <FontAwesomeIcon size={14} icon={faExclamationCircle} style={tailwind('text-blue-700 mr-1')} />
-                                        <Text style={tailwind('text-blue-900 text-xs')}>Tap to change</Text>
+                                        <Text style={tailwind('text-blue-900 text-xs')}>{translate('components.interface.LocationPicker.tapToChange')}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -245,7 +247,7 @@ const LocationPicker = (props) => {
                         <View style={tailwind(`flex flex-row items-center px-4 py-6 bg-blue-50 border-b border-gray-100`)}>
                             <View style={tailwind('flex flex-row')}>
                                 <FontAwesomeIcon size={16} icon={faExclamationCircle} style={tailwind('text-blue-700 mr-1')} />
-                                <Text style={tailwind('text-blue-900')}>Tap to add delivery location</Text>
+                                <Text style={tailwind('text-blue-900')}>{translate('components.interface.LocationPicker.tapToAddDeliveryLocation')}</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -262,7 +264,7 @@ const LocationPicker = (props) => {
                     {deliverTo && (
                         <View style={tailwind('flex flex-row items-center')}>
                             <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-900 mr-2')} />
-                            <Text style={tailwind('text-blue-900 font-semibold mr-1')}>{props.label ?? 'Deliver to:'}</Text>
+                            <Text style={tailwind('text-blue-900 font-semibold mr-1')}>{props.label ?? translate('components.interface.LocationPicker.deliverTo')}</Text>
                             <View style={{ maxWidth: 100 }}>
                                 <Text style={tailwind('text-blue-900')} numberOfLines={1}>
                                     {deliverTo.getAttribute('name') || deliverTo.getAttribute('street1')}
@@ -273,7 +275,7 @@ const LocationPicker = (props) => {
                     {!deliverTo && (
                         <View style={tailwind('flex flex-row items-center')}>
                             <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-900 mr-2')} />
-                            <Text style={tailwind('text-blue-900 font-semibold mr-1')}>Select location</Text>
+                            <Text style={tailwind('text-blue-900 font-semibold mr-1')}>{translate('components.interface.LocationPicker.selectLocation')}</Text>
                         </View>
                     )}
                 </View>
@@ -285,18 +287,6 @@ const LocationPicker = (props) => {
                     {isAddingDeliveryLocation && <SearchDevliveryLocationView />}
                 </View>
             </Modal>
-
-            {/* <ActionSheet
-                containerStyle={[{ height: dialogHeight }]}
-                gestureEnabled={true}
-                bounceOnOpen={true}
-                nestedScrollEnabled={true}
-                onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
-                {!isAddingDeliveryLocation && <SelectDeliveryLocationView />}
-                {isAddingDeliveryLocation && <SearchDevliveryLocationView />}
-            </ActionSheet> */}
         </View>
     );
 };

@@ -72,7 +72,7 @@ export default class LocalizeUtil {
     }
 
     static setLanguage(lang) {
-        setI18nConfig(lang);
+        return setI18nConfig(lang);
     }
 
     static getLanguage() {
@@ -96,6 +96,8 @@ export default class LocalizeUtil {
         i18n.fallbacks = true;
         i18n.missingBehaviour = 'guess';
         i18n.translations = { [locale]: translations[locale] };
+        console.log(' [i18n.translations.mn.Shared] ', i18n.translations.mn?.Shared);
+        // console.log(' [i18n.translations.mn.components] ', i18n.translations.mn?.components);
         i18n.locale = locale;
 
         // broadcast
