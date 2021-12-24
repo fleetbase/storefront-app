@@ -1,11 +1,11 @@
-import React, { useEffect, useState, createRef } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
+import React, { useEffect, useState, useRef, createRef } from 'react';
+import { View, ScrollView, Text, TouchableOpacity, ImageBackground, ActivityIndicator, Alert, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBillWave, faCashRegister } from '@fortawesome/free-solid-svg-icons';
 import { faStripe } from '@fortawesome/free-brands-svg-icons';
 import { formatCurrency, calculatePercentage, isLastIndex, logError, translate } from 'utils';
 import { useResourceStorage } from 'utils/Storage';
@@ -13,6 +13,7 @@ import { useStorefront, useFleetbase, useCustomer, useMountedState, useLocale } 
 import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Collection } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
+import QpayPaymentSheet from 'interface/QpayPaymentSheet';
 import ActionSheet from 'react-native-actions-sheet';
 import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
@@ -33,6 +34,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, storefront.getAdapter());
     const [cart, setCart] = useResourceStorage('cart', Cart, storefront.getAdapter(), new Cart(serializedCart));
     const [isLoading, setIsLoading] = useState(false);
+    const [qpayInvoice, setQPayInvoice] = useState(null);
+    const [qpayPaymentSheet, setQpayPaymentSheet] = useState(null);
     const [paymentSheetError, setPaymentSheetError] = useState(false);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
@@ -58,7 +61,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     const taxPercentage = info?.options?.tax_percentage ?? 0;
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
 
-    const gatewayDetails = {
+    const [gatewayDetails, setGatewayDetails] = useState({
         cash: {
             name: translate('Cart.CheckoutScreen.gatewayDetails.cash.title'),
             icon: <FontAwesomeIcon icon={faMoneyBillWave} size={26} style={tailwind('text-green-400')} />,
@@ -69,7 +72,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             icon: <FontAwesomeIcon icon={faStripe} size={30} style={tailwind('text-indigo-400')} />,
             description: translate('Cart.CheckoutScreen.gatewayDetails.stripe.description'),
         },
-    };
+    });
 
     const canPlaceOrder = (() => {
         let isGatewayValid = isPaymentGatewayResource(gateway);
@@ -119,6 +122,19 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         return formatCurrency(deliveryTip / 100, cart.getAttribute('currency'));
     })();
+
+    const openLink = async (url, errorMessage = null) => {
+        // Checking if the link is supported for links with custom URL scheme.
+        const supported = await Linking.canOpenURL(url).catch(logError);
+
+        if (supported) {
+            // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+            // by some browser in the mobile
+            await Linking.openURL(url).catch(logError);
+        } else {
+            Alert.alert(errorMessage ?? `Unable to open link!`);
+        }
+    };
 
     const updateCart = (cart) => {
         setCart(cart);
@@ -228,6 +244,23 @@ const CheckoutScreen = ({ navigation, route }) => {
         }
     };
 
+    const setupQpayGateway = async (gateway, c = null) => {
+        const currentCustomer = c ?? customer;
+
+        if (!currentCustomer || !isPaymentGatewayResource(gateway)) {
+            return null;
+        }
+
+        const options = getOrderOptions();
+
+        const { token, invoice } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
+            logError(error, '[ Error initializing checkout token! ]');
+        });
+
+        setQPayInvoice(invoice);
+        gateway.setCheckoutToken(token);
+    };
+
     const setupCashGateway = async (gateway, c = null) => {
         const currentCustomer = c ?? customer;
 
@@ -249,7 +282,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     };
 
     const setupGateways = async (gateways, c = null) => {
-        setGatewayOptions(gateways);
+        // setGatewayOptions(gateways);
 
         const _gateways = new Collection();
 
@@ -267,12 +300,25 @@ const CheckoutScreen = ({ navigation, route }) => {
                 await setupCashGateway(gateway, c);
             }
 
+            if (gateway.type === 'qpay') {
+                await setupQpayGateway(gateway, c);
+            }
+
+            if (!gatewayDetails[gateway.type]) {
+                gatewayDetails[gateway.type] = {
+                    name: gateway.getAttribute('name'),
+                    icon: <FontAwesomeIcon icon={faCashRegister} size={26} style={tailwind('text-blue-500')} />,
+                    description: gateway.getAttribute('description') ?? `${gateway.type} payment gateway`,
+                };
+            }
+
             console.log('[ Gateway has initial token set ]', gateway.getCheckoutToken());
 
             _gateways.pushObject(gateway);
         }
 
-        setGatewayOptions(gateways);
+        setGatewayOptions(_gateways);
+        setGatewayDetails(gatewayDetails);
     };
 
     const fetchGateways = (c = null) => {
@@ -361,16 +407,27 @@ const CheckoutScreen = ({ navigation, route }) => {
             });
     };
 
+    const completeQpayOrder = async () => {
+        await qpayPaymentSheet?.show();
+        setIsLoading(false);
+    };
+
     const placeOrder = () => {
         setIsLoading(true);
 
-        if (gateway.isStripeGateway) {
+        if (gateway?.type === 'qpay') {
+            return completeQpayOrder();
+        }
+
+        if (gateway?.isStripeGateway) {
             return completeStripeOrder();
         }
 
-        if (gateway.isCashGateway) {
+        if (gateway?.isCashGateway) {
             return completeCashOrder();
         }
+
+        setIsLoading(false);
     };
 
     const getDeliveryQuote = () => {
@@ -446,7 +503,6 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         // Listen for customer updated event
         const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
-            setCustomer(customer);
             fetchGateways(customer);
         });
 
@@ -589,6 +645,15 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     </View>
                                 )}
 
+                                {gateway?.type === 'qpay' && (
+                                    <View>
+                                        <View style={tailwind('flex flex-row items-center')}>
+                                            <FontAwesomeIcon icon={faCashRegister} size={20} style={tailwind('text-blue-500 mr-2')} />
+                                            <Text>{gateway.getAttribute('name')}</Text>
+                                        </View>
+                                    </View>
+                                )}
+
                                 {gateway?.isCashGateway && (
                                     <View>
                                         <View style={tailwind('flex flex-row items-center')}>
@@ -638,14 +703,16 @@ const CheckoutScreen = ({ navigation, route }) => {
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
-                                    <Text style={tailwind('font-semibold text-base')}>{translate('Cart.CheckoutScreen.cartLabelText', { cartUniqueItemsCount: cart.getAttribute('total_unique_items') })}</Text>
+                                    <Text style={tailwind('font-semibold text-base')}>
+                                        {translate('Cart.CheckoutScreen.cartLabelText', { cartUniqueItemsCount: cart.getAttribute('total_unique_items') })}
+                                    </Text>
                                 </View>
                                 <View style={tailwind('flex flex-row justify-between')}>
                                     <View style={tailwind('flex-1 flex flex-row')}>
                                         {cart.contents().map((cartItem, index) => (
                                             <View key={index} style={tailwind('mr-2 flex items-center justify-center w-20')}>
                                                 <View style={tailwind('border border-gray-200 flex items-center justify-center w-16 h-16 mb-2')}>
-                                                    <Image source={{ uri: cartItem.product_image_url }} style={tailwind('w-10 h-10')} />
+                                                    <FastImage source={{ uri: cartItem.product_image_url }} style={tailwind('w-10 h-10')} />
                                                 </View>
                                                 <Text style={tailwind('text-center text-xs mb-1')} numberOfLines={1}>
                                                     {cartItem.name}
@@ -718,12 +785,15 @@ const CheckoutScreen = ({ navigation, route }) => {
                                 )}
                             >
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
-                                <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>{translate('Cart.CheckoutScreen.submitOrderButtonText')}</Text>
+                                <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>
+                                    {translate('Cart.CheckoutScreen.submitOrderButtonText')}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
+            <QpayPaymentSheet invoice={qpayInvoice} onPress={(bank) => openLink(bank.link, `Unable to open ${bank.name} app!`)} onReady={setQpayPaymentSheet} />
         </View>
     );
 };

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { isResource, logError, mutatePlaces } from 'utils';
 import { useLocale, useMountedState } from 'hooks';
-import { activeTranslations, setLanguage, getLanguage } from 'utils/Localize';
+import { activeTranslations } from 'utils/Localize';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
 import localeEmoji from 'locale-emoji';

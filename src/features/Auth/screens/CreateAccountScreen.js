@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, ImageBackground, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, ImageBackground, TouchableOpacity, ActivityIndicator, Platform, KeyboardAvoidingView, Pressable, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useStorefront, useLocale } from 'hooks';
-import { updateCustomer } from 'utils/Customer';
+import { useStorefront, useLocale, useCustomer } from 'hooks';
 import { getLocation } from 'utils/Geo';
 import { get } from 'utils/Storage';
-import { translate } from 'utils';
+import { translate, config } from 'utils';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
 
@@ -21,6 +20,7 @@ const CreateAccountScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [locale, setLocale] = useLocale();
+    const [customer, setCustomer] = useCustomer();
 
     const storefront = useStorefront();
     const location = getLocation();
@@ -50,7 +50,7 @@ const CreateAccountScreen = ({ navigation, route }) => {
         storefront.customers
             .create(phone, code, { name, phone })
             .then((customer) => {
-                updateCustomer(customer);
+                setCustomer(customer);
                 syncDevice(customer);
                 setIsLoading(false);
 
@@ -73,22 +73,30 @@ const CreateAccountScreen = ({ navigation, route }) => {
     };
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
-            <View style={tailwind('w-full h-full bg-white relative')}>
-                <View style={tailwind('flex flex-row items-center p-4')}>
+        <ImageBackground
+            source={config('ui.createAccountScreen.containerBackgroundImage')}
+            resizeMode={config('ui.createAccountScreen.containerBackgroundResizeMode') ?? 'cover'}
+            style={[config('ui.createAccountScreen.containerBackgroundImageStyle')]}
+        >
+            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.createAccountScreen.containerStyle'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('flex flex-row items-center p-4'), config('ui.createAccountScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
-                        <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                            <FontAwesomeIcon icon={faTimes} />
+                        <View style={[tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center'), config('ui.createAccountScreen.headerIconContainerStyle')]}>
+                            <FontAwesomeIcon icon={faTimes} style={config('ui.createAccountScreen.headerIconStyle')} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>{translate('Auth.CreateAccountScreen.title')}</Text>
+                    <Text style={[tailwind('text-xl font-semibold'), config('ui.createAccountScreen.headerTextStyle')]}>{translate('Auth.CreateAccountScreen.title')}</Text>
                 </View>
-                <View style={tailwind('px-4 py-6')}>
+                <Pressable onPress={Keyboard.dismiss} style={[tailwind('px-4 py-6'), config('ui.createAccountScreen.contentContainerStyle')]}>
                     {isNotAwaitingVerification && (
-                        <View>
-                            <View style={tailwind('mb-8')}>
-                                <Text style={tailwind('text-lg text-gray-600')}>{translate('Auth.CreateAccountScreen.greetingTitle', { infoName: info.name })}</Text>
-                                <Text style={tailwind('text-lg text-gray-500')}>{translate('Auth.CreateAccountScreen.greetingSubtitle')}</Text>
+                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={160} style={[config('ui.createAccountScreen.createAccountFormContainerStyle')]}>
+                            <View style={[tailwind('mb-8'), config('ui.createAccountScreen.greetingContainerStyle')]}>
+                                <Text style={[tailwind('text-lg text-gray-600'), config('ui.createAccountScreen.greetingLine1TextStyle')]}>
+                                    {translate('Auth.CreateAccountScreen.greetingTitle', { infoName: info.name })}
+                                </Text>
+                                <Text style={[tailwind('text-lg text-gray-500'), config('ui.createAccountScreen.greetingLine2TextStyle')]}>
+                                    {translate('Auth.CreateAccountScreen.greetingSubtitle')}
+                                </Text>
                             </View>
                             {error && (
                                 <View style={tailwind('mb-8')}>
@@ -101,28 +109,42 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                     <TextInput
                                         value={name}
                                         onChangeText={setName}
-                                        style={tailwind('form-input py-2 flex flex-row')}
+                                        style={[tailwind('form-input py-2 flex flex-row'), config('ui.createAccountScreen.nameInputStyle')]}
                                         disabled={isAwaitingVerification}
                                         placeholder={translate('Auth.CreateAccountScreen.nameInputPlaceholder')}
+                                        {...(config('ui.createAccountScreen.nameInputProps') ?? {})}
                                     />
                                 </View>
                                 <View style={tailwind('mb-6')}>
-                                    <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} disabled={isAwaitingVerification} />
+                                    <PhoneInput
+                                        value={phone}
+                                        onChangeText={setPhone}
+                                        defaultCountry={location?.country}
+                                        disabled={isAwaitingVerification}
+                                        style={config('ui.createAccountScreen.phoneInputStyle')}
+                                        {...(config('ui.createAccountScreen.phoneInputProps') ?? {})}
+                                    />
                                 </View>
                                 <TouchableOpacity onPress={sendVerificationCode}>
-                                    <View style={tailwind('btn border border-blue-50 bg-blue-50')}>
+                                    <View style={[tailwind('btn border border-blue-50 bg-blue-50'), config('ui.createAccountScreen.sendVerificationCodeButtonStyle')]}>
                                         {isLoading && <ActivityIndicator color={'rgba(59, 130, 246, 1)'} style={tailwind('mr-2')} />}
-                                        <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>{translate('Auth.CreateAccountScreen.sendVerificationCodeButtonText')}</Text>
+                                        <Text style={[tailwind('font-semibold text-blue-900 text-lg text-center'), config('ui.createAccountScreen.sendVerificationCodeButtonTextStyle')]}>
+                                            {translate('Auth.CreateAccountScreen.sendVerificationCodeButtonText')}
+                                        </Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </KeyboardAvoidingView>
                     )}
                     {isAwaitingVerification && (
-                        <View>
-                            <View style={tailwind('mb-8')}>
-                                <Text style={tailwind('text-lg text-green-700')}>{translate('Auth.CreateAccountScreen.awaitingVerificationTitle', { name  })}</Text>
-                                <Text style={tailwind('text-lg text-green-500')}>{translate('Auth.CreateAccountScreen.awaitingVerificationSubtitle')}</Text>
+                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80} style={[config('ui.createAccountScreen.verifyFormContainerStyle')]}>
+                            <View style={[tailwind('mb-8'), config('ui.createAccountScreen.greetingContainerStyle')]}>
+                                <Text style={[tailwind('text-lg text-green-700'), config('ui.createAccountScreen.greetingLine1TextStyle')]}>
+                                    {translate('Auth.CreateAccountScreen.awaitingVerificationTitle', { name })}
+                                </Text>
+                                <Text style={[tailwind('text-lg text-green-500'), config('ui.createAccountScreen.greetingLine2TextStyle')]}>
+                                    {translate('Auth.CreateAccountScreen.awaitingVerificationSubtitle')}
+                                </Text>
                             </View>
 
                             <View>
@@ -132,26 +154,31 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                         keyboardType={'phone-pad'}
                                         placeholder={translate('Auth.CreateAccountScreen.codeInputPlaceholder')}
                                         placeholderTextColor={'rgba(156, 163, 175, 1)'}
-                                        style={tailwind('form-input text-center mb-2')}
+                                        style={[tailwind('form-input text-center mb-2'), config('ui.createAccountScreen.verifyCodeInputStyle')]}
+                                        {...(config('ui.createAccountScreen.verifyCodeInputProps') ?? {})}
                                     />
                                     <View style={tailwind('flex flex-row justify-end')}>
-                                        <TouchableOpacity onPress={retry}>
-                                            <Text style={tailwind('text-blue-900 font-semibold')}>{translate('Auth.CreateAccountScreen.retryButtonText')}</Text>
+                                        <TouchableOpacity style={config('ui.createAccountScreen.retryButtonStyle')} onPress={retry}>
+                                            <Text style={[tailwind('text-blue-900 font-semibold'), config('ui.createAccountScreen.retryButtonTextStyle')]}>
+                                                {translate('Auth.CreateAccountScreen.retryButtonText')}
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                                 <TouchableOpacity onPress={verifyCode}>
-                                    <View style={tailwind('btn border border-green-50 bg-green-50')}>
+                                    <View style={[tailwind('btn border border-green-50 bg-green-50'), config('ui.createAccountScreen.verifyCodeButtonStyle')]}>
                                         {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
-                                        <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>{translate('Auth.CreateAccountScreen.verifyCodeButtonText')}</Text>
+                                        <Text style={[tailwind('font-semibold text-green-900 text-lg text-center'), config('ui.createAccountScreen.verifyCodeButtonTextStyle')]}>
+                                            {translate('Auth.CreateAccountScreen.verifyCodeButtonText')}
+                                        </Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </KeyboardAvoidingView>
                     )}
-                </View>
+                </Pressable>
             </View>
-        </View>
+        </ImageBackground>
     );
 };
 

@@ -83,7 +83,7 @@ const PhoneInput = (props) => {
                     keyboardType={'phone-pad'}
                     placeholder={props.placeholder || '+0 (000) 000 - 000'}
                     placeholderTextColor={'rgba(107, 114, 128, 1)'}
-                    style={tailwind('w-full')}
+                    style={[tailwind('w-full'), props.inputStyle]}
                     disabled={props.disabled}
                 />
             </View>

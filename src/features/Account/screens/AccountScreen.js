@@ -7,6 +7,7 @@ import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, f
 import { useCustomer, signOut } from 'utils/Customer';
 import { config, translate } from 'utils';
 import { useLocale } from 'hooks';
+import FastImage from 'react-native-fast-image';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import tailwind from 'tailwind';
@@ -20,9 +21,6 @@ const AccountScreen = ({ navigation, route }) => {
     const [locale, setLocale] = useLocale();
     const [isLoading, setIsLoading] = useState(false);
 
-    const imageBgSource = customer ? config('ui.accountScreen.signedInContainerBackgroundImage') : config('ui.accountScreen.signedOutContainerBackgroundImage');
-    const moreContainerStyle = customer ? config('ui.accountScreen.signedInContainerStyle') : config('ui.accountScreen.signedOutContainerStyle');
-    const moreHeaderContainerStyle = customer ? config('ui.accountScreen.signedInHeaderContainerStyle') : config('ui.accountScreen.signedOutHeaderContainerStyle');
     const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? true;
     const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
 
@@ -36,14 +34,49 @@ const AccountScreen = ({ navigation, route }) => {
         }
     };
 
+    const RenderBackground = (props) => {
+        if (customer) {
+            return (
+                <ImageBackground
+                    source={config('ui.accountScreen.signedInContainerBackgroundImage')}
+                    resizeMode={config('ui.accountScreen.signedInBackgroundResizeMode') ?? 'cover'}
+                    style={[config('ui.accountScreen.signedInContainerBackgroundImageStyle')]}
+                >
+                    {props.children}
+                </ImageBackground>
+            );
+        }
+
+        return (
+            <ImageBackground
+                source={config('ui.accountScreen.signedOutContainerBackgroundImage')}
+                resizeMode={config('ui.accountScreen.signedOutBackgroundResizeMode') ?? 'cover'}
+                style={[config('ui.accountScreen.signedOutContainerBackgroundImageStyle')]}
+            >
+                {props.children}
+            </ImageBackground>
+        );
+    };
+
     return (
-        <ImageBackground
-            source={imageBgSource}
-            resizeMode={config(customer ? 'ui.accountScreen.signedInBackgroundResizeMode' : 'ui.accountScreen.signedOutBackgroundResizeMode') ?? 'cover'}
-            style={[config(customer ? 'ui.accountScreen.signedInContainerBackgroundImageStyle' : 'ui.accountScreen.signedOutContainerBackgroundImageStyle')]}
-        >
-            {displayHeaderComponent === true && <RenderHeader style={[tailwind('bg-white bg-opacity-50'), config('ui.accountScreen.headerContainerStyle'), moreHeaderContainerStyle]} />}
-            <View style={[tailwind('bg-white'), config('ui.accountScreen.containerStyle'), moreContainerStyle, { height: containerHeight }]}>
+        <RenderBackground>
+            {displayHeaderComponent === true && (
+                <RenderHeader
+                    style={[
+                        tailwind('bg-white bg-opacity-50'),
+                        config('ui.accountScreen.headerContainerStyle'),
+                        customer ? config('ui.accountScreen.signedInHeaderContainerStyle') : config('ui.accountScreen.signedOutHeaderContainerStyle'),
+                    ]}
+                />
+            )}
+            <View
+                style={[
+                    tailwind('bg-white'),
+                    config('ui.accountScreen.containerStyle'),
+                    customer ? config('ui.accountScreen.signedInContainerStyle') : config('ui.accountScreen.signedOutContainerStyle'),
+                    { height: containerHeight },
+                ]}
+            >
                 {!customer && (
                     <View style={tailwind('w-full h-full relative')}>
                         <View style={tailwind('flex items-center justify-center w-full h-full relative')}>
@@ -90,7 +123,7 @@ const AccountScreen = ({ navigation, route }) => {
                         <View style={tailwind('p-4 mb-4 bg-white relative')}>
                             <View style={tailwind('flex flex-row')}>
                                 <View style={tailwind('mr-4')}>
-                                    <Image source={{ uri: customer.getAttribute('photo_url') }} style={tailwind('w-12 h-12 rounded-full')} />
+                                    <FastImage source={{ uri: customer.getAttribute('photo_url') }} style={tailwind('w-12 h-12 rounded-full')} />
                                 </View>
                                 <View>
                                     <Text style={tailwind('text-lg font-semibold')}>
@@ -160,7 +193,7 @@ const AccountScreen = ({ navigation, route }) => {
                     </View>
                 )}
             </View>
-        </ImageBackground>
+        </RenderBackground>
     );
 };
 

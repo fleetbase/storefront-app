@@ -15,7 +15,7 @@ const EditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const location = getLocation();
 
-    const [locale, useLocale] = useLocale();
+    const [locale, setLocale] = useLocale();
     const [customer, setCustomer] = useCustomer();
     const [name, setName] = useState(customer.getAttribute('name'));
     const [email, setEmail] = useState(customer.getAttribute('email'));

@@ -377,6 +377,40 @@ export default class HelperUtil {
 
         return numbers.reduce((sum, number) => sum + number, 0);
     }
+
+    /**
+     * Takes a tailwind color based classname property and returns it's rgb color value
+     *
+     * @static
+     * @param {String} string
+     * @return {String} 
+     * @memberof HelperUtil
+     */
+    static getColorCode(string) {
+        const styles = require('../../styles.json');
+        const property = styles[string] ?? null;
+
+        const rgba2rgb = (rgbaString) => {
+            const decimals = rgbaString.replace('rgba', 'rgb').split(',');
+            decimals.pop();
+
+            return decimals.join(',') + ')';
+        }
+
+        if (property) {
+            if (string.startsWith('bg-')) {
+                // get background color value
+                return rgba2rgb(property?.backgroundColor);
+            }
+
+            if (string.startsWith('text-')) {
+                // get text color value
+                return rgba2rgb(property?.color);
+            }
+        }
+
+        return null;
+    }
 }
 
 const listCountries = HelperUtil.listCountries;
@@ -396,5 +430,6 @@ const debounce = HelperUtil.debounce;
 const deepGet = HelperUtil.deepGet;
 const config = HelperUtil.config;
 const sum = HelperUtil.sum;
+const getColorCode = HelperUtil.getColorCode;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config, sum };
+export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config, sum, getColorCode };

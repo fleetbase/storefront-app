@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, TextInput, ActivityIndicator, Platform, KeyboardAvoidingView, Pressable, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useStorefront, useLocale } from 'hooks';
-import { logError, translate } from 'utils';
-import { updateCustomer } from 'utils/Customer';
+import { useStorefront, useLocale, useCustomer } from 'hooks';
+import { logError, translate, config } from 'utils';
 import { getLocation } from 'utils/Geo';
 import { set, get } from 'utils/Storage';
 import tailwind from 'tailwind';
@@ -21,6 +20,7 @@ const LoginScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [locale, setLocale] = useLocale();
+    const [customer, setCustomer] = useCustomer();
 
     const storefront = useStorefront();
     const location = getLocation();
@@ -58,17 +58,18 @@ const LoginScreen = ({ navigation, route }) => {
         storefront.customers
             .verifyCode(phone, code)
             .then((customer) => {
-                updateCustomer(customer);
+                setCustomer(customer);
                 syncDevice(customer);
                 setIsLoading(false);
 
                 if (redirectTo) {
-                    return navigation.navigate(redirectTo);
+                    navigation.navigate(redirectTo);
+                } else {
+                    navigation.goBack();
                 }
-
-                navigation.goBack();
             })
             .catch((error) => {
+                logError(error);
                 setError(error.message);
                 retry();
             });
@@ -81,67 +82,86 @@ const LoginScreen = ({ navigation, route }) => {
     };
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
-            <View style={tailwind('w-full h-full bg-white relative')}>
-                <View style={tailwind('flex flex-row items-center p-4')}>
+        <ImageBackground
+            source={config('ui.loginScreen.containerBackgroundImage')}
+            resizeMode={config('ui.loginScreen.containerBackgroundResizeMode') ?? 'cover'}
+            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}
+        >
+            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('flex flex-row items-center p-4'), config('ui.loginScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
-                        <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                            <FontAwesomeIcon icon={faTimes} />
+                        <View style={[tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center'), config('ui.loginScreen.headerIconContainerStyle')]}>
+                            <FontAwesomeIcon icon={faTimes} style={[config('ui.loginScreen.headerIconStyle')]} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={tailwind('text-xl font-semibold')}>{translate('Auth.LoginScreen.title')}</Text>
+                    <Text style={[tailwind('text-xl font-semibold'), config('ui.loginScreen.headerTextStyle')]}>{translate('Auth.LoginScreen.title')}</Text>
                 </View>
-                <View style={tailwind('px-4 py-6')}>
+                <Pressable onPress={Keyboard.dismiss} style={[tailwind('px-4 py-6'), config('ui.loginScreen.contentContainerStyle')]}>
                     {error && (
                         <View style={tailwind('mb-8')}>
                             <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
                         </View>
                     )}
                     {isNotAwaitingVerification && (
-                        <View>
+                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80} style={[config('ui.loginScreen.loginFormContainerStyle')]}>
                             <View style={tailwind('mb-6')}>
-                                <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
+                                <PhoneInput
+                                    value={phone}
+                                    onChangeText={setPhone}
+                                    defaultCountry={location?.country}
+                                    style={config('ui.loginScreen.phoneInputStyle')}
+                                    {...(config('ui.createAccountScreen.phoneInputProps') ?? {})}
+                                />
                             </View>
                             <TouchableOpacity style={tailwind('mb-3')} onPress={sendVerificationCode}>
-                                <View style={tailwind('btn border border-blue-50 bg-blue-50')}>
+                                <View style={[tailwind('btn border border-blue-50 bg-blue-50'), config('ui.loginScreen.sendVerificationCodeButtonStyle')]}>
                                     {isLoading && <ActivityIndicator color={'rgba(59, 130, 246, 1)'} style={tailwind('mr-2')} />}
-                                    <Text style={tailwind('font-semibold text-blue-900 text-lg text-center')}>{translate('Auth.LoginScreen.sendVerificationCodeButtonText')}</Text>
+                                    <Text style={[tailwind('font-semibold text-blue-900 text-lg text-center'), config('ui.loginScreen.sendVerificationCodeButtonTextStyle')]}>
+                                        {translate('Auth.LoginScreen.sendVerificationCodeButtonText')}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity disabled={isLoading} onPress={() => navigation.navigate('CreateAccount', { redirectTo })}>
-                                <View style={tailwind('btn border border-green-50 bg-green-50')}>
-                                    <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>{translate('Auth.LoginScreen.createAccountButtonText')}</Text>
+                                <View style={[tailwind('btn border border-green-50 bg-green-50'), config('ui.loginScreen.createAccountButtonStyle')]}>
+                                    <Text style={[tailwind('font-semibold text-green-900 text-lg text-center'), config('ui.loginScreen.createAccountButtonTextStyle')]}>
+                                        {translate('Auth.LoginScreen.createAccountButtonText')}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
-                        </View>
+                        </KeyboardAvoidingView>
                     )}
                     {isAwaitingVerification && (
-                        <View>
+                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={140} style={[config('ui.loginScreen.verifyFormContainerStyle')]}>
                             <View style={tailwind('mb-6')}>
                                 <TextInput
                                     onChangeText={setCode}
                                     keyboardType={'phone-pad'}
                                     placeholder={translate('Auth.LoginScreen.codeInputPlaceholder')}
                                     placeholderTextColor={'rgba(156, 163, 175, 1)'}
-                                    style={tailwind('form-input text-center mb-2')}
+                                    style={[tailwind('form-input text-center mb-2'), config('ui.loginScreen.verifyCodeInputStyle')]}
+                                    {...(config('ui.loginScreen.verifyCodeInputProps') ?? {})}
                                 />
                                 <View style={tailwind('flex flex-row justify-end')}>
-                                    <TouchableOpacity onPress={retry}>
-                                        <Text style={tailwind('text-blue-900 font-semibold')}>{translate('Auth.LoginScreen.retryButtonText')}</Text>
+                                    <TouchableOpacity style={config('ui.loginScreen.retryButtonStyle')} onPress={retry}>
+                                        <Text style={[tailwind('text-blue-900 font-semibold'), config('ui.loginScreen.retryButtonTextStyle')]}>
+                                            {translate('Auth.LoginScreen.retryButtonText')}
+                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
                             <TouchableOpacity onPress={verifyCode}>
-                                <View style={tailwind('btn border border-green-50 bg-green-50')}>
+                                <View style={[tailwind('btn border border-green-50 bg-green-50'), config('ui.loginScreen.verifyCodeButtonStyle')]}>
                                     {isLoading && <ActivityIndicator color={'rgba(16, 185, 129, 1)'} style={tailwind('mr-2')} />}
-                                    <Text style={tailwind('font-semibold text-green-900 text-lg text-center')}>{translate('Auth.LoginScreen.verifyCodeButtonText')}</Text>
+                                    <Text style={[tailwind('font-semibold text-green-900 text-lg text-center'), config('ui.loginScreen.verifyCodeButtonTextStyle')]}>
+                                        {translate('Auth.LoginScreen.verifyCodeButtonText')}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
-                        </View>
+                        </KeyboardAvoidingView>
                     )}
-                </View>
+                </Pressable>
             </View>
-        </View>
+        </ImageBackground>
     );
 };
 

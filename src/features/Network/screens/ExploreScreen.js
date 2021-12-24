@@ -5,9 +5,8 @@ import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { config } from 'utils';
+import { config, translate } from 'utils';
 import { useMountedState, useLocale } from 'hooks';
-import { translate, setLanguage, getLanguage } from 'utils/Localize';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
@@ -91,10 +90,10 @@ const ExploreScreen = ({ navigation, route }) => {
                                     </View>
                                     <View style={tailwind('pr-2 w-3/4')}>
                                         <Text style={tailwind('font-semibold text-base')} numberOfLines={1}>
-                                            {store.getAttribute('name')}
+                                            {translate(store, 'name')}
                                         </Text>
                                         <Text style={tailwind('text-sm text-gray-500')} numberOfLines={1}>
-                                            {store.getAttribute('description') ?? 'No description'}
+                                            {translate(store, 'description') ?? 'No description'}
                                         </Text>
                                         {isReviewsEnabled && (
                                             <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>

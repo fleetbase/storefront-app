@@ -8,6 +8,7 @@ import { Collection } from '@fleetbase/sdk';
 import { Network, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useResourceCollection } from 'utils/Storage';
+import { config } from 'utils';
 import LocationPicker from '../LocationPicker';
 import LangPicker from '../LangPicker';
 import StorePicker from '../StorePicker';
@@ -32,8 +33,8 @@ const NetworkHeader = (props) => {
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, categories ?? new Collection());
 
     return (
-        <View style={[tailwind('z-50'), { paddingTop: insets.top }, props.style]}>
-            <View style={[tailwind('border-b border-gray-100'), props.wrapperStyle]}>
+        <ImageBackground source={config('ui.headerComponent.backgroundImage')} resizeMode={config('ui.headerComponent.backgroundImageResizeMode')} style={[tailwind('z-50'), { paddingTop: insets.top }, props.style, config('ui.headerComponent.backgroundImageStyle')]}>
+            <View style={[tailwind('border-b border-gray-100'), props.wrapperStyle, config('ui.headerComponent.containerStyle')]}>
                 <View style={[tailwind('flex flex-row items-center justify-between px-4 py-1 overflow-hidden'), props.innerStyle]}>
                     <View style={tailwind('flex flex-row items-center')}>
                         {onBack && (
@@ -43,28 +44,28 @@ const NetworkHeader = (props) => {
                                 </View>
                             </TouchableOpacity>
                         )}
-                        <Text style={[tailwind('font-bold text-lg'), props.logoStyle ?? {}]}>{props.info.name}</Text>
+                        {config('ui.headerComponent.displayLogoText') === true && <Text style={[tailwind('font-bold text-lg'), props.logoStyle ?? {}]}>{props.info.name}</Text>}
                     </View>
                     <View style={tailwind('flex flex-row')}>
-                        <LangPicker wrapperStyle={tailwind('mr-2')} />
-                        <LocationPicker />
+                        {config('ui.headerComponent.displayLocalePicker') === true && <LangPicker wrapperStyle={tailwind('mr-2')} buttonStyle={[config('ui.headerComponent.localePickerStyle')]} />}
+                        {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
                     </View>
                 </View>
 
                 {!hideSearch && (
                     <View style={tailwind('px-4 py-2 flex flex-row items-center')}>
                         <View style={tailwind('flex-1')}>
-                            <NetworkSearch network={network} buttonTitle={searchPlaceholder} onResultPress={onSearchResultPress} />
+                            <NetworkSearch network={network} buttonTitle={searchPlaceholder} onResultPress={onSearchResultPress} buttonStyle={[config('ui.headerComponent.searchButtonStyle')]} buttonIconStyle={[config('ui.headerComponent.searchButtonIconStyle')]} />
                         </View>
                         {!hideCategoryPicker && (
                             <View style={tailwind('ml-3')}>
-                                <StoreCategoryPicker categories={networkCategories} hideButtonTitle={true} onCategoryPress={onCategoryPress} buttonStyle={tailwind('h-10')} />
+                                <StoreCategoryPicker categories={networkCategories} hideButtonTitle={true} onCategoryPress={onCategoryPress} buttonStyle={[tailwind('h-10'), config('ui.headerComponent.categoryButtonStyle')]} />
                             </View>
                         )}
                     </View>
                 )}
             </View>
-        </View>
+        </ImageBackground>
     );
 };
 
