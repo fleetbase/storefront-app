@@ -63,7 +63,7 @@ const AccountScreen = ({ navigation, route }) => {
             {displayHeaderComponent === true && (
                 <RenderHeader
                     style={[
-                        tailwind('bg-white bg-opacity-50'),
+                        tailwind('bg-white'),
                         config('ui.accountScreen.headerContainerStyle'),
                         customer ? config('ui.accountScreen.signedInHeaderContainerStyle') : config('ui.accountScreen.signedOutHeaderContainerStyle'),
                     ]}
