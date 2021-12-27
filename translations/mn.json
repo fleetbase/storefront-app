@@ -4,22 +4,22 @@
             "title": "Бүртгэл үүсгэх эсвэл нэвтрэх",
             "loginButtonText": "Нэвтрэх",
             "createAccountButtonText": "Бүртгүүлэх ",
-            "userGreetingTitle": "Сайн байн уу, {{customerName}}",
+            "userGreetingTitle": "Сайн байнa уу, {{customerName}}",
             "accountMenuTitle": "Миний Данс",
-            "profileLinkText": "Профиль",
+            "profileLinkText": "Өөрийн мэдээлэл",
             "ordersLinkText": "Захиалга",
             "placesLinkText": "Газарууд",
-            "signoutButtonText": "Буртгэлээс Гарах"
+            "signoutButtonText": "Бүртгэлээс гарах"
         },
         "ChangePasswordScreen": {
             "title": " Нууц үг Солих"
         },
         "EditProfileScreen": {
-            "title": "Таны Профиль",
-            "nameLabelText": "Таны Нэр",
-            "emailLabelText": "Таны Э-мэйл Хаяг",
-            "phoneLabelText": "Таны Утасны Дугаар",
-            "saveButtonText": "Профиль Хадгалах"
+            "title": "Таны мэдээлэл ",
+            "nameLabelText": "Таны нэр",
+            "emailLabelText": "Таны И-мэйл хаяг",
+            "phoneLabelText": "Таны утасны дугаар",
+            "saveButtonText": "Мэдээлэл хадгалах"
         },
         "OrderHistoryScreen": {
             "title": "Таны Захиалга",
@@ -39,13 +39,13 @@
         "CreateAccountScreen": {
             "title": " Бүртгэл үүсгэх",
             "greetingTitle": "Сайн байна уу, тавтай морил {{infoName}}.",
-            "greetingSubtitle": "Доорх хэсэгт нэр болон утсаара буртгэл уусэгнүү",
+            "greetingSubtitle": "Доорх хэсэгт нэр болон утасны дугаараар бүртгэл үүсгэнэ үү ",
             "sendVerificationCodeButtonText": " Баталгаажуулах код илгээнэ үү",
             "awaitingVerificationTitle": " Баярлалаа, {{name}}!",
             "awaitingVerificationSubtitle": " Одоо та утсандаа SMS-ээр код хүлээн авсан байх ёстой бөгөөд бүртгэлээ үүсгэхийн тулд кодыг баталгаажуулна уу!",
             "retryButtonText": "Дахин оролдоно уу?",
             "verifyCodeButtonText": " Баталгаажуулах код",
-            "codeInputPlaceholder": "Баталгаажуулалтүн кодоо оруулна уу ! ",
+            "codeInputPlaceholder": "Баталгаажуулалтын кодоо оруулна уу ! ",
             "nameInputPlaceholder": "Нэр "
         },
         "LoginScreen": {
@@ -54,7 +54,7 @@
             "createAccountButtonText": "Эсвэл Бүртгэл үүсгэх",
             "retryButtonText": "Дахин оролдох уу?",
             "verifyCodeButtonText": "Баталгаажуулах код",
-            "codeInputPlaceholder": "Баталгаажуулалтүн кодоо оруулна уу ! "
+            "codeInputPlaceholder": "Баталгаажуулалтын кодоо оруулна уу ! "
         }
     },
     "Browser": {
@@ -102,7 +102,7 @@
                 "deliveryFeeLabelText": "Хүргэлтийн хураамж",
                 "tipLabelText": "Тип",
                 "deliveryTipLabelText": "Хүргэлтийн Тип",
-                "cartSubtotalLabelText": "Дунд нийлбэр",
+                "cartSubtotalLabelText": "Нийлбэр",
                 "cartTotalLabelText": "Нийт"
             },
             "CartHeader": {
@@ -320,7 +320,9 @@
             "LangPicker": {
                 "title": "Хэл сонгох "
             },
-            "NetworkCategoryBlock": {},
+            "NetworkCategoryBlock": {
+                "categories": "Ангилал"
+            },
             "NetworkSearch": {
                 "searching": "Хайж байна...",
                 "noDescription": "Тодорхойлолт байхгүй"
@@ -349,7 +351,8 @@
     "terms": {
         "edit": "Өөрчлөх ",
         "delete": "Устгах ",
-        "loading": "Ачаалаж байна "
+        "loading": "Ачаалаж байна ",
+        "more": "Үргэлжлэл "
     },
     "status": {
         "created": "Захиалга бүртгэгдсэн ",

@@ -7,8 +7,6 @@ import { configure } from './defaults';
  *
  * @type {object} 
  */
-const AppConfig = configure('AppConfig', {
-    enabledTranslations: ['en', 'mn']
-});
+const AppConfig = configure('AppConfig', {});
 
 export default AppConfig;

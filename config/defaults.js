@@ -13,7 +13,7 @@ const DefaultConfig = {
     AppConfig: {
         linkingPrefixes: [],
         enableTranslations: false,
-        enabledTranslations: []
+        enabledTranslations: [],
     },
 
     InterfaceConfig: {
@@ -28,6 +28,9 @@ const DefaultConfig = {
                 defaultCategoryComponentProps: {
                     containerStyle: {},
                 },
+            },
+            storeScreen: {
+                networkHeaderProps: {},
             },
         },
 
@@ -125,8 +128,8 @@ const DefaultConfig = {
             signedInContainerBackgroundImageStyle: {},
             signedOutContainerBackgroundImageStyle: {},
             signedInBackgroundResizeMode: 'cover',
-            signedOutBackgroundResizeMode: 'cover'
-        }
+            signedOutBackgroundResizeMode: 'cover',
+        },
     },
 };
 

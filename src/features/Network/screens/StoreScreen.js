@@ -10,7 +10,7 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import { useMountedState, useLocale } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { formatCurrency, logError, translate } from 'utils';
+import { formatCurrency, logError, translate, config } from 'utils';
 import FastImage from 'react-native-fast-image';
 import Share from 'react-native-share';
 import ActionSheet from 'react-native-actions-sheet';
@@ -361,6 +361,7 @@ const StoreScreen = ({ navigation, route }) => {
                     info={info}
                     onBack={() => navigation.goBack()}
                     hideSearch={true}
+                    {...config('ui.network.storeScreen.networkHeaderProps')}
                 />
                 <ScrollView
                     showsHorizontalScrollIndicator={false}

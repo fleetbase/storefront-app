@@ -97,13 +97,13 @@ const LoginScreen = ({ navigation, route }) => {
                     <Text style={[tailwind('text-xl font-semibold'), config('ui.loginScreen.headerTextStyle')]}>{translate('Auth.LoginScreen.title')}</Text>
                 </View>
                 <Pressable onPress={Keyboard.dismiss} style={[tailwind('px-4 py-6'), config('ui.loginScreen.contentContainerStyle')]}>
-                    {error && (
-                        <View style={tailwind('mb-8')}>
-                            <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
-                        </View>
-                    )}
                     {isNotAwaitingVerification && (
                         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80} style={[config('ui.loginScreen.loginFormContainerStyle')]}>
+                            {error && (
+                                <View style={tailwind('mb-8')}>
+                                    <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
+                                </View>
+                            )}
                             <View style={tailwind('mb-6')}>
                                 <PhoneInput
                                     value={phone}
@@ -131,7 +131,16 @@ const LoginScreen = ({ navigation, route }) => {
                         </KeyboardAvoidingView>
                     )}
                     {isAwaitingVerification && (
-                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={140} style={[config('ui.loginScreen.verifyFormContainerStyle')]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            keyboardVerticalOffset={140}
+                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}
+                        >
+                            {error && (
+                                <View style={tailwind('mb-8')}>
+                                    <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
+                                </View>
+                            )}
                             <View style={tailwind('mb-6')}>
                                 <TextInput
                                     onChangeText={setCode}

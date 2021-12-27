@@ -320,7 +320,9 @@
             "LangPicker": {
                 "title": "Select language"
             },
-            "NetworkCategoryBlock": {},
+            "NetworkCategoryBlock": {
+                "categories": "Categories"
+            },
             "NetworkSearch": {
                 "searching": "Searching...",
                 "noDescription": "No description"
@@ -349,7 +351,8 @@
     "terms": {
         "edit": "Edit",
         "delete": "Delete",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "more": "More"
     },
     "status": {
         "created": "Created",
