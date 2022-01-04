@@ -132,7 +132,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.storefrontapp"
+        applicationId project.env.get("APP_IDENTIFIER")
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
