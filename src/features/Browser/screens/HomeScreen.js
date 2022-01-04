@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import { useStorefront, useLocale } from 'hooks';
-import { translations } from 'utils';
+import { translate } from 'utils';
 import CategoryProductSlider from 'ui/CategoryProductSlider';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
 import tailwind from 'tailwind';
@@ -31,7 +31,7 @@ const HomeScreen = ({ navigation, route }) => {
                             return (
                                 <TouchableOpacity key={category.id} onPress={() => navigation.navigate('CategoryScreen', { attributes: category.serialize() })}>
                                     <View style={tailwind('rounded-full px-4 py-2 bg-gray-200 ml-4 mb-3')}>
-                                        <Text>{category.getAttribute('name')}</Text>
+                                        <Text>{translate(category, 'name')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             );
