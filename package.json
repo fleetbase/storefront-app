@@ -9,7 +9,8 @@
     "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
     "test": "jest",
     "lint": "eslint .",
-    "generate-app-icon": "npx app-icon generate -i ./assets/app-icon.png"
+    "generate-app-icon": "npx app-icon generate -i ./assets/app-icon.png",
+    "generate-launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background-color=FFFFFF --logo-width=100 --flavor=main"
   },
   "dependencies": {
     "@fleetbase/storefront": "1.1.1",
@@ -35,6 +36,7 @@
     "react-native": "0.64.2",
     "react-native-actions-sheet": "^0.5.4",
     "react-native-animated-radio-button": "^2.0.6",
+    "react-native-bootsplash": "^4.0.2",
     "react-native-bouncy-checkbox": "^2.1.2",
     "react-native-config": "^1.4.2",
     "react-native-device-info": "^8.1.3",
