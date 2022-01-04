@@ -8,7 +8,8 @@
     "start": "react-native start",
     "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "generate-app-icon": "npx app-icon generate -i ./assets/app-icon.png"
   },
   "dependencies": {
     "@fleetbase/storefront": "1.1.1",
