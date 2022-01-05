@@ -6,14 +6,15 @@ import { useStorefront } from 'hooks';
 import { set } from 'utils/Storage';
 import { setI18nConfig } from 'utils/Localize';
 import { tailwind } from 'tailwind';
+import RNBootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from 'exceptions/SetupWarningScreen';
 import config from 'config';
 
 const { STRIPE_KEY, APP_IDENTIFIER } = config;
 
 /**
- * BootScreen is a simple initialization screen, will load 
- * the store or network information and navigate to the correct 
+ * BootScreen is a simple initialization screen, will load
+ * the store or network information and navigate to the correct
  * screens.
  *
  * @component
@@ -35,7 +36,7 @@ const BootScreen = ({ navigation }) => {
     // Initialize i18n
     setI18nConfig();
 
-    // Fetch the about() information 
+    // Fetch the about() information
     storefront
         .about()
         .then((info) => {
@@ -54,6 +55,11 @@ const BootScreen = ({ navigation }) => {
         })
         .catch((error) => {
             logError(error, '[  Error fetching storefront info!  ]');
+        })
+        .finally(() => {
+            setTimeout(() => {
+                RNBootSplash.hide();
+            }, 300);
         });
 
     useEffect(() => {

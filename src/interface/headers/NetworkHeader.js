@@ -31,7 +31,7 @@ const NetworkHeader = (props) => {
         backgroundImage,
         backgroundImageResizeMode,
         backgroundImageStyle,
-        displayLogoText
+        displayLogoText,
     } = props;
 
     searchPlaceholder = searchPlaceholder ?? translate('components.interface.headers.NetworkHeader.search');
@@ -69,7 +69,7 @@ const NetworkHeader = (props) => {
                         {shouldDisplayLogoText && <Text style={[tailwind('font-bold text-lg'), props.logoStyle ?? {}]}>{props.info.name}</Text>}
                     </View>
                     <View style={tailwind('flex flex-row')}>
-                        {config('ui.headerComponent.displayLocalePicker') === true && (
+                        {config('ui.headerComponent.displayLocalePicker') === true && config('app.enableTranslations') === true && (
                             <LangPicker wrapperStyle={tailwind('mr-2')} buttonStyle={[config('ui.headerComponent.localePickerStyle')]} />
                         )}
                         {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}

@@ -190,6 +190,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     // implementation "com.google.firebase:firebase-iid"
 
+    implementation "androidx.core:core-splashscreen:1.0.0-alpha02" 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     // implementation 'com.google.firebase:firebase-analytics:17.3.0'
