@@ -43,11 +43,11 @@ PODS:
   - MMKV (1.2.10):
     - MMKVCore (~> 1.2.10)
   - MMKVCore (1.2.10)
-  - Permission-Contacts (3.0.5):
+  - Permission-Contacts (3.2.0):
     - RNPermissions
-  - Permission-LocationWhenInUse (3.0.5):
+  - Permission-LocationWhenInUse (3.2.0):
     - RNPermissions
-  - Permission-Notifications (3.0.5):
+  - Permission-Notifications (3.2.0):
     - RNPermissions
   - RCT-Folly (2020.01.13.00):
     - boost-for-react-native
@@ -245,23 +245,23 @@ PODS:
     - React-jsi (= 0.64.2)
     - React-perflogger (= 0.64.2)
   - React-jsinspector (0.64.2)
-  - react-native-config (1.4.4):
-    - react-native-config/App (= 1.4.4)
-  - react-native-config/App (1.4.4):
+  - react-native-config (1.4.5):
+    - react-native-config/App (= 1.4.5)
+  - react-native-config/App (1.4.5):
     - React-Core
-  - react-native-geolocation-service (5.3.0-beta.3):
+  - react-native-geolocation-service (5.3.0-beta.4):
     - React
   - react-native-google-maps (0.28.0):
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.5.0)
     - React-Core
-  - react-native-image-picker (4.4.0):
+  - react-native-image-picker (4.7.0):
     - React-Core
   - react-native-image-resizer (1.4.5):
     - React-Core
   - react-native-maps (0.28.0):
     - React-Core
-  - react-native-mmkv-storage (0.6.4):
+  - react-native-mmkv-storage (0.6.7):
     - MMKV (= 1.2.10)
     - React-Core
   - react-native-safe-area-context (3.3.2):
@@ -332,7 +332,7 @@ PODS:
     - React-perflogger (= 0.64.2)
   - RNBootSplash (4.0.2):
     - React-Core
-  - RNCAsyncStorage (1.15.8):
+  - RNCAsyncStorage (1.15.14):
     - React-Core
   - RNCMaskedView (0.1.11):
     - React
@@ -342,7 +342,7 @@ PODS:
     - React-Core
   - RNDateTimePicker (4.0.1):
     - React-Core
-  - RNDeviceInfo (8.3.3):
+  - RNDeviceInfo (8.4.8):
     - React-Core
   - RNFastImage (8.5.11):
     - React-Core
@@ -352,11 +352,11 @@ PODS:
     - React
   - RNGestureHandler (1.10.3):
     - React-Core
-  - RNLocalize (2.1.5):
+  - RNLocalize (2.1.7):
     - React-Core
-  - RNPermissions (3.0.5):
+  - RNPermissions (3.2.0):
     - React-Core
-  - RNReanimated (2.2.2):
+  - RNReanimated (2.3.1):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -382,10 +382,9 @@ PODS:
     - React-RCTNetwork
     - React-RCTSettings
     - React-RCTText
-    - React-RCTVibration
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.8.0):
+  - RNScreens (3.10.1):
     - React-Core
     - React-RCTImage
   - RNShare (7.3.2):
@@ -605,16 +604,16 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
-  FBReactNativeSpec: b1fc60e236fb5b9b1144002d0eba44fb48bf6b16
+  FBReactNativeSpec: db9ca7226a6272498fb750bfb6ca87dfaacd4a9d
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 32ca02de09de357a10ac773f2c70f1986751392d
   libwebp: 98a37e597e40bfdb4c911fc98f2c53d0b12d05fc
   MMKV: 76033b9ace2006623308910a3afcc0e25eba3140
   MMKVCore: b00e7a09ec77a1b916aef336eedd3b99ec249978
-  Permission-Contacts: 4bd4bdbbcec21ce0175e02cc4925070a773204cf
-  Permission-LocationWhenInUse: e1168a583654f1d2d34d3a18c4c6518ce409ad2a
-  Permission-Notifications: 16ccd862111103378a7bab9fb1c5c71addffc348
+  Permission-Contacts: 3919ddcaa62d6dc4320d41a27883b6f734a76fa4
+  Permission-LocationWhenInUse: 13de9a01e006cb53a6ac3c9f8d1ab6cc98318d9c
+  Permission-Notifications: bb420c3d28328df24de1b476b41ed8249ccf2537
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
   RCTRequired: 6d3e854f0e7260a648badd0d44fc364bc9da9728
   RCTTypeSafety: c1f31d19349c6b53085766359caac425926fafaa
@@ -627,13 +626,13 @@ SPEC CHECKSUMS:
   React-jsi: 67747b9722f6dab2ffe15b011bcf6b3f2c3f1427
   React-jsiexecutor: 80c46bd381fd06e418e0d4f53672dc1d1945c4c3
   React-jsinspector: cc614ec18a9ca96fd275100c16d74d62ee11f0ae
-  react-native-config: 72d948053a442779b3178fddd571e37f118ef606
-  react-native-geolocation-service: 32e50a2e4e4518b51b829fdfe137562a672d95d2
+  react-native-config: 6502b1879f97ed5ac570a029961fc35ea606cd14
+  react-native-geolocation-service: c0efb872258ed9240f1003a70fca9e9757e5c785
   react-native-google-maps: 46dea4aa4acb7300beff508f64d9f8c84e9fb106
-  react-native-image-picker: 14910ea6b6a38bd45d1a69cb643b157e6ac142cb
+  react-native-image-picker: 4b090b73077c3a71b91fddc739a594feebd00184
   react-native-image-resizer: d9fb629a867335bdc13230ac2a58702bb8c8828f
   react-native-maps: 2d405b4e8cee0282e4c02bac434d81450dfea877
-  react-native-mmkv-storage: ef0108761e775232be39fda2f41fef040406d858
+  react-native-mmkv-storage: 3f853bdd4f2a0ea905b80280bc1edaee539fb3b7
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
   React-RCTActionSheet: af7796ba49ffe4ca92e7277a5d992d37203f7da5
@@ -648,19 +647,19 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: a9904c6d0218fb9f8b19d6dd88607225927668f9
   ReactCommon: 149906e01aa51142707a10665185db879898e966
   RNBootSplash: 5e82ba24a59a07315cbb2bb4855bb8d76fc7e802
-  RNCAsyncStorage: e8b8d6320a0dd90eb610fb0d0b1ef90596697c69
+  RNCAsyncStorage: ea6b5c280997b2b32a587793163b1f10e580c4f7
   RNCMaskedView: 0e1bc4bfa8365eba5fbbb71e07fbdc0555249489
   RNCPicker: 0991c56da7815c0cf946d6f63cf920b25296e5f6
   RNCPushNotificationIOS: 87b8d16d3ede4532745e05b03c42cff33a36cc45
   RNDateTimePicker: a654a0ebfa3dd78bbe5389421aa2d3d5b2744e47
-  RNDeviceInfo: cc7de0772378f85d8f36ae439df20f05c590a651
+  RNDeviceInfo: 0400a6d0c94186d1120c3cbd97b23abc022187a9
   RNFastImage: 1f2cab428712a4baaf78d6169eaec7f622556dd7
   RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
-  RNLocalize: 74b82db20cc3895ccc25af992c644879bcec2815
-  RNPermissions: 7043bacbf928eae25808275cfe73799b8f618911
-  RNReanimated: 241c586663f44f19a53883c63375fdd041253960
-  RNScreens: 6e1ea5787989f92b0671049b808aef64fa1ef98c
+  RNLocalize: f567ea0e35116a641cdffe6683b0d212d568f32a
+  RNPermissions: f7ebe52db07c00901127966ca080b4ec6a6ceb0a
+  RNReanimated: 7f143675d94978c3555345d5bfa8ed6ae800c5d3
+  RNScreens: 522705f2e5c9d27efb17f24aceb2bf8335bc7b8e
   RNShare: d76b8c9c6e6ffb38fc18f40b4338c9d867592ed3
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
