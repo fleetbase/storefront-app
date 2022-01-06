@@ -96,8 +96,6 @@ export default class LocalizeUtil {
         i18n.fallbacks = true;
         i18n.missingBehaviour = 'guess';
         i18n.translations = { [locale]: translations[locale] };
-        console.log(' [i18n.translations.mn.Places.SearchPlacesScreen] ', i18n.translations.mn?.Places?.SearchPlacesScreen);
-        // console.log(' [i18n.translations.mn.components] ', i18n.translations.mn?.components);
         i18n.locale = locale;
 
         // broadcast
