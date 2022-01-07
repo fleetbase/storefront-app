@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { logError, debounce, stripHtml, translate } from 'utils';
-import { useStorefront, useLocale } from 'hooks';
+import { NetworkInfoService } from 'services';
+import { useStorefront, useLocale, useMountedState, useStorage } from 'hooks';
 import ProductPriceView from './ProductPriceView';
 import tailwind from 'tailwind';
 
@@ -17,8 +18,10 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
 
     const insets = useSafeAreaInsets();
     const storefront = useStorefront();
+    const isMounted = useMountedState();
 
     const [locale] = useLocale();
+    const [tags, setTags] = useStorage('network_tags', []);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState([]);
@@ -47,6 +50,11 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
     const debouncedSearch = debounce((query, cb) => {
         fetchResultsFromStore(query, cb);
     }, 600);
+
+    useEffect(() => {
+        // Load tags from network
+        NetworkInfoService.getTags().then(setTags).catch(logError);
+    }, [isMounted]);
 
     useEffect(() => {
         if (!query) {
@@ -106,6 +114,13 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
                         </View>
                     )}
                     <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+                        {tags.length > 0 && <View style={tailwind('flex flex-row flex-wrap px-4')}>
+                            {tags.map((tag, index) => (
+                                <TouchableOpacity onPress={() => setQuery(tag)} key={index} style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
+                                    <Text style={tailwind('text-xs text-gray-700')}>{tag}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>}
                         {results.map((product, index) => (
                             <TouchableOpacity key={index} onPress={() => handleResultPress(product)}>
                                 <View style={tailwind('px-5 py-4 border-b border-gray-100')}>

@@ -8,7 +8,7 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
 import { config, translate, getCurrentLocation } from 'utils';
-import { useMountedState, useLocale } from 'hooks';
+import { useMountedState, useLocale, useStorage } from 'hooks';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
@@ -31,7 +31,8 @@ const ExploreScreen = ({ navigation, route }) => {
     const [userLocation, setUserLocation] = useState(null);
     const [locationsQuery, setLocationsQuery] = useState(null);
     const [params, setParams] = useState({});
-    const [filters, setFilters] = useState([]);
+    // const [filters, setFilters] = useState([]);
+    const [filters, setFilters] = useStorage('network_tags', []);
     const [tagged, setTagged] = useState([]);
     const [locale, setLocale] = useLocale();
 
