@@ -61,7 +61,7 @@ const ExploreScreen = ({ navigation, route }) => {
         }
 
         // close map view if applicable
-        setIsMapView(false);
+        // setIsMapView(false);
 
         const data = typeof store?.serialize === 'function' ? store.serialize() : store;
 
