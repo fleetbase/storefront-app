@@ -168,7 +168,9 @@
         }
     },
     "Network": {
-        "ExploreScreen": {},
+        "ExploreScreen": {
+            "searchPlaces": "Search places"
+        },
         "NetworkCategoryScreen": {},
         "StoreScreen": {
             "loadingText": "Loading...",
@@ -345,14 +347,28 @@
                 "inputPlaceholderText": "Search {{storeName}}"
             },
             "TipInput": {},
-            "TipView": {}
+            "TipView": {},
+            "ExploreBar": {
+                "clearAllFilters": "Clear all filters",
+                "map": "Map",
+                "nearestFirst": "Nearest first",
+                "highestRated": "Highest rated",
+                "lowestRated": "Lowest rated",
+                "newestFirst": "Newest first",
+                "oldestFirst": "Oldest first",
+                "mostPopular": "Most popular",
+                "trending": "Trending"
+            }
         }
     },
     "terms": {
         "edit": "Edit",
         "delete": "Delete",
         "loading": "Loading...",
-        "more": "More"
+        "more": "More",
+        "sort": "Sort",
+        "filter": "Filter",
+        "search": "Search"
     },
     "status": {
         "created": "Created",

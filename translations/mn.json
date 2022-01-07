@@ -168,7 +168,9 @@
         }
     },
     "Network": {
-        "ExploreScreen": {},
+        "ExploreScreen": {
+            "searchPlaces": "Газрууд хайх"
+        },
         "NetworkCategoryScreen": {},
         "StoreScreen": {
             "loadingText": "Уншиж байна...",
@@ -345,14 +347,28 @@
                 "inputPlaceholderText": "Хайх {{storeName}}"
             },
             "TipInput": {},
-            "TipView": {}
+            "TipView": {},
+            "ExploreBar": {
+                "clearAllFilters": "Шүүлтүүрийг арилгах",
+                "map": "Газрын зураг",
+                "nearestFirst": "Хамгийн ойр нь",
+                "highestRated": "Өндөр үнэлгээтэй",
+                "lowestRated": "Бага үнэлгээтэй",
+                "newestFirst": "Шинэ нь",
+                "oldestFirst": "Хуучин нь",
+                "mostPopular": "Хамгийн алдартай нь",
+                "trending": "Тренд болж байгаа"
+            }
         }
     },
     "terms": {
         "edit": "Өөрчлөх ",
         "delete": "Устгах ",
         "loading": "Ачаалаж байна ",
-        "more": "Үргэлжлэл "
+        "more": "Үргэлжлэл ",
+        "sort": "Эрэмблэх",
+        "filter": "Ялгах",
+        "search": "Хайх"
     },
     "status": {
         "created": "Захиалга бүртгэгдсэн ",

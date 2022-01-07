@@ -23,6 +23,7 @@ const NetworkHeader = (props) => {
         onBack,
         backButtonIcon,
         hideSearch,
+        hideSearchBar,
         hideCategoryPicker,
         categories,
         searchPlaceholder,
@@ -32,6 +33,7 @@ const NetworkHeader = (props) => {
         backgroundImageResizeMode,
         backgroundImageStyle,
         displayLogoText,
+        children,
     } = props;
 
     searchPlaceholder = searchPlaceholder ?? translate('components.interface.headers.NetworkHeader.search');
@@ -76,17 +78,19 @@ const NetworkHeader = (props) => {
                     </View>
                 </View>
 
-                {!hideSearch && (
+                {!hideSearchBar && (
                     <View style={tailwind('px-4 py-2 flex flex-row items-center')}>
-                        <View style={tailwind('flex-1')}>
-                            <NetworkSearch
-                                network={network}
-                                buttonTitle={searchPlaceholder}
-                                onResultPress={onSearchResultPress}
-                                buttonStyle={[config('ui.headerComponent.searchButtonStyle')]}
-                                buttonIconStyle={[config('ui.headerComponent.searchButtonIconStyle')]}
-                            />
-                        </View>
+                        {!hideSearch && (
+                            <View style={tailwind('flex-1')}>
+                                <NetworkSearch
+                                    network={network}
+                                    buttonTitle={searchPlaceholder}
+                                    onResultPress={onSearchResultPress}
+                                    buttonStyle={[config('ui.headerComponent.searchButtonStyle')]}
+                                    buttonIconStyle={[config('ui.headerComponent.searchButtonIconStyle')]}
+                                />
+                            </View>
+                        )}
                         {!hideCategoryPicker && (
                             <View style={tailwind('ml-3')}>
                                 <StoreCategoryPicker
@@ -98,6 +102,7 @@ const NetworkHeader = (props) => {
                                 />
                             </View>
                         )}
+                        {children}
                     </View>
                 )}
             </View>

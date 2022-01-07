@@ -9,6 +9,7 @@ import PhoneInput from './PhoneInput';
 import StoreSearch from './StoreSearch';
 import ProductPriceView from './ProductPriceView';
 import LangPicker from './LangPicker';
+import ExploreBar from './ExploreBar';
 
 export {
     TipInput,
@@ -22,4 +23,5 @@ export {
     StoreSearch,
     ProductPriceView,
     LangPicker,
+    ExploreBar
 }

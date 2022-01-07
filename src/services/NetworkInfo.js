@@ -35,4 +35,29 @@ export default class NetworkInfoService {
 
         return network.getStores(params);
     }
+
+    /**
+     * Fetches the all store locations in the network
+     * @static
+     * @return {Promise}
+     * @memberof NetworkInfoService
+     */
+    static getStoreLocations(params = {}) {
+        const network = NetworkInfoService.instance();
+
+        return network.getStoreLocations(params);
+    }
+
+    /**
+     * Fetches the current networks tags
+     *
+     * @static
+     * @return {Promise}
+     * @memberof NetworkInfoService
+     */
+    static getTags(params = {}) {
+        const network = NetworkInfoService.instance();
+
+        return network.getTags(params);
+    }
 }

@@ -10,7 +10,7 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import { useMountedState, useLocale } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { formatCurrency, logError, translate, config } from 'utils';
+import { formatCurrency, logError, translate, config, isResource } from 'utils';
 import FastImage from 'react-native-fast-image';
 import Share from 'react-native-share';
 import ActionSheet from 'react-native-actions-sheet';
@@ -27,7 +27,7 @@ const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
 const StoreScreen = ({ navigation, route }) => {
-    const { info, data } = route.params;
+    const { info, data, location } = route.params;
 
     const storefront = useStorefront();
     const isMounted = useMountedState();
@@ -38,7 +38,7 @@ const StoreScreen = ({ navigation, route }) => {
     const isReviewsEnabled = info?.options?.reviews_enabled === true;
 
     const [categories, setCategories] = useResourceCollection(`${store.id}_categories`, Category, StorefrontAdapter);
-    const [storeLocation, setStoreLocation] = useResourceStorage(`${store.id}_store_location`, StoreLocation, StorefrontAdapter);
+    const [storeLocation, setStoreLocation] = useResourceStorage(`${store.id}_store_location`, StoreLocation, StorefrontAdapter, location);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -349,6 +349,15 @@ const StoreScreen = ({ navigation, route }) => {
         loadCategories();
     }, [isMounted]);
 
+    // if store location changes or provided, set it
+    useEffect(() => {
+        const currentStoreLocation = new StoreLocation(location);
+        
+        if (currentStoreLocation && isResource(currentStoreLocation)) {
+            setStoreLocation(currentStoreLocation);
+        }
+    }, [location]);
+
     return (
         <ImageBackground source={{ uri: store.getAttribute('backdrop_url') }} style={tailwind('bg-white h-full')} imageStyle={tailwind('bg-cover')}>
             <View style={tailwind('bg-gray-900 bg-opacity-50')}>
@@ -360,7 +369,7 @@ const StoreScreen = ({ navigation, route }) => {
                     logoStyle={tailwind('text-white')}
                     info={info}
                     onBack={() => navigation.goBack()}
-                    hideSearch={true}
+                    hideSearchBar={true}
                     {...config('ui.network.storeScreen.networkHeaderProps')}
                 />
                 <ScrollView

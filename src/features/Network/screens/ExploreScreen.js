@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, Image, ImageBackground, TouchableOpacity } from 'react-native';
+import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, Modal } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { config, translate } from 'utils';
+import { config, translate, getCurrentLocation } from 'utils';
 import { useMountedState, useLocale } from 'hooks';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
-import Rating from 'ui/Rating';
+import ExploreBar from 'ui/ExploreBar';
+import StoreCard from 'ui/StoreCard';
+import StoreMap from 'ui/StoreMap';
 import tailwind from 'tailwind';
 
 const ExploreScreen = ({ navigation, route }) => {
@@ -22,6 +26,13 @@ const ExploreScreen = ({ navigation, route }) => {
     const [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter, new Collection());
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isQuerying, setIsQuerying] = useState(false);
+    const [isMapView, setIsMapView] = useState(false);
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationsQuery, setLocationsQuery] = useState(null);
+    const [params, setParams] = useState({});
+    const [filters, setFilters] = useState([]);
+    const [tagged, setTagged] = useState([]);
     const [locale, setLocale] = useLocale();
 
     const transitionToProduct = (product, close, timeout = 300) => {
@@ -39,18 +50,50 @@ const ExploreScreen = ({ navigation, route }) => {
         actionSheet?.setModalVisible(false);
     };
 
-    const transitionToStore = (store) => {
-        if (!store.getAttribute('online')) {
+    const transitionToStore = (store, storeLocation) => {
+        if (typeof store?.getAttribute === 'function' && !store?.getAttribute('online')) {
             return;
         }
 
-        navigation.navigate('StoreScreen', { data: store.serialize() });
+        if (store?.online === false) {
+            return;
+        }
+
+        // close map view if applicable
+        setIsMapView(false);
+
+        const data = typeof store?.serialize === 'function' ? store.serialize() : store;
+
+        navigation.navigate('StoreScreen', { data, location: storeLocation?.serialize() ?? storeLocation });
+    };
+
+    const setParam = (key, value) => {
+        const _params = Object.assign({}, params);
+        _params[key] = value;
+
+        // for nearby sort send the current location of user
+        if (_params?.sort === 'nearest') {
+            _params.location = userLocation?.coordinates?.join(',');
+        } else {
+            delete _params.location;
+        }
+
+        if (key === 'tagged') {
+            setTagged(value);
+        }
+
+        setParams(_params);
+        setIsQuerying(true);
+
+        NetworkInfoService.getStores(_params)
+            .then(setStores)
+            .finally(() => setIsQuerying(false));
     };
 
     const refresh = () => {
         setIsRefreshing(true);
 
-        NetworkInfoService.getStores()
+        NetworkInfoService.getStores(params)
             .then(setStores)
             .finally(() => {
                 setIsRefreshing(false);
@@ -59,7 +102,13 @@ const ExploreScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         // Load all stores from netwrk
-        NetworkInfoService.getStores().then(setStores);
+        NetworkInfoService.getStores(params).then(setStores);
+
+        // Load tags from network
+        NetworkInfoService.getTags(params).then(setFilters);
+
+        // Set user location to state
+        getCurrentLocation().then(setUserLocation);
     }, [isMounted]);
 
     return (
@@ -69,45 +118,68 @@ const ExploreScreen = ({ navigation, route }) => {
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
                 refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
+                stickyHeaderIndices={[1]}
                 style={tailwind('w-full h-full')}
             >
-                <View style={tailwind('py-2')}>
-                    <View style={tailwind('py-2 px-4')}>
-                        <NetworkCategoryBlock
-                            containerStyle={tailwind('mb-2 p-2')}
-                            onCategoriesLoaded={setNetworkCategories}
-                            onPress={transitionToCategory}
-                            {...config('ui.network.exploreScreen.defaultCategoryComponentProps')}
-                        />
-                    </View>
-
-                    {stores.map((store) => (
-                        <TouchableOpacity key={store.id} style={tailwind(`px-4`)} disabled={!store.getAttribute('online')} onPress={() => transitionToStore(store)}>
-                            <View style={tailwind(`border-b border-gray-100 py-3 ${store.getAttribute('online') ? 'opacity-100' : 'opacity-30'}`)}>
-                                <View style={tailwind('flex flex-row')}>
-                                    <View style={tailwind('mr-4')}>
-                                        <FastImage source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-20 w-20 rounded-md')} />
-                                    </View>
-                                    <View style={tailwind('pr-2 w-3/4')}>
-                                        <Text style={tailwind('font-semibold text-base')} numberOfLines={1}>
-                                            {translate(store, 'name')}
-                                        </Text>
-                                        <Text style={tailwind('text-sm text-gray-500')} numberOfLines={1}>
-                                            {translate(store, 'description') ?? 'No description'}
-                                        </Text>
-                                        {isReviewsEnabled && (
-                                            <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>
-                                                <Rating value={store.getAttribute('rating')} readonly={true} />
-                                            </View>
-                                        )}
-                                    </View>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
+                <View style={tailwind('py-2 px-4')}>
+                    <NetworkCategoryBlock
+                        containerStyle={tailwind('mb-2 p-2')}
+                        onCategoriesLoaded={setNetworkCategories}
+                        onPress={transitionToCategory}
+                        {...config('ui.network.exploreScreen.defaultCategoryComponentProps')}
+                    />
                 </View>
-                <View style={tailwind('w-full h-44')}></View>
+                <ExploreBar
+                    filterOptions={filters}
+                    onSort={(sort) => setParam('sort', sort)}
+                    onFilter={(filters) => setParam('tagged', filters)}
+                    tagged={tagged}
+                    onToggleMap={() => setIsMapView(true)}
+                    isLoading={isQuerying}
+                    containerStyle={tailwind('bg-white')}
+                />
+                {stores.map((store) => (
+                    <StoreCard key={store.id} store={store} onPress={() => transitionToStore(store)} isReviewsEnabled={isReviewsEnabled} />
+                ))}
+                <View style={tailwind('h-44 w-full')} />
             </ScrollView>
+
+            <Modal animationType="slide" transparent={true} visible={isMapView} onRequestClose={() => setIsMapView(false)}>
+                <View style={tailwind('bg-white w-full h-full')}>
+                    <NetworkHeader info={info} hideSearch={true} hideCategoryPicker={true}>
+                        <ExploreBar
+                            filterOptions={filters}
+                            onFilter={(selected) => setParam('tagged', selected)}
+                            tagged={tagged}
+                            hideMapButon={true}
+                            hideSortButton={true}
+                            isLoading={isQuerying}
+                            containerStyle={tailwind('border-b-0 h-auto py-0 px-0')}
+                        />
+                        <View style={tailwind('relative overflow-hidden flex-1 pr-3')}>
+                            <View style={tailwind('absolute top-0 bottom-0 left-0 h-full flex items-center justify-center z-10')}>
+                                <FontAwesomeIcon icon={faSearch} style={[tailwind('text-gray-800 ml-3')]} />
+                            </View>
+                            <TextInput
+                                value={locationsQuery}
+                                style={tailwind('bg-gray-100 rounded-md pl-10 pr-2 h-10 flex-1')}
+                                placeholder={translate('Network.ExploreScreen.searchPlaces')}
+                                onChangeText={setLocationsQuery}
+                                autoComplete={'off'}
+                                autoCapitalize={'none'}
+                            />
+                        </View>
+                        <View>
+                            <TouchableOpacity onPress={() => setIsMapView(false)}>
+                                <View style={tailwind('rounded-full bg-red-50 w-8 h-8 flex items-center justify-center')}>
+                                    <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </NetworkHeader>
+                    <StoreMap query={locationsQuery} location={userLocation} filters={tagged} onPressStore={(store, storeLocation) => transitionToStore(store, storeLocation)} />
+                </View>
+            </Modal>
         </View>
     );
 };

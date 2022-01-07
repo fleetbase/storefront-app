@@ -31,11 +31,12 @@ const StorePicker = (props) => {
         displayAddressForTitle,
         onStoreLocationSelected,
         onLoaded,
+        defaultStoreLocation
     } = props;
     const buttonIcon = props?.buttonIcon ?? faInfoCircle;
 
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
-    const [storeLocation, setStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter);
+    const [storeLocation, setStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter, defaultStoreLocation);
     const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
     const [isInitialized, setIsInitialized] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,7 +60,10 @@ const StorePicker = (props) => {
                 }
 
                 setStoreLocations(locations);
-                selectStoreLocation(locations);
+                
+                if (!defaultStoreLocation) {
+                    selectStoreLocation(locations);
+                }
 
                 if (typeof onLoaded === 'function') {
                     onLoaded(locations);

@@ -113,7 +113,7 @@ export default class GeoUtil {
                             resolve(lastLocation);
                         }
 
-                        geocode(latitude, longitude).then((googleAddress) => {
+                        GeoUtil.geocode(latitude, longitude).then((googleAddress) => {
                             if (!googleAddress) {
                                 resolve(position);
                             }
