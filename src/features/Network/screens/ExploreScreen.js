@@ -27,11 +27,9 @@ const ExploreScreen = ({ navigation, route }) => {
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isQuerying, setIsQuerying] = useState(false);
-    // const [isMapView, setIsMapView] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
     const [locationsQuery, setLocationsQuery] = useState(null);
     const [params, setParams] = useState({});
-    // const [filters, setFilters] = useState([]);
     const [filters, setFilters] = useStorage('network_tags', []);
     const [tagged, setTagged] = useState([]);
     const [locale, setLocale] = useLocale();
@@ -59,9 +57,6 @@ const ExploreScreen = ({ navigation, route }) => {
         if (store?.online === false) {
             return;
         }
-
-        // close map view if applicable
-        // setIsMapView(false);
 
         const data = typeof store?.serialize === 'function' ? store.serialize() : store;
 
@@ -144,43 +139,6 @@ const ExploreScreen = ({ navigation, route }) => {
                 ))}
                 <View style={tailwind('h-44 w-full')} />
             </ScrollView>
-
-            {/* <Modal animationType="slide" transparent={true} visible={isMapView} onRequestClose={() => setIsMapView(false)}>
-                <View style={tailwind('bg-white w-full h-full')}>
-                    <NetworkHeader info={info} hideSearch={true} hideCategoryPicker={true}>
-                        <ExploreBar
-                            filterOptions={filters}
-                            onFilter={(selected) => setParam('tagged', selected)}
-                            tagged={tagged}
-                            hideMapButon={true}
-                            hideSortButton={true}
-                            isLoading={isQuerying}
-                            containerStyle={tailwind('border-b-0 h-auto py-0 px-0')}
-                        />
-                        <View style={tailwind('relative overflow-hidden flex-1 pr-3')}>
-                            <View style={tailwind('absolute top-0 bottom-0 left-0 h-full flex items-center justify-center z-10')}>
-                                <FontAwesomeIcon icon={faSearch} style={[tailwind('text-gray-800 ml-3')]} />
-                            </View>
-                            <TextInput
-                                value={locationsQuery}
-                                style={tailwind('bg-gray-100 rounded-md pl-10 pr-2 h-10 flex-1')}
-                                placeholder={translate('Network.ExploreScreen.searchPlaces')}
-                                onChangeText={setLocationsQuery}
-                                autoComplete={'off'}
-                                autoCapitalize={'none'}
-                            />
-                        </View>
-                        <View>
-                            <TouchableOpacity onPress={() => setIsMapView(false)}>
-                                <View style={tailwind('rounded-full bg-red-50 w-8 h-8 flex items-center justify-center')}>
-                                    <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    </NetworkHeader>
-                    <StoreMap query={locationsQuery} location={userLocation} filters={tagged} onPressStore={(store, storeLocation) => transitionToStore(store, storeLocation)} />
-                </View>
-            </Modal> */}
         </View>
     );
 };

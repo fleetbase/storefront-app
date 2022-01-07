@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createRef } from 'react';
 import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBars, faMapMarkerAlt, faShare, faImages, faStar, faMapMarkedAlt, faExternalLinkAlt, faPhone, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faMapMarkerAlt, faShare, faImages, faStar, faMapMarkedAlt, faExternalLinkAlt, faPhone, faSearch, faTimes, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
