@@ -171,6 +171,9 @@
         "ExploreScreen": {
             "searchPlaces": "Газрууд хайх"
         },
+        "MapScreen": {
+            "searchPlaces": "Газрууд хайх"
+        },
         "NetworkCategoryScreen": {},
         "StoreScreen": {
             "loadingText": "Уншиж байна...",

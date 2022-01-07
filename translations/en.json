@@ -171,6 +171,9 @@
         "ExploreScreen": {
             "searchPlaces": "Search places"
         },
+        "MapScreen": {
+            "searchPlaces": "Search places"
+        },
         "NetworkCategoryScreen": {},
         "StoreScreen": {
             "loadingText": "Loading...",

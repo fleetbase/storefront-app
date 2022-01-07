@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ExploreScreen from './screens/ExploreScreen';
+import MapScreen from './screens/MapScreen';
 import NetworkCategoryScreen from './screens/NetworkCategoryScreen';
 import StoreScreen from './screens/StoreScreen';
 import CategoryScreen from 'browser/screens/CategoryScreen';
@@ -16,6 +17,25 @@ import CreateAccountScreen from 'auth/screens//CreateAccountScreen';
 const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
 const StoreStack = createStackNavigator();
+const MapStack = createStackNavigator();
+
+const verticalAnimation = {
+    gestureDirection: 'vertical',
+    cardStyleInterpolator: ({ current, layouts }) => {
+        return {
+            cardStyle: {
+                transform: [
+                    {
+                        translateY: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [layouts.screen.height, 0],
+                        }),
+                    },
+                ],
+            },
+        };
+    },
+};
 
 const StoreScreenStack = ({ route }) => {
     const { info } = route.params;
@@ -33,6 +53,17 @@ const StoreScreenStack = ({ route }) => {
     );
 };
 
+const MapViewStack = ({ route }) => {
+    const { info } = route.params;
+
+    return (
+        <MapStack.Navigator mode="modal">
+            <MapStack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} initialParams={route.params} />
+            <MapStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
+        </MapStack.Navigator>
+    );
+};
+
 const BootScreen = ({ route }) => {
     const { info } = route.params;
 
@@ -41,6 +72,7 @@ const BootScreen = ({ route }) => {
             <MainStack.Screen name="ExploreScreen" component={ExploreScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="NetworkCategoryScreen" component={NetworkCategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
+            <MainStack.Screen name="MapScreen" component={MapViewStack} options={{ headerShown: false, ...verticalAnimation }} initialParams={{ info }} />
             <MainStack.Screen name="CategoryScreen" component={CategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="ProductScreen" component={ProductScreen} options={{ headerShown: false }} initialParams={{ info }} />
         </MainStack.Navigator>

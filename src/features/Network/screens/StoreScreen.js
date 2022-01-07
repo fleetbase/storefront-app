@@ -27,7 +27,9 @@ const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
 const StoreScreen = ({ navigation, route }) => {
-    const { info, data, location } = route.params;
+    let { info, data, location, backButtonIcon } = route.params;
+
+    backButtonIcon = backButtonIcon ?? faArrowLeft;
 
     const storefront = useStorefront();
     const isMounted = useMountedState();
@@ -364,6 +366,7 @@ const StoreScreen = ({ navigation, route }) => {
                 <NetworkHeader
                     style={tailwind('absolute top-0 w-full bg-gray-900 bg-opacity-25 z-20')}
                     wrapperStyle={[tailwind('border-b-0 pb-2')]}
+                    backButtonIcon={backButtonIcon}
                     backButtonStyle={tailwind('bg-opacity-50 bg-gray-900')}
                     backButtonIconStyle={tailwind('text-gray-50')}
                     logoStyle={tailwind('text-white')}

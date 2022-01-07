@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, Modal } from 'react-native';
+import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Collection } from '@fleetbase/sdk';
@@ -27,7 +27,7 @@ const ExploreScreen = ({ navigation, route }) => {
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isQuerying, setIsQuerying] = useState(false);
-    const [isMapView, setIsMapView] = useState(false);
+    // const [isMapView, setIsMapView] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
     const [locationsQuery, setLocationsQuery] = useState(null);
     const [params, setParams] = useState({});
@@ -134,7 +134,7 @@ const ExploreScreen = ({ navigation, route }) => {
                     onSort={(sort) => setParam('sort', sort)}
                     onFilter={(filters) => setParam('tagged', filters)}
                     tagged={tagged}
-                    onToggleMap={() => setIsMapView(true)}
+                    onToggleMap={() => navigation.navigate('MapScreen', { selectedTags: tagged, defaultUserLocation: userLocation })}
                     isLoading={isQuerying}
                     containerStyle={tailwind('bg-white')}
                 />
@@ -144,7 +144,7 @@ const ExploreScreen = ({ navigation, route }) => {
                 <View style={tailwind('h-44 w-full')} />
             </ScrollView>
 
-            <Modal animationType="slide" transparent={true} visible={isMapView} onRequestClose={() => setIsMapView(false)}>
+            {/* <Modal animationType="slide" transparent={true} visible={isMapView} onRequestClose={() => setIsMapView(false)}>
                 <View style={tailwind('bg-white w-full h-full')}>
                     <NetworkHeader info={info} hideSearch={true} hideCategoryPicker={true}>
                         <ExploreBar
@@ -179,7 +179,7 @@ const ExploreScreen = ({ navigation, route }) => {
                     </NetworkHeader>
                     <StoreMap query={locationsQuery} location={userLocation} filters={tagged} onPressStore={(store, storeLocation) => transitionToStore(store, storeLocation)} />
                 </View>
-            </Modal>
+            </Modal> */}
         </View>
     );
 };
