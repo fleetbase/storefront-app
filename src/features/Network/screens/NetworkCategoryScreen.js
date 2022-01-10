@@ -42,7 +42,7 @@ const NetworkCategoryScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind('bg-white')}>
-            <NetworkHeader info={info} hideCategoryPicker={true} searchPlaceholder={`Search for ${category.getAttribute('name')}`} onBack={() => navigation.goBack()} />
+            <NetworkHeader info={info} hideCategoryPicker={true} searchPlaceholder={`Search for ${category.getAttribute('name')}`} onBack={() => navigation.goBack()} {...config('ui.network.networkCategoryScreen.networkHeaderProps')} />
             <ScrollView showsVerticalScrollIndicator={false} style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2')}>
                     {stores.map((store) => (

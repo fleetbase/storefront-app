@@ -292,7 +292,7 @@ const CartScreen = ({ navigation, route }) => {
         }
 
         if (info.is_network) {
-            return <NetworkHeader info={info} hideCategoryPicker={true} style={tailwind('bg-white')} />;
+            return <NetworkHeader info={info} hideCategoryPicker={true} style={tailwind('bg-white')} {...config('ui.cart.cartScreen.networkHeaderProps')} />;
         }
     };
 

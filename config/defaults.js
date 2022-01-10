@@ -23,13 +23,29 @@ const DefaultConfig = {
 
         network: {
             defaultHeaderComponent: 'ui/headers/NetworkHeader',
+
             exploreScreen: {
                 defaultCategoryComponent: 'ui/NetworkCategoryBlock',
                 defaultCategoryComponentProps: {
                     containerStyle: {},
                 },
             },
+
             storeScreen: {
+                networkHeaderProps: {},
+            },
+
+            mapScreen: {
+                networkHeaderProps: {},
+            },
+
+            networkCategoryScreen: {
+                networkHeaderProps: {},
+            },
+        },
+
+        cart: {
+            cartScreen: {
                 networkHeaderProps: {},
             },
         },
