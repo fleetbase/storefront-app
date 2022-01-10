@@ -7,7 +7,7 @@ import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { config, translate, getCurrentLocation } from 'utils';
+import { config, translate, getCurrentLocation, config } from 'utils';
 import { useMountedState, useLocale, useStorage } from 'hooks';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
@@ -109,7 +109,7 @@ const ExploreScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind('bg-white')}>
-            <NetworkHeader info={info} onSearchResultPress={transitionToProduct} onCategoryPress={transitionToCategory} />
+            <NetworkHeader info={info} onSearchResultPress={transitionToProduct} onCategoryPress={transitionToCategory} {...config('ui.network.exploreScreen.networkHeaderProps')} />
             <ScrollView
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}

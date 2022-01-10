@@ -26,6 +26,7 @@ const DefaultConfig = {
 
             exploreScreen: {
                 defaultCategoryComponent: 'ui/NetworkCategoryBlock',
+                networkHeaderProps: {},
                 defaultCategoryComponentProps: {
                     containerStyle: {},
                 },

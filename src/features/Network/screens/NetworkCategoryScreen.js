@@ -5,7 +5,7 @@ import { Store, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { logError } from 'utils';
+import { logError, config } from 'utils';
 import { useMountedState } from 'hooks';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';

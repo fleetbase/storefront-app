@@ -9,7 +9,7 @@ import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/sto
 import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
 import { calculatePercentage } from 'utils/Calculate';
 import { useResourceStorage, useResourceCollection } from 'utils/Storage';
-import { formatCurrency, isLastIndex, stripHtml, logError, translate } from 'utils';
+import { formatCurrency, isLastIndex, stripHtml, logError, translate, config } from 'utils';
 import { NetworkInfoService } from 'services';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
