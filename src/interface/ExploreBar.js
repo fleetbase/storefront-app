@@ -10,7 +10,7 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const ExploreBar = ({ onSort, onFilter, onToggleMap, filterOptions, wrapperStyle, containerStyle, isLoading, hideMapButon, hideSortButton, hideFilterButton, tagged }) => {
+const ExploreBar = ({ onSort, onFilter, onToggleMap, filterOptions, wrapperStyle, containerStyle, scrollContainerStyle, isLoading, hideMapButon, hideSortButton, hideFilterButton, tagged }) => {
     const actionSheetRef = createRef();
 
     // default filter options
@@ -109,48 +109,50 @@ const ExploreBar = ({ onSort, onFilter, onToggleMap, filterOptions, wrapperStyle
     }, [tagged]);
 
     return (
-        <View style={[wrapperStyle]}>
-            <View style={[tailwind('border-b border-gray-200 py-2 px-4 h-14 flex flex-row items-center'), containerStyle]}>
-                {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
-                {!hideSortButton && (
-                    <View style={tailwind('pr-2')}>
-                        <TouchableOpacity
-                            onPress={openSortDialog}
-                            style={[tailwind(`btn border ${sort ? 'border-blue-300 bg-blue-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
-                        >
-                            <View style={tailwind('flex flex-row items-center')}>
-                                <FontAwesomeIcon icon={faSort} size={12} style={tailwind('text-gray-600 mr-1')} />
-                                <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>
-                                    {translate('terms.sort')} {currentSort ? `(${currentSort.label})` : ''}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                {!hideFilterButton && (
-                    <View style={tailwind('pr-2')}>
-                        <TouchableOpacity
-                            onPress={openFilterDialog}
-                            style={[tailwind(`btn border ${selectedFilters.length ? 'border-green-300 bg-green-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
-                        >
-                            <View style={tailwind('flex flex-row items-center')}>
-                                <FontAwesomeIcon icon={faFilter} size={10} style={tailwind('text-gray-600 mr-1')} />
-                                <Text style={tailwind(`${selectedFilters.length ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>{translate('terms.filter')}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                {!hideMapButon && (
-                    <View style={tailwind('pr-2')}>
-                        <TouchableOpacity onPress={onToggleMap} style={[tailwind(`btn border border-gray-200 rounded-full px-4 py-2`), { width: 'auto' }]}>
-                            <View style={tailwind('flex flex-row items-center')}>
-                                <FontAwesomeIcon icon={faMapMarked} size={12} style={tailwind('text-gray-600 mr-1')} />
-                                <Text style={tailwind(`text-gray-900 font-semibold`)}>{translate('components.interface.ExploreBar.map')}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
+        <View style={[tailwind('w-full'), wrapperStyle]}>
+            <ScrollView horizontal={true} style={[tailwind('w-full border-b border-gray-200'), scrollContainerStyle]}>
+                <View style={[tailwind('py-2 px-4 h-14 flex flex-row items-center w-full'), containerStyle]}>
+                    {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
+                    {!hideSortButton && (
+                        <View style={tailwind('pr-2')}>
+                            <TouchableOpacity
+                                onPress={openSortDialog}
+                                style={[tailwind(`btn border ${sort ? 'border-blue-300 bg-blue-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
+                            >
+                                <View style={tailwind('flex flex-row items-center')}>
+                                    <FontAwesomeIcon icon={faSort} size={12} style={tailwind('text-gray-600 mr-1')} />
+                                    <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>
+                                        {translate('terms.sort')} {currentSort ? `(${currentSort.label})` : ''}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {!hideFilterButton && (
+                        <View style={tailwind('pr-2')}>
+                            <TouchableOpacity
+                                onPress={openFilterDialog}
+                                style={[tailwind(`btn border ${selectedFilters.length ? 'border-green-300 bg-green-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
+                            >
+                                <View style={tailwind('flex flex-row items-center')}>
+                                    <FontAwesomeIcon icon={faFilter} size={10} style={tailwind('text-gray-600 mr-1')} />
+                                    <Text style={tailwind(`${selectedFilters.length ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>{translate('terms.filter')}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {!hideMapButon && (
+                        <View style={tailwind('pr-2')}>
+                            <TouchableOpacity onPress={onToggleMap} style={[tailwind(`btn border border-gray-200 rounded-full px-4 py-2`), { width: 'auto' }]}>
+                                <View style={tailwind('flex flex-row items-center')}>
+                                    <FontAwesomeIcon icon={faMapMarked} size={12} style={tailwind('text-gray-600 mr-1')} />
+                                    <Text style={tailwind(`text-gray-900 font-semibold`)}>{translate('components.interface.ExploreBar.map')}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
             <ActionSheet
                 containerStyle={[{ height: dialogHeight + 150 }]}
                 gestureEnabled={true}
