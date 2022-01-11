@@ -204,8 +204,7 @@ const LocationPicker = (props) => {
                                         <View style={tailwind('flex flex-row items-center mb-1')}>
                                             <Text style={tailwind('font-semibold uppercase')}>{place.getAttribute('name')}</Text>
                                         </View>
-                                        <Text style={tailwind('uppercase')}>{place.getAttribute('street1')}</Text>
-                                        <Text style={tailwind('uppercase')}>{place.getAttribute('postal_code')}</Text>
+                                        <Text style={tailwind('uppercase')}>{place.getAttribute('street1') ?? place.getAttribute('street1') ?? place.getAttribute('postal_code') ?? place.getAttribute('district')}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -226,10 +225,7 @@ const LocationPicker = (props) => {
                                         </Text>
                                     </View>
                                     <Text numberOfLines={1} style={tailwind('uppercase')}>
-                                        {deliverTo.getAttribute('street1')}
-                                    </Text>
-                                    <Text numberOfLines={1} style={tailwind('uppercase')}>
-                                        {deliverTo.getAttribute('postal_code')}
+                                        {deliverTo.getAttribute('name') ?? deliverTo.getAttribute('street1') ?? deliverTo.getAttribute('postal_code') ?? deliverTo.getAttribute('district')}
                                     </Text>
                                 </View>
                                 <View style={tailwind('h-full flex items-center flex-row')}>
