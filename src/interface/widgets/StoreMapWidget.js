@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, Linking } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import MapView, { Marker } from 'react-native-maps';
 import FastImage from 'react-native-fast-image';
 import { translate, config } from 'utils';
@@ -81,10 +83,12 @@ const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerSty
                             </View>
                             <View
                                 style={[
-                                    tailwind('w-2 h-2 rounded-full bg-blue-500 absolute top-0 shadow-xl z-10 -ml-2 -mt-2'),
-                                    { shadowColor: 'rgba(59, 130, 246, 1)', left: '50%', top: '50%' },
+                                    tailwind('flex items-center justify-center w-8 h-8 border-4 border-gray-100 rounded-full bg-red-500 absolute top-0 shadow-xl z-10 -ml-2 -mt-2'),
+                                    { shadowColor: 'rgba(220, 38, 38, 1)', left: '50%', top: '50%' },
                                 ]}
-                            />
+                            >
+                                <FontAwesomeIcon icon={faBuilding} size={12} style={tailwind('text-white')} />
+                            </View>
                         </View>
                     </Marker>
                 </MapView>
