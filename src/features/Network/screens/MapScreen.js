@@ -92,6 +92,7 @@ const MapScreen = ({ navigation, route }) => {
                     hideMapButon={true}
                     hideSortButton={true}
                     isLoading={isQuerying}
+                    scrollContainerStyle={tailwind('border-b-0')}
                     containerStyle={tailwind('border-b-0 h-auto py-0 px-0')}
                 />
                 <View style={tailwind('relative overflow-hidden flex-1')}>

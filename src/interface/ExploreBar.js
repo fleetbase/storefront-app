@@ -109,9 +109,9 @@ const ExploreBar = ({ onSort, onFilter, onToggleMap, filterOptions, wrapperStyle
     }, [tagged]);
 
     return (
-        <View style={[tailwind('w-full'), wrapperStyle]}>
-            <ScrollView horizontal={true} style={[tailwind('w-full border-b border-gray-200'), scrollContainerStyle]}>
-                <View style={[tailwind('py-2 px-4 h-14 flex flex-row items-center w-full'), containerStyle]}>
+        <View style={[wrapperStyle]}>
+            <ScrollView horizontal={true} style={[tailwind('border-b border-gray-200'), scrollContainerStyle]}>
+                <View style={[tailwind('py-2 px-4 h-14 flex flex-row items-center'), containerStyle]}>
                     {isLoading && <ActivityIndicator style={tailwind('mr-2')} />}
                     {!hideSortButton && (
                         <View style={tailwind('pr-2')}>

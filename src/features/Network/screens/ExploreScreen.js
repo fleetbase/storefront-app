@@ -132,7 +132,7 @@ const ExploreScreen = ({ navigation, route }) => {
                     tagged={tagged}
                     onToggleMap={() => navigation.navigate('MapScreen', { selectedTags: tagged, defaultUserLocation: userLocation })}
                     isLoading={isQuerying}
-                    containerStyle={tailwind('bg-white')}
+                    scrollContainerStyle={tailwind('bg-white')}
                 />
                 {stores.map((store) => (
                     <StoreCard key={store.id} store={store} onPress={() => transitionToStore(store)} isReviewsEnabled={isReviewsEnabled} />
