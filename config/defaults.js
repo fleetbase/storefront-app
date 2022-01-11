@@ -14,6 +14,22 @@ const DefaultConfig = {
         linkingPrefixes: [],
         enableTranslations: false,
         enabledTranslations: ['en'],
+        storeScreenOptions: {
+            actionBarEnabled: true,
+            photosEnabled: true,
+            reviewsEnabled: true,
+            mapEnabled: true,
+            websiteLinkEnabled: true,
+            contactEnabled: true,
+            shareEnabled: true,
+            searchEnabled: true,
+            browseEnabled: true,
+            mapWidgetEnabled: true,
+            infoWidgetEnabled: true,
+            relatedWidgetEnabled: true,
+            photosWidgetEnabled: true,
+            reviewsWidgetEnabled: true
+        }
     },
 
     InterfaceConfig: {

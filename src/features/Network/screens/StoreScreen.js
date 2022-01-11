@@ -21,6 +21,7 @@ import StoreSearch from 'ui/StoreSearch';
 import ProductCard from 'ui/ProductCard';
 import StorePicker from 'ui/StorePicker';
 import Rating from 'ui/Rating';
+import { StoreMapWidget, StoreInfoWidget, StorePhotosWidget, StoreRelatedWidget, StoreReviewsWidget } from 'ui/widgets';
 import tailwind from 'tailwind';
 
 const windowHeight = Dimensions.get('window').height;
@@ -34,10 +35,26 @@ const StoreScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const isMounted = useMountedState();
     const insets = useSafeAreaInsets();
-    const store = new Store(data);
+    const store = new Store(data, StorefrontAdapter);
     const contactActionSheetRef = createRef();
 
-    const isReviewsEnabled = info?.options?.reviews_enabled === true;
+    // actions
+    const isActionBarEnabled = config('app.storeScreenOptions.actionBarEnabled');
+    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
+    const isPhotosEnabled = config('app.storeScreenOptions.photosEnabled');
+    const isMapEnabled = config('app.storeScreenOptions.mapEnabled');
+    const isShareEnabled = config('app.storeScreenOptions.shareEnabled');
+    const isSearchEnabled = config('app.storeScreenOptions.searchEnabled');
+    const isBrowseEnabled = config('app.storeScreenOptions.browseEnabled');
+    const isContactEnabled = config('app.storeScreenOptions.contactEnabled');
+    const isWebsiteLinkEnabled = config('app.storeScreenOptions.websiteLinkEnabled');
+
+    // widgets
+    const isMapWidgetEnabled = config('app.storeScreenOptions.mapWidgetEnabled');
+    const isInfoWidgetEnabled = config('app.storeScreenOptions.infoWidgetEnabled');
+    const isRelatedWidgetEnabled = config('app.storeScreenOptions.relatedWidgetEnabled');
+    const isPhotosWidgetEnabled = config('app.storeScreenOptions.photosWidgetEnabled');
+    const isReviewsWidgetEnabled = config('app.storeScreenOptions.reviewsWidgetEnabled');
 
     const [categories, setCategories] = useResourceCollection(`${store.id}_categories`, Category, StorefrontAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage(`${store.id}_store_location`, StoreLocation, StorefrontAdapter, location);
@@ -83,8 +100,8 @@ const StoreScreen = ({ navigation, route }) => {
         navigation.navigate('StoreReviewsScreen', { storeData: data });
     };
 
-    const transitionToPhotos = () => {
-        navigation.navigate('StorePhotosScreen', { storeData: data });
+    const transitionToPhotos = (initialMedia = null) => {
+        navigation.navigate('StorePhotosScreen', { storeData: data, initialMedia });
     };
 
     const transitionToProduct = (product, close, timeout = 300) => {
@@ -136,7 +153,9 @@ const StoreScreen = ({ navigation, route }) => {
                                 <Text style={tailwind('font-bold text-lg text-white')} numberOfLines={1}>
                                     {store.getAttribute('name')}
                                 </Text>
-                                <Text style={tailwind('text-gray-100')}>{store.getAttribute('description') ?? translate('Network.StoreScreen.descriptionMissing')}</Text>
+                                <Text style={tailwind('text-gray-100')} numberOfLines={3}>
+                                    {store.getAttribute('description') ?? translate('Network.StoreScreen.descriptionMissing')}
+                                </Text>
                                 {isReviewsEnabled && (
                                     <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>
                                         <Rating value={store.getAttribute('rating')} readonly={true} />
@@ -168,13 +187,15 @@ const StoreScreen = ({ navigation, route }) => {
                         <TouchableOpacity style={tailwind('p-4 w-full flex flex-row')} onPress={toggleHours}>
                             <Text style={tailwind('font-bold')}>{translate('Network.StoreScreen.displayHoursToggleText')}</Text>
                             {storeLocation?.schedule[today]?.length > 0 && (
-                                <View style={tailwind('ml-2')}>
-                                    <Text style={tailwind('font-bold text-gray-500')}>
-                                        {`${translate('Network.StoreScreen.displayHoursTodayLabel')}: ${format(storeLocation?.schedule[today][0].startDateInstance, 'hh:mm aaa')} - ${format(
-                                            storeLocation?.schedule[today][0].endDateInstance,
-                                            'hh:mm aaa'
-                                        )}`}
-                                    </Text>
+                                <View style={tailwind('ml-2 flex flex-row')}>
+                                    <Text style={tailwind('font-bold text-gray-500')}>{translate('Network.StoreScreen.displayHoursTodayLabel')}: </Text>
+                                    {storeLocation?.schedule[today].length > 0 && (
+                                        <Text style={tailwind('font-bold text-gray-500')}>
+                                            {format(storeLocation?.schedule[today][0].startDateInstance, 'hh:mm aaa')} -{' '}
+                                            {format(storeLocation?.schedule[today][0].endDateInstance, 'hh:mm aaa')}
+                                        </Text>
+                                    )}
+                                    {storeLocation?.schedule[today].length == 0 && <Text style={tailwind('font-bold text-gray-500')}>{translate('Network.StoreScreen.closed')}</Text>}
                                 </View>
                             )}
                         </TouchableOpacity>
@@ -184,13 +205,13 @@ const StoreScreen = ({ navigation, route }) => {
                                     {weekdays.map((weekday) => (
                                         <View key={weekday} style={tailwind('w-1/2 mb-2')}>
                                             <Text style={tailwind('font-semibold mb-1')}>{translate(`Network.StoreScreen.weekday${weekday}`)}</Text>
-                                            {storeLocation?.schedule[weekday].map((hour, hourIndex) => (
-                                                <View key={hourIndex} style={tailwind('mb-1')}>
-                                                    <Text>
-                                                        {format(hour.startDateInstance, 'hh:mm aaa')} - {format(hour.endDateInstance, 'hh:mm aaa')}
-                                                    </Text>
-                                                </View>
-                                            ))}
+                                            {storeLocation?.schedule[weekday].length > 0 &&
+                                                storeLocation?.schedule[weekday].map((hour, hourIndex) => (
+                                                    <View key={hourIndex} style={tailwind('mb-1')}>
+                                                        <Text>{hour.humanReadableHours}</Text>
+                                                    </View>
+                                                ))}
+                                            {storeLocation?.schedule[weekday].length === 0 && <Text>{translate('Network.StoreScreen.closed')}</Text>}
                                         </View>
                                     ))}
                                 </View>
@@ -199,89 +220,101 @@ const StoreScreen = ({ navigation, route }) => {
                     </View>
                 )}
             </View>
-            <View style={tailwind('w-full px-2 py-2 bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <TouchableOpacity onPress={transitionToPhotos} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                        <FontAwesomeIcon icon={faImages} size={20} style={tailwind('text-gray-600 mb-2')} />
-                        <Text style={tailwind('text-xs')} numberOfLines={1}>
-                            {translate('Network.StoreScreen.photosButtonText')}
-                        </Text>
-                    </TouchableOpacity>
+            {isActionBarEnabled && (
+                <View style={tailwind('w-full px-2 py-2 bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
+                    {isPhotosEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity onPress={transitionToPhotos} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                                <FontAwesomeIcon icon={faImages} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.photosButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isReviewsEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity onPress={transitionToReviews} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                                <FontAwesomeIcon icon={faStar} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.reviewsButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isMapEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('StoreLocationScreen', { data: store.serialize(), locationData: storeLocation.serialize() })}
+                                style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
+                            >
+                                <FontAwesomeIcon icon={faMapMarkedAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.mapButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isWebsiteLinkEnabled && store.isAttributeFilled('website') && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity onPress={visitStoreWebsite} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                                <FontAwesomeIcon icon={faExternalLinkAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.websiteButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isContactEnabled && hasContactInformation && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity onPress={contactStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                                <FontAwesomeIcon icon={faPhone} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.contactButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isShareEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <TouchableOpacity onPress={shareStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
+                                <FontAwesomeIcon icon={faShare} size={20} style={tailwind('text-gray-600 mb-2')} />
+                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                    {translate('Network.StoreScreen.shareButtonText')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {isSearchEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <StoreSearch
+                                store={store}
+                                onResultPress={transitionToProduct}
+                                buttonStyle={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
+                                buttonIconSize={20}
+                                buttonIconStyle={tailwind('text-gray-600 mb-2 mr-0')}
+                                buttonTitleStyle={tailwind('text-xs')}
+                                numberOfLines={1}
+                                buttonTitle={translate('Network.StoreScreen.searchButtonText')}
+                            />
+                        </View>
+                    )}
+                    {isBrowseEnabled && (
+                        <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
+                            <StoreCategoryPicker
+                                buttonTitle={translate('Network.StoreScreen.browseButtonText')}
+                                categories={categories.filter((category) => category.getAttribute('products.length') > 0)}
+                                onCategoryPress={transitionToCategory}
+                                buttonStyle={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
+                                buttonIconSize={20}
+                                buttonIconStyle={tailwind('text-gray-600 mb-2 mr-0')}
+                                buttonTitleStyle={tailwind('text-xs')}
+                                numberOfLines={1}
+                            />
+                        </View>
+                    )}
                 </View>
-                {isReviewsEnabled && (
-                    <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                        <TouchableOpacity onPress={transitionToReviews} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                            <FontAwesomeIcon icon={faStar} size={20} style={tailwind('text-gray-600 mb-2')} />
-                            <Text style={tailwind('text-xs')} numberOfLines={1}>
-                                {translate('Network.StoreScreen.reviewsButtonText')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('StoreLocationScreen', { data: store.serialize(), locationData: storeLocation.serialize() })}
-                        style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
-                    >
-                        <FontAwesomeIcon icon={faMapMarkedAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
-                        <Text style={tailwind('text-xs')} numberOfLines={1}>
-                            {translate('Network.StoreScreen.mapButtonText')}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                {store.isAttributeFilled('website') && (
-                    <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                        <TouchableOpacity onPress={visitStoreWebsite} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                            <FontAwesomeIcon icon={faExternalLinkAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
-                            <Text style={tailwind('text-xs')} numberOfLines={1}>
-                                {translate('Network.StoreScreen.websiteButtonText')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                {hasContactInformation && (
-                    <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                        <TouchableOpacity onPress={contactStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                            <FontAwesomeIcon icon={faPhone} size={20} style={tailwind('text-gray-600 mb-2')} />
-                            <Text style={tailwind('text-xs')} numberOfLines={1}>
-                                {translate('Network.StoreScreen.contactButtonText')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <TouchableOpacity onPress={shareStore} style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
-                        <FontAwesomeIcon icon={faShare} size={20} style={tailwind('text-gray-600 mb-2')} />
-                        <Text style={tailwind('text-xs')} numberOfLines={1}>
-                            {translate('Network.StoreScreen.shareButtonText')}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <StoreSearch
-                        store={store}
-                        onResultPress={transitionToProduct}
-                        buttonStyle={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
-                        buttonIconSize={20}
-                        buttonIconStyle={tailwind('text-gray-600 mb-2 mr-0')}
-                        buttonTitleStyle={tailwind('text-xs')}
-                        numberOfLines={1}
-                        buttonTitle={translate('Network.StoreScreen.searchButtonText')}
-                    />
-                </View>
-                <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
-                    <StoreCategoryPicker
-                        buttonTitle={translate('Network.StoreScreen.browseButtonText')}
-                        categories={categories.filter((category) => category.getAttribute('products.length') > 0)}
-                        onCategoryPress={transitionToCategory}
-                        buttonStyle={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
-                        buttonIconSize={20}
-                        buttonIconStyle={tailwind('text-gray-600 mb-2 mr-0')}
-                        buttonTitleStyle={tailwind('text-xs')}
-                        numberOfLines={1}
-                    />
-                </View>
-            </View>
+            )}
         </View>
     );
 
@@ -316,12 +349,16 @@ const StoreScreen = ({ navigation, route }) => {
                                 onPress={() => Linking.openURL(`tel:${store.getAttribute('phone')}`)}
                                 style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}
                             >
-                                <Text style={tailwind('text-base font-semibold')}>{translate('Network.StoreScreen.contactActionSheetCallActionButtonText', { phone: store.getAttribute('phone') })}</Text>
+                                <Text style={tailwind('text-base font-semibold')}>
+                                    {translate('Network.StoreScreen.contactActionSheetCallActionButtonText', { phone: store.getAttribute('phone') })}
+                                </Text>
                             </TouchableOpacity>
                         )}
                         {store.isAttributeFilled('email') && (
                             <View style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}>
-                                <Text style={tailwind('text-base font-semibold')}>{translate('Network.StoreScreen.contactActionSheetEmailActionButtonText', { email: store.getAttribute('email') })}</Text>
+                                <Text style={tailwind('text-base font-semibold')}>
+                                    {translate('Network.StoreScreen.contactActionSheetEmailActionButtonText', { email: store.getAttribute('email') })}
+                                </Text>
                             </View>
                         )}
                         {store.isAttributeFilled('facebook') && (
@@ -354,14 +391,14 @@ const StoreScreen = ({ navigation, route }) => {
     // if store location changes or provided, set it
     useEffect(() => {
         const currentStoreLocation = new StoreLocation(location);
-        
+
         if (currentStoreLocation && isResource(currentStoreLocation)) {
             setStoreLocation(currentStoreLocation);
         }
     }, [location]);
 
     return (
-        <ImageBackground source={{ uri: store.getAttribute('backdrop_url') }} style={tailwind('bg-white h-full')} imageStyle={tailwind('bg-cover')}>
+        <ImageBackground source={{ uri: store.getAttribute('backdrop_url') }} style={tailwind('bg-gray-100 h-full')} imageStyle={tailwind('bg-cover')}>
             <View style={tailwind('bg-gray-900 bg-opacity-50')}>
                 <NetworkHeader
                     style={tailwind('absolute top-0 w-full bg-gray-900 bg-opacity-25 z-20')}
@@ -381,30 +418,67 @@ const StoreScreen = ({ navigation, route }) => {
                     refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadCategories(true)} />}
                 >
                     <StoreHeader store={store} wrapperStyle={tailwind('bg-transparent pt-28')} />
-                    {shouldDisplayLoader && (
-                        <View style={tailwind('py-6 w-full flex flex-row items-center justify-center bg-white')}>
-                            <ActivityIndicator />
-                            <Text style={tailwind('ml-3 text-gray-500')}>{translate('terms.loading')}</Text>
+                    <View style={tailwind('w-full h-full min-h-80 bg-gray-100')}>
+                        {shouldDisplayLoader && (
+                            <View style={tailwind('py-6 w-full flex flex-row items-center justify-center bg-white')}>
+                                <ActivityIndicator />
+                                <Text style={tailwind('ml-3 text-gray-500')}>{translate('terms.loading')}</Text>
+                            </View>
+                        )}
+                        {isMapWidgetEnabled && (
+                            <StoreMapWidget
+                                wrapperStyle={tailwind('mb-2 mt-4')}
+                                info={info}
+                                store={store}
+                                storeLocation={storeLocation}
+                                onAddressPress={() => navigation.navigate('StoreLocationScreen', { data: store.serialize(), locationData: storeLocation.serialize() })}
+                            />
+                        )}
+                        {isInfoWidgetEnabled && <StoreInfoWidget wrapperStyle={tailwind('my-2')} info={info} store={store} storeLocation={storeLocation} />}
+                        {isPhotosWidgetEnabled && store.getAttribute('media', []).length > 0 && (
+                            <StorePhotosWidget
+                                wrapperStyle={tailwind('my-2')}
+                                info={info}
+                                store={store}
+                                storeLocation={storeLocation}
+                                onViewMorePress={() => navigation.navigate('StorePhotosScreen', { storeData: data })}
+                                onMediaPress={(media) => transitionToPhotos(media)}
+                            />
+                        )}
+                        {isReviewsWidgetEnabled && (
+                            <StoreReviewsWidget
+                                wrapperStyle={tailwind('my-2')}
+                                info={info}
+                                store={store}
+                                storeLocation={storeLocation}
+                                onStartReviewPress={() => navigation.navigate('WriteReviewScreen', { subjectData: store.serialize(), subjectType: 'store' })}
+                            />
+                        )}
+                        {isRelatedWidgetEnabled && <StoreRelatedWidget wrapperStyle={tailwind('my-2')} info={info} store={store} storeLocation={storeLocation} />}
+                        <View>
+                            {categories
+                                .filter((category) => category.getAttribute('products.length') > 0)
+                                .map((category) => (
+                                    <View key={category.id}>
+                                        <View style={tailwind('w-full px-4 py-4')}>
+                                            <Text style={tailwind('font-bold text-base')}>{translate(category, 'name')}</Text>
+                                        </View>
+                                        <View style={tailwind('flex flex-row')}>
+                                            {category
+                                                .getAttribute('products')
+                                                .map((product) => new Product(product, StorefrontAdapter))
+                                                .map((product, index) => (
+                                                    <ProductCard
+                                                        key={index}
+                                                        product={product}
+                                                        containerStyle={tailwind('w-1/2')}
+                                                        onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
+                                                    />
+                                                ))}
+                                        </View>
+                                    </View>
+                                ))}
                         </View>
-                    )}
-                    <View style={tailwind('w-full h-full min-h-80 bg-white')}>
-                        {categories
-                            .filter((category) => category.getAttribute('products.length') > 0)
-                            .map((category) => (
-                                <View key={category.id}>
-                                    <View style={tailwind('w-full px-4 py-4')}>
-                                        <Text style={tailwind('font-bold text-base')}>{translate(category, 'name')}</Text>
-                                    </View>
-                                    <View style={tailwind('flex flex-row')}>
-                                        {category
-                                            .getAttribute('products')
-                                            .map((product) => new Product(product, StorefrontAdapter))
-                                            .map((product, index) => (
-                                                <ProductCard key={index} product={product} containerStyle={tailwind('w-1/2')} onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })} />
-                                            ))}
-                                    </View>
-                                </View>
-                            ))}
                     </View>
                     <View style={tailwind('w-full h-80')}></View>
                 </ScrollView>

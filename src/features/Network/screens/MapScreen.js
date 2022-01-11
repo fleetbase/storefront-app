@@ -8,7 +8,7 @@ import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefron
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
 import { config, translate, getCurrentLocation, getLocation, logError } from 'utils';
-import { useMountedState, useLocale } from 'hooks';
+import { useMountedState, useLocale, useStorage } from 'hooks';
 import FastImage from 'react-native-fast-image';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
@@ -26,13 +26,13 @@ const MapScreen = ({ navigation, route }) => {
     const [isQuerying, setIsQuerying] = useState(false);
     const [userLocation, setUserLocation] = useState(defaultUserLocation ?? getLocation());
     const [query, setQuery] = useState(null);
-    const [filters, setFilters] = useState([]);
+    const [filters, setFilters] = useStorage('network_tags', []);
     const [tagged, setTagged] = useState(selectedTags ?? []);
     const [locale, setLocale] = useLocale();
     const [params, setParams] = useState({
         location: userLocation?.coordinates?.join(','),
         with_store: true,
-        tagged: filters,
+        tagged,
         query,
     });
 
@@ -47,7 +47,7 @@ const MapScreen = ({ navigation, route }) => {
 
         const data = typeof store?.serialize === 'function' ? store.serialize() : store;
 
-        navigation.navigate('StoreScreen', { data, location: storeLocation?.serialize() ?? storeLocation, backButtonIcon: faTimes });
+        navigation.push('StoreScreen', { data, location: storeLocation?.serialize() ?? storeLocation, backButtonIcon: faTimes });
     };
 
     const setParam = (key, value) => {

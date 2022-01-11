@@ -53,6 +53,7 @@
     "react-native-maps-directions": "^1.8.0",
     "react-native-mmkv-storage": "^0.6.3",
     "react-native-modal": "^12.0.2",
+    "react-native-open-maps": "^0.4.0",
     "react-native-permissions": "^3.0.5",
     "react-native-picker-module": "^2.0.4",
     "react-native-push-notification": "^7.4.0",

@@ -15,7 +15,7 @@ import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
 const StorePhotosScreen = ({ navigation, route }) => {
-    const { info, storeData } = route.params;
+    const { info, storeData, initialMedia } = route.params;
 
     const storefront = useStorefront();
     const isMounted = useMountedState();
@@ -23,7 +23,8 @@ const StorePhotosScreen = ({ navigation, route }) => {
     const store = new Store(storeData, StorefrontAdapter);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [viewingPhoto, setViewingPhoto] = useState(null);
+    const [viewingPhoto, setViewingPhoto] = useState(initialMedia);
+    const isModalVisible = viewingPhoto !== null && viewingPhoto !== undefined;
 
     return (
         <View style={[tailwind('bg-black'), { paddingTop: insets.top }]}>
@@ -47,7 +48,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                     ))}
                 </View>
             </View>
-            <Modal visible={viewingPhoto !== null} animationType={'slide'} transparent={true}>
+            <Modal visible={isModalVisible} animationType={'slide'} transparent={true}>
                 <View style={[tailwind('bg-black'), { paddingTop: insets.top }]}>
                     <View style={tailwind('flex flex-row items-center p-4 z-10')}>
                         <TouchableOpacity onPress={() => setViewingPhoto(null)} style={tailwind('mr-4')}>

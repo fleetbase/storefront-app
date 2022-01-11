@@ -31,7 +31,7 @@ const StorePicker = (props) => {
         displayAddressForTitle,
         onStoreLocationSelected,
         onLoaded,
-        defaultStoreLocation
+        defaultStoreLocation,
     } = props;
     const buttonIcon = props?.buttonIcon ?? faInfoCircle;
 
@@ -60,7 +60,7 @@ const StorePicker = (props) => {
                 }
 
                 setStoreLocations(locations);
-                
+
                 if (!defaultStoreLocation) {
                     selectStoreLocation(locations);
                 }
@@ -143,8 +143,14 @@ const StorePicker = (props) => {
                     <View style={[buttonTitleWrapperStyle]}>
                         {useAddressTitle && (
                             <View style={[props.addressContainerStyle]}>
-                                <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]}>{storeLocation.getAttribute('name')}</Text>
-                                <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]}>{storeLocation.getAttribute('place.street1')}</Text>
+                                <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]} numberOfLines={1}>
+                                    {storeLocation.getAttribute('name')}
+                                </Text>
+                                {storeLocation.getAttribute('name') !== storeLocation.getAttribute('place.street1') && (
+                                    <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]} numberOfLines={1}>
+                                        {storeLocation.getAttribute('place.street1')}
+                                    </Text>
+                                )}
                             </View>
                         )}
                         {!useAddressTitle && (
@@ -171,7 +177,7 @@ const StorePicker = (props) => {
                                 >
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
-                                            <View style={tailwind('flex-1')}>
+                                            <View style={tailwind('flex-1 pr-10')}>
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     {isCurrentStoreLocation(storeLocation) && (
                                                         <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-2')}>
@@ -179,7 +185,7 @@ const StorePicker = (props) => {
                                                         </View>
                                                     )}
                                                     <View style={[props.addressRowContainerStyle]}>
-                                                        <Text style={tailwind('font-semibold uppercase')}>{storeLocation.getAttribute('name')}</Text>
+                                                        <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>{storeLocation.getAttribute('name')}</Text>
                                                         <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1')}</Text>
                                                         <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>
                                                     </View>

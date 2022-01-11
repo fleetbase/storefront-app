@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createRef } from 'react';
 import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faSort, faFilter, faEllipsisH, faStar, faImage } from '@fortawesome/free-solid-svg-icons';
 import { formatDistanceToNow } from 'date-fns';
@@ -17,18 +17,13 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const StoreReviewsScreen = ({ navigation, route }) => {
-    const { info, storeData } = route.params;
-
+const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containerStyle, onStartReviewPress }) => {
+    const navigation = useNavigation();
     const storefront = useStorefront();
     const isMounted = useMountedState();
-    const insets = useSafeAreaInsets();
+    const actionSheetRef = createRef();
     const [locale] = useLocale();
 
-    const store = new Store(storeData, StorefrontAdapter);
-    const actionSheetRef = createRef();
-
-    // const [reviews, setReviews] = useState([]);
     const [reviews, setReviews] = useResourceCollection(`${store.id}_reviews`, Review, StorefrontAdapter);
     const [counts, setCounts] = useStorage(`${store.id}_review_counts`, {
         1: 0,
@@ -61,7 +56,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
 
         // get reviews for store
         store
-            ?.getReviews()
+            ?.getReviews({ limit: 3, sort: 'highest rated' })
             .then(setReviews)
             .catch(logError)
             .finally(() => {
@@ -72,10 +67,6 @@ const StoreReviewsScreen = ({ navigation, route }) => {
 
     const percentageOfTotal = (number) => {
         return number > 0 ? Math.round((number / totalCount) * 100) : 0;
-    };
-
-    const startReview = () => {
-        navigation.navigate('WriteReviewScreen', { subjectData: storeData, subjectType: 'store' });
     };
 
     const openFilterDialog = () => {
@@ -145,27 +136,20 @@ const StoreReviewsScreen = ({ navigation, route }) => {
     }, [isMounted]);
 
     return (
-        <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
-            <View style={tailwind('relative h-full')}>
-                <View style={tailwind('w-full bg-white')}>
-                    <View style={tailwind('flex flex-row items-center p-4')}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
-                            <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
-                                <FontAwesomeIcon icon={faTimes} />
-                            </View>
-                        </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-semibold')}>{translate('Shared.StoreReviewsScreen.title', { storeName: store.getAttribute('name') })}</Text>
-                    </View>
+        <View style={[wrapperStyle]}>
+            <View style={[tailwind('bg-white'), containerStyle]}>
+                <View style={tailwind('px-4 pt-4 pb-2')}>
+                    <Text style={tailwind('font-bold text-lg text-black mb-2')}>{translate('components.widgets.StoreReviewsWidget.title')}</Text>
                 </View>
                 <View style={tailwind('p-4')}>
                     <View style={tailwind('flex flex-row')}>
                         <View style={tailwind('w-2/5 flex justify-center')}>
-                            <Text style={tailwind('text-base font-semibold mb-2')}>{translate('Shared.StoreReviewsScreen.overallRating')}</Text>
+                            <Text style={tailwind('text-base font-semibold mb-2')}>{translate('components.widgets.StoreReviewsWidget.overallRating')}</Text>
                             <View style={tailwind('mb-2 flex flex-row items-start')}>
                                 <Rating value={store.getAttribute('rating')} size={24} readonly={true} />
                             </View>
                             <Text style={tailwind('text-gray-600 text-lg')}>
-                                {totalCount} {totalCount === 1 ? translate('Shared.StoreReviewsScreen.review') : translate('Shared.StoreReviewsScreen.reviews')}
+                                {totalCount} {totalCount === 1 ? translate('components.widgets.StoreReviewsWidget.review') : translate('components.widgets.StoreReviewsWidget.reviews')}
                             </Text>
                         </View>
                         <View style={tailwind('flex-1')}>
@@ -187,9 +171,9 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                 ))}
                         </View>
                     </View>
-                    <TouchableOpacity onPress={startReview} style={tailwind('btn rounded-md bg-blue-500 px-4 py-3 shadow-sm mt-4')}>
+                    <TouchableOpacity onPress={onStartReviewPress} style={tailwind('btn rounded-md bg-blue-500 px-4 py-3 shadow-sm mt-4')}>
                         <View style={tailwind('flex flex-row items-center')}>
-                            <Text style={tailwind('text-white font-semibold')}>{translate('Shared.StoreReviewsScreen.writeAReview')}</Text>
+                            <Text style={tailwind('text-white font-semibold')}>{translate('components.widgets.StoreReviewsWidget.writeAReview')}</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -204,7 +188,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faSort} size={12} style={tailwind('text-gray-600 mr-1')} />
                                         <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>
-                                            {sort ? capitalize(sort) : translate('Shared.StoreReviewsScreen.sort')}
+                                            {sort ? capitalize(sort) : translate('components.widgets.StoreReviewsWidget.sort')}
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
@@ -217,7 +201,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faFilter} size={10} style={tailwind('text-gray-600 mr-1')} />
                                         <Text style={tailwind(`${filter ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>
-                                            {filter ? translate('Shared.StoreReviewsScreen.starRatings', { filter }) : translate('Shared.StoreReviewsScreen.filter')}
+                                            {filter ? translate('components.widgets.StoreReviewsWidget.starRatings', { filter }) : translate('components.widgets.StoreReviewsWidget.filter')}
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
@@ -255,16 +239,11 @@ const StoreReviewsScreen = ({ navigation, route }) => {
                                         </View>
                                     </View>
                                 </View>
-                                {/* <View>
-                                    <TouchableOpacity style={tailwind('flex')}>
-                                        <FontAwesomeIcon icon={faEllipsisH} style={tailwind('text-gray-300')} />
-                                    </TouchableOpacity>
-                                </View> */}
                             </View>
                             <View style={tailwind('flex flex-row items-center mb-2')}>
                                 <Rating value={review.getAttribute('rating')} size={16} readonly={true} />
                                 <Text style={tailwind('text-gray-400 text-xs ml-2')}>
-                                    {translate('Shared.StoreReviewsScreen.createdAgo', { reviewCreatedAgo: formatDistanceToNow(new Date(review.getAttribute('created_at'))) })}
+                                    {translate('components.widgets.StoreReviewsWidget.createdAgo', { reviewCreatedAgo: formatDistanceToNow(new Date(review.getAttribute('created_at'))) })}
                                 </Text>
                             </View>
                             <View style={tailwind('flex flex-row items-center')}>
@@ -363,4 +342,4 @@ const StoreReviewsScreen = ({ navigation, route }) => {
     );
 };
 
-export default StoreReviewsScreen;
+export default StoreReviewsWidget;

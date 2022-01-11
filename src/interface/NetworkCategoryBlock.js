@@ -7,7 +7,7 @@ import { Category } from '@fleetbase/storefront';
 import { useNavigation } from '@react-navigation/native';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { formatCurrency, capitalize, logError, translate } from 'utils';
-import { useLocale } from 'hooks';
+import { useLocale, useMountedState } from 'hooks';
 import { useResourceCollection } from 'utils/Storage';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
@@ -18,6 +18,7 @@ const dialogHeight = windowHeight / 1.12;
 const NetworkCategoryBlock = (props) => {
     const navigation = useNavigation();
     const storefront = useStorefront();
+    const isMounted = useMountedState();
     const actionSheetRef = createRef();
 
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
@@ -37,6 +38,8 @@ const NetworkCategoryBlock = (props) => {
         }
     }
 
+    const stopLoading = () => setIsLoading(false);
+
     useEffect(() => {
         setIsLoading(true);
 
@@ -47,10 +50,8 @@ const NetworkCategoryBlock = (props) => {
                 on('categoriesLoaded', categories);
             })
             .catch(logError)
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, []);
+            .finally(stopLoading);
+    }, [isMounted]);
 
     if (!networkCategories || networkCategories?.length === 0) {
         return <View />;

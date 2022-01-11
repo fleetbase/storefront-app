@@ -204,7 +204,8 @@
             "contactActionSheetInstagramActionButtonText": "Instagram",
             "contactActionSheetTwitterActionButtonText": "Twitter",
             "serviceIndicatorText": "Үйлчилгээ",
-            "descriptionMissing": "Тайлбар байхгүй "
+            "descriptionMissing": "Тайлбар байхгүй ",
+            "closed": "Closed"
         }
     },
     "Places": {
@@ -361,6 +362,40 @@
                 "oldestFirst": "Хуучин нь",
                 "mostPopular": "Хамгийн алдартай нь",
                 "trending": "Тренд болж байгаа"
+            }
+        },
+        "widgets": {
+            "StoreReviewsWidget": {
+                "title": "Recommended Reviews",
+                "overallRating": "Overall rating",
+                "review": "review",
+                "reviews": "reviews",
+                "writeAReview": "Write a Review",
+                "createdAgo": "{{reviewCreatedAgo}} ago",
+                "sort": "Sort",
+                "filter": "Filter",
+                "starRatings": "{{filter}} star ratings",
+                "actionSheetTitle": "{{action}} reviews",
+                "filterOptionText": "{{rating}} stars",
+                "allRatings": "All ratings",
+                "newestFirst": "Newest first",
+                "oldestFirst": "Oldest first",
+                "highestRated": "Highest rated",
+                "lowestRated": "Lowest rated",
+                "defaultSortOption": "{{networkName}} Sort"
+            },
+            "StoreMapWidget": {
+                "getDirections": "Get Directions",
+                "call": "Call"
+            },
+            "StorePhotosWidget": {
+                "title": "Photos"
+            },
+            "StoreRelatedWidget": {
+                "title": "More like this"
+            },
+            "StoreInfoWidget": {
+                "title": "Info"
             }
         }
     },

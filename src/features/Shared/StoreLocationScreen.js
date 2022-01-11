@@ -5,6 +5,7 @@ import { faTimes, faStoreAlt } from '@fortawesome/free-solid-svg-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
+import FastImage from 'react-native-fast-image';
 import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
 import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
@@ -13,6 +14,7 @@ import { useMountedState, useLocale } from 'hooks';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
 import { logError, getCurrentLocation, config, translate } from 'utils';
+import Rating from 'ui/Rating';
 import tailwind from 'tailwind';
 
 const { width, height } = Dimensions.get('window');
@@ -37,9 +39,11 @@ const StoreLocationScreen = ({ navigation, route }) => {
     const [isDisplayingDirections, setIsDisplayDirections] = useState(false);
     const [directionsResult, setDirectionsResult] = useState(null);
 
+    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
+
     const origin = {
         latitude: userLocation?.coordinates[0],
-        longitude: userLocation?.coordinates[1]
+        longitude: userLocation?.coordinates[1],
     };
 
     const destination = {
@@ -98,6 +102,7 @@ const StoreLocationScreen = ({ navigation, route }) => {
         store
             .getLocation(locationData.id)
             .then(setStoreLocation)
+            .catch(logError)
             .finally(() => {
                 setIsLoading(false);
             });
@@ -113,9 +118,9 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                 <FontAwesomeIcon icon={faTimes} />
                             </View>
                         </TouchableOpacity>
-                        <View style={tailwind('flex flex-col items-start')}>
+                        <View style={tailwind('flex flex-col items-start pr-10')}>
                             <Text style={tailwind('text-xl font-bold text-white')}>{store.getAttribute('name')}</Text>
-                            <Text style={tailwind('text-sm font-semibold text-white')}>{storeLocation?.getAttribute('name') ?? translate('Shared.StoreLocationScreen.loading')}</Text>
+                            <Text style={tailwind('text-sm font-semibold text-white')} numberOfLines={1}>{storeLocation?.getAttribute('name') ?? translate('Shared.StoreLocationScreen.loading')}</Text>
                         </View>
                         {isLoading && (
                             <View style={tailwind('ml-4')}>
@@ -133,7 +138,9 @@ const StoreLocationScreen = ({ navigation, route }) => {
                     <View>
                         <View style={tailwind('absolute z-20 bottom-0 w-full px-4 py-8 mt-24')}>
                             <TouchableOpacity onPress={toggleDirections} style={tailwind('btn bg-blue-500 shadow-lg border-blue-700 mb-2 flex flex-row')} disabled={isLoadingDirections}>
-                                <Text style={tailwind('font-bold text-white')}>{isDisplayingDirections ? translate('Shared.StoreLocationScreen.hideDirections') : translate('Shared.StoreLocationScreen.displayDirections')}</Text>
+                                <Text style={tailwind('font-bold text-white')}>
+                                    {isDisplayingDirections ? translate('Shared.StoreLocationScreen.hideDirections') : translate('Shared.StoreLocationScreen.displayDirections')}
+                                </Text>
                                 {isLoadingDirections && <ActivityIndicator color={'white'} style={tailwind('ml-2')} />}
                             </TouchableOpacity>
                             <TouchableOpacity onPress={focusStore} style={tailwind('btn shadow-lg mb-2')}>
@@ -163,11 +170,15 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                     <View style={tailwind('flex flex-row px-1')}>
                                         <View style={tailwind('flex flex-row mr-3')}>
                                             <Text style={tailwind('font-semibold mr-1')}>{translate('Shared.StoreLocationScreen.distance')}</Text>
-                                            <Text>{Math.round(directionsResult.distance)} {translate('Shared.StoreLocationScreen.km')}</Text>
+                                            <Text>
+                                                {Math.round(directionsResult.distance)} {translate('Shared.StoreLocationScreen.km')}
+                                            </Text>
                                         </View>
                                         <View style={tailwind('flex flex-row')}>
                                             <Text style={tailwind('font-semibold mr-1')}>{translate('Shared.StoreLocationScreen.duration')}</Text>
-                                            <Text>{Math.round(directionsResult.duration)} {translate('Shared.StoreLocationScreen.min')}</Text>
+                                            <Text>
+                                                {Math.round(directionsResult.duration)} {translate('Shared.StoreLocationScreen.min')}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
@@ -198,15 +209,22 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                         )}
                                     >
                                         <View style={tailwind('mr-3')}>
-                                            <Image source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-12 w-12 rounded')} />
+                                            <FastImage source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-12 w-12 rounded')} />
                                         </View>
                                         <View style={tailwind('flex w-36')}>
                                             <Text style={tailwind('font-bold text-base -mt-4')} numberOfLines={1}>
                                                 {store.getAttribute('name')}
                                             </Text>
-                                            <Text style={tailwind('text-xs')} numberOfLines={1}>
-                                                {store.getAttribute('description')}
-                                            </Text>
+                                            {store.isAttributeFilled('description') && (
+                                                <Text style={tailwind('text-xs')} numberOfLines={1}>
+                                                    {store.getAttribute('description')}
+                                                </Text>
+                                            )}
+                                            {isReviewsEnabled && (
+                                                <View style={tailwind('mt-1 flex flex-row items-center justify-start')}>
+                                                    <Rating value={store.getAttribute('rating')} inactiveColor={'text-gray-300'} readonly={true} />
+                                                </View>
+                                            )}
                                         </View>
                                     </View>
                                     <View

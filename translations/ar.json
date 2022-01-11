@@ -1,0 +1,400 @@
+{
+    "Account": {
+        "AccountScreen": {
+            "title": "إنشاء حساب أو تسجيل الدخول",
+            "loginButtonText": "تسجيل الدخول",
+            "createAccountButtonText": "إنشاء حساب",
+            "userGreetingTitle": "مرحبًا، {{customerName}}",
+            "accountMenuTitle": "حسابي",
+            "profileLinkText": "الملف الشخصي",
+            "ordersLinkText": "الطلبات",
+            "placesLinkText": "الأماكن",
+            "signoutButtonText": "تسجيل الخروج"
+        },
+        "ChangePasswordScreen": {
+            "title": "تغيير كلمة السر"
+        },
+        "EditProfileScreen": {
+            "title": "ملفك الشخصي",
+            "nameLabelText": "اسمك",
+            "emailLabelText": "عنوان بريدك",
+            "phoneLabelText": "رقم هاتفك",
+            "saveButtonText": "حفظ الملف الشخصي"
+        },
+        "OrderHistoryScreen": {
+            "title": "طلباتك",
+            "emptyStateText": "يبدو أنك لم تقدم أي طلبات",
+            "bodyTitle": "لا يوجد لديك طلبات",
+            "bodyTitleLoading": "جاري تحميل سجل طلبك"
+        },
+        "SavedPlacesScreen": {
+            "title": "الأماكن المحفوظة",
+            "loadingYourSavedPlaces": "جاري تحميل الأماكن المحفوظة",
+            "youHaveNoSavedPlaces": "أنت لم تحفظ أماكن",
+            "emptyStateText": "يبدو أنك لم تحفظ أي عناوين",
+            "addNewAddress": "إضافة عنوان جديد"
+        }
+    },
+    "Auth": {
+        "CreateAccountScreen": {
+            "title": "إنشاء حساب",
+            "greetingTitle": "أهلاً وسهلاً بك {{infoName}}.",
+            "greetingSubtitle": "إنشاء حسابك باستخدام رقم هاتفك واسمك أسفله فقط",
+            "sendVerificationCodeButtonText": "ارسل كود التأكيد",
+            "awaitingVerificationTitle": "شكرًا لك {{name}}!",
+            "awaitingVerificationSubtitle": "لابد أنك استلمت الآن كود عبر الرسائل الهاتفية، تحقق من الكود لإنشاء حسابك.",
+            "retryButtonText": "هل تريد إعادة المحاولة؟",
+            "verifyCodeButtonText": "كود التأكيد",
+            "codeInputPlaceholder": "ادخل كود التأكيد",
+            "nameInputPlaceholder": "اسمك"
+        },
+        "LoginScreen": {
+            "title": "تسجيل الدخول",
+            "sendVerificationCodeButtonText": "إرسال كود التأكيد",
+            "createAccountButtonText": "أو إنشاء حساب؟",
+            "retryButtonText": "هل تريد إعادة المحاولة؟",
+            "verifyCodeButtonText": "كود التأكيد",
+            "codeInputPlaceholder": "ادخل كود التأكيد"
+        }
+    },
+    "Browser": {
+        "CategoryScreen": {},
+        "HomeScreen": {
+            "categoryPickerHeaderTitle": "تسوّق حسب الفئة"
+        },
+        "ProductScreen": {
+            "updateInCartActionText": "تحديث العربة",
+            "addAnotherActionText": "أضف غيرها",
+            "addToCartActionText": "أضف إلى العربة",
+            "basePriceLabel": "السعر الأساسي",
+            "optionalAddonLabel": "اختياري، كحد أقصى {{addonsCount}}",
+            "hasItemsAlertTitle": "العربة بها عناصر!",
+            "hasItemsAlertDecription": "يوجد عناصر من متجر اخر بالفعل، سيتم تفريغ عربتك اذا اردت الاستمرار",
+            "hasItemsAlertCancelActionText": "إلغاء",
+            "hasItemsAlertContinueActionText": "استمرار",
+            "displayBookingDetailsTitle": "حجزك",
+            "displayBookingDateLabelText": "التاريخ",
+            "displayBookingTimeLabelText": "الوقت",
+            "confirmBookingActionSheetTitle": "تأكيد وقت وتاريخ الحجز",
+            "confirmBookingActionSheetDateLabelText": "التاريخ",
+            "confirmBookingActionSheetTimeLabelText": "الوقت",
+            "confirmBookingActionSheetButtonText": "تأكيد الحجز",
+            "viewProductMediaTitle": "عرض الوسائط",
+            "serviceIdentifierText": "(خدمة)",
+            "youtubeVidsSectionTitle": "مقاطع يوتيوب",
+            "updateBookingActionText": "تحديث الحجز",
+            "addAnotherBookingActionText": "حجز غيرها",
+            "bookServiceActionText": "حجز الخدمة"
+        }
+    },
+    "Cart": {
+        "components": {
+            "CartCheckoutPanel": {
+                "cartTotalLabelText": "الإجمالي",
+                "checkoutButtonText": "الدفع"
+            },
+            "CartFooter": {
+                "optionsLabelText": "الاختيارات",
+                "pickupOrderLabelText": "استلام الطلب",
+                "askTipLabelText": "إضافة بقشيش",
+                "askDeliveryTipLabelText": "بقشيش التوصيل",
+                "costLabelText": "التكلفة",
+                "deliveryFeeLabelText": "رسوم التوصيل",
+                "tipLabelText": "البقشيش",
+                "deliveryTipLabelText": "بقشيش التوصيل",
+                "cartSubtotalLabelText": "المجموع الفرعي",
+                "cartTotalLabelText": "الإجمالي"
+            },
+            "CartHeader": {
+                "title": "{{cartItemsCount}} عناصر في عربتك",
+                "multiCartVendorsSubtitle": "من {{storeCount}} بائعين",
+                "removeAllItemsButtonText": "حذف كل العناصر",
+                "cartSummaryLabelText": "ملخص العربة",
+                "addMoreButtonText": "إضافة المزيد"
+            }
+        },
+        "CartScreen": {
+            "reloadCartButtonText": "إعادة تحميل العربة",
+            "emptyStateTitle": "عربتك فارغة",
+            "emptyStateSubtitle": "يبدو أنك لم نضف أي شيء إلى عربتك بعد",
+            "goToBrowserButtonText": "بدء التسوّق",
+            "quantityExplenation": "(كل {{cost}})"
+        },
+        "CheckoutScreen": {
+            "gatewayDetails": {
+                "cash": {
+                    "title": "نقدًا",
+                    "description": "الدفع عند التوصيل او الاستلام"
+                },
+                "stripe": {
+                    "title": "Stripe",
+                    "description": "الدفع ببطاقة, مدعومة ب Stripe"
+                },
+                "qpay": {
+                    "title": "QPay",
+                    "description": "دفع عن طريق بنك Qpay"
+                }
+            },
+            "selectPaymentMethodActionSheetTitle": "حدد طريقة الدفع",
+            "checkoutLabelText": "الدفع",
+            "loginToCheckoutWarningText": "عليك تسجيل الدخول او إنشاء حساب للدفع",
+            "loginButtonText": "تسجيل الدخول",
+            "addressLabelText": "عنوان التوصيل",
+            "selectAddressLabelText": "حدد موقع التوصيل",
+            "paymentMethodLabelText": "طريقة الدفع",
+            "selectPaymentMethodLabelText": "حدد طريقة الدفع",
+            "cashGatewayName": "نقدًا",
+            "noPaymentMethodLabelText": "لا توجد طريقة دفع",
+            "cartLabelText": "العربة ({{cartUniqueItemsCount}})",
+            "orderSummaryLabelText": "ملخص الطلب",
+            "subtotalLabelText": "المجموع الفرعي",
+            "deliveryFeeLabelText": "رسوم التوصيل",
+            "tipLabelText": "البقشيش",
+            "deliveryTipLabelText": "بقشيش التوصيل",
+            "orderTotalLabelText": "إجمالي الطلب",
+            "submitOrderButtonText": "تقديم طلب"
+        }
+    },
+    "Core": {
+        "BootScreen": {},
+        "NetworkScreen": {},
+        "StorefrontScreen": {}
+    },
+    "Exceptions": {
+        "SetupWarningScreen": {
+            "title": "التكوينات مفقودة",
+            "subtitle": "يبدو أنك لم تقم بتهيئة تطبيقك بشكل صحيح",
+            "envMissingText": "مفقود من البيئة"
+        }
+    },
+    "Network": {
+        "ExploreScreen": {},
+        "NetworkCategoryScreen": {},
+        "StoreScreen": {
+            "loadingText": "جاري التحميل...",
+            "displayHoursToggleText": "ساعات",
+            "displayHoursTodayLabel": "اليوم",
+            "weekdayMonday": "الاثنين",
+            "weekdayTuesday": "الثلاثاء",
+            "weekdayWednesday": "الأربعاء",
+            "weekdayThursday": "الخميس",
+            "weekdayFriday": "الجمعة",
+            "weekdaySaturday": "السبت",
+            "weekdaySunday": "الأحد",
+            "shareStoreTitleText": "{{storeName}} وجد على {{networkName}}",
+            "shareStoreSubjectText": "{{storeName}} وجد على {{networkName}}",
+            "shareStoreMessageText": "الق نظرة على ما وجدته على {{networkName}}! تصفح {{storeName}}!",
+            "photosButtonText": "الصور",
+            "reviewsButtonText": "المراجعات",
+            "mapButtonText": "الخريطة",
+            "websiteButtonText": "الموقع الالكتروني",
+            "contactButtonText": "اتصال",
+            "shareButtonText": "مشاركة",
+            "searchButtonText": "بحث",
+            "browseButtonText": "تصفّح",
+            "contactActionSheetTitle": "اتصل {{storeName}}",
+            "contactActionSheetCallActionButtonText": "اتصال {{phone}}",
+            "contactActionSheetEmailActionButtonText": "البريد {{email}}",
+            "contactActionSheetFacebookActionButtonText": "Facebook",
+            "contactActionSheetInstagramActionButtonText": "Instagram",
+            "contactActionSheetTwitterActionButtonText": "Twitter",
+            "serviceIndicatorText": "(الخدمة)",
+            "descriptionMissing": "لا يوجد وصف"
+        }
+    },
+    "Places": {
+        "EditPlaceScreen": {
+            "title": "حفظ مكان جديد",
+            "name": "الأسم",
+            "namePlaceholder": "مثلا المنزل/ العمل / المدرسة",
+            "streetAddress": "عنوان الشارع",
+            "streetAddress2": "الشقة، العمارة، الدور، وهكذا",
+            "city": "المدينة",
+            "state": "الولاية أو المقاطعة",
+            "postalCode": "الرمز البريدي",
+            "country": "الدولة",
+            "phoneNumber": "رقم الهاتف",
+            "savePlaceDetails": "حفظ بيانات المكان",
+            "makeDefault": "جعل الافتراضي",
+            "deletePlace": "حذف مكان"
+        },
+        "SearchPlacesScreen": {
+            "title": "إضافة مكان جديد",
+            "enterAddress": "ادخل العنوان...",
+            "currentLocationLabel": "الموقع الحالي"
+        }
+    },
+    "Shared": {
+        "OrderCompletedScreen": {
+            "title": "تم استلام الطلب!",
+            "pickupOrderFrom": "استلام الطلب من",
+            "orderNotes": "ملاحظات الطلب",
+            "qrCode": "رمز الاستجابة السريعة",
+            "orderSummary": "ملخص الطلب",
+            "cash": "نقدًا",
+            "subtotal": "المجموع الفرعي",
+            "deliveryFee": "رسوم التوصيل",
+            "tip": "البقشيش",
+            "deliveryTip": "بقشيش الطلب",
+            "total": "الإجمالي"
+        },
+        "OrderScreen": {
+            "title": "الطلب {{orderStatus}}",
+            "arrivingIn": "يصل خلال {{estimatedDuration}}",
+            "pickupOrderFrom": "استلام الطلب من",
+            "orderNotes": "ملاحظات الطلب",
+            "qrCode": "رمز الاستجابة السريعة",
+            "orderSummary": "ملخص الطلب",
+            "cash": "نقدًا",
+            "subtotal": "المجموع الفرعي",
+            "deliveryFee": "رسوم التوصيل",
+            "tip": "البقشيش",
+            "deliveryTip": "توصيل بقشيش",
+            "total": "الإجمالي"
+        },
+        "StoreLocationScreen": {
+            "hideDirections": "إخفاء الاتجاهات",
+            "displayDirections": "عرض الاتجاهات",
+            "focusOn": "التركيز على {{storeName}}",
+            "call": "اتصل",
+            "from": "من:",
+            "to": "إلى:",
+            "distance": "المسافة:",
+            "km": "كم",
+            "duration": "المدة:",
+            "min": "دقيقة",
+            "loading": "جاري التحميل"
+        },
+        "StorePhotosScreen": {
+            "title": "الصور ({{storeMediaCount}})",
+            "viewingPhoto": "عرض الصورة"
+        },
+        "StoreReviewsScreen": {
+            "title": "{{storeName}} المراجعات",
+            "overallRating": "التقييم العام",
+            "review": "مراجعة",
+            "reviews": "المراجعات",
+            "writeAReview": "كتابة مراجعة",
+            "createdAgo": "{{reviewCreatedAgo}} منذ",
+            "sort": "النوع",
+            "filter": "الترشيح",
+            "starRatings": "{{filter}} التقييم بالنجوم",
+            "actionSheetTitle": "{{action}} مراجعات",
+            "filterOptionText": "{{rating}} نجوم",
+            "allRatings": "كل التقييمات",
+            "newestFirst": "الأجدد أولاً",
+            "oldestFirst": "الأقدم أولاً",
+            "highestRated": "أعلى تقييم",
+            "lowestRated": "أقل تقييم",
+            "defaultSortOption": "{{networkName}} النوع"
+        },
+        "WriteReviewScreen": {
+            "loginToReviewWarningText": "عليك تسجيل الدخول أو إنشاء حساب جديد لإضافة مراجعة",
+            "login": "تسجيل الدخول",
+            "selectYourRating": "حدد تقييمك",
+            "submitReview": "قدم المراجعة"
+        }
+    },
+    "components": {
+        "interface": {
+            "headers": {
+                "NetworkHeader": {
+                    "search": "بحث"
+                },
+                "StorefrontHeader": {}
+            },
+            "CartSubtotalView": {},
+            "CartTotalView": {},
+            "CategoryProductSlider": {},
+            "LocationPicker": {
+                "enterDeliveryLocation": "ادخل موقع التوصيل",
+                "enterAddress": "ادخل العنوان...",
+                "selectDeliveryLocation": "حدد مكان التوصيل",
+                "tapToAddNewDeliveryLocation": "انقر لإضافة موقع توصيل جديد",
+                "tapToChange": "انقر للتغيير",
+                "tapToAddDeliveryLocation": "انقر لإضافة موقع التوصيل",
+                "deliverTo": "التوصيل إلى:",
+                "selectLocation": "حدد الموقع",
+                "currentLocation": "الموقع الحالي"
+            },
+            "LangPicker": {
+                "title": "حدد اللغة"
+            },
+            "NetworkCategoryBlock": {
+                "categories": "الفئات"
+            },
+            "NetworkSearch": {
+                "searching": "جاري البحث...",
+                "noDescription": "لا يوجد وصف"
+            },
+            "PhoneInput": {
+                "selectCountry": "حدد الدولة"
+            },
+            "ProductPriceView": {},
+            "ProductCard": {
+                "serviceIndicator": "(Service)",
+                "unavailable": "غير متاح"
+            },
+            "ServiceQuoteFeeView": {},
+            "StoreCategoryPicker": {
+                "viewCategories": "عرض الفئات",
+                "categories": "الفئات"
+            },
+            "StorePicker": {},
+            "StoreSearch": {
+                "inputPlaceholderText": "بحث {{storeName}}"
+            },
+            "TipInput": {},
+            "TipView": {}
+        },
+        "widgets": {
+            "StoreReviewsWidget": {
+                "title": "Recommended Reviews",
+                "overallRating": "Overall rating",
+                "review": "review",
+                "reviews": "reviews",
+                "writeAReview": "Write a Review",
+                "createdAgo": "{{reviewCreatedAgo}} ago",
+                "sort": "Sort",
+                "filter": "Filter",
+                "starRatings": "{{filter}} star ratings",
+                "actionSheetTitle": "{{action}} reviews",
+                "filterOptionText": "{{rating}} stars",
+                "allRatings": "All ratings",
+                "newestFirst": "Newest first",
+                "oldestFirst": "Oldest first",
+                "highestRated": "Highest rated",
+                "lowestRated": "Lowest rated",
+                "defaultSortOption": "{{networkName}} Sort"
+            },
+            "StoreMapWidget": {
+                "getDirections": "Get Directions",
+                "call": "Call"
+            },
+            "StorePhotosWidget": {
+                "title": "Photos"
+            },
+            "StoreRelatedWidget": {
+                "title": "More like this"
+            },
+            "StoreInfoWidget": {
+                "title": "Info"
+            }
+        }
+    },
+    "terms": {
+        "edit": "تعديل",
+        "delete": "حذف",
+        "loading": "تحميل...",
+        "more": "المزيد"
+    },
+    "status": {
+        "created": "تم الإنشاء",
+        "preparing": "جاري التحضير",
+        "dispatched": "مُرسَل",
+        "driver_enroute": "في الطريق",
+        "pending": "مُعلَّق",
+        "in_progress": "في تقدم",
+        "completed": "مكتمل"
+    }
+}
