@@ -10,6 +10,7 @@ import { logError, config, translate, isLastIndex } from 'utils';
 import { useMountedState, useLocale } from 'hooks';
 import NetworkHeader from 'ui/headers/NetworkHeader';
 import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
+import StoreCard from 'ui/StoreCard';
 import tailwind from 'tailwind';
 
 const NetworkCategoryScreen = ({ navigation, route }) => {
