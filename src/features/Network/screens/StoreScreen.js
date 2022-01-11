@@ -138,6 +138,9 @@ const StoreScreen = ({ navigation, route }) => {
         });
     };
 
+    console.log('[storeLocation.today]', storeLocation?.today);
+    console.log('[storeLocation.isAlwaysOpen]', storeLocation?.isAlwaysOpen);
+
     const StoreHeader = ({ store, wrapperStyle }) => (
         <View style={[tailwind('w-full z-20'), wrapperStyle]}>
             <View style={tailwind('w-full flex items-center justify-center')}>
@@ -182,20 +185,15 @@ const StoreScreen = ({ navigation, route }) => {
                 </View>
             </View>
             <View>
-                {storeLocation?.getAttribute('hours')?.length > 0 && (
+                {storeLocation?.getAttribute('hours')?.length > 0 && !storeLocation?.isAlwaysOpen && (
                     <View style={tailwind('w-full bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
                         <TouchableOpacity style={tailwind('p-4 w-full flex flex-row')} onPress={toggleHours}>
                             <Text style={tailwind('font-bold')}>{translate('Network.StoreScreen.displayHoursToggleText')}</Text>
-                            {storeLocation?.schedule[today]?.length > 0 && (
+                            {storeLocation?.today?.length > 0 && (
                                 <View style={tailwind('ml-2 flex flex-row')}>
                                     <Text style={tailwind('font-bold text-gray-500')}>{translate('Network.StoreScreen.displayHoursTodayLabel')}: </Text>
-                                    {storeLocation?.schedule[today].length > 0 && (
-                                        <Text style={tailwind('font-bold text-gray-500')}>
-                                            {format(storeLocation?.schedule[today][0].startDateInstance, 'hh:mm aaa')} -{' '}
-                                            {format(storeLocation?.schedule[today][0].endDateInstance, 'hh:mm aaa')}
-                                        </Text>
-                                    )}
-                                    {storeLocation?.schedule[today].length == 0 && <Text style={tailwind('font-bold text-gray-500')}>{translate('Network.StoreScreen.closed')}</Text>}
+                                    {storeLocation?.today?.length > 0 && <Text style={tailwind('font-bold text-gray-500')}>{storeLocation?.today[0].humanReadableHours}</Text>}
+                                    {storeLocation?.today?.length == 0 && <Text style={tailwind('font-bold text-gray-500')}>{translate('Network.StoreScreen.closed')}</Text>}
                                 </View>
                             )}
                         </TouchableOpacity>
@@ -217,6 +215,13 @@ const StoreScreen = ({ navigation, route }) => {
                                 </View>
                             </View>
                         )}
+                    </View>
+                )}
+                {storeLocation?.getAttribute('hours')?.length > 0 && storeLocation?.isAlwaysOpen === true && (
+                    <View style={tailwind('w-full bg-white flex flex-row flex-wrap items-center border-b border-gray-100')}>
+                        <View style={tailwind('p-4 w-full flex flex-row')}>
+                            <Text style={tailwind('font-bold text-green-600')}>Open 24 Hours</Text>
+                        </View>
                     </View>
                 )}
             </View>
