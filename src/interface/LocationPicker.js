@@ -267,7 +267,7 @@ const LocationPicker = (props) => {
                             <Text style={tailwind('text-blue-900 font-semibold mr-1')}>{props.label ?? translate('components.interface.LocationPicker.deliverTo')}</Text>
                             <View style={{ maxWidth: 100 }}>
                                 <Text style={tailwind('text-blue-900')} numberOfLines={1}>
-                                    {deliverTo.getAttribute('name') || deliverTo.getAttribute('street1')}
+                                    {deliverTo.getAttribute('name') ?? deliverTo.getAttribute('street1') ?? deliverTo.getAttribute('postal_code') ?? deliverTo.getAttribute('district')}
                                 </Text>
                             </View>
                         </View>
