@@ -21,6 +21,7 @@ const MapScreen = ({ navigation, route }) => {
     const { info, selectedTags, defaultUserLocation } = route.params;
 
     const isMounted = useMountedState();
+    const isReviewsEnabled = info?.options?.reviews_enabled === true;
 
     const [storeLocations, setStoreLocations] = useResourceCollection('network_store_locations', StoreLocation, StorefrontAdapter);
     const [isQuerying, setIsQuerying] = useState(false);
@@ -109,7 +110,7 @@ const MapScreen = ({ navigation, route }) => {
                     />
                 </View>
             </NetworkHeader>
-            <StoreMap location={userLocation} locations={storeLocations} useLocationsProp={true} onPressStore={transitionToStore} />
+            <StoreMap location={userLocation} locations={storeLocations} useLocationsProp={true} onPressStore={transitionToStore} useCarousel={true} isReviewsEnabled={isReviewsEnabled} />
         </View>
     );
 };
