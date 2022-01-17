@@ -6,8 +6,8 @@ import tailwind from 'tailwind';
 const ServiceQuoteFeeView = ({ serviceQuote, isFetchingServiceQuote, serviceQuoteError, style }) => {
     let render = <ActivityIndicator />;
 
-    if (!isFetchingServiceQuote) {
-        render = <Text style={style} numberOfLines={1}>{formatCurrency(serviceQuote.getAttribute('amount') / 100, serviceQuote.getAttribute('currency'))}</Text>;
+    if (!isFetchingServiceQuote && serviceQuote?.id) {
+        render = <Text style={style} numberOfLines={1}>{formatCurrency(serviceQuote?.getAttribute('amount') / 100, serviceQuote?.getAttribute('currency'))}</Text>;
     } else if (!isFetchingServiceQuote) {
         render = (
             <Text style={style} numberOfLines={1} style={tailwind('w-3/4')}>
