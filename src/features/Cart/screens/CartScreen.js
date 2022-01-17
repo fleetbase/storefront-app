@@ -530,6 +530,7 @@ const CartScreen = ({ navigation, route }) => {
                                     stopRightSwipe={-256}
                                     disableRightSwipe={true}
                                     onRowOpen={() => setFlatListScrollEnabled(false)}
+                                    onRowDidOpen={() => setFlatListScrollEnabled(true)}
                                     onRowClose={() => setFlatListScrollEnabled(true)}
                                 />
                             </View>
