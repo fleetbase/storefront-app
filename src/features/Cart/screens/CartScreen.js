@@ -54,6 +54,7 @@ const CartScreen = ({ navigation, route }) => {
     const [serviceQuote, setServiceQuote] = useState(null);
     const [serviceQuoteError, setServiceQuoteError] = useState(false);
     const [yOffset, setYoffset] = useState(0);
+    const [flatListScrollEnabled, setFlatListScrollEnabled] = useState(true);
 
     // if network load in stores to group cart items if multi store checkout is enabled
     if (isNetwork) {
@@ -219,6 +220,7 @@ const CartScreen = ({ navigation, route }) => {
 
         return getCart().then((cart) => {
             setIsLoading(false);
+            setFlatListScrollEnabled(true);
 
             return cart;
         });
@@ -229,13 +231,11 @@ const CartScreen = ({ navigation, route }) => {
 
         return cart
             .remove(cartItem.id)
-            .then((cart) => {
+            .then(setCart)
+            .catch(logError)
+            .finally(() => {
+                setFlatListScrollEnabled(true);
                 setIsEmptying(false);
-                setCart(cart);
-            })
-            .catch((error) => {
-                setIsEmptying(false);
-                logError(error, '[ Error removing item from cart! ]');
             });
     };
 
@@ -246,13 +246,11 @@ const CartScreen = ({ navigation, route }) => {
 
             return cart
                 .empty()
-                .then((cart) => {
+                .then(setCart)
+                .catch(logError)
+                .finally(() => {
+                    setFlatListScrollEnabled(true);
                     setIsEmptying(false);
-                    setCart(cart);
-                })
-                .catch((error) => {
-                    setIsEmptying(false);
-                    logError(error, '[ Error emptying cart! ]');
                 });
         };
 
@@ -396,11 +394,11 @@ const CartScreen = ({ navigation, route }) => {
                     </View>
                 </View>
                 <View style={tailwind('flex items-end')}>
-                    <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, item.currency)}</Text>
+                    <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
                     {item.quantity > 1 && (
                         <View>
                             <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                                {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, item.currency) })}
+                                {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency')) })}
                             </Text>
                         </View>
                     )}
@@ -503,6 +501,7 @@ const CartScreen = ({ navigation, route }) => {
                     refreshing={isLoading}
                     showsHorizontalScrollIndicator={false}
                     showsVerticalScrollIndicator={false}
+                    scrollEnabled={flatListScrollEnabled}
                     renderItem={({ item }) => {
                         const contents = cart.contents().filter((cartItem) => cartItem.store_id === item.id);
 
@@ -530,6 +529,8 @@ const CartScreen = ({ navigation, route }) => {
                                     rightOpenValue={-256}
                                     stopRightSwipe={-256}
                                     disableRightSwipe={true}
+                                    onRowOpen={() => setFlatListScrollEnabled(false)}
+                                    onRowClose={() => setFlatListScrollEnabled(true)}
                                 />
                             </View>
                         );

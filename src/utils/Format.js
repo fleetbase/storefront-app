@@ -1,4 +1,7 @@
 import { isVoid } from './Helper';
+import getCurrency from './get-currency';
+import countryLocaleMap from 'country-locale-map';
+
 
 /**
  *  Utility class for formatting strings.
@@ -17,13 +20,24 @@ export default class FormatUtil {
      * @return {string} 
      * @memberof FormatUtil
      */
-    static currency(amount = 0, currency = 'USD', currencyDisplay = 'symbol') {
+    static currency(amount = 0, currency = 'USD', currencyDisplay = 'symbol', options = {}) {
         if (isVoid(currency)) {
             // default back to usd
             currency = 'USD';
         }
 
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency, currencyDisplay }).format(amount);
+        const currencyData = getCurrency(currency);
+        const locale = countryLocaleMap.getLocaleByAlpha2(currencyData?.iso2)?.replace('_', '-') ?? 'en-US';
+
+        console.log(`Found locale ${locale} for currency ${currency} !`);
+        console.log(`Found currency data for currency ${currency} !`, currencyData);
+        
+        if (currencyData?.precision === 0) {
+            options.minimumFractionDigits = 0;
+            options.maximumFractionDigits = 0;
+        }
+
+        return new Intl.NumberFormat(locale, { style: 'currency', currency, currencyDisplay, ...options }).format(amount);
     }
 
     /**
