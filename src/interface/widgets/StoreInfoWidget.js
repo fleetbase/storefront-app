@@ -9,6 +9,11 @@ import tailwind from 'tailwind';
 
 const StoreInfoWidget = ({ info, store, storeLocation, wrapperStyle, containerStyle }) => {
     const [locale] = useLocale();
+    const links = ['website', 'facebook', 'instagram', 'twitter'].filter((attr) => store.isAttributeFilled(attr));
+
+    if (!links) {
+        return <View />;
+    }
 
     const openLink = (link) => {
         switch (link) {
@@ -46,8 +51,6 @@ const StoreInfoWidget = ({ info, store, storeLocation, wrapperStyle, containerSt
                 break;
         }
     };
-
-    const links = ['website', 'facebook', 'instagram', 'twitter'].filter((attr) => store.isAttributeFilled(attr));
 
     const getIcon = (link) => {
         let icon = faGlobe;

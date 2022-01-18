@@ -7,7 +7,7 @@ import { Store } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { translate, config } from 'utils';
+import { translate, config, isArray } from 'utils';
 import { useLocale, useMountedState } from 'hooks';
 import StoreCard from 'ui/StoreCard';
 import tailwind from 'tailwind';
@@ -26,6 +26,10 @@ const StoreRelatedWidget = ({ info, store, storeLocation, wrapperStyle, containe
         limit: 5,
         exclude: [store.id]
     };
+
+    if (isArray(relatedStores) && relatedStores.length === 0) {
+        return <View />
+    }
 
     const transitionToStore = (relatedStore, relatedStoreLocation) => {
         if (typeof relatedStore?.getAttribute === 'function' && !relatedStore?.getAttribute('online')) {
