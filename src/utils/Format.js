@@ -28,9 +28,6 @@ export default class FormatUtil {
 
         const currencyData = getCurrency(currency);
         const locale = countryLocaleMap.getLocaleByAlpha2(currencyData?.iso2)?.replace('_', '-') ?? 'en-US';
-
-        console.log(`Found locale ${locale} for currency ${currency} !`);
-        console.log(`Found currency data for currency ${currency} !`, currencyData);
         
         if (currencyData?.precision === 0) {
             options.minimumFractionDigits = 0;

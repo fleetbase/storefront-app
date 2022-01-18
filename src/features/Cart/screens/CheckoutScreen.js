@@ -7,12 +7,14 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faExclamationTriangle, faChevronRight, faTimes, faMoneyBillWave, faCashRegister } from '@fortawesome/free-solid-svg-icons';
 import { faStripe } from '@fortawesome/free-brands-svg-icons';
+import { NetworkInfoService } from 'services';
 import { formatCurrency, calculatePercentage, isLastIndex, logError, translate } from 'utils';
-import { useResourceStorage } from 'utils/Storage';
+import { useResourceStorage, useResourceCollection } from 'utils/Storage';
 import { useStorefront, useFleetbase, useCustomer, useMountedState, useLocale } from 'hooks';
-import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer } from '@fleetbase/storefront';
+import { Cart, Store, StoreLocation, DeliveryServiceQuote, Customer, PaymentGateway } from '@fleetbase/storefront';
 import { Place, ServiceQuote, Collection } from '@fleetbase/sdk';
 import { useStripe } from '@stripe/stripe-react-native';
+import { CheckoutDeliveryMap } from 'interface/widgets';
 import QpayPaymentSheet from 'interface/QpayPaymentSheet';
 import ActionSheet from 'react-native-actions-sheet';
 import FastImage from 'react-native-fast-image';
@@ -28,11 +30,29 @@ const CheckoutScreen = ({ navigation, route }) => {
     const insets = useSafeAreaInsets();
     const isMounted = useMountedState();
 
+    const StorefrontAdapter = storefront.getAdapter();
+    const FleetbaseAdapter = fleetbase.getAdapter();
+
     const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
     const { info, serializedCart, isPickupOrder, isTipping, isTippingDriver, tipAmount, deliveryTipAmount, quote } = route.params;
-    const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, fleetbase.getAdapter());
-    const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, storefront.getAdapter());
-    const [cart, setCart] = useResourceStorage('cart', Cart, storefront.getAdapter(), new Cart(serializedCart));
+
+    const isNetwork = info.is_network === true;
+    const codEnabled = info?.options?.cod_enabled === true;
+    const pickupEnabled = info?.options?.pickup_enabled === true;
+    const tipsEnabled = info?.options?.tips_enabled === true;
+    const deliveryTipsEnabled = info?.options?.delivery_tips_enabled === true;
+    const taxEnabled = info?.options?.tax_enabled === true;
+    const taxPercentage = info?.options?.tax_percentage ?? 0;
+    const store = new Store(info, StorefrontAdapter);
+
+    let stores, setStores, storeLocations, setStoreLocations, storeLocationIds, storeIds, origin;
+
+    const [customer, setCustomer] = useCustomer();
+    const [locale] = useLocale();
+
+    const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
+    const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
+    const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart));
     const [isLoading, setIsLoading] = useState(false);
     const [qpayInvoice, setQPayInvoice] = useState(null);
     const [qpayPaymentSheet, setQpayPaymentSheet] = useState(null);
@@ -49,17 +69,31 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [gatewayOptions, setGatewayOptions] = useState(new Collection());
     const [tip, setTip] = useState(tipAmount ?? 0);
     const [deliveryTip, setDeliveryTip] = useState(deliveryTipAmount ?? 0);
-    const [customer, setCustomer] = useCustomer();
-    const [locale] = useLocale();
-    const store = new Store(info, storefront.getAdapter());
 
-    const codEnabled = info?.options?.cod_enabled === true;
-    const pickupEnabled = info?.options?.pickup_enabled === true;
-    const tipsEnabled = info?.options?.tips_enabled === true;
-    const deliveryTipsEnabled = info?.options?.delivery_tips_enabled === true;
-    const taxEnabled = info?.options?.tax_enabled === true;
-    const taxPercentage = info?.options?.tax_percentage ?? 0;
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
+
+    // delivery origin
+    origin = storeLocation?.id ? new Place(storeLocation.getAttribute('place')) : null;
+
+    if (isNetwork) {
+        [stores, setStores] = useResourceCollection(`checkout_network_stores`, Store, StorefrontAdapter);
+        [storeLocations, setStoreLocations] = useResourceCollection(`checkout_network_store_locations`, StoreLocation, StorefrontAdapter);
+
+        // store ids for this order
+        storeIds = cart
+            .contents()
+            .map((cartItem) => cartItem.store_id)
+            .filter((id, index, arr) => arr.indexOf(id) === index);
+
+        // storelocation ids for this order
+        storeLocationIds = cart
+            .contents()
+            .map((cartItem) => cartItem.store_location_id)
+            .filter((id, index, arr) => arr.indexOf(id) === index);
+
+        // create delivery origins
+        origin = storeLocations?.map((sl) => new Place(sl.getAttribute('place')));
+    }
 
     const [gatewayDetails, setGatewayDetails] = useState({
         cash: {
@@ -91,7 +125,8 @@ const CheckoutScreen = ({ navigation, route }) => {
         let deliveryFee = <ActivityIndicator />;
 
         if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
-            deliveryFee = serviceQuote.formattedAmount;
+            // deliveryFee = serviceQuote.formattedAmount;
+            deliveryFee = formatCurrency(serviceQuote.getAttribute('amount') / 100, cart.getAttribute('currency'));
         }
 
         if (serviceQuoteError) {
@@ -282,8 +317,6 @@ const CheckoutScreen = ({ navigation, route }) => {
     };
 
     const setupGateways = async (gateways, c = null) => {
-        // setGatewayOptions(gateways);
-
         const _gateways = new Collection();
 
         // setup each payment gateway
@@ -313,7 +346,6 @@ const CheckoutScreen = ({ navigation, route }) => {
             }
 
             console.log('[ Gateway has initial token set ]', gateway.getCheckoutToken());
-
             _gateways.pushObject(gateway);
         }
 
@@ -395,14 +427,13 @@ const CheckoutScreen = ({ navigation, route }) => {
         return storefront.checkout
             .captureOrder(checkoutToken)
             .then((order) => {
-                setIsLoading(false);
                 cart.empty().then((cart) => {
                     updateCart(cart);
                 });
                 navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
             })
-            .catch((error) => {
-                logError(error, '[ Failed to capture order! ]');
+            .catch(logError)
+            .finally(() => {
                 setIsLoading(false);
             });
     };
@@ -435,12 +466,12 @@ const CheckoutScreen = ({ navigation, route }) => {
     };
 
     const getServiceQuoteFor = (customerLocation) => {
-        const quote = new DeliveryServiceQuote(storefront.getAdapter());
+        const quote = new DeliveryServiceQuote(StorefrontAdapter);
 
         /**
             or
 
-            DeliveryServiceQuote.getFromCart(storefront.getAdapter(), storeLocation, deliverTo, cart).then((serviceQuote) => {
+            DeliveryServiceQuote.getFromCart(StorefrontAdapter, storeLocation, deliverTo, cart).then((serviceQuote) => {
                 ...
             });
          */
@@ -501,6 +532,14 @@ const CheckoutScreen = ({ navigation, route }) => {
     useEffect(() => {
         fetchGateways();
 
+        if (isNetwork) {
+            // Load store locations from the network
+            NetworkInfoService.getStoreLocations({ ids: storeLocationIds }).then(setStoreLocations).catch(logError);
+
+            // Load stores from the network
+            NetworkInfoService.getStores({ ids: storeIds }).then(setStores).catch(logError);
+        }
+
         // Listen for customer updated event
         const customerUpdatedListener = EventRegister.addEventListener('customer.updated', (customer) => {
             fetchGateways(customer);
@@ -541,13 +580,13 @@ const CheckoutScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={tailwind('h-full px-5')}>
-                        {gatewayOptions.map((gateway) => (
+                        {gatewayOptions?.map((gateway) => (
                             <TouchableOpacity key={gateway.id} onPress={() => selectPaymentGateway(gateway)} style={tailwind('rounded-md bg-gray-50 p-4 mb-4')}>
                                 <View style={tailwind('flex flex-row')}>
-                                    <View style={tailwind('w-10')}>{gatewayDetails[gateway.type].icon}</View>
+                                    <View style={tailwind('w-10')}>{gatewayDetails[gateway?.type]?.icon}</View>
                                     <View>
-                                        <Text style={tailwind('font-bold text-base mb-1')}>{gatewayDetails[gateway.type].name}</Text>
-                                        <Text>{gatewayDetails[gateway.type].description}</Text>
+                                        <Text style={tailwind('font-bold text-base mb-1')}>{gatewayDetails[gateway?.type]?.name}</Text>
+                                        <Text>{gatewayDetails[gateway?.type]?.description}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -587,6 +626,9 @@ const CheckoutScreen = ({ navigation, route }) => {
                         </View>
                     )}
                     {!isPickupOrder && (
+                        <CheckoutDeliveryMap info={info} origin={origin} destination={deliverTo} wrapperStyle={tailwind('mb-4')} />
+                    )}
+                    {!isPickupOrder && (
                         <TouchableOpacity
                             style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}
                             disabled={!customer}
@@ -601,7 +643,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     {deliverTo && (
                                         <View>
                                             {deliverTo.isAttributeFilled('name') && <Text style={tailwind('font-semibold')}>{deliverTo.getAttribute('name')}</Text>}
-                                            <Text>{deliverTo.getAttribute('street1')}</Text>
+                                            <Text>{deliverTo.getAttribute('street1') ?? deliverTo.getAttribute('postal_code') ?? deliverTo.getAttribute('district')}</Text>
                                             {deliverTo.isAttributeFilled('street2') && <Text>{deliverTo.getAttribute('street2')}</Text>}
                                             <Text>
                                                 {deliverTo.getAttribute('city')}, {deliverTo.getAttribute('country')} {deliverTo.getAttribute('postal_code')}
@@ -624,11 +666,11 @@ const CheckoutScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                     )}
 
-                    {/* <View style={tailwind('my-4 bg-gray-50 rounded-md p-4')}>
-                        <Text numberOfLines={1}>Token: {checkoutToken}</Text>
-                    </View> */}
-
-                    <TouchableOpacity style={tailwind('p-4 rounded-md bg-gray-50 mb-4')} disabled={isLoading} onPress={choosePaymentOption}>
+                    <TouchableOpacity
+                        style={tailwind(`p-4 rounded-md bg-gray-50 mb-4 ${gatewayOptions?.length === 0 ? 'opacity-50' : ''}`)}
+                        disabled={isLoading || gatewayOptions?.length === 0}
+                        onPress={choosePaymentOption}
+                    >
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
@@ -746,7 +788,8 @@ const CheckoutScreen = ({ navigation, route }) => {
                         {!isPickupOrder && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
                                 <Text>{translate('Cart.CheckoutScreen.deliveryFeeLabelText')}</Text>
-                                <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text>
+                                {/* <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text> */}
+                                <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : formatCurrency(serviceQuote.getAttribute('amount') / 100, cart.getAttribute('currency'))}</Text>
                             </View>
                         )}
                         {tip !== 0 && (

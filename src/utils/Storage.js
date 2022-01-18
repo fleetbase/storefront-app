@@ -79,7 +79,6 @@ export default class StorageUtil {
      * @memberof StorageUtil
      */
     static useResourceCollection(key, resource, adapter, defaultValue = new Collection()) {
-        // const value = getArray(key) ?? defaultValue;
         const [value, setCollection] = useStorage(key, defaultValue);
 
         const toCollection = (arr, resource) => {
@@ -110,7 +109,7 @@ export default class StorageUtil {
             if (typeof resource?.invoke !== 'function') {
                 return setCollection({ items: resource });
             }
-
+            
             return setCollection({ items: resource.invoke('serialize') });
         };
 
