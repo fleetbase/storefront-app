@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useMountedState, useLocale } from 'hooks';
-import { formatCurrency, logError, config, translate } from 'utils';
+import { formatCurrency, logError, config, translate, isLastIndex } from 'utils';
 import { useResourceCollection } from 'utils/Storage';
 import Storefront, { Category } from '@fleetbase/storefront';
 import ProductCard from 'ui/ProductCard';

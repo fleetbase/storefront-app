@@ -38,24 +38,6 @@ const StoreScreen = ({ navigation, route }) => {
     const store = new Store(data, StorefrontAdapter);
     const contactActionSheetRef = createRef();
 
-    // actions
-    const isActionBarEnabled = config('app.storeScreenOptions.actionBarEnabled');
-    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
-    const isPhotosEnabled = config('app.storeScreenOptions.photosEnabled');
-    const isMapEnabled = config('app.storeScreenOptions.mapEnabled');
-    const isShareEnabled = config('app.storeScreenOptions.shareEnabled');
-    const isSearchEnabled = config('app.storeScreenOptions.searchEnabled');
-    const isBrowseEnabled = config('app.storeScreenOptions.browseEnabled');
-    const isContactEnabled = config('app.storeScreenOptions.contactEnabled');
-    const isWebsiteLinkEnabled = config('app.storeScreenOptions.websiteLinkEnabled');
-
-    // widgets
-    const isMapWidgetEnabled = config('app.storeScreenOptions.mapWidgetEnabled');
-    const isInfoWidgetEnabled = config('app.storeScreenOptions.infoWidgetEnabled');
-    const isRelatedWidgetEnabled = config('app.storeScreenOptions.relatedWidgetEnabled');
-    const isPhotosWidgetEnabled = config('app.storeScreenOptions.photosWidgetEnabled');
-    const isReviewsWidgetEnabled = config('app.storeScreenOptions.reviewsWidgetEnabled');
-
     const [categories, setCategories] = useResourceCollection(`${store.id}_categories`, Category, StorefrontAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage(`${store.id}_store_location`, StoreLocation, StorefrontAdapter, location);
     const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +50,24 @@ const StoreScreen = ({ navigation, route }) => {
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const today = weekdays[new Date().getDay()];
     const hasContactInformation = store.isAttributeFilled(['phone', 'email', 'facebook', 'instagram', 'twitter']);
+
+    // actions
+    const isActionBarEnabled = config('app.storeScreenOptions.actionBarEnabled');
+    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
+    const isPhotosEnabled = config('app.storeScreenOptions.photosEnabled');
+    const isMapEnabled = config('app.storeScreenOptions.mapEnabled');
+    const isShareEnabled = config('app.storeScreenOptions.shareEnabled');
+    const isSearchEnabled = config('app.storeScreenOptions.searchEnabled');
+    const isBrowseEnabled = config('app.storeScreenOptions.browseEnabled') && categories?.length > 0;
+    const isContactEnabled = config('app.storeScreenOptions.contactEnabled');
+    const isWebsiteLinkEnabled = config('app.storeScreenOptions.websiteLinkEnabled');
+
+    // widgets
+    const isMapWidgetEnabled = config('app.storeScreenOptions.mapWidgetEnabled');
+    const isInfoWidgetEnabled = config('app.storeScreenOptions.infoWidgetEnabled');
+    const isRelatedWidgetEnabled = config('app.storeScreenOptions.relatedWidgetEnabled');
+    const isPhotosWidgetEnabled = config('app.storeScreenOptions.photosWidgetEnabled');
+    const isReviewsWidgetEnabled = config('app.storeScreenOptions.reviewsWidgetEnabled');
 
     const loadCategories = (isRefreshing = false) => {
         setIsLoading(true);
