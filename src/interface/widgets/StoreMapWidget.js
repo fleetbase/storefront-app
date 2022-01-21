@@ -95,14 +95,14 @@ const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerSty
                 <View>
                     <View style={tailwind('px-2')}>
                         <TouchableOpacity onPress={onAddressPress} style={tailwind('border-b border-gray-200 py-3 px-2')}>
-                            <Text style={tailwind('text-lg text-gray-800')} numberOfLines={1}>
+                            <Text style={tailwind('text-sm text-gray-800')} numberOfLines={1}>
                                 {storeLocation.getAttribute('place.address')}
                             </Text>
                         </TouchableOpacity>
                     </View>
                     <View style={tailwind('px-2')}>
                         <TouchableOpacity onPress={() => openMap(destination)} style={tailwind(`${store.hasAttribute('phone') ? 'border-b border-gray-200' : ''} py-3 px-2`)}>
-                            <Text style={tailwind('text-lg text-gray-800')} numberOfLines={1}>
+                            <Text style={tailwind('text-sm text-gray-800')} numberOfLines={1}>
                                 {translate('components.widgets.StoreMapWidget.getDirections')}
                             </Text>
                         </TouchableOpacity>
@@ -110,7 +110,7 @@ const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerSty
                     {store.hasAttribute('phone') && (
                         <View style={tailwind('px-2')}>
                             <TouchableOpacity onPress={() => Linking.openURL(`tel:${store.getAttribute('phone')}`)} style={tailwind('py-3 px-2')}>
-                                <Text style={tailwind('text-lg text-gray-800')} numberOfLines={1}>
+                                <Text style={tailwind('text-sm text-gray-800')} numberOfLines={1}>
                                     {translate('components.widgets.StoreMapWidget.call')}
                                 </Text>
                                 <Text style={tailwind('text-sm text-gray-500 -mt-1')} numberOfLines={1}>
