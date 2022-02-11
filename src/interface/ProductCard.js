@@ -18,9 +18,9 @@ const ProductCard = ({ product, onPress, containerStyle }) => {
                 <View style={tailwind('flex p-2')}>
                     <View style={tailwind('mb-1.5 flex flex-row items-center')}>
                         <Text style={tailwind('font-semibold')}>{translate(product, 'name')}</Text>
-                        {product.getAttribute('is_service') === true && <Text style={tailwind('ml-1 text-blue-500 font-semibold')}>{translate('Components.interface.ProductCard.serviceIndicator')}</Text>}
+                        {product.getAttribute('is_service') === true && <Text style={tailwind('ml-1 text-blue-500 font-semibold')}>{translate('components.interface.ProductCard.serviceIndicator')}</Text>}
                     </View>
-                    {product.getAttribute('is_available') === false && <View style={tailwind('mb-1.5')}><Text style={tailwind('text-red-500 font-semibold')}>{translate('Components.interface.ProductCard.unavailable')}</Text></View>}
+                    {product.getAttribute('is_available') === false && <View style={tailwind('mb-1.5')}><Text style={tailwind('text-red-500 font-semibold')}>{translate('components.interface.ProductCard.unavailable')}</Text></View>}
                     <ProductPriceView product={product} textStyle={tailwind('font-bold')} />
                 </View>
             </View>
