@@ -12,7 +12,7 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, buttonIcon, buttonIconStyle, onResultPress, placeholder }) => {
+const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, buttonStyle, buttonIcon, buttonIconStyle, onResultPress, placeholder }) => {
     buttonTitle = buttonTitle ?? `Search ${network.getAttribute('name')}`;
     buttonIcon = buttonIcon ?? faSearch;
 
@@ -72,7 +72,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonStyle, button
             <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
                 <View style={[tailwind(`flex flex-row items-center bg-gray-100 rounded-md px-3 pr-2 h-10`), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} style={[tailwind('mr-2 text-gray-800'), buttonIconStyle]} />
-                    <Text style={[tailwind('text-gray-500 text-base'), buttonStyle]}>{buttonTitle}</Text>
+                    <Text style={[tailwind('text-gray-500 text-base'), buttonTitleStyle]}>{buttonTitle}</Text>
                 </View>
             </TouchableOpacity>
 
