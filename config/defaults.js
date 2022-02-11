@@ -76,6 +76,7 @@ const DefaultConfig = {
             backgroundImageStyle: {},
             containerStyle: {},
             searchButtonStyle: {},
+            searchButtonTitleStyle: {},
             searchButtonIconStyle: {},
             categoryButtonStyle: {},
             localePickerStyle: {},

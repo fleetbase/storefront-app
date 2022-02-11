@@ -87,6 +87,7 @@ const NetworkHeader = (props) => {
                                     buttonTitle={searchPlaceholder}
                                     onResultPress={onSearchResultPress}
                                     buttonStyle={[config('ui.headerComponent.searchButtonStyle')]}
+                                    buttonTitleStyle={[config('ui.headerComponent.searchButtonTitleStyle')]}
                                     buttonIconStyle={[config('ui.headerComponent.searchButtonIconStyle')]}
                                 />
                             </View>
