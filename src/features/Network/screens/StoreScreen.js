@@ -63,11 +63,11 @@ const StoreScreen = ({ navigation, route }) => {
     const isWebsiteLinkEnabled = config('app.storeScreenOptions.websiteLinkEnabled');
 
     // widgets
-    const isMapWidgetEnabled = config('app.storeScreenOptions.mapWidgetEnabled');
+    const isMapWidgetEnabled = isMapEnabled && config('app.storeScreenOptions.mapWidgetEnabled');
     const isInfoWidgetEnabled = config('app.storeScreenOptions.infoWidgetEnabled');
     const isRelatedWidgetEnabled = config('app.storeScreenOptions.relatedWidgetEnabled');
-    const isPhotosWidgetEnabled = config('app.storeScreenOptions.photosWidgetEnabled');
-    const isReviewsWidgetEnabled = config('app.storeScreenOptions.reviewsWidgetEnabled');
+    const isPhotosWidgetEnabled = isPhotosEnabled && config('app.storeScreenOptions.photosWidgetEnabled');
+    const isReviewsWidgetEnabled = isReviewsEnabled && config('app.storeScreenOptions.reviewsWidgetEnabled');
 
     const loadCategories = (isRefreshing = false) => {
         setIsLoading(true);

@@ -24,12 +24,12 @@ const StorePhotosWidget = ({ info, store, storeLocation, wrapperStyle, container
     return (
         <View style={[wrapperStyle]}>
             <View style={[tailwind('bg-white'), containerStyle]}>
-                <View style={tailwind('px-4 pt-4 pb-2 flex flex-row items-center justify-between')}>
+                <TouchableOpacity onPress={onViewMorePress} style={tailwind('px-4 pt-4 pb-2 flex flex-row items-center justify-between')}>
                     <Text style={tailwind('font-bold text-lg text-black mb-2')}>{translate('components.widgets.StorePhotosWidget.title')}</Text>
-                    <TouchableOpacity onPress={onViewMorePress}>
+                    <View>
                         <FontAwesomeIcon icon={faArrowRight} />
-                    </TouchableOpacity>
-                </View>
+                    </View>
+                </TouchableOpacity>
                 <ScrollView horizontal={true} style={tailwind('flex flex-row p-4')}>
                     {store.getAttribute('media', []).map((media, index) => (
                         <TouchableOpacity key={index} onPress={() => viewMedia(media)} style={tailwind('mr-3')}>

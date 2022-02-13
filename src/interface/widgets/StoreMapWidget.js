@@ -16,8 +16,10 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerStyle, mapHeight, onAddressPress }) => {
+
     const [locale] = useLocale();
     const map = useRef();
+    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
 
     mapHeight = mapHeight ?? 250;
 
@@ -25,12 +27,14 @@ const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerSty
         return <View />;
     }
 
-    const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
-
     const destination = {
         latitude: storeLocation?.getAttribute('place.location.coordinates.1'),
         longitude: storeLocation?.getAttribute('place.location.coordinates.0'),
     };
+
+    if (!destination?.latitude || !destination?.longitude) {
+        return <View />;
+    }
 
     const focus = () => {
         map?.current?.animateToRegion({

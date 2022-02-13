@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt, faTimes, faInfoCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { EventRegister } from 'react-native-event-listeners';
-import { haversine, isResource } from 'utils';
+import { haversine, isResource, logError } from 'utils';
 import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
 import { getCoordinates, getDistance } from 'utils/Geo';
 import { formatKm } from 'utils/Format';
@@ -33,83 +33,41 @@ const StorePicker = (props) => {
         onLoaded,
         defaultStoreLocation,
     } = props;
-    const buttonIcon = props?.buttonIcon ?? faInfoCircle;
-
-    const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
-    const [storeLocation, setStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter, defaultStoreLocation);
-    const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
-    const [isInitialized, setIsInitialized] = useState(false);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isSelecting, setIsSelecting] = useState(false);
-    const isMounted = useMountedState();
 
     const store = new Store(info, StorefrontAdapter);
+    const buttonIcon = props?.buttonIcon ?? faInfoCircle;
+    const isMounted = useMountedState();
     const insets = useSafeAreaInsets();
-    const useAddressTitle = displayAddressForTitle && storeLocation?.id;
 
-    const loadLocations = () => {
-        if (typeof store?.getLocations !== 'function') {
-            return;
+    const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
+    const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
+    const [selectedStoreLocation, setSelectedStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter, defaultStoreLocation ?? storeLocations?.first);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    
+    const useAddressTitle = displayAddressForTitle && selectedStoreLocation?.id;
+
+    const isCurrentStoreLocation = (storeLocation) => {
+        return storeLocation.id === selectedStoreLocation?.id;
+    };
+
+    const setLoadedStoreLocations = (storeLocations) => {
+        setStoreLocations(storeLocations);
+
+        if (typeof onLoaded === 'function') {
+            onLoaded(storeLocations);
         }
-
-        return store
-            .getLocations()
-            .then((locations) => {
-                if (!isMounted()) {
-                    return;
-                }
-
-                setStoreLocations(locations);
-
-                if (!defaultStoreLocation) {
-                    selectStoreLocation(locations);
-                }
-
-                if (typeof onLoaded === 'function') {
-                    onLoaded(locations);
-                }
-            })
-            .catch((error) => {
-                console.log('[Error fetching store locations]', error);
-            });
     };
 
     const selectStoreLocation = (selectedStoreLocation) => {
-        if (!storeLocation?.getAttribute('place') && isArray(selectedStoreLocation)) {
-            const defaultStoreLocation = selectedStoreLocation.first;
-
-            if (defaultStoreLocation) {
-                setStoreLocation(defaultStoreLocation);
-                sendStoreLocation(defaultStoreLocation);
-            }
-
-            return;
-        }
-
-        if (!storeLocation?.getAttribute('place') && selectedStoreLocation === undefined) {
-            const defaultStoreLocation = storeLocations.first;
-
-            if (defaultStoreLocation) {
-                setStoreLocation(defaultStoreLocation);
-                sendStoreLocation(defaultStoreLocation);
-            }
-
-            return;
-        }
-
         if (selectedStoreLocation instanceof StoreLocation) {
-            setStoreLocation(selectedStoreLocation);
-            sendStoreLocation(selectedStoreLocation);
+            setSelectedStoreLocation(selectedStoreLocation);
+
+            if (typeof onStoreLocationSelected === 'function') {
+                onStoreLocationSelected(storeLocation);
+            }
         }
     };
-
-    const sendStoreLocation = (storeLocation) => {
-        if (typeof onStoreLocationSelected === 'function') {
-            onStoreLocationSelected(storeLocation);
-        }
-    };
-
-    const isCurrentStoreLocation = (idxStoreLocation) => idxStoreLocation.id === storeLocation?.id;
 
     const DialogHeader = ({ title, subtitle, icon, onCancel }) => (
         <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
@@ -132,9 +90,13 @@ const StorePicker = (props) => {
     );
 
     useEffect(() => {
-        loadLocations(true);
-    }, [isMounted]);
+        if (!isMounted) {
+            return;
+        }
 
+        store?.getLocations().then(setLoadedStoreLocations).catch(logError);
+    }, [isMounted]);
+    
     return (
         <View style={[wrapperStyle]}>
             <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
@@ -144,12 +106,15 @@ const StorePicker = (props) => {
                         {useAddressTitle && (
                             <View style={[props.addressContainerStyle]}>
                                 <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]} numberOfLines={1}>
-                                    {storeLocation.getAttribute('name')}
+                                    {selectedStoreLocation.getAttribute('name')}
                                 </Text>
-                                {storeLocation.getAttribute('name') !== storeLocation.getAttribute('place.street1') && (
-                                    <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]} numberOfLines={1}>
-                                        {storeLocation.getAttribute('place.street1')}
-                                    </Text>
+                                {selectedStoreLocation.getAttribute('name') !== selectedStoreLocation.getAttribute('place.street1') && (
+                                    <View>
+                                        <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]} numberOfLines={1}>
+                                            {selectedStoreLocation.getAttribute('place.street1') ?? selectedStoreLocation.getAttribute('place.city') ?? selectedStoreLocation.getAttribute('place.district')}
+                                        </Text>
+                                        {selectedStoreLocation.hasAttribute('place.postal_code') && <Text style={tailwind('uppercase')}>{selectedStoreLocation.getAttribute('place.postal_code')}</Text>}
+                                    </View>
                                 )}
                             </View>
                         )}
@@ -170,10 +135,7 @@ const StorePicker = (props) => {
                             {(storeLocations ?? []).map((storeLocation, index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    onPress={() => {
-                                        selectStoreLocation(storeLocation);
-                                        setIsSelecting(false);
-                                    }}
+                                    onPress={() => selectStoreLocation(storeLocation)}
                                 >
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
@@ -185,9 +147,11 @@ const StorePicker = (props) => {
                                                         </View>
                                                     )}
                                                     <View style={[props.addressRowContainerStyle]}>
-                                                        <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>{storeLocation.getAttribute('name')}</Text>
-                                                        <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1')}</Text>
-                                                        <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>
+                                                        <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>
+                                                            {storeLocation.getAttribute('name')}
+                                                        </Text>
+                                                        <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1') ?? storeLocation.getAttribute('place.city') ?? storeLocation.getAttribute('place.district')}</Text>
+                                                        {storeLocation.hasAttribute('place.postal_code') && <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>}
                                                     </View>
                                                 </View>
                                             </View>
