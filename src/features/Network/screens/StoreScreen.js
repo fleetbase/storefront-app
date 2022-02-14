@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createRef } from 'react';
 import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBars, faMapMarkerAlt, faShare, faImages, faStar, faMapMarkedAlt, faExternalLinkAlt, faPhone, faSearch, faTimes, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faMapMarkerAlt, faShare, faImages, faStar, faMapMarkedAlt, faExternalLinkAlt, faPhone, faSearch, faTimes, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
@@ -464,11 +464,14 @@ const StoreScreen = ({ navigation, route }) => {
                             {categories
                                 .filter((category) => category.getAttribute('products.length') > 0)
                                 .map((category) => (
-                                    <View key={category.id}>
-                                        <View style={tailwind('w-full px-4 py-4')}>
-                                            <Text style={tailwind('font-bold text-base')}>{translate(category, 'name')}</Text>
-                                        </View>
-                                        <View style={tailwind('flex flex-row')}>
+                                    <View key={category.id} style={tailwind('bg-white my-2')}>
+                                        <TouchableOpacity onPress={() => transitionToCategory(category)} style={tailwind('px-4 py-2 flex flex-row items-center justify-between')}>
+                                            <Text style={tailwind('font-bold text-lg text-black mb-2')}>{translate(category, 'name')}</Text>
+                                            <View>
+                                                <FontAwesomeIcon icon={faArrowRight} />
+                                            </View>
+                                        </TouchableOpacity>
+                                        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={tailwind('flex flex-row px-2 py-2 w-full')}>
                                             {category
                                                 .getAttribute('products')
                                                 .map((product) => new Product(product, StorefrontAdapter))
@@ -476,11 +479,12 @@ const StoreScreen = ({ navigation, route }) => {
                                                     <ProductCard
                                                         key={index}
                                                         product={product}
-                                                        containerStyle={tailwind('w-1/2')}
+                                                        containerStyle={tailwind('flex-1')}
                                                         onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
                                                     />
                                                 ))}
-                                        </View>
+                                                <View style={tailwind('w-32 h-full')} />
+                                        </ScrollView>
                                     </View>
                                 ))}
                         </View>

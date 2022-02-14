@@ -30,7 +30,7 @@ const StorePhotosWidget = ({ info, store, storeLocation, wrapperStyle, container
                         <FontAwesomeIcon icon={faArrowRight} />
                     </View>
                 </TouchableOpacity>
-                <ScrollView horizontal={true} style={tailwind('flex flex-row p-4')}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={tailwind('flex flex-row p-4')}>
                     {store.getAttribute('media', []).map((media, index) => (
                         <TouchableOpacity key={index} onPress={() => viewMedia(media)} style={tailwind('mr-3')}>
                             <FastImage source={{ uri: media.url }} style={tailwind('border-4 border-gray-900 w-36 h-36')} />
