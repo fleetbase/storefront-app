@@ -138,9 +138,6 @@ const StoreScreen = ({ navigation, route }) => {
         });
     };
 
-    console.log('[storeLocation.today]', storeLocation?.today);
-    console.log('[storeLocation.isAlwaysOpen]', storeLocation?.isAlwaysOpen);
-
     const StoreHeader = ({ store, wrapperStyle }) => (
         <View style={[tailwind('w-full z-20'), wrapperStyle]}>
             <View style={tailwind('w-full flex items-center justify-center')}>

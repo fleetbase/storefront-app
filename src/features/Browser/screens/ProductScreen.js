@@ -29,8 +29,8 @@ const getYoutubeId = (url) => {
         return false;
     }
     
-    const match = url?.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
-    return match && match[7].length == 11 ? match[7] : false;
+    const match = url?.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/);
+    return match && match[1].length == 11 ? match[1] : false;
 };
 
 const getYoutubeThumbnail = (url) => {
@@ -38,7 +38,7 @@ const getYoutubeThumbnail = (url) => {
     return `https://i3.ytimg.com/vi/${id}/hqdefault.jpg`;
 };
 
-const isYoutubeUrl = (url) => typeof url === 'string' && url.includes('youtube.com');
+const isYoutubeUrl = (url) => typeof url === 'string' && url.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/)?.length > 0;
 
 const ProductScreen = ({ navigation, route }) => {
     const { attributes, cartItemAttributes, store, info } = route.params;
@@ -470,13 +470,13 @@ const ProductScreen = ({ navigation, route }) => {
                                         <View style={tailwind('flex flex-row items-center mb-2')}>
                                             <Text style={tailwind('font-semibold text-lg')}>{translate('Browser.ProductScreen.youtubeVidsSectionTitle')}</Text>
                                         </View>
-                                        <View style={tailwind(`flex flex-row flex-wrap py-4`)}>
+                                        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={tailwind(`flex flex-row flex-wrap py-4`)}>
                                             {youtubeUrls.map((youtubeUrl, index) => (
-                                                <TouchableOpacity key={index} onPress={() => setViewingMedia(youtubeUrl)} style={tailwind('border border-black')}>
+                                                <TouchableOpacity key={index} onPress={() => setViewingMedia(youtubeUrl)} style={tailwind('border border-black mr-2')}>
                                                     <FastImage source={{ uri: getYoutubeThumbnail(youtubeUrl) }} style={tailwind('w-40 h-24')} />
                                                 </TouchableOpacity>
                                             ))}
-                                        </View>
+                                        </ScrollView>
                                     </View>
                                 </View>
                             )}
