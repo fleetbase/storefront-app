@@ -18,59 +18,61 @@ const { emit } = EventRegister;
  * Push Notifications Configurations
  * We will just use EventRegister to pass up.
  */
-if (!isEmulator()) {
-    PushNotification.configure({
-        // (optional) Called when Token is generated (iOS and Android)
-        onRegister: function (token) {
-            console.log('[NOTIFICATION:TOKEN]', token);
-            emit('onNotificationsRegister', token);
-            // save token
-            set('token', token);
-        },
-
-        // (required) Called when a remote is received or opened, or local notification is opened
-        onNotification: function (notification) {
-            console.log('[NOTIFICATION]', notification);
-            emit('onNotification', notification);
+isEmulator().then((isEmulator) => {
+    if (!isEmulator) {
+        PushNotification.configure({
+            // (optional) Called when Token is generated (iOS and Android)
+            onRegister: function (token) {
+                console.log('[NOTIFICATION:TOKEN]', token);
+                emit('onNotificationsRegister', token);
+                // save token
+                set('token', token);
+            },
 
             // (required) Called when a remote is received or opened, or local notification is opened
-            notification.finish(PushNotificationIOS.FetchResult.NoData);
-        },
+            onNotification: function (notification) {
+                console.log('[NOTIFICATION]', notification);
+                emit('onNotification', notification);
 
-        // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
-        onAction: function (notification) {
-            console.log('ACTION:', notification.action);
-            console.log('NOTIFICATION:', notification);
-            emit('onNotificationsAction', notification);
-            // process the action
-        },
+                // (required) Called when a remote is received or opened, or local notification is opened
+                notification.finish(PushNotificationIOS.FetchResult.NoData);
+            },
 
-        // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
-        onRegistrationError: function (err) {
-            console.error(err.message, err);
-            emit('onNotificationsRegistrationError', err);
-        },
+            // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
+            onAction: function (notification) {
+                console.log('ACTION:', notification.action);
+                console.log('NOTIFICATION:', notification);
+                emit('onNotificationsAction', notification);
+                // process the action
+            },
 
-        // IOS ONLY (optional): default: all - Permissions to register.
-        permissions: {
-            alert: true,
-            badge: true,
-            sound: true,
-        },
+            // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
+            onRegistrationError: function (err) {
+                console.error(err.message, err);
+                emit('onNotificationsRegistrationError', err);
+            },
 
-        // Should the initial notification be popped automatically
-        // default: true
-        popInitialNotification: true,
+            // IOS ONLY (optional): default: all - Permissions to register.
+            permissions: {
+                alert: true,
+                badge: true,
+                sound: true,
+            },
 
-        /**
-         * (optional) default: true
-         * - Specified if permissions (ios) and token (android and ios) will requested or not,
-         * - if not, you must call PushNotificationsHandler.requestPermissions() later
-         * - if you are not using remote notification or do not have Firebase installed, use this:
-         *     requestPermissions: Platform.OS === 'ios'
-         */
-        requestPermissions: true,
-    });
-}
+            // Should the initial notification be popped automatically
+            // default: true
+            popInitialNotification: true,
+
+            /**
+             * (optional) default: true
+             * - Specified if permissions (ios) and token (android and ios) will requested or not,
+             * - if not, you must call PushNotificationsHandler.requestPermissions() later
+             * - if you are not using remote notification or do not have Firebase installed, use this:
+             *     requestPermissions: Platform.OS === 'ios'
+             */
+            requestPermissions: true,
+        });
+    }
+});
 
 AppRegistry.registerComponent(appName, () => App);
