@@ -14,6 +14,7 @@
 		67645E408F3552F2E5478C2E /* libPods-StorefrontApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96A859EB5B568259B9BD3FA9 /* libPods-StorefrontApp.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		C3CCC92698644AECB80B2AD1 /* libPods-StorefrontApp-StorefrontAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D2AA564C91BA79CD0C46DBF /* libPods-StorefrontApp-StorefrontAppTests.a */; };
+		E438535227D5EC6100DB8282 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E438535127D5EC6100DB8282 /* BootSplash.storyboard */; };
 		E4E31EBE26970A7F001BAF0A /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E31EBD26970A7F001BAF0A /* Header.swift */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = StorefrontApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		96A859EB5B568259B9BD3FA9 /* libPods-StorefrontApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StorefrontApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E433B8C026AE740200D2388C /* StorefrontApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = StorefrontApp.entitlements; path = StorefrontApp/StorefrontApp.entitlements; sourceTree = "<group>"; };
+		E438535127D5EC6100DB8282 /* BootSplash.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = BootSplash.storyboard; path = StorefrontApp/BootSplash.storyboard; sourceTree = "<group>"; };
 		E4516E7726CBAE3200A186F7 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		E4E31EBC26970A7F001BAF0A /* StorefrontApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StorefrontApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		E4E31EBD26970A7F001BAF0A /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 		13B07FAE1A68108700A75B9A /* StorefrontApp */ = {
 			isa = PBXGroup;
 			children = (
+				E438535127D5EC6100DB8282 /* BootSplash.storyboard */,
 				E433B8C026AE740200D2388C /* StorefrontApp.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -257,6 +260,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E438535227D5EC6100DB8282 /* BootSplash.storyboard in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);

@@ -10,7 +10,7 @@
     "test": "jest",
     "lint": "eslint .",
     "generate-app-icon": "npx app-icon generate -i ./assets/app-icon.png",
-    "generate-launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background-color=FFFFFF --logo-width=100 --flavor=main"
+    "generate-launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background-color=#FFFFFF --logo-width=100 --flavor=main"
   },
   "dependencies": {
     "@fleetbase/storefront": "^1.1.5",
