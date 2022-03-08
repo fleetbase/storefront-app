@@ -476,11 +476,11 @@ const StoreScreen = ({ navigation, route }) => {
                                                     <ProductCard
                                                         key={index}
                                                         product={product}
-                                                        containerStyle={tailwind('flex-1')}
+                                                        containerStyle={tailwind('w-40')}
                                                         onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
                                                     />
                                                 ))}
-                                                <View style={tailwind('w-32 h-full')} />
+                                                <View style={tailwind('w-40 h-full')} />
                                         </ScrollView>
                                     </View>
                                 ))}

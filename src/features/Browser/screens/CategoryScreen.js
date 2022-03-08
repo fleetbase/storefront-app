@@ -77,7 +77,7 @@ const CategoryScreen = ({ navigation, route }) => {
                         <ProductCard
                             key={index}
                             product={product}
-                            containerStyle={tailwind('w-1/2')}
+                            containerStyle={tailwind('w-40')}
                             onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize() })}
                         />
                     ))}
