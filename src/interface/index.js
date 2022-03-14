@@ -10,6 +10,7 @@ import StoreSearch from './StoreSearch';
 import ProductPriceView from './ProductPriceView';
 import LangPicker from './LangPicker';
 import ExploreBar from './ExploreBar';
+import OrderStatusBadge from './OrderStatusBadge';
 
 export {
     TipInput,
@@ -23,5 +24,6 @@ export {
     StoreSearch,
     ProductPriceView,
     LangPicker,
-    ExploreBar
+    ExploreBar,
+    OrderStatusBadge
 }

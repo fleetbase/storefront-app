@@ -84,6 +84,12 @@ const CartScreen = ({ navigation, route }) => {
         return ids.includes(store.id);
     });
 
+    const networkStoreLocations = cart
+        .contents()
+        .map((cartItem) => cartItem?.store_location_id)
+        .filter(Boolean)
+        .filter((value, index, self) => self.indexOf(value) === index);
+
     const getDeliveryQuote = () => {
         return getServiceQuoteFor(deliverTo);
     };
@@ -114,7 +120,7 @@ const CartScreen = ({ navigation, route }) => {
         setServiceQuoteError(false);
 
         quote
-            .fromCart(storeLocation, customerLocation, cart)
+            .fromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
             .then((serviceQuote) => {
                 setServiceQuote(serviceQuote);
                 setIsFetchingServiceQuote(false);
@@ -442,6 +448,7 @@ const CartScreen = ({ navigation, route }) => {
             if (Object.keys(products).length === 0) {
                 preloadCartItems(cart);
             }
+            getDeliveryQuote();
         });
 
         const locationChanged = addEventListener('location.updated', (place) => {
@@ -460,7 +467,15 @@ const CartScreen = ({ navigation, route }) => {
             removeEventListener(customerSignedOut);
             removeEventListener(locationChanged);
         };
-    }, []);
+    }, [isMounted]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDeliveryQuote();
+        });
+
+        return unsubscribe;
+    }, [isMounted]);
 
     return (
         <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>

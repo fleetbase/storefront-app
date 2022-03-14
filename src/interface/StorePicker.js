@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt, faTimes, faInfoCircle, faStar } from '@fortawesome/free-solid-svg-icons';
@@ -41,11 +41,17 @@ const StorePicker = (props) => {
 
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
-    const [selectedStoreLocation, setSelectedStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter, defaultStoreLocation ?? storeLocations?.first);
+    const [selectedStoreLocation, setSelectedStoreLocation] = useResourceStorage(
+        `${info.id}_store_location`,
+        StoreLocation,
+        StorefrontAdapter,
+        defaultStoreLocation ?? storeLocations?.first
+    );
     const [isInitialized, setIsInitialized] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
-    const useAddressTitle = displayAddressForTitle && selectedStoreLocation?.id;
+    const [render, setRender] = useState(false);
+
+    const useAddressTitle = displayAddressForTitle && typeof selectedStoreLocation?.id === 'string' && selectedStoreLocation?.id.length > 1;
 
     const isCurrentStoreLocation = (storeLocation) => {
         return storeLocation.id === selectedStoreLocation?.id;
@@ -64,7 +70,7 @@ const StorePicker = (props) => {
             setSelectedStoreLocation(selectedStoreLocation);
 
             if (typeof onStoreLocationSelected === 'function') {
-                onStoreLocationSelected(storeLocation);
+                onStoreLocationSelected(selectedStoreLocation);
             }
         }
     };
@@ -90,20 +96,38 @@ const StorePicker = (props) => {
     );
 
     useEffect(() => {
-        if (!isMounted) {
+        if (!isMounted && render === true) {
             return;
         }
 
         store?.getLocations().then(setLoadedStoreLocations).catch(logError);
     }, [isMounted]);
-    
+
+    useEffect(() => {
+        setRender(true);
+    }, [isMounted]);
+
+    useEffect(() => {
+        if (!defaultStoreLocation && typeof onStoreLocationSelected === 'function') {
+            onStoreLocationSelected(selectedStoreLocation);
+        }
+    }, [isMounted]);
+
+    if (!render) {
+        return (
+            <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2'), buttonStyle]}>
+                <ActivityIndicator />
+            </View>
+        );
+    }
+
     return (
         <View style={[wrapperStyle]}>
             <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
                 <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2'), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('text-white mr-2'), buttonIconStyle]} />
                     <View style={[buttonTitleWrapperStyle]}>
-                        {useAddressTitle && (
+                        {useAddressTitle && render && (
                             <View style={[props.addressContainerStyle]}>
                                 <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]} numberOfLines={1}>
                                     {selectedStoreLocation.getAttribute('name')}
@@ -111,14 +135,18 @@ const StorePicker = (props) => {
                                 {selectedStoreLocation.getAttribute('name') !== selectedStoreLocation.getAttribute('place.street1') && (
                                     <View>
                                         <Text style={[tailwind('uppercase'), props.addressSubtitleStyle]} numberOfLines={1}>
-                                            {selectedStoreLocation.getAttribute('place.street1') ?? selectedStoreLocation.getAttribute('place.city') ?? selectedStoreLocation.getAttribute('place.district')}
+                                            {selectedStoreLocation.getAttribute('place.street1') ??
+                                                selectedStoreLocation.getAttribute('place.city') ??
+                                                selectedStoreLocation.getAttribute('place.district')}
                                         </Text>
-                                        {selectedStoreLocation.hasAttribute('place.postal_code') && <Text style={tailwind('uppercase')}>{selectedStoreLocation.getAttribute('place.postal_code')}</Text>}
+                                        {selectedStoreLocation.hasAttribute('place.postal_code') && (
+                                            <Text style={tailwind('uppercase')}>{selectedStoreLocation.getAttribute('place.postal_code')}</Text>
+                                        )}
                                     </View>
                                 )}
                             </View>
                         )}
-                        {!useAddressTitle && (
+                        {!useAddressTitle && render && (
                             <Text style={[tailwind('text-white'), buttonTitleStyle]} numberOfLines={buttonTitleMaxLines ?? 1}>
                                 {info.name}
                             </Text>
@@ -127,16 +155,13 @@ const StorePicker = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
+            <Modal animationType={'slide'} transparent={true} visible={isDialogOpen && render} onRequestClose={() => setIsDialogOpen(false)}>
                 <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
                     <View>
                         <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />
                         <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                             {(storeLocations ?? []).map((storeLocation, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    onPress={() => selectStoreLocation(storeLocation)}
-                                >
+                                <TouchableOpacity key={index} onPress={() => selectStoreLocation(storeLocation)}>
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             <View style={tailwind('flex-1 pr-10')}>
@@ -150,8 +175,14 @@ const StorePicker = (props) => {
                                                         <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>
                                                             {storeLocation.getAttribute('name')}
                                                         </Text>
-                                                        <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.street1') ?? storeLocation.getAttribute('place.city') ?? storeLocation.getAttribute('place.district')}</Text>
-                                                        {storeLocation.hasAttribute('place.postal_code') && <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>}
+                                                        <Text style={tailwind('uppercase')}>
+                                                            {storeLocation.getAttribute('place.street1') ??
+                                                                storeLocation.getAttribute('place.city') ??
+                                                                storeLocation.getAttribute('place.district')}
+                                                        </Text>
+                                                        {storeLocation.hasAttribute('place.postal_code') && (
+                                                            <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>
+                                                        )}
                                                     </View>
                                                 </View>
                                             </View>

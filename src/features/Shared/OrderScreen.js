@@ -47,6 +47,9 @@ const OrderScreen = ({ navigation, route }) => {
     const deliveryTip = order.getAttribute('meta.delivery_tip');
     const isCod = order.getAttribute('payload.cod_amount') > 0;
 
+    const noTip = tip === 0 || tip == false || tip === undefined;
+    const noDeliveryTip = deliveryTip === 0 || deliveryTip == false || deliveryTip === undefined;
+
     const formattedTip = (() => {
         if (typeof tip === 'string' && tip.endsWith('%')) {
             const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal) / 100, currency);
@@ -309,7 +312,7 @@ const OrderScreen = ({ navigation, route }) => {
                                     </View>
                                     <View style={tailwind('w-full bg-white p-4')}>
                                         {order.getAttribute('payload.entities', []).map((entity, index) => (
-                                            <View key={index} style={tailwind('flex flex-row mb-2')}>
+                                            <View key={index} style={tailwind('flex flex-row mb-3')}>
                                                 <View style={tailwind('mr-3')}>
                                                     <View style={tailwind('rounded-md border border-gray-300 flex items-center justify-center w-7 h-7 mr-3')}>
                                                         <Text style={tailwind('font-semibold text-blue-500 text-sm')}>{entity.meta.quantity}x</Text>
@@ -356,13 +359,13 @@ const OrderScreen = ({ navigation, route }) => {
                                                 <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
                                             </View>
                                         )}
-                                        {tip && (
+                                        {!noTip && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
                                                 <Text>{translate('Shared.OrderScreen.tip')}</Text>
                                                 <Text>{formattedTip}</Text>
                                             </View>
                                         )}
-                                        {deliveryTip && !isPickupOrder && (
+                                        {!noDeliveryTip && !isPickupOrder && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
                                                 <Text>{translate('Shared.OrderScreen.deliveryTip')}</Text>
                                                 <Text>{formattedDeliveryTip}</Text>

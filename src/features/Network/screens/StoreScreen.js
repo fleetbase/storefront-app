@@ -46,6 +46,7 @@ const StoreScreen = ({ navigation, route }) => {
     const [isHoursVisible, setIsHoursVisible] = useState(false);
     const [results, setResults] = useState(new Collection());
     const [locale] = useLocale();
+
     const shouldDisplayLoader = categories?.length === 0 && isLoading;
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const today = weekdays[new Date().getDay()];
@@ -175,6 +176,8 @@ const StoreScreen = ({ navigation, route }) => {
                                 buttonIconStyle={tailwind('text-gray-100')}
                                 addressTitleStyle={tailwind('text-white font-semibold')}
                                 addressSubtitleStyle={tailwind('text-gray-100')}
+                                defaultStoreLocation={storeLocation}
+                                onStoreLocationSelected={setStoreLocation}
                                 buttonIconSize={22}
                             />
                         </View>
@@ -390,15 +393,6 @@ const StoreScreen = ({ navigation, route }) => {
         loadCategories();
     }, [isMounted]);
 
-    // if store location changes or provided, set it
-    useEffect(() => {
-        const currentStoreLocation = new StoreLocation(location);
-
-        if (currentStoreLocation && isResource(currentStoreLocation)) {
-            setStoreLocation(currentStoreLocation);
-        }
-    }, [location]);
-
     return (
         <ImageBackground source={{ uri: store.getAttribute('backdrop_url') }} style={tailwind('bg-gray-100 h-full')} imageStyle={tailwind('bg-cover')}>
             <View style={tailwind('bg-gray-900 bg-opacity-50')}>
@@ -477,7 +471,7 @@ const StoreScreen = ({ navigation, route }) => {
                                                         key={index}
                                                         product={product}
                                                         containerStyle={tailwind('w-40')}
-                                                        onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data })}
+                                                        onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data, selectedStoreLocation: storeLocation?.serialize() })}
                                                     />
                                                 ))}
                                                 <View style={tailwind('w-40 h-full')} />

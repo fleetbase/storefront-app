@@ -8,7 +8,7 @@ import { Collection } from '@fleetbase/sdk';
 import { Network, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { useResourceCollection } from 'utils/Storage';
-import { useLocale } from 'hooks';
+import { useLocale, useMountedState } from 'hooks';
 import { config, translate } from 'utils';
 import LocationPicker from '../LocationPicker';
 import LangPicker from '../LangPicker';
@@ -41,6 +41,7 @@ const NetworkHeader = (props) => {
     const insets = useSafeAreaInsets();
     const storefront = useStorefront();
     const navigation = useNavigation();
+    const isMounted = useMountedState();
 
     const network = new Network(info, storefront.getAdapter());
 
@@ -48,9 +49,14 @@ const NetworkHeader = (props) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState(new Collection());
+    const [render, setRender] = useState(false);
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, categories ?? new Collection());
 
     const shouldDisplayLogoText = (displayLogoText ?? config('ui.headerComponent.displayLogoText')) === true;
+   
+    useEffect(() => {
+        setRender(true);
+    }, [isMounted]);
 
     return (
         <ImageBackground
@@ -74,11 +80,11 @@ const NetworkHeader = (props) => {
                         {config('ui.headerComponent.displayLocalePicker') === true && config('app.enableTranslations') === true && (
                             <LangPicker wrapperStyle={tailwind('mr-2')} buttonStyle={[config('ui.headerComponent.localePickerStyle')]} />
                         )}
-                        {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
+                        {config('ui.headerComponent.displayLocationPicker') === true && render && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
                     </View>
                 </View>
 
-                {!hideSearchBar && (
+                {!hideSearchBar && render && (
                     <View style={tailwind('px-4 py-2 flex flex-row items-center')}>
                         {!hideSearch && (
                             <View style={tailwind('flex-1')}>

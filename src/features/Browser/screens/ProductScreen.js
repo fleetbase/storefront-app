@@ -41,7 +41,7 @@ const getYoutubeThumbnail = (url) => {
 const isYoutubeUrl = (url) => typeof url === 'string' && url.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/)?.length > 0;
 
 const ProductScreen = ({ navigation, route }) => {
-    const { attributes, cartItemAttributes, store, info } = route.params;
+    const { attributes, cartItemAttributes, store, selectedStoreLocation, info } = route.params;
     const storefront = useStorefront();
     const product = new Product(attributes);
     // const images = product.getAttribute('images');
@@ -53,7 +53,7 @@ const ProductScreen = ({ navigation, route }) => {
     const actionSheetRef = createRef();
 
     // only if store has been passed in
-    const [storeLocation, setStoreLocation] = useResourceStorage(store?.id ? `${store.id}_store_location` : 'store_location', StoreLocation, storefront.getAdapter());
+    const [storeLocation, setStoreLocation] = useResourceStorage(store?.id ? `${store.id}_store_location` : 'store_location', StoreLocation, storefront.getAdapter(), selectedStoreLocation);
     // relevant product state
     const [images, setImages] = useState(product.getAttribute('images'));
     const [activeSlide, setActiveSlide] = useState(0);

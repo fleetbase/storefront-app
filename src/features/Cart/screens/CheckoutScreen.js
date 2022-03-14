@@ -72,6 +72,12 @@ const CheckoutScreen = ({ navigation, route }) => {
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
 
+    const networkStoreLocations = cart
+        .contents()
+        .map((cartItem) => cartItem?.store_location_id)
+        .filter(Boolean)
+        .filter((value, index, self) => self.indexOf(value) === index);
+
     // delivery origin
     origin = storeLocation?.id ? new Place(storeLocation.getAttribute('place')) : null;
 
@@ -491,7 +497,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         setServiceQuoteError(false);
 
         quote
-            .fromCart(storeLocation, customerLocation, cart)
+            .fromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
             .then((serviceQuote) => {
                 setServiceQuote(serviceQuote);
                 setIsFetchingServiceQuote(false);
@@ -548,6 +554,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         // Listen for changes to cart
         const cartChanged = addEventListener('cart.updated', (cart) => {
             setCart(cart);
+            getDeliveryQuote();
         });
 
         // Listen for changes to customer delivery location
@@ -561,7 +568,15 @@ const CheckoutScreen = ({ navigation, route }) => {
             removeEventListener(cartChanged);
             removeEventListener(locationChanged);
         };
-    }, []);
+    }, [isMounted]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDeliveryQuote();
+        });
+
+        return unsubscribe;
+    }, [isMounted]);
 
     return (
         <View style={[tailwind('w-full h-full bg-white relative'), { paddingTop: insets.top }]}>

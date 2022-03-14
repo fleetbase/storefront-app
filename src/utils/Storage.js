@@ -56,6 +56,10 @@ export default class StorageUtil {
             return [new Collection(value.map((attributes) => new ResourceType(attributes, adapter))), setResource];
         }
 
+        if (value && typeof value?.serialize === 'function') {
+            return [new ResourceType(value.serialize(), adapter), setResource];
+        }
+
         if (value) {
             return [new ResourceType(value, adapter), setResource];
         }
