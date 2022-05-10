@@ -9,7 +9,7 @@ import MapView, { Marker } from 'react-native-maps';
 import FastImage from 'react-native-fast-image';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
-import { translate, getCurrentLocation, logError } from 'utils';
+import { translate, getCurrentLocation, logError, isArray } from 'utils';
 import { useLocale, useMountedState } from 'hooks';
 import Rating from 'ui/Rating';
 import tailwind from 'tailwind';
@@ -29,7 +29,7 @@ const StoreMap = ({ query, location, filters, onPressStore, containerStyle, mapV
 
     const [storeLocations, setStoreLocations] = useResourceCollection('network_store_locations', StoreLocation, StorefrontAdapter, locations);
     const [userLocation, setUserLocation] = useState(location);
-    const [focusedLocationIndex, setFocusedLocationIndex] = useState(Math.round(storeLocations?.length / 2));
+    const [focusedLocationIndex, setFocusedLocationIndex] = useState(0);
     const [params, setParams] = useState({
         location: userLocation?.coordinates?.join(','),
         with_store: true,
@@ -56,8 +56,18 @@ const StoreMap = ({ query, location, filters, onPressStore, containerStyle, mapV
         }
     };
 
-    const focusStoreLocation = (index) => {
+    const focusStoreLocation = (index = 0) => {
         setFocusedLocationIndex(index);
+
+        const count = index + 1;
+
+        if (!isArray(storeLocations)) {
+            return;
+        }
+
+        if (storeLocations.length < count) {
+            return;
+        }
 
         const storeLocation = storeLocations.objectAt(index);
         const destination = {
@@ -68,6 +78,10 @@ const StoreMap = ({ query, location, filters, onPressStore, containerStyle, mapV
         const longitudeZoom = 30;
         const latitudeDelta = LATITUDE_DELTA / latitudeZoom;
         const longitudeDelta = LONGITUDE_DELTA / longitudeZoom;
+
+        if (destination?.latitude === NaN || destination?.longitude === NaN) {
+            return focusStoreLocation(index++);
+        }
 
         map?.current?.animateToRegion({
             ...destination,
@@ -123,6 +137,12 @@ const StoreMap = ({ query, location, filters, onPressStore, containerStyle, mapV
         // Set user location to state
         getCurrentLocation().then(setUserLocation).catch(logError);
     }, [isMounted]);
+
+    useEffect(() => {
+        // when store locations count changes focus
+        // should only be after initial load
+        focusStoreLocation();
+    }, [JSON.stringify(storeLocations)]);
 
     useEffect(() => {
         setParam('tagged', filters);
