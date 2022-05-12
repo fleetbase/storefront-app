@@ -42,6 +42,12 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
  - [Push Notifications](#push-notifications)
 	 - [APNS Push Notifications](#apns-push-notifications)
 	 - [FCM Push Notifications](#fcm-push-notifications)
+ - [Configuration](#configuration)
+	 - [Application Configuration](#appconfig)
+	 - [Interface Configuration](#uiconfig)
+ - [Internationalization and Translations](#internationalization-and-translations)
+	 - [Internationalization](#internationalization)
+	 - [Translations](#translations)
  - [Payment Gateways](#payment-gateways)
 	 - [Stripe](#stripe)
  - [Store Locations](#store-locations)
@@ -174,6 +180,54 @@ FCM Push Notifications or "Firebase Cloud Messaging" notifications are simple to
  4. Click "Create Notification Channel"
  5. That's it, you're all set. Now when orders go through Fleetbase will be able to send push notifications to your android app.
 
+### Configuration
+StorefrontApp features config files which will allow you to change the behaviour and look of your app. It will also allow you to setup [linking prefixes](https://reactnative.dev/docs/linking), which will be documented more in the future. 
+
+#### Application Configuration
+Application configuration includes behaviour configuration, linking prefixes, translations, and the enabling or disabling of widgets.
+
+| Prop                | Type    | Default | Description                                                                                                                                                             |
+|---------------------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| linkingPrefixes     | Array   | []      | Define app linking prefixes, they will automatically be loaded into the navigation router.                                                                              |
+| enableTranslations  | Boolean | false   | Enable or disable the translations toggle, this allows users to select a language.                                                                                      |
+| enabledTranslations | Array   | ['en']  | Select which translations to enable by supplying the translation iso2 country or language code, the language or iso2 code must exists in the `/translations` directory. |
+| storeScreenOptions  | Object  | {...}   | Define options for store screens, see below.                                                                                                                            |
+
+**storeScreenOptions**
+| Prop                 | Type    | Default | Description                                                                          |
+|----------------------|---------|---------|--------------------------------------------------------------------------------------|
+| actionBarEnabled     | Boolean | true    | Enable or disable the action buttons on the store screen                             |
+| photosEnabled        | Boolean | true    | Enable or disable the button to open store photos on the store screen                |
+| reviewsEnabled       | Boolean | true    | Enable or disable review button and features on the store screen                     |
+| mapEnabled           | Boolean | true    | Enable or disable the button to open the map/directions screen from the store screen |
+| websiteLinkEnabled   | Boolean | true    | Enable or disable the button to open a link to the stores website                    |
+| contactEnabled       | Boolean | true    | Enable or disable the button to prompt contact options for the store                 |
+| shareEnabled         | Boolean | true    | Enable or disable the button to prompt to share the store                            |
+| searchEnabled        | Boolean | true    | Enable or disable the button to open the store search dialog                         |
+| browseEnabled        | Boolean | true    | Enable or disable the button to open the dialog of store categories                  |
+| mapWidgetEnabled     | Boolean | true    | Enable or disable the mini map widget on the store screen                            |
+| infoWidgetEnabled    | Boolean | true    | Enable or disable the store info widget on the store screen                          |
+| relatedWidgetEnabled | Boolean | true    | Enable or disable the "related stores" widget on the store screen                    |
+| photosWidgetEnabled  | Boolean | true    | Enable or disable the photos widget on the store screen                              |
+| reviewsWidgetEnabled | Boolean | true    | Enable or disable the reviews widget on the store screen                             |
+
+#### Interface Configuration
+These options can be used to customize the design and look of your StorefrontApp. From adding background images, changing colors, positioning inputs and views. You can do a lot of customizing from the config alone.
+
+
+For interface config please reference the file `/config/defaults.js` to view options.
+
+### Internationalization and Translations
+Baked in by default StorefrontApp support internationalization and app translations. Internationalization starts from when you configure your store or network from within the Storefront extension in the [Fleetbase Console](https://console.fleetbase.io/). Read below for getting started with internationalization and translations.
+
+#### Internationalization
+Internationalization starts with your store or network configuration from the Storefront extension. When creating a store or network you must select the default currency, this will default the currency throughout the app. Next when adding store locations Storefront will then use the country settings from here for localization.
+
+#### Translations
+When translations are enabled via the StorefrontApp config, users are able to select which language they want to view the app in. To enable app translations, the translation file must exist within the `/translations/`directory. By default StorefrontApp is translated from english to Mongolian, and Arabic. You can add custom translations by adding your own translation json file to the `/translations` directory.
+
+If you add a translation file for a new language, please feel free to make a pull request so we can add the translation to the app as a default language.
+
 ### Payment Gateways
 Payment gateways are required for accepting payments through your app, depending on your payment gateway can determine which types of payment methods your customers can use at checkout. Currently Fleetbase Storefront is only setup to work with [Stripe](https://stripe.com/), but we are working on including more payment gateways in the near future.
 
@@ -205,7 +259,7 @@ Fleetbase Storefront intends to support marketplaces natively though a concept c
 Coming soon...
 
 #### Launch network on app
-Coming soon...
+Launching a network app is much like launching a singular StorefrontApp, but instead of providing a "store key", you must provide a "network key" which can be found in the Storefront extension in the network dialog for the network you are building.
 
 ### Cart
 Fleetbase Storefront SDK provides a functional cart that can be used with a few simple methods. This will serve as a quick overview of how the cart operates. More documentation can be found at the [Fleetbase API Reference](https://fleetbase.io/docs/api#cart).
