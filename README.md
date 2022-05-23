@@ -42,6 +42,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
  - [Push Notifications](#push-notifications)
 	 - [APNS Push Notifications](#apns-push-notifications)
 	 - [FCM Push Notifications](#fcm-push-notifications)
+ - [Generate Assets](#generate-assets)
  - [Configuration](#configuration)
 	 - [Application Configuration](#appconfig)
 	 - [Interface Configuration](#uiconfig)
@@ -179,6 +180,22 @@ FCM Push Notifications or "Firebase Cloud Messaging" notifications are simple to
 	 6. **Firebase project name** This is just your firebase project name, it should be dasherized.
  4. Click "Create Notification Channel"
  5. That's it, you're all set. Now when orders go through Fleetbase will be able to send push notifications to your android app.
+
+### Generate Assets
+We've tried to make it as easy as possible to generate your app assets such as the launch screen and the app icon, to make it one less tedious task. In order to use the app icon and launch screen asset generators follow the steps below.
+
+1. First you'll need to add your app icon to the `/assets/` directory with the filename `app-icon.png`. (The best size for the app icon is 1024x1024)
+2. Next for your launch screen you'll need to add your launch screen file to the `/assets/` directory using the filename `splash-screen.png`
+
+Once those two steps are done, you can then generate your app icon and launch screen automatically for both iOS and Android.
+
+```bash
+# Generate App Icon
+yarn generate-app-icon
+
+# Generate Launch Screen Assets:
+yarn generate-launch-screen
+```
 
 ### Configuration
 StorefrontApp features config files which will allow you to change the behaviour and look of your app. It will also allow you to setup [linking prefixes](https://reactnative.dev/docs/linking), which will be documented more in the future. 
