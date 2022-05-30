@@ -371,7 +371,7 @@ export default class HelperUtil {
      * @memberof HelperUtil
      */
     static sum(numbers = []) {
-        if (!isArray(numbers)) {
+        if (!HelperUtil.isArray(numbers)) {
             numbers = [ ...arguments ];
         }
 
