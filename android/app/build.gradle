@@ -137,6 +137,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        resValue "string", "build_config_package", "com.storefrontapp"
     }
     splits {
         abi {
@@ -189,6 +190,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
     // implementation "com.google.firebase:firebase-iid"
+    implementation project(':react-native-config')
 
     implementation "androidx.core:core-splashscreen:1.0.0-alpha02" 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"

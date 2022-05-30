@@ -22,6 +22,8 @@ target 'StorefrontApp' do
   pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
   pod 'Permission-Contacts', :path => "#{permissions_path}/Contacts"
 
+  pod 'react-native-config', :path => '../node_modules/react-native-config'
+
   target 'StorefrontAppTests' do
     inherit! :complete
     # Pods for testing
