@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -15,7 +15,7 @@ import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
 import { Store, StoreLocation } from '@fleetbase/storefront';
 import tailwind from 'tailwind';
 
-const { addEventListener, removeEventListener } = EventRegister;
+// const { addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
 
 const StorePicker = (props) => {
@@ -49,23 +49,22 @@ const StorePicker = (props) => {
     );
     const [isInitialized, setIsInitialized] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [render, setRender] = useState(false);
 
     const useAddressTitle = displayAddressForTitle && typeof selectedStoreLocation?.id === 'string' && selectedStoreLocation?.id.length > 1;
 
-    const isCurrentStoreLocation = (storeLocation) => {
+    const isCurrentStoreLocation = useCallback((storeLocation) => {
         return storeLocation.id === selectedStoreLocation?.id;
-    };
+    });
 
-    const setLoadedStoreLocations = (storeLocations) => {
+    const setLoadedStoreLocations = useCallback((storeLocations) => {
         setStoreLocations(storeLocations);
 
         if (typeof onLoaded === 'function') {
             onLoaded(storeLocations);
         }
-    };
+    });
 
-    const selectStoreLocation = (selectedStoreLocation) => {
+    const selectStoreLocation = useCallback((selectedStoreLocation) => {
         if (selectedStoreLocation instanceof StoreLocation) {
             setSelectedStoreLocation(selectedStoreLocation);
 
@@ -73,7 +72,17 @@ const StorePicker = (props) => {
                 onStoreLocationSelected(selectedStoreLocation);
             }
         }
-    };
+    });
+
+    const initializeSelectedStoreLocation = useCallback(() => {
+        if (!defaultStoreLocation && typeof onStoreLocationSelected === 'function') {
+            onStoreLocationSelected(selectedStoreLocation);
+        }
+    });
+
+    const loadStoreLocations = useCallback(() => {
+        store?.getLocations().then(setLoadedStoreLocations).catch(logError).finally(initializeSelectedStoreLocation);
+    });
 
     const DialogHeader = ({ title, subtitle, icon, onCancel }) => (
         <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
@@ -96,29 +105,11 @@ const StorePicker = (props) => {
     );
 
     useEffect(() => {
-        if (!isMounted && render === true) {
-            return;
-        }
-
-        store?.getLocations().then(setLoadedStoreLocations).catch(logError);
+        loadStoreLocations();
     }, [isMounted]);
 
-    useEffect(() => {
-        setRender(true);
-    }, [isMounted]);
-
-    useEffect(() => {
-        if (!defaultStoreLocation && typeof onStoreLocationSelected === 'function') {
-            onStoreLocationSelected(selectedStoreLocation);
-        }
-    }, [isMounted]);
-
-    if (!render) {
-        return (
-            <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2'), buttonStyle]}>
-                <ActivityIndicator />
-            </View>
-        );
+    if (!isMounted()) {
+        return <View />;
     }
 
     return (
@@ -127,7 +118,7 @@ const StorePicker = (props) => {
                 <View style={[tailwind('flex flex-row items-center rounded-full bg-gray-900 px-3 py-2'), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('text-white mr-2'), buttonIconStyle]} />
                     <View style={[buttonTitleWrapperStyle]}>
-                        {useAddressTitle && render && (
+                        {useAddressTitle && (
                             <View style={[props.addressContainerStyle]}>
                                 <Text style={[tailwind('font-semibold uppercase'), props.addressTitleStyle]} numberOfLines={1}>
                                     {selectedStoreLocation.getAttribute('name')}
@@ -146,7 +137,7 @@ const StorePicker = (props) => {
                                 )}
                             </View>
                         )}
-                        {!useAddressTitle && render && (
+                        {!useAddressTitle && (
                             <Text style={[tailwind('text-white'), buttonTitleStyle]} numberOfLines={buttonTitleMaxLines ?? 1}>
                                 {info.name}
                             </Text>
@@ -155,7 +146,7 @@ const StorePicker = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <Modal animationType={'slide'} transparent={true} visible={isDialogOpen && render} onRequestClose={() => setIsDialogOpen(false)}>
+            <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
                 <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
                     <View>
                         <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />

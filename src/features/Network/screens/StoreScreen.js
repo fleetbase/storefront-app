@@ -1,7 +1,20 @@
-import React, { useState, useEffect, createRef } from 'react';
+import React, { useState, useCallback, useEffect, createRef } from 'react';
 import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBars, faMapMarkerAlt, faShare, faImages, faStar, faMapMarkedAlt, faExternalLinkAlt, faPhone, faSearch, faTimes, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+    faBars,
+    faMapMarkerAlt,
+    faShare,
+    faImages,
+    faStar,
+    faMapMarkedAlt,
+    faExternalLinkAlt,
+    faPhone,
+    faSearch,
+    faTimes,
+    faArrowLeft,
+    faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
@@ -92,20 +105,20 @@ const StoreScreen = ({ navigation, route }) => {
 
     const toggleHours = () => setIsHoursVisible(!isHoursVisible);
 
-    const transitionToCategory = (category, actionSheet) => {
+    const transitionToCategory = useCallback((category, actionSheet) => {
         navigation.navigate('CategoryScreen', { attributes: category.serialize(), storeData: data });
         actionSheet?.hide();
-    };
+    });
 
-    const transitionToReviews = () => {
+    const transitionToReviews = useCallback(() => {
         navigation.navigate('StoreReviewsScreen', { storeData: data });
-    };
+    });
 
-    const transitionToPhotos = (initialMedia = null) => {
+    const transitionToPhotos = useCallback((initialMedia = null) => {
         navigation.navigate('StorePhotosScreen', { storeData: data, initialMedia });
-    };
+    });
 
-    const transitionToProduct = (product, close, timeout = 300) => {
+    const transitionToProduct = useCallback((product, close, timeout = 300) => {
         if (typeof close === 'function') {
             close();
         }
@@ -113,21 +126,21 @@ const StoreScreen = ({ navigation, route }) => {
         setTimeout(() => {
             navigation.navigate('ProductScreen', { attributes: product.serialize(), storeData: data });
         }, timeout);
-    };
+    });
 
-    const shareStore = () => {
+    const shareStore = useCallback(() => {
         Share.open({
             title: translate('Network.StoreScreen.shareStoreTitleText', { storeName: store.getAttribute('name'), networkName: info.name }),
             subject: translate('Network.StoreScreen.shareStoreSubjectText', { storeName: store.getAttribute('name'), networkName: info.name }),
             message: translate('Network.StoreScreen.shareStoreMessageText', { storeName: store.getAttribute('name'), networkName: info.name }),
         });
-    };
+    });
 
-    const contactStore = () => {
+    const contactStore = useCallback(() => {
         contactActionSheetRef.current?.setModalVisible();
-    };
+    });
 
-    const visitStoreWebsite = () => {
+    const visitStoreWebsite = useCallback(() => {
         const url = store.getAttribute('website');
 
         Linking.canOpenURL(url).then((supported) => {
@@ -137,7 +150,7 @@ const StoreScreen = ({ navigation, route }) => {
                 console.log(`Don't know how to open URI: ${url}`);
             }
         });
-    };
+    });
 
     const StoreHeader = ({ store, wrapperStyle }) => (
         <View style={[tailwind('w-full z-20'), wrapperStyle]}>
@@ -165,21 +178,23 @@ const StoreScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                         <View>
-                            <StorePicker
-                                info={data}
-                                displayAddressForTitle={true}
-                                buttonIcon={faMapMarkerAlt}
-                                buttonTitleMaxLines={2}
-                                buttonStyle={tailwind('text-gray-100 rounded-md')}
-                                buttonTitleStyle={tailwind('text-sm text-white')}
-                                buttonTitleWrapperStyle={tailwind('w-full flex-1')}
-                                buttonIconStyle={tailwind('text-gray-100')}
-                                addressTitleStyle={tailwind('text-white font-semibold')}
-                                addressSubtitleStyle={tailwind('text-gray-100')}
-                                defaultStoreLocation={storeLocation}
-                                onStoreLocationSelected={setStoreLocation}
-                                buttonIconSize={22}
-                            />
+                            {isMounted() && (
+                                <StorePicker
+                                    info={data}
+                                    displayAddressForTitle={true}
+                                    buttonIcon={faMapMarkerAlt}
+                                    buttonTitleMaxLines={2}
+                                    buttonStyle={tailwind('text-gray-100 rounded-md')}
+                                    buttonTitleStyle={tailwind('text-sm text-white')}
+                                    buttonTitleWrapperStyle={tailwind('w-full flex-1')}
+                                    buttonIconStyle={tailwind('text-gray-100')}
+                                    addressTitleStyle={tailwind('text-white font-semibold')}
+                                    addressSubtitleStyle={tailwind('text-gray-100')}
+                                    defaultStoreLocation={storeLocation}
+                                    onStoreLocationSelected={setStoreLocation}
+                                    buttonIconSize={22}
+                                />
+                            )}
                         </View>
                     </View>
                 </View>
@@ -471,10 +486,16 @@ const StoreScreen = ({ navigation, route }) => {
                                                         key={index}
                                                         product={product}
                                                         containerStyle={tailwind('w-40')}
-                                                        onPress={() => navigation.navigate('ProductScreen', { attributes: product.serialize(), store: data, selectedStoreLocation: storeLocation?.serialize() })}
+                                                        onPress={() =>
+                                                            navigation.navigate('ProductScreen', {
+                                                                attributes: product.serialize(),
+                                                                store: data,
+                                                                selectedStoreLocation: storeLocation?.serialize(),
+                                                            })
+                                                        }
                                                     />
                                                 ))}
-                                                <View style={tailwind('w-40 h-full')} />
+                                            <View style={tailwind('w-40 h-full')} />
                                         </ScrollView>
                                     </View>
                                 ))}
