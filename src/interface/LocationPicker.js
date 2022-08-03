@@ -248,7 +248,7 @@ const LocationPicker = (props) => {
                         </View>
                     </TouchableOpacity>
                 )}
-                <View style={tailwind('w-full my-10 h-20')}></View>
+                <View style={tailwind('w-full flex-1 h-96')}></View>
             </ScrollView>
         </View>
     );

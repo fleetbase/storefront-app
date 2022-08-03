@@ -116,13 +116,13 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
                     <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                         {tags.length > 0 && <View style={tailwind('flex flex-row flex-wrap px-4')}>
                             {tags.map((tag, index) => (
-                                <TouchableOpacity onPress={() => setQuery(tag)} key={index} style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
+                                <TouchableOpacity disabled={isLoading} onPress={() => setQuery(tag)} key={index} style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
                                     <Text style={tailwind('text-xs text-gray-700')}>{tag}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>}
                         {results.map((product, index) => (
-                            <TouchableOpacity key={index} onPress={() => handleResultPress(product)}>
+                            <TouchableOpacity key={index} disabled={isLoading} onPress={() => handleResultPress(product)}>
                                 <View style={tailwind('px-5 py-4 border-b border-gray-100')}>
                                     <View style={tailwind('flex flex-row')}>
                                         <View style={tailwind('mr-3')}>

@@ -178,23 +178,22 @@ const StoreScreen = ({ navigation, route }) => {
                             </View>
                         </View>
                         <View>
-                            {isMounted() && (
-                                <StorePicker
-                                    info={data}
-                                    displayAddressForTitle={true}
-                                    buttonIcon={faMapMarkerAlt}
-                                    buttonTitleMaxLines={2}
-                                    buttonStyle={tailwind('text-gray-100 rounded-md')}
-                                    buttonTitleStyle={tailwind('text-sm text-white')}
-                                    buttonTitleWrapperStyle={tailwind('w-full flex-1')}
-                                    buttonIconStyle={tailwind('text-gray-100')}
-                                    addressTitleStyle={tailwind('text-white font-semibold')}
-                                    addressSubtitleStyle={tailwind('text-gray-100')}
-                                    defaultStoreLocation={storeLocation}
-                                    onStoreLocationSelected={setStoreLocation}
-                                    buttonIconSize={22}
-                                />
-                            )}
+                            <StorePicker
+                                info={data}
+                                displayAddressForTitle={true}
+                                buttonIcon={faMapMarkerAlt}
+                                buttonTitleMaxLines={2}
+                                buttonStyle={tailwind('text-gray-100 rounded-md')}
+                                buttonTitleStyle={tailwind('text-sm text-white')}
+                                buttonTitleWrapperStyle={tailwind('w-full flex-1')}
+                                buttonIconStyle={tailwind('text-gray-100')}
+                                addressTitleStyle={tailwind('text-white font-semibold')}
+                                addressSubtitleStyle={tailwind('text-gray-100')}
+                                defaultStoreLocation={storeLocation}
+                                storeLocations={store.getAttribute('locations', [])}
+                                onStoreLocationSelected={setStoreLocation}
+                                buttonIconSize={22}
+                            />
                         </View>
                     </View>
                 </View>

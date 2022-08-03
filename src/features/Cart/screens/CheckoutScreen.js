@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, createRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, createRef } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, ImageBackground, ActivityIndicator, Alert, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -322,7 +322,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         gateway.setCheckoutToken(token);
     };
 
-    const setupGateways = async (gateways, c = null) => {
+    const setupGateways = useCallback(async (gateways, c = null) => {
         const _gateways = new Collection();
 
         // setup each payment gateway
@@ -330,6 +330,11 @@ const CheckoutScreen = ({ navigation, route }) => {
         // store gateways with token to update state
         for (let i = 0; i < gateways.length; i++) {
             const gateway = gateways.objectAt(i);
+
+            console.log('[setupGateways() #gateway]', gateway.serialize());
+            console.log('[setupGateways() #gateway.isStripeGateway]', gateway.isStripeGateway);
+            console.log('[setupGateways() #gateway.isCashGateway]', gateway.isCashGateway);
+            console.log('[setupGateways() #gateway.type]', gateway.type);
 
             if (gateway.isStripeGateway) {
                 await setupStripeGateway(gateway, c);
@@ -357,16 +362,16 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         setGatewayOptions(_gateways);
         setGatewayDetails(gatewayDetails);
-    };
+    });
 
-    const fetchGateways = (c = null) => {
+    const fetchGateways = useCallback((c = null) => {
         store
             .getPaymentGateways()
             .then((gateways) => setupGateways(gateways, c))
             .catch((error) => {
                 logError(error, '[ Error fetching payment gateways! ]');
             });
-    };
+    });
 
     const selectStripePaymentMethod = async () => {
         const { error, paymentOption } = await presentPaymentSheet({

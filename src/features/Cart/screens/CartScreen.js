@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { View, ScrollView, FlatList, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Switch } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart, faTrash, faPencilAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
 import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
-import { Place, ServiceQuote, Point } from '@fleetbase/sdk';
+import { Place, ServiceQuote, Point, Collection } from '@fleetbase/sdk';
 import { calculatePercentage } from 'utils/Calculate';
 import { useResourceStorage, useResourceCollection } from 'utils/Storage';
 import { formatCurrency, isLastIndex, stripHtml, logError, translate, config } from 'utils';
@@ -37,7 +38,7 @@ const CartScreen = ({ navigation, route }) => {
     const isNetwork = info.is_network === true;
 
     // declare stores and setStores from state
-    let stores, setStores;
+    let stores, setStores, storeLocations, setStoreLocations;
 
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
@@ -59,6 +60,7 @@ const CartScreen = ({ navigation, route }) => {
     // if network load in stores to group cart items if multi store checkout is enabled
     if (isNetwork) {
         [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter);
+        [storeLocations, setStoreLocations] = useResourceCollection('network_store_locations', StoreLocation, StorefrontAdapter, new Collection());
     }
 
     const codEnabled = info?.options?.cod_enabled === true;
@@ -132,7 +134,7 @@ const CartScreen = ({ navigation, route }) => {
             });
     };
 
-    const calculateTotal = () => {
+    const calculateTotal = useCallback(() => {
         let subtotal = cart.subtotal();
 
         if (cart.isEmpty) {
@@ -160,21 +162,32 @@ const CartScreen = ({ navigation, route }) => {
         }
 
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
-    };
+    });
 
-    const getStore = (id) => {
+    const getStore = useCallback((id) => {
         if (!isArray(stores)) {
             return null;
         }
 
         return stores.find((store) => store?.id === id);
-    };
+    });
 
-    const editCartItem = async (cartItem) => {
+    const getStoreLocation = useCallback((id) => {
+        if (!isArray(storeLocations)) {
+            return null;
+        }
+
+        return storeLocations.find((storeLocation) => storeLocation?.id === id);
+    });
+
+    const editCartItem = useCallback(async (cartItem) => {
         let product;
 
         // get store if applicable
         const store = getStore(cartItem?.store_id);
+
+        // get store location too
+        const storeLocation = getStoreLocation(cartItem?.store_location_id);
 
         // check cache for product
         if (products[cartItem.product_id]) {
@@ -185,10 +198,10 @@ const CartScreen = ({ navigation, route }) => {
             });
         }
 
-        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), cartItemAttributes: cartItem, store });
-    };
+        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), selectedStoreLocation: storeLocation?.serialize(), cartItemAttributes: cartItem, store });
+    });
 
-    const preloadCartItems = async (cart) => {
+    const preloadCartItems = useCallback(async (cart) => {
         const contents = cart.contents();
 
         for (let i = 0; i < contents.length; i++) {
@@ -201,9 +214,9 @@ const CartScreen = ({ navigation, route }) => {
         }
 
         setProducts(products);
-    };
+    });
 
-    const getCart = () => {
+    const getCart = useCallback(() => {
         return storefront.cart
             .retrieve(getUniqueId())
             .then((cart) => {
@@ -219,9 +232,9 @@ const CartScreen = ({ navigation, route }) => {
             .catch((error) => {
                 logError(error, '[ Error fetching cart! ]');
             });
-    };
+    });
 
-    const refreshCart = () => {
+    const refreshCart = useCallback(() => {
         setIsLoading(true);
 
         return getCart().then((cart) => {
@@ -230,9 +243,9 @@ const CartScreen = ({ navigation, route }) => {
 
             return cart;
         });
-    };
+    });
 
-    const removeFromCart = (cartItem) => {
+    const removeFromCart = useCallback((cartItem) => {
         setIsEmptying(true);
 
         return cart
@@ -243,9 +256,9 @@ const CartScreen = ({ navigation, route }) => {
                 setFlatListScrollEnabled(true);
                 setIsEmptying(false);
             });
-    };
+    });
 
-    const emptyCart = () => {
+    const emptyCart = useCallback(() => {
         // create action
         const emptyCartAction = (cart) => {
             setIsEmptying(true);
@@ -265,9 +278,9 @@ const CartScreen = ({ navigation, route }) => {
         }
 
         return getCart().then(emptyCartAction);
-    };
+    });
 
-    const calculateCartItemRowHeight = (cartItem) => {
+    const calculateCartItemRowHeight = useCallback((cartItem) => {
         let height = 112;
 
         height += cartItem.variants.length * 12;
@@ -278,9 +291,9 @@ const CartScreen = ({ navigation, route }) => {
         }
 
         return height;
-    };
+    });
 
-    const shopForMore = () => {
+    const shopForMore = useCallback(() => {
         if (info.is_store) {
             return navigation.navigate('Browser');
         }
@@ -288,7 +301,7 @@ const CartScreen = ({ navigation, route }) => {
         if (info.is_network) {
             return navigation.navigate('ExploreScreen');
         }
-    };
+    });
 
     const RenderHeader = () => {
         if (info.is_store) {
@@ -435,8 +448,6 @@ const CartScreen = ({ navigation, route }) => {
     );
 
     useEffect(() => {
-        getCart();
-
         // if network load stores
         if (info.is_network) {
             NetworkInfoService.getStores().then((stores) => {
@@ -469,13 +480,21 @@ const CartScreen = ({ navigation, route }) => {
         };
     }, [isMounted]);
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            getDeliveryQuote();
-        });
+    // useEffect(() => {
+    //     const unsubscribe = navigation.addListener('focus', () => {
+    //         getDeliveryQuote();
+    //     });
 
-        return unsubscribe;
-    }, [isMounted]);
+    //     return unsubscribe;
+    // }, [isMounted]);
+
+    useFocusEffect(
+        useCallback(() => {
+            getCart().then(() => {
+                getDeliveryQuote();
+            });
+        }, [])
+    );
 
     return (
         <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>

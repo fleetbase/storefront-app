@@ -8,6 +8,7 @@ import tailwind from 'tailwind';
 
 const StoreCard = ({ store, onPress, isReviewsEnabled, containerStyle }) => {
     const [locale] = useLocale();
+    const numberOfLocations = store.getAttribute('locations', []).length;
 
     return (
         <TouchableOpacity key={store.id} style={[containerStyle, tailwind(`px-4`)]} disabled={!store.getAttribute('online')} onPress={onPress}>
@@ -28,6 +29,7 @@ const StoreCard = ({ store, onPress, isReviewsEnabled, containerStyle }) => {
                                 <Rating value={store.getAttribute('rating')} readonly={true} />
                             </View>
                         )}
+                        {numberOfLocations > 0 && <Text style={tailwind('text-sm text-blue-600')}>{numberOfLocations} locations</Text>}
                     </View>
                 </View>
             </View>

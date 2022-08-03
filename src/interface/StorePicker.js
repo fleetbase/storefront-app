@@ -32,6 +32,7 @@ const StorePicker = (props) => {
         onStoreLocationSelected,
         onLoaded,
         defaultStoreLocation,
+        storeLocations,
     } = props;
 
     const store = new Store(info, StorefrontAdapter);
@@ -40,13 +41,8 @@ const StorePicker = (props) => {
     const insets = useSafeAreaInsets();
 
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
-    const [storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection());
-    const [selectedStoreLocation, setSelectedStoreLocation] = useResourceStorage(
-        `${info.id}_store_location`,
-        StoreLocation,
-        StorefrontAdapter,
-        defaultStoreLocation ?? storeLocations?.first
-    );
+    const [_storeLocations, setStoreLocations] = useResourceCollection(`${info.id}_store_locations`, StoreLocation, StorefrontAdapter, new Collection(storeLocations));
+    const [selectedStoreLocation, setSelectedStoreLocation] = useResourceStorage(`${info.id}_store_location`, StoreLocation, StorefrontAdapter, defaultStoreLocation);
     const [isInitialized, setIsInitialized] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -54,14 +50,6 @@ const StorePicker = (props) => {
 
     const isCurrentStoreLocation = useCallback((storeLocation) => {
         return storeLocation.id === selectedStoreLocation?.id;
-    });
-
-    const setLoadedStoreLocations = useCallback((storeLocations) => {
-        setStoreLocations(storeLocations);
-
-        if (typeof onLoaded === 'function') {
-            onLoaded(storeLocations);
-        }
     });
 
     const selectStoreLocation = useCallback((selectedStoreLocation) => {
@@ -72,16 +60,6 @@ const StorePicker = (props) => {
                 onStoreLocationSelected(selectedStoreLocation);
             }
         }
-    });
-
-    const initializeSelectedStoreLocation = useCallback(() => {
-        if (!defaultStoreLocation && typeof onStoreLocationSelected === 'function') {
-            onStoreLocationSelected(selectedStoreLocation);
-        }
-    });
-
-    const loadStoreLocations = useCallback(() => {
-        store?.getLocations().then(setLoadedStoreLocations).catch(logError).finally(initializeSelectedStoreLocation);
     });
 
     const DialogHeader = ({ title, subtitle, icon, onCancel }) => (
@@ -103,14 +81,6 @@ const StorePicker = (props) => {
             </View>
         </View>
     );
-
-    useEffect(() => {
-        loadStoreLocations();
-    }, [isMounted]);
-
-    if (!isMounted()) {
-        return <View />;
-    }
 
     return (
         <View style={[wrapperStyle]}>
@@ -151,7 +121,7 @@ const StorePicker = (props) => {
                     <View>
                         <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />
                         <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                            {(storeLocations ?? []).map((storeLocation, index) => (
+                            {_storeLocations.map((storeLocation, index) => (
                                 <TouchableOpacity key={index} onPress={() => selectStoreLocation(storeLocation)}>
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>

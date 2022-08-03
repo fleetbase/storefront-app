@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Collection } from '@fleetbase/sdk';
-import { Store, Category } from '@fleetbase/storefront';
+import { Store, StoreLocation, Category } from '@fleetbase/storefront';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import { NetworkInfoService } from 'services';
 import { useResourceCollection } from 'utils/Storage';
@@ -21,20 +21,22 @@ const ExploreScreen = ({ navigation, route }) => {
     const { info } = route.params;
 
     const isMounted = useMountedState();
+    const storefront = useStorefront();
     const isReviewsEnabled = info?.options?.reviews_enabled === true;
 
     const [stores, setStores] = useResourceCollection('network_stores', Store, StorefrontAdapter, new Collection());
+    const [storeLocations, setStoreLocations] = useResourceCollection('network_store_locations', StoreLocation, StorefrontAdapter, new Collection());
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, new Collection());
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isQuerying, setIsQuerying] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
     const [locationsQuery, setLocationsQuery] = useState(null);
-    const [params, setParams] = useState({});
+    const [params, setParams] = useState({ with: ['locations'] });
     const [filters, setFilters] = useStorage('network_tags', []);
     const [tagged, setTagged] = useState([]);
     const [locale, setLocale] = useLocale();
 
-    const transitionToProduct = (product, close, timeout = 300) => {
+    const transitionToProduct = useCallback((product, close, timeout = 300) => {
         if (typeof close === 'function') {
             close();
         }
@@ -42,14 +44,14 @@ const ExploreScreen = ({ navigation, route }) => {
         setTimeout(() => {
             navigation.navigate('ProductScreen', { attributes: product.serialize() });
         }, timeout);
-    };
+    });
 
-    const transitionToCategory = (category, actionSheet) => {
+    const transitionToCategory = useCallback((category, actionSheet) => {
         navigation.navigate('NetworkCategoryScreen', { data: category.serialize() });
         actionSheet?.setModalVisible(false);
-    };
+    });
 
-    const transitionToStore = (store, storeLocation) => {
+    const transitionToStore = useCallback((store, location = null) => {
         if (typeof store?.getAttribute === 'function' && !store?.getAttribute('online')) {
             return;
         }
@@ -60,10 +62,16 @@ const ExploreScreen = ({ navigation, route }) => {
 
         const data = typeof store?.serialize === 'function' ? store.serialize() : store;
 
-        navigation.navigate('StoreScreen', { data, location: storeLocation?.serialize() ?? storeLocation });
-    };
+        if (typeof location?.serialize === 'function') {
+            location = location.serialize();
+        } else if (location === null && store.hasAttribute('locations')) {
+            location = store.getAttribute('locations.0');
+        }
 
-    const setParam = (key, value) => {
+        navigation.navigate('StoreScreen', { data, location });
+    });
+
+    const setParam = useCallback((key, value) => {
         const _params = Object.assign({}, params);
         _params[key] = value;
 
@@ -84,9 +92,9 @@ const ExploreScreen = ({ navigation, route }) => {
         NetworkInfoService.getStores(_params)
             .then(setStores)
             .finally(() => setIsQuerying(false));
-    };
+    });
 
-    const refresh = () => {
+    const refresh = useCallback(() => {
         setIsRefreshing(true);
 
         NetworkInfoService.getStores(params)
@@ -94,14 +102,14 @@ const ExploreScreen = ({ navigation, route }) => {
             .finally(() => {
                 setIsRefreshing(false);
             });
-    };
+    });
 
     useEffect(() => {
         // Load all stores from netwrk
         NetworkInfoService.getStores(params).then(setStores);
 
         // Load tags from network
-        NetworkInfoService.getTags(params).then(setFilters);
+        NetworkInfoService.getTags().then(setFilters);
 
         // Set user location to state
         getCurrentLocation().then(setUserLocation);
