@@ -49,7 +49,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
 
     const debouncedSearch = debounce((query, cb) => {
         fetchResultsFromStore(query, cb);
-    }, 600);
+    }, 300);
 
     useEffect(() => {
         // Load tags from network
