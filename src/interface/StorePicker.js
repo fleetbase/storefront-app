@@ -121,7 +121,7 @@ const StorePicker = (props) => {
                     <View>
                         <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />
                         <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                            {_storeLocations.map((storeLocation, index) => (
+                            {_storeLocations.map(sl => sl instanceof StoreLocation ? sl : new StoreLocation(sl)).map((storeLocation, index) => (
                                 <TouchableOpacity key={index} onPress={() => selectStoreLocation(storeLocation)}>
                                     <View style={tailwind(`p-4 border-b border-gray-100`)}>
                                         <View style={tailwind('flex flex-row justify-between')}>

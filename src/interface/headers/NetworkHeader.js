@@ -49,14 +49,12 @@ const NetworkHeader = (props) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState(new Collection());
-    const [render, setRender] = useState(false);
     const [networkCategories, setNetworkCategories] = useResourceCollection('category', Category, StorefrontAdapter, categories ?? new Collection());
 
     const shouldDisplayLogoText = (displayLogoText ?? config('ui.headerComponent.displayLogoText')) === true;
-   
-    useEffect(() => {
-        setRender(true);
-    }, [isMounted]);
+    const displaySearchBar = !hideSearchBar;
+    const displayNetworkSearch = !hideSearch;
+    const displayCategoryPicker = !hideCategoryPicker;
 
     return (
         <ImageBackground
@@ -80,13 +78,13 @@ const NetworkHeader = (props) => {
                         {config('ui.headerComponent.displayLocalePicker') === true && config('app.enableTranslations') === true && (
                             <LangPicker wrapperStyle={tailwind('mr-2')} buttonStyle={[config('ui.headerComponent.localePickerStyle')]} />
                         )}
-                        {config('ui.headerComponent.displayLocationPicker') === true && render && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
+                        {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
                     </View>
                 </View>
 
-                {!hideSearchBar && render && (
+                {displaySearchBar && (
                     <View style={tailwind('px-4 py-2 flex flex-row items-center')}>
-                        {!hideSearch && (
+                        {displayNetworkSearch && (
                             <View style={tailwind('flex-1')}>
                                 <NetworkSearch
                                     network={network}
@@ -98,7 +96,7 @@ const NetworkHeader = (props) => {
                                 />
                             </View>
                         )}
-                        {!hideCategoryPicker && (
+                        {displayCategoryPicker && (
                             <View style={tailwind('ml-3')}>
                                 <StoreCategoryPicker
                                     categories={networkCategories}

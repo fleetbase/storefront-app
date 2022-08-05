@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ScrollView, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, Dimensions, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -27,15 +27,15 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
     const [results, setResults] = useState([]);
     const [query, setQuery] = useState(null);
 
-    const closeDialog = () => setIsDialogOpen(false);
+    const closeDialog = useCallback(() => setIsDialogOpen(false));
 
-    const handleResultPress = (result) => {
+    const handleResultPress = useCallback((result) => {
         if (typeof onResultPress === 'function') {
             onResultPress(result, closeDialog);
         }
-    };
+    });
 
-    const fetchResultsFromStore = async (query, cb) => {
+    const fetchResultsFromStore = useCallback(async (query, cb) => {
         setIsLoading(true);
 
         const results = await storefront.search(query).catch(logError);
@@ -45,11 +45,11 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
         if (typeof cb === 'function') {
             cb(results);
         }
-    };
+    });
 
-    const debouncedSearch = debounce((query, cb) => {
+    const debouncedSearch = useCallback(debounce((query, cb) => {
         fetchResultsFromStore(query, cb);
-    }, 300);
+    }, 300));
 
     useEffect(() => {
         // Load tags from network

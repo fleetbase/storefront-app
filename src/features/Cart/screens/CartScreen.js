@@ -28,6 +28,143 @@ import tailwind from 'tailwind';
 const { emit, addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
 
+const invoke = (fn, ...params) => {
+    if (typeof fn === 'function') {
+        return fn(...params);
+    }
+
+    return null;
+};
+
+const RenderHeader = ({ info, hideCategoryPicker = true }) => {
+    if (info.is_store) {
+        return <StorefrontHeader info={info} />;
+    }
+
+    if (info.is_network) {
+        return <NetworkHeader info={info} hideCategoryPicker={hideCategoryPicker} style={tailwind('bg-white')} {...config('ui.cart.cartScreen.networkHeaderProps')} />;
+    }
+};
+
+const RenderCartReloadView = ({ isLoading, isEmptying, onRefresh }) => (
+    <View style={tailwind(`mt-20 flex items-center justify-center ${isLoading || isEmptying ? 'opacity-50' : ''}`)}>
+        <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
+            <ActivityIndicator />
+            <TouchableOpacity style={tailwind('w-full mt-10')} onPress={() => invoke(onRefresh)}>
+                <View style={tailwind('flex items-center justify-center text-center rounded-md px-3 py-2 bg-white border border-blue-500 shadow-sm')}>
+                    <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>{translate('Cart.CartScreen.reloadCartButtonText')}</Text>
+                </View>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
+const RenderEmptyCartView = ({ onShopForMore }) => (
+    <View style={tailwind('w-full bg-white flex items-center justify-center')}>
+        <View style={tailwind('flex items-center justify-center w-full px-8')}>
+            <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-100 w-60 h-60')}>
+                <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
+            </View>
+            <View style={tailwind('flex items-center justify-center mb-10')}>
+                <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{translate('Cart.CartScreen.emptyStateTitle')}</Text>
+                <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Cart.CartScreen.emptyStateSubtitle')}</Text>
+            </View>
+            <TouchableOpacity style={tailwind('w-full')} onPress={() => invoke(onShopForMore)}>
+                <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
+                    <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Cart.CartScreen.goToBrowserButtonText')}</Text>
+                </View>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
+const RenderCartItemActions = ({ item, index, onRemoveFromCart, onEditCartItem }) => (
+    <View style={tailwind('flex flex-1 items-center bg-white flex-1 flex-row justify-end')}>
+        <TouchableOpacity onPress={() => invoke(onEditCartItem, item)} style={tailwind('flex bg-blue-500 w-28 h-full items-center justify-center')}>
+            <View>
+                <FontAwesomeIcon icon={faPencilAlt} size={22} style={tailwind('text-white')} />
+            </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => invoke(onRemoveFromCart, item)} style={tailwind('flex bg-red-500 w-28 h-full items-center justify-center')}>
+            <View>
+                <FontAwesomeIcon icon={faTrash} size={22} style={tailwind('text-white')} />
+            </View>
+        </TouchableOpacity>
+    </View>
+);
+
+const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRowHeight }) => (
+    <View
+        key={index}
+        style={[
+            tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`),
+            { height: typeof calculateCartItemRowHeight === 'function' ? calculateCartItemRowHeight(item) : 200 },
+        ]}
+    >
+        <View style={tailwind('flex flex-1 flex-row justify-between')}>
+            <View style={tailwind('flex flex-row items-start')}>
+                <View>
+                    <View style={tailwind('rounded-md border border-gray-300 flex items-center justify-center w-7 h-7 mr-3')}>
+                        <Text style={tailwind('font-semibold text-blue-500 text-sm')}>{item.quantity}x</Text>
+                    </View>
+                </View>
+                <View style={tailwind('flex flex-row items-start')}>
+                    <View style={tailwind('mr-3')}>
+                        <View>
+                            <FastImage source={{ uri: item.product_image_url }} style={tailwind('w-16 h-16')} />
+                        </View>
+                    </View>
+                    <View style={tailwind('w-36')}>
+                        <View>
+                            <View>
+                                <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
+                                    {item.name}
+                                </Text>
+                                <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>
+                                    {stripHtml(item.description) ?? 'No description'}
+                                </Text>
+                                <View>
+                                    {item.variants.map((variant) => (
+                                        <View key={variant.id}>
+                                            <Text style={tailwind('text-xs')}>{variant.name}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                                <View>
+                                    {item.addons.map((addon) => (
+                                        <View key={addon.id}>
+                                            <Text style={tailwind('text-xs')}>+ {addon.name}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                                {item.scheduled_at && (
+                                    <View style={tailwind('flex flex-row items-center mt-1')}>
+                                        <FontAwesomeIcon icon={faCalendarCheck} size={12} style={tailwind('text-green-600 mr-1')} />
+                                        <Text style={tailwind('text-xs font-semibold text-green-600')}>{format(new Date(item.scheduled_at), 'MMM do K:mmbbb')}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                        <TouchableOpacity style={tailwind('mt-2')} onPress={() => invoke(onEditCartItem, item)}>
+                            <Text style={tailwind('text-blue-600 text-sm font-semibold')}>{translate('terms.edit')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+            <View style={tailwind('flex items-end')}>
+                <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
+                {item.quantity > 1 && (
+                    <View>
+                        <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
+                            {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency')) })}
+                        </Text>
+                    </View>
+                )}
+            </View>
+        </View>
+    </View>
+);
+
 const CartScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
     const fleetbase = useFleetbase();
@@ -198,7 +335,7 @@ const CartScreen = ({ navigation, route }) => {
             });
         }
 
-        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), selectedStoreLocation: storeLocation?.serialize(), cartItemAttributes: cartItem, store });
+        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), selectedStoreLocation: storeLocation?.serialize(), cartItemAttributes: cartItem, store: store?.serialize() });
     });
 
     const preloadCartItems = useCallback(async (cart) => {
@@ -303,202 +440,48 @@ const CartScreen = ({ navigation, route }) => {
         }
     });
 
-    const RenderHeader = () => {
-        if (info.is_store) {
-            return <StorefrontHeader info={info} />;
-        }
-
-        if (info.is_network) {
-            return <NetworkHeader info={info} hideCategoryPicker={true} style={tailwind('bg-white')} {...config('ui.cart.cartScreen.networkHeaderProps')} />;
-        }
-    };
-
-    const RenderCartReloadView = () => (
-        <View style={tailwind(`mt-20 flex items-center justify-center ${isLoading || isEmptying ? 'opacity-50' : ''}`)}>
-            <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
-                <ActivityIndicator />
-                <TouchableOpacity style={tailwind('w-full mt-10')} onPress={refreshCart}>
-                    <View style={tailwind('flex items-center justify-center text-center rounded-md px-3 py-2 bg-white border border-blue-500 shadow-sm')}>
-                        <Text style={tailwind('font-semibold text-blue-500 text-lg text-center')}>{translate('Cart.CartScreen.reloadCartButtonText')}</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
-    const RenderEmptyCartView = () => (
-        <View style={tailwind('w-full bg-white flex items-center justify-center')}>
-            <View style={tailwind('flex items-center justify-center w-full px-8')}>
-                <View style={tailwind('flex items-center justify-center my-6 rounded-full bg-gray-100 w-60 h-60')}>
-                    <FontAwesomeIcon icon={faShoppingCart} size={88} style={tailwind('text-gray-600')} />
-                </View>
-                <View style={tailwind('flex items-center justify-center mb-10')}>
-                    <Text style={tailwind('font-bold text-xl mb-2 text-center text-gray-800')}>{translate('Cart.CartScreen.emptyStateTitle')}</Text>
-                    <Text style={tailwind('w-52 text-center text-gray-600 font-semibold')}>{translate('Cart.CartScreen.emptyStateSubtitle')}</Text>
-                </View>
-                <TouchableOpacity style={tailwind('w-full')} onPress={shopForMore}>
-                    <View style={tailwind('flex items-center justify-center rounded-md px-8 py-2 bg-white border border-blue-500 shadow-sm')}>
-                        <Text style={tailwind('font-semibold text-blue-500 text-lg')}>{translate('Cart.CartScreen.goToBrowserButtonText')}</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
-    const RenderCartItemActions = ({ item, index }) => (
-        <View style={tailwind('flex flex-1 items-center bg-white flex-1 flex-row justify-end')}>
-            <TouchableOpacity onPress={() => editCartItem(item)} style={tailwind('flex bg-blue-500 w-28 h-full items-center justify-center')}>
-                <View>
-                    <FontAwesomeIcon icon={faPencilAlt} size={22} style={tailwind('text-white')} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => removeFromCart(item)} style={tailwind('flex bg-red-500 w-28 h-full items-center justify-center')}>
-                <View>
-                    <FontAwesomeIcon icon={faTrash} size={22} style={tailwind('text-white')} />
-                </View>
-            </TouchableOpacity>
-        </View>
-    );
-
-    const RenderCartItem = ({ item, index }) => (
-        <View key={index} style={[tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`), { height: calculateCartItemRowHeight(item) }]}>
-            <View style={tailwind('flex flex-1 flex-row justify-between')}>
-                <View style={tailwind('flex flex-row items-start')}>
-                    <View>
-                        <View style={tailwind('rounded-md border border-gray-300 flex items-center justify-center w-7 h-7 mr-3')}>
-                            <Text style={tailwind('font-semibold text-blue-500 text-sm')}>{item.quantity}x</Text>
-                        </View>
-                    </View>
-                    <View style={tailwind('flex flex-row items-start')}>
-                        <View style={tailwind('mr-3')}>
-                            <View>
-                                <FastImage source={{ uri: item.product_image_url }} style={tailwind('w-16 h-16')} />
-                            </View>
-                        </View>
-                        <View style={tailwind('w-36')}>
-                            <View>
-                                <View>
-                                    <Text style={tailwind('text-lg font-semibold -mt-1')} numberOfLines={1}>
-                                        {item.name}
-                                    </Text>
-                                    <Text style={tailwind('text-xs text-gray-500')} numberOfLines={1}>
-                                        {stripHtml(item.description) ?? 'No description'}
-                                    </Text>
-                                    <View>
-                                        {item.variants.map((variant) => (
-                                            <View key={variant.id}>
-                                                <Text style={tailwind('text-xs')}>{variant.name}</Text>
-                                            </View>
-                                        ))}
-                                    </View>
-                                    <View>
-                                        {item.addons.map((addon) => (
-                                            <View key={addon.id}>
-                                                <Text style={tailwind('text-xs')}>+ {addon.name}</Text>
-                                            </View>
-                                        ))}
-                                    </View>
-                                    {item.scheduled_at && (
-                                        <View style={tailwind('flex flex-row items-center mt-1')}>
-                                            <FontAwesomeIcon icon={faCalendarCheck} size={12} style={tailwind('text-green-600 mr-1')} />
-                                            <Text style={tailwind('text-xs font-semibold text-green-600')}>{format(new Date(item.scheduled_at), 'MMM do K:mmbbb')}</Text>
-                                        </View>
-                                    )}
-                                </View>
-                            </View>
-                            <TouchableOpacity style={tailwind('mt-2')} onPress={() => editCartItem(item)}>
-                                <Text style={tailwind('text-blue-600 text-sm font-semibold')}>{translate('terms.edit')}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-                <View style={tailwind('flex items-end')}>
-                    <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
-                    {item.quantity > 1 && (
-                        <View>
-                            <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                                {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency')) })}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-        </View>
-    );
-
-    const RenderCartFooter = () => (
-        <CartFooter
-            cart={cart}
-            info={info}
-            total={calculateTotal()}
-            tip={tip}
-            deliveryTip={deliveryTip}
-            isTipping={isTipping}
-            isTippingDriver={isTippingDriver}
-            isPickupOrder={isPickupOrder}
-            serviceQuote={serviceQuote}
-            isFetchingServiceQuote={isFetchingServiceQuote}
-            serviceQuoteError={serviceQuoteError}
-            onSetIsPickupOrder={setIsPickupOrder}
-            onSetDeliveryTip={setDeliveryTip}
-            onSetIsTipping={setIsTipping}
-            onSetIsTippingDriver={setIsTippingDriver}
-            onSetTip={setTip}
-        />
-    );
-
-    useEffect(() => {
-        // if network load stores
-        if (info.is_network) {
-            NetworkInfoService.getStores().then((stores) => {
-                setStores(stores);
-            });
-        }
-
-        const cartChanged = addEventListener('cart.updated', (cart) => {
-            if (Object.keys(products).length === 0) {
-                preloadCartItems(cart);
-            }
-            getDeliveryQuote();
-        });
-
-        const locationChanged = addEventListener('location.updated', (place) => {
-            // update state in cart
-            setDeliverTo(place);
-            // update delivery quote
-            getServiceQuoteFor(place);
-        });
-
-        const customerSignedOut = addEventListener('customer.signedout', () => {
-            refreshCart();
-        });
-
-        return () => {
-            removeEventListener(cartChanged);
-            removeEventListener(customerSignedOut);
-            removeEventListener(locationChanged);
-        };
-    }, [isMounted]);
-
     // useEffect(() => {
-    //     const unsubscribe = navigation.addListener('focus', () => {
+    //     // if network load stores
+    //     if (info.is_network) {
+    //         NetworkInfoService.getStores().then((stores) => {
+    //             setStores(stores);
+    //         });
+    //     }
+
+    //     const cartChanged = addEventListener('cart.updated', (cart) => {
+    //         if (Object.keys(products).length === 0) {
+    //             preloadCartItems(cart);
+    //         }
     //         getDeliveryQuote();
     //     });
 
-    //     return unsubscribe;
+    //     const locationChanged = addEventListener('location.updated', (place) => {
+    //         // update state in cart
+    //         setDeliverTo(place);
+    //         // update delivery quote
+    //         getServiceQuoteFor(place);
+    //     });
+
+    //     const customerSignedOut = addEventListener('customer.signedout', () => {
+    //         refreshCart();
+    //     });
+
+    //     return () => {
+    //         removeEventListener(cartChanged);
+    //         removeEventListener(customerSignedOut);
+    //         removeEventListener(locationChanged);
+    //     };
     // }, [isMounted]);
 
     useFocusEffect(
         useCallback(() => {
-            getCart().then(() => {
-                getDeliveryQuote();
-            });
+            getCart();
         }, [])
     );
 
     return (
         <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>
-            <RenderHeader />
+            <RenderHeader info={info} hideCategoryPicker={true} />
             <CartCheckoutPanel
                 cart={cart}
                 total={calculateTotal()}
@@ -518,14 +501,33 @@ const CartScreen = ({ navigation, route }) => {
                     style={tailwind(`h-full ${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
-                    renderItem={RenderCartItem}
-                    renderHiddenItem={RenderCartItemActions}
+                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
+                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
                     rightOpenValue={-256}
                     stopRightSwipe={-256}
                     disableRightSwipe={true}
                     ListHeaderComponent={<CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} />}
-                    ListEmptyComponent={RenderEmptyCartView}
-                    ListFooterComponent={RenderCartFooter}
+                    ListEmptyComponent={<RenderEmptyCartView onShopForMore={shopForMore} />}
+                    ListFooterComponent={
+                        <CartFooter
+                            cart={cart}
+                            info={info}
+                            total={calculateTotal()}
+                            tip={tip}
+                            deliveryTip={deliveryTip}
+                            isTipping={isTipping}
+                            isTippingDriver={isTippingDriver}
+                            isPickupOrder={isPickupOrder}
+                            serviceQuote={serviceQuote}
+                            isFetchingServiceQuote={isFetchingServiceQuote}
+                            serviceQuoteError={serviceQuoteError}
+                            onSetIsPickupOrder={setIsPickupOrder}
+                            onSetDeliveryTip={setDeliveryTip}
+                            onSetIsTipping={setIsTipping}
+                            onSetIsTippingDriver={setIsTippingDriver}
+                            onSetTip={setTip}
+                        />
+                    }
                 />
             ) : (
                 <FlatList
@@ -558,8 +560,8 @@ const CartScreen = ({ navigation, route }) => {
                                     keyExtractor={(item) => item.id}
                                     style={tailwind(`${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                                     refreshing={isLoading}
-                                    renderItem={RenderCartItem}
-                                    renderHiddenItem={RenderCartItemActions}
+                                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
+                                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
                                     rightOpenValue={-256}
                                     stopRightSwipe={-256}
                                     disableRightSwipe={true}
@@ -570,11 +572,30 @@ const CartScreen = ({ navigation, route }) => {
                             </View>
                         );
                     }}
-                    ListEmptyComponent={RenderEmptyCartView}
+                    ListEmptyComponent={<RenderEmptyCartView onShopForMore={shopForMore} />}
                     ListHeaderComponent={
                         <CartHeader cart={cart} storeCount={networkStores?.length ?? 0} onEmptyCart={emptyCart} onPressAddMore={shopForMore} style={tailwind('border-b border-gray-100')} />
                     }
-                    ListFooterComponent={RenderCartFooter}
+                    ListFooterComponent={
+                        <CartFooter
+                            cart={cart}
+                            info={info}
+                            total={calculateTotal()}
+                            tip={tip}
+                            deliveryTip={deliveryTip}
+                            isTipping={isTipping}
+                            isTippingDriver={isTippingDriver}
+                            isPickupOrder={isPickupOrder}
+                            serviceQuote={serviceQuote}
+                            isFetchingServiceQuote={isFetchingServiceQuote}
+                            serviceQuoteError={serviceQuoteError}
+                            onSetIsPickupOrder={setIsPickupOrder}
+                            onSetDeliveryTip={setDeliveryTip}
+                            onSetIsTipping={setIsTipping}
+                            onSetIsTippingDriver={setIsTippingDriver}
+                            onSetTip={setTip}
+                        />
+                    }
                 />
             )}
         </View>
