@@ -454,7 +454,7 @@ x = will soon be an option in Storefront settings.
 If auto-assigned orders is not enabled, once the store owner accepts the order they will then be responsible for assigning the order to a driver themselves. 
 
 ### Documentation
-See the [documentation webpage](https://fleetbase.io/docs).
+See the [documentation webpage](https://docs.fleetbase.dev/).
 
 If you would like to make contributions to the Fleetbase Javascript SDK documentation source, here is a [guide](https://github.com/fleetbase/fleetbase-js/blob/master/CONTRIBUTING.md) in doing so.
 
