@@ -75,3 +75,4 @@ android/app/google-services.json
 assets/*
 config/app.js
 config/interface.js
+vendor
