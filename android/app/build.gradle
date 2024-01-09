@@ -91,7 +91,8 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
-
+    namespace "com.storefrontapp"
+        
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER")
         minSdkVersion rootProject.ext.minSdkVersion
@@ -138,6 +139,7 @@ dependencies {
     // Installed dependencies
     implementation project(':react-native-config')
     implementation "androidx.core:core-splashscreen:1.0.0-alpha02" 
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
