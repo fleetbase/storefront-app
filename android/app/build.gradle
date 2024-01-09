@@ -1,5 +1,7 @@
 apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 /*
@@ -93,6 +95,13 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     namespace "com.storefrontapp"
         
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER")
         minSdkVersion rootProject.ext.minSdkVersion
@@ -101,6 +110,14 @@ android {
         versionCode project.env.get("ANDROID_VERSION_CODE")?.toInteger() ?: 1
         versionName project.env.get("ANDROID_VERSION_NAME") ?: "1.0.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+    }
+    configurations.all {
+        resolutionStrategy {
+            // Force usage of androidx.core:core:1.10.0 to resolve conflicts
+            force 'androidx.core:core:1.10.0'
+            // Or, alternatively, force the use of the support library
+            force 'com.android.support:support-compat:27.1.1'
+        }
     }
     signingConfigs {
         release {
@@ -129,6 +146,26 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+    }
+}
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+subprojects {
+    android {
+        // Android configurations if needed
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
+        }
+    }
+    
+    
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinDebugCompile).configureEach {
+        kotlinOptions.jvmTarget = "17"
     }
 }
 
