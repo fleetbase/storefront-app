@@ -94,13 +94,13 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
     namespace "com.storefrontapp"
-        
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        jvmToolchain(11)
     }
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER")
@@ -113,9 +113,7 @@ android {
     }
     configurations.all {
         resolutionStrategy {
-            // Force usage of androidx.core:core:1.10.0 to resolve conflicts
             force 'androidx.core:core:1.10.0'
-            // Or, alternatively, force the use of the support library
             force 'com.android.support:support-compat:27.1.1'
         }
     }
@@ -148,9 +146,17 @@ android {
         }
     }
 }
+
+// Configure JVM Toolchain
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(11)) // Set Java version here
     }
 }
 
@@ -158,14 +164,13 @@ subprojects {
     android {
         // Android configurations if needed
         compileOptions {
-            sourceCompatibility JavaVersion.VERSION_17
-            targetCompatibility JavaVersion.VERSION_17
+            sourceCompatibility JavaVersion.VERSION_11
+            targetCompatibility JavaVersion.VERSION_11
         }
     }
-    
-    
+
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinDebugCompile).configureEach {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "11"
     }
 }
 
@@ -197,4 +202,4 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")   ; applyNativeModulesAppBuildGradle(project)
