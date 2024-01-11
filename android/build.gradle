@@ -1,28 +1,20 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        googlePlayServicesVersion = "+"
-        playServicesLocationVersion = "21.0.1"
-        firebaseMessagingVersion = "22.0.0"
-        firebaseVersion = "22.0.0"
-        buildToolsVersion = "33.0.0"
-        minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
-        ndkVersion = "21.4.7075529"
+        buildToolsVersion = "34.0.0"
+        minSdkVersion = 21
+        compileSdkVersion = 34
+        targetSdkVersion = 34
+        ndkVersion = "25.1.8937393"
+        kotlinVersion = "1.7.10"
     }
     repositories {
         google()
         mavenCentral()
-
-        maven {
-            url "https://jitpack.io" // Or the correct repository URL for Flipper
-        }
     }
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
         classpath('com.google.gms:google-services:4.3.15')
     }
 }
