@@ -38,6 +38,7 @@
         "countries-list": "^2.6.1",
         "country-locale-map": "^1.8.0",
         "date-fns": "^2.28.0",
+        "deprecated-react-native-prop-types": "^5.0.0",
         "hermes-engine": "^0.11.0",
         "i18n-js": "^3.8.0",
         "inflector-js": "^1.0.1",

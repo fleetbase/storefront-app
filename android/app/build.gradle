@@ -95,13 +95,6 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     namespace "com.storefrontapp"
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    kotlin {
-        jvmToolchain(11)
-    }
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER")
         minSdkVersion rootProject.ext.minSdkVersion
@@ -115,6 +108,7 @@ android {
         resolutionStrategy {
             force 'androidx.core:core:1.10.0'
             force 'com.android.support:support-compat:27.1.1'
+            force 'com.facebook.react:hermes-android:0.72.4'
         }
     }
     signingConfigs {
@@ -147,33 +141,6 @@ android {
     }
 }
 
-// Configure JVM Toolchain
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11)) // Set Java version here
-    }
-}
-
-subprojects {
-    android {
-        // Android configurations if needed
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_11
-            targetCompatibility JavaVersion.VERSION_11
-        }
-    }
-
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinDebugCompile).configureEach {
-        kotlinOptions.jvmTarget = "11"
-    }
-}
-
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
@@ -191,11 +158,8 @@ dependencies {
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
     }
-
-    if (enableHermes) {
-        def hermesPath = "../../node_modules/hermes-engine/android/";
-        debugImplementation files(hermesPath + "hermes-debug.aar")
-        releaseImplementation files(hermesPath + "hermes-release.aar")
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
     }
