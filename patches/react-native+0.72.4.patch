@@ -1,0 +1,40 @@
+diff --git a/node_modules/react-native/index.js b/node_modules/react-native/index.js
+index 7149c64..121078a 100644
+--- a/node_modules/react-native/index.js
++++ b/node_modules/react-native/index.js
+@@ -380,7 +380,7 @@ module.exports = {
+   },
+   // Deprecated Prop Types
+   get ColorPropType(): $FlowFixMe {
+-    console.error(
++    console.warn(
+       'ColorPropType will be removed from React Native, along with all ' +
+         'other PropTypes. We recommend that you migrate away from PropTypes ' +
+         'and switch to a type system like TypeScript. If you need to ' +
+@@ -390,7 +390,7 @@ module.exports = {
+     return require('deprecated-react-native-prop-types').ColorPropType;
+   },
+   get EdgeInsetsPropType(): $FlowFixMe {
+-    console.error(
++    console.warn(
+       'EdgeInsetsPropType will be removed from React Native, along with all ' +
+         'other PropTypes. We recommend that you migrate away from PropTypes ' +
+         'and switch to a type system like TypeScript. If you need to ' +
+@@ -400,7 +400,7 @@ module.exports = {
+     return require('deprecated-react-native-prop-types').EdgeInsetsPropType;
+   },
+   get PointPropType(): $FlowFixMe {
+-    console.error(
++    console.warn(
+       'PointPropType will be removed from React Native, along with all ' +
+         'other PropTypes. We recommend that you migrate away from PropTypes ' +
+         'and switch to a type system like TypeScript. If you need to ' +
+@@ -410,7 +410,7 @@ module.exports = {
+     return require('deprecated-react-native-prop-types').PointPropType;
+   },
+   get ViewPropTypes(): $FlowFixMe {
+-    console.error(
++    console.warn(
+       'ViewPropTypes will be removed from React Native, along with all ' +
+         'other PropTypes. We recommend that you migrate away from PropTypes ' +
+         'and switch to a type system like TypeScript. If you need to ' +
