@@ -2,11 +2,11 @@
 
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
+
 #import <React/RCTRootView.h>
 #import <UserNotifications/UserNotifications.h>
 #import <RNCPushNotificationIOS.h>
-#import <GoogleMaps/GoogleMaps.h>
-#import "ReactNativeConfig.h"
+#import "RNCConfig.h"
 #import "RNBootSplash.h"
 
 #ifdef FB_SONARKIT_ENABLED
@@ -34,8 +34,7 @@ static void InitializeFlipper(UIApplication *application) {
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [GMSServices provideAPIKey: [ReactNativeConfig envFor:@"GOOGLE_MAPS_KEY"]]; 
-#ifdef FB_SONARKIT_ENABLED
+  #ifdef FB_SONARKIT_ENABLED
   InitializeFlipper(application);
 #endif
 
@@ -98,7 +97,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
