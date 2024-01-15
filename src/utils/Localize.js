@@ -84,7 +84,7 @@ export default class LocalizeUtil {
         const fallback = { languageTag: 'en', isRTL: false };
 
         // default
-        const { languageTag, isRTL } = RNLocalize.findBestAvailableLanguage(Object.keys(LocalizeUtil.translationGetters)) ?? fallback;
+        const { languageTag, isRTL } = RNLocalize.findBestLanguageTag(Object.keys(LocalizeUtil.translationGetters)) ?? fallback;
 
         // determine locale
         const locale = lang ?? getString('_locale') ?? languageTag;

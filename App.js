@@ -38,8 +38,7 @@ const App: () => Node = () => {
                         <Text style={tailwind('text-gray-700')}>Loading...</Text>
                     </View>
                 </View>
-            }
-        >
+            }>
             <Stack.Navigator>
                 <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
             </Stack.Navigator>

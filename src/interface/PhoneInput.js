@@ -1,102 +1,112 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { listCountries, translate } from 'utils';
-import { useLocale } from 'hooks';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import { CountryPicker, countryCodes } from 'react-native-country-codes-picker';
+import { getColorCode } from 'utils';
 import tailwind from 'tailwind';
-import ReactNativePickerModule from 'react-native-picker-module';
 
-const isString = (string) => typeof string === 'string';
+function isValidCountryCode(code) {
+    // Regular expression to match ISO-2 alpha country codes
+    var regex = /^[A-Za-z]{2}$/;
 
-const PhoneInput = (props) => {
-    const pickerRef = useRef();
+    // Check if the code matches the regular expression
+    return regex.test(code);
+}
 
-    const [locale] = useLocale();
-    const [value, setValue] = useState(props.value ?? null);
-    const [country, setCountry] = useState(props.country ?? null);
+function findDialCodeFromCountryCode(code) {
+    const countryData = countryCodes.find((country) => country.code === code);
 
-    const updatePhoneNumber = (input) => {
-        // if manually entering country code
-        if (isString(input) && input.startsWith('+')) {
-            const manuallySetCountry = listCountries().find((country) => {
-                // get default coutnry from value if starting with country code
-                if (isString(input) && input.startsWith(`+${country.phone}`)) {
-                    return country;
-                }
-            });
+    if (countryData) {
+        return countryData.dial_code;
+    }
 
-            if (manuallySetCountry) {
-                setCountry(manuallySetCountry);
+    return null;
+}
 
-                // patch input
-                input = input.replace(`+${manuallySetCountry.phone}`, '');
+const PhoneInput = ({
+    value,
+    onCountryCodeSelected,
+    onChangePhone,
+    onChangeValue,
+    defaultCountryCode = '+1',
+    placeholder = '+1 (999) 999 9999',
+    style = {},
+    wrapperStyle = {},
+    autoFocus = true,
+}) => {
+    const windowHeight = Dimensions.get('window').height;
+
+    const [show, setShow] = useState(false);
+    const [countryCode, setCountryCode] = useState(defaultCountryCode);
+    const [input, setInput] = useState(value);
+
+    // if the default country code is alphanumeric ISO-2 convert to phone code
+    useEffect(() => {
+        if (isValidCountryCode(countryCode)) {
+            // convert from ISO-2 to Dial Code
+            const dialCode = findDialCodeFromCountryCode(countryCode);
+
+            if (dialCode) {
+                setCountryCode(dialCode);
             }
         }
-
-        setValue(input);
-
-        if (typeof props.onChangeText === 'function') {
-            props.onChangeText(`+${country?.phone || '1'}${input}`);
-        }
-    };
-
-    const getDefaultCountry = () => {
-        const defaultCountry = listCountries().find((country) => {
-            // get default coutnry from value if starting with country code
-            if (isString(value) && value.startsWith(`+${country.phone}`)) {
-                return country;
-            }
-
-            if (isString(props.defaultCountry) && country.iso2 === props.defaultCountry) {
-                return country;
-            }
-        });
-
-        return defaultCountry;
-    };
-
-    const selectCountry = (countryCode) => {
-        const selectedCountry = listCountries(countryCode);
-        setCountry(selectedCountry);
-
-        if (typeof props.onChangeText === 'function') {
-            props.onChangeText(`+${selectedCountry.phone}${value}`);
-        }
-    };
+    }, [setCountryCode]);
 
     useEffect(() => {
-        const defaultCountry = getDefaultCountry();
-        setCountry(defaultCountry);
+        const newValue = `${countryCode}${input}`;
 
-        if (defaultCountry && isString(value)) {
-            setValue(value.replace(`+${defaultCountry.phone}`, ''));
+        if (typeof onChangeValue === 'function') {
+            onChangeValue(newValue);
         }
-    }, []);
+    }, [input, countryCode]);
 
     return (
-        <View>
-            <View style={[tailwind('form-input py-2 flex flex-row'), { height: 52 }, props.style || {}]}>
-                <TouchableOpacity onPress={() => pickerRef.current.show()}>
-                    <View style={tailwind('flex items-center justify-center mr-3')}>
-                        <Text style={tailwind('text-2xl')}>{country?.emoji}</Text>
-                    </View>
+        <View style={[tailwind('flex flex-row mr-2'), { height: 52 }, style]}>
+            <View style={[tailwind('form-input flex flex-row items-center px-1.5 py-1 border border-gray-100 rounded-md mr-1.5'), { height: 52 }, style]}>
+                <TouchableOpacity onPress={() => setShow(true)} style={tailwind('bg-gray-200 rounded-lg py-1.5 px-2')}>
+                    <Text style={tailwind('text-gray-900')}>{countryCode}</Text>
                 </TouchableOpacity>
                 <TextInput
+                    style={[tailwind('h-12 px-2 w-full rounded-md')]}
                     value={value}
-                    onChangeText={updatePhoneNumber}
+                    onChangeText={(text) => {
+                        if (typeof onChangePhone === 'function') {
+                            onChangePhone(text);
+                        }
+
+                        setInput(text);
+                    }}
                     keyboardType={'phone-pad'}
-                    placeholder={props.placeholder || '+0 (000) 000 - 000'}
-                    placeholderTextColor={'rgba(107, 114, 128, 1)'}
-                    style={[tailwind('w-full'), props.inputStyle]}
-                    disabled={props.disabled}
+                    autoFocus={autoFocus}
+                    autoComplete={'off'}
+                    autoCorrect={false}
+                    autoCapitalize={'none'}
+                    placeholder={placeholder}
+                    placeholderTextColor={getColorCode('text-gray-400')}
                 />
             </View>
-            <ReactNativePickerModule
-                pickerRef={pickerRef}
-                value={null}
-                title={translate('components.interface.PhoneInput.selectCountry')}
-                items={listCountries().map((c) => ({ label: `${c.emoji} (+${c.phone}) ${c.name}`, value: c.iso2 }))}
-                selectedColor="#3485e2"
-                onValueChange={selectCountry}
+            <CountryPicker
+                show={show}
+                enableModalAvoiding={true}
+                onBackdropPress={() => setShow(false)}
+                popularCountries={['US', 'UK', 'SG', 'IN', 'NG']}
+                inputPlaceholder={'Search your country'}
+                pickerButtonOnPress={(item) => {
+                    setCountryCode(item.dial_code);
+                    setShow(false);
+
+                    if (typeof onCountryCodeSelected === 'function') {
+                        onCountryCodeSelected(item.dial_code);
+                    }
+                }}
+                style={{
+                    modal: {
+                        height: windowHeight / 2,
+                    },
+                    textInput: {
+                        paddingLeft: 15,
+                        paddingRight: 15,
+                    },
+                }}
             />
         </View>
     );

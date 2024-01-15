@@ -1,43 +1,28 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext {
         googlePlayServicesVersion = "+"
+        playServicesLocationVersion = "21.0.1"
         firebaseMessagingVersion = "22.0.0"
         firebaseVersion = "22.0.0"
-        buildToolsVersion = "29.0.3"
+        buildToolsVersion = "33.0.0"
         minSdkVersion = 23
-        compileSdkVersion = 31
-        targetSdkVersion = 30
-        ndkVersion = "20.1.5948944"
-        googlePlayServicesVersion = "17.0.0"
+        compileSdkVersion = 33
+        targetSdkVersion = 33
+        ndkVersion = "21.4.7075529"
     }
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+
+        maven {
+            url "https://jitpack.io" // Or the correct repository URL for Flipper
+        }
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:4.2.0')
-        classpath("com.google.gms:google-services:4.3.3")
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        mavenLocal()
-        maven {
-            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url("$rootDir/../node_modules/react-native/android")
-        }
-        maven {
-            // Android JSC is installed from npm
-            url("$rootDir/../node_modules/jsc-android/dist")
-        }
-
-        google()
-        jcenter()
-        maven { url 'https://www.jitpack.io' }
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+        classpath('com.google.gms:google-services:4.3.15')
     }
 }
