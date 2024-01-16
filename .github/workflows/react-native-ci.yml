@@ -58,9 +58,6 @@ jobs:
         distribution: 'oracle' 
         java-version: '17'
         
-    - name: Run Jetify
-      run: npx jetify
-
     - name: Cache Gradle Wrapper
       uses: actions/cache@v2
       with:
