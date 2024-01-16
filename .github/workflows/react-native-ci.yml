@@ -35,7 +35,7 @@ jobs:
 
     - name: Generate google-services.json
       env:
-        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        GOOGLE_SERVICES_JSON: ${{ secrets.STOREFRONT_GOOGLE_SERVICES_JSON }}
       run: |
         echo "$GOOGLE_SERVICES_JSON" > google-services.json
         mkdir -p android/app/src  
@@ -52,11 +52,11 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
-    - name: Set up JDK 17
+    - name: Set up JDK 20
       uses: actions/setup-java@v4
       with:
         distribution: 'oracle' 
-        java-version: '17'
+        java-version: '20'
         
     - name: Cache Gradle Wrapper
       uses: actions/cache@v2
