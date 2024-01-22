@@ -139,6 +139,7 @@ Your `.env` file should look something like this once you're done.
 # .env
 APP_NAME=
 APP_IDENTIFIER=
+FLEETBASE_HOST=
 STOREFRONT_KEY=
 FLEETBASE_KEY=
 GOOGLE_MAPS_KEY=
