@@ -58,8 +58,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 key={index}
                                 onPress={() => setViewingPhoto(media)}
-                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}
-                            >
+                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}>
                                 <FastImage source={{ uri: media.url }} style={tailwind('w-full h-full')} />
                             </TouchableOpacity>
                         ))}
@@ -67,7 +66,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                 </ScrollView>
             </View>
             <Modal visible={isModalVisible} animationType={'slide'} transparent={true}>
-                <View style={[tailwind('bg-black bg-opacity-75 mt-1'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('bg-black bg-opacity-75 mt-1'), { paddingTop: Math.max(insets.top, 24) }]}>
                     <View style={tailwind('flex flex-row items-center p-4 z-10')}>
                         <TouchableOpacity onPress={() => setViewingPhoto(null)} style={tailwind('mr-4')}>
                             <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>

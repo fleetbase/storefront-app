@@ -28,7 +28,7 @@ const getYoutubeId = (url) => {
     if (typeof url !== 'string') {
         return false;
     }
-    
+
     const match = url?.match(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/);
     return match && match[1].length == 11 ? match[1] : false;
 };
@@ -84,12 +84,27 @@ const ProductScreen = ({ navigation, route }) => {
     const isMultiCartDisabled = !isMultiCartEnabled;
     const isService = product.getAttribute('is_service') === true;
     const isBookable = isService && product.getAttribute('is_bookable') === true;
-    const youtubeUrls = product.getAttribute('youtube_urls', []).filter((url) => typeof url === 'string').filter(Boolean);
+    const youtubeUrls = product
+        .getAttribute('youtube_urls', [])
+        .filter((url) => typeof url === 'string')
+        .filter(Boolean);
 
-    let actionButtonText = `${cartItem ? translate('Browser.ProductScreen.updateInCartActionText') : isInCart ? translate('Browser.ProductScreen.addAnotherActionText') : translate('Browser.ProductScreen.addToCartActionText')} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+    let actionButtonText = `${
+        cartItem
+            ? translate('Browser.ProductScreen.updateInCartActionText')
+            : isInCart
+              ? translate('Browser.ProductScreen.addAnotherActionText')
+              : translate('Browser.ProductScreen.addToCartActionText')
+    } - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
 
     if (isBookable) {
-        actionButtonText = `${cartItem ? translate('Browser.ProductScreen.updateBookingActionText') : isInCart ? translate('Browser.ProductScreen.addAnotherBookingActionText') : translate('Browser.ProductScreen.bookServiceActionText')} - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+        actionButtonText = `${
+            cartItem
+                ? translate('Browser.ProductScreen.updateBookingActionText')
+                : isInCart
+                  ? translate('Browser.ProductScreen.addAnotherBookingActionText')
+                  : translate('Browser.ProductScreen.bookServiceActionText')
+        } - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
     }
 
     const checkIfCanAddToCart = () => {
@@ -528,8 +543,7 @@ const ProductScreen = ({ navigation, route }) => {
                                         {variation.options.map((variant, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}
-                                            >
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}>
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     <View style={tailwind('mr-4')}>
                                                         <RadioButton
@@ -555,13 +569,14 @@ const ProductScreen = ({ navigation, route }) => {
                                     <View key={i} style={tailwind('my-2 bg-white w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <Text style={tailwind('font-semibold text-lg mr-2')}>{addonCategory.name}</Text>
-                                            <Text style={tailwind('text-gray-400 text-xs')}>{translate('Browser.ProductScreen.optionalAddonLabel', { addonsCount: addonCategory?.addons?.length })}</Text>
+                                            <Text style={tailwind('text-gray-400 text-xs')}>
+                                                {translate('Browser.ProductScreen.optionalAddonLabel', { addonsCount: addonCategory?.addons?.length })}
+                                            </Text>
                                         </View>
                                         {addonCategory.addons.map((addon, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`)}
-                                            >
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`)}>
                                                 <View>
                                                     <View style={tailwind('flex flex-row items-center')}>
                                                         <Checkbox
@@ -598,8 +613,9 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={tailwind('absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white')}>
                     <TouchableOpacity style={tailwind('mb-2')} disabled={cannotAddToCart} onPress={addToCart}>
                         <View
-                            style={tailwind(`rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`)}
-                        >
+                            style={tailwind(
+                                `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`
+                            )}>
                             {isAddingToCart && <ActivityIndicator color="#3B82F6" style={tailwind('mr-3')} />}
                             <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{actionButtonText}</Text>
                         </View>
@@ -609,8 +625,7 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canDecreaseQuantity ? 'opacity-50' : ''}`
-                                )}
-                            >
+                                )}>
                                 <FontAwesomeIcon icon={faMinus} size={15} />
                             </View>
                         </TouchableOpacity>
@@ -621,8 +636,7 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canIncreaseQuantity ? 'opacity-50' : ''}`
-                                )}
-                            >
+                                )}>
                                 <FontAwesomeIcon icon={faPlus} size={15} />
                             </View>
                         </TouchableOpacity>

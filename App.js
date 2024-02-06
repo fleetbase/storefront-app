@@ -14,6 +14,7 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import CoreStack from './src/features/Core/CoreStack';
 import { config } from './src/utils';
 import tailwind from 'tailwind';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const isAndroid = Platform.OS === 'android';
 const Stack = createStackNavigator();
@@ -29,20 +30,22 @@ const linking = {
 
 const App: () => Node = () => {
     return (
-        <NavigationContainer
-            linking={linking}
-            fallback={
-                <View style={tailwind('bg-white flex items-center justify-center w-full h-full')}>
-                    <View style={tailwind('flex items-center justify-center')}>
-                        <ActivityIndicator style={tailwind('mb-4')} />
-                        <Text style={tailwind('text-gray-700')}>Loading...</Text>
+        <SafeAreaProvider>
+            <NavigationContainer
+                linking={linking}
+                fallback={
+                    <View style={tailwind('bg-white flex items-center justify-center w-full h-full')}>
+                        <View style={tailwind('flex items-center justify-center')}>
+                            <ActivityIndicator style={tailwind('mb-4')} />
+                            <Text style={tailwind('text-gray-700')}>Loading...</Text>
+                        </View>
                     </View>
-                </View>
-            }>
-            <Stack.Navigator>
-                <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
-            </Stack.Navigator>
-        </NavigationContainer>
+                }>
+                <Stack.Navigator>
+                    <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </SafeAreaProvider>
     );
 };
 

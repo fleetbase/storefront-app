@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Pressable, Keyboard } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EventRegister } from 'react-native-event-listeners';
+import { Collection, Order } from '@fleetbase/sdk';
+import { faArrowLeft, faBox, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faBox, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { Customer } from '@fleetbase/storefront';
-import { Order, Collection } from '@fleetbase/sdk';
-import { useStorefront, useCustomer, useLocale, useMountedState } from 'hooks';
-import { adapter } from 'hooks/use-fleetbase';
-import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
-import { logError, translate, getColorCode, debounce } from 'utils';
 import { format } from 'date-fns';
+import { useCustomer, useLocale, useMountedState, useStorefront } from 'hooks';
+import { adapter } from 'hooks/use-fleetbase';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import OrderStatusBadge from 'ui/OrderStatusBadge';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
+import OrderStatusBadge from 'ui/OrderStatusBadge';
+import { debounce, getColorCode, logError, translate } from 'utils';
+import { useResourceCollection } from 'utils/Storage';
 
 const OrderHistoryScreen = ({ navigation, route }) => {
     const { useLeftArrow, info } = route.params;
@@ -30,7 +28,6 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isQuerying, setIsQuerying] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
-    
 
     const pushOrders = (orders = []) => {
         setOrders(orders);
@@ -119,7 +116,6 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                                 placeholder={'Search orders'}
                                 placeholderTextColor={getColorCode('text-gray-600')}
                                 autoCapitalize={'none'}
-                                autoComplete={false}
                                 autoCorrect={false}
                                 clearButtonMode={'while-editing'}
                             />

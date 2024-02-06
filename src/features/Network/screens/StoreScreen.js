@@ -83,6 +83,10 @@ const StoreScreen = ({ navigation, route }) => {
     const isPhotosWidgetEnabled = isPhotosEnabled && config('app.storeScreenOptions.photosWidgetEnabled');
     const isReviewsWidgetEnabled = isReviewsEnabled && config('app.storeScreenOptions.reviewsWidgetEnabled');
 
+    useEffect(() => {
+        console.log('StoreScreen mounted: ', storeLocation);
+    }, [isMounted, storeLocation]);
+
     const loadCategories = (isRefreshing = false) => {
         setIsLoading(true);
         setIsRefreshing(isRefreshing);
@@ -265,8 +269,7 @@ const StoreScreen = ({ navigation, route }) => {
                         <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
                             <TouchableOpacity
                                 onPress={() => navigation.navigate('StoreLocationScreen', { data: store.serialize(), locationData: storeLocation.serialize() })}
-                                style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
-                            >
+                                style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
                                 <FontAwesomeIcon icon={faMapMarkedAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
                                 <Text style={tailwind('text-xs')} numberOfLines={1}>
                                     {translate('Network.StoreScreen.mapButtonText')}
@@ -344,8 +347,7 @@ const StoreScreen = ({ navigation, route }) => {
             bounceOnOpen={true}
             nestedScrollEnabled={true}
             onMomentumScrollEnd={() => contactActionSheetRef.current?.handleChildScrollEnd()}
-            ref={contactActionSheetRef}
-        >
+            ref={contactActionSheetRef}>
             <View>
                 <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                     <View style={tailwind('flex flex-row items-center')}>
@@ -366,8 +368,7 @@ const StoreScreen = ({ navigation, route }) => {
                         {store.isAttributeFilled('phone') && (
                             <TouchableOpacity
                                 onPress={() => Linking.openURL(`tel:${store.getAttribute('phone')}`)}
-                                style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}
-                            >
+                                style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}>
                                 <Text style={tailwind('text-base font-semibold')}>
                                     {translate('Network.StoreScreen.contactActionSheetCallActionButtonText', { phone: store.getAttribute('phone') })}
                                 </Text>
@@ -425,8 +426,7 @@ const StoreScreen = ({ navigation, route }) => {
                 <ScrollView
                     showsHorizontalScrollIndicator={false}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadCategories(true)} />}
-                >
+                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadCategories(true)} />}>
                     <StoreHeader store={store} wrapperStyle={tailwind('bg-transparent pt-28')} />
                     <View style={tailwind('w-full h-full min-h-80 bg-gray-100')}>
                         {shouldDisplayLoader && (

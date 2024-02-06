@@ -24,24 +24,13 @@ const AccountScreen = ({ navigation, route }) => {
     const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? true;
     const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
 
-    const RenderHeader = ({ style }) => {
-        if (info.is_store) {
-            return <StorefrontHeader info={info} style={style} {...config('ui.accountScreen.headerComponentProps')} />;
-        }
-
-        if (info.is_network) {
-            return <NetworkHeader info={info} hideCategoryPicker={true} style={[tailwind('bg-white'), style]} {...config('ui.accountScreen.headerComponentProps')} />;
-        }
-    };
-
     const RenderBackground = (props) => {
         if (customer) {
             return (
                 <ImageBackground
                     source={config('ui.accountScreen.signedInContainerBackgroundImage')}
                     resizeMode={config('ui.accountScreen.signedInBackgroundResizeMode') ?? 'cover'}
-                    style={[config('ui.accountScreen.signedInContainerBackgroundImageStyle')]}
-                >
+                    style={[config('ui.accountScreen.signedInContainerBackgroundImageStyle')]}>
                     {props.children}
                 </ImageBackground>
             );
@@ -51,8 +40,7 @@ const AccountScreen = ({ navigation, route }) => {
             <ImageBackground
                 source={config('ui.accountScreen.signedOutContainerBackgroundImage')}
                 resizeMode={config('ui.accountScreen.signedOutBackgroundResizeMode') ?? 'cover'}
-                style={[config('ui.accountScreen.signedOutContainerBackgroundImageStyle')]}
-            >
+                style={[config('ui.accountScreen.signedOutContainerBackgroundImageStyle')]}>
                 {props.children}
             </ImageBackground>
         );
@@ -60,23 +48,13 @@ const AccountScreen = ({ navigation, route }) => {
 
     return (
         <RenderBackground>
-            {displayHeaderComponent === true && (
-                <RenderHeader
-                    style={[
-                        tailwind('bg-white'),
-                        config('ui.accountScreen.headerContainerStyle'),
-                        customer ? config('ui.accountScreen.signedInHeaderContainerStyle') : config('ui.accountScreen.signedOutHeaderContainerStyle'),
-                    ]}
-                />
-            )}
             <View
                 style={[
                     tailwind('bg-white'),
                     config('ui.accountScreen.containerStyle'),
                     customer ? config('ui.accountScreen.signedInContainerStyle') : config('ui.accountScreen.signedOutContainerStyle'),
                     { height: containerHeight },
-                ]}
-            >
+                ]}>
                 {!customer && (
                     <View style={tailwind('w-full h-full relative')}>
                         <View style={tailwind('flex items-center justify-center w-full h-full relative')}>
@@ -86,8 +64,7 @@ const AccountScreen = ({ navigation, route }) => {
                                         style={[
                                             tailwind('flex items-center justify-center mb-10 rounded-full bg-gray-100 w-60 h-60'),
                                             config('ui.accountScreen.emptyStatePlaceholderIconContainerStyle'),
-                                        ]}
-                                    >
+                                        ]}>
                                         <FontAwesomeIcon icon={faIdBadge} size={88} style={[tailwind('text-gray-600'), config('ui.accountScreen.emptyStatePlaceholderIconStyle')]} />
                                     </View>
                                     <Text style={[tailwind('text-lg text-center font-semibold mb-10'), config('ui.accountScreen.emptyStatePlaceholderTextStyle')]}>

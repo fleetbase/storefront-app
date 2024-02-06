@@ -58,12 +58,14 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
             <TouchableOpacity onPress={() => setIsDialogOpen(true)}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-lg px-4 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind('mr-2 text-gray-900'), buttonIconStyle]} />
-                    <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>{buttonTitle}</Text>
+                    <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>
+                        {buttonTitle}
+                    </Text>
                 </View>
             </TouchableOpacity>
 
             <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={closeDialog}>
-                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: Math.max(insets.top, 47) }]}>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between')}>
                         <View style={tailwind('flex-1 pr-4')}>
                             <View style={tailwind('relative overflow-hidden')}>
@@ -80,7 +82,7 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
                                     clearButtonMode={'while-editing'}
                                     textAlign={'left'}
                                     style={tailwind('bg-gray-100 rounded-md pl-10 pr-2 h-10')}
-                                    placeholder={translate('components.interface.StoreSearch.inputPlaceholderText')}
+                                    placeholder={translate('components.interface.StoreSearch.inputPlaceholderText', { storeName: store?.getAttribute('name') })}
                                 />
                             </View>
                         </View>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, TextInput, ActivityIndicator, Dimensions, Modal } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt, faTimes, faStar, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { EventRegister } from 'react-native-event-listeners';
@@ -31,7 +31,7 @@ const LocationPicker = (props) => {
     const [places, setPlaces] = useResourceCollection('places', Place, adapter);
     const [isAddingDeliveryLocation, setIsAddingDeliveryLocation] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
+
     const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
     const loadPlaces = (customer) => {
@@ -278,7 +278,7 @@ const LocationPicker = (props) => {
             </TouchableOpacity>
 
             <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
-                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: Math.max(insets.top) }]}>
                     {!isAddingDeliveryLocation && <SelectDeliveryLocationView />}
                     {isAddingDeliveryLocation && <SearchDevliveryLocationView />}
                 </View>

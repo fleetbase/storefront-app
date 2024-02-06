@@ -34,16 +34,6 @@ const invoke = (fn, ...params) => {
     return null;
 };
 
-const RenderHeader = ({ info, hideCategoryPicker = true }) => {
-    if (info.is_store) {
-        return <StorefrontHeader info={info} />;
-    }
-
-    if (info.is_network) {
-        return <NetworkHeader info={info} hideCategoryPicker={hideCategoryPicker} style={tailwind('bg-white')} {...config('ui.cart.cartScreen.networkHeaderProps')} />;
-    }
-};
-
 const RenderCartReloadView = ({ isLoading, isEmptying, onRefresh }) => (
     <View style={tailwind(`mt-20 flex items-center justify-center ${isLoading || isEmptying ? 'opacity-50' : ''}`)}>
         <View style={tailwind('flex items-center justify-center my-6 w-60 h-60')}>
@@ -248,7 +238,7 @@ const CartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation?.coordinates;
         }
 
-        if (!cart || !cart instanceof Cart || (!isNetwork && (!storeLocation || !storeLocation instanceof StoreLocation)) || !customerLocation) {
+        if (!cart || (!cart) instanceof Cart || (!isNetwork && (!storeLocation || (!storeLocation) instanceof StoreLocation)) || !customerLocation) {
             return;
         }
 
@@ -483,7 +473,6 @@ const CartScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>
-            <RenderHeader info={info} hideCategoryPicker={true} />
             <CartCheckoutPanel
                 cart={cart}
                 total={calculateTotal()}
