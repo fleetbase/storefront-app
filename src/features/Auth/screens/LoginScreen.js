@@ -5,7 +5,7 @@ import { getUniqueId } from 'react-native-device-info';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useStorefront, useLocale, useCustomer } from 'hooks';
-import { logError, translate, config } from 'utils';
+import { logError, deepGet, translate, config } from 'utils';
 import { getLocation } from 'utils/Geo';
 import { set, get } from 'utils/Storage';
 import tailwind from 'tailwind';
@@ -85,8 +85,7 @@ const LoginScreen = ({ navigation, route }) => {
         <ImageBackground
             source={config('ui.loginScreen.containerBackgroundImage')}
             resizeMode={config('ui.loginScreen.containerBackgroundResizeMode') ?? 'cover'}
-            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}
-        >
+            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}>
             <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle'), { paddingTop: insets.top }]}>
                 <View style={[tailwind('flex flex-row items-center p-4'), config('ui.loginScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -106,9 +105,9 @@ const LoginScreen = ({ navigation, route }) => {
                             )}
                             <View style={tailwind('mb-6')}>
                                 <PhoneInput
-                                    value={phone}
-                                    onChangeText={setPhone}
-                                    defaultCountry={location?.country}
+                                    onChangeValue={setPhone}
+                                    autoFocus={true}
+                                    defaultCountryCode={location?.country || '+1'}
                                     style={config('ui.loginScreen.phoneInputStyle')}
                                     {...(config('ui.createAccountScreen.phoneInputProps') ?? {})}
                                 />
@@ -134,8 +133,7 @@ const LoginScreen = ({ navigation, route }) => {
                         <KeyboardAvoidingView
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                             keyboardVerticalOffset={140}
-                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}
-                        >
+                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}>
                             {error && (
                                 <View style={tailwind('mb-8')}>
                                     <Text style={tailwind('text-lg text-red-600')}>{error}</Text>
