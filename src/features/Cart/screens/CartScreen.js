@@ -1,29 +1,27 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import { View, ScrollView, FlatList, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Switch } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { SwipeListView } from 'react-native-swipe-list-view';
-import { EventRegister } from 'react-native-event-listeners';
-import { getUniqueId } from 'react-native-device-info';
+import { Collection, Place } from '@fleetbase/sdk';
+import { Cart, DeliveryServiceQuote, Store, StoreLocation } from '@fleetbase/storefront';
+import { faCalendarCheck, faPencilAlt, faShoppingCart, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faShoppingCart, faTrash, faPencilAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
-import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
-import { Place, ServiceQuote, Point, Collection } from '@fleetbase/sdk';
-import { calculatePercentage } from 'utils/Calculate';
-import { useResourceStorage, useResourceCollection } from 'utils/Storage';
-import { formatCurrency, isLastIndex, stripHtml, logError, translate, config } from 'utils';
-import { NetworkInfoService } from 'services';
-import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useCart, useMountedState, useLocale } from 'hooks';
-import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
+import { useFocusEffect } from '@react-navigation/native';
 import { format } from 'date-fns';
+import { useCart, useLocale, useMountedState } from 'hooks';
+import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
+import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { getUniqueId } from 'react-native-device-info';
+import { EventRegister } from 'react-native-event-listeners';
 import FastImage from 'react-native-fast-image';
-import StorefrontHeader from 'ui/headers/StorefrontHeader';
-import NetworkHeader from 'ui/headers/NetworkHeader';
-import CartCheckoutPanel from '../components/CartCheckoutPanel';
-import CartHeader from '../components/CartHeader';
-import CartFooter from '../components/CartFooter';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import tailwind from 'tailwind';
+import NetworkHeader from 'ui/headers/NetworkHeader';
+import StorefrontHeader from 'ui/headers/StorefrontHeader';
+import { config, formatCurrency, isLastIndex, logError, stripHtml, translate } from 'utils';
+import { calculatePercentage } from 'utils/Calculate';
+import { useResourceCollection, useResourceStorage } from 'utils/Storage';
+import CartCheckoutPanel from '../components/CartCheckoutPanel';
+import CartFooter from '../components/CartFooter';
+import CartHeader from '../components/CartHeader';
 
 const { emit, addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
@@ -99,8 +97,7 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
         style={[
             tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`),
             { height: typeof calculateCartItemRowHeight === 'function' ? calculateCartItemRowHeight(item) : 200 },
-        ]}
-    >
+        ]}>
         <View style={tailwind('flex flex-1 flex-row justify-between')}>
             <View style={tailwind('flex flex-row items-start')}>
                 <View>
@@ -335,7 +332,12 @@ const CartScreen = ({ navigation, route }) => {
             });
         }
 
-        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), selectedStoreLocation: storeLocation?.serialize(), cartItemAttributes: cartItem, store: store?.serialize() });
+        return navigation.navigate('CartItemScreen', {
+            attributes: product.serialize(),
+            selectedStoreLocation: storeLocation?.serialize(),
+            cartItemAttributes: cartItem,
+            store: store?.serialize(),
+        });
     });
 
     const preloadCartItems = useCallback(async (cart) => {
@@ -501,8 +503,10 @@ const CartScreen = ({ navigation, route }) => {
                     style={tailwind(`h-full ${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
-                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
-                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
+                    renderItem={({ item, index }) => (
+                        <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />
+                    )}
+                    renderHiddenItem={({ item, index }) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
                     rightOpenValue={-256}
                     stopRightSwipe={-256}
                     disableRightSwipe={true}
@@ -560,8 +564,12 @@ const CartScreen = ({ navigation, route }) => {
                                     keyExtractor={(item) => item.id}
                                     style={tailwind(`${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                                     refreshing={isLoading}
-                                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
-                                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
+                                    renderItem={({ item, index }) => (
+                                        <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />
+                                    )}
+                                    renderHiddenItem={({ item, index }) => (
+                                        <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />
+                                    )}
                                     rightOpenValue={-256}
                                     stopRightSwipe={-256}
                                     disableRightSwipe={true}
