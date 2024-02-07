@@ -491,7 +491,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         setServiceQuoteError(false);
 
         quote
-            .fromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
+            .fetchServiceQuotesFromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
             .then((serviceQuote) => {
                 setServiceQuote(serviceQuote);
                 setIsFetchingServiceQuote(false);

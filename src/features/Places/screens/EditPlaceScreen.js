@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EventRegister } from 'react-native-event-listeners';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { Place } from '@fleetbase/sdk';
+import { faArrowLeft, faSave, faStar, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faSave, faTimes, faStar } from '@fortawesome/free-solid-svg-icons';
-import { Place, GoogleAddress } from '@fleetbase/sdk';
-import { useStorefront, useCustomer, useLocale } from 'hooks';
+import { useCustomer, useStorefront } from 'hooks';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { get, set, remove } from 'utils/Storage';
-import { translate } from 'utils';
+import React, { useState } from 'react';
+import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { EventRegister } from 'react-native-event-listeners';
 import MapView, { Marker } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
+import { translate } from 'utils';
+import { get, remove, set } from 'utils/Storage';
 
 navigator.geolocation = require('react-native-geolocation-service');
 
@@ -120,14 +119,13 @@ const EditPlaceScreen = ({ navigation, route }) => {
                             zoom={10}
                             style={tailwind('w-full h-40 rounded-md shadow-sm')}
                             initialRegion={{
-                                latitude: place.latitude,
-                                longitude: place.longitude,
+                                latitude: place?.latitude,
+                                longitude: place?.longitude,
                                 latitudeDelta: 0.0922,
                                 longitudeDelta: 0.0421,
-                            }}
-                    >
-                        <Marker coordinate={{ latitude: place.latitude, longitude: place.longitude }} />
-                    </MapView>
+                            }}>
+                            <Marker coordinate={{ latitude: place?.latitude, longitude: place?.longitude }} />
+                        </MapView>
                     </View>
                     <View style={tailwind('mb-4')}>
                         <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Places.EditPlaceScreen.name')}</Text>

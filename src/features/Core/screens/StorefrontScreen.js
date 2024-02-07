@@ -1,28 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import { getUniqueId } from 'react-native-device-info';
+import { faShoppingCart, faStore, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faStore, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { EventRegister } from 'react-native-event-listeners';
-import { getCurrentLocation } from 'utils/Geo';
-import { useResourceStorage, get } from 'utils/Storage';
-import { getCustomer, syncDevice } from 'utils/Customer';
-import { logError } from 'utils';
-import { tailwind } from 'tailwind';
-import { Cart, Store, StoreLocation } from '@fleetbase/storefront';
-import { useCart, useCartTabOptions, useStoreLocation, useCustomer } from 'hooks';
-import { CartService, StoreInfoService, NavigationService } from 'services';
-import useFleetbase from 'hooks/use-fleetbase';
+import AccountStack from 'account/AccountStack';
 import BrowserStack from 'browser/BrowserStack';
 import CartStack from 'cart/CartStack';
-import AccountStack from 'account/AccountStack';
+import { useCart, useCartTabOptions, useCustomer, useStoreLocation } from 'hooks';
+import useFleetbase from 'hooks/use-fleetbase';
+import React, { useEffect, useState } from 'react';
+import { EventRegister } from 'react-native-event-listeners';
+import { CartService, NavigationService, StoreInfoService } from 'services';
+import { tailwind } from 'tailwind';
+import { logError } from 'utils';
+import { syncDevice } from 'utils/Customer';
+import { getCurrentLocation } from 'utils/Geo';
 
 const { addEventListener, removeEventListener } = EventRegister;
 const Tab = createBottomTabNavigator();
 
 const StorefrontScreen = ({ navigation, route }) => {
-    const { info } = route.params;
+    let { info } = route.params;
 
     const fleetbase = useFleetbase();
 
@@ -96,10 +92,9 @@ const StorefrontScreen = ({ navigation, route }) => {
                 style: tailwind('bg-black border-black'),
                 tabStyle: tailwind('bg-black border-black'),
                 showLabel: false,
-            }}
-        >
-            <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info }} />
-            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, data: cart?.serialize() }} />
+            }}>
+            <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info: { ...info, storeLocations: storeLocation } }} />
+            <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info: { ...info, storeLocations: storeLocation }, data: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>
     );

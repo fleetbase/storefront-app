@@ -34,6 +34,10 @@ const LocationPicker = (props) => {
 
     const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
+    useEffect(() => {
+        console.log('[ LocationPicker ]', places);
+    }, [isMounted]);
+
     const loadPlaces = (customer) => {
         if (!isValidCustomer(customer)) {
             return setPlaces([]);
@@ -158,7 +162,7 @@ const LocationPicker = (props) => {
                     placeholder={translate('components.interface.LocationPicker.enterAddress')}
                     placeholderTextColor={'rgba(156, 163, 175, 1)'}
                     autoCapitalize={'none'}
-                    autoCorrect={false}
+                    autoCorrect={true}
                     currentLocation={true}
                     enableHighAccuracyLocation={true}
                     fetchDetails={true}
@@ -278,7 +282,7 @@ const LocationPicker = (props) => {
             </TouchableOpacity>
 
             <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
-                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: Math.max(insets.top) }]}>
+                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: Math.max(insets.top, 47) }]}>
                     {!isAddingDeliveryLocation && <SelectDeliveryLocationView />}
                     {isAddingDeliveryLocation && <SearchDevliveryLocationView />}
                 </View>
