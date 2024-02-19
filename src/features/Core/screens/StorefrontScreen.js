@@ -26,6 +26,7 @@ const StorefrontScreen = ({ navigation, route }) => {
     const [customer, setCustomer] = useCustomer();
     const [storeLocation, setStoreLocation] = useStoreLocation();
     const [cart, setCart] = useCart();
+    const [storeLocations, setStoreLocations] = useState([]);
     const [cartTabOptions, setCartTabOptions] = useCartTabOptions(cart);
 
     useEffect(() => {
@@ -38,7 +39,13 @@ const StorefrontScreen = ({ navigation, route }) => {
             .catch(logError);
 
         // Fetch and set default store location
-        StoreInfoService.getDefaultLocation().then(setStoreLocation).catch(logError);
+        StoreInfoService.getDefaultLocation()
+            .then((locations) => {
+                console.log('locations', locations.defaultStoreLocation, locations.locations);
+                setStoreLocation(locations.defaultStoreLocation);
+                setStoreLocations(locations.locations);
+            })
+            .catch(logError);
 
         // Set location
         getCurrentLocation();
@@ -93,7 +100,7 @@ const StorefrontScreen = ({ navigation, route }) => {
                 tabStyle: tailwind('bg-black border-black'),
                 showLabel: false,
             }}>
-            <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info: { ...info, storeLocations: storeLocation } }} />
+            <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info: { ...info, defaultStoreLocation: storeLocation, storeLocations: storeLocations } }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info: { ...info, storeLocations: storeLocation }, data: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
         </Tab.Navigator>

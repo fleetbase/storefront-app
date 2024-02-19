@@ -27,9 +27,9 @@ const StorePicker = (props) => {
         displayAddressForTitle,
         onStoreLocationSelected,
         onLoaded,
-        defaultStoreLocation,
-        storeLocations,
     } = props;
+
+    const { defaultStoreLocation, storeLocations } = info;
 
     const store = new Store(info, StorefrontAdapter);
     const buttonIcon = props?.buttonIcon ?? faInfoCircle;
