@@ -445,7 +445,7 @@ const StoreScreen = ({ navigation, route }) => {
                             />
                         )}
                         {isInfoWidgetEnabled && <StoreInfoWidget wrapperStyle={tailwind('my-2')} info={info} store={store} storeLocation={storeLocation} />}
-                        {isPhotosWidgetEnabled && store.getAttribute('media', []).length > 0 && (
+                        {isPhotosWidgetEnabled && store.getAttribute('media', [])?.length > 0 && (
                             <StorePhotosWidget
                                 wrapperStyle={tailwind('my-2')}
                                 info={info}

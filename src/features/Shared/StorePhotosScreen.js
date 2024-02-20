@@ -34,7 +34,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
 
     const isModalVisible = viewingPhoto !== null && viewingPhoto !== undefined;
     const medias = store.getAttribute('media', []);
-    const currentIndex = medias.indexOf(viewingPhoto);
+    const currentIndex = medias?.indexOf(viewingPhoto);
 
     return (
         <View style={[tailwind('bg-black'), { paddingTop: insets.top }]}>
@@ -54,7 +54,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                 </View>
                 <ScrollView style={tailwind('w-full h-full pb-12')}>
                     <View style={tailwind('flex flex-row flex-wrap')}>
-                        {medias.map((media, index) => (
+                        {medias?.map((media, index) => (
                             <TouchableOpacity
                                 key={index}
                                 onPress={() => setViewingPhoto(media)}
