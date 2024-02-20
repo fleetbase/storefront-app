@@ -62,15 +62,6 @@ const BootScreen = ({ navigation }) => {
             }, 300);
         });
 
-    useEffect(() => {
-        if (STRIPE_KEY) {
-            initStripe({
-                publishableKey: STRIPE_KEY,
-                merchantIdentifier: APP_IDENTIFIER,
-            });
-        }
-    }, []);
-
     return (
         <SafeAreaView style={tailwind('bg-white')}>
             <View style={tailwind('flex items-center justify-center w-full h-full bg-white')}>
