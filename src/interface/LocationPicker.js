@@ -34,10 +34,6 @@ const LocationPicker = (props) => {
 
     const isDefaultDeliveryLocation = (place) => deliverTo?.id === place?.id;
 
-    useEffect(() => {
-        console.log('[ LocationPicker ]', places);
-    }, [isMounted]);
-
     const loadPlaces = (customer) => {
         if (!isValidCustomer(customer)) {
             return setPlaces([]);

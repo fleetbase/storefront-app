@@ -47,9 +47,11 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
         }
     });
 
-    const debouncedSearch = useCallback(debounce((query, cb) => {
-        fetchResultsFromStore(query, cb);
-    }, 300));
+    const debouncedSearch = useCallback(
+        debounce((query, cb) => {
+            fetchResultsFromStore(query, cb);
+        }, 300)
+    );
 
     useEffect(() => {
         // Load tags from network
@@ -77,7 +79,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
             </TouchableOpacity>
 
             <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={closeDialog}>
-                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: Math.max(insets.top, 47) }]}>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between')}>
                         <View style={tailwind('flex-1 pr-4')}>
                             <View style={tailwind('relative overflow-hidden')}>
@@ -114,13 +116,19 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
                         </View>
                     )}
                     <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                        {tags.length > 0 && <View style={tailwind('flex flex-row flex-wrap px-4')}>
-                            {tags.map((tag, index) => (
-                                <TouchableOpacity disabled={isLoading} onPress={() => setQuery(tag)} key={index} style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
-                                    <Text style={tailwind('text-xs text-gray-700')}>{tag}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>}
+                        {tags.length > 0 && (
+                            <View style={tailwind('flex flex-row flex-wrap px-4')}>
+                                {tags.map((tag, index) => (
+                                    <TouchableOpacity
+                                        disabled={isLoading}
+                                        onPress={() => setQuery(tag)}
+                                        key={index}
+                                        style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
+                                        <Text style={tailwind('text-xs text-gray-700')}>{tag}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
                         {results.map((product, index) => (
                             <TouchableOpacity key={index} disabled={isLoading} onPress={() => handleResultPress(product)}>
                                 <View style={tailwind('px-5 py-4 border-b border-gray-100')}>

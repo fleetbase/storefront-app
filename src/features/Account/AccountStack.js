@@ -44,7 +44,7 @@ const AccountStack = ({ route }) => {
 
     return (
         <SafeAreaProvider>
-            <RootStack.Navigator mode="modal">
+            <RootStack.Navigator screenOptions={{ presentation: 'modal' }}>
                 <RootStack.Screen name="AccountStack" component={MainStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="CreateAccount" component={CreateAccountScreen} options={{ headerShown: false }} initialParams={{ info }} />

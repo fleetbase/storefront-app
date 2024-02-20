@@ -41,7 +41,7 @@ const StoreScreenStack = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <StoreStack.Navigator mode="modal">
+        <StoreStack.Navigator screenOptions={{ presentation: 'modal' }}>
             <StoreStack.Screen name="StoreScreen" component={StoreScreen} options={{ headerShown: false }} initialParams={route.params} />
             <StoreStack.Screen name="StoreLocationScreen" component={StoreLocationScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <StoreStack.Screen name="StorePhotosScreen" component={StorePhotosScreen} options={{ headerShown: false }} initialParams={{ info }} />
@@ -57,7 +57,7 @@ const MapViewStack = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <MapStack.Navigator mode="modal">
+        <MapStack.Navigator screenOptions={{ presentation: 'modal' }}>
             <MapStack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} initialParams={route.params} />
             <MapStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
         </MapStack.Navigator>
