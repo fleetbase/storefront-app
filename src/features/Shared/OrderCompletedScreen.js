@@ -29,21 +29,21 @@ const OrderCompletedScreen = ({ navigation, route }) => {
 
     const formattedTip = (() => {
         if (typeof tip === 'string' && tip.endsWith('%')) {
-            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal) / 100, currency);
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal), currency);
 
             return `${tip} (${tipAmount})`;
         }
 
-        return formatCurrency(tip / 100, currency);
+        return formatCurrency(tip, currency);
     })();
     const formattedDeliveryTip = (() => {
         if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
-            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), subtotal) / 100, currency);
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), subtotal), currency);
 
             return `${deliveryTip} (${tipAmount})`;
         }
 
-        return formatCurrency(deliveryTip / 100, currency);
+        return formatCurrency(deliveryTip, currency);
     })();
 
     return (
@@ -95,7 +95,12 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.pickup.name') ?? order.getAttribute('payload.pickup.street1')}, {order.getAttribute('payload.pickup.postal_code') ?? order.getAttribute('payload.pickup.building') ?? order.getAttribute('payload.pickup.neighborhood') ?? order.getAttribute('payload.pickup.district') ?? order.getAttribute('payload.pickup.city')}
+                                                        {order.getAttribute('payload.pickup.name') ?? order.getAttribute('payload.pickup.street1')},{' '}
+                                                        {order.getAttribute('payload.pickup.postal_code') ??
+                                                            order.getAttribute('payload.pickup.building') ??
+                                                            order.getAttribute('payload.pickup.neighborhood') ??
+                                                            order.getAttribute('payload.pickup.district') ??
+                                                            order.getAttribute('payload.pickup.city')}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -107,7 +112,8 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                                         </View>
                                                         <View>
                                                             <Text style={tailwind('text-sm')}>
-                                                                {waypoint.name ?? waypoint.street1}, {waypoint.postal_code ?? waypoint.building ?? waypoint.neighborhood ?? waypoint.district ?? waypoint.city}
+                                                                {waypoint.name ?? waypoint.street1},{' '}
+                                                                {waypoint.postal_code ?? waypoint.building ?? waypoint.neighborhood ?? waypoint.district ?? waypoint.city}
                                                             </Text>
                                                         </View>
                                                     </View>
@@ -118,7 +124,12 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                                 </View>
                                                 <View>
                                                     <Text style={tailwind('text-sm')}>
-                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')}, {order.getAttribute('payload.dropoff.postal_code') ?? order.getAttribute('payload.dropoff.building') ?? order.getAttribute('payload.dropoff.neighborhood') ?? order.getAttribute('payload.dropoff.district') ?? order.getAttribute('payload.dropoff.city')}
+                                                        {order.getAttribute('payload.dropoff.name') ?? order.getAttribute('payload.dropoff.street1')},{' '}
+                                                        {order.getAttribute('payload.dropoff.postal_code') ??
+                                                            order.getAttribute('payload.dropoff.building') ??
+                                                            order.getAttribute('payload.dropoff.neighborhood') ??
+                                                            order.getAttribute('payload.dropoff.district') ??
+                                                            order.getAttribute('payload.dropoff.city')}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -216,7 +227,7 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                                     </View>
                                                 </View>
                                                 <View>
-                                                    <Text>{formatCurrency(entity.meta.subtotal / 100, entity.currency)}</Text>
+                                                    <Text>{formatCurrency(entity.meta.subtotal, entity.currency)}</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -228,12 +239,12 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                     <View style={tailwind('w-full p-4 border-b border-gray-200')}>
                                         <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
                                             <Text>{translate('Shared.OrderCompletedScreen.subtotal')}</Text>
-                                            <Text>{formatCurrency(order.getAttribute('meta.subtotal') / 100, order.getAttribute('meta.currency'))}</Text>
+                                            <Text>{formatCurrency(order.getAttribute('meta.subtotal'), order.getAttribute('meta.currency'))}</Text>
                                         </View>
                                         {!isPickupOrder && (
                                             <View style={tailwind('flex flex-row items-center justify-between mb-2')}>
                                                 <Text>{translate('Shared.OrderCompletedScreen.deliveryFee')}</Text>
-                                                <Text>{formatCurrency(order.getAttribute('meta.delivery_fee') / 100, order.getAttribute('meta.currency'))}</Text>
+                                                <Text>{formatCurrency(order.getAttribute('meta.delivery_fee'), order.getAttribute('meta.currency'))}</Text>
                                             </View>
                                         )}
                                         {tip && (
@@ -252,7 +263,7 @@ const OrderCompletedScreen = ({ navigation, route }) => {
                                     <View style={tailwind('w-full p-4')}>
                                         <View style={tailwind('flex flex-row items-center justify-between')}>
                                             <Text style={tailwind('font-semibold')}>{translate('Shared.OrderCompletedScreen.total')}</Text>
-                                            <Text style={tailwind('font-semibold')}>{formatCurrency(order.getAttribute('meta.total') / 100, order.getAttribute('meta.currency'))}</Text>
+                                            <Text style={tailwind('font-semibold')}>{formatCurrency(order.getAttribute('meta.total'), order.getAttribute('meta.currency'))}</Text>
                                         </View>
                                     </View>
                                 </View>

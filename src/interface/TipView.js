@@ -5,12 +5,12 @@ import { calculatePercentage } from 'utils/Calculate';
 
 const TipView = ({ style, tip, subtotal, currency }) => {
     if (typeof tip === 'string' && tip.endsWith('%')) {
-        const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal) / 100, currency);
+        const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), subtotal), currency);
 
         return <Text style={style}>{`${tip} (${tipAmount})`}</Text>;
     }
 
-    return <Text style={style}>{formatCurrency(tip / 100, currency)}</Text>;
+    return <Text style={style}>{formatCurrency(tip, currency)}</Text>;
 };
 
 export default TipView;

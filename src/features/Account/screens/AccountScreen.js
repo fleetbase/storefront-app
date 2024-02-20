@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground, Image, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { getUniqueId } from 'react-native-device-info';
-import { EventRegister } from 'react-native-event-listeners';
+import { faBox, faChevronRight, faIdBadge, faMapMarked, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBox, faChevronRight, faLockOpen, faUser, faMapMarked, faCreditCard, faIdBadge } from '@fortawesome/free-solid-svg-icons';
-import { useCustomer, signOut } from 'utils/Customer';
-import { config, translate } from 'utils';
 import { useLocale } from 'hooks';
+import React, { useState } from 'react';
+import { ActivityIndicator, Dimensions, ImageBackground, Text, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import StorefrontHeader from 'ui/headers/StorefrontHeader';
-import NetworkHeader from 'ui/headers/NetworkHeader';
 import tailwind from 'tailwind';
+import { config, translate } from 'utils';
+import { signOut, useCustomer } from 'utils/Customer';
 
 const fullHeight = Dimensions.get('window').height;
 

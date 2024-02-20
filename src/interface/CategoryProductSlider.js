@@ -49,15 +49,15 @@ const CategoryProductSlider = (props) => {
                                         </View>
                                         {product.isOnSale && (
                                             <View style={tailwind('flex flex-row')}>
-                                                <Text style={tailwind('font-bold mr-1')}>{formatCurrency(product.getAttribute('sale_price') / 100, product.getAttribute('currency'))}</Text>
+                                                <Text style={tailwind('font-bold mr-1')}>{formatCurrency(product.getAttribute('sale_price'), product.getAttribute('currency'))}</Text>
                                                 <Text style={tailwind('line-through text-xs text-gray-400')}>
-                                                    {formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}
+                                                    {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                                                 </Text>
                                             </View>
                                         )}
                                         {!product.isOnSale && (
                                             <View style={tailwind('flex flex-row')}>
-                                                <Text style={tailwind('text-center font-bold')}>{formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}</Text>
+                                                <Text style={tailwind('text-center font-bold')}>{formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}</Text>
                                             </View>
                                         )}
                                     </View>

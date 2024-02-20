@@ -1,19 +1,15 @@
 import Storefront from '@fleetbase/storefront';
 import config from 'config';
 
-const { STOREFRONT_KEY, FLEETBASE_HOST } = config;
-let storefront, adapter;
+import { get } from 'utils/Storage';
 
-try {
-    storefront = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
-    adapter = storefront.getAdapter();
-} catch (error) {
-    storefront = error;
-}
+let { STOREFRONT_KEY, FLEETBASE_HOST } = config;
 
 const useStorefront = () => {
+    const storefront = new Storefront(STOREFRONT_KEY || 'store_726cc5fe346591e99edfa2aed2102148', { host: 'https://460a-202-131-229-106.ngrok-free.app' });
+    const adapter = storefront.getAdapter();
+
     return storefront;
 };
 
 export default useStorefront;
-export { adapter };

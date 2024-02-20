@@ -34,7 +34,7 @@ const CartTotalView = ({ cart, style, tip, deliveryTip, isTipping, isTippingDriv
         return serviceQuote instanceof DeliveryServiceQuote ? subtotal + serviceQuote.getAttribute('amount') : subtotal;
     };
 
-    return <Text style={style}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>;
+    return <Text style={style}>{formatCurrency(calculateTotal(), cart.getAttribute('currency'))}</Text>;
 };
 
 export default CartTotalView;

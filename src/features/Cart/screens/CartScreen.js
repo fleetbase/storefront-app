@@ -137,11 +137,11 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
                 </View>
             </View>
             <View style={tailwind('flex items-end')}>
-                <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
+                <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal, cart.getAttribute('currency'))}</Text>
                 {item.quantity > 1 && (
                     <View>
                         <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                            {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency')) })}
+                            {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity, cart.getAttribute('currency')) })}
                         </Text>
                     </View>
                 )}

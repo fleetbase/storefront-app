@@ -50,7 +50,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                 }
 
                 return customer
-                    .getOrderHistory({ query, sort: '-created_at', limit: -1, ...params })
+                    .getOrderHistory({ query, sort: 'created_at', limit: 25, ...params })
                     .then(pushOrders)
                     .then(resolve)
                     .catch(logError)

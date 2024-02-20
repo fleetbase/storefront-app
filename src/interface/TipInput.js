@@ -17,7 +17,7 @@ const TipInput = (props) => {
             return `${parseInt(value)}%`;
         }
 
-        return formatCurrency(value / 100, currency);
+        return formatCurrency(value, currency);
     })();
 
     const decrementDisabled = (() => {
@@ -49,7 +49,7 @@ const TipInput = (props) => {
             if (value === 5) {
                 return;
             }
-            
+
             return updateValue(value - 5, isPercent);
         }
 

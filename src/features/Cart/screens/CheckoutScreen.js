@@ -132,7 +132,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
             // deliveryFee = serviceQuote.formattedAmount;
-            deliveryFee = formatCurrency(serviceQuote.getAttribute('amount') / 100, cart.getAttribute('currency'));
+            deliveryFee = formatCurrency(serviceQuote.getAttribute('amount'), cart.getAttribute('currency'));
         }
 
         if (serviceQuoteError) {
@@ -147,21 +147,21 @@ const CheckoutScreen = ({ navigation, route }) => {
     })();
     const formattedTip = (() => {
         if (typeof tip === 'string' && tip.endsWith('%')) {
-            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), cart.subtotal()) / 100, cart.getAttribute('currency'));
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), cart.subtotal()), cart.getAttribute('currency'));
 
             return `${tip} (${tipAmount})`;
         }
 
-        return formatCurrency(tip / 100, cart.getAttribute('currency'));
+        return formatCurrency(tip, cart.getAttribute('currency'));
     })();
     const formattedDeliveryTip = (() => {
         if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
-            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), cart.subtotal()) / 100, cart.getAttribute('currency'));
+            const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), cart.subtotal()), cart.getAttribute('currency'));
 
             return `${deliveryTip} (${tipAmount})`;
         }
 
-        return formatCurrency(deliveryTip / 100, cart.getAttribute('currency'));
+        return formatCurrency(deliveryTip, cart.getAttribute('currency'));
     })();
 
     const openLink = async (url, errorMessage = null) => {
@@ -764,7 +764,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                                     {cartItem.name}
                                                 </Text>
                                                 <Text style={tailwind('text-center text-xs')} numberOfLines={1}>
-                                                    x{cartItem.quantity} {formatCurrency(cartItem.subtotal / 100, cart.getAttribute('currency'))}
+                                                    x{cartItem.quantity} {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
                                                 </Text>
                                             </View>
                                         ))}
@@ -787,13 +787,13 @@ const CheckoutScreen = ({ navigation, route }) => {
                     <View style={tailwind('pb-40')}>
                         <View style={tailwind('flex flex-row items-center justify-between py-2')}>
                             <Text>{translate('Cart.CheckoutScreen.subtotalLabelText')}</Text>
-                            <Text>{formatCurrency(cart.subtotal() / 100, cart.getAttribute('currency'))}</Text>
+                            <Text>{formatCurrency(cart.subtotal(), cart.getAttribute('currency'))}</Text>
                         </View>
                         {!isPickupOrder && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
                                 <Text>{translate('Cart.CheckoutScreen.deliveryFeeLabelText')}</Text>
                                 {/* <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text> */}
-                                <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : formatCurrency(serviceQuote.getAttribute('amount') / 100, cart.getAttribute('currency'))}</Text>
+                                <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : formatCurrency(serviceQuote.getAttribute('amount'), cart.getAttribute('currency'))}</Text>
                             </View>
                         )}
                         {tip !== 0 && (
@@ -810,7 +810,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                         )}
                         <View style={tailwind('flex flex-row items-center justify-between mt-2 pt-4 border-t-2 border-gray-900')}>
                             <Text style={tailwind('font-semibold')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
-                            <Text style={tailwind('font-semibold')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
+                            <Text style={tailwind('font-semibold')}>{formatCurrency(calculateTotal(), cart.getAttribute('currency'))}</Text>
                         </View>
                     </View>
                 </View>
@@ -821,7 +821,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex flex-row justify-between mb-2')}>
                         <View>
                             <Text style={tailwind('text-gray-400')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
-                            <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal() / 100, cart.getAttribute('currency'))}</Text>
+                            <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal(), cart.getAttribute('currency'))}</Text>
                         </View>
                         <TouchableOpacity onPress={placeOrder} disabled={!canPlaceOrder}>
                             <View

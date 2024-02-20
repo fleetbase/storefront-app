@@ -95,7 +95,7 @@ const ProductScreen = ({ navigation, route }) => {
             : isInCart
               ? translate('Browser.ProductScreen.addAnotherActionText')
               : translate('Browser.ProductScreen.addToCartActionText')
-    } - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+    } - ${formatCurrency(subtotal, product.getAttribute('currency'))}`;
 
     if (isBookable) {
         actionButtonText = `${
@@ -104,7 +104,7 @@ const ProductScreen = ({ navigation, route }) => {
                 : isInCart
                   ? translate('Browser.ProductScreen.addAnotherBookingActionText')
                   : translate('Browser.ProductScreen.bookServiceActionText')
-        } - ${formatCurrency(subtotal / 100, product.getAttribute('currency'))}`;
+        } - ${formatCurrency(subtotal, product.getAttribute('currency'))}`;
     }
 
     const checkIfCanAddToCart = () => {
@@ -460,18 +460,16 @@ const ProductScreen = ({ navigation, route }) => {
                                 <View style={tailwind('mb-2')}>
                                     {product.isOnSale && (
                                         <View style={tailwind('flex flex-row')}>
-                                            <Text style={tailwind('font-semibold text-xl mr-1')}>
-                                                {formatCurrency(product.getAttribute('sale_price') / 100, product.getAttribute('currency'))}
-                                            </Text>
+                                            <Text style={tailwind('font-semibold text-xl mr-1')}>{formatCurrency(product.getAttribute('sale_price'), product.getAttribute('currency'))}</Text>
                                             <Text style={tailwind('line-through text-base text-gray-400')}>
-                                                {formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}
+                                                {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                                             </Text>
                                         </View>
                                     )}
                                     {!product.isOnSale && (
                                         <View style={tailwind('flex flex-row')}>
                                             <Text style={tailwind('text-center text-xl font-semibold')}>
-                                                {formatCurrency(product.getAttribute('price') / 100, product.getAttribute('currency'))}
+                                                {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                                             </Text>
                                         </View>
                                     )}
@@ -557,7 +555,7 @@ const ProductScreen = ({ navigation, route }) => {
                                                     <Text style={tailwind('text-sm text-gray-700')}>{variant.name}</Text>
                                                 </View>
                                                 <View>
-                                                    <Text style={tailwind('text-gray-400')}>+{formatCurrency(variant.additional_cost / 100, product.getAttribute('currency'))}</Text>
+                                                    <Text style={tailwind('text-gray-400')}>+{formatCurrency(variant.additional_cost, product.getAttribute('currency'))}</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -593,11 +591,11 @@ const ProductScreen = ({ navigation, route }) => {
                                                 <View>
                                                     <View style={tailwind('flex flex-row')}>
                                                         <Text style={tailwind('text-gray-400')}>
-                                                            +{formatCurrency((addon.is_on_sale ? addon.sale_price : addon.price) / 100, product.getAttribute('currency'))}
+                                                            +{formatCurrency(addon.is_on_sale ? addon.sale_price : addon.price, product.getAttribute('currency'))}
                                                         </Text>
                                                         {addon.is_on_sale && (
                                                             <Text style={tailwind('ml-1 line-through text-base text-gray-300')}>
-                                                                {formatCurrency(addon.price / 100, product.getAttribute('currency'))}
+                                                                {formatCurrency(addon.price, product.getAttribute('currency'))}
                                                             </Text>
                                                         )}
                                                     </View>
