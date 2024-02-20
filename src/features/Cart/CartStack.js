@@ -42,7 +42,7 @@ const CartStack = ({ route }) => {
     const { info, data } = route.params;
 
     return (
-        <RootStack.Navigator mode="modal">
+        <RootStack.Navigator screenOptions={{ presentation: 'modal' }}>
             <RootStack.Screen name="CartStack" component={MainStackScreen} options={{ headerShown: false }} initialParams={{ info, data }} />
             <RootStack.Screen name="CartItemScreen" component={ProductScreen} options={{ headerShown: false }} />
             <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
