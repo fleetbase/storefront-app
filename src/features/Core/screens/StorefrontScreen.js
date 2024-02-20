@@ -41,7 +41,6 @@ const StorefrontScreen = ({ navigation, route }) => {
         // Fetch and set default store location
         StoreInfoService.getDefaultLocation()
             .then((locations) => {
-                console.log('locations', locations.defaultStoreLocation, locations.locations);
                 setStoreLocation(locations.defaultStoreLocation);
                 setStoreLocations(locations.locations);
             })
@@ -94,12 +93,10 @@ const StorefrontScreen = ({ navigation, route }) => {
                     // You can return any component that you like here!
                     return <FontAwesomeIcon icon={icon} size={size} color={focused ? '#93C5FD' : '#6B7280'} />;
                 },
-            })}
-            tabBarOptions={{
-                style: tailwind('bg-black border-black'),
-                tabStyle: tailwind('bg-black border-black'),
-                showLabel: false,
-            }}>
+                tabBarShowLabel: false,
+                tabBarStyleItem: tailwind('bg-black border-black'),
+                tabBarStyle: tailwind('bg-black border-black'),
+            })}>
             <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info: { ...info, defaultStoreLocation: storeLocation, storeLocations: storeLocations } }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info: { ...info, storeLocations: storeLocation }, data: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />

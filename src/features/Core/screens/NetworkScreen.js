@@ -68,6 +68,9 @@ const NetworkScreen = ({ navigation, route }) => {
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
+                tabBarStyle: tailwind('bg-black border-black'),
+                tabBarItemStyle: tailwind('bg-black border-black'),
+                tabBarShowLabel: false,
                 tabBarIcon: ({ focused, size }) => {
                     let icon;
                     switch (route.name) {
@@ -84,13 +87,7 @@ const NetworkScreen = ({ navigation, route }) => {
                     // You can return any component that you like here!
                     return <FontAwesomeIcon icon={icon} size={size} color={focused ? '#93C5FD' : '#6B7280'} />;
                 },
-            })}
-            tabBarOptions={{
-                style: tailwind('bg-black border-black'),
-                tabStyle: tailwind('bg-black border-black'),
-                showLabel: false,
-            }}
-        >
+            })}>
             <Tab.Screen key="network" name="Network" component={NetworkStack} initialParams={{ info }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />
