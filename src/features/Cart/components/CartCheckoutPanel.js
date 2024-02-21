@@ -34,11 +34,13 @@ const CartCheckoutPanel = ({ style, panelStyle, cart, total, serviceQuote, tip, 
                                 tipAmount: isTipping ? tip : 0,
                                 deliveryTipAmount: isTippingDriver ? deliveryTip : 0,
                             })
-                        }>
+                        }
+                    >
                         <View
                             style={tailwind(
                                 `flex items-center justify-center rounded-md px-8 py-2 bg-white border border-green-600 ${isCheckoutDisabled ? 'bg-opacity-50 border-opacity-50' : ''}`
-                            )}>
+                            )}
+                        >
                             <Text style={tailwind(`font-semibold text-green-600 text-lg ${isCheckoutDisabled ? 'text-opacity-50' : ''}`)}>
                                 {translate('Cart.components.CartCheckoutPanel.checkoutButtonText')}
                             </Text>

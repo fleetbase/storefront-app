@@ -58,7 +58,8 @@ const StorePhotosScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 key={index}
                                 onPress={() => setViewingPhoto(media)}
-                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}>
+                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}
+                            >
                                 <FastImage source={{ uri: media.url }} style={tailwind('w-full h-full')} />
                             </TouchableOpacity>
                         ))}

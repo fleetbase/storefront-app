@@ -10,7 +10,7 @@ import { activeTranslations } from 'utils/Localize';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
 import localeEmoji from 'locale-emoji';
-import { getLangNameFromCode } from 'language-name-map'
+import { getLangNameFromCode } from 'language-name-map';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;

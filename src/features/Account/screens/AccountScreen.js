@@ -26,7 +26,8 @@ const AccountScreen = ({ navigation, route }) => {
                 <ImageBackground
                     source={config('ui.accountScreen.signedInContainerBackgroundImage')}
                     resizeMode={config('ui.accountScreen.signedInBackgroundResizeMode') ?? 'cover'}
-                    style={[config('ui.accountScreen.signedInContainerBackgroundImageStyle')]}>
+                    style={[config('ui.accountScreen.signedInContainerBackgroundImageStyle')]}
+                >
                     {props.children}
                 </ImageBackground>
             );
@@ -36,7 +37,8 @@ const AccountScreen = ({ navigation, route }) => {
             <ImageBackground
                 source={config('ui.accountScreen.signedOutContainerBackgroundImage')}
                 resizeMode={config('ui.accountScreen.signedOutBackgroundResizeMode') ?? 'cover'}
-                style={[config('ui.accountScreen.signedOutContainerBackgroundImageStyle')]}>
+                style={[config('ui.accountScreen.signedOutContainerBackgroundImageStyle')]}
+            >
                 {props.children}
             </ImageBackground>
         );
@@ -50,7 +52,8 @@ const AccountScreen = ({ navigation, route }) => {
                     config('ui.accountScreen.containerStyle'),
                     customer ? config('ui.accountScreen.signedInContainerStyle') : config('ui.accountScreen.signedOutContainerStyle'),
                     { height: containerHeight },
-                ]}>
+                ]}
+            >
                 {!customer && (
                     <View style={tailwind('w-full h-full relative')}>
                         <View style={tailwind('flex items-center justify-center w-full h-full relative')}>
@@ -60,7 +63,8 @@ const AccountScreen = ({ navigation, route }) => {
                                         style={[
                                             tailwind('flex items-center justify-center mb-10 rounded-full bg-gray-100 w-60 h-60'),
                                             config('ui.accountScreen.emptyStatePlaceholderIconContainerStyle'),
-                                        ]}>
+                                        ]}
+                                    >
                                         <FontAwesomeIcon icon={faIdBadge} size={88} style={[tailwind('text-gray-600'), config('ui.accountScreen.emptyStatePlaceholderIconStyle')]} />
                                     </View>
                                     <Text style={[tailwind('text-lg text-center font-semibold mb-10'), config('ui.accountScreen.emptyStatePlaceholderTextStyle')]}>

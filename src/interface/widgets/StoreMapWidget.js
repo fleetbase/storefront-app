@@ -16,7 +16,6 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 const StoreMapWidget = ({ info, store, storeLocation, wrapperStyle, containerStyle, mapHeight, onAddressPress }) => {
-
     const [locale] = useLocale();
     const map = useRef();
     const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');

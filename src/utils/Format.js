@@ -17,7 +17,7 @@ export default class FormatUtil {
      * @param {number} [amount=0]
      * @param {string} [currency='USD']
      * @param {string} [currencyDisplay='symbol']
-     * @return {string} 
+     * @return {string}
      * @memberof FormatUtil
      */
     static currency(amount = 0, currency = 'USD', currencyDisplay = 'symbol', options = {}) {
@@ -28,7 +28,7 @@ export default class FormatUtil {
 
         const currencyData = getCurrency(currency);
         const locale = countryLocaleMap.getLocaleByAlpha2(currencyData?.iso2)?.replace('_', '-') ?? 'en-US';
-        
+
         if (currencyData?.precision === 0) {
             options.minimumFractionDigits = 0;
             options.maximumFractionDigits = 0;
@@ -42,7 +42,7 @@ export default class FormatUtil {
      *
      * @static
      * @param {String} string
-     * @return {String} 
+     * @return {String}
      * @memberof FormatUtil
      */
     static capitalize([first, ...rest]) {
@@ -54,7 +54,7 @@ export default class FormatUtil {
      *
      * @static
      * @param {*} km
-     * @return {*} 
+     * @return {*}
      * @memberof FormatUtil
      */
     static km(km) {

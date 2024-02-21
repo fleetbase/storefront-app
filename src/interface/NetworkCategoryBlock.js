@@ -33,10 +33,10 @@ const NetworkCategoryBlock = (props) => {
             actionSheetRef.current?.setModalVisible();
         }
 
-        if (typeof fn  === 'function') {
+        if (typeof fn === 'function') {
             fn(...params);
         }
-    }
+    };
 
     const stopLoading = () => setIsLoading(false);
 

@@ -85,7 +85,8 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
         style={[
             tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`),
             { height: typeof calculateCartItemRowHeight === 'function' ? calculateCartItemRowHeight(item) : 200 },
-        ]}>
+        ]}
+    >
         <View style={tailwind('flex flex-1 flex-row justify-between')}>
             <View style={tailwind('flex flex-row items-start')}>
                 <View>

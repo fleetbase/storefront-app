@@ -292,7 +292,7 @@ export default class HelperUtil {
      * @static
      * @param {*} object
      * @param {*} path
-     * @return {*} 
+     * @return {*}
      * @memberof HelperUtil
      */
     static deepGet(object, path) {
@@ -348,14 +348,14 @@ export default class HelperUtil {
     static getResolved = (func, path) => {
         const resolved = func();
         return Array.isArray(resolved) || typeof resolved === 'object' ? HelperUtil.deepGet(resolved, path) : null;
-    }
+    };
 
     /**
      * Returns a configuration value provided it's path.
      *
      * @static
      * @param {String} path
-     * @return {Mixed} 
+     * @return {Mixed}
      * @memberof HelperUtil
      */
     static config(path) {
@@ -367,12 +367,12 @@ export default class HelperUtil {
      *
      * @static
      * @param {Array} sum
-     * @return {Integer} 
+     * @return {Integer}
      * @memberof HelperUtil
      */
     static sum(numbers = []) {
         if (!HelperUtil.isArray(numbers)) {
-            numbers = [ ...arguments ];
+            numbers = [...arguments];
         }
 
         return numbers.reduce((sum, number) => sum + number, 0);
@@ -383,7 +383,7 @@ export default class HelperUtil {
      *
      * @static
      * @param {String} string
-     * @return {String} 
+     * @return {String}
      * @memberof HelperUtil
      */
     static getColorCode(string) {
@@ -395,7 +395,7 @@ export default class HelperUtil {
             decimals.pop();
 
             return decimals.join(',') + ')';
-        }
+        };
 
         if (property) {
             if (string.startsWith('bg-')) {
@@ -432,4 +432,23 @@ const config = HelperUtil.config;
 const sum = HelperUtil.sum;
 const getColorCode = HelperUtil.getColorCode;
 
-export { listCountries, isArray, hasRequiredKeys, isLastIndex, stripHtml, stripIframeTags, isAndroid, isApple, isVoid, isResource, endSession, logError, mutatePlaces, debounce, deepGet, config, sum, getColorCode };
+export {
+    listCountries,
+    isArray,
+    hasRequiredKeys,
+    isLastIndex,
+    stripHtml,
+    stripIframeTags,
+    isAndroid,
+    isApple,
+    isVoid,
+    isResource,
+    endSession,
+    logError,
+    mutatePlaces,
+    debounce,
+    deepGet,
+    config,
+    sum,
+    getColorCode,
+};

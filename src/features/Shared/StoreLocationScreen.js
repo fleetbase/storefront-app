@@ -1,21 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
+import { Store, StoreLocation } from '@fleetbase/storefront';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faStoreAlt } from '@fortawesome/free-solid-svg-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocale, useMountedState } from 'hooks';
+import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Dimensions, Linking, Text, TouchableOpacity, View } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import FastImage from 'react-native-fast-image';
-import { format } from 'date-fns';
-import { Collection } from '@fleetbase/sdk';
-import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
-import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState, useLocale } from 'hooks';
-import { NetworkInfoService } from 'services';
-import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { logError, getCurrentLocation, config, translate } from 'utils';
-import Rating from 'ui/Rating';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
+import Rating from 'ui/Rating';
+import { config, getCurrentLocation, logError, translate } from 'utils';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -120,7 +116,9 @@ const StoreLocationScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                         <View style={tailwind('flex flex-col items-start pr-10')}>
                             <Text style={tailwind('text-xl font-bold text-white')}>{store.getAttribute('name')}</Text>
-                            <Text style={tailwind('text-sm font-semibold text-white')} numberOfLines={1}>{storeLocation?.getAttribute('name') ?? translate('Shared.StoreLocationScreen.loading')}</Text>
+                            <Text style={tailwind('text-sm font-semibold text-white')} numberOfLines={1}>
+                                {storeLocation?.getAttribute('name') ?? translate('Shared.StoreLocationScreen.loading')}
+                            </Text>
                         </View>
                         {isLoading && (
                             <View style={tailwind('ml-4')}>

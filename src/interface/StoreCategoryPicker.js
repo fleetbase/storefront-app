@@ -4,14 +4,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { isResource, logError, mutatePlaces, translate } from 'utils';
-import { useLocale } from 'hooks'; 
+import { useLocale } from 'hooks';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButtonTitle, buttonStyle, buttonTitleStyle, dialogIconStyle, buttonIcon, buttonIconSize, buttonIconStyle, numberOfLines, onCategoryPress }) => {
+const StoreCategoryPicker = ({
+    categories,
+    wrapperStyle,
+    buttonTitle,
+    hideButtonTitle,
+    buttonStyle,
+    buttonTitleStyle,
+    dialogIconStyle,
+    buttonIcon,
+    buttonIconSize,
+    buttonIconStyle,
+    numberOfLines,
+    onCategoryPress,
+}) => {
     categories = categories ?? [];
     buttonTitle = buttonTitle ?? translate('components.interface.StoreCategoryPicker.viewCategories');
     buttonIcon = buttonIcon ?? faBars;
@@ -30,7 +43,11 @@ const StoreCategoryPicker = ({ categories, wrapperStyle, buttonTitle, hideButton
             <TouchableOpacity onPress={() => actionSheetRef.current?.setModalVisible()}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-lg px-4 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind(`text-gray-900 ${!hideButtonTitle ? 'mr-2' : ''}`), buttonIconStyle]} />
-                    {!hideButtonTitle && <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>{buttonTitle}</Text>}
+                    {!hideButtonTitle && (
+                        <Text style={[tailwind('text-gray-900 text-base'), buttonTitleStyle]} numberOfLines={numberOfLines}>
+                            {buttonTitle}
+                        </Text>
+                    )}
                 </View>
             </TouchableOpacity>
 

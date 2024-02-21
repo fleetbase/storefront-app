@@ -28,8 +28,8 @@ const DefaultConfig = {
             infoWidgetEnabled: true,
             relatedWidgetEnabled: true,
             photosWidgetEnabled: true,
-            reviewsWidgetEnabled: true
-        }
+            reviewsWidgetEnabled: true,
+        },
     },
 
     InterfaceConfig: {

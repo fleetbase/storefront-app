@@ -123,7 +123,8 @@ const EditPlaceScreen = ({ navigation, route }) => {
                                 longitude: place?.longitude,
                                 latitudeDelta: 0.0922,
                                 longitudeDelta: 0.0421,
-                            }}>
+                            }}
+                        >
                             <Marker coordinate={{ latitude: place?.latitude, longitude: place?.longitude }} />
                         </MapView>
                     </View>

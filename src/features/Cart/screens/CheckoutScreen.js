@@ -437,7 +437,8 @@ const CheckoutScreen = ({ navigation, route }) => {
                         <TouchableOpacity
                             onPress={() => {
                                 actionSheetRef.current?.setModalVisible(false);
-                            }}>
+                            }}
+                        >
                             <View style={tailwind('rounded-full bg-red-50 w-8 h-8 flex items-center justify-center')}>
                                 <FontAwesomeIcon icon={faTimes} style={tailwind('text-red-900')} />
                             </View>
@@ -494,7 +495,8 @@ const CheckoutScreen = ({ navigation, route }) => {
                         <TouchableOpacity
                             style={tailwind('p-4 rounded-md bg-gray-50 mb-4')}
                             disabled={!customer}
-                            onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}>
+                            onPress={() => navigation.navigate('CheckoutSavedPlaces', { useLeftArrow: true })}
+                        >
                             <View style={tailwind('flex flex-row justify-between')}>
                                 <View>
                                     <View style={tailwind('flex flex-row items-center mb-3')}>
@@ -530,7 +532,8 @@ const CheckoutScreen = ({ navigation, route }) => {
                     <TouchableOpacity
                         style={tailwind(`p-4 rounded-md bg-gray-50 mb-4 ${gatewayOptions?.length === 0 ? 'opacity-50' : ''}`)}
                         disabled={isLoading || gatewayOptions?.length === 0}
-                        onPress={choosePaymentOption}>
+                        onPress={choosePaymentOption}
+                    >
                         <View style={tailwind('flex flex-row justify-between')}>
                             <View>
                                 <View style={tailwind('flex flex-row justify-between mb-3')}>
@@ -657,7 +660,8 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     `flex flex-row items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500 ${
                                         isLoading || !canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
                                     }`
-                                )}>
+                                )}
+                            >
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
                                 <Text style={tailwind(`font-semibold text-white text-lg ${isLoading ? 'text-opacity-50' : ''}`)}>
                                     {translate('Cart.CheckoutScreen.submitOrderButtonText')}

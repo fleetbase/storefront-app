@@ -17,8 +17,8 @@
     },
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
-        "@fleetbase/sdk": "1.2.7",
-        "@fleetbase/storefront": "^1.1.6",
+        "@fleetbase/sdk": "1.2.8",
+        "@fleetbase/storefront": "../storefront-js",
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
         "@fortawesome/free-brands-svg-icons": "^6.5.1",
         "@fortawesome/free-solid-svg-icons": "^6.5.1",
@@ -36,7 +36,6 @@
         "@shopify/flash-list": "^1.6.3",
         "@stripe/stripe-react-native": "0.36.0",
         "autoprefixer": "^10.4.17",
-        "axios": "0.21.1",
         "countries-list": "^3.0.6",
         "country-locale-map": "^1.9.0",
         "date-fns": "^3.3.1",

@@ -4,6 +4,4 @@
  * @export
  * @class CartUtil
  */
-export default class CartUtil {
-    
-}
+export default class CartUtil {}

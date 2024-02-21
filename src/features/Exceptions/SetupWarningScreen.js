@@ -12,7 +12,6 @@ const keyMissing = (key) => {
 };
 
 const SetupWarningScreen = (props) => {
-
     const [locale] = useLocale();
 
     return (

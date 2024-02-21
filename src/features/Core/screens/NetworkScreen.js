@@ -83,7 +83,8 @@ const NetworkScreen = ({ navigation, route }) => {
                     // You can return any component that you like here!
                     return <FontAwesomeIcon icon={icon} size={size} color={focused ? '#93C5FD' : '#6B7280'} />;
                 },
-            })}>
+            })}
+        >
             <Tab.Screen key="network" name="Network" component={NetworkStack} initialParams={{ info }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info, serializedCart: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />

@@ -62,7 +62,8 @@ const CategoryScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 key={category.id}
                                 onPress={() => transitionToCategory(category)}
-                                style={[tailwind(`w-full flex flex-row items-center py-3 px-2 ${isLastIndex(subCategories, index) ? '' : 'border-b border-gray-100'}`)]}>
+                                style={[tailwind(`w-full flex flex-row items-center py-3 px-2 ${isLastIndex(subCategories, index) ? '' : 'border-b border-gray-100'}`)]}
+                            >
                                 <View style={[tailwind('flex flex-row items-center justify-center mr-3')]}>
                                     <View style={[tailwind('rounded-full flex items-center justify-center w-8 h-8 bg-blue-50')]}>
                                         <FontAwesomeIcon icon={faFolder} size={17} style={[tailwind('text-blue-900')]} />

@@ -10,7 +10,7 @@ import tailwind from 'tailwind';
 const ChangePasswordScreen = ({ navigation, route }) => {
     const insets = useSafeAreaInsets();
     const [locale, setLocale] = useLocale();
-    
+
     return (
         <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <View style={tailwind('w-full h-full bg-white relative')}>

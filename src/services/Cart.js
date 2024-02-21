@@ -1,6 +1,5 @@
-import { getUniqueId } from 'react-native-device-info';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { isResource } from 'utils';
+import { getUniqueId } from 'react-native-device-info';
 
 /**
  * Wrapper for storefront calls from the current Store instance.

@@ -10,7 +10,20 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const ExploreBar = ({ onSort, onFilter, onToggleMap, filterOptions, wrapperStyle, containerStyle, scrollContainerStyle, isLoading, hideMapButon, hideSortButton, hideFilterButton, tagged }) => {
+const ExploreBar = ({
+    onSort,
+    onFilter,
+    onToggleMap,
+    filterOptions,
+    wrapperStyle,
+    containerStyle,
+    scrollContainerStyle,
+    isLoading,
+    hideMapButon,
+    hideSortButton,
+    hideFilterButton,
+    tagged,
+}) => {
     const actionSheetRef = createRef();
 
     // default filter options

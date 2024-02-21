@@ -109,7 +109,7 @@ export default class CustomerUtil {
      *
      * @static
      * @param {Customer} customer
-     * @return {boolean} 
+     * @return {boolean}
      * @memberof CustomerUtil
      */
     static isValid(customer) {

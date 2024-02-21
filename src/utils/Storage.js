@@ -113,7 +113,7 @@ export default class StorageUtil {
             if (typeof resource?.invoke !== 'function') {
                 return setCollection({ items: resource });
             }
-            
+
             return setCollection({ items: resource.invoke('serialize') });
         };
 
@@ -196,4 +196,22 @@ const clear = StorageUtil.clear;
 const useResourceStorage = StorageUtil.useResourceStorage;
 const useResourceCollection = StorageUtil.useResourceCollection;
 
-export { set, get, remove, clear, storage, useMMKVStorage, useStorage, useResourceStorage, useResourceCollection, getString, setString, getInt, setInt, getBool, setBool, getArray, setArray };
+export {
+    set,
+    get,
+    remove,
+    clear,
+    storage,
+    useMMKVStorage,
+    useStorage,
+    useResourceStorage,
+    useResourceCollection,
+    getString,
+    setString,
+    getInt,
+    setInt,
+    getBool,
+    setBool,
+    getArray,
+    setArray,
+};
