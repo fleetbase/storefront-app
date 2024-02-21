@@ -40,7 +40,7 @@ const StoreCategoryPicker = ({
 
     return (
         <View style={[wrapperStyle]}>
-            <TouchableOpacity onPress={() => actionSheetRef.current?.setModalVisible()}>
+            <TouchableOpacity onPress={() => actionSheetRef.current?.show()}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-lg px-4 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
                     <FontAwesomeIcon icon={buttonIcon} size={buttonIconSize} style={[tailwind(`text-gray-900 ${!hideButtonTitle ? 'mr-2' : ''}`), buttonIconStyle]} />
                     {!hideButtonTitle && (
@@ -57,8 +57,7 @@ const StoreCategoryPicker = ({
                 bounceOnOpen={true}
                 nestedScrollEnabled={true}
                 onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
+                ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
