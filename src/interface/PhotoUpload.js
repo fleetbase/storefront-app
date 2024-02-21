@@ -32,7 +32,7 @@ const PhotoUpload = (props) => {
     };
 
     const openImagePicker = () => {
-        actionSheetRef.current?.setModalVisible();
+        actionSheetRef.current?.show();
         setDisabled(true);
 
         if (typeof props.onStart === 'function') {

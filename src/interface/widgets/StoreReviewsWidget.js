@@ -72,23 +72,23 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
     const openFilterDialog = () => {
         setActionSheetAction('filter');
 
-        actionSheetRef.current?.setModalVisible();
+        actionSheetRef.current?.show();
     };
 
     const openSortDialog = () => {
         setActionSheetAction('sort');
 
-        actionSheetRef.current?.setModalVisible();
+        actionSheetRef.current?.show();
     };
 
     const setSort = (value) => {
         setSortValue(value);
-        actionSheetRef.current?.setModalVisible(false);
+        actionSheetRef.current?.hide();
     };
 
     const setFilter = (value) => {
         setFilterValue(value);
-        actionSheetRef.current?.setModalVisible(false);
+        actionSheetRef.current?.hide();
     };
 
     const getReviews = () => {
@@ -183,8 +183,7 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                             <View style={tailwind('pr-2')}>
                                 <TouchableOpacity
                                     onPress={openSortDialog}
-                                    style={[tailwind(`btn border ${sort ? 'border-blue-300 bg-blue-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
-                                >
+                                    style={[tailwind(`btn border ${sort ? 'border-blue-300 bg-blue-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faSort} size={12} style={tailwind('text-gray-600 mr-1')} />
                                         <Text style={tailwind(`${sort ? 'text-blue-500' : 'text-gray-900'} font-semibold`)}>
@@ -196,8 +195,7 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                             <View>
                                 <TouchableOpacity
                                     onPress={openFilterDialog}
-                                    style={[tailwind(`btn border ${filter ? 'border-green-300 bg-green-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}
-                                >
+                                    style={[tailwind(`btn border ${filter ? 'border-green-300 bg-green-50' : 'border-gray-200'} rounded-full px-4 py-2`), { width: 'auto' }]}>
                                     <View style={tailwind('flex flex-row items-center')}>
                                         <FontAwesomeIcon icon={faFilter} size={10} style={tailwind('text-gray-600 mr-1')} />
                                         <Text style={tailwind(`${filter ? 'text-green-600' : 'text-gray-900'} font-semibold`)}>
@@ -212,8 +210,7 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                 <ScrollView
                     showsHorizontalScrollIndicator={false}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadReviews(true)} />}
-                >
+                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadReviews(true)} />}>
                     {getReviews().map((review, index) => (
                         <View key={review?.id ?? index} style={tailwind('flex w-full px-5 py-4')}>
                             <View style={tailwind('flex flex-row')}>
@@ -268,8 +265,7 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                 bounceOnOpen={true}
                 nestedScrollEnabled={true}
                 onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
+                ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
