@@ -12,7 +12,7 @@ const BrowserStack = ({ route }) => {
 
     return (
         <SafeAreaProvider>
-            <RootStack.Navigator>
+            <RootStack.Navigator screenOptions={{ headerShown: false }}>
                 <RootStack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} initialParams={{ info }} />
                 <RootStack.Screen name="CategoryScreen" component={CategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
                 <RootStack.Screen name="ProductScreen" component={ProductScreen} options={{ headerShown: false }} initialParams={{ info }} />

@@ -1,41 +1,25 @@
-import React, { useState, useCallback, useEffect, createRef } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import {
-    faBars,
-    faMapMarkerAlt,
-    faShare,
-    faImages,
-    faStar,
-    faMapMarkedAlt,
-    faExternalLinkAlt,
-    faPhone,
-    faSearch,
-    faTimes,
-    faArrowLeft,
-    faArrowRight,
-} from '@fortawesome/free-solid-svg-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
-import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
+import { Category, Product, Store, StoreLocation } from '@fleetbase/storefront';
+import { faArrowLeft, faArrowRight, faExternalLinkAlt, faImages, faMapMarkedAlt, faMapMarkerAlt, faPhone, faShare, faStar, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useLocale, useMountedState } from 'hooks';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState, useLocale } from 'hooks';
-import { NetworkInfoService } from 'services';
-import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { formatCurrency, logError, translate, config, isResource } from 'utils';
-import FastImage from 'react-native-fast-image';
-import Share from 'react-native-share';
+import React, { createRef, useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ImageBackground, Linking, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
-import NetworkHeader from 'ui/headers/NetworkHeader';
-import CategoryProductSlider from 'ui/CategoryProductSlider';
-import StoreCategoryPicker from 'ui/StoreCategoryPicker';
-import StoreSearch from 'ui/StoreSearch';
-import ProductCard from 'ui/ProductCard';
-import StorePicker from 'ui/StorePicker';
-import Rating from 'ui/Rating';
-import { StoreMapWidget, StoreInfoWidget, StorePhotosWidget, StoreRelatedWidget, StoreReviewsWidget } from 'ui/widgets';
+import FastImage from 'react-native-fast-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Share from 'react-native-share';
 import tailwind from 'tailwind';
+import ProductCard from 'ui/ProductCard';
+import Rating from 'ui/Rating';
+import StoreCategoryPicker from 'ui/StoreCategoryPicker';
+import StorePicker from 'ui/StorePicker';
+import StoreSearch from 'ui/StoreSearch';
+import NetworkHeader from 'ui/headers/NetworkHeader';
+import { StoreInfoWidget, StoreMapWidget, StorePhotosWidget, StoreRelatedWidget, StoreReviewsWidget } from 'ui/widgets';
+import { config, logError, translate } from 'utils';
+import { useResourceCollection, useResourceStorage } from 'utils/Storage';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
@@ -82,10 +66,6 @@ const StoreScreen = ({ navigation, route }) => {
     const isRelatedWidgetEnabled = config('app.storeScreenOptions.relatedWidgetEnabled');
     const isPhotosWidgetEnabled = isPhotosEnabled && config('app.storeScreenOptions.photosWidgetEnabled');
     const isReviewsWidgetEnabled = isReviewsEnabled && config('app.storeScreenOptions.reviewsWidgetEnabled');
-
-    useEffect(() => {
-        console.log('StoreScreen mounted: ', storeLocation);
-    }, [isMounted, storeLocation]);
 
     const loadCategories = (isRefreshing = false) => {
         setIsLoading(true);

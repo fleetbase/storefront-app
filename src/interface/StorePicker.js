@@ -7,8 +7,7 @@ import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
 import React, { useCallback, useState } from 'react';
 import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
 import { formatKm } from 'utils/Format';
 import { getDistance } from 'utils/Geo';
@@ -26,10 +25,9 @@ const StorePicker = (props) => {
         buttonTitleMaxLines,
         displayAddressForTitle,
         onStoreLocationSelected,
-        onLoaded,
+        defaultStoreLocation,
+        storeLocations,
     } = props;
-
-    const { defaultStoreLocation, storeLocations } = info;
 
     const store = new Store(info, StorefrontAdapter);
     const buttonIcon = props?.buttonIcon ?? faInfoCircle;

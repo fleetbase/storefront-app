@@ -68,8 +68,8 @@ const BootScreen = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <MainStack.Navigator>
-            <MainStack.Screen name="ExploreScreen" component={ExploreScreen} options={{ headerShown: false }} initialParams={{ info }} />
+        <MainStack.Navigator screenOptions={{ headerShown: false, title: '' }}>
+            <MainStack.Screen name="ExploreScreen" component={ExploreScreen} options={{ headerShown: false, title: '' }} initialParams={{ info }} />
             <MainStack.Screen name="NetworkCategoryScreen" component={NetworkCategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="MapScreen" component={MapViewStack} options={{ headerShown: false, ...verticalAnimation }} initialParams={{ info }} />
