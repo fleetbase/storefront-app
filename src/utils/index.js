@@ -20,7 +20,7 @@ import {
 } from './Helper';
 import { calculatePercentage, haversine } from './Calculate';
 import { syncDevice } from './Customer';
-import { formatCurrency, capitalize, getStatusColors } from './Format';
+import { formatCurrency, capitalize, getStatusColors, truncateString } from './Format';
 import { geocode, getCurrentLocation, getLocation } from './Geo';
 import { translate } from './Localize';
 import getCurrency from './get-currency';
@@ -55,4 +55,5 @@ export {
     translate,
     getColorCode,
     getCurrency,
+    truncateString,
 };

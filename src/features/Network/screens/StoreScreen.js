@@ -394,7 +394,7 @@ const StoreScreen = ({ navigation, route }) => {
             <View style={tailwind('bg-gray-900 bg-opacity-50')}>
                 <NetworkHeader
                     style={tailwind('absolute top-0 w-full bg-gray-900 bg-opacity-25 z-20')}
-                    wrapperStyle={[tailwind('border-b-0 pb-2')]}
+                    wrapperStyle={[tailwind('border-b-0 py-2')]}
                     backButtonIcon={backButtonIcon}
                     backButtonStyle={tailwind('bg-opacity-50 bg-gray-900')}
                     backButtonIconStyle={tailwind('text-gray-50')}

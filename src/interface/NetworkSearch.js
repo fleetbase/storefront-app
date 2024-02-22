@@ -123,8 +123,7 @@ const NetworkSearch = ({ network, wrapperStyle, buttonTitle, buttonTitleStyle, b
                                         disabled={isLoading}
                                         onPress={() => setQuery(tag)}
                                         key={index}
-                                        style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}
-                                    >
+                                        style={tailwind(`px-2 py-1 border bg-gray-50 border-gray-200 rounded-lg mx-1 my-1.5`)}>
                                         <Text style={tailwind('text-xs text-gray-700')}>{tag}</Text>
                                     </TouchableOpacity>
                                 ))}

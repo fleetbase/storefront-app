@@ -62,6 +62,20 @@ export default class FormatUtil {
     }
 
     /**
+     * Truncate string
+     * @static
+     * @param {String} str
+     * @param {Number} length
+     * @return {String}
+     */
+    static truncateString(str, length = 20) {
+        if (str.length > length) {
+            return str.substring(0, length) + '...';
+        }
+        return str;
+    }
+
+    /**
      * Get styles for statuses
      *
      * @static
@@ -137,5 +151,6 @@ const formatCurrency = FormatUtil.currency;
 const formatKm = FormatUtil.km;
 const capitalize = FormatUtil.capitalize;
 const getStatusColors = FormatUtil.getStatusColors;
+const truncateString = FormatUtil.truncateString;
 
-export { formatCurrency, formatKm, capitalize, getStatusColors };
+export { formatCurrency, formatKm, capitalize, getStatusColors, truncateString };
