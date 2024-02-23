@@ -111,6 +111,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         return !isLoading && typeof customer?.serialize === 'function' && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && isGatewayValid;
     })();
+
     const deliveryFee = (() => {
         let deliveryFee = <ActivityIndicator />;
 
@@ -212,16 +213,20 @@ const CheckoutScreen = ({ navigation, route }) => {
 
     const setupCashGateway = async (gateway, c = null) => {
         const currentCustomer = c ?? customer;
-
         if (!currentCustomer || !isPaymentGatewayResource(gateway)) {
             return null;
         }
-
         const options = getOrderOptions({ cash: true });
 
-        const { token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
+        const response = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
             logError(error, '[ Error initializing checkout token! ]');
         });
+
+        if (response.error) {
+            return null;
+        }
+
+        const { token } = response;
 
         if (!token) {
             return null;
@@ -651,11 +656,11 @@ const CheckoutScreen = ({ navigation, route }) => {
                             <Text style={tailwind('text-gray-400')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
                             <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal(), cart.getAttribute('currency'))}</Text>
                         </View>
-                        <TouchableOpacity onPress={placeOrder} disabled={!canPlaceOrder}>
+                        <TouchableOpacity onPress={placeOrder} disabled={canPlaceOrder}>
                             <View
                                 style={tailwind(
                                     `flex flex-row items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500 ${
-                                        isLoading || !canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
+                                        isLoading || canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
                                     }`
                                 )}>
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}

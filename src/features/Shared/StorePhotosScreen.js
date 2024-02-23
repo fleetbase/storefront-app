@@ -48,7 +48,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                     <View style={tailwind('flex flex-col items-start')}>
                         <Text style={tailwind('text-xl font-bold text-white')}>{store.getAttribute('name')}</Text>
                         <Text style={tailwind('text-sm font-semibold text-white')}>
-                            {translate('Shared.StorePhotosScreen.title', { storeMediaCount: store.getAttribute('media', [])?.length })}
+                            {translate('Shared.StorePhotosScreen.title', { storeMediaCount: store.getAttribute('media', [])?.length || 0 })}
                         </Text>
                     </View>
                 </View>
@@ -58,8 +58,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 key={index}
                                 onPress={() => setViewingPhoto(media)}
-                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}
-                            >
+                                style={[tailwind('w-1/3 h-36 border-4 border-gray-900'), currentIndex === index ? tailwind('border-green-500') : null]}>
                                 <FastImage source={{ uri: media.url }} style={tailwind('w-full h-full')} />
                             </TouchableOpacity>
                         ))}

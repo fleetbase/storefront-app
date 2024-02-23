@@ -19,7 +19,7 @@ const MainStackScreen = ({ route }) => {
     const { info, data } = route.params;
 
     return (
-        <MainStack.Navigator>
+        <MainStack.Navigator screenOptions={{ headerShown: false }}>
             <MainStack.Screen name="CartScreen" component={CartScreen} options={{ headerShown: false }} initialParams={{ info, data }} />
             <MainStack.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ headerShown: false }} initialParams={{ info }} />
             <MainStack.Screen name="CheckoutSavedPlaces" component={SavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />

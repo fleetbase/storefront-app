@@ -17,7 +17,7 @@ import tailwind from 'tailwind';
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
 
-const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containerStyle, onStartReviewPress }) => {
+const StoreReviewsWidget = ({ info, store, storeLocation, listVisible = false, wrapperStyle, containerStyle, onStartReviewPress }) => {
     const navigation = useNavigation();
     const storefront = useStorefront();
     const isMounted = useMountedState();
@@ -177,7 +177,7 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                         </View>
                     </TouchableOpacity>
                 </View>
-                {getReviews().length > 0 && (
+                {!listVisible && getReviews().length > 0 && (
                     <View style={tailwind('p-4 border-t border-b border-gray-100')}>
                         <View style={tailwind('flex flex-row flex-wrap')}>
                             <View style={tailwind('pr-2')}>
@@ -207,57 +207,61 @@ const StoreReviewsWidget = ({ info, store, storeLocation, wrapperStyle, containe
                         </View>
                     </View>
                 )}
-                <ScrollView
-                    showsHorizontalScrollIndicator={false}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadReviews(true)} />}>
-                    {getReviews().map((review, index) => (
-                        <View key={review?.id ?? index} style={tailwind('flex w-full px-5 py-4')}>
-                            <View style={tailwind('flex flex-row')}>
-                                <View style={tailwind('flex flex-row items-center flex-1 mb-3')}>
-                                    <View style={tailwind('mr-3')}>
-                                        <FastImage source={{ uri: review.getAttribute('customer.photo_url') }} style={tailwind('bg-gray-300 rounded-full w-10 h-10')} />
-                                    </View>
-                                    <View style={tailwind('flex-1 flex justify-center')}>
-                                        <Text style={tailwind('font-semibold mb-1')}>{review.getAttribute('customer.name')}</Text>
-                                        <View style={tailwind('flex flex-row')}>
-                                            <View style={tailwind('flex flex-row mr-2 items-center')}>
-                                                <View style={tailwind('mr-1')}>
-                                                    <FontAwesomeIcon icon={faStar} size={13} style={tailwind('text-gray-500')} />
+                {!listVisible && (
+                    <ScrollView
+                        showsHorizontalScrollIndicator={false}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadReviews(true)} />}>
+                        {getReviews().map((review, index) => (
+                            <View key={review?.id ?? index} style={tailwind('flex w-full px-5 py-4')}>
+                                <View style={tailwind('flex flex-row')}>
+                                    <View style={tailwind('flex flex-row items-center flex-1 mb-3')}>
+                                        <View style={tailwind('mr-3')}>
+                                            <FastImage source={{ uri: review.getAttribute('customer.photo_url') }} style={tailwind('bg-gray-300 rounded-full w-10 h-10')} />
+                                        </View>
+                                        <View style={tailwind('flex-1 flex justify-center')}>
+                                            <Text style={tailwind('font-semibold mb-1')}>{review.getAttribute('customer.name')}</Text>
+                                            <View style={tailwind('flex flex-row')}>
+                                                <View style={tailwind('flex flex-row mr-2 items-center')}>
+                                                    <View style={tailwind('mr-1')}>
+                                                        <FontAwesomeIcon icon={faStar} size={13} style={tailwind('text-gray-500')} />
+                                                    </View>
+                                                    <Text style={tailwind('text-gray-500 text-sm')}>{review.getAttribute('customer.reviews_count')}</Text>
                                                 </View>
-                                                <Text style={tailwind('text-gray-500 text-sm')}>{review.getAttribute('customer.reviews_count')}</Text>
-                                            </View>
-                                            <View style={tailwind('flex flex-row items-center')}>
-                                                <View style={tailwind('mr-1')}>
-                                                    <FontAwesomeIcon icon={faImage} size={13} style={tailwind('text-gray-500')} />
+                                                <View style={tailwind('flex flex-row items-center')}>
+                                                    <View style={tailwind('mr-1')}>
+                                                        <FontAwesomeIcon icon={faImage} size={13} style={tailwind('text-gray-500')} />
+                                                    </View>
+                                                    <Text style={tailwind('text-gray-500 text-sm')}>{review.getAttribute('customer.uploads_count')}</Text>
                                                 </View>
-                                                <Text style={tailwind('text-gray-500 text-sm')}>{review.getAttribute('customer.uploads_count')}</Text>
                                             </View>
                                         </View>
                                     </View>
                                 </View>
+                                <View style={tailwind('flex flex-row items-center mb-2')}>
+                                    <Rating value={review.getAttribute('rating')} size={16} readonly={true} />
+                                    <Text style={tailwind('text-gray-400 text-xs ml-2')}>
+                                        {translate('components.widgets.StoreReviewsWidget.createdAgo', {
+                                            reviewCreatedAgo: formatDistanceToNow(new Date(review.getAttribute('created_at'))),
+                                        })}
+                                    </Text>
+                                </View>
+                                <View style={tailwind('flex flex-row items-center')}>
+                                    <Text numberOfLines={4} style={tailwind('text-gray-900 text-sm')}>
+                                        {review.getAttribute('content')}
+                                    </Text>
+                                </View>
+                                <View style={tailwind(`flex flex-row flex-wrap ${review.getAttribute('photos') ? 'mt-4' : ''}`)}>
+                                    {review.getAttribute('photos')?.map((photo, index) => (
+                                        <View key={index} style={tailwind('mr-2 mb-2')}>
+                                            <FastImage source={{ uri: photo.url }} style={tailwind('w-24 h-24 z-10')} />
+                                        </View>
+                                    ))}
+                                </View>
                             </View>
-                            <View style={tailwind('flex flex-row items-center mb-2')}>
-                                <Rating value={review.getAttribute('rating')} size={16} readonly={true} />
-                                <Text style={tailwind('text-gray-400 text-xs ml-2')}>
-                                    {translate('components.widgets.StoreReviewsWidget.createdAgo', { reviewCreatedAgo: formatDistanceToNow(new Date(review.getAttribute('created_at'))) })}
-                                </Text>
-                            </View>
-                            <View style={tailwind('flex flex-row items-center')}>
-                                <Text numberOfLines={4} style={tailwind('text-gray-900 text-sm')}>
-                                    {review.getAttribute('content')}
-                                </Text>
-                            </View>
-                            <View style={tailwind(`flex flex-row flex-wrap ${review.getAttribute('photos') ? 'mt-4' : ''}`)}>
-                                {review.getAttribute('photos')?.map((photo, index) => (
-                                    <View key={index} style={tailwind('mr-2 mb-2')}>
-                                        <FastImage source={{ uri: photo.url }} style={tailwind('w-24 h-24 z-10')} />
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
+                        ))}
+                    </ScrollView>
+                )}
             </View>
             <ActionSheet
                 containerStyle={[{ height: dialogHeight + 150 }]}

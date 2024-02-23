@@ -441,6 +441,7 @@ const StoreScreen = ({ navigation, route }) => {
                                 wrapperStyle={tailwind('my-2')}
                                 info={info}
                                 store={store}
+                                listVisible={true}
                                 storeLocation={storeLocation}
                                 onStartReviewPress={() => navigation.navigate('WriteReviewScreen', { subjectData: store.serialize(), subjectType: 'store' })}
                             />
