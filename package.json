@@ -1,6 +1,6 @@
 {
     "name": "storefrontapp",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "private": true,
     "scripts": {
         "android": "react-native run-android",
@@ -18,7 +18,7 @@
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
         "@fleetbase/sdk": "1.2.8",
-        "@fleetbase/storefront": "../storefront-js",
+        "@fleetbase/storefront": "1.1.9",
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
         "@fortawesome/free-brands-svg-icons": "^6.5.1",
         "@fortawesome/free-solid-svg-icons": "^6.5.1",
