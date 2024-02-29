@@ -94,10 +94,10 @@ const StorefrontScreen = ({ navigation, route }) => {
                     return <FontAwesomeIcon icon={icon} size={size} color={focused ? '#93C5FD' : '#6B7280'} />;
                 },
                 tabBarShowLabel: false,
+                headerShown: false,
                 tabBarStyleItem: tailwind('bg-black border-black'),
                 tabBarStyle: tailwind('bg-black border-black'),
-            })}
-        >
+            })}>
             <Tab.Screen key="browser" name="Browser" component={BrowserStack} initialParams={{ info: { ...info, defaultStoreLocation: storeLocation, storeLocations: storeLocations } }} />
             <Tab.Screen key="cart" name="Cart" component={CartStack} options={cartTabOptions} initialParams={{ info: { ...info, storeLocations: storeLocation }, data: cart?.serialize() }} />
             <Tab.Screen key="account" name="Account" component={AccountStack} initialParams={{ info }} />

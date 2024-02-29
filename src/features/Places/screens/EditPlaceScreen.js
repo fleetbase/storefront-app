@@ -87,7 +87,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
     };
 
     return (
-        <View style={[tailwind('w-full h-full bg-white relative'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white relative')]}>
             <View style={tailwind('flex flex-row items-center justify-between p-4')}>
                 <View style={tailwind('flex flex-row items-center')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -123,8 +123,7 @@ const EditPlaceScreen = ({ navigation, route }) => {
                                 longitude: place?.longitude,
                                 latitudeDelta: 0.0922,
                                 longitudeDelta: 0.0421,
-                            }}
-                        >
+                            }}>
                             <Marker coordinate={{ latitude: place?.latitude, longitude: place?.longitude }} />
                         </MapView>
                     </View>

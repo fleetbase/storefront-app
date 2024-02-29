@@ -2,8 +2,7 @@ import { Collection, Order } from '@fleetbase/sdk';
 import { faArrowLeft, faBox, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { format } from 'date-fns';
-import { useCustomer, useLocale, useMountedState, useStorefront } from 'hooks';
-import { adapter } from 'hooks/use-fleetbase';
+import { useCustomer, useLocale, useMountedState, useStorefront, useFleetbase } from 'hooks';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -21,7 +20,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     const isMounted = useMountedState();
     const isNetwork = info.is_network === true;
 
-    const [orders, setOrders] = useResourceCollection('order', Order, adapter, new Collection());
+    const [orders, setOrders] = useResourceCollection('order', Order, storefront.getAdapter(), new Collection());
     const [customer, setCustomer] = useCustomer();
     const [locale, setLocale] = useLocale();
     const [query, setQuery] = useState(null);
@@ -82,7 +81,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     }, [query]);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white')]}>
             <FlatList
                 data={orders}
                 onRefresh={() => fetchOrders({ isLoading: true })}

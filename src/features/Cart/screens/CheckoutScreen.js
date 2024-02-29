@@ -38,6 +38,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     const taxEnabled = info?.options?.tax_enabled === true;
     const taxPercentage = info?.options?.tax_percentage ?? 0;
     const store = new Store(info, StorefrontAdapter);
+    const insets = useSafeAreaInsets();
 
     let stores, setStores, storeLocations, setStoreLocations, storeLocationIds, storeIds, origin;
 
@@ -261,6 +262,8 @@ const CheckoutScreen = ({ navigation, route }) => {
             }
 
             _gateways.pushObject(gateway);
+
+            console.log('gateway: ', gatewayDetails, _gateways);
         }
         console.log('gateways', _gateways);
         console.log('gatewayDetails', gatewayDetails);
@@ -285,6 +288,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     const selectPaymentGateway = (gateway) => {
         setGateway(gateway);
         setCheckoutToken(gateway.getCheckoutToken());
+        console.log('Select gateway: ', gateway, gateway.getCheckoutToken());
         actionSheetRef.current?.hide();
     };
 
@@ -434,7 +438,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     }, [isMounted]);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white relative')]}>
+        <View style={[tailwind('w-full h-full bg-white relative'), { marginTop: insets.top }]}>
             <ActionSheet containerStyle={tailwind('h-80')} gestureEnabled={true} bounceOnOpen={true} ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('p-5 flex flex-row items-center justify-between')}>

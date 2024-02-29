@@ -271,12 +271,14 @@ const ProductScreen = ({ navigation, route }) => {
     };
 
     const getCart = () => {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             if (cart) {
                 resolve(cart);
             }
 
-            return storefront.cart.retrieve(getUniqueId()).then((cart) => {
+            const cartId = await getUniqueId();
+
+            return storefront.cart.retrieve(cartId).then((cart) => {
                 setCart(cart);
                 resolve(cart);
             });
@@ -541,8 +543,7 @@ const ProductScreen = ({ navigation, route }) => {
                                         {variation.options.map((variant, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}
-                                            >
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(variation.options, j) ? '' : 'border-b'} border-gray-100`)}>
                                                 <View style={tailwind('flex flex-row items-center')}>
                                                     <View style={tailwind('mr-4')}>
                                                         <RadioButton
@@ -575,8 +576,7 @@ const ProductScreen = ({ navigation, route }) => {
                                         {addonCategory.addons.map((addon, j) => (
                                             <View
                                                 key={j}
-                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`)}
-                                            >
+                                                style={tailwind(`flex flex-row items-center justify-between py-4 ${isLastIndex(addonCategory.addons, j) ? '' : 'border-b'} border-gray-100`)}>
                                                 <View>
                                                     <View style={tailwind('flex flex-row items-center')}>
                                                         <Checkbox
@@ -613,8 +613,9 @@ const ProductScreen = ({ navigation, route }) => {
                 <View style={tailwind('absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white')}>
                     <TouchableOpacity style={tailwind('mb-2')} disabled={cannotAddToCart} onPress={addToCart}>
                         <View
-                            style={tailwind(`rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`)}
-                        >
+                            style={tailwind(
+                                `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${cannotAddToCart ? 'opacity-50' : ''}`
+                            )}>
                             {isAddingToCart && <ActivityIndicator color="#3B82F6" style={tailwind('mr-3')} />}
                             <Text style={tailwind('text-blue-500 text-lg font-semibold')}>{actionButtonText}</Text>
                         </View>
@@ -624,8 +625,7 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canDecreaseQuantity ? 'opacity-50' : ''}`
-                                )}
-                            >
+                                )}>
                                 <FontAwesomeIcon icon={faMinus} size={15} />
                             </View>
                         </TouchableOpacity>
@@ -636,8 +636,7 @@ const ProductScreen = ({ navigation, route }) => {
                             <View
                                 style={tailwind(
                                     `rounded-md border border-blue-500 bg-blue-50 px-4 py-2 w-full flex flex-row items-center justify-center ${!canIncreaseQuantity ? 'opacity-50' : ''}`
-                                )}
-                            >
+                                )}>
                                 <FontAwesomeIcon icon={faPlus} size={15} />
                             </View>
                         </TouchableOpacity>

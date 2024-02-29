@@ -20,14 +20,13 @@ const MainStackScreen = ({ route }) => {
 
     return (
         <MainStack.Navigator screenOptions={{ headerShown: false }}>
-            <MainStack.Screen name="CartScreen" component={CartScreen} options={{ headerShown: false }} initialParams={{ info, data }} />
-            <MainStack.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="CheckoutSavedPlaces" component={SavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <MainStack.Screen name="CartScreen" component={CartScreen} initialParams={{ info, data }} />
+            <MainStack.Screen name="CheckoutScreen" component={CheckoutScreen} initialParams={{ info }} />
+            <MainStack.Screen name="CheckoutSavedPlaces" component={SavedPlacesScreen} initialParams={{ info }} />
             <MainStack.Screen
                 name="OrderCompleted"
                 component={OrderCompletedScreen}
                 options={{
-                    headerShown: false,
                     gestureEnabled: false,
                     gestureDirection: 'vertical',
                     ...(isAndroid ? TransitionPresets.RevealFromBottomAndroid : TransitionPresets.ModalSlideFromBottomIOS),
@@ -42,13 +41,13 @@ const CartStack = ({ route }) => {
     const { info, data } = route.params;
 
     return (
-        <RootStack.Navigator screenOptions={{ presentation: 'modal' }}>
-            <RootStack.Screen name="CartStack" component={MainStackScreen} options={{ headerShown: false }} initialParams={{ info, data }} />
-            <RootStack.Screen name="CartItemScreen" component={ProductScreen} options={{ headerShown: false }} />
-            <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <RootStack.Screen name="EditPlaceForm" component={EditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <RootStack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <RootStack.Screen name="CreateAccountScreen" component={CreateAccountScreen} options={{ headerShown: false }} initialParams={{ info }} />
+        <RootStack.Navigator screenOptions={{ presentation: 'modal', headerShown: false }}>
+            <RootStack.Screen name="CartStack" component={MainStackScreen} initialParams={{ info, data }} />
+            <RootStack.Screen name="CartItemScreen" component={ProductScreen} />
+            <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} initialParams={{ info }} />
+            <RootStack.Screen name="EditPlaceForm" component={EditPlaceScreen} initialParams={{ info }} />
+            <RootStack.Screen name="LoginScreen" component={LoginScreen} initialParams={{ info }} />
+            <RootStack.Screen name="CreateAccountScreen" component={CreateAccountScreen} initialParams={{ info }} />
         </RootStack.Navigator>
     );
 };

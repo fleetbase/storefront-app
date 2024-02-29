@@ -20,6 +20,7 @@ import { useResourceCollection, useResourceStorage } from 'utils/Storage';
 import CartCheckoutPanel from '../components/CartCheckoutPanel';
 import CartFooter from '../components/CartFooter';
 import CartHeader from '../components/CartHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { emit, addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
@@ -85,8 +86,7 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
         style={[
             tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`),
             { height: typeof calculateCartItemRowHeight === 'function' ? calculateCartItemRowHeight(item) : 200 },
-        ]}
-    >
+        ]}>
         <View style={tailwind('flex flex-1 flex-row justify-between')}>
             <View style={tailwind('flex flex-row items-start')}>
                 <View>
@@ -156,6 +156,7 @@ const CartScreen = ({ navigation, route }) => {
     const fleetbase = useFleetbase();
     const isMounted = useMountedState();
     const [locale] = useLocale();
+    const insets = useSafeAreaInsets();
 
     const { info, data } = route.params;
     const isNetwork = info.is_network === true;
@@ -329,24 +330,10 @@ const CartScreen = ({ navigation, route }) => {
         });
     });
 
-    const preloadCartItems = useCallback(async (cart) => {
-        const contents = cart.contents();
-
-        for (let i = 0; i < contents.length; i++) {
-            const cartItem = contents[i];
-            const product = await storefront.products.findRecord(cartItem.product_id);
-
-            if (product) {
-                products[product.id] = product;
-            }
-        }
-
-        setProducts(products);
-    });
-
-    const getCart = useCallback(() => {
+    const getCart = useCallback(async () => {
+        const cartId = await getUniqueId();
         return storefront.cart
-            .retrieve(getUniqueId())
+            .retrieve(cartId)
             .then((cart) => {
                 if (cart instanceof Cart) {
                     setCart(cart);
@@ -471,7 +458,7 @@ const CartScreen = ({ navigation, route }) => {
     );
 
     return (
-        <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>
+        <View style={[tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`), { marginTop: insets.top }]}>
             <CartCheckoutPanel
                 cart={cart}
                 total={calculateTotal()}

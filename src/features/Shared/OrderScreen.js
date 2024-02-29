@@ -116,7 +116,7 @@ const OrderScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white')]}>
             <View style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
@@ -140,14 +140,12 @@ const OrderScreen = ({ navigation, route }) => {
                                             longitude: order.getAttribute('payload.pickup.location.coordinates.0'),
                                             latitudeDelta: 1.0922,
                                             longitudeDelta: 0.0421,
-                                        }}
-                                    >
+                                        }}>
                                         <Marker
                                             coordinate={{
                                                 latitude: order.getAttribute('payload.pickup.location.coordinates.1'),
                                                 longitude: order.getAttribute('payload.pickup.location.coordinates.0'),
-                                            }}
-                                        >
+                                            }}>
                                             <View style={tailwind('bg-blue-500 shadow-sm rounded-full w-8 h-8 flex items-center justify-center')}>
                                                 <FontAwesomeIcon icon={faStoreAlt} size={18} color={'#fff'} />
                                             </View>
@@ -156,8 +154,7 @@ const OrderScreen = ({ navigation, route }) => {
                                             coordinate={{
                                                 latitude: order.getAttribute('payload.dropoff.location.coordinates.1'),
                                                 longitude: order.getAttribute('payload.dropoff.location.coordinates.0'),
-                                            }}
-                                        >
+                                            }}>
                                             <View style={tailwind('bg-red-500 shadow-sm rounded-full w-8 h-8 flex items-center justify-center')}>
                                                 <FontAwesomeIcon icon={faMapMarkerAlt} size={18} color={'#fff'} />
                                             </View>
@@ -167,8 +164,7 @@ const OrderScreen = ({ navigation, route }) => {
                                                 coordinate={{
                                                     latitude: order.getAttribute('driver_assigned.location.coordinates.1'),
                                                     longitude: order.getAttribute('driver_assigned.location.coordinates.0'),
-                                                }}
-                                            >
+                                                }}>
                                                 <View style={tailwind('bg-green-500 shadow-sm rounded-full w-8 h-8 flex items-center justify-center')}>
                                                     <FontAwesomeIcon icon={faCar} size={18} color={'#fff'} />
                                                 </View>

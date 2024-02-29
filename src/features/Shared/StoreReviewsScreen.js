@@ -145,7 +145,7 @@ const StoreReviewsScreen = ({ navigation, route }) => {
     }, [isMounted]);
 
     return (
-        <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('bg-white')]}>
             <View style={tailwind('relative h-full')}>
                 <View style={tailwind('w-full bg-white')}>
                     <View style={tailwind('flex flex-row items-center p-4')}>

@@ -84,9 +84,8 @@ const LoginScreen = ({ navigation, route }) => {
         <ImageBackground
             source={config('ui.loginScreen.containerBackgroundImage')}
             resizeMode={config('ui.loginScreen.containerBackgroundResizeMode') ?? 'cover'}
-            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}
-        >
-            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle'), { paddingTop: insets.top }]}>
+            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}>
+            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle')]}>
                 <View style={[tailwind('flex flex-row items-center p-4'), config('ui.loginScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={[tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center'), config('ui.loginScreen.headerIconContainerStyle')]}>
@@ -133,8 +132,7 @@ const LoginScreen = ({ navigation, route }) => {
                         <KeyboardAvoidingView
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                             keyboardVerticalOffset={140}
-                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}
-                        >
+                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}>
                             {error && (
                                 <View style={tailwind('mb-8')}>
                                     <Text style={tailwind('text-lg text-red-600')}>{error}</Text>

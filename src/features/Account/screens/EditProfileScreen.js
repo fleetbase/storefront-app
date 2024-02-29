@@ -40,7 +40,7 @@ const EditProfileScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white')]}>
             <Pressable onPress={Keyboard.dismiss} style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>

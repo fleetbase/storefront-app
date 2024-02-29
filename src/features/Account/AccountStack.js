@@ -21,9 +21,9 @@ const PlaceStackScreen = ({ route }) => {
 
     return (
         <SafeAreaProvider>
-            <PlacesStack.Navigator>
-                <PlacesStack.Screen name="SearchPlace" component={SearchPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <PlacesStack.Screen name="EditPlace" component={EditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <PlacesStack.Navigator screenOptions={{ headerShown: false }}>
+                <PlacesStack.Screen name="SearchPlace" component={SearchPlaceScreen} initialParams={{ info }} />
+                <PlacesStack.Screen name="EditPlace" component={EditPlaceScreen} initialParams={{ info }} />
             </PlacesStack.Navigator>
         </SafeAreaProvider>
     );
@@ -33,8 +33,8 @@ const MainStackScreen = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <MainStack.Navigator>
-            <MainStack.Screen name="AccountScreen" component={AccountScreen} options={{ headerShown: false }} initialParams={{ info }} />
+        <MainStack.Navigator screenOptions={{ headerShown: false }}>
+            <MainStack.Screen name="AccountScreen" component={AccountScreen} initialParams={{ info }} />
         </MainStack.Navigator>
     );
 };
@@ -44,17 +44,17 @@ const AccountStack = ({ route }) => {
 
     return (
         <SafeAreaProvider>
-            <RootStack.Navigator screenOptions={{ presentation: 'modal' }}>
-                <RootStack.Screen name="AccountStack" component={MainStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="CreateAccount" component={CreateAccountScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="SavedPlaces" component={SavedPlacesScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <MainStack.Screen name="EditPlaceForm" component={EditPlaceScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="OrderHistory" component={OrderHistoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false }} initialParams={{ info }} />
-                <RootStack.Screen name="Order" component={OrderScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <RootStack.Navigator screenOptions={{ presentation: 'modal', headerShown: false }}>
+                <RootStack.Screen name="AccountStack" component={MainStackScreen} initialParams={{ info }} />
+                <RootStack.Screen name="Login" component={LoginScreen} initialParams={{ info }} />
+                <RootStack.Screen name="CreateAccount" component={CreateAccountScreen} initialParams={{ info }} />
+                <RootStack.Screen name="EditProfile" component={EditProfileScreen} initialParams={{ info }} />
+                <RootStack.Screen name="SavedPlaces" component={SavedPlacesScreen} initialParams={{ info }} />
+                <RootStack.Screen name="AddNewPlace" component={PlaceStackScreen} initialParams={{ info }} />
+                <MainStack.Screen name="EditPlaceForm" component={EditPlaceScreen} initialParams={{ info }} />
+                <RootStack.Screen name="OrderHistory" component={OrderHistoryScreen} initialParams={{ info }} />
+                <RootStack.Screen name="ChangePassword" component={ChangePasswordScreen} initialParams={{ info }} />
+                <RootStack.Screen name="Order" component={OrderScreen} initialParams={{ info }} />
             </RootStack.Navigator>
         </SafeAreaProvider>
     );
