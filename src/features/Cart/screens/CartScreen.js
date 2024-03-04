@@ -518,8 +518,6 @@ const CartScreen = ({ navigation, route }) => {
                     showsVerticalScrollIndicator={false}
                     scrollEnabled={flatListScrollEnabled}
                     renderItem={({ item }) => {
-                        const contents = cart.contents().filter((cartItem) => cartItem.store_id === item.id);
-
                         return (
                             <View key={item.id}>
                                 <View style={tailwind('flex px-4 py-2 bg-gray-100')}>
@@ -535,7 +533,7 @@ const CartScreen = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 </View>
                                 <SwipeListView
-                                    data={contents}
+                                    data={cart.contents()}
                                     keyExtractor={(item) => item.id}
                                     style={tailwind(`${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                                     refreshing={isLoading}

@@ -47,7 +47,7 @@ const OrderCompletedScreen = ({ navigation, route }) => {
     })();
 
     return (
-        <View style={[tailwind('w-full h-full bg-white')]}>
+        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <View style={tailwind('w-full h-full bg-white relative')}>
                 <View style={tailwind('flex flex-row items-center p-4')}>
                     <TouchableOpacity onPress={() => navigation.navigate('CartScreen')} style={tailwind('mr-4')}>

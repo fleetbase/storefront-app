@@ -26,9 +26,10 @@ export default class CartService {
      * @return {Promise}
      * @memberof CartService
      */
-    static get() {
+    static async get() {
         const storefront = useStorefront();
 
-        return storefront.cart.retrieve(getUniqueId());
+        const cartId = await getUniqueId();
+        return storefront.cart.retrieve(cartId);
     }
 }

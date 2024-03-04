@@ -653,7 +653,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 </View>
             </ScrollView>
 
-            <View style={tailwind('absolute w-full bottom-0')}>
+            <View style={tailwind('absolute w-full bottom-7')}>
                 <View style={tailwind('w-full bg-white shadow-sm px-4 py-6')}>
                     <View style={tailwind('flex flex-row justify-between mb-2')}>
                         <View>
