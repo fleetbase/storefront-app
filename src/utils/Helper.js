@@ -4,6 +4,7 @@ import { countries } from 'countries-list';
 import { set } from './Storage';
 import { getCurrentLocation } from './Geo';
 import configuration from 'config';
+import { currency, number as numberSettings } from './Settings';
 
 const { emit } = EventRegister;
 
@@ -411,6 +412,227 @@ export default class HelperUtil {
 
         return null;
     }
+
+    /**
+     * Takes a string/array of strings, removes all formatting/cruft and returns the raw float value
+     * Alias: `parse(string)`
+     *
+     * Decimal must be included in the regular expression to match floats (defaults to
+     * settings.numberSettings.decimal), so if the number uses a non-standard decimal
+     * separator, provide it as the second argument.
+     *
+     * Also matches bracketed negatives (eg. "$ (1.99)" => -1.99)
+     *
+     * Doesn't throw any errors (`NaN`s become 0) but this may change in future
+     *
+     * ```js
+     *  unformat("£ 12,345,678.90 GBP"); // 12345678.9
+     * ```
+     *
+     * @method unformat
+     * @param {String|Array<String>} value The string or array of strings containing the number/s to parse.
+     * @param {Number}               decimal Number of decimal digits of the resultant number
+     * @return {Float} The parsed number
+     */
+    static unformat(value, decimal) {
+        // Recursively unformat arrays:
+        if (isArray(value)) {
+            return value.map(function (val) {
+                return unformat(val, decimal);
+            });
+        }
+
+        // Fails silently (need decent errors):
+        value = value || 0;
+
+        // Return the value as-is if it's already a number:
+        if (typeof value === 'number') {
+            return value;
+        }
+
+        // Default decimal point comes from settings, but could be set to eg. "," in opts:
+        decimal = decimal || numberSettings.decimal;
+
+        // Build regex to strip out everything except digits, decimal point and minus sign:
+        const regex = new RegExp('[^0-9-' + decimal + ']', ['g']);
+        const unformatted = parseFloat(
+            ('' + value)
+                .replace(/\((.*)\)/, '-$1') // replace bracketed values with negatives
+                .replace(regex, '') // strip out any cruft
+                .replace(decimal, '.') // make sure decimal point is standard
+        );
+
+        // This will fail silently which may cause trouble, let's wait and see:
+        return !isNaN(unformatted) ? unformatted : 0;
+    }
+
+    /**
+     * Implementation of toFixed() that treats floats more like decimals
+     *
+     * ```js
+     *  (0.615).toFixed(2);           // "0.61" (native toFixed has rounding issues)
+     *  toFixed(0.615, 2); // "0.62"
+     * ```
+     *
+     * @method toFixed
+     * @param Float}   value         The float to be treated as a decimal numberSettings.
+     * @param {Number} [precision=2] The number of decimal digits to keep.
+     * @return {String} The given number transformed into a string with the given precission
+     */
+    static toFixed(value, precision = 2) {
+        precision = checkPrecision(precision, numberSettings.precision);
+        const power = Math.pow(10, precision);
+
+        // Multiply up by precision, round accurately, then divide and use native toFixed():
+        return (Math.round(unformat(value) * power) / power).toFixed(precision);
+    }
+
+    /**
+     * Check and normalise the value of precision (must be positive integer)
+     */
+    static checkPrecision(val, base) {
+        val = Math.round(Math.abs(val));
+        return isNaN(val) ? base : val;
+    }
+
+    /**
+     * Extends an object with a defaults object, similar to underscore's _.defaults
+     *
+     * Used for abstracting parameter handling from API methods
+     */
+    static defaults(object, defs) {
+        let key;
+        object = Object.assign({}, object);
+        defs = defs || {};
+        // Iterate over object non-prototype properties:
+        for (key in defs) {
+            if (Object.hasOwnProperty(defs, key)) {
+                // Replace values with defaults only if undefined (allow empty/zero values):
+                if (object[key] == null) {
+                    object[key] = defs[key];
+                }
+            }
+        }
+        return object;
+    }
+
+    /**
+     * Returns the toString representation of an object even when the object
+     * does not support `toString` out of the box, i.e. `EmptyObject`.
+     */
+    static toString(obj) {
+        return Object.prototype.toString.call(obj);
+    }
+
+    /**
+     * Tests whether supplied parameter is a true object
+     */
+    static isObject(obj) {
+        return obj && toString(obj) === '[object Object]';
+    }
+
+    /**
+     * Parses a format string or object and returns format obj for use in rendering
+     *
+     * `format` is either a string with the default (positive) format, or object
+     * containing `pos` (required), `neg` and `zero` values (or a function returning
+     * either a string or object)
+     *
+     * Either string or format.pos must contain "%v" (value) to be valid
+     */
+    static checkCurrencyFormat(format) {
+        const defaults = currency.format;
+
+        // Allow function as format parameter (should return string or object):
+        if (typeof format === 'function') {
+            format = format();
+        }
+
+        // Format can be a string, in which case `value` ("%v") must be present:
+        if (typeof format === 'string' && format.match('%v')) {
+            // Create and return positive, negative and zero formats:
+            return {
+                pos: format,
+                neg: format.replace('-', '').replace('%v', '-%v'),
+                zero: format,
+            };
+
+            // If no format, or object is missing valid positive value, use defaults:
+        } else if (!format || !format.pos || !format.pos.match('%v')) {
+            // If defaults is a string, casts it to an object for faster checking next time:
+            if (typeof defaults !== 'string') {
+                return defaults;
+            } else {
+                return (currency.format = {
+                    pos: defaults,
+                    neg: defaults.replace('%v', '-%v'),
+                    zero: defaults,
+                });
+            }
+        }
+        // Otherwise, assume format was fine:
+        return format;
+    }
+
+    /**
+     * Format a number, with comma-separated thousands and custom precision/decimal places
+     * Alias: `format()`
+     *
+     * Localise by overriding the precision and thousand / decimal separators
+     * 2nd parameter `precision` can be an object matching `settings.number`
+     *
+     * ```js
+     * formatNumber(5318008);              // 5,318,008
+     * formatNumber(9876543.21, 3, " "); // 9 876 543.210
+     * ```
+     *
+     * @method formatNumber
+     * @param {Number}        number The number to be formatted.
+     * @param {Integer}       [precision=2] Number of decimal digits
+     * @param {String}        [thousand=','] String with the thousands separator.
+     * @param {String}        [decimal="."] String with the decimal separator.
+     * @return {String} The given number properly formatted.
+     */
+    static formatNumber(number, precision = 2, thousand = ',', decimal = '.') {
+        // Resursively format arrays:
+        if (isArray(number)) {
+            return numberSettings.map(function (val) {
+                return formatNumber(val, precision, thousand, decimal);
+            });
+        }
+
+        // Clean up number:
+        number = HelperUtil.unformat(number);
+
+        // Build options object from second param (if object) or all params, extending defaults:
+        const opts = defaults(
+            isObject(precision)
+                ? precision
+                : {
+                      precision: precision,
+                      thousand: thousand,
+                      decimal: decimal,
+                  },
+            numberSettings
+        );
+
+        // Clean up precision
+        const usePrecision = checkPrecision(opts.precision);
+
+        // Do some calc:
+        const fixedNumber = toFixed(number || 0, usePrecision);
+        const negative = fixedNumber < 0 ? '-' : '';
+        const base = String(parseInt(Math.abs(fixedNumber), 10));
+        const mod = base.length > 3 ? base.length % 3 : 0;
+
+        // Format the number:
+        return (
+            negative +
+            (mod ? base.substr(0, mod) + opts.thousand : '') +
+            base.substr(mod).replace(/(\d{3})(?=\d)/g, '$1' + opts.thousand) +
+            (usePrecision ? opts.decimal + toFixed(Math.abs(number), usePrecision).split('.')[1] : '')
+        );
+    }
 }
 
 const listCountries = HelperUtil.listCountries;
@@ -431,6 +653,14 @@ const deepGet = HelperUtil.deepGet;
 const config = HelperUtil.config;
 const sum = HelperUtil.sum;
 const getColorCode = HelperUtil.getColorCode;
+const unformat = HelperUtil.unformat;
+const toFixed = HelperUtil.toFixed;
+const checkPrecision = HelperUtil.checkPrecision;
+const defaults = HelperUtil.defaults;
+const toString = HelperUtil.toString;
+const isObject = HelperUtil.isObject;
+const checkCurrencyFormat = HelperUtil.checkCurrencyFormat;
+const formatNumber = HelperUtil.formatNumber;
 
 export {
     listCountries,
@@ -451,4 +681,12 @@ export {
     config,
     sum,
     getColorCode,
+    unformat,
+    toFixed,
+    checkPrecision,
+    defaults,
+    toString,
+    isObject,
+    checkCurrencyFormat,
+    formatNumber,
 };

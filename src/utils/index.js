@@ -17,6 +17,13 @@ import {
     config,
     sum,
     getColorCode,
+    unformat,
+    checkCurrencyFormat,
+    checkPrecision,
+    defaults,
+    toFixed,
+    formatNumber,
+    isObject,
 } from './Helper';
 import { calculatePercentage, haversine } from './Calculate';
 import { syncDevice } from './Customer';
@@ -56,4 +63,11 @@ export {
     getColorCode,
     getCurrency,
     truncateString,
+    unformat,
+    checkCurrencyFormat,
+    checkPrecision,
+    defaults,
+    toFixed,
+    formatNumber,
+    isObject,
 };
