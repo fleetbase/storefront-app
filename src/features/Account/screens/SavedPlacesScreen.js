@@ -66,7 +66,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white')]}>
+        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
             <FlatList
                 data={places}
                 onRefresh={loadPlaces}
