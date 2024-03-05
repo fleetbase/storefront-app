@@ -195,6 +195,58 @@ const CheckoutScreen = ({ navigation, route }) => {
         return { ...orderOptions, ...setOptions };
     };
 
+    const setupStripeGateway = async (gateway, c = null) => {
+        const currentCustomer = c ?? customer;
+
+        // if no customer we can't setup the stripe gateway return null
+        if (!currentCustomer || !isPaymentGatewayResource(gateway)) {
+            return null;
+        }
+
+        // fetch payment intent
+        const fetchPaymentIntent = async () => {
+            const options = getOrderOptions();
+
+            const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize(currentCustomer, cart, serviceQuote, gateway, options).catch((error) => {
+                logError(error, '[ Error initializing checkout token! ]');
+            });
+
+            if (!token) {
+                return null;
+            }
+
+            // set the checkout token to the gateway
+            gateway.setCheckoutToken(token);
+
+            return {
+                paymentIntent,
+                ephemeralKey,
+                customerId,
+                token,
+            };
+        };
+
+        setIsLoading(true);
+
+        try {
+            const { paymentIntent, ephemeralKey, customerId, token } = await fetchPaymentIntent();
+
+            if (!token) {
+                return null;
+            }
+
+            setPaymentMethod({
+                label: gateway.name,
+                image: gateway.icon,
+            });
+        } catch (error) {
+            logError(error, '[ Error initializing stripe payment intent! ]');
+            return null;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const setupQpayGateway = async (gateway, c = null) => {
         const currentCustomer = c ?? customer;
 
@@ -245,6 +297,10 @@ const CheckoutScreen = ({ navigation, route }) => {
         for (let i = 0; i < gateways.length; i++) {
             const gateway = gateways.objectAt(i);
 
+            if (gateway.isStripeGateway) {
+                await setupStripeGateway(gateway, c);
+            }
+
             if (gateway.isCashGateway) {
                 await setupCashGateway(gateway, c);
             }
@@ -262,11 +318,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             }
 
             _gateways.pushObject(gateway);
-
-            console.log('gateway: ', gatewayDetails, _gateways);
         }
-        console.log('gateways', _gateways);
-        console.log('gatewayDetails', gatewayDetails);
 
         setGatewayOptions(_gateways);
         setGatewayDetails(gatewayDetails);
@@ -288,8 +340,35 @@ const CheckoutScreen = ({ navigation, route }) => {
     const selectPaymentGateway = (gateway) => {
         setGateway(gateway);
         setCheckoutToken(gateway.getCheckoutToken());
-        console.log('Select gateway: ', gateway, gateway.getCheckoutToken());
+
+        if (gateway.isStripeGateway) {
+            setTimeout(() => {
+                console.log(gateway);
+                // TODO: Stripe payment sheet
+                setPaymentMethod({
+                    label: gateway.name,
+                    image: gateway.icon,
+                });
+            }, 300);
+        }
+
         actionSheetRef.current?.hide();
+    };
+
+    const completeStripeOrder = async () => {
+        // TODO: Complete stripe order
+        return storefront.checkout
+            .captureOrder(checkoutToken)
+            .then((order) => {
+                setIsLoading(false);
+                cart.empty().then((cart) => {
+                    updateCart(cart);
+                });
+                navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
+            })
+            .catch((error) => {
+                logError(error, '[ Failed to capture order! ]');
+            });
     };
 
     const completeCashOrder = () => {
@@ -317,6 +396,10 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         if (gateway?.type === 'qpay') {
             return completeQpayOrder();
+        }
+
+        if (gateway?.isStripeGateway) {
+            return completeStripeOrder();
         }
 
         if (gateway?.isCashGateway) {
@@ -570,6 +653,26 @@ const CheckoutScreen = ({ navigation, route }) => {
                                         <View style={tailwind('flex flex-row items-center')}>
                                             <FontAwesomeIcon icon={faMoneyBillWave} size={20} style={tailwind('text-green-400 mr-2')} />
                                             <Text>{translate('Cart.CheckoutScreen.cashGatewayName')}</Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {gateway?.isStripeGateway && (
+                                    <View>
+                                        <View style={tailwind('flex flex-row justify-between')}>
+                                            {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
+                                            {!isLoading && !paymentMethod?.label && <Text>{translate('Cart.CheckoutScreen.noPaymentMethodLabelText')}</Text>}
+                                            {paymentMethod?.label !== null && (
+                                                <View style={tailwind('flex flex-row items-center')}>
+                                                    <FastImage
+                                                        source={{
+                                                            uri: `data:image/png;base64,${paymentMethod?.image}`,
+                                                        }}
+                                                        style={[{ width: 35, height: 22, marginRight: 10 }]}
+                                                    />
+                                                    <Text>{paymentMethod?.label}</Text>
+                                                </View>
+                                            )}
                                         </View>
                                     </View>
                                 )}
