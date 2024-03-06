@@ -1,9 +1,9 @@
-import React from 'react';
-import { Text, View, TouchableOpacity, Switch } from 'react-native';
-import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
-import { formatCurrency, translate } from 'utils';
 import { useLocale } from 'hooks';
+import React from 'react';
+import { Switch, Text, View } from 'react-native';
 import tailwind from 'tailwind';
+import { CartSubtotalView, ServiceQuoteFeeView, TipInput, TipView } from 'ui';
+import { formatCurrency, translate } from 'utils';
 
 const capitalize = ([first, ...rest]) => `${first.toUpperCase()}${rest.join('')}`;
 
@@ -88,7 +88,7 @@ const CartFooter = (props) => {
                                     </View>
                                     {isTipping && (
                                         <View style={tailwind('ml-2')}>
-                                            <TipInput value={tip} onChange={(tip, isPercent) => dispatch('setTip', isPercent ? `${tip}%` : tip)} />
+                                            <TipInput currency={cart.getAttribute('currency')} value={tip} onChange={(tip, isPercent) => dispatch('setTip', isPercent ? `${tip}%` : tip)} />
                                         </View>
                                     )}
                                 </View>
@@ -114,7 +114,11 @@ const CartFooter = (props) => {
                                     </View>
                                     {isTippingDriver && (
                                         <View style={tailwind('ml-2')}>
-                                            <TipInput value={deliveryTip} onChange={(tip, isPercent) => dispatch('setDeliveryTip', isPercent ? `${tip}%` : tip)} />
+                                            <TipInput
+                                                currency={cart.getAttribute('currency')}
+                                                value={deliveryTip}
+                                                onChange={(tip, isPercent) => dispatch('setDeliveryTip', isPercent ? `${tip}%` : tip)}
+                                            />
                                         </View>
                                     )}
                                 </View>
