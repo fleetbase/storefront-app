@@ -152,7 +152,8 @@
             "tipLabelText": "Tip",
             "deliveryTipLabelText": "Delivery Tip",
             "orderTotalLabelText": "Order Total",
-            "submitOrderButtonText": "Place Order"
+            "submitOrderButtonText": "Place Order",
+            "confirmButtonText": "Confirm"
         }
     },
     "Core": {

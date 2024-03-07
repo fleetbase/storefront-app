@@ -152,7 +152,8 @@
             "tipLabelText": "Гарийн Мөнгө",
             "deliveryTipLabelText": "Хүргэлтийн Гарийн Мөнгө",
             "orderTotalLabelText": "Захиалгын нийт",
-            "submitOrderButtonText": "Захиалга өгөх"
+            "submitOrderButtonText": "Захиалга өгөх",
+            "confirmButtonText": "Баталгаажуулах"
         }
     },
     "Core": {

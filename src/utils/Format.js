@@ -233,5 +233,7 @@ const formatKm = FormatUtil.km;
 const capitalize = FormatUtil.capitalize;
 const getStatusColors = FormatUtil.getStatusColors;
 const truncateString = FormatUtil.truncateString;
+const removeNonNumber = (string = '') => string.replace(/[^\d]/g, '');
+const removeLeadingSpaces = (string = '') => string.replace(/^\s+/g, '');
 
-export { formatCurrency, formatKm, capitalize, getStatusColors, truncateString };
+export { formatCurrency, formatKm, capitalize, getStatusColors, truncateString, removeNonNumber, removeLeadingSpaces };

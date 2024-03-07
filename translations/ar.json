@@ -152,7 +152,8 @@
             "tipLabelText": "البقشيش",
             "deliveryTipLabelText": "بقشيش التوصيل",
             "orderTotalLabelText": "إجمالي الطلب",
-            "submitOrderButtonText": "تقديم طلب"
+            "submitOrderButtonText": "تقديم طلب",
+            "confirmButtonText": "يتأكد"
         }
     },
     "Core": {
