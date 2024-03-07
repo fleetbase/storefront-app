@@ -1,8 +1,8 @@
 import { Collection, Place, ServiceQuote } from '@fleetbase/sdk';
-import { Cart, DeliveryServiceQuote, Store, StoreLocation, PaymentGateway } from '@fleetbase/storefront';
+import { Cart, DeliveryServiceQuote, Store, StoreLocation } from '@fleetbase/storefront';
 import { faArrowLeft, faCashRegister, faChevronRight, faExclamationTriangle, faMoneyBillWave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useCustomer, useFleetbase, useLocale, useMountedState, useStorefront } from 'hooks';
+import { useCustomer, useFleetbase, useMountedState, useStorefront } from 'hooks';
 import QpayPaymentSheet from 'interface/QpayPaymentSheet';
 import { CheckoutDeliveryMap } from 'interface/widgets';
 import React, { createRef, useCallback, useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import { NetworkInfoService } from 'services';
 import tailwind from 'tailwind';
 import { calculatePercentage, formatCurrency, logError, translate } from 'utils';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
+import StripePaymentSheet from '../../../interface/StripePaymentSheet';
 
 const { addEventListener, removeEventListener, emit } = EventRegister;
 const isPaymentGatewayResource = (gateway) => typeof gateway === 'object' && gateway?.resource === 'payment-gateway';
@@ -50,6 +51,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [qpayInvoice, setQPayInvoice] = useState(null);
     const [qpayPaymentSheet, setQpayPaymentSheet] = useState(null);
+    const [stripePaymentSheet, setStripePaymentSheet] = useState(null);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote));
     const [serviceQuoteError, setServiceQuoteError] = useState(false);
@@ -59,6 +61,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [gatewayOptions, setGatewayOptions] = useState(new Collection());
     const [tip, setTip] = useState(tipAmount ?? 0);
     const [deliveryTip, setDeliveryTip] = useState(deliveryTipAmount ?? 0);
+    const [cardDetails, setCardDetails] = useState(null);
+    const [intent, setIntent] = useState(null);
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
 
@@ -231,6 +235,8 @@ const CheckoutScreen = ({ navigation, route }) => {
         try {
             const { paymentIntent, ephemeralKey, customerId, token } = await fetchPaymentIntent();
 
+            setIntent(paymentIntent);
+
             if (!token) {
                 return null;
             }
@@ -343,8 +349,8 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         if (gateway.isStripeGateway) {
             setTimeout(() => {
-                console.log(gateway);
-                // TODO: Stripe payment sheet
+                stripePaymentSheet?.show();
+
                 setPaymentMethod({
                     label: gateway.name,
                     image: gateway.icon,
@@ -356,6 +362,17 @@ const CheckoutScreen = ({ navigation, route }) => {
     };
 
     const completeStripeOrder = async () => {
+        const confirmResponse = StorefrontAdapter.post('/checkouts/confirm', {
+            gateway: gateway.type,
+            paymentIntent: intent,
+            card: cardDetails.values,
+        });
+
+        if (confirmResponse.error) {
+            logError(confirmResponse.error, '[ Error confirming stripe payment! ]');
+            return;
+        }
+        setIsLoading(false);
         // TODO: Complete stripe order
         return storefront.checkout
             .captureOrder(checkoutToken)
@@ -524,7 +541,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         <View style={[tailwind('w-full h-full bg-white relative'), { marginTop: insets.top }]}>
             <ActionSheet containerStyle={tailwind('h-80')} gestureEnabled={true} bounceOnOpen={true} ref={actionSheetRef}>
                 <View>
-                    <View style={tailwind('p-5 flex flex-row items-center justify-between')}>
+                    <View style={tailwind('px-5 py-1 flex flex-row items-center justify-between')}>
                         <Text style={tailwind('text-lg font-bold')}>{translate('Cart.CheckoutScreen.selectPaymentMethodActionSheetTitle')}</Text>
                         <TouchableOpacity
                             onPress={() => {
@@ -535,9 +552,9 @@ const CheckoutScreen = ({ navigation, route }) => {
                             </View>
                         </TouchableOpacity>
                     </View>
-                    <View style={tailwind('h-full px-5')}>
+                    <View style={tailwind('h-full px-5 pt-4')}>
                         {gatewayOptions?.map((gateway) => (
-                            <TouchableOpacity key={gateway.id} onPress={() => selectPaymentGateway(gateway)} style={tailwind('rounded-md bg-gray-50 p-4 mb-4')}>
+                            <TouchableOpacity key={gateway.id} onPress={() => selectPaymentGateway(gateway)} style={tailwind('rounded-md bg-gray-50 p-2 mb-4')}>
                                 <View style={tailwind('flex flex-row')}>
                                     <View style={tailwind('w-10')}>{gatewayDetails[gateway?.type]?.icon}</View>
                                     <View>
@@ -631,48 +648,18 @@ const CheckoutScreen = ({ navigation, route }) => {
                                     </View>
                                 </View>
 
-                                {gateway === null && (
+                                {gateway === null ? (
                                     <View>
                                         <View style={tailwind('flex flex-row justify-between')}>
                                             <Text>{translate('Cart.CheckoutScreen.selectPaymentMethodLabelText')}</Text>
                                         </View>
                                     </View>
-                                )}
-
-                                {gateway?.type === 'qpay' && (
-                                    <View>
-                                        <View style={tailwind('flex flex-row items-center')}>
-                                            <FontAwesomeIcon icon={faCashRegister} size={20} style={tailwind('text-blue-500 mr-2')} />
-                                            <Text>{gateway.getAttribute('name')}</Text>
-                                        </View>
-                                    </View>
-                                )}
-
-                                {gateway?.isCashGateway && (
-                                    <View>
-                                        <View style={tailwind('flex flex-row items-center')}>
-                                            <FontAwesomeIcon icon={faMoneyBillWave} size={20} style={tailwind('text-green-400 mr-2')} />
-                                            <Text>{translate('Cart.CheckoutScreen.cashGatewayName')}</Text>
-                                        </View>
-                                    </View>
-                                )}
-
-                                {gateway?.isStripeGateway && (
-                                    <View>
-                                        <View style={tailwind('flex flex-row justify-between')}>
-                                            {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
-                                            {!isLoading && !paymentMethod?.label && <Text>{translate('Cart.CheckoutScreen.noPaymentMethodLabelText')}</Text>}
-                                            {paymentMethod?.label !== null && (
-                                                <View style={tailwind('flex flex-row items-center')}>
-                                                    <FastImage
-                                                        source={{
-                                                            uri: `data:image/png;base64,${paymentMethod?.image}`,
-                                                        }}
-                                                        style={[{ width: 35, height: 22, marginRight: 10 }]}
-                                                    />
-                                                    <Text>{paymentMethod?.label}</Text>
-                                                </View>
-                                            )}
+                                ) : (
+                                    <View style={tailwind('flex flex-row')}>
+                                        <View style={tailwind('w-10')}>{gatewayDetails[gateway?.type]?.icon}</View>
+                                        <View>
+                                            <Text style={tailwind('font-bold text-base mb-1')}>{gatewayDetails[gateway?.type]?.name}</Text>
+                                            <Text>{gatewayDetails[gateway?.type]?.description}</Text>
                                         </View>
                                     </View>
                                 )}
@@ -780,6 +767,13 @@ const CheckoutScreen = ({ navigation, route }) => {
                 </View>
             </View>
             <QpayPaymentSheet invoice={qpayInvoice} onPress={(bank) => openLink(bank.link, `Unable to open ${bank.name} app!`)} onReady={setQpayPaymentSheet} />
+            <StripePaymentSheet
+                onPress={(card) => {
+                    setCardDetails(card);
+                    console.log('Card', card);
+                }}
+                onReady={setStripePaymentSheet}
+            />
         </View>
     );
 };
