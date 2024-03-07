@@ -2,6 +2,8 @@ import { Collection, Place, ServiceQuote } from '@fleetbase/sdk';
 import { Cart, DeliveryServiceQuote, Store, StoreLocation } from '@fleetbase/storefront';
 import { faArrowLeft, faCashRegister, faChevronRight, faExclamationTriangle, faMoneyBillWave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { initStripe, useStripe } from '@stripe/stripe-react-native';
+import config from 'config';
 import { useCustomer, useFleetbase, useMountedState, useStorefront } from 'hooks';
 import QpayPaymentSheet from 'interface/QpayPaymentSheet';
 import { CheckoutDeliveryMap } from 'interface/widgets';
@@ -15,7 +17,8 @@ import { NetworkInfoService } from 'services';
 import tailwind from 'tailwind';
 import { calculatePercentage, formatCurrency, logError, translate } from 'utils';
 import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import StripePaymentSheet from '../../../interface/StripePaymentSheet';
+const { STRIPE_KEY, APP_IDENTIFIER } = config;
+let isStripeInitialized = false;
 
 const { addEventListener, removeEventListener, emit } = EventRegister;
 const isPaymentGatewayResource = (gateway) => typeof gateway === 'object' && gateway?.resource === 'payment-gateway';
@@ -32,26 +35,20 @@ const CheckoutScreen = ({ navigation, route }) => {
     const { info, serializedCart, isPickupOrder, isTipping, isTippingDriver, tipAmount, deliveryTipAmount, quote } = route.params;
 
     const isNetwork = info.is_network === true;
-    const codEnabled = info?.options?.cod_enabled === true;
-    const pickupEnabled = info?.options?.pickup_enabled === true;
-    const tipsEnabled = info?.options?.tips_enabled === true;
-    const deliveryTipsEnabled = info?.options?.delivery_tips_enabled === true;
-    const taxEnabled = info?.options?.tax_enabled === true;
-    const taxPercentage = info?.options?.tax_percentage ?? 0;
     const store = new Store(info, StorefrontAdapter);
     const insets = useSafeAreaInsets();
 
     let stores, setStores, storeLocations, setStoreLocations, storeLocationIds, storeIds, origin;
 
     const [customer, setCustomer] = useCustomer();
-
+    const [paymentSheetError, setPaymentSheetError] = useState(false);
+    const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [deliverTo, setDeliverTo] = useResourceStorage('deliver_to', Place, FleetbaseAdapter);
     const [storeLocation, setStoreLocation] = useResourceStorage('store_location', StoreLocation, StorefrontAdapter);
     const [cart, setCart] = useResourceStorage('cart', Cart, StorefrontAdapter, new Cart(serializedCart));
     const [isLoading, setIsLoading] = useState(false);
     const [qpayInvoice, setQPayInvoice] = useState(null);
     const [qpayPaymentSheet, setQpayPaymentSheet] = useState(null);
-    const [stripePaymentSheet, setStripePaymentSheet] = useState(null);
     const [isFetchingServiceQuote, setIsFetchingServiceQuote] = useState(false);
     const [serviceQuote, setServiceQuote] = useState(new DeliveryServiceQuote(quote));
     const [serviceQuoteError, setServiceQuoteError] = useState(false);
@@ -61,8 +58,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     const [gatewayOptions, setGatewayOptions] = useState(new Collection());
     const [tip, setTip] = useState(tipAmount ?? 0);
     const [deliveryTip, setDeliveryTip] = useState(deliveryTipAmount ?? 0);
-    const [cardDetails, setCardDetails] = useState(null);
-    const [intent, setIntent] = useState(null);
+
+    const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
 
     const isInvalidDeliveryPlace = !(deliverTo instanceof Place);
 
@@ -74,6 +71,23 @@ const CheckoutScreen = ({ navigation, route }) => {
 
     // delivery origin
     origin = storeLocation?.id ? new Place(storeLocation.getAttribute('place')) : null;
+
+    useEffect(() => {
+        // TODO: Get the Stripe config from the network or store's payment gateway config
+        try {
+            if (STRIPE_KEY && !isStripeInitialized) {
+                initStripe({
+                    publishableKey: STRIPE_KEY,
+                    merchantIdentifier: APP_IDENTIFIER,
+                    setReturnUrlSchemeOnAndroid: true,
+                });
+
+                isStripeInitialized = true;
+            }
+        } catch (error) {
+            console.log('Error initializing stripe', error);
+        }
+    }, []);
 
     if (isNetwork) {
         [stores, setStores] = useResourceCollection(`checkout_network_stores`, Store, StorefrontAdapter);
@@ -106,8 +120,8 @@ const CheckoutScreen = ({ navigation, route }) => {
     const canPlaceOrder = (() => {
         let isGatewayValid = isPaymentGatewayResource(gateway);
 
-        if (isGatewayValid) {
-            isGatewayValid = isGatewayValid && paymentMethod?.label;
+        if (isGatewayValid && gateway.isStripeGateway) {
+            isGatewayValid = isGatewayValid && !!paymentMethod?.label;
         }
 
         if (isPickupOrder) {
@@ -117,24 +131,6 @@ const CheckoutScreen = ({ navigation, route }) => {
         return !isLoading && typeof customer?.serialize === 'function' && !isInvalidDeliveryPlace && cart instanceof Cart && cart.contents().length > 0 && isGatewayValid;
     })();
 
-    const deliveryFee = (() => {
-        let deliveryFee = <ActivityIndicator />;
-
-        if (!isFetchingServiceQuote && serviceQuote instanceof ServiceQuote) {
-            // deliveryFee = serviceQuote.formattedAmount;
-            deliveryFee = formatCurrency(serviceQuote.getAttribute('amount'), cart.getAttribute('currency'));
-        }
-
-        if (serviceQuoteError) {
-            deliveryFee = (
-                <Text style={tailwind('text-red-500')} numberOfLines={1}>
-                    {serviceQuoteError}
-                </Text>
-            );
-        }
-
-        return deliveryFee;
-    })();
     const formattedTip = (() => {
         if (typeof tip === 'string' && tip.endsWith('%')) {
             const tipAmount = formatCurrency(calculatePercentage(parseInt(tip), cart.subtotal()), cart.getAttribute('currency'));
@@ -144,6 +140,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
         return formatCurrency(tip, cart.getAttribute('currency'));
     })();
+
     const formattedDeliveryTip = (() => {
         if (typeof deliveryTip === 'string' && deliveryTip.endsWith('%')) {
             const tipAmount = formatCurrency(calculatePercentage(parseInt(deliveryTip), cart.subtotal()), cart.getAttribute('currency'));
@@ -230,21 +227,44 @@ const CheckoutScreen = ({ navigation, route }) => {
             };
         };
 
+        // if payment sheet already enabled return null
+        if (paymentSheetEnabled) {
+            return null;
+        }
+
         setIsLoading(true);
 
         try {
             const { paymentIntent, ephemeralKey, customerId, token } = await fetchPaymentIntent();
 
-            setIntent(paymentIntent);
-
             if (!token) {
                 return null;
             }
 
-            setPaymentMethod({
-                label: gateway.name,
-                image: gateway.icon,
+            const { error, paymentOption } = await initPaymentSheet({
+                customerId,
+                customerEphemeralKeySecret: ephemeralKey,
+                paymentIntentClientSecret: paymentIntent,
+                customFlow: true,
+                merchantDisplayName: info.name,
+                applePay: false,
+                merchantCountryCode: 'US',
+                style: 'alwaysLight',
+                googlePay: false,
+                testEnv: true,
+                returnURL: 'com.fleetbase.storefront://stripe-redirect',
             });
+
+            if (!error) {
+                setPaymentSheetEnabled(true);
+            } else {
+                setPaymentSheetError(error.localizedMessage);
+                logError(error, '[ Error enabling stripe payment sheet! ]');
+            }
+
+            if (paymentOption) {
+                setPaymentMethod(paymentOption);
+            }
         } catch (error) {
             logError(error, '[ Error initializing stripe payment intent! ]');
             return null;
@@ -346,46 +366,55 @@ const CheckoutScreen = ({ navigation, route }) => {
     const selectPaymentGateway = (gateway) => {
         setGateway(gateway);
         setCheckoutToken(gateway.getCheckoutToken());
+        actionSheetRef.current?.setModalVisible(false);
 
+        console.log('[ 💰 Checkout token set: ]', gateway.getCheckoutToken());
+
+        // stripe must present payment sheet
         if (gateway.isStripeGateway) {
             setTimeout(() => {
-                stripePaymentSheet?.show();
-
-                setPaymentMethod({
-                    label: gateway.name,
-                    image: gateway.icon,
-                });
+                selectStripePaymentMethod();
             }, 300);
         }
+    };
 
-        actionSheetRef.current?.hide();
+    const selectStripePaymentMethod = async () => {
+        const { error, paymentOption } = await presentPaymentSheet({
+            confirmPayment: false,
+        });
+
+        if (error) {
+            logError(error, '[ Error loading stripe payment sheet! ]');
+        } else if (paymentOption) {
+            setPaymentMethod({
+                label: paymentOption.label,
+                image: paymentOption.image,
+            });
+        } else {
+            setPaymentMethod(null);
+        }
     };
 
     const completeStripeOrder = async () => {
-        const confirmResponse = StorefrontAdapter.post('/checkouts/confirm', {
-            gateway: gateway.type,
-            paymentIntent: intent,
-            card: cardDetails.values,
-        });
+        const { error } = await confirmPaymentSheetPayment();
 
-        if (confirmResponse.error) {
-            logError(confirmResponse.error, '[ Error confirming stripe payment! ]');
-            return;
-        }
-        setIsLoading(false);
-        // TODO: Complete stripe order
-        return storefront.checkout
-            .captureOrder(checkoutToken)
-            .then((order) => {
-                setIsLoading(false);
-                cart.empty().then((cart) => {
-                    updateCart(cart);
+        if (error) {
+            return setIsLoading(false);
+        } else {
+            setPaymentSheetEnabled(false);
+            return storefront.checkout
+                .captureOrder(checkoutToken)
+                .then((order) => {
+                    setIsLoading(false);
+                    cart.empty().then((cart) => {
+                        updateCart(cart);
+                    });
+                    navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
+                })
+                .catch((error) => {
+                    logError(error, '[ Failed to capture order! ]');
                 });
-                navigation.navigate('OrderCompleted', { serializedOrder: order.serialize() });
-            })
-            .catch((error) => {
-                logError(error, '[ Failed to capture order! ]');
-            });
+        }
     };
 
     const completeCashOrder = () => {
@@ -537,6 +566,36 @@ const CheckoutScreen = ({ navigation, route }) => {
         return unsubscribe;
     }, [isMounted]);
 
+    const renderSelectedPaymentMethod = (selectedGateway) => {
+        return selectedGateway.isStripeGateway ? (
+            <View>
+                <View style={tailwind('flex flex-row justify-between')}>
+                    {isLoading && !paymentMethod?.label && <ActivityIndicator color={`rgba(31, 41, 55, .5)`} />}
+                    {!isLoading && !paymentMethod?.label && <Text>{translate('Cart.CheckoutScreen.noPaymentMethodLabelText')}</Text>}
+                    {paymentMethod?.label !== null && (
+                        <View style={tailwind('flex flex-row items-center')}>
+                            <FastImage
+                                source={{
+                                    uri: `data:image/png;base64,${paymentMethod?.image}`,
+                                }}
+                                style={[{ width: 35, height: 22, marginRight: 10 }]}
+                            />
+                            <Text>{paymentMethod?.label}</Text>
+                        </View>
+                    )}
+                </View>
+            </View>
+        ) : (
+            <View style={tailwind('flex flex-row')}>
+                <View style={tailwind('w-10')}>{gatewayDetails[selectedGateway?.type]?.icon}</View>
+                <View>
+                    <Text style={tailwind('font-bold text-base mb-1')}>{gatewayDetails[selectedGateway?.type]?.name}</Text>
+                    <Text>{gatewayDetails[selectedGateway?.type]?.description}</Text>
+                </View>
+            </View>
+        );
+    };
+
     return (
         <View style={[tailwind('w-full h-full bg-white relative'), { marginTop: insets.top }]}>
             <ActionSheet containerStyle={tailwind('h-80')} gestureEnabled={true} bounceOnOpen={true} ref={actionSheetRef}>
@@ -655,13 +714,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                                         </View>
                                     </View>
                                 ) : (
-                                    <View style={tailwind('flex flex-row')}>
-                                        <View style={tailwind('w-10')}>{gatewayDetails[gateway?.type]?.icon}</View>
-                                        <View>
-                                            <Text style={tailwind('font-bold text-base mb-1')}>{gatewayDetails[gateway?.type]?.name}</Text>
-                                            <Text>{gatewayDetails[gateway?.type]?.description}</Text>
-                                        </View>
-                                    </View>
+                                    renderSelectedPaymentMethod(gateway)
                                 )}
                             </View>
                             <View style={tailwind('flex justify-center')}>
@@ -719,7 +772,6 @@ const CheckoutScreen = ({ navigation, route }) => {
                         {!isPickupOrder && (
                             <View style={tailwind('flex flex-row items-center justify-between py-2')}>
                                 <Text>{translate('Cart.CheckoutScreen.deliveryFeeLabelText')}</Text>
-                                {/* <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : serviceQuote.formattedAmount}</Text> */}
                                 <Text>{isFetchingServiceQuote ? <ActivityIndicator /> : formatCurrency(serviceQuote.getAttribute('amount'), cart.getAttribute('currency'))}</Text>
                             </View>
                         )}
@@ -750,11 +802,11 @@ const CheckoutScreen = ({ navigation, route }) => {
                             <Text style={tailwind('text-gray-400')}>{translate('Cart.CheckoutScreen.orderTotalLabelText')}</Text>
                             <Text style={tailwind('font-bold text-base')}>{formatCurrency(calculateTotal(), cart.getAttribute('currency'))}</Text>
                         </View>
-                        <TouchableOpacity onPress={placeOrder} disabled={canPlaceOrder}>
+                        <TouchableOpacity onPress={placeOrder} disabled={!canPlaceOrder}>
                             <View
                                 style={tailwind(
                                     `flex flex-row items-center justify-center rounded-md px-8 py-2 bg-white bg-green-500 border border-green-500 ${
-                                        isLoading || canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
+                                        isLoading || !canPlaceOrder ? 'bg-opacity-50 border-opacity-50' : ''
                                     }`
                                 )}>
                                 {isLoading && <ActivityIndicator color={'rgba(6, 78, 59, .5)'} style={tailwind('mr-2')} />}
@@ -767,13 +819,6 @@ const CheckoutScreen = ({ navigation, route }) => {
                 </View>
             </View>
             <QpayPaymentSheet invoice={qpayInvoice} onPress={(bank) => openLink(bank.link, `Unable to open ${bank.name} app!`)} onReady={setQpayPaymentSheet} />
-            <StripePaymentSheet
-                onPress={(card) => {
-                    setCardDetails(card);
-                    console.log('Card', card);
-                }}
-                onReady={setStripePaymentSheet}
-            />
         </View>
     );
 };
