@@ -108,4 +108,4 @@ jobs:
               run: cd ios && pod install
 
             - name: Build iOS
-              run: npx react-native run-ios --mode Release
+              run: npx react-native run-ios
