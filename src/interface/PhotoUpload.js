@@ -32,7 +32,7 @@ const PhotoUpload = (props) => {
     };
 
     const openImagePicker = () => {
-        actionSheetRef.current?.setModalVisible();
+        actionSheetRef.current?.show();
         setDisabled(true);
 
         if (typeof props.onStart === 'function') {
@@ -80,15 +80,17 @@ const PhotoUpload = (props) => {
         }
     };
 
-    const onLaunchImageLibrary = () => launchImageLibrary(options, (response) => {
-        actionSheetRef.current?.hide();
-        onSelectPhoto(response);
-    });
+    const onLaunchImageLibrary = () =>
+        launchImageLibrary(options, (response) => {
+            actionSheetRef.current?.hide();
+            onSelectPhoto(response);
+        });
 
-    const onLaunchCamera = () => launchCamera(options, (response) => {
-        actionSheetRef.current?.hide();
-        onSelectPhoto(response);
-    });
+    const onLaunchCamera = () =>
+        launchCamera(options, (response) => {
+            actionSheetRef.current?.hide();
+            onSelectPhoto(response);
+        });
 
     return (
         <View>

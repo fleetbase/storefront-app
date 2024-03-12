@@ -15,7 +15,7 @@ export default class CalculateUtil {
      * @memberof CalculateUtil
      */
     static percentage(percentage, number) {
-        return (percentage / 100) * number;
+        return percentage * number;
     }
 
     /**

@@ -34,7 +34,11 @@ const StorefrontHeader = (props) => {
                             </View>
                         </View>
                         <View>
-                            <StoreSearch store={new Store(props.info)} onResultPress={viewProduct} buttonStyle={tailwind('flex flex-row items-center justify-start bg-gray-100 rounded-md px-3 pr-2 h-10')} />
+                            <StoreSearch
+                                store={new Store(props.info)}
+                                onResultPress={viewProduct}
+                                buttonStyle={tailwind('flex flex-row items-center justify-start bg-gray-100 rounded-md px-3 pr-2 h-10')}
+                            />
                         </View>
                     </View>
                 </ImageBackground>

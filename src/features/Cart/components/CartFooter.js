@@ -1,11 +1,11 @@
-import React from 'react';
-import { Text, View, TouchableOpacity, Switch } from 'react-native';
-import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
-import { formatCurrency, translate } from 'utils';
 import { useLocale } from 'hooks';
+import React from 'react';
+import { Switch, Text, View } from 'react-native';
 import tailwind from 'tailwind';
+import { CartSubtotalView, ServiceQuoteFeeView, TipInput, TipView } from 'ui';
+import { formatCurrency, translate } from 'utils';
 
-const capitalize = ([ first, ...rest ]) => `${first.toUpperCase()}${rest.join('')}`;
+const capitalize = ([first, ...rest]) => `${first.toUpperCase()}${rest.join('')}`;
 
 const CartFooter = (props) => {
     const { style, cart, info, serviceQuote, isFetchingServiceQuote, serviceQuoteError, tip, deliveryTip, isTipping, isTippingDriver, isPickupOrder, isCheckoutDisabled, total } = props;
@@ -88,7 +88,7 @@ const CartFooter = (props) => {
                                     </View>
                                     {isTipping && (
                                         <View style={tailwind('ml-2')}>
-                                            <TipInput value={tip} onChange={(tip, isPercent) => dispatch('setTip', (isPercent ? `${tip}%` : tip))} />
+                                            <TipInput currency={cart.getAttribute('currency')} value={tip} onChange={(tip, isPercent) => dispatch('setTip', isPercent ? `${tip}%` : tip)} />
                                         </View>
                                     )}
                                 </View>
@@ -103,7 +103,7 @@ const CartFooter = (props) => {
                                         trackColor={{ false: 'rgba(229, 231, 235, 1)', true: 'rgba(16, 185, 129, 1)' }}
                                         thumbColor={'#f4f3f4'}
                                         ios_backgroundColor="#3e3e3e"
-                                        onValueChange={() => dispatch('setIsTippingDriver', (!isTippingDriver))}
+                                        onValueChange={() => dispatch('setIsTippingDriver', !isTippingDriver)}
                                         value={isTippingDriver}
                                         style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                                     />
@@ -114,7 +114,11 @@ const CartFooter = (props) => {
                                     </View>
                                     {isTippingDriver && (
                                         <View style={tailwind('ml-2')}>
-                                            <TipInput value={deliveryTip} onChange={(tip, isPercent) => dispatch('setDeliveryTip', (isPercent ? `${tip}%` : tip))} />
+                                            <TipInput
+                                                currency={cart.getAttribute('currency')}
+                                                value={deliveryTip}
+                                                onChange={(tip, isPercent) => dispatch('setDeliveryTip', isPercent ? `${tip}%` : tip)}
+                                            />
                                         </View>
                                     )}
                                 </View>
@@ -177,7 +181,7 @@ const CartFooter = (props) => {
                         <Text style={tailwind('font-bold')}>{translate('Cart.components.CartFooter.cartTotalLabelText')}</Text>
                     </View>
                     <View>
-                        <Text style={tailwind('font-bold')}>{formatCurrency(total / 100, cart.getAttribute('currency'))}</Text>
+                        <Text style={tailwind('font-bold')}>{formatCurrency(total, cart.getAttribute('currency'))}</Text>
                     </View>
                 </View>
             </View>

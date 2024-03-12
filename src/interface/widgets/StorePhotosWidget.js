@@ -18,7 +18,7 @@ const StorePhotosWidget = ({ info, store, storeLocation, wrapperStyle, container
     };
 
     if (!store.getAttribute('media', [])) {
-        return <View />
+        return <View />;
     }
 
     return (

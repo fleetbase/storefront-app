@@ -85,7 +85,14 @@ const MapScreen = ({ navigation, route }) => {
 
     return (
         <View style={tailwind('bg-white h-full w-full')}>
-            <NetworkHeader info={info} onBack={() => navigation.goBack()} backButtonIcon={faTimes} hideSearch={true} hideCategoryPicker={true} {...config('ui.network.mapScreen.networkHeaderProps')}>
+            <NetworkHeader
+                info={info}
+                onBack={() => navigation.goBack()}
+                backButtonIcon={faTimes}
+                hideSearch={true}
+                hideCategoryPicker={true}
+                {...config('ui.network.mapScreen.networkHeaderProps')}
+            >
                 <ExploreBar
                     filterOptions={filters}
                     onFilter={(selected) => setParam('tagged', selected)}

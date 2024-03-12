@@ -1,22 +1,17 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, TextInput, Modal, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Collection, Place } from '@fleetbase/sdk';
+import { Store, StoreLocation } from '@fleetbase/storefront';
+import { faInfoCircle, faMapMarkerAlt, faStar, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapMarkerAlt, faTimes, faInfoCircle, faStar } from '@fortawesome/free-solid-svg-icons';
-import { EventRegister } from 'react-native-event-listeners';
-import { haversine, isResource, logError } from 'utils';
-import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
-import { getCoordinates, getDistance } from 'utils/Geo';
-import { formatKm } from 'utils/Format';
 import { useMountedState } from 'hooks';
 import { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
 import { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { Place, GoogleAddress, Collection } from '@fleetbase/sdk';
-import { Store, StoreLocation } from '@fleetbase/storefront';
+import React, { useCallback, useState } from 'react';
+import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
-
-// const { addEventListener, removeEventListener } = EventRegister;
-const { isArray } = Array;
+import { formatKm } from 'utils/Format';
+import { getDistance } from 'utils/Geo';
+import { useResourceCollection, useResourceStorage } from 'utils/Storage';
 
 const StorePicker = (props) => {
     const {
@@ -30,7 +25,6 @@ const StorePicker = (props) => {
         buttonTitleMaxLines,
         displayAddressForTitle,
         onStoreLocationSelected,
-        onLoaded,
         defaultStoreLocation,
         storeLocations,
     } = props;
@@ -117,41 +111,43 @@ const StorePicker = (props) => {
             </TouchableOpacity>
 
             <Modal animationType={'slide'} transparent={true} visible={isDialogOpen} onRequestClose={() => setIsDialogOpen(false)}>
-                <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
-                    <View>
+                <View style={{ flex: 1, paddingTop: Math.max(insets.top, 47) }}>
+                    <View style={[tailwind('w-full h-full bg-white')]}>
                         <DialogHeader title={info.name} subtitle={'Location and Hours'} icon={faMapMarkerAlt} onCancel={() => setIsDialogOpen(false)} />
                         <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                            {_storeLocations.map(sl => sl instanceof StoreLocation ? sl : new StoreLocation(sl)).map((storeLocation, index) => (
-                                <TouchableOpacity key={index} onPress={() => selectStoreLocation(storeLocation)}>
-                                    <View style={tailwind(`p-4 border-b border-gray-100`)}>
-                                        <View style={tailwind('flex flex-row justify-between')}>
-                                            <View style={tailwind('flex-1 pr-10')}>
-                                                <View style={tailwind('flex flex-row items-center')}>
-                                                    {isCurrentStoreLocation(storeLocation) && (
-                                                        <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-2')}>
-                                                            <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
-                                                        </View>
-                                                    )}
-                                                    <View style={[props.addressRowContainerStyle]}>
-                                                        <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>
-                                                            {storeLocation.getAttribute('name')}
-                                                        </Text>
-                                                        <Text style={tailwind('uppercase')}>
-                                                            {storeLocation.getAttribute('place.street1') ??
-                                                                storeLocation.getAttribute('place.city') ??
-                                                                storeLocation.getAttribute('place.district')}
-                                                        </Text>
-                                                        {storeLocation.hasAttribute('place.postal_code') && (
-                                                            <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>
+                            {_storeLocations
+                                .map((sl) => (sl instanceof StoreLocation ? sl : new StoreLocation(sl)))
+                                .map((storeLocation, index) => (
+                                    <TouchableOpacity key={index} onPress={() => selectStoreLocation(storeLocation)}>
+                                        <View style={tailwind(`p-4 border-b border-gray-100`)}>
+                                            <View style={tailwind('flex flex-row justify-between')}>
+                                                <View style={tailwind('flex-1 pr-10')}>
+                                                    <View style={tailwind('flex flex-row items-center')}>
+                                                        {isCurrentStoreLocation(storeLocation) && (
+                                                            <View style={tailwind('rounded-full bg-yellow-50 w-5 h-5 flex items-center justify-center mr-2')}>
+                                                                <FontAwesomeIcon size={9} icon={faStar} style={tailwind('text-yellow-900')} />
+                                                            </View>
                                                         )}
+                                                        <View style={[props.addressRowContainerStyle]}>
+                                                            <Text style={tailwind('font-semibold uppercase')} numberOfLines={1}>
+                                                                {storeLocation.getAttribute('name')}
+                                                            </Text>
+                                                            <Text style={tailwind('uppercase')}>
+                                                                {storeLocation.getAttribute('place.street1') ??
+                                                                    storeLocation.getAttribute('place.city') ??
+                                                                    storeLocation.getAttribute('place.district')}
+                                                            </Text>
+                                                            {storeLocation.hasAttribute('place.postal_code') && (
+                                                                <Text style={tailwind('uppercase')}>{storeLocation.getAttribute('place.postal_code')}</Text>
+                                                            )}
+                                                        </View>
                                                     </View>
                                                 </View>
+                                                <View>{deliverTo && <Text>{formatKm(getDistance(storeLocation, deliverTo))}</Text>}</View>
                                             </View>
-                                            <View>{deliverTo && <Text>{formatKm(getDistance(storeLocation, deliverTo))}</Text>}</View>
                                         </View>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+                                    </TouchableOpacity>
+                                ))}
                             <View style={tailwind('w-full h-44')}></View>
                         </ScrollView>
                     </View>

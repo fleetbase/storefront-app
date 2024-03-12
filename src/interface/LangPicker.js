@@ -10,7 +10,7 @@ import { activeTranslations } from 'utils/Localize';
 import ActionSheet from 'react-native-actions-sheet';
 import tailwind from 'tailwind';
 import localeEmoji from 'locale-emoji';
-import { getLangNameFromCode } from 'language-name-map'
+import { getLangNameFromCode } from 'language-name-map';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
@@ -38,7 +38,7 @@ const LangPicker = ({ title, buttonStyle, wrapperStyle, dialogIconStyle, hideBut
 
     return (
         <View style={[wrapperStyle]}>
-            <TouchableOpacity onPress={() => actionSheetRef.current?.setModalVisible()}>
+            <TouchableOpacity onPress={() => actionSheetRef.current?.show()}>
                 <View style={[tailwind(`flex flex-row items-center justify-center rounded-full px-2 py-2 bg-white bg-gray-50 border border-gray-100`), buttonStyle]}>
                     <Text>{localeEmoji(locale)}</Text>
                 </View>
@@ -50,8 +50,7 @@ const LangPicker = ({ title, buttonStyle, wrapperStyle, dialogIconStyle, hideBut
                 bounceOnOpen={true}
                 nestedScrollEnabled={true}
                 onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
+                ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>

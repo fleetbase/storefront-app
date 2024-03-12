@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, TextInput, ActivityIndicator, Platform, KeyboardAvoidingView, Pressable, Keyboard } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getUniqueId } from 'react-native-device-info';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useStorefront, useLocale, useCustomer } from 'hooks';
-import { logError, translate, config } from 'utils';
-import { getLocation } from 'utils/Geo';
-import { set, get } from 'utils/Storage';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useCustomer, useLocale, useStorefront } from 'hooks';
+import React, { useState } from 'react';
+import { ActivityIndicator, ImageBackground, Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
+import { config, logError, translate } from 'utils';
+import { getLocation } from 'utils/Geo';
+import { get } from 'utils/Storage';
 
 const LoginScreen = ({ navigation, route }) => {
     const { info, redirectTo } = route.params;
@@ -85,9 +84,8 @@ const LoginScreen = ({ navigation, route }) => {
         <ImageBackground
             source={config('ui.loginScreen.containerBackgroundImage')}
             resizeMode={config('ui.loginScreen.containerBackgroundResizeMode') ?? 'cover'}
-            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}
-        >
-            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle'), { paddingTop: insets.top }]}>
+            style={[config('ui.loginScreen.containerBackgroundImageStyle')]}>
+            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.loginScreen.containerStyle')]}>
                 <View style={[tailwind('flex flex-row items-center p-4'), config('ui.loginScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={[tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center'), config('ui.loginScreen.headerIconContainerStyle')]}>
@@ -106,9 +104,9 @@ const LoginScreen = ({ navigation, route }) => {
                             )}
                             <View style={tailwind('mb-6')}>
                                 <PhoneInput
-                                    value={phone}
-                                    onChangeText={setPhone}
-                                    defaultCountry={location?.country}
+                                    onChangeValue={setPhone}
+                                    autoFocus={true}
+                                    defaultCountryCode={location?.country || '+1'}
                                     style={config('ui.loginScreen.phoneInputStyle')}
                                     {...(config('ui.createAccountScreen.phoneInputProps') ?? {})}
                                 />
@@ -134,8 +132,7 @@ const LoginScreen = ({ navigation, route }) => {
                         <KeyboardAvoidingView
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                             keyboardVerticalOffset={140}
-                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}
-                        >
+                            style={[config('ui.loginScreen.verifyFormContainerStyle')]}>
                             {error && (
                                 <View style={tailwind('mb-8')}>
                                     <Text style={tailwind('text-lg text-red-600')}>{error}</Text>

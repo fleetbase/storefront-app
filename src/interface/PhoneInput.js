@@ -60,13 +60,13 @@ const PhoneInput = ({
     }, [input, countryCode]);
 
     return (
-        <View style={[tailwind('flex flex-row mr-2'), { height: 52 }, style]}>
-            <View style={[tailwind('form-input flex flex-row items-center px-1.5 py-1 border border-gray-100 rounded-md mr-1.5'), { height: 52 }, style]}>
+        <View style={[tailwind('flex flex-row'), { height: 52 }, style]}>
+            <View style={[tailwind('form-input flex flex-row items-center px-1.5 py-1 border border-gray-100 rounded-md mr-1.5 w-full'), { height: 52 }, style]}>
                 <TouchableOpacity onPress={() => setShow(true)} style={tailwind('bg-gray-200 rounded-lg py-1.5 px-2')}>
                     <Text style={tailwind('text-gray-900')}>{countryCode}</Text>
                 </TouchableOpacity>
                 <TextInput
-                    style={[tailwind('h-12 px-2 w-full rounded-md')]}
+                    style={[tailwind('h-12 rounded-md')]}
                     value={value}
                     onChangeText={(text) => {
                         if (typeof onChangePhone === 'function') {

@@ -1,21 +1,17 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Collection } from '@fleetbase/sdk';
-import { Store, StoreLocation, Category } from '@fleetbase/storefront';
+import { Category, Store, StoreLocation } from '@fleetbase/storefront';
+import { useLocale, useMountedState, useStorage } from 'hooks';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { NetworkInfoService } from 'services';
-import { useResourceCollection } from 'utils/Storage';
-import { config, translate, getCurrentLocation } from 'utils';
-import { useMountedState, useLocale, useStorage } from 'hooks';
-import FastImage from 'react-native-fast-image';
-import NetworkHeader from 'ui/headers/NetworkHeader';
-import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
-import ExploreBar from 'ui/ExploreBar';
-import StoreCard from 'ui/StoreCard';
-import StoreMap from 'ui/StoreMap';
 import tailwind from 'tailwind';
+import ExploreBar from 'ui/ExploreBar';
+import NetworkCategoryBlock from 'ui/NetworkCategoryBlock';
+import StoreCard from 'ui/StoreCard';
+import NetworkHeader from 'ui/headers/NetworkHeader';
+import { config, getCurrentLocation } from 'utils';
+import { useResourceCollection } from 'utils/Storage';
 
 const ExploreScreen = ({ navigation, route }) => {
     const { info } = route.params;
@@ -123,8 +119,7 @@ const ExploreScreen = ({ navigation, route }) => {
                 showsVerticalScrollIndicator={false}
                 refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
                 stickyHeaderIndices={[1]}
-                style={tailwind('w-full h-full')}
-            >
+                style={tailwind('w-full h-full')}>
                 <View style={tailwind('py-2 px-4')}>
                     <NetworkCategoryBlock
                         containerStyle={tailwind('mb-2 p-2')}

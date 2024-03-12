@@ -76,9 +76,8 @@ const CreateAccountScreen = ({ navigation, route }) => {
         <ImageBackground
             source={config('ui.createAccountScreen.containerBackgroundImage')}
             resizeMode={config('ui.createAccountScreen.containerBackgroundResizeMode') ?? 'cover'}
-            style={[config('ui.createAccountScreen.containerBackgroundImageStyle')]}
-        >
-            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.createAccountScreen.containerStyle'), { paddingTop: insets.top }]}>
+            style={[config('ui.createAccountScreen.containerBackgroundImageStyle')]}>
+            <View style={[tailwind('w-full h-full bg-white relative'), config('ui.createAccountScreen.containerStyle')]}>
                 <View style={[tailwind('flex flex-row items-center p-4'), config('ui.createAccountScreen.headerContainerStyle')]}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                         <View style={[tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center'), config('ui.createAccountScreen.headerIconContainerStyle')]}>
@@ -89,7 +88,10 @@ const CreateAccountScreen = ({ navigation, route }) => {
                 </View>
                 <Pressable onPress={Keyboard.dismiss} style={[tailwind('px-4 py-6'), config('ui.createAccountScreen.contentContainerStyle')]}>
                     {isNotAwaitingVerification && (
-                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={160} style={[config('ui.createAccountScreen.createAccountFormContainerStyle')]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            keyboardVerticalOffset={160}
+                            style={[config('ui.createAccountScreen.createAccountFormContainerStyle')]}>
                             <View style={[tailwind('mb-8'), config('ui.createAccountScreen.greetingContainerStyle')]}>
                                 <Text style={[tailwind('text-lg text-gray-600'), config('ui.createAccountScreen.greetingLine1TextStyle')]}>
                                     {translate('Auth.CreateAccountScreen.greetingTitle', { infoName: info.name })}
@@ -117,8 +119,7 @@ const CreateAccountScreen = ({ navigation, route }) => {
                                 </View>
                                 <View style={tailwind('mb-6')}>
                                     <PhoneInput
-                                        value={phone}
-                                        onChangeText={setPhone}
+                                        onChangeValue={setPhone}
                                         defaultCountry={location?.country}
                                         disabled={isAwaitingVerification}
                                         style={config('ui.createAccountScreen.phoneInputStyle')}
@@ -137,7 +138,10 @@ const CreateAccountScreen = ({ navigation, route }) => {
                         </KeyboardAvoidingView>
                     )}
                     {isAwaitingVerification && (
-                        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={80} style={[config('ui.createAccountScreen.verifyFormContainerStyle')]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            keyboardVerticalOffset={80}
+                            style={[config('ui.createAccountScreen.verifyFormContainerStyle')]}>
                             <View style={[tailwind('mb-8'), config('ui.createAccountScreen.greetingContainerStyle')]}>
                                 <Text style={[tailwind('text-lg text-green-700'), config('ui.createAccountScreen.greetingLine1TextStyle')]}>
                                     {translate('Auth.CreateAccountScreen.awaitingVerificationTitle', { name })}

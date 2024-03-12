@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Pressable, Keyboard } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EventRegister } from 'react-native-event-listeners';
+import { Collection, Order } from '@fleetbase/sdk';
+import { faArrowLeft, faBox, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faBox, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { Customer } from '@fleetbase/storefront';
-import { Order, Collection } from '@fleetbase/sdk';
-import { useStorefront, useCustomer, useLocale, useMountedState } from 'hooks';
-import { adapter } from 'hooks/use-fleetbase';
-import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
-import { logError, translate, getColorCode, debounce } from 'utils';
 import { format } from 'date-fns';
+import { useCustomer, useLocale, useMountedState, useStorefront, useFleetbase } from 'hooks';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import OrderStatusBadge from 'ui/OrderStatusBadge';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
+import OrderStatusBadge from 'ui/OrderStatusBadge';
+import { debounce, getColorCode, logError, translate } from 'utils';
+import { useResourceCollection } from 'utils/Storage';
 
 const OrderHistoryScreen = ({ navigation, route }) => {
     const { useLeftArrow, info } = route.params;
@@ -23,14 +20,13 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     const isMounted = useMountedState();
     const isNetwork = info.is_network === true;
 
-    const [orders, setOrders] = useResourceCollection('order', Order, adapter, new Collection());
+    const [orders, setOrders] = useResourceCollection('order', Order, storefront.getAdapter(), new Collection());
     const [customer, setCustomer] = useCustomer();
     const [locale, setLocale] = useLocale();
     const [query, setQuery] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isQuerying, setIsQuerying] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
-    
 
     const pushOrders = (orders = []) => {
         setOrders(orders);
@@ -53,7 +49,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                 }
 
                 return customer
-                    .getOrderHistory({ query, sort: '-created_at', limit: -1, ...params })
+                    .getOrderHistory({ query, sort: 'created_at', limit: 25, ...params })
                     .then(pushOrders)
                     .then(resolve)
                     .catch(logError)
@@ -85,7 +81,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     }, [query]);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white')]}>
             <FlatList
                 data={orders}
                 onRefresh={() => fetchOrders({ isLoading: true })}
@@ -119,7 +115,6 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                                 placeholder={'Search orders'}
                                 placeholderTextColor={getColorCode('text-gray-600')}
                                 autoCapitalize={'none'}
-                                autoComplete={false}
                                 autoCorrect={false}
                                 clearButtonMode={'while-editing'}
                             />

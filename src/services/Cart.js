@@ -1,6 +1,5 @@
-import { getUniqueId } from 'react-native-device-info';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { isResource } from 'utils';
+import { getUniqueId } from 'react-native-device-info';
 
 /**
  * Wrapper for storefront calls from the current Store instance.
@@ -27,9 +26,10 @@ export default class CartService {
      * @return {Promise}
      * @memberof CartService
      */
-    static get() {
+    static async get() {
         const storefront = useStorefront();
 
-        return storefront.cart.retrieve(getUniqueId());
+        const cartId = await getUniqueId();
+        return storefront.cart.retrieve(cartId);
     }
 }

@@ -16,8 +16,12 @@ const CartHeader = ({ style, wrapperStyle, cart, storeCount, onPressAddMore, onE
             <View style={[tailwind('px-4 py-2 bg-white mb-2'), style]}>
                 <View style={tailwind('flex flex-row items-start justify-between')}>
                     <View style={tailwind('flex-1')}>
-                        <Text style={tailwind(`text-lg font-bold ${storeCount ? '' : 'mb-2'}`)}>{translate('Cart.components.CartHeader.title', { cartItemsCount: cart.getAttribute('total_items') })}</Text>
-                        {storeCount > 0 && <Text style={tailwind('text-sm text-gray-400 font-bold mb-2')}>{translate('Cart.components.CartHeader.multiCartVendorsSubtitle', { storeCount })}</Text>}
+                        <Text style={tailwind(`text-lg font-bold ${storeCount ? '' : 'mb-2'}`)}>
+                            {translate('Cart.components.CartHeader.title', { cartItemsCount: cart.getAttribute('total_items') })}
+                        </Text>
+                        {storeCount > 0 && (
+                            <Text style={tailwind('text-sm text-gray-400 font-bold mb-2')}>{translate('Cart.components.CartHeader.multiCartVendorsSubtitle', { storeCount })}</Text>
+                        )}
                         {cart.isNotEmpty && (
                             <TouchableOpacity style={tailwind('mb-2')} onPress={onEmptyCart}>
                                 <Text style={tailwind('underline text-red-400 text-sm font-semibold')}>{translate('Cart.components.CartHeader.removeAllItemsButtonText')}</Text>

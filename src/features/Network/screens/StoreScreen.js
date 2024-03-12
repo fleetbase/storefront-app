@@ -1,41 +1,25 @@
-import React, { useState, useCallback, useEffect, createRef } from 'react';
-import { SafeAreaView, ScrollView, RefreshControl, View, Text, TextInput, Image, ImageBackground, TouchableOpacity, ActivityIndicator, Dimensions, Linking } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import {
-    faBars,
-    faMapMarkerAlt,
-    faShare,
-    faImages,
-    faStar,
-    faMapMarkedAlt,
-    faExternalLinkAlt,
-    faPhone,
-    faSearch,
-    faTimes,
-    faArrowLeft,
-    faArrowRight,
-} from '@fortawesome/free-solid-svg-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { format } from 'date-fns';
 import { Collection } from '@fleetbase/sdk';
-import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
+import { Category, Product, Store, StoreLocation } from '@fleetbase/storefront';
+import { faArrowLeft, faArrowRight, faExternalLinkAlt, faImages, faMapMarkedAlt, faMapMarkerAlt, faPhone, faShare, faStar, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useLocale, useMountedState } from 'hooks';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState, useLocale } from 'hooks';
-import { NetworkInfoService } from 'services';
-import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { formatCurrency, logError, translate, config, isResource } from 'utils';
-import FastImage from 'react-native-fast-image';
-import Share from 'react-native-share';
+import React, { createRef, useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ImageBackground, Linking, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
-import NetworkHeader from 'ui/headers/NetworkHeader';
-import CategoryProductSlider from 'ui/CategoryProductSlider';
-import StoreCategoryPicker from 'ui/StoreCategoryPicker';
-import StoreSearch from 'ui/StoreSearch';
-import ProductCard from 'ui/ProductCard';
-import StorePicker from 'ui/StorePicker';
-import Rating from 'ui/Rating';
-import { StoreMapWidget, StoreInfoWidget, StorePhotosWidget, StoreRelatedWidget, StoreReviewsWidget } from 'ui/widgets';
+import FastImage from 'react-native-fast-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Share from 'react-native-share';
 import tailwind from 'tailwind';
+import ProductCard from 'ui/ProductCard';
+import Rating from 'ui/Rating';
+import StoreCategoryPicker from 'ui/StoreCategoryPicker';
+import StorePicker from 'ui/StorePicker';
+import StoreSearch from 'ui/StoreSearch';
+import NetworkHeader from 'ui/headers/NetworkHeader';
+import { StoreInfoWidget, StoreMapWidget, StorePhotosWidget, StoreRelatedWidget, StoreReviewsWidget } from 'ui/widgets';
+import { config, logError, translate } from 'utils';
+import { useResourceCollection, useResourceStorage } from 'utils/Storage';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 2;
@@ -106,6 +90,7 @@ const StoreScreen = ({ navigation, route }) => {
     const toggleHours = () => setIsHoursVisible(!isHoursVisible);
 
     const transitionToCategory = useCallback((category, actionSheet) => {
+        console.log('transitionToCategory', category, actionSheet);
         navigation.navigate('CategoryScreen', { attributes: category.serialize(), storeData: data });
         actionSheet?.hide();
     });
@@ -137,7 +122,7 @@ const StoreScreen = ({ navigation, route }) => {
     });
 
     const contactStore = useCallback(() => {
-        contactActionSheetRef.current?.setModalVisible();
+        contactActionSheetRef.current?.show();
     });
 
     const visitStoreWebsite = useCallback(() => {
@@ -265,8 +250,7 @@ const StoreScreen = ({ navigation, route }) => {
                         <View style={tailwind('w-1/4 flex items-center justify-center py-2')}>
                             <TouchableOpacity
                                 onPress={() => navigation.navigate('StoreLocationScreen', { data: store.serialize(), locationData: storeLocation.serialize() })}
-                                style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}
-                            >
+                                style={tailwind('rounded-md bg-gray-200 p-3 w-20 flex flex-col items-center justify-center')}>
                                 <FontAwesomeIcon icon={faMapMarkedAlt} size={20} style={tailwind('text-gray-600 mb-2')} />
                                 <Text style={tailwind('text-xs')} numberOfLines={1}>
                                     {translate('Network.StoreScreen.mapButtonText')}
@@ -344,8 +328,7 @@ const StoreScreen = ({ navigation, route }) => {
             bounceOnOpen={true}
             nestedScrollEnabled={true}
             onMomentumScrollEnd={() => contactActionSheetRef.current?.handleChildScrollEnd()}
-            ref={contactActionSheetRef}
-        >
+            ref={contactActionSheetRef}>
             <View>
                 <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                     <View style={tailwind('flex flex-row items-center')}>
@@ -366,8 +349,7 @@ const StoreScreen = ({ navigation, route }) => {
                         {store.isAttributeFilled('phone') && (
                             <TouchableOpacity
                                 onPress={() => Linking.openURL(`tel:${store.getAttribute('phone')}`)}
-                                style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}
-                            >
+                                style={tailwind('flex flex-row items-center p-4 rounded-md mb-4 bg-gray-100')}>
                                 <Text style={tailwind('text-base font-semibold')}>
                                     {translate('Network.StoreScreen.contactActionSheetCallActionButtonText', { phone: store.getAttribute('phone') })}
                                 </Text>
@@ -412,7 +394,7 @@ const StoreScreen = ({ navigation, route }) => {
             <View style={tailwind('bg-gray-900 bg-opacity-50')}>
                 <NetworkHeader
                     style={tailwind('absolute top-0 w-full bg-gray-900 bg-opacity-25 z-20')}
-                    wrapperStyle={[tailwind('border-b-0 pb-2')]}
+                    wrapperStyle={[tailwind('border-b-0 py-2')]}
                     backButtonIcon={backButtonIcon}
                     backButtonStyle={tailwind('bg-opacity-50 bg-gray-900')}
                     backButtonIconStyle={tailwind('text-gray-50')}
@@ -425,8 +407,7 @@ const StoreScreen = ({ navigation, route }) => {
                 <ScrollView
                     showsHorizontalScrollIndicator={false}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadCategories(true)} />}
-                >
+                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => loadCategories(true)} />}>
                     <StoreHeader store={store} wrapperStyle={tailwind('bg-transparent pt-28')} />
                     <View style={tailwind('w-full h-full min-h-80 bg-gray-100')}>
                         {shouldDisplayLoader && (
@@ -445,7 +426,7 @@ const StoreScreen = ({ navigation, route }) => {
                             />
                         )}
                         {isInfoWidgetEnabled && <StoreInfoWidget wrapperStyle={tailwind('my-2')} info={info} store={store} storeLocation={storeLocation} />}
-                        {isPhotosWidgetEnabled && store.getAttribute('media', []).length > 0 && (
+                        {isPhotosWidgetEnabled && store.getAttribute('media', [])?.length > 0 && (
                             <StorePhotosWidget
                                 wrapperStyle={tailwind('my-2')}
                                 info={info}
@@ -460,6 +441,7 @@ const StoreScreen = ({ navigation, route }) => {
                                 wrapperStyle={tailwind('my-2')}
                                 info={info}
                                 store={store}
+                                listVisible={true}
                                 storeLocation={storeLocation}
                                 onStartReviewPress={() => navigation.navigate('WriteReviewScreen', { subjectData: store.serialize(), subjectType: 'store' })}
                             />

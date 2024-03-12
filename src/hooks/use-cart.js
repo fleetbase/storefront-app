@@ -12,7 +12,7 @@ const useCart = () => {
     const setCart = (cart) => {
         if (typeof cart?.serialize === 'function') {
             emit('cart.updated', cart);
-            
+
             return setValue(cart.serialize());
         }
 

@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground, TextInput, TouchableOpacity, Modal, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapMarkerAlt, faTimes, faInfoCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useNavigation } from '@react-navigation/native';
 import { Collection } from '@fleetbase/sdk';
-import { Network, Category } from '@fleetbase/storefront';
-import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useResourceCollection } from 'utils/Storage';
+import { Category, Network } from '@fleetbase/storefront';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useNavigation } from '@react-navigation/native';
 import { useLocale, useMountedState } from 'hooks';
+import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import React, { useState } from 'react';
+import { ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import tailwind from 'tailwind';
 import { config, translate } from 'utils';
-import LocationPicker from '../LocationPicker';
+import { useResourceCollection } from 'utils/Storage';
+import { truncateString } from '../../utils';
 import LangPicker from '../LangPicker';
-import StorePicker from '../StorePicker';
+import LocationPicker from '../LocationPicker';
 import NetworkSearch from '../NetworkSearch';
 import StoreCategoryPicker from '../StoreCategoryPicker';
-import tailwind from 'tailwind';
 
 const NetworkHeader = (props) => {
     let {
@@ -60,19 +60,18 @@ const NetworkHeader = (props) => {
         <ImageBackground
             source={backgroundImage ?? config('ui.headerComponent.backgroundImage')}
             resizeMode={backgroundImageResizeMode ?? config('ui.headerComponent.backgroundImageResizeMode')}
-            style={[tailwind('z-50'), { paddingTop: insets.top }, props.style, backgroundImageStyle ?? config('ui.headerComponent.backgroundImageStyle')]}
-        >
+            style={[tailwind('z-50'), { paddingTop: insets.top }, props.style, backgroundImageStyle ?? config('ui.headerComponent.backgroundImageStyle')]}>
             <View style={[tailwind('border-b border-gray-100'), props.wrapperStyle, config('ui.headerComponent.containerStyle')]}>
-                <View style={[tailwind('flex flex-row items-center justify-between px-4 py-1 overflow-hidden'), props.innerStyle]}>
+                <View style={[tailwind('flex flex-row items-center justify-between px-2 py-1 overflow-hidden'), props.innerStyle]}>
                     <View style={tailwind('flex flex-row items-center')}>
                         {onBack && (
-                            <TouchableOpacity style={tailwind('mr-2')} onPress={onBack}>
+                            <TouchableOpacity style={tailwind('mr-0')} onPress={onBack}>
                                 <View style={[tailwind('rounded-full bg-gray-50 w-8 h-8 flex items-center justify-center'), props.backButtonStyle ?? {}]}>
                                     <FontAwesomeIcon icon={backButtonIcon ?? faArrowLeft} style={[tailwind('text-gray-900'), props.backButtonIconStyle ?? {}]} />
                                 </View>
                             </TouchableOpacity>
                         )}
-                        {shouldDisplayLogoText && <Text style={[tailwind('font-bold text-lg'), props.logoStyle ?? {}]}>{props.info.name}</Text>}
+                        {shouldDisplayLogoText && <Text style={[tailwind('font-bold text-lg pl-1'), props.logoStyle ?? {}]}>{truncateString(props.info.name, onBack ? 20 : 40)}</Text>}
                     </View>
                     <View style={tailwind('flex flex-row')}>
                         {config('ui.headerComponent.displayLocalePicker') === true && config('app.enableTranslations') === true && (

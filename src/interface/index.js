@@ -25,5 +25,5 @@ export {
     ProductPriceView,
     LangPicker,
     ExploreBar,
-    OrderStatusBadge
-}
+    OrderStatusBadge,
+};

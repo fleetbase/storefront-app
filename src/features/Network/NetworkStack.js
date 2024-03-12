@@ -41,14 +41,14 @@ const StoreScreenStack = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <StoreStack.Navigator mode="modal">
-            <StoreStack.Screen name="StoreScreen" component={StoreScreen} options={{ headerShown: false }} initialParams={route.params} />
-            <StoreStack.Screen name="StoreLocationScreen" component={StoreLocationScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <StoreStack.Screen name="StorePhotosScreen" component={StorePhotosScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <StoreStack.Screen name="StoreReviewsScreen" component={StoreReviewsScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <StoreStack.Screen name="WriteReviewScreen" component={WriteReviewScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <StoreStack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <StoreStack.Screen name="CreateAccountScreen" component={CreateAccountScreen} options={{ headerShown: false }} initialParams={{ info }} />
+        <StoreStack.Navigator screenOptions={{ presentation: 'modal', headerShown: false }}>
+            <StoreStack.Screen name="StoreScreen" component={StoreScreen} initialParams={route.params} />
+            <StoreStack.Screen name="StoreLocationScreen" component={StoreLocationScreen} initialParams={{ info }} />
+            <StoreStack.Screen name="StorePhotosScreen" component={StorePhotosScreen} initialParams={{ info }} />
+            <StoreStack.Screen name="StoreReviewsScreen" component={StoreReviewsScreen} initialParams={{ info }} />
+            <StoreStack.Screen name="WriteReviewScreen" component={WriteReviewScreen} initialParams={{ info }} />
+            <StoreStack.Screen name="LoginScreen" component={LoginScreen} initialParams={{ info }} />
+            <StoreStack.Screen name="CreateAccountScreen" component={CreateAccountScreen} initialParams={{ info }} />
         </StoreStack.Navigator>
     );
 };
@@ -57,9 +57,9 @@ const MapViewStack = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <MapStack.Navigator mode="modal">
-            <MapStack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} initialParams={route.params} />
-            <MapStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
+        <MapStack.Navigator screenOptions={{ presentation: 'modal', headerShown: false }}>
+            <MapStack.Screen name="MapScreen" component={MapScreen} initialParams={route.params} />
+            <MapStack.Screen name="StoreScreen" component={StoreScreenStack} initialParams={{ info }} />
         </MapStack.Navigator>
     );
 };
@@ -68,13 +68,13 @@ const BootScreen = ({ route }) => {
     const { info } = route.params;
 
     return (
-        <MainStack.Navigator>
-            <MainStack.Screen name="ExploreScreen" component={ExploreScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="NetworkCategoryScreen" component={NetworkCategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="StoreScreen" component={StoreScreenStack} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="MapScreen" component={MapViewStack} options={{ headerShown: false, ...verticalAnimation }} initialParams={{ info }} />
-            <MainStack.Screen name="CategoryScreen" component={CategoryScreen} options={{ headerShown: false }} initialParams={{ info }} />
-            <MainStack.Screen name="ProductScreen" component={ProductScreen} options={{ headerShown: false }} initialParams={{ info }} />
+        <MainStack.Navigator screenOptions={{ headerShown: false }}>
+            <MainStack.Screen name="ExploreScreen" component={ExploreScreen} initialParams={{ info }} />
+            <MainStack.Screen name="NetworkCategoryScreen" component={NetworkCategoryScreen} initialParams={{ info }} />
+            <MainStack.Screen name="StoreScreen" component={StoreScreenStack} initialParams={{ info }} />
+            <MainStack.Screen name="MapScreen" component={MapViewStack} options={{ ...verticalAnimation }} initialParams={{ info }} />
+            <MainStack.Screen name="CategoryScreen" component={CategoryScreen} initialParams={{ info }} />
+            <MainStack.Screen name="ProductScreen" component={ProductScreen} initialParams={{ info }} />
         </MainStack.Navigator>
     );
 };
@@ -84,8 +84,8 @@ const NetworkStack = ({ route }) => {
 
     return (
         <SafeAreaProvider>
-            <RootStack.Navigator>
-                <RootStack.Screen name="NetworkStack" component={BootScreen} options={{ headerShown: false }} initialParams={{ info }} />
+            <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                <RootStack.Screen name="NetworkStack" component={BootScreen} initialParams={{ info }} />
             </RootStack.Navigator>
         </SafeAreaProvider>
     );

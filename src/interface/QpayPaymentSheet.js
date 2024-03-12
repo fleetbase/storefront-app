@@ -1,22 +1,18 @@
-import React, { useState, useEffect, useRef, createRef } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, TextInput, ActivityIndicator, Dimensions, Modal, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { isResource, logError, mutatePlaces, translate } from 'utils';
-import { useLocale, useMountedState } from 'hooks'; 
-import FastImage from 'react-native-fast-image';
+import { useLocale, useMountedState } from 'hooks';
+import React, { createRef, useEffect } from 'react';
+import { Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
+import FastImage from 'react-native-fast-image';
 import tailwind from 'tailwind';
 
 const windowHeight = Dimensions.get('window').height;
 const dialogHeight = windowHeight / 1.2;
 
 const QpayPaymentSheet = ({ invoice, title, wrapperStyle, onReady, onPress }) => {
-
     const actionSheetRef = createRef();
     const isMounted = useMountedState();
-    const [locale] = useLocale();
 
     const pressHandler = (bank) => {
         if (typeof onPress === 'function') {
@@ -24,7 +20,7 @@ const QpayPaymentSheet = ({ invoice, title, wrapperStyle, onReady, onPress }) =>
         }
 
         actionSheetRef?.current?.hide();
-    }
+    };
 
     useEffect(() => {
         if (typeof onReady === 'function') {
@@ -40,8 +36,7 @@ const QpayPaymentSheet = ({ invoice, title, wrapperStyle, onReady, onPress }) =>
                 bounceOnOpen={true}
                 nestedScrollEnabled={true}
                 onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
+                ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>
@@ -65,7 +60,9 @@ const QpayPaymentSheet = ({ invoice, title, wrapperStyle, onReady, onPress }) =>
                                             <FastImage source={{ uri: bank.logo }} style={tailwind('w-10 h-10')} />
                                         </View>
                                         <View>
-                                            <Text style={tailwind('font-semibold')} numberOfLines={1}>{bank.name}</Text>
+                                            <Text style={tailwind('font-semibold')} numberOfLines={1}>
+                                                {bank.name}
+                                            </Text>
                                             <Text numberOfLines={1}>{bank.description}</Text>
                                         </View>
                                     </View>

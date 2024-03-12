@@ -1,29 +1,26 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import { View, ScrollView, FlatList, Text, TouchableOpacity, Image, ImageBackground, ActivityIndicator, Switch } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { SwipeListView } from 'react-native-swipe-list-view';
-import { EventRegister } from 'react-native-event-listeners';
-import { getUniqueId } from 'react-native-device-info';
+import { Collection, Place } from '@fleetbase/sdk';
+import { Cart, DeliveryServiceQuote, Store, StoreLocation } from '@fleetbase/storefront';
+import { faCalendarCheck, faPencilAlt, faShoppingCart, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faShoppingCart, faTrash, faPencilAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
-import { Cart, Store, StoreLocation, DeliveryServiceQuote } from '@fleetbase/storefront';
-import { Place, ServiceQuote, Point, Collection } from '@fleetbase/sdk';
-import { calculatePercentage } from 'utils/Calculate';
-import { useResourceStorage, useResourceCollection } from 'utils/Storage';
-import { formatCurrency, isLastIndex, stripHtml, logError, translate, config } from 'utils';
-import { NetworkInfoService } from 'services';
-import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useCart, useMountedState, useLocale } from 'hooks';
-import { TipInput, CartTotalView, CartSubtotalView, ServiceQuoteFeeView, TipView } from 'ui';
+import { useFocusEffect } from '@react-navigation/native';
 import { format } from 'date-fns';
+import { useCart, useLocale, useMountedState } from 'hooks';
+import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
+import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { getUniqueId } from 'react-native-device-info';
+import { EventRegister } from 'react-native-event-listeners';
 import FastImage from 'react-native-fast-image';
-import StorefrontHeader from 'ui/headers/StorefrontHeader';
-import NetworkHeader from 'ui/headers/NetworkHeader';
-import CartCheckoutPanel from '../components/CartCheckoutPanel';
-import CartHeader from '../components/CartHeader';
-import CartFooter from '../components/CartFooter';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import tailwind from 'tailwind';
+import { formatCurrency, isLastIndex, logError, stripHtml, translate } from 'utils';
+import { calculatePercentage } from 'utils/Calculate';
+import { useResourceCollection, useResourceStorage } from 'utils/Storage';
+import CartCheckoutPanel from '../components/CartCheckoutPanel';
+import CartFooter from '../components/CartFooter';
+import CartHeader from '../components/CartHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { emit, addEventListener, removeEventListener } = EventRegister;
 const { isArray } = Array;
@@ -34,16 +31,6 @@ const invoke = (fn, ...params) => {
     }
 
     return null;
-};
-
-const RenderHeader = ({ info, hideCategoryPicker = true }) => {
-    if (info.is_store) {
-        return <StorefrontHeader info={info} />;
-    }
-
-    if (info.is_network) {
-        return <NetworkHeader info={info} hideCategoryPicker={hideCategoryPicker} style={tailwind('bg-white')} {...config('ui.cart.cartScreen.networkHeaderProps')} />;
-    }
 };
 
 const RenderCartReloadView = ({ isLoading, isEmptying, onRefresh }) => (
@@ -99,8 +86,7 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
         style={[
             tailwind(`${isLastIndex(cart.contents(), index) ? '' : 'border-b'} border-gray-100 p-4 bg-white`),
             { height: typeof calculateCartItemRowHeight === 'function' ? calculateCartItemRowHeight(item) : 200 },
-        ]}
-    >
+        ]}>
         <View style={tailwind('flex flex-1 flex-row justify-between')}>
             <View style={tailwind('flex flex-row items-start')}>
                 <View>
@@ -152,11 +138,11 @@ const RenderCartItem = ({ item, index, cart, onEditCartItem, calculateCartItemRo
                 </View>
             </View>
             <View style={tailwind('flex items-end')}>
-                <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal / 100, cart.getAttribute('currency'))}</Text>
+                <Text style={tailwind('font-semibold text-sm')}>{formatCurrency(item.subtotal, cart.getAttribute('currency'))}</Text>
                 {item.quantity > 1 && (
                     <View>
                         <Text numberOfLines={1} style={tailwind('text-gray-400 text-sm')}>
-                            {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity / 100, cart.getAttribute('currency')) })}
+                            {translate('Cart.CartScreen.quantityExplenation', { cost: formatCurrency(item.subtotal / item.quantity, cart.getAttribute('currency')) })}
                         </Text>
                     </View>
                 )}
@@ -170,6 +156,7 @@ const CartScreen = ({ navigation, route }) => {
     const fleetbase = useFleetbase();
     const isMounted = useMountedState();
     const [locale] = useLocale();
+    const insets = useSafeAreaInsets();
 
     const { info, data } = route.params;
     const isNetwork = info.is_network === true;
@@ -251,7 +238,7 @@ const CartScreen = ({ navigation, route }) => {
             customerLocation = customerLocation?.coordinates;
         }
 
-        if (!cart || !cart instanceof Cart || (!isNetwork && (!storeLocation || !storeLocation instanceof StoreLocation)) || !customerLocation) {
+        if (!cart || (!cart) instanceof Cart || (!isNetwork && (!storeLocation || (!storeLocation) instanceof StoreLocation)) || !customerLocation) {
             return;
         }
 
@@ -259,7 +246,7 @@ const CartScreen = ({ navigation, route }) => {
         setServiceQuoteError(false);
 
         quote
-            .fromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
+            .fetchServiceQuotesFromCart(isNetwork ? networkStoreLocations : storeLocation, customerLocation, cart)
             .then((serviceQuote) => {
                 setServiceQuote(serviceQuote);
                 setIsFetchingServiceQuote(false);
@@ -335,27 +322,18 @@ const CartScreen = ({ navigation, route }) => {
             });
         }
 
-        return navigation.navigate('CartItemScreen', { attributes: product.serialize(), selectedStoreLocation: storeLocation?.serialize(), cartItemAttributes: cartItem, store: store?.serialize() });
+        return navigation.navigate('CartItemScreen', {
+            attributes: product.serialize(),
+            selectedStoreLocation: storeLocation?.serialize(),
+            cartItemAttributes: cartItem,
+            store: store?.serialize(),
+        });
     });
 
-    const preloadCartItems = useCallback(async (cart) => {
-        const contents = cart.contents();
-
-        for (let i = 0; i < contents.length; i++) {
-            const cartItem = contents[i];
-            const product = await storefront.products.findRecord(cartItem.product_id);
-
-            if (product) {
-                products[product.id] = product;
-            }
-        }
-
-        setProducts(products);
-    });
-
-    const getCart = useCallback(() => {
+    const getCart = useCallback(async () => {
+        const cartId = await getUniqueId();
         return storefront.cart
-            .retrieve(getUniqueId())
+            .retrieve(cartId)
             .then((cart) => {
                 if (cart instanceof Cart) {
                     setCart(cart);
@@ -480,8 +458,7 @@ const CartScreen = ({ navigation, route }) => {
     );
 
     return (
-        <View style={tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`)}>
-            <RenderHeader info={info} hideCategoryPicker={true} />
+        <View style={[tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`), { marginTop: insets.top }]}>
             <CartCheckoutPanel
                 cart={cart}
                 total={calculateTotal()}
@@ -501,8 +478,10 @@ const CartScreen = ({ navigation, route }) => {
                     style={tailwind(`h-full ${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                     onRefresh={refreshCart}
                     refreshing={isLoading}
-                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
-                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
+                    renderItem={({ item, index }) => (
+                        <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />
+                    )}
+                    renderHiddenItem={({ item, index }) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
                     rightOpenValue={-256}
                     stopRightSwipe={-256}
                     disableRightSwipe={true}
@@ -539,8 +518,6 @@ const CartScreen = ({ navigation, route }) => {
                     showsVerticalScrollIndicator={false}
                     scrollEnabled={flatListScrollEnabled}
                     renderItem={({ item }) => {
-                        const contents = cart.contents().filter((cartItem) => cartItem.store_id === item.id);
-
                         return (
                             <View key={item.id}>
                                 <View style={tailwind('flex px-4 py-2 bg-gray-100')}>
@@ -556,12 +533,16 @@ const CartScreen = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 </View>
                                 <SwipeListView
-                                    data={contents}
+                                    data={cart.contents()}
                                     keyExtractor={(item) => item.id}
                                     style={tailwind(`${isLoading || isEmptying ? 'opacity-50' : ''}`)}
                                     refreshing={isLoading}
-                                    renderItem={({ item, index }) => <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />}
-                                    renderHiddenItem={({item, index}) => <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />}
+                                    renderItem={({ item, index }) => (
+                                        <RenderCartItem item={item} index={index} cart={cart} onEditCartItem={editCartItem} calculateCartItemRowHeight={calculateCartItemRowHeight} />
+                                    )}
+                                    renderHiddenItem={({ item, index }) => (
+                                        <RenderCartItemActions item={item} index={index} onRemoveFromCart={removeFromCart} onEditCartItem={editCartItem} />
+                                    )}
                                     rightOpenValue={-256}
                                     stopRightSwipe={-256}
                                     disableRightSwipe={true}

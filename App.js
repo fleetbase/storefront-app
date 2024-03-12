@@ -5,15 +5,16 @@
  * @flow strict-local
  */
 
-import 'react-native-gesture-handler';
-import React from 'react';
-import type { Node } from 'react';
-import { Platform, Text, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
+import type { Node } from 'react';
+import React from 'react';
+import { ActivityIndicator, LogBox, Platform, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import tailwind from 'tailwind';
 import CoreStack from './src/features/Core/CoreStack';
 import { config } from './src/utils';
-import tailwind from 'tailwind';
 
 const isAndroid = Platform.OS === 'android';
 const Stack = createStackNavigator();
@@ -28,21 +29,25 @@ const linking = {
 };
 
 const App: () => Node = () => {
+    LogBox.ignoreLogs(['RCTUIManager.measureLayoutRelativeToParent']);
+
     return (
-        <NavigationContainer
-            linking={linking}
-            fallback={
-                <View style={tailwind('bg-white flex items-center justify-center w-full h-full')}>
-                    <View style={tailwind('flex items-center justify-center')}>
-                        <ActivityIndicator style={tailwind('mb-4')} />
-                        <Text style={tailwind('text-gray-700')}>Loading...</Text>
+        <SafeAreaProvider>
+            <NavigationContainer
+                linking={linking}
+                fallback={
+                    <View style={tailwind('bg-white flex items-center justify-center w-full h-full')}>
+                        <View style={tailwind('flex items-center justify-center')}>
+                            <ActivityIndicator style={tailwind('mb-4')} />
+                            <Text style={tailwind('text-gray-700')}>Loading...</Text>
+                        </View>
                     </View>
-                </View>
-            }>
-            <Stack.Navigator>
-                <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
-            </Stack.Navigator>
-        </NavigationContainer>
+                }>
+                <Stack.Navigator>
+                    <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </SafeAreaProvider>
     );
 };
 

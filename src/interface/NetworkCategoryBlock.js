@@ -30,13 +30,13 @@ const NetworkCategoryBlock = (props) => {
         const fn = props[actionName];
 
         if (actionName === 'onPressMore') {
-            actionSheetRef.current?.setModalVisible();
+            actionSheetRef.current?.show();
         }
 
-        if (typeof fn  === 'function') {
+        if (typeof fn === 'function') {
             fn(...params);
         }
-    }
+    };
 
     const stopLoading = () => setIsLoading(false);
 
@@ -93,8 +93,7 @@ const NetworkCategoryBlock = (props) => {
                 bounceOnOpen={true}
                 nestedScrollEnabled={true}
                 onMomentumScrollEnd={() => actionSheetRef.current?.handleChildScrollEnd()}
-                ref={actionSheetRef}
-            >
+                ref={actionSheetRef}>
                 <View>
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between mb-2')}>
                         <View style={tailwind('flex flex-row items-center')}>

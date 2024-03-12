@@ -24,11 +24,11 @@ const StoreRelatedWidget = ({ info, store, storeLocation, wrapperStyle, containe
     const params = {
         tagged: keyword,
         limit: 5,
-        exclude: [store.id]
+        exclude: [store.id],
     };
 
     if (isArray(relatedStores) && relatedStores.length === 0) {
-        return <View />
+        return <View />;
     }
 
     const transitionToStore = (relatedStore, relatedStoreLocation) => {

@@ -40,7 +40,10 @@ export default class StoreInfoService {
                     const defaultStoreLocation = locations.first;
 
                     if (defaultStoreLocation) {
-                        resolve(defaultStoreLocation);
+                        resolve({
+                            locations: locations,
+                            defaultStoreLocation: defaultStoreLocation,
+                        });
                     } else {
                         reject(new Error('Store has no locations defined!'));
                     }

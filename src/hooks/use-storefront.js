@@ -5,7 +5,7 @@ const { STOREFRONT_KEY, FLEETBASE_HOST } = config;
 let storefront, adapter;
 
 try {
-    storefront = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
+    storefront = new Storefront('network_f7c72f15ff4be9fd3f6fa25ed30271af', { host: 'https://top-ox-equally.ngrok-free.app' });
     adapter = storefront.getAdapter();
 } catch (error) {
     storefront = error;

@@ -7,7 +7,11 @@ const ServiceQuoteFeeView = ({ serviceQuote, isFetchingServiceQuote, serviceQuot
     let render = <ActivityIndicator />;
 
     if (!isFetchingServiceQuote && serviceQuote?.id) {
-        render = <Text style={style} numberOfLines={1}>{formatCurrency(serviceQuote?.getAttribute('amount') / 100, serviceQuote?.getAttribute('currency'))}</Text>;
+        render = (
+            <Text style={style} numberOfLines={1}>
+                {formatCurrency(serviceQuote?.getAttribute('amount'), serviceQuote?.getAttribute('currency'))}
+            </Text>
+        );
     } else if (!isFetchingServiceQuote) {
         render = (
             <Text style={style} numberOfLines={1} style={tailwind('w-3/4')}>

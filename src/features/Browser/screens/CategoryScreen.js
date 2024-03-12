@@ -30,7 +30,11 @@ const CategoryScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         // load products for category
-        storefront.products.query({ category: category.id }).then(setProducts).catch(logError).finally(stopLoading);
+        storefront.products
+            .query({ category: category.id })
+            .then(setProducts)
+            .catch((err) => logError(err, 'CategoryScreen.useEffect'))
+            .finally(stopLoading);
 
         // load sub categories
         storefront.categories.query({ parent: category.id }).then(setSubCategories).catch(logError).finally(stopLoading);
