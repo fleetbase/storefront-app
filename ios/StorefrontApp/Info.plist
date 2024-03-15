@@ -69,6 +69,16 @@
 			other important information.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app allows you to upload photos from your photo library</string>
+		<key>NSBluetoothPeripheralUsageDescription</key>
+		<string>This app may request access to Bluetooth for potential future features or
+			integrations. Although the app does not currently utilize Bluetooth functionality, this
+			permission may be required by some third-party libraries or frameworks included in the
+			app.</string>
+		<key>NSAppleMusicUsageDescription</key>
+		<string>This app may request access to Apple Music for potential future features or
+			integrations. Although the app does not currently utilize Apple Music functionality,
+			this permission may be required by some third-party libraries or frameworks included in
+			the app.</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>remote-notification</string>
