@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, ActivityIndicator, Dimensions, Modal } from 'react-native';
+import { Store } from '@fleetbase/storefront';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faStoreAlt } from '@fortawesome/free-solid-svg-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { format } from 'date-fns';
-import { Collection } from '@fleetbase/sdk';
-import { Store, Category, Product, StoreLocation } from '@fleetbase/storefront';
+import { useMountedState } from 'hooks';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState, useLocale } from 'hooks';
-import { NetworkInfoService } from 'services';
-import { useResourceCollection, useResourceStorage } from 'utils/Storage';
-import { logError, getCurrentLocation, config, translate } from 'utils';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Carousel from 'react-native-snap-carousel';
 import tailwind from 'tailwind';
+import { translate } from 'utils';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -37,7 +33,7 @@ const StorePhotosScreen = ({ navigation, route }) => {
     const currentIndex = medias?.indexOf(viewingPhoto);
 
     return (
-        <View style={[tailwind('bg-black'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('bg-black')]}>
             <View style={tailwind('h-full w-full')}>
                 <View style={tailwind('flex flex-row items-center p-4 z-10')}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
