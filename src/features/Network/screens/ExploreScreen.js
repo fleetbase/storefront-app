@@ -120,7 +120,7 @@ const ExploreScreen = ({ navigation, route }) => {
                 refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
                 stickyHeaderIndices={[1]}
                 style={tailwind('w-full h-full')}>
-                <View style={tailwind('py-2 px-4')}>
+                <View style={tailwind('px-4')}>
                     <NetworkCategoryBlock
                         containerStyle={tailwind('mb-2 p-2')}
                         onCategoriesLoaded={setNetworkCategories}
