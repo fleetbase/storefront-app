@@ -44,12 +44,12 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
     }, 600);
 
     useEffect(() => {
-        if (!query) {
+        if (!query || query.length < 4) {
             return;
         }
 
         debouncedSearch(query, (results) => {
-            setResults(results);
+            setResults(results || []);
         });
     }, [query]);
 
@@ -69,7 +69,7 @@ const StoreSearch = ({ store, wrapperStyle, buttonTitle, buttonStyle, buttonTitl
                     <View style={tailwind('px-5 py-2 flex flex-row items-center justify-between')}>
                         <View style={tailwind('flex-1 pr-4')}>
                             <View style={tailwind('relative overflow-hidden')}>
-                                <View style={tailwind('absolute top-0 bottom-0 left-0 h-full flex items-center justify-center z-10')}>
+                                <View style={tailwind('absolute top-1 bottom-0 left-0 h-full flex items-center justify-center z-10')}>
                                     <FontAwesomeIcon icon={buttonIcon} style={[tailwind('text-gray-800 ml-3'), buttonIconStyle]} />
                                 </View>
                                 <TextInput
