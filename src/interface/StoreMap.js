@@ -165,19 +165,17 @@ const StoreMap = ({ query, location, filters, onPressStore, containerStyle, mapV
                     showsTraffic={true}
                     style={[tailwind('w-full h-full rounded-md shadow-sm z-10'), mapViewStyle]}
                     initialRegion={{
-                        latitude: userLocation.coordinates[0],
-                        longitude: userLocation.coordinates[1],
+                        latitude: userLocation.coords.latitude,
+                        longitude: userLocation.coords.longitude,
                         latitudeDelta: LATITUDE_DELTA,
                         longitudeDelta: LONGITUDE_DELTA,
-                    }}
-                >
+                    }}>
                     {storeLocations.map((storeLocation, index) => (
                         <Marker
                             key={index}
                             coordinate={{ latitude: storeLocation.getAttribute('place.location.coordinates.1'), longitude: storeLocation.getAttribute('place.location.coordinates.0') }}
                             onPress={() => handleStorePress(storeLocation)}
-                            style={tailwind(`${focusedLocationIndex === index ? 'z-30' : 'z-10'}`)}
-                        >
+                            style={tailwind(`${focusedLocationIndex === index ? 'z-30' : 'z-10'}`)}>
                             <TouchableOpacity style={tailwind('flex items-center')}>
                                 <View style={tailwind('flex items-center justify-center')}>
                                     <FastImage source={{ uri: storeLocation.getAttribute('store.logo_url') }} style={tailwind('h-8 w-8')} />
