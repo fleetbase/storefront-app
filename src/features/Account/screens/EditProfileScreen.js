@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Pressable, Keyboard } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EventRegister } from 'react-native-event-listeners';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useCustomer, useLocale } from 'hooks';
-import { getLocation } from 'utils/Geo';
-import { set } from 'utils/Storage';
-import { logError, translate, splitCountryCode } from 'utils';
+import React, { useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
+import { logError, splitCountryCode, translate } from 'utils';
+import { getLocation } from 'utils/Geo';
 
 const EditProfileScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
