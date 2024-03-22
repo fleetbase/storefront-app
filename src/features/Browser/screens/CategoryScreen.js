@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, View, TouchableOpacity, Text, Image, ActivityIndicator } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Category } from '@fleetbase/storefront';
 import { faArrowLeft, faFolder } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useLocale, useMountedState } from 'hooks';
 import useStorefront, { adapter as StorefrontAdapter } from 'hooks/use-storefront';
-import { useMountedState, useLocale } from 'hooks';
-import { formatCurrency, logError, config, translate, isLastIndex } from 'utils';
-import { useResourceCollection } from 'utils/Storage';
-import Storefront, { Category } from '@fleetbase/storefront';
-import ProductCard from 'ui/ProductCard';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import tailwind from 'tailwind';
+import ProductCard from 'ui/ProductCard';
+import { isLastIndex, logError, translate } from 'utils';
+import { useResourceCollection } from 'utils/Storage';
 
 const CategoryScreen = ({ navigation, route }) => {
     const { attributes } = route.params;
@@ -62,8 +62,7 @@ const CategoryScreen = ({ navigation, route }) => {
                             <TouchableOpacity
                                 key={category.id}
                                 onPress={() => transitionToCategory(category)}
-                                style={[tailwind(`w-full flex flex-row items-center py-3 px-2 ${isLastIndex(subCategories, index) ? '' : 'border-b border-gray-100'}`)]}
-                            >
+                                style={[tailwind(`w-full flex flex-row items-center py-3 px-2 ${isLastIndex(subCategories, index) ? '' : 'border-b border-gray-100'}`)]}>
                                 <View style={[tailwind('flex flex-row items-center justify-center mr-3')]}>
                                     <View style={[tailwind('rounded-full flex items-center justify-center w-8 h-8 bg-blue-50')]}>
                                         <FontAwesomeIcon icon={faFolder} size={17} style={[tailwind('text-blue-900')]} />

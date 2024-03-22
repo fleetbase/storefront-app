@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EventRegister } from 'react-native-event-listeners';
+import { Collection, Place } from '@fleetbase/sdk';
+import { faArrowLeft, faEdit, faMapMarked, faPlus, faStar, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faMapMarked, faPlus, faEdit, faStar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { Customer } from '@fleetbase/storefront';
-import { Place, Collection, isResource } from '@fleetbase/sdk';
-import { useStorefront, useCustomer, useDeliveryLocation, useLocale } from 'hooks';
-import { mutatePlaces, translate } from 'utils';
+import { useCustomer, useDeliveryLocation, useLocale, useStorefront } from 'hooks';
 import useFleetbase, { adapter as FleetbaseAdapter } from 'hooks/use-fleetbase';
-import { useResourceStorage, useResourceCollection, get, set } from 'utils/Storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { EventRegister } from 'react-native-event-listeners';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
+import { mutatePlaces, translate } from 'utils';
+import { useResourceCollection } from 'utils/Storage';
 
 const { emit, addEventListener, removeEventListener } = EventRegister;
 
@@ -66,7 +65,7 @@ const SavedPlacesScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={[tailwind('w-full h-full bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('w-full h-full bg-white')]}>
             <FlatList
                 data={places}
                 onRefresh={loadPlaces}
