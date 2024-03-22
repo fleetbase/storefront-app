@@ -35,14 +35,12 @@ end
 
   # Permissions handlers
 setup_permissions([
-  'Bluetooth',
   'Camera',
   'Contacts',
   'FaceID',
   'LocationAccuracy',
   'LocationAlways',
   'LocationWhenInUse',
-  'MediaLibrary',
   'Notifications',
   'PhotoLibrary',
   'PhotoLibraryAddOnly',
