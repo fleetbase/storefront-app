@@ -7,7 +7,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useCustomer, useLocale } from 'hooks';
 import { getLocation } from 'utils/Geo';
 import { set } from 'utils/Storage';
-import { logError, translate } from 'utils';
+import { logError, translate, splitCountryCode } from 'utils';
 import tailwind from 'tailwind';
 import PhoneInput from 'ui/PhoneInput';
 
@@ -19,8 +19,15 @@ const EditProfileScreen = ({ navigation }) => {
     const [customer, setCustomer] = useCustomer();
     const [name, setName] = useState(customer.getAttribute('name'));
     const [email, setEmail] = useState(customer.getAttribute('email'));
-    const [phone, setPhone] = useState(customer.getAttribute('phone'));
     const [isLoading, setIsLoading] = useState(false);
+    const [phone, setPhone] = useState(
+        splitCountryCode(customer.getAttribute('phone')) || {
+            code: location?.country || '+1',
+            number: customer.getAttribute('phone'),
+        }
+    );
+
+    const [phoneValue, setPhoneValue] = useState();
 
     const saveProfile = () => {
         setIsLoading(true);
@@ -29,7 +36,7 @@ const EditProfileScreen = ({ navigation }) => {
             .update({
                 name,
                 email,
-                phone,
+                phoneValue,
             })
             .then((customer) => {
                 setCustomer(customer);
@@ -76,7 +83,7 @@ const EditProfileScreen = ({ navigation }) => {
                         </View>
                         <View style={tailwind('mb-4')}>
                             <Text style={tailwind('font-semibold text-base text-black mb-2')}>{translate('Account.EditProfileScreen.phoneLabelText')}</Text>
-                            <PhoneInput value={phone} onChangeText={setPhone} defaultCountry={location?.country} />
+                            <PhoneInput value={phone?.number} defaultCountryCode={phone?.code} />
                         </View>
                         <TouchableOpacity onPress={saveProfile} disabled={isLoading}>
                             <View style={tailwind('btn bg-green-50 border border-green-50')}>

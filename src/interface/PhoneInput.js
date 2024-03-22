@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Dimensions } from 'react-nativ
 import { CountryPicker, countryCodes } from 'react-native-country-codes-picker';
 import { getColorCode } from 'utils';
 import tailwind from 'tailwind';
+import { set } from '../utils/Storage';
 
 function isValidCountryCode(code) {
     // Regular expression to match ISO-2 alpha country codes
@@ -31,6 +32,7 @@ const PhoneInput = ({
     placeholder = '+1 (999) 999 9999',
     style = {},
     wrapperStyle = {},
+    disabled = false,
     autoFocus = true,
 }) => {
     const windowHeight = Dimensions.get('window').height;
@@ -67,6 +69,7 @@ const PhoneInput = ({
                 </TouchableOpacity>
                 <TextInput
                     style={[tailwind('h-12 rounded-md')]}
+                    disabled={disabled}
                     value={value}
                     onChangeText={(text) => {
                         if (typeof onChangePhone === 'function') {
