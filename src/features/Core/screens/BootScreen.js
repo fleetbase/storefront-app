@@ -1,16 +1,12 @@
-import React, { useEffect } from 'react';
-import { SafeAreaView, View, ActivityIndicator } from 'react-native';
-import { initStripe } from '@stripe/stripe-react-native';
-import { hasRequiredKeys, logError } from 'utils';
-import { useStorefront } from 'hooks';
-import { set } from 'utils/Storage';
-import { setI18nConfig } from 'utils/Localize';
-import { tailwind } from 'tailwind';
-import RNBootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from 'exceptions/SetupWarningScreen';
-import config from 'config';
-
-const { STRIPE_KEY, APP_IDENTIFIER } = config;
+import { useStorefront } from 'hooks';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, SafeAreaView, View } from 'react-native';
+import RNBootSplash from 'react-native-bootsplash';
+import { tailwind } from 'tailwind';
+import { hasRequiredKeys, logError } from 'utils';
+import { setI18nConfig } from 'utils/Localize';
+import { set } from 'utils/Storage';
 
 /**
  * BootScreen is a simple initialization screen, will load
@@ -20,6 +16,7 @@ const { STRIPE_KEY, APP_IDENTIFIER } = config;
  * @component
  */
 const BootScreen = ({ navigation }) => {
+    const [error, setError] = useState(null);
     // If the required keys are not provided display the setup warning screen
     if (!hasRequiredKeys()) {
         return <SetupWarningScreen />;
@@ -36,31 +33,38 @@ const BootScreen = ({ navigation }) => {
     // Initialize i18n
     setI18nConfig();
 
-    // Fetch the about() information
-    storefront
-        .about()
-        .then((info) => {
-            // Store storefront/network info
-            set('info', info);
+    useEffect(() => {
+        // Fetch the about() information
+        storefront
+            .about()
+            .then((info) => {
+                // Store storefront/network info
+                set('info', info);
 
-            // if is single store only go to storefront screens
-            if (info.is_store) {
-                return navigation.navigate('StorefrontScreen', { info });
-            }
+                // if is single store only go to storefront screens
+                if (info.is_store) {
+                    return navigation.navigate('StorefrontScreen', { info });
+                }
 
-            // if is network/multi-vendor
-            if (info.is_network) {
-                return navigation.navigate('NetworkScreen', { info });
-            }
-        })
-        .catch((error) => {
-            logError(error, '[  Error fetching storefront info!  ]');
-        })
-        .finally(() => {
-            setTimeout(() => {
-                RNBootSplash.hide();
-            }, 300);
-        });
+                // if is network/multi-vendor
+                if (info.is_network) {
+                    return navigation.navigate('NetworkScreen', { info });
+                }
+            })
+            .catch((error) => {
+                setError(error);
+                logError(error, '[  Error fetching storefront info!  ]');
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    RNBootSplash.hide();
+                }, 300);
+            });
+    }, []);
+
+    if (error) {
+        return <SetupWarningScreen error={error} />;
+    }
 
     return (
         <SafeAreaView style={tailwind('bg-white')}>

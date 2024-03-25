@@ -38,8 +38,8 @@ const StoreLocationScreen = ({ navigation, route }) => {
     const isReviewsEnabled = info?.options?.reviews_enabled === true && config('app.storeScreenOptions.reviewsEnabled');
 
     const origin = {
-        latitude: userLocation?.coordinates[0],
-        longitude: userLocation?.coordinates[1],
+        latitude: userLocation?.coords.latitude,
+        longitude: userLocation?.coords.longitude,
     };
 
     const destination = {
@@ -107,7 +107,7 @@ const StoreLocationScreen = ({ navigation, route }) => {
     return (
         <View>
             <View style={tailwind('bg-white h-full w-full')}>
-                <View style={[tailwind('absolute w-full z-10 top-0 p-4 bg-gray-900 bg-opacity-50'), { paddingTop: insets.top }]}>
+                <View style={[tailwind('absolute w-full z-10 top-0 p-4 bg-gray-900 bg-opacity-50')]}>
                     <View style={tailwind('flex flex-row items-center')}>
                         <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
                             <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
@@ -192,20 +192,17 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                 longitude: storeLocation.getAttribute('place.location.coordinates.0'),
                                 latitudeDelta: LATITUDE_DELTA,
                                 longitudeDelta: LONGITUDE_DELTA,
-                            }}
-                        >
+                            }}>
                             <Marker
                                 coordinate={{
                                     latitude: storeLocation.getAttribute('place.location.coordinates.1'),
                                     longitude: storeLocation.getAttribute('place.location.coordinates.0'),
-                                }}
-                            >
+                                }}>
                                 <View style={tailwind('relative')}>
                                     <View
                                         style={tailwind(
                                             'p-3 absolute bottom-0 left-0 mb-1.5 mr-3 rounded-md bg-white bg-opacity-75 border border-gray-400 shadow flex flex-row items-center z-30'
-                                        )}
-                                    >
+                                        )}>
                                         <View style={tailwind('mr-3')}>
                                             <FastImage source={{ uri: store.getAttribute('logo_url') }} style={tailwind('h-12 w-12 rounded')} />
                                         </View>

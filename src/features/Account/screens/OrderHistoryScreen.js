@@ -101,7 +101,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                                     </View>
                                 )}
                             </View>
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind('mr-4')}>
+                            <TouchableOpacity onPress={() => navigation.goBack()}>
                                 <View style={tailwind('rounded-full bg-gray-100 w-10 h-10 flex items-center justify-center')}>
                                     <FontAwesomeIcon icon={useLeftArrow === true ? faArrowLeft : faTimes} />
                                 </View>

@@ -9,6 +9,7 @@ import PhoneInput from 'ui/PhoneInput';
 import { config, logError, translate } from 'utils';
 import { getLocation } from 'utils/Geo';
 import { get } from 'utils/Storage';
+import packageJson from '../../../../package.json';
 
 const LoginScreen = ({ navigation, route }) => {
     const { info, redirectTo } = route.params;
@@ -166,6 +167,9 @@ const LoginScreen = ({ navigation, route }) => {
                         </KeyboardAvoidingView>
                     )}
                 </Pressable>
+                <View style={tailwind('absolute bottom-4 left-4')}>
+                    <Text style={tailwind('font-semibold text-black')}>v{packageJson.version}</Text>
+                </View>
             </View>
         </ImageBackground>
     );

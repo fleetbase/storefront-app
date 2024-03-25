@@ -118,7 +118,7 @@ export default class GeoUtil {
                                 resolve(position);
                             }
 
-                            googleAddress.setAttribute('position', position);
+                            googleAddress?.setAttribute('position', position);
 
                             // save last known location
                             set('location', googleAddress.all());

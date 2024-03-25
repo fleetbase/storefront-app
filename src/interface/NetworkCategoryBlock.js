@@ -60,7 +60,7 @@ const NetworkCategoryBlock = (props) => {
     const categories = networkCategories?.length > 7 ? networkCategories.slice(0, 7) : networkCategories;
 
     return (
-        <View style={[tailwind('rounded-md border border-gray-200 drop-shadow-lg'), props.containerStyle]}>
+        <View style={[tailwind('rounded-md border border-gray-200 drop-shadow-lg py-2'), props.containerStyle]}>
             <View style={tailwind('flex flex-row flex-wrap justify-evenly w-full')}>
                 {categories.map((category) => (
                     <TouchableOpacity key={category.id} onPress={() => on('press', category)} style={[tailwind('w-1/4 flex items-center text-center mb-3'), props.categoryStyle]}>

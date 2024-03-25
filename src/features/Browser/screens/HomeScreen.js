@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, ImageBackground, TouchableOpacity } from 'react-native';
-import { useStorefront, useLocale } from 'hooks';
-import { translate } from 'utils';
+import { useLocale, useStorefront } from 'hooks';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import tailwind from 'tailwind';
 import CategoryProductSlider from 'ui/CategoryProductSlider';
 import StorefrontHeader from 'ui/headers/StorefrontHeader';
-import tailwind from 'tailwind';
+import { translate } from 'utils';
 
 const HomeScreen = ({ navigation, route }) => {
     const { info } = route.params;

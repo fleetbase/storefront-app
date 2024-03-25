@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tailwind from 'tailwind';
 import { config, translate } from 'utils';
 import { signOut, useCustomer } from 'utils/Customer';
+import packageJson from '../../../../package.json';
 
 const fullHeight = Dimensions.get('window').height;
 
@@ -19,8 +20,8 @@ const AccountScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const insets = useSafeAreaInsets();
 
-    const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? true;
-    const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight;
+    const displayHeaderComponent = config(customer ? 'ui.accountScreen.displaySignedInHeaderComponent' : 'ui.accountScreen.displaySignedOutHeaderComponent') ?? false;
+    const containerHeight = displayHeaderComponent === true ? fullHeight - 224 : fullHeight - insets.bottom;
 
     const RenderBackground = (props) => {
         if (customer) {
@@ -164,6 +165,10 @@ const AccountScreen = ({ navigation, route }) => {
                                     </View>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+
+                        <View style={tailwind('px-4')}>
+                            <Text style={tailwind('font-semibold text-black')}>v{packageJson.version}</Text>
                         </View>
                     </View>
                 )}

@@ -24,6 +24,7 @@ import {
     toFixed,
     formatNumber,
     isObject,
+    splitCountryCode,
 } from './Helper';
 import { calculatePercentage, haversine } from './Calculate';
 import { syncDevice } from './Customer';
@@ -34,6 +35,7 @@ import getCurrency from './get-currency';
 
 export {
     listCountries,
+    splitCountryCode,
     isArray,
     hasRequiredKeys,
     isLastIndex,

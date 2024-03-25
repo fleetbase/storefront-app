@@ -73,7 +73,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
     };
 
     return (
-        <View style={[tailwind('bg-white'), { paddingTop: insets.top }]}>
+        <View style={[tailwind('bg-white')]}>
             <View style={tailwind('relative h-full')}>
                 <View style={tailwind('w-full')}>
                     <View style={tailwind('flex flex-row items-center p-4')}>
@@ -82,13 +82,13 @@ const WriteReviewScreen = ({ navigation, route }) => {
                                 <FontAwesomeIcon icon={faTimes} />
                             </View>
                         </TouchableOpacity>
-                        <Text style={tailwind('text-xl font-semibold')}>{subject.getAttribute('name')}</Text>
+                        <Text style={tailwind('text-xl font-semibold')}>{subject?.getAttribute('name')}</Text>
                     </View>
                 </View>
                 <ScrollView>
                     {!customer && (
-                        <View style={tailwind('flex flex-row items-center py-4 px-5')}>
-                            <View style={tailwind('p-4 rounded-md bg-red-50 mb-4')}>
+                        <View style={tailwind('flex flex-row items-center py-4 px-5 w-full')}>
+                            <View style={tailwind('p-4 rounded-md bg-red-50 mb-4  w-full')}>
                                 <View style={tailwind('flex flex-col overflow-hidden')}>
                                     <View style={tailwind('flex flex-row items-center mb-3 w-full')}>
                                         <FontAwesomeIcon icon={faExclamationTriangle} size={14} style={tailwind('text-red-500 mr-2')} />
@@ -127,8 +127,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
                                 <PhotoUpload
                                     onPhotoSelect={queueReviewPhoto}
                                     containerStyle={tailwind('w-full flex items-center justify-center')}
-                                    style={tailwind('w-full flex items-center justify-center')}
-                                >
+                                    style={tailwind('w-full flex items-center justify-center')}>
                                     <View style={tailwind('w-full flex items-center justify-center')}>
                                         <FontAwesomeIcon icon={faPhotoVideo} size={35} style={tailwind('text-gray-300')} />
                                     </View>
@@ -141,8 +140,7 @@ const WriteReviewScreen = ({ navigation, route }) => {
                                                 onPress={() => removeQueuedReviewPhoto(index)}
                                                 style={tailwind(
                                                     'absolute top-0 right-0 -mt-2 -mr-2 z-20 rounded-full border border-white h-6 w-6 bg-red-500 flex items-center justify-center'
-                                                )}
-                                            >
+                                                )}>
                                                 <FontAwesomeIcon icon={faTimes} style={tailwind('text-white')} />
                                             </TouchableOpacity>
                                         </View>

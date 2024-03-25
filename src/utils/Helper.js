@@ -5,6 +5,7 @@ import { set } from './Storage';
 import { getCurrentLocation } from './Geo';
 import configuration from 'config';
 import { currency, number as numberSettings } from './Settings';
+import { countryCodes } from 'react-native-country-codes-picker';
 
 const { emit } = EventRegister;
 
@@ -45,6 +46,24 @@ export default class HelperUtil {
         }
 
         return _list;
+    }
+
+    static splitCountryCode(phoneNumber) {
+        if (!phoneNumber || !countryCodes) {
+            return { code: '', number: phoneNumber };
+        }
+
+        const codes = countryCodes.map((c) => c.dial_code);
+
+        for (let i = 0; i < codes.length; i++) {
+            const code = codes[i];
+            if (phoneNumber.startsWith(code)) {
+                const codeSize = code.length;
+                return { code: phoneNumber.substring(0, codeSize), number: phoneNumber.substring(codeSize) };
+            }
+        }
+
+        return { code: '', number: phoneNumber };
     }
 
     /**
@@ -661,10 +680,12 @@ const toString = HelperUtil.toString;
 const isObject = HelperUtil.isObject;
 const checkCurrencyFormat = HelperUtil.checkCurrencyFormat;
 const formatNumber = HelperUtil.formatNumber;
+const splitCountryCode = HelperUtil.splitCountryCode;
 
 export {
     listCountries,
     isArray,
+    splitCountryCode,
     hasRequiredKeys,
     isLastIndex,
     stripHtml,
