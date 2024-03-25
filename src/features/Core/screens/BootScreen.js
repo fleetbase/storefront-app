@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, ActivityIndicator } from 'react-native';
 import { initStripe } from '@stripe/stripe-react-native';
 import { hasRequiredKeys, logError } from 'utils';
@@ -20,6 +20,7 @@ const { STRIPE_KEY, APP_IDENTIFIER } = config;
  * @component
  */
 const BootScreen = ({ navigation }) => {
+    const [error, setError] = useState(null);
     // If the required keys are not provided display the setup warning screen
     if (!hasRequiredKeys()) {
         return <SetupWarningScreen />;
@@ -54,6 +55,7 @@ const BootScreen = ({ navigation }) => {
             }
         })
         .catch((error) => {
+            setError(error);
             logError(error, '[  Error fetching storefront info!  ]');
         })
         .finally(() => {
@@ -61,6 +63,10 @@ const BootScreen = ({ navigation }) => {
                 RNBootSplash.hide();
             }, 300);
         });
+
+    if (error) {
+        return <SetupWarningScreen error={error} />;
+    }
 
     return (
         <SafeAreaView style={tailwind('bg-white')}>
