@@ -1,6 +1,6 @@
 import { Collection } from '@fleetbase/sdk';
 import { Category, Network } from '@fleetbase/storefront';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import { useLocale, useMountedState } from 'hooks';
@@ -44,7 +44,6 @@ const NetworkHeader = (props) => {
     const isMounted = useMountedState();
 
     const network = new Network(info, storefront.getAdapter());
-
     const [locale] = useLocale();
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +59,8 @@ const NetworkHeader = (props) => {
         <ImageBackground
             source={backgroundImage ?? config('ui.headerComponent.backgroundImage')}
             resizeMode={backgroundImageResizeMode ?? config('ui.headerComponent.backgroundImageResizeMode')}
-            style={[tailwind('z-50'), { paddingTop: insets.top }, props.style, backgroundImageStyle ?? config('ui.headerComponent.backgroundImageStyle')]}>
+            style={[tailwind('z-50'), { paddingTop: insets.top }, props.style, backgroundImageStyle ?? config('ui.headerComponent.backgroundImageStyle')]}
+        >
             <View style={[tailwind('border-b border-gray-100'), props.wrapperStyle, config('ui.headerComponent.containerStyle')]}>
                 <View style={[tailwind('flex flex-row items-center justify-between px-2 py-1 overflow-hidden'), props.innerStyle]}>
                     <View style={tailwind('flex flex-row items-center')}>
@@ -77,7 +77,13 @@ const NetworkHeader = (props) => {
                         {config('ui.headerComponent.displayLocalePicker') === true && config('app.enableTranslations') === true && (
                             <LangPicker wrapperStyle={tailwind('mr-2')} buttonStyle={[config('ui.headerComponent.localePickerStyle')]} />
                         )}
-                        {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />}
+                        {/* {config('ui.headerComponent.displayLocationPicker') === true && <LocationPicker buttonStyle={[config('ui.headerComponent.locationPickerStyle')]} />} */}
+                        {config('ui.headerComponent.displayLocationPicker') === true && (
+                            <TouchableOpacity onPress={() => navigation.navigate('LocationPickerStack')} style={tailwind('flex flex-row items-center rounded-full bg-blue-50 px-3 py-2')}>
+                                <FontAwesomeIcon icon={faMapMarkerAlt} style={tailwind('text-blue-900 mr-2')} />
+                                <Text style={tailwind('text-blue-900 font-semibold mr-1')}>{translate('components.interface.LocationPicker.selectLocation')}</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
 

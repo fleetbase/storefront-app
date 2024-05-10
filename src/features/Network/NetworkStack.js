@@ -11,6 +11,7 @@ import StoreLocationScreen from 'shared/StoreLocationScreen';
 import StorePhotosScreen from 'shared/StorePhotosScreen';
 import StoreReviewsScreen from 'shared/StoreReviewsScreen';
 import WriteReviewScreen from 'shared/WriteReviewScreen';
+import LocationPickerScreen from 'shared/LocationPickerScreen';
 import LoginScreen from 'auth/screens/LoginScreen';
 import CreateAccountScreen from 'auth/screens//CreateAccountScreen';
 
@@ -18,6 +19,7 @@ const MainStack = createStackNavigator();
 const RootStack = createStackNavigator();
 const StoreStack = createStackNavigator();
 const MapStack = createStackNavigator();
+const LocationStack = createStackNavigator();
 
 const verticalAnimation = {
     gestureDirection: 'vertical',
@@ -63,6 +65,15 @@ const MapViewStack = ({ route }) => {
         </MapStack.Navigator>
     );
 };
+const LocationPickerStack = ({ route }) => {
+    const { info } = route.params;
+
+    return (
+        <LocationStack.Navigator screenOptions={{ presentation: 'modal' }}>
+            <LocationStack.Screen name="LocationPickerScreen" component={LocationPickerScreen} initialParams={route.params} options={{ headerShown: false, gesturesEnabled: false }} />
+        </LocationStack.Navigator>
+    );
+};
 
 const BootScreen = ({ route }) => {
     const { info } = route.params;
@@ -75,6 +86,7 @@ const BootScreen = ({ route }) => {
             <MainStack.Screen name="MapScreen" component={MapViewStack} options={{ ...verticalAnimation }} initialParams={{ info }} />
             <MainStack.Screen name="CategoryScreen" component={CategoryScreen} initialParams={{ info }} />
             <MainStack.Screen name="ProductScreen" component={ProductScreen} initialParams={{ info }} />
+            <MainStack.Screen name="LocationPickerStack" component={LocationPickerStack} initialParams={{ info }} />
         </MainStack.Navigator>
     );
 };

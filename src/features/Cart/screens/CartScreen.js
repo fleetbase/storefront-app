@@ -458,7 +458,7 @@ const CartScreen = ({ navigation, route }) => {
     );
 
     return (
-        <View style={[tailwind(`h-full ${cart?.isEmpty ? 'bg-white' : 'bg-white'}`), { marginTop: insets.top }]}>
+        <View style={[tailwind('h-full bg-white'), { paddingTop: insets.top }]}>
             <CartCheckoutPanel
                 cart={cart}
                 total={calculateTotal()}
