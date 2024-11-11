@@ -24,6 +24,12 @@ jobs:
             - name: Install dependencies
               run: npm install -g yarn
 
+            - name: Enable Corepack
+              run: corepack enable
+
+            - name: Activate Yarn 3.6.4
+              run: corepack prepare yarn@3.6.4 --activate
+
             - name: Install dependencies
               run: yarn install
 
@@ -48,6 +54,12 @@ jobs:
 
             - name: Install dependencies
               run: npm install -g yarn
+
+            - name: Enable Corepack
+              run: corepack enable
+
+            - name: Activate Yarn 3.6.4
+              run: corepack prepare yarn@3.6.4 --activate
 
             - name: Install dependencies
               run: yarn install
@@ -97,6 +109,12 @@ jobs:
 
             - name: Install dependencies
               run: npm install -g yarn
+
+            - name: Enable Corepack
+              run: corepack enable
+
+            - name: Activate Yarn 3.6.4
+              run: corepack prepare yarn@3.6.4 --activate
 
             - name: Install dependencies
               run: yarn install
