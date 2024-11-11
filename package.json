@@ -60,7 +60,7 @@
         "react-native-config": "^1.5.3",
         "react-native-country-codes-picker": "^2.3.5",
         "react-native-credit-card-input-plus": "^0.4.7",
-        "react-native-device-info": "^10.12.0",
+        "react-native-device-info": "^14.0.0",
         "react-native-dropdown-picker": "^5.4.6",
         "react-native-event-listeners": "^1.0.7",
         "react-native-fast-image": "^8.6.3",

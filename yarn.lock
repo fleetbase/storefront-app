@@ -11343,12 +11343,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-device-info@npm:^10.12.0":
-  version: 10.14.0
-  resolution: "react-native-device-info@npm:10.14.0"
+"react-native-device-info@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "react-native-device-info@npm:14.0.0"
   peerDependencies:
     react-native: "*"
-  checksum: bf0630beef9c391498122cc66708fa9922bf8335701b0fe7f30642f509d60441338607a89daaa86eb9ced675926ee948da034c63c03659053ce34c10d50bd9e3
+  checksum: d9990fce678c6c179f498866d5042f08dc9c3fec1a139fc12a83341b3289f4ee954e86613b1794047d7646d25f04a902d96927b0a52db9d324e194ffb99e8946
   languageName: node
   linkType: hard
 
@@ -13125,7 +13125,7 @@ __metadata:
     react-native-config: ^1.5.3
     react-native-country-codes-picker: ^2.3.5
     react-native-credit-card-input-plus: ^0.4.7
-    react-native-device-info: ^10.12.0
+    react-native-device-info: ^14.0.0
     react-native-dropdown-picker: ^5.4.6
     react-native-event-listeners: ^1.0.7
     react-native-fast-image: ^8.6.3
