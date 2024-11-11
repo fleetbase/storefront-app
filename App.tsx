@@ -28,7 +28,7 @@ const linking = {
     },
 };
 
-const App: () => Node = () => {
+function App (): React.JSX.Element {
     LogBox.ignoreLogs(['RCTUIManager.measureLayoutRelativeToParent']);
 
     return (
@@ -44,11 +44,11 @@ const App: () => Node = () => {
                     </View>
                 }>
                 <Stack.Navigator>
-                    <Stack.Screen name="CoreStack" component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
+                    <Stack.Screen name='CoreStack' component={CoreStack} options={{ headerShown: false, animationEnabled: false, gestureEnabled: false }} />
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>
     );
-};
+}
 
 export default App;

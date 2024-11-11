@@ -5,11 +5,12 @@ buildscript {
         playServicesLocationVersion = "21.0.1"
         firebaseMessagingVersion = "22.0.0"
         firebaseVersion = "22.0.0"
-        buildToolsVersion = "33.0.0"
-        minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
-        ndkVersion = "21.4.7075529"
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 35
+        targetSdkVersion = 34
+        ndkVersion = "26.1.10909125"
+        kotlinVersion = "1.9.24"
     }
     repositories {
         google()
@@ -24,5 +25,8 @@ buildscript {
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
         classpath('com.google.gms:google-services:4.3.15')
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
+
+apply plugin: "com.facebook.react.rootproject"

@@ -125,7 +125,9 @@ Run the commands below; first clone the project, use npm or yarn to install the 
 git clone git@github.com:fleetbase/storefront-app.git
 cd storefront-app
 yarn
-npx pod-install
+bundle install
+cd ios 
+bundle exec pod install
 touch .env
 ```
 

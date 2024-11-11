@@ -10,11 +10,18 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
     tools:ignore="ScopedStorage" />
 
-  <application android:name=".MainApplication" android:label="@string/app_name"
-    android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round"
-    android:theme="@style/AppTheme" android:networkSecurityConfig="@xml/network_security_config"
-    android:dataExtractionRules="@xml/data_extraction_rules" android:fullBackupContent="true"
-    tools:targetApi="s">
+  <application 
+    android:name=".MainApplication" 
+    android:label="@string/app_name"
+    android:icon="@mipmap/ic_launcher" 
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:theme="@style/AppTheme" 
+    android:networkSecurityConfig="@xml/network_security_config"
+    android:dataExtractionRules="@xml/data_extraction_rules" 
+    android:fullBackupContent="true"
+    tools:targetApi="s"
+    android:supportsRtl="true"
+    >
     <!-- Change the value to true to enable pop-up for in foreground on receiving remote
     notifications (for prevent duplicating while showing local notifications set this to false) -->
     <meta-data android:name="com.dieam.reactnativepushnotification.notification_foreground"

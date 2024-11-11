@@ -1,31 +1,12 @@
 # Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
-def node_require(script)
-  # Resolve script with node to allow for hoisting
-  require Pod::Executable.execute_command('node', ['-p',
-    "require.resolve(
-      '#{script}',
-      {paths: [process.argv[1]]},
-    )", __dir__]).strip
-end
-
-
-node_require('react-native/scripts/react_native_pods.rb')
-node_require('react-native-permissions/scripts/setup.rb')
-
-platform :ios, '13.0'
+platform :ios, min_ios_version_supported
 prepare_react_native_project!
-
-# If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
-# because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
-#
-# To fix this you can also exclude `react-native-flipper` using a `react-native.config.js`
-# ```js
-# module.exports = {
-#   dependencies: {
-#     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
-# ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -33,33 +14,14 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-  # Permissions handlers
-setup_permissions([
-  'Camera',
-  'Contacts',
-  'FaceID',
-  'LocationAccuracy',
-  'LocationAlways',
-  'LocationWhenInUse',
-  'Notifications',
-  'PhotoLibrary',
-  'PhotoLibraryAddOnly',
-])
-
 target 'StorefrontApp' do
   config = use_native_modules!
 
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    # to enable hermes on iOS, change `false` to `true` and then install pods
-    :hermes_enabled => false
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  pod 'react-native-config', :path => '../node_modules/react-native-config'
-  # pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
 
   target 'StorefrontAppTests' do
     inherit! :complete
@@ -67,19 +29,12 @@ target 'StorefrontApp' do
   end
 
   post_install do |installer|
-     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
-     react_native_post_install(
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
-    installer.pods_project.targets.each do |target|
-      if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
-        target.build_configurations.each do |config|
-            config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-        end
-      end
-    end
   end
 end

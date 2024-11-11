@@ -48,6 +48,9 @@ react {
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
+
+    /* Autolinking */
+    autolinkLibrariesWithApp()
 }
 
 project.ext.react = [
@@ -92,7 +95,9 @@ def isNewArchitectureEnabled() {
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+    
     namespace "com.storefrontapp"
 
     defaultConfig {
@@ -149,15 +154,6 @@ dependencies {
     implementation project(':react-native-config')
     implementation "androidx.core:core-splashscreen:1.0.0-alpha02" 
 
-    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
-    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-        exclude group:'com.squareup.okhttp3', module:'okhttp'
-    }
-
-    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-    }
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
@@ -166,4 +162,3 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")   ; applyNativeModulesAppBuildGradle(project)
