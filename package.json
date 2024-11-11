@@ -6,12 +6,11 @@
         "android": "react-native run-android",
         "ios": "react-native run-ios",
         "start": "react-native start",
-        "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && npx pod-install",
+        "pod-reset": "rm -rf ios/Pods/ ios/Podfile.lock && cd ios && bundle exec pod install",
         "test": "jest",
         "lint": "eslint .",
         "clean:android": "cd android && ./gradlew clean && cd ../",
         "adb-reverse": "adb reverse tcp:8081 tcp:8081",
-        "postinstall": "patch-package",
         "generate-app-icon": "npx app-icon generate -i ./assets/app-icon.png",
         "generate-launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background-color=#FFFFFF --logo-width=100 --flavor=main"
     },

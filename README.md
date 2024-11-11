@@ -124,6 +124,8 @@ Run the commands below; first clone the project, use npm or yarn to install the 
 ```
 git clone git@github.com:fleetbase/storefront-app.git
 cd storefront-app
+corepack enable
+corepack prepare yarn@3.6.4 --activate
 yarn
 bundle install
 cd ios 
