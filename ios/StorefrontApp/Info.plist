@@ -32,6 +32,7 @@
 			<key>NSAllowsArbitraryLoads</key>
 			<false/>
 			<key>NSAllowsLocalNetworking</key>
+			<true />
 			<key>NSExceptionDomains</key>
 			<dict>
 				<key>fleetbase.engineering</key>
