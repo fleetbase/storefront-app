@@ -1,9 +1,11 @@
 #import "AppDelegate.h"
 #import "RNBootSplash.h"
+#import "RNCConfig.h"
 
 #import <UserNotifications/UserNotifications.h>
 #import <RNCPushNotificationIOS.h>
 #import <React/RCTBundleURLProvider.h>
+#import <GoogleMaps/GoogleMaps.h>
 
 @implementation AppDelegate
 
@@ -13,6 +15,9 @@
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
+  
+  // Enable Google Maps
+  // [GMSServices provideAPIKey:[RNCConfig envFor:@"GOOGLE_MAPS_KEY"]];
 
   // Define UNUserNotificationCenter
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -37,7 +42,7 @@
 
 - (void)customizeRootView:(RCTRootView *)rootView {
   [super customizeRootView:rootView];
-  [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView]; // ⬅️ initialize the splash screen
+  // [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView]; // ⬅️ initialize the splash screen
 }
 
 //Called when a notification is delivered to a foreground app.
