@@ -1588,7 +1588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.6, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.8.4":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.23.6, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.8.4":
   version: 7.26.0
   resolution: "@babel/runtime@npm:7.26.0"
   dependencies:
@@ -1801,6 +1801,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fleetbase/sdk@npm:1.2.1":
+  version: 1.2.1
+  resolution: "@fleetbase/sdk@npm:1.2.1"
+  dependencies:
+    "@babel/runtime": ^7.15.4
+    axios: ^0.21.1
+    cross-fetch: ^3.1.4
+    global: ^4.4.0
+    rollup: ^2.50.5
+  checksum: 974b3ec0481536ce47899a28243257e88781a8663072264b268f9f2236644f5654cd6abc2ef222ef102ef6ba1d3c69d9fb2205c261178e376fc529f574f4afdf
+  languageName: node
+  linkType: hard
+
 "@fleetbase/sdk@npm:1.2.8":
   version: 1.2.8
   resolution: "@fleetbase/sdk@npm:1.2.8"
@@ -1814,13 +1827,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fleetbase/storefront@npm:1.1.9":
-  version: 1.1.9
-  resolution: "@fleetbase/storefront@npm:1.1.9"
+"@fleetbase/storefront@file:../storefront-js::locator=storefrontapp%40workspace%3A.":
+  version: 1.1.6
+  resolution: "@fleetbase/storefront@file:../storefront-js#../storefront-js::hash=8067ee&locator=storefrontapp%40workspace%3A."
   dependencies:
-    "@fleetbase/sdk": 1.2.8
-    date-fns: ^3.0.5
-  checksum: 99d719e402298e0216c48a3c60183d1bfae0d3719ae45c2cf021302c945f36d1961195e30ae5a6431c94d9208507c11a261c33bea1b3a5f02062d7176191c3c6
+    "@fleetbase/sdk": 1.2.1
+    date-fns: ^2.22.1
+  checksum: 6f98fef79d04c6f7c6a2c2a453d8fe0ba7b8185505dd03c7e51db913a7b382ff92f83e0a4981b7c7da0cea7e99d247f54d5f6abdbbd34f66ea959350d234b893
   languageName: node
   linkType: hard
 
@@ -5375,6 +5388,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.21.1":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
+  dependencies:
+    follow-redirects: ^1.14.0
+  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
+  languageName: node
+  linkType: hard
+
 "b4a@npm:^1.6.4":
   version: 1.6.7
   resolution: "b4a@npm:1.6.7"
@@ -6291,7 +6313,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.1.5":
+"cross-fetch@npm:^3.1.4, cross-fetch@npm:^3.1.5":
   version: 3.1.8
   resolution: "cross-fetch@npm:3.1.8"
   dependencies:
@@ -6417,10 +6439,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^3.0.5":
-  version: 3.6.0
-  resolution: "date-fns@npm:3.6.0"
-  checksum: 0daa1e9a436cf99f9f2ae9232b55e11f3dd46132bee10987164f3eebd29f245b2e066d7d7db40782627411ecf18551d8f4c9fcdf2226e48bb66545407d448ab7
+"date-fns@npm:^2.22.1":
+  version: 2.30.0
+  resolution: "date-fns@npm:2.30.0"
+  dependencies:
+    "@babel/runtime": ^7.21.0
+  checksum: f7be01523282e9bb06c0cd2693d34f245247a29098527d4420628966a2d9aad154bd0e90a6b1cf66d37adcb769cd108cf8a7bd49d76db0fb119af5cdd13644f4
   languageName: node
   linkType: hard
 
@@ -7570,7 +7594,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.10.0":
+"follow-redirects@npm:^1.10.0, follow-redirects@npm:^1.14.0":
   version: 1.15.9
   resolution: "follow-redirects@npm:1.15.9"
   peerDependenciesMeta:
@@ -11954,6 +11978,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup@npm:^2.50.5":
+  version: 2.79.2
+  resolution: "rollup@npm:2.79.2"
+  dependencies:
+    fsevents: ~2.3.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    rollup: dist/bin/rollup
+  checksum: df7aa4c8b95245dede157b06ab71e1921de6080757d30e9bf31f8fb142064d12dda865e2bafbab4349588f43425b2965a290c9a5da1c048246a70fc21734ebd7
+  languageName: node
+  linkType: hard
+
 "rollup@npm:^4.9.0":
   version: 4.25.0
   resolution: "rollup@npm:4.25.0"
@@ -12547,7 +12585,7 @@ __metadata:
     "@babel/preset-react": ^7.25.9
     "@babel/runtime": ^7.25.0
     "@fleetbase/sdk": 1.2.8
-    "@fleetbase/storefront": 1.1.9
+    "@fleetbase/storefront": "file:../storefront-js"
     "@fortawesome/fontawesome-svg-core": ^6.5.1
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1

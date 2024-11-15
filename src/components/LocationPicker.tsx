@@ -12,6 +12,7 @@ import useStorage from '../hooks/use-storage';
 
 const LocationPicker = ({ ...props }) => {
     const navigation = useNavigation();
+    const { onPressAddNewLocation } = props;
     const { storefront, adapter } = useStorefront();
     const [currentLocation, setCurrentLocation] = useStorage('location');
     const [savedLocations, setSavedLocations] = useState([]);
@@ -60,8 +61,12 @@ const LocationPicker = ({ ...props }) => {
     };
 
     const handleAddNewLocation = () => {
-        navigation.navigate('AddNewLocationScreen');
         setDropdownOpen(false);
+        if (typeof onPressAddNewLocation === 'function') {
+            onPressAddNewLocation(navigation);
+        } else {
+            navigation.navigate('AddNewLocationScreen');
+        }
     };
 
     return (

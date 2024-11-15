@@ -21,7 +21,7 @@
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
         "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
         "@fleetbase/sdk": "1.2.8",
-        "@fleetbase/storefront": "1.1.9",
+        "@fleetbase/storefront": "file:../storefront-js",
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
         "@fortawesome/free-brands-svg-icons": "^6.5.1",
         "@fortawesome/free-solid-svg-icons": "^6.5.1",

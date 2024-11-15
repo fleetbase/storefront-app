@@ -51,7 +51,7 @@ const BootScreen = () => {
                 setInfo(info);
 
                 // Navigate based on storefront type
-                navigation.navigate(info.is_network ? 'NetworkHome' : 'StoreHome', { info });
+                navigation.navigate(info.is_network ? 'NetworkHome' : 'StoreNavigator', { info });
             } catch (initializationError) {
                 setError(initializationError);
             } finally {

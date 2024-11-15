@@ -58,7 +58,27 @@ export function isResource(target, type = null) {
 }
 
 export function hasResouceProperties(target) {
-    return target !== null && target !== undefined && isObject(target) && typeof target.id === 'string' && typeof target.serialize === 'function' && typeof target.resource === 'string';
+    return hasProperties(target, ['id', 'serialize', 'resource'], true);
+}
+
+export function isNone(target) {
+    return target === null || target === undefined;
+}
+
+export function hasProperties(obj, keys, strict = false) {
+    if (isNone(obj) || !isObject(obj) || !isArray(keys)) {
+        return false;
+    }
+
+    return keys.every((key) => {
+        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+            return false;
+        }
+        if (strict && (obj[key] === null || obj[key] === undefined)) {
+            return false;
+        }
+        return true;
+    });
 }
 
 export function invokeAndGet(callable, path, defaultValue = null) {
@@ -83,4 +103,20 @@ export function getTheme(key = null) {
         }
     }
     return {};
+}
+
+export function defaults(object, defs) {
+    let key;
+    object = Object.assign({}, object);
+    defs = defs || {};
+    // Iterate over object non-prototype properties:
+    for (key in defs) {
+        if (Object.hasOwnProperty(defs, key)) {
+            // Replace values with defaults only if undefined (allow empty/zero values):
+            if (object[key] == null) {
+                object[key] = defs[key];
+            }
+        }
+    }
+    return object;
 }

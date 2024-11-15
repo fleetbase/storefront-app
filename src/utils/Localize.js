@@ -53,8 +53,9 @@ export function translate(key, config = {}) {
     }
 
     config.locale = config?.locale ?? getLanguage();
+    return key;
 
-    return i18n.t(key, config);
+    // return i18n.t(key, config);
 }
 
 export function translateResource(resource, key) {
