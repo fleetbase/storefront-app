@@ -1,54 +1,294 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native';
-import { Stack, Text, YStack, useTheme, Button } from 'tamagui';
+import { Animated, SafeAreaView, TouchableOpacity, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { formatCurrency } from '../utils/format';
+import { delay, loadPersistedResource } from '../utils';
+import { calculateCartTotal } from '../utils/cart';
 import useCart from '../hooks/use-cart';
+import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const CartScreen = () => {
     const theme = useTheme();
+    const navigation = useNavigation();
+    const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
+    const rowRefs = useRef({});
     const [cart, updateCart] = useCart();
+    const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
 
-    if (cart) {
-        console.log('[cart]', cart);
-    }
+    // Make sure cart items is latest
+    useEffect(() => {
+        setDisplayedItems(cart ? cart.contents() : []);
+    }, [cart]);
 
-    const emptyCart = async () => {
-        console.log('Emptying cart', cart);
-        if (!cart) return false;
-
-        try {
-            const emptiedCart = await cart.empty();
-            updateCart(emptiedCart);
-            console.log('Cart emptied!', emptiedCart);
-        } catch (error) {
-            console.log(error.message);
+    const handleEdit = async (cartItem) => {
+        const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
+        if (product) {
+            navigation.navigate('CartItem', { cartItem, product: product.serialize() });
         }
     };
 
-    const reloadCart = async () => {
-        console.log('Reloading cart', cart);
-        if (!cart) return false;
+    const handleDelete = async (cartItem) => {
+        const rowRef = rowRefs.current[cartItem.id];
+
+        if (!rowRef) {
+            toast.error('Could not find item to delete.', { position: ToastPosition.BOTTOM });
+            return;
+        }
 
         try {
-            const refreshedCart = await cart.refresh();
-            updateCart(refreshedCart);
-            console.log('Cart reloaded!', refreshedCart);
+            await new Promise((resolve) => {
+                Animated.parallel([
+                    Animated.timing(rowRef.opacity, {
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(rowRef.translateX, {
+                        toValue: -100,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }),
+                ]).start(resolve);
+            });
+
+            // Remove item visually
+            setDisplayedItems((prevItems) => prevItems.filter((item) => item.id !== cartItem.id));
+            toast.success(`${cartItem.name} removed from cart.`, { position: ToastPosition.BOTTOM });
+
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+            const updatedCart = await runWithLoading(cart.remove(cartItem.id), `removeCartItem_${cartItem.id}`);
+            updateCart(updatedCart);
         } catch (error) {
-            console.log(error.message);
+            toast.error('Failed to remove item from cart');
+            console.error('Error removing cart item:', error.message);
         }
+    };
+
+    const handleEmpty = async () => {
+        const cartItems = cart.contents();
+
+        if (!cartItems.length) {
+            toast.error('Cart is already empty', { position: ToastPosition.BOTTOM });
+            return;
+        }
+
+        try {
+            const animations = cartItems.map((cartItem) => {
+                const rowRef = rowRefs.current[cartItem.id];
+
+                if (rowRef) {
+                    return new Promise((resolve) => {
+                        Animated.parallel([
+                            Animated.timing(rowRef.opacity, {
+                                toValue: 0,
+                                duration: 300,
+                                useNativeDriver: true,
+                            }),
+                            Animated.timing(rowRef.translateX, {
+                                toValue: -100,
+                                duration: 300,
+                                useNativeDriver: true,
+                            }),
+                        ]).start(resolve);
+                    });
+                }
+
+                return Promise.resolve();
+            });
+
+            await Promise.all(animations);
+            toast.success('Cart emptied', { position: ToastPosition.BOTTOM });
+
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+            const emptiedCart = await runWithLoading(cart.empty(), 'emptyCart');
+            updateCart(emptiedCart);
+        } catch (error) {
+            toast.error('Failed to empty cart');
+            console.error('Error emptying cart:', error.message);
+        }
+    };
+
+    const renderRightActions = (cartItem) => (
+        <XStack height='100%' width={200} borderBottomWidth={4} minHeight={100} maxHeight={125} borderColor='$borderColor'>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleEdit(cartItem)}>
+                <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
+                    <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
+                </YStack>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleDelete(cartItem)}>
+                <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
+                    {isLoading(`removeCartItem_${cartItem.id}`) ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
+                </YStack>
+            </TouchableOpacity>
+        </XStack>
+    );
+
+    const renderItem = ({ item: cartItem }) => {
+        const opacity = new Animated.Value(1);
+        const translateX = new Animated.Value(0);
+        rowRefs.current[cartItem.id] = { opacity, translateX };
+
+        return (
+            <Animated.View
+                style={[
+                    {
+                        borderBottomWidth: 1,
+                        borderColor: theme.borderColor.val,
+                        backgroundColor: theme.background.val,
+                        opacity,
+                        transform: [{ translateX }],
+                    },
+                ]}
+            >
+                <Swipeable renderRightActions={() => renderRightActions(cartItem)}>
+                    <YStack flex={1} bg='$background' padding='$4' borderBottomWidth={4} minHeight={100} maxHeight={125} borderColor='$borderColor'>
+                        <XStack space='$3' justifyContent='space-between'>
+                            <XStack flex={1}>
+                                <TouchableOpacity onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
+                                    <XStack flex={1} space='$3' height='100%'>
+                                        <YStack>
+                                            <XStack width={40} height={40} borderWidth={1} borderColor='$secondary' borderRadius='$3' alignItems='center' justifyContent='center'>
+                                                <XStack alignItems='flex-end'>
+                                                    <Text fontSize='$1' color='$primary'>
+                                                        x
+                                                    </Text>
+                                                    <Text fontSize='$5' fontWeight='bold' color='$primary'>
+                                                        {cartItem.quantity}
+                                                    </Text>
+                                                </XStack>
+                                            </XStack>
+                                        </YStack>
+                                        <YStack
+                                            borderWidth={1}
+                                            borderColor='$borderColor'
+                                            borderRadius='$3'
+                                            height={60}
+                                            width={60}
+                                            alignItems='center'
+                                            justifyContent='center'
+                                            position='relative'
+                                        >
+                                            <Image
+                                                source={{ uri: cartItem.product_image_url }}
+                                                style={{
+                                                    height: '100%',
+                                                    width: '100%',
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    borderRadius: 5,
+                                                }}
+                                                resizeMode='cover'
+                                            />
+                                        </YStack>
+                                        <YStack>
+                                            <YStack mb='$1'>
+                                                <XStack space='$2' alignItems='center'>
+                                                    <Text fontSize='$5' fontWeight='bold' color='$color' numberOfLines={1}>
+                                                        {cartItem.name}
+                                                    </Text>
+                                                </XStack>
+                                                {cartItem.description && (
+                                                    <Text fontSize='$4' color='$textSecondary'>
+                                                        {cartItem.description}
+                                                    </Text>
+                                                )}
+                                            </YStack>
+                                            <YStack>
+                                                {cartItem.variants.map((variant) => (
+                                                    <XStack key={variant.id} alignItems='center' space='$2'>
+                                                        <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
+                                                            {variant.name}
+                                                        </Text>
+                                                    </XStack>
+                                                ))}
+                                                {cartItem.addons.map((addon) => (
+                                                    <XStack key={addon.id} alignItems='center' space='$2'>
+                                                        <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
+                                                            {addon.name}
+                                                        </Text>
+                                                    </XStack>
+                                                ))}
+                                            </YStack>
+                                        </YStack>
+                                    </XStack>
+                                </TouchableOpacity>
+                            </XStack>
+                            <YStack width={150} alignItems='flex-end'>
+                                <YStack>
+                                    <Text fontSize='$5' color='$primary' fontWeight='bold'>
+                                        {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
+                                    </Text>
+                                </YStack>
+                            </YStack>
+                        </XStack>
+                    </YStack>
+                </Swipeable>
+            </Animated.View>
+        );
     };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            {cart && (
-                <YStack flex={1} alignItems='center' justifyContent='center' bg='$background' space='$3'>
-                    <Text size='$7'>Cart has {cart.contents().length} items</Text>
-                    <Button onPress={emptyCart} bg='$error' color='white' borderRadius='$3' animation='bouncy' hoverStyle={{ opacity: 0.8 }} pressStyle={{ scale: 0.95 }}>
-                        <Button.Text>Empty Cart</Button.Text>
-                    </Button>
-                    <Button onPress={reloadCart} bg='$primary' color='white' borderRadius='$3' animation='quick' hoverStyle={{ opacity: 0.8 }} pressStyle={{ scale: 0.95 }}>
-                        <Button.Text>Reload Cart</Button.Text>
-                    </Button>
+            <XStack justifyContent='space-between' alignItems='center' padding='$5'>
+                <XStack alignItems='center'>
+                    <Text fontSize='$7' fontWeight='bold'>
+                        Order items ({displayedItems.length})
+                    </Text>
+                    {isAnyLoading() && (
+                        <YStack ml='$2'>
+                            <Spinner color='$primary' />
+                        </YStack>
+                    )}
+                </XStack>
+                <YStack>
+                    <TouchableOpacity onPress={handleEmpty}>
+                        <Text color='$error' fontSize='$4'>
+                            Empty Cart
+                        </Text>
+                    </TouchableOpacity>
+                </YStack>
+            </XStack>
+            <Animated.FlatList data={displayedItems} renderItem={renderItem} keyExtractor={(item) => item.id} contentContainerStyle={{ paddingBottom: 16 }} />
+            {cart.isNotEmpty && (
+                <YStack
+                    position='absolute'
+                    bg='$background'
+                    bottom={0}
+                    borderTopWidth={1}
+                    borderColor='$borderColorWithShadow'
+                    width='100%'
+                    padding='$4'
+                    shadowColor='$shadowColor'
+                    shadowOffset={{ width: 0, height: 1 }}
+                    shadowOpacity={0.15}
+                    shadowRadius={3}
+                >
+                    <XStack alignItems='center' justifyContent='space-between'>
+                        <YStack flex={1}>
+                            <Text fontSize='$9' fontWeight='bold'>
+                                {formatCurrency(calculateCartTotal(), cart.getAttribute('currency'))}
+                            </Text>
+                        </YStack>
+                        <YStack>
+                            <Button bg='$success' color='white' width={180} paddingVertical='$2' rounded>
+                                <Button.Text fontSize='$6' fontWeight='bold' color='white'>
+                                    Checkout
+                                </Button.Text>
+                            </Button>
+                        </YStack>
+                    </XStack>
                 </YStack>
             )}
         </SafeAreaView>

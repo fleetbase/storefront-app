@@ -19,7 +19,7 @@ const StoreCategoryScreen = ({ route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' paddingVertical='$4' paddingHorizontal='$3'>
+            <YStack flex={1} bg='$background' paddingVertical='$4'>
                 {isLoadingProducts && (
                     <Portal hostName='LoadingIndicatorPortal'>
                         <XStack>
@@ -27,9 +27,11 @@ const StoreCategoryScreen = ({ route }) => {
                         </XStack>
                     </Portal>
                 )}
-                <XStack>
+                <XStack width='100%' space='$3' paddingHorizontal='$4'>
                     {products.map((product, index) => (
-                        <ProductCard key={product.id} product={product} onPress={() => navigation.navigate('Product', { product: product.serialize() })} style={{ width: '50%' }} />
+                        <YStack key={product.id} width='50%'>
+                            <ProductCard product={product} sliderHeight={135} onPress={() => navigation.navigate('Product', { product: product.serialize() })} />
+                        </YStack>
                     ))}
                 </XStack>
             </YStack>

@@ -11,6 +11,7 @@ import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreS
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CartScreen from '../screens/CartScreen';
+import CartItemScreen from '../screens/CartItemScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProductScreen from '../screens/ProductScreen';
 import LocationPicker from '../components/LocationPicker';
@@ -24,6 +25,10 @@ const StoreHomeTab = createNativeStackNavigator({
         StoreCategory,
         Product: {
             screen: ProductScreen,
+            options: {
+                presentation: 'modal',
+                headerShown: false,
+            },
         },
         ...LocationStack,
     },
@@ -33,6 +38,13 @@ const StoreSearchTab = createNativeStackNavigator({
     initialRouteName: 'StoreSearch',
     screens: {
         StoreSearch,
+        Product: {
+            screen: ProductScreen,
+            options: {
+                presentation: 'modal',
+                headerShown: false,
+            },
+        },
     },
 });
 
@@ -48,6 +60,16 @@ const StoreCartTab = createNativeStackNavigator({
     screens: {
         Cart: {
             screen: CartScreen,
+            options: {
+                headerShown: false,
+            },
+        },
+        CartItem: {
+            screen: CartItemScreen,
+            options: {
+                presentation: 'modal',
+                headerShown: false,
+            },
         },
     },
 });

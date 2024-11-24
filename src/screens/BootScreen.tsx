@@ -14,7 +14,6 @@ const BootScreen = () => {
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
     const [info, setInfo] = useStorage('info', {});
     const navigation = useNavigation();
-    console.log('BootScreen');
 
     useEffect(() => {
         const checkLocationPermission = async () => {
@@ -47,7 +46,6 @@ const BootScreen = () => {
                 if (!storefront) return;
 
                 const info = await storefront.about();
-                console.log('About this Storefront', info);
                 setInfo(info);
 
                 // Navigate based on storefront type

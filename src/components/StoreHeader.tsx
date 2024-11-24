@@ -1,11 +1,11 @@
 import React from 'react';
-import { Image } from 'tamagui';
-import { YStack, Text, XStack } from 'tamagui';
+import { Animated } from 'react-native';
+import { YStack, Text, XStack, Image } from 'tamagui';
 import LinearGradient from 'react-native-linear-gradient';
 
-const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl }) => {
+const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 200, wrapperStyle = {} }) => {
     return (
-        <YStack height={200} width='100%' position='relative' overflow='hidden'>
+        <Animated.View style={[{ position: 'relative', width: '100%', overflow: 'hidden', height }, wrapperStyle]}>
             <Image
                 source={{ uri: backgroundUrl }}
                 style={{
@@ -31,17 +31,19 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl }) => {
                             />
                         </YStack>
                     )}
-                    <Text color='white' fontSize='$8' fontWeight='bold'>
+                    <Text color='white' fontSize='$8' fontWeight='bold' numberOfLines={1}>
                         {storeName}
                     </Text>
                 </XStack>
-                <Text color='white' fontSize='$5' opacity={0.9} mt='$2'>
-                    {description}
-                </Text>
+                {description && (
+                    <Text color='white' fontSize='$5' opacity={0.9} mt='$2' numberOfLines={1}>
+                        {description}
+                    </Text>
+                )}
             </YStack>
 
             <LinearGradient
-                colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.5)']}
+                colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.8)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 style={{
@@ -51,7 +53,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl }) => {
                     width: '100%',
                 }}
             />
-        </YStack>
+        </Animated.View>
     );
 };
 

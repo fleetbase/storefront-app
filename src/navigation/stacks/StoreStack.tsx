@@ -13,14 +13,19 @@ export const StoreHome = {
         return {
             title: '',
             headerLeft: () => {
-                return <LocationPicker mt='$3' onPressAddNewLocation={(navigation) => navigation.navigate('StoreHomeTab', { screen: 'AddNewLocation' })} />;
+                return (
+                    <LocationPicker
+                        triggerStyle={{ borderWidth: 1, backgroundColor: 'black', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }}
+                        onPressAddNewLocation={(navigation) => navigation.navigate('StoreHomeTab', { screen: 'AddNewLocation' })}
+                    />
+                );
             },
             headerTransparent: true,
             headerShadowVisible: false,
             gestureEnabled: false,
             animation: 'none',
             headerStyle: {
-                backgroundColor: 'transparent',
+                transform: [{ translateY: -15 }],
             },
         };
     },
@@ -57,14 +62,7 @@ export const StoreSearch = {
     screen: StoreSearchScreen,
     options: ({ route }) => {
         return {
-            title: 'Search',
-            headerShadowVisible: false,
-            headerBlurEffect: 'regular',
-            gestureEnabled: false,
-            animation: 'none',
-            headerStyle: {
-                backgroundColor: getTheme('background'),
-            },
+            headerShown: false,
         };
     },
 };

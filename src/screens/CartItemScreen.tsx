@@ -2,47 +2,73 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
-import { restoreStorefrontInstance } from '../utils';
+import { restoreStorefrontInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
-import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
+import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 
-const ProductScreen = ({ route = {} }) => {
+const CartItemScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
-    const product = restoreStorefrontInstance(route.params.product, 'product');
-    const isService = product.getAttribute('is_service') === true;
-    const [selectedAddons, setSelectedAddons] = useState({});
-    const [selectedVariants, setSelectedVariants] = useState({});
-    const [subtotal, setSubtotal] = useState(calculateProductSubtotal(product, selectedVariants, selectedAddons));
-    const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
+    const [cartItem, setCartItem] = useState(route.params.cartItem);
+    const [product, setProduct] = useState(restoreStorefrontInstance(route.params.product, 'product'));
+    const [selectedAddons, setSelectedAddons] = useState(getAddonSelectionsFromCartItem(cartItem, product));
+    const [selectedVariants, setSelectedVariants] = useState(getVariantSelectionsFromCartItem(cartItem, product));
+    const [subtotal, setSubtotal] = useState(0);
+    const [quantity, setQuantity] = useState(cartItem.quantity ?? 1);
     const [ready, setReady] = useState(false);
 
-    useEffect(() => {
-        setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
-        setReady(isProductReadyForCheckout(product, selectedVariants));
-    }, [selectedAddons, selectedVariants]);
+    const isService = product && product.getAttribute('is_service') === true;
 
     useEffect(() => {
-        setReady(isProductReadyForCheckout(product, selectedVariants));
-    }, []);
+        if (product) {
+            setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
+            setReady(isProductReadyForCheckout(product, selectedVariants));
+        }
+    }, [product, selectedAddons, selectedVariants]);
+
+    useEffect(() => {
+        if (product) {
+            if (isEmpty(selectedVariants)) {
+                setSelectedVariants(getVariantSelectionsFromCartItem(cartItem, product));
+            }
+
+            if (isEmpty(selectedAddons)) {
+                setSelectedAddons(getAddonSelectionsFromCartItem(cartItem, product));
+            }
+
+            setReady(isProductReadyForCheckout(product, selectedVariants));
+        }
+    }, [product, cartItem]);
 
     const handleClose = () => {
         navigation.goBack();
     };
 
+    const handleRemoveFromCart = async () => {
+        try {
+            const updatedCart = await runWithLoading(cart.remove(cartItem.id), 'removeCartItem');
+            updateCart(updatedCart);
+            toast.success(`${product.getAttribute('name')} removed from cart.`, { position: ToastPosition.BOTTOM });
+            navigation.goBack();
+        } catch (error) {
+            toast.error('Failed to remove item from cart', { position: ToastPosition.BOTTOM });
+            console.error('Error removing cart item:', error.message);
+        }
+    };
+
     const handleAddToCart = async () => {
-        if (isLoading('addToCart') || !isProductReadyForCheckout(product, selectedVariants)) {
+        if (!isProductReadyForCheckout(product, selectedVariants)) {
             console.log('Product is not ready for checkout');
             return;
         }
@@ -52,9 +78,9 @@ const ProductScreen = ({ route = {} }) => {
         const variants = getSelectedVariants(selectedVariants);
 
         try {
-            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants }), 'addToCart');
+            const updatedCart = await runWithLoading(cart.update(cartItem.id, quantity, { addons, variants }), 'updateCart');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${product.getAttribute('name')} updated in cart.`, { position: ToastPosition.BOTTOM });
             navigation.goBack();
         } catch (error) {
             console.log('Error Adding to Cart', error.message);
@@ -120,12 +146,19 @@ const ProductScreen = ({ route = {} }) => {
                             </XStack>
                         )}
                     </YStack>
-                    <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} wrapperProps={{ space: '$4' }} />
+                    <ProductOptionsForm
+                        product={product}
+                        defaultSelectedAddons={selectedAddons}
+                        defaultSelectedVariants={selectedVariants}
+                        onAddonsChanged={setSelectedAddons}
+                        onVariationsChanged={setSelectedVariants}
+                        wrapperProps={{ space: '$4' }}
+                    />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' paddingHorizontal='$4' paddingTop='$2' paddingBottom='$8' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
-                <XStack width='38%'>
-                    <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} />
+            <XStack position='absolute' paddingHorizontal='$4' paddingTop='$2' paddingBottom='$8' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
+                <XStack width='35%'>
+                    <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} disabled={isLoading('addToCart') || isLoading('removeCartItem')} />
                 </XStack>
                 <XStack flex={1}>
                     <Button
@@ -138,28 +171,36 @@ const ProductScreen = ({ route = {} }) => {
                         width='100%'
                         alignItems='center'
                         justifyContent='space-between'
-                        disabled={!ready || isLoading('addToCart')}
+                        disabled={!ready || isLoading('addToCart') || isLoading('removeCartItem')}
                         opacity={ready ? 1 : 0.5}
-                        hoverStyle={{
-                            scale: 0.75,
-                            opacity: 0.5,
-                        }}
-                        pressStyle={{
-                            scale: 0.75,
-                            opacity: 0.5,
-                        }}
                     >
-                        {isLoading('addToCart') && (
+                        {isLoading('updateCart') && (
                             <Button.Icon>
                                 <Spinner />
                             </Button.Icon>
                         )}
                         <Button.Text fontSize='$5' fontWeight='normal'>
-                            Add to Cart
+                            Update
                         </Button.Text>
                         <Button.Text fontSize='$6' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}
                         </Button.Text>
+                    </Button>
+                </XStack>
+                <XStack width='12%'>
+                    <Button
+                        onPress={handleRemoveFromCart}
+                        bg='$error'
+                        color='white'
+                        width='100%'
+                        size='$4'
+                        alignSelf='center'
+                        alignItems='center'
+                        justifyContent='center'
+                        disabled={isLoading('addToCart') || isLoading('removeCartItem')}
+                        rounded
+                    >
+                        <Button.Icon>{isLoading('removeCartItem') ? <Spinner size='$4' color='white' /> : <FontAwesomeIcon icon={faTrash} color='white' size={15} />}</Button.Icon>
                     </Button>
                 </XStack>
             </XStack>
@@ -167,4 +208,4 @@ const ProductScreen = ({ route = {} }) => {
     );
 };
 
-export default ProductScreen;
+export default CartItemScreen;

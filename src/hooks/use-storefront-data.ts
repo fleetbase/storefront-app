@@ -3,30 +3,10 @@ import { Collection } from '@fleetbase/sdk';
 import { lookup } from '@fleetbase/storefront';
 import useStorefront from './use-storefront';
 import useStorage from './use-storage';
-import { isObject, isArray, isResource } from '../utils';
-
-export const restoreStorefrontResource = (data) => {
-    // If array of resources
-    if (isArray(data) && data.length) {
-        const isCollectionData = data.every((resource) => resource && isObject(resource.attributes));
-        const resourceType = data[0].resource;
-
-        if (isCollectionData) {
-            const collectionData = data.map(({ attributes, resource: type }) => lookup('resource', type, attributes));
-            return new Collection(collectionData);
-        }
-    }
-
-    // If single resource
-    if (isResource(data)) {
-        return lookup('resource', data.resource, data.attributes);
-    }
-
-    return data;
-};
+import { isObject, isArray, isResource, restoreStorefrontInstance } from '../utils';
 
 const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
-    const { persistKey, defaultValue = null, dependencies = [] } = isObject(onDataLoaded) ? onDataLoaded : options;
+    const { persistKey, defaultValue = null, dependencies = [], restoreType = null } = isObject(onDataLoaded) ? onDataLoaded : options;
     const { storefront } = useStorefront();
 
     // Use either useState or useStorage depending on whether persistKey is provided
@@ -56,7 +36,7 @@ const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
         fetchData();
     }, [storefront, ...dependencies]); // Watch dependencies
 
-    return { data: persistKey ? restoreStorefrontResource(data) : data, error, loading };
+    return { data: persistKey ? restoreStorefrontInstance(data, restoreType) : data, error, loading };
 };
 
 export default useStorefrontData;

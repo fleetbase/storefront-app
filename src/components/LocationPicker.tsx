@@ -12,7 +12,7 @@ import useStorage from '../hooks/use-storage';
 
 const LocationPicker = ({ ...props }) => {
     const navigation = useNavigation();
-    const { onPressAddNewLocation } = props;
+    const { onPressAddNewLocation, wrapperStyle = {}, triggerWrapperStyle = {}, triggerStyle = {}, triggerTextStyle = {}, triggerArrowStyle = {}, triggerProps = {} } = props;
     const { storefront, adapter } = useStorefront();
     const [currentLocation, setCurrentLocation] = useStorage('location');
     const [savedLocations, setSavedLocations] = useState([]);
@@ -70,32 +70,38 @@ const LocationPicker = ({ ...props }) => {
     };
 
     return (
-        <YStack space='$3' {...props}>
+        <YStack space='$3' style={wrapperStyle} {...props}>
             <TouchableOpacity
                 ref={triggerRef}
                 onPress={toggleDropdown}
                 activeOpacity={0.7}
-                style={{
-                    backgroundColor: isDropdownOpen ? '$surface' : 'transparent',
-                }}
+                style={[
+                    {
+                        backgroundColor: isDropdownOpen ? '$surface' : 'transparent',
+                    },
+                    triggerWrapperStyle,
+                ]}
             >
-                <XStack alignItems='center' space='$2'>
+                <XStack alignItems='center' space='$2' style={triggerStyle} {...triggerProps}>
                     <FontAwesomeIcon icon={faMapMarkerAlt} size={14} color='#4b5563' />
                     <Text
                         color='$primary'
                         fontWeight='bold'
                         fontSize='$5'
                         numberOfLines={1}
-                        style={{
-                            maxWidth: 200,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                        }}
+                        style={[
+                            {
+                                maxWidth: 200,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            },
+                            triggerTextStyle,
+                        ]}
                     >
                         {currentLocation ? currentLocation.name : 'Loading...'}
                     </Text>
-                    <Text style={{ fontSize: 14, color: '#4b5563' }}>▼</Text>
+                    <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>
                 </XStack>
             </TouchableOpacity>
 
@@ -113,7 +119,7 @@ const LocationPicker = ({ ...props }) => {
                             backgroundColor='transparent'
                             width={dropdownWidth}
                             position='absolute'
-                            top={triggerPosition.height + 80}
+                            top={triggerPosition.height + 60}
                             left={triggerPosition.x - 15}
                             zIndex={1}
                             enterStyle={{
@@ -135,7 +141,7 @@ const LocationPicker = ({ ...props }) => {
                             originY={0}
                         >
                             <BlurView style={StyleSheet.absoluteFillObject} blurType='light' blurAmount={10} borderRadius={10} reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)' />
-                            <YStack space='$2' padding='$3' borderRadius='$4'>
+                            <YStack space='$2' padding='$2' borderRadius='$4'>
                                 {savedLocations.map((location) => (
                                     <TouchableOpacity
                                         key={location.id}

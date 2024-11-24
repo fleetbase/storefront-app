@@ -3,14 +3,14 @@ import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { Cart } from '@fleetbase/storefront';
 import useStorage from './use-storage';
-import useStorefront from './use-storefront';
+import useStorefront, { adapter } from './use-storefront';
 
 const { emit } = EventRegister;
 
-const useCart = () => {
+const useCart = (cartId = null) => {
     const { storefront } = useStorefront();
     const [storedCart, setStoredCart] = useStorage('cart');
-    const [cart, setCart] = useState(null); // Actual Cart instance
+    const [cart, setCart] = useState(storedCart ? new Cart(storedCart, adapter) : new Cart({ items: [] }), adapter); // Actual Cart instance
 
     // Initialize the Cart instance when storefront and storedCart are available
     useEffect(() => {
@@ -19,14 +19,15 @@ const useCart = () => {
 
         // Load the cart from server
         const loadCartFromServer = async () => {
-            const deviceId = await getUniqueId();
-            const cartInstance = await storefront.cart.retrieve(deviceId);
+            cartId = cartId ? cartId : await getUniqueId();
+            const cartInstance = await storefront.cart.retrieve(cartId);
             setCart(cartInstance);
+            setStoredCart(cartInstance.serialize());
         };
 
         // Load the cart from storage
         const loadCartFromStorage = () => {
-            const cartInstance = new Cart(storedCart, storefront.getAdapter());
+            const cartInstance = new Cart(storedCart, adapter);
             setCart(cartInstance);
         };
 
@@ -49,7 +50,7 @@ const useCart = () => {
             }
 
             // Ensure we always have a Cart instance
-            const cartInstance = newCart instanceof Cart ? newCart : new Cart(newCart, storefront.getAdapter());
+            const cartInstance = newCart instanceof Cart ? newCart : new Cart(newCart, adapter);
 
             // Persist serialized cart and update state
             setStoredCart(cartInstance.serialize());

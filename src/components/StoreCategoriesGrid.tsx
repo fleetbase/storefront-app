@@ -36,8 +36,8 @@ const StoreCategoriesGrid = ({
 
     // Calculate item width with fixed padding
     const screenWidth = Dimensions.get('window').width;
-    const sidePadding = 16; // Padding on each side
-    const itemSpacing = 8; // Space between items
+    const sidePadding = 16;
+    const itemSpacing = 8;
     const totalItemWidth = screenWidth - sidePadding * 2 - itemSpacing * (adjustedCategoriesPerRow - 1);
     const itemWidth = itemContainerWidth ? itemContainerWidth : totalItemWidth / adjustedCategoriesPerRow;
     const rows = organizeCategoriesIntoRows(categories, adjustedCategoriesPerRow);
@@ -49,14 +49,25 @@ const StoreCategoriesGrid = ({
     };
 
     return (
-        <YStack paddingHorizontal={sidePadding} paddingVertical='$2' space='$2' style={[{ flex: 1 }, wrapperStyle]} {...wrapperProps}>
+        <YStack
+            paddingHorizontal={sidePadding}
+            bg='$bg'
+            borderWidth={1}
+            borderColor='$borderColor'
+            borderRadius='$4'
+            paddingVertical='$2'
+            space='$2'
+            flex={1}
+            style={wrapperStyle}
+            {...wrapperProps}
+        >
             {rows.map((row, rowIndex) => (
                 <XStack key={rowIndex} justifyContent={justifyContent} space={itemSpacing} style={rowStyle} {...rowProps}>
                     {row.map((category, index) => (
                         <TouchableOpacity key={index} onPress={() => handleCategoryPress(category)}>
-                            <YStack alignItems='center' justifyContent='center' paddingVertical='$4' space='$2' width={itemWidth} style={itemStyle} {...itemContainerProps}>
+                            <YStack alignItems='center' justifyContent='center' paddingVertical='$2' space='$2' width={itemWidth} style={itemStyle} {...itemContainerProps}>
                                 <Image source={{ uri: category.getAttribute('icon_url') }} width={50} height={50} borderRadius={25} />
-                                <Text fontSize='$4' fontWeight='600' textAlign='center' color='$color'>
+                                <Text fontSize='$5' fontWeight='bold' textAlign='center' color='$color'>
                                     {category.getAttribute('name')}
                                 </Text>
                             </YStack>
