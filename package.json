@@ -20,6 +20,7 @@
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
         "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+        "@backpackapp-io/react-native-toast": "^0.12.1",
         "@fleetbase/sdk": "1.2.8",
         "@fleetbase/storefront": "file:../storefront-js",
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
@@ -44,6 +45,7 @@
         "country-locale-map": "^1.9.0",
         "date-fns": "^4.1.0",
         "i18n-js": "^4.5.0",
+        "inflected": "^2.1.0",
         "inflector-js": "^1.0.1",
         "language-name-map": "^0.3.0",
         "locale-emoji": "^0.3.0",
