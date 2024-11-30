@@ -102,6 +102,9 @@ android {
 
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER")
+        manifestPlaceholders = [
+            appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX")
+        ]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         missingDimensionStrategy 'react-native-camera', 'general' 

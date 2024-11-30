@@ -2,6 +2,8 @@ import LocationPermissionScreen from '../../screens/LocationPermissionScreen';
 import LocationPickerScreen from '../../screens/LocationPickerScreen';
 import SavedLocationsScreen from '../../screens/SavedLocationsScreen';
 import AddNewLocationScreen from '../../screens/AddNewLocationScreen';
+import EditLocationScreen from '../../screens/EditLocationScreen';
+import AddressBookScreen from '../../screens/AddressBookScreen';
 import BackButton from '../../components/BackButton';
 import { getTheme } from '../../utils';
 
@@ -19,10 +21,34 @@ export const SavedLocations = {
     options: {},
 };
 
+export const AddressBook = {
+    screen: AddressBookScreen,
+    options: ({ navigation, route }) => {
+        return {
+            title: 'Address Book',
+            headerTransparent: true,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerBlurEffect: 'light',
+        };
+    },
+};
+
 export const AddNewLocation = {
     screen: AddNewLocationScreen,
     options: {
         headerShown: false,
+    },
+};
+
+export const EditLocation = {
+    screen: EditLocationScreen,
+    options: ({ navigation, route }) => {
+        return {
+            title: route.params.place.street1,
+            headerTransparent: true,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerBlurEffect: 'light',
+        };
     },
 };
 
@@ -42,7 +68,9 @@ const LocationStack = {
     LocationPermission,
     SavedLocations,
     AddNewLocation,
+    EditLocation,
     LocationPicker,
+    AddressBook,
 };
 
 export default LocationStack;

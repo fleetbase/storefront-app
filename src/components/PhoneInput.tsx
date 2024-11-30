@@ -1,0 +1,162 @@
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { FlatList, TextInput, Keyboard } from 'react-native';
+import { countries, getEmojiFlag } from 'countries-list';
+import BottomSheet, { BottomSheetView, BottomSheetFlatList, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { useTheme, View, Text, Button, XStack, YStack, Input } from 'tamagui';
+import { Portal } from '@gorhom/portal';
+import { getCountryByPhoneCode, getCountryByISO2, parsePhoneNumber, debounce } from '../utils';
+
+function getDefaultValues(value = null, fallbackCountry = 'US') {
+    if (typeof value === 'string' && value.startsWith('+')) {
+        const segments = parsePhoneNumber(value);
+        return {
+            phoneNumber: segments.localNumber ?? '',
+            ...segments,
+        };
+    }
+
+    const country = getCountryByISO2(fallbackCountry);
+    return {
+        phoneNumber: '',
+        country,
+    };
+}
+
+const countryList = Object.entries(countries).map(([code, details]) => ({
+    code,
+    name: details.name,
+    phone: details.phone[0],
+    emoji: getEmojiFlag(code),
+}));
+
+const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US', wrapperProps = {} }) => {
+    const defaultValue = getDefaultValues(value, defaultCountryCode);
+    const theme = useTheme();
+    const [selectedCountry, setSelectedCountry] = useState(defaultValue.country);
+    const [phoneNumber, setPhoneNumber] = useState(defaultValue.phoneNumber);
+    const [searchTerm, setSearchTerm] = useState('');
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const phoneInputRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const snapPoints = useMemo(() => ['50%', '75%'], []);
+
+    const filteredCountries = useMemo(() => {
+        return countryList.filter(({ name, code, phone }) => {
+            const lowerSearch = searchTerm.toLowerCase();
+            return name.toLowerCase().includes(lowerSearch) || code.toLowerCase().includes(lowerSearch) || String(phone).includes(lowerSearch);
+        });
+    }, [searchTerm]);
+
+    const openBottomSheet = () => {
+        phoneInputRef.current?.blur();
+        bottomSheetRef.current?.collapse();
+        searchInputRef.current?.focus();
+    };
+
+    const closeBottomSheet = () => {
+        Keyboard.dismiss();
+        bottomSheetRef.current?.close();
+        phoneInputRef.current?.focus();
+    };
+
+    const handleInputFocus = () => {
+        bottomSheetRef.current?.close();
+    };
+
+    const handleCountrySelect = (country: { code: string; phone: string }) => {
+        setSelectedCountry(country);
+        closeBottomSheet();
+    };
+
+    useEffect(() => {
+        if (onChange) {
+            const combinedValue = `+${selectedCountry.phone}${phoneNumber}`;
+            onChange(combinedValue, phoneNumber, selectedCountry);
+        }
+    }, [selectedCountry, phoneNumber, onChange]);
+
+    return (
+        <YStack space='$4' {...wrapperProps}>
+            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' bg='white'>
+                <Button size='$4' onPress={openBottomSheet} bg='transparent' borderWidth={0} borderRadius={0} borderRightWidth={1} borderColor='$borderColor' width={90} maxWidth={90}>
+                    <XStack alignItems='center' space='$2'>
+                        <Text>{getEmojiFlag(selectedCountry.code)}</Text>
+                        <Text>+{selectedCountry.phone}</Text>
+                    </XStack>
+                </Button>
+                <Input
+                    ref={phoneInputRef}
+                    flex={1}
+                    placeholder='Enter phone number'
+                    keyboardType='phone-pad'
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    onFocus={handleInputFocus}
+                    borderWidth={0}
+                    borderRadius={0}
+                    bg='transparent'
+                />
+            </XStack>
+
+            <Portal hostName='MainPortal'>
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    keyboardBehavior='extend'
+                    keyboardBlurBehavior='none'
+                    enableDynamicSizing={false}
+                    style={{ flex: 1, padding: 10, width: '100%' }}
+                >
+                    <BottomSheetTextInput
+                        ref={searchInputRef}
+                        placeholder='Search country'
+                        onChangeText={setSearchTerm}
+                        autoCapitalize={false}
+                        autoComplete={false}
+                        style={{
+                            borderWidth: 1,
+                            borderColor: theme.borderColor.val,
+                            padding: 14,
+                            borderRadius: 6,
+                            fontSize: 13,
+                            marginBottom: 10,
+                        }}
+                    />
+                    <BottomSheetView style={{ flex: 1 }}>
+                        <BottomSheetFlatList
+                            data={filteredCountries}
+                            keyExtractor={(item) => item.code}
+                            renderItem={({ item }) => (
+                                <Button
+                                    size='$4'
+                                    onPress={() => handleCountrySelect({ code: item.code, phone: item.phone })}
+                                    bg='$secondary'
+                                    justifyContent='space-between'
+                                    space='$2'
+                                    mb='$2'
+                                    hoverStyle={{
+                                        scale: 0.9,
+                                        opacity: 0.5,
+                                    }}
+                                    pressStyle={{
+                                        scale: 0.9,
+                                        opacity: 0.5,
+                                    }}
+                                >
+                                    <XStack alignItems='center' space='$2'>
+                                        <Text>{item.emoji}</Text>
+                                        <Text>{item.name}</Text>
+                                    </XStack>
+                                    <Text>+{item.phone}</Text>
+                                </Button>
+                            )}
+                        />
+                    </BottomSheetView>
+                </BottomSheet>
+            </Portal>
+        </YStack>
+    );
+};
+
+export default PhoneInput;

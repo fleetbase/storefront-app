@@ -56,6 +56,17 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>$(APP_IDENTIFIER)</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>$(APP_LINK_PREFIX)</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSCameraUsageDescription</key>
 		<string>This app may need to use your camera for your profile picture</string>
 		<key>NSContactsUsageDescription</key>

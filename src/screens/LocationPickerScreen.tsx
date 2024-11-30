@@ -114,7 +114,7 @@ const LocationPickerScreen = ({ route }) => {
                                 placeholder='Search for your address'
                                 bg='$surface'
                                 borderColor='$borderColor'
-                                fontColor='$color'
+                                color='$color'
                             />
                         </View>
                     </YStack>

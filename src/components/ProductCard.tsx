@@ -114,7 +114,7 @@ const ProductCard = ({
                                             </Text>
                                         </YStack>
                                     ) : (
-                                        <Text fontSize='$5' fontColor='$success' fontWeight='bold'>
+                                        <Text fontSize='$5' color='$success' fontWeight='bold'>
                                             {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                                         </Text>
                                     )}

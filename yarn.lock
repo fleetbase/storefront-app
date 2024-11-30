@@ -3263,6 +3263,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shopify/flash-list@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@shopify/flash-list@npm:1.7.2"
+  dependencies:
+    recyclerlistview: 4.2.1
+    tslib: 2.6.3
+  peerDependencies:
+    "@babel/runtime": "*"
+    react: "*"
+    react-native: "*"
+  checksum: 94a407fa8897c07004a75e8dc8e8aa7aa70505b37ecdec8a59c248c30f5f7a4f9890c2320bd34394584633c8b03ed59b64392a5c7cb7c1455af19e30e01c3039
+  languageName: node
+  linkType: hard
+
 "@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -9599,7 +9613,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.debounce@npm:^4.0.8":
+"lodash.debounce@npm:4.0.8, lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
   checksum: a3f527d22c548f43ae31c861ada88b2637eb48ac6aa3eb56e82d44917971b8aa96fbb37aa60efea674dc4ee8c42074f90f7b1f772e9db375435f6c83a19b3bc6
@@ -11047,7 +11061,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.0, prop-types@npm:^15.5.7, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.5.0, prop-types@npm:^15.5.7, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -11204,6 +11218,25 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
+  languageName: node
+  linkType: hard
+
+"react-native-app-auth@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "react-native-app-auth@npm:8.0.1"
+  dependencies:
+    invariant: 2.2.4
+    react-native-base64: 0.0.2
+  peerDependencies:
+    react-native: ">=0.63.0"
+  checksum: 0a5beda9af784e32b4c0d6772f62ff3ab881a3a7a787d0ba6ec439799989cbe2c7d5f53b2ed641625ae784236d06eda26d1bf145680992744fed7fc8c06b7be1
+  languageName: node
+  linkType: hard
+
+"react-native-base64@npm:0.0.2":
+  version: 0.0.2
+  resolution: "react-native-base64@npm:0.0.2"
+  checksum: 696f6cad0e3ce26437275bcd791becaf597300d351a3ab2d7084fd42a177731bb9ab1e490534397ed35de4cd2a5a4385ee8d49bf5846069101b5ada98f132d23
   languageName: node
   linkType: hard
 
@@ -11370,6 +11403,16 @@ __metadata:
   bin:
     mmkv-link: autolink/postlink/run.js
   checksum: 543f784ec19c588f7514612bda3642997d88c640318f95bbd19d4a66d1ae09ef6114aef2ad2044717fe80097f5f7194b5f8731dbdd5a6e60c638e682c6718703
+  languageName: node
+  linkType: hard
+
+"react-native-otp-entry@npm:^1.7.3":
+  version: 1.7.3
+  resolution: "react-native-otp-entry@npm:1.7.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 561bd593c6a2281b769051c38c240cc3c4d2a99be84cd20e5d9c9395003a423ff862d675285128dbfc1e2d8e9a52b52917944b06a0c4960f0a6d9e0a4a54902a
   languageName: node
   linkType: hard
 
@@ -11741,6 +11784,20 @@ __metadata:
     source-map: ~0.6.1
     tslib: ^2.0.1
   checksum: 03cc7f57562238ba258d468be67bf7446ce7a707bc87a087891dad15afead46c36e9aaeedf2130e2ab5a465244a9c62bfd4127849761cf8f4085abe2f3e5f485
+  languageName: node
+  linkType: hard
+
+"recyclerlistview@npm:4.2.1":
+  version: 4.2.1
+  resolution: "recyclerlistview@npm:4.2.1"
+  dependencies:
+    lodash.debounce: 4.0.8
+    prop-types: 15.8.1
+    ts-object-utils: 0.0.5
+  peerDependencies:
+    react: ">= 15.2.1"
+    react-native: ">= 0.30.0"
+  checksum: 48e84937f803ac2acb510b2bc36b3ef1ea9c5383540a832f80c87d7e7f933b26c59e4ffc2d7de529be55e14a8d551c4f6660a450ad220142f351e6bf6e630450
   languageName: node
   linkType: hard
 
@@ -12629,6 +12686,7 @@ __metadata:
     "@react-navigation/elements": ^2.0.0
     "@react-navigation/native": ^7.0.0
     "@react-navigation/native-stack": ^7.0.0
+    "@shopify/flash-list": ^1.7.2
     "@stripe/stripe-react-native": 0.39.0
     "@tamagui/config": ^1.116.14
     "@types/react": ^18.2.6
@@ -12650,6 +12708,7 @@ __metadata:
     react: 18.3.1
     react-dom: ^18.3.1
     react-native: 0.76.1
+    react-native-app-auth: ^8.0.1
     react-native-bootsplash: ^5.3.0
     react-native-config: ^1.5.3
     react-native-device-info: ^14.0.0
@@ -12663,6 +12722,7 @@ __metadata:
     react-native-maps: ^1.20.0
     react-native-maps-directions: ^1.9.0
     react-native-mmkv-storage: ^0.11.0
+    react-native-otp-entry: ^1.7.3
     react-native-permissions: ^4.1.1
     react-native-push-notification: ^8.1.1
     react-native-reanimated: ^3.16.1
@@ -13235,10 +13295,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-object-utils@npm:0.0.5":
+  version: 0.0.5
+  resolution: "ts-object-utils@npm:0.0.5"
+  checksum: 83c48fbdaba392fb2c01cea53b267ed5538d2bb44fc6c3eecc10bcfabc1780bfa6ec8569b52bbf0140d9b521d9049d5f15884e12286918244d463d854dbc73cb
+  languageName: node
+  linkType: hard
+
 "ts-toolbelt@npm:^6.15.1":
   version: 6.15.5
   resolution: "ts-toolbelt@npm:6.15.5"
   checksum: 24ad00cfd9ce735c76c873a9b1347eac475b94e39ebbdf100c9019dce88dd5f4babed52884cf82bb456a38c28edd0099ab6f704b84b2e5e034852b618472c1f3
+  languageName: node
+  linkType: hard
+
+"tslib@npm:2.6.3":
+  version: 2.6.3
+  resolution: "tslib@npm:2.6.3"
+  checksum: 74fce0e100f1ebd95b8995fbbd0e6c91bdd8f4c35c00d4da62e285a3363aaa534de40a80db30ecfd388ed7c313c42d930ee0eaf108e8114214b180eec3dbe6f5
   languageName: node
   linkType: hard
 

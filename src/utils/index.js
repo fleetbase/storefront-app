@@ -1,10 +1,12 @@
 import Config from 'react-native-config';
+import { Platform, ActionSheetIOS, Alert } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
 import { lookup } from '@fleetbase/storefront';
 import storage, { getString } from './storage';
 import { adapter, instance as storefrontInstance } from '../hooks/use-storefront';
 import { themes } from '../../tamagui.config';
 import { pluralize } from 'inflected';
+import { countries } from 'countries-list';
 
 export function get(target, path, defaultValue = null) {
     let current = target;
@@ -216,10 +218,176 @@ export async function delay(ms = 300, callback = null) {
     });
 }
 
+export function later(callback = null, ms = 300) {
+    return setTimeout(() => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+    }, ms);
+}
+
 export function debounce(func, delay) {
     let timeoutId;
     return (...args) => {
         if (timeoutId) clearTimeout(timeoutId);
         timeoutId = setTimeout(() => func(...args), delay);
     };
+}
+
+export function getCountryByPhoneCode(phoneCode) {
+    const normalizedCode = String(phoneCode).replace('+', ''); // Ensure the code is a string and remove leading '+'
+
+    for (const [countryCode, countryData] of Object.entries(countries)) {
+        if (countryData.phone.includes(Number(normalizedCode))) {
+            return {
+                code: countryCode,
+                phone: countryData.phone[0],
+                ...countryData,
+            };
+        }
+    }
+
+    return null;
+}
+
+export function getCountryByISO2(iso2) {
+    if (!iso2 || typeof iso2 !== 'string') {
+        throw new Error('Invalid ISO2 country code. It must be a non-empty string.');
+    }
+
+    const normalizedCode = iso2.toUpperCase(); // Ensure the code is uppercase
+
+    const countryData = countries[normalizedCode];
+    if (countryData) {
+        return {
+            code: normalizedCode,
+            phone: countryData.phone[0],
+            ...countryData, // Full country data
+        };
+    }
+
+    return null; // Return null if no country matches the code
+}
+
+export function parsePhoneNumber(phoneNumber) {
+    if (!phoneNumber || typeof phoneNumber !== 'string' || !phoneNumber.startsWith('+')) {
+        throw new Error('Invalid phone number format. It should start with a "+" sign.');
+    }
+
+    // Remove the "+" from the phone number
+    const numericPhone = phoneNumber.slice(1);
+
+    // Iterate through all countries to find a matching country code
+    for (const [countryCode, countryData] of Object.entries(countries)) {
+        for (const code of countryData.phone) {
+            const codeString = String(code);
+            if (numericPhone.startsWith(codeString)) {
+                const localNumber = numericPhone.slice(codeString.length); // Extract the remaining phone number
+
+                // Handle case for `1` defaulting to Canada 🤢
+                if (codeString === '1') {
+                    return { country: getCountryByISO2('US'), localNumber };
+                }
+
+                return {
+                    country: {
+                        code: countryCode, // Alpha-2 code (e.g., "SG" or "MN")
+                        name: countryData.name,
+                        phone: codeString,
+                    },
+                    localNumber,
+                };
+            }
+        }
+    }
+
+    // Return null if no matching country code is found
+    return null;
+}
+
+export function isValidPhoneNumber(phoneNumber) {
+    // Ensure it's a string
+    if (typeof phoneNumber !== 'string') {
+        return false;
+    }
+
+    // Ensure it starts with a '+' followed by digits
+    if (!phoneNumber.startsWith('+')) {
+        return false;
+    }
+
+    // Remove spaces, dashes, and parentheses for further validation
+    const cleanedNumber = phoneNumber.replace(/[\s\-()]/g, '');
+
+    // Ensure it contains only digits after the '+'
+    const phoneRegex = /^\+\d{8,15}$/;
+    if (!phoneRegex.test(cleanedNumber)) {
+        return false;
+    }
+
+    // Passes all validations
+    return true;
+}
+
+export function abbreviateName(name, length = 2) {
+    if (typeof name !== 'string' || name.trim() === '') {
+        throw new Error('Invalid name. Please provide a valid non-empty string.');
+    }
+    if (![2, 3].includes(length)) {
+        throw new Error('Invalid length. Only 2 or 3 are supported.');
+    }
+
+    name = name.trim();
+
+    // If the name's length is less than or equal to the desired length, return the name
+    if (name.length <= length) {
+        return name.toUpperCase();
+    }
+
+    const parts = name.split(/\s+/); // Split by whitespace
+    let abbreviation = '';
+
+    // Handle names with multiple words
+    if (parts.length > 1) {
+        for (const part of parts) {
+            if (abbreviation.length < length) {
+                abbreviation += part[0]?.toUpperCase() ?? '';
+            }
+        }
+    } else {
+        // Handle single-word names
+        abbreviation = name.slice(0, length).toUpperCase();
+    }
+
+    // Ensure the abbreviation matches the requested length
+    return abbreviation.slice(0, length).padEnd(length, abbreviation[0] || '');
+}
+
+export function showActionSheet({ title, message, options, cancelButtonIndex, destructiveButtonIndex, onSelect }) {
+    if (Platform.OS === 'ios') {
+        // iOS Action Sheet
+        ActionSheetIOS.showActionSheetWithOptions(
+            {
+                title,
+                message,
+                options,
+                cancelButtonIndex,
+                destructiveButtonIndex,
+            },
+            (buttonIndex) => {
+                if (onSelect) {
+                    onSelect(buttonIndex);
+                }
+            }
+        );
+    } else if (Platform.OS === 'android') {
+        // Android Alert
+        const buttons = options.map((option, index) => ({
+            text: option,
+            onPress: () => onSelect && onSelect(index),
+            style: index === cancelButtonIndex ? 'cancel' : index === destructiveButtonIndex ? 'destructive' : 'default',
+        }));
+
+        Alert.alert(title || 'Choose an option', message || '', buttons, { cancelable: true });
+    }
 }

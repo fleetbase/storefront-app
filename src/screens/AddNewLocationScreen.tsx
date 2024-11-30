@@ -4,14 +4,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
-import { geocodeAutocomplete, getCurrentLocation, getLocationName } from '../utils/location';
+import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { geocodeAutocomplete, getPlaceDetails, createFleetbasePlaceFromDetails, formattedAddressFromPlace } from '../utils/location';
 import useStorage from '../hooks/use-storage';
+import useCurrentLocation from '../hooks/use-current-location';
 import BackButton from '../components/BackButton';
 
 const AddNewLocationScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
-    const [currentLocation, setCurrentLocation] = useState({});
+    const { liveLocation: currentLocation, getCurrentLocationCoordinates } = useCurrentLocation();
     const [inputFocused, setInputFocused] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -26,20 +28,23 @@ const AddNewLocationScreen = () => {
         searchInput.current.blur();
     };
 
-    useEffect(() => {
-        const initializeLocation = async () => {
-            const location = await getCurrentLocation();
-            if (location) {
-                setCurrentLocation({
-                    id: 'default',
-                    name: getLocationName(location),
-                    coordinates: location.coordinates,
-                });
-            }
-        };
+    const handleLocationSelect = async (location) => {
+        try {
+            const details = await getPlaceDetails(location.place_id);
+            const place = createFleetbasePlaceFromDetails(details);
+            navigation.navigate('EditLocation', { place: place.serialize() });
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
-        initializeLocation();
-    }, []);
+    const handleUseCurrentLocation = async () => {
+        try {
+            navigation.navigate('EditLocation', { place: currentLocation.serialize() });
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     const searchPlaces = useCallback(async () => {
         if (inputValue.trim() === '') {
@@ -47,9 +52,8 @@ const AddNewLocationScreen = () => {
             return;
         }
 
-        console.log('Searching Places...');
-        const results = await geocodeAutocomplete(inputValue, currentLocation ? currentLocation.coordinates : null);
-        console.log('searchPlaces results', results);
+        const coordinates = getCurrentLocationCoordinates();
+        const results = await geocodeAutocomplete(inputValue, coordinates);
         setSearchResults(results);
     }, [inputValue]);
 
@@ -57,7 +61,7 @@ const AddNewLocationScreen = () => {
     useEffect(() => {
         const debounceTimeout = setTimeout(() => {
             searchPlaces();
-        }, 500); // Adjust delay as necessary
+        }, 500);
 
         return () => clearTimeout(debounceTimeout); // Clear timeout on cleanup
     }, [inputValue, searchPlaces]);
@@ -124,6 +128,9 @@ const AddNewLocationScreen = () => {
                                     onFocus={handleFocus}
                                     onBlur={handleBlur}
                                     onChangeText={setInputValue}
+                                    autoCapitalize={false}
+                                    autoComplete={false}
+                                    autoCorrect={false}
                                 />
                                 {inputFocused && (
                                     <Button size={40} onPress={handleClearInput} bg='transparent' animation='quick'>
@@ -150,7 +157,7 @@ const AddNewLocationScreen = () => {
                         >
                             <ScrollView style={{ height: 150 }}>
                                 {currentLocation && searchResults.length === 0 && (
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={handleUseCurrentLocation}>
                                         <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                             <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                                 <Circle size={40} bg='$background'>
@@ -158,10 +165,10 @@ const AddNewLocationScreen = () => {
                                                 </Circle>
                                             </YStack>
                                             <YStack flex={1} space='$1'>
-                                                <Text fontColor='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                    {currentLocation.name}
+                                                <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
+                                                    {formattedAddressFromPlace(currentLocation)}
                                                 </Text>
-                                                <Text fontColor='$textSecondary' numberOfLines={1}>
+                                                <Text color='$textSecondary' numberOfLines={1}>
                                                     We think you're around here
                                                 </Text>
                                             </YStack>
@@ -170,7 +177,7 @@ const AddNewLocationScreen = () => {
                                 )}
                                 {searchResults.length > 0 &&
                                     searchResults.map((location) => (
-                                        <TouchableOpacity key={location.place_id}>
+                                        <TouchableOpacity onPress={() => handleLocationSelect(location)} key={location.place_id}>
                                             <XStack animation='quick' space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                                 <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                                     <Circle size={40} bg='$background'>
@@ -178,11 +185,11 @@ const AddNewLocationScreen = () => {
                                                     </Circle>
                                                 </YStack>
                                                 <YStack flex={1} space='$1'>
-                                                    <Text fontColor='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
+                                                    <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
                                                         {location.description}
                                                     </Text>
-                                                    <Text fontColor='$textSecondary' numberOfLines={1}>
-                                                        Testing
+                                                    <Text color='$textSecondary' numberOfLines={1}>
+                                                        {[location.city, location.state, location.country].filter(Boolean).join(', ')}
                                                     </Text>
                                                 </YStack>
                                             </XStack>
@@ -196,10 +203,10 @@ const AddNewLocationScreen = () => {
                                             </Circle>
                                         </YStack>
                                         <YStack flex={1} space='$1'>
-                                            <Text fontColor='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
+                                            <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
                                                 Can't find your address?
                                             </Text>
-                                            <Text fontColor='$textSecondary' numberOfLines={1}>
+                                            <Text color='$textSecondary' numberOfLines={1}>
                                                 Use a map to do this instead
                                             </Text>
                                         </YStack>

@@ -123,7 +123,7 @@ const StoreSearch = (route = {}) => {
                     shadowOpacity={0}
                     shadowRadius={0}
                     borderWidth={1}
-                    borderColor='black'
+                    borderColor='$borderColorWithShadow'
                     borderRadius='$4'
                     bg='white'
                     shadowColor='$shadowColor'
@@ -204,7 +204,7 @@ const StoreSearch = (route = {}) => {
                 }}
             >
                 <YStack padding='$4'>
-                    <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} fontColor='black' />
+                    <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} color='black' />
                 </YStack>
             </Animated.View>
             {inputFocused && (

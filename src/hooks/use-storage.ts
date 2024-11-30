@@ -2,7 +2,7 @@ import { MMKVLoader, useMMKVStorage as useMMKV } from 'react-native-mmkv-storage
 import { useCallback } from 'react';
 
 // Initialize MMKV storage once, ensuring it’s a singleton
-const storage = new MMKVLoader().initialize();
+export const storage = new MMKVLoader().initialize();
 
 // Main `useStorage` hook function
 function useStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {

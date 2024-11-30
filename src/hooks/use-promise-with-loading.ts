@@ -13,17 +13,17 @@ export function usePromiseWithLoading() {
         }
     }, []);
 
+    const isAnyLoading = useCallback(() => {
+        const anyLoading = Object.values(loadingStates).some((_) => _ === true);
+        return anyLoading;
+    }, [loadingStates]);
+
     const isLoading = useCallback(
         (loadingKey = 'default') => {
             return !!loadingStates[loadingKey];
         },
         [loadingStates]
     );
-
-    const isAnyLoading = useCallback(() => {
-        const anyLoading = Object.values(loadingStates).some((_) => _ === true);
-        return anyLoading;
-    }, [loadingStates]);
 
     return { runWithLoading, isLoading, isAnyLoading };
 }

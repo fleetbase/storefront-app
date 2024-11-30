@@ -5,14 +5,21 @@ import { StyleSheet } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
-import { getTheme } from '../utils';
+import { useTheme } from 'tamagui';
 import { getCartCount } from '../utils/cart';
+import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
 import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CartScreen from '../screens/CartScreen';
 import CartItemScreen from '../screens/CartItemScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import LoginScreen from '../screens/LoginScreen';
+import PhoneLoginScreen from '../screens/PhoneLoginScreen';
+import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
+import CreateAccountScreen from '../screens/CreateAccountScreen';
+import AccountScreen from '../screens/AccountScreen';
+import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
 import ProductScreen from '../screens/ProductScreen';
 import LocationPicker from '../components/LocationPicker';
 import BackButton from '../components/BackButton';
@@ -75,22 +82,87 @@ const StoreCartTab = createNativeStackNavigator({
 });
 
 const StoreProfileTab = createNativeStackNavigator({
-    initialRouteName: 'Profile',
     screens: {
         Profile: {
+            if: useIsAuthenticated,
             screen: ProfileScreen,
+            options: {
+                headerShown: false,
+            },
         },
+        Account: {
+            if: useIsAuthenticated,
+            screen: AccountScreen,
+            options: ({ route, navigation }) => {
+                return {
+                    title: '',
+                    headerTitleAlign: 'left',
+                    headerTransparent: true,
+                    headerShadowVisible: false,
+                    headerLeft: () => {
+                        return <BackButton onPress={() => navigation.goBack()} />;
+                    },
+                };
+            },
+        },
+        EditAccountProperty: {
+            if: useIsAuthenticated,
+            screen: EditAccountPropertyScreen,
+            options: ({ route, navigation }) => {
+                return {
+                    title: '',
+                    headerTitleAlign: 'left',
+                    headerTransparent: true,
+                    headerShadowVisible: false,
+                    headerLeft: () => {
+                        return <BackButton onPress={() => navigation.goBack()} />;
+                    },
+                };
+            },
+        },
+        Login: {
+            if: useIsNotAuthenticated,
+            screen: LoginScreen,
+            options: {
+                headerShown: false,
+            },
+        },
+        PhoneLogin: {
+            if: useIsNotAuthenticated,
+            screen: PhoneLoginScreen,
+            options: {
+                headerShown: false,
+                gestureEnabled: false,
+            },
+        },
+        PhoneLoginVerify: {
+            if: useIsNotAuthenticated,
+            screen: PhoneLoginVerifyScreen,
+            options: {
+                headerShown: false,
+                gestureEnabled: false,
+            },
+        },
+        CreateAccount: {
+            if: useIsNotAuthenticated,
+            screen: CreateAccountScreen,
+            options: {
+                headerShown: false,
+            },
+        },
+        ...LocationStack,
     },
 });
 
 const StoreNavigator = createBottomTabNavigator({
     initialRouteName: 'StoreHomeTab',
     screenOptions: ({ route, navigation }) => {
+        const theme = useTheme();
         return {
             headerShown: false,
             tabBarBackground: () => <BlurView tint='light' intensity={100} style={StyleSheet.absoluteFill} />,
-            tabBarInactiveTintColor: getTheme('secondary'),
-            tabBarActiveTintColor: getTheme('primary'),
+            tabBarInactiveTintColor: theme.secondary.val,
+            tabBarActiveTintColor: theme.primary.val,
             tabBarIcon: ({ focused }) => {
                 let icon;
                 switch (route.name) {
@@ -111,7 +183,7 @@ const StoreNavigator = createBottomTabNavigator({
                         break;
                 }
 
-                return <FontAwesomeIcon icon={icon} size={20} color={focused ? getTheme('primary') : getTheme('secondary')} />;
+                return <FontAwesomeIcon icon={icon} size={20} color={focused ? theme.primary.val : theme.secondary.val} />;
             },
             tabBarLabelStyle: ({ focused }) => {
                 return {

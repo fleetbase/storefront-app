@@ -4,9 +4,10 @@ import { EventRegister } from 'react-native-event-listeners';
 import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { GoogleAddress, Place } from '@fleetbase/sdk';
 import { StoreLocation } from '@fleetbase/storefront';
-import { setMap, getMap, getArray } from './storage';
+import { adapter } from '../hooks/use-storefront';
 import { haversine } from './math';
-import { config, uniqueArray, isObject, isArray } from './';
+import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializedResource, isPojoResource } from './';
+import storage from './storage';
 import axios from 'axios';
 
 /** Configure GeoLocation */
@@ -22,7 +23,7 @@ export function createGoogleAddress(...args) {
     return new GoogleAddress(...args);
 }
 
-export async function geocode(latitude: number, longitude: number) {
+export async function geocode(latitude: number, longitude: number, options = {}) {
     try {
         const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
             params: {
@@ -32,8 +33,13 @@ export async function geocode(latitude: number, longitude: number) {
                 key: config('GOOGLE_MAPS_KEY'),
             },
         });
+
+        if (isEmpty(response.data.results)) {
+            throw new Error('No geocode results for provided coordinates.');
+        }
+
         const result = response.data.results[0];
-        return result ? new GoogleAddress(result) : null;
+        return options.asGoogleAddress === true ? new GoogleAddress(result) : result;
     } catch (error) {
         console.error('Geocoding error:', error);
         return null;
@@ -59,10 +65,15 @@ export async function geocodeAutocomplete(input, coordinates = null) {
         });
 
         // Extract predictions from response
-        const predictions = response.data.predictions.map(prediction => ({
-            description: prediction.description,
-            place_id: prediction.place_id,
-        }));
+        const predictions = response.data.predictions.map(prediction => {
+            const segments = parseAutocompleteAddress(prediction.description);
+
+            return {
+                description: prediction.description,
+                place_id: prediction.place_id,
+                ...segments
+             };
+        });
 
         return predictions;
     } catch (error) {
@@ -71,33 +82,144 @@ export async function geocodeAutocomplete(input, coordinates = null) {
     }
 }
 
-export async function getCurrentLocation () {
-    const lastLocation = getMap('last_current_location');
+export async function getPlaceDetails(placeId) {
+    try {
+        // Make a request to the Google Places Details API
+        const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+            params: {
+                place_id: placeId,
+                key: config('GOOGLE_MAPS_KEY'),
+                // You can include 'fields' to limit the data retrieved or omit it for all available details
+                fields: 'name,formatted_address,geometry,place_id,types,international_phone_number,website,address_components'
+            }
+        });
 
+        // Handle API response
+        if (response.data.status !== 'OK') {
+            throw new Error(`Google API Error: ${response.data.status}`);
+        }
+
+        // Return the full result object from Google
+        return response.data.result;
+    } catch (error) {
+        console.error('Error fetching place details:', error.message);
+        return null;
+    }
+}
+
+export function createFleetbasePlaceFromDetails(details, meta = {}) {
+    const addressObject = parseAutocompleteAddress(details.formatted_address);
+    const placeObject = parsePlaceDetails(details);
+
+    const attributes = {
+        name: null,
+        street1: placeObject.street ?? addressObject.street,
+        city: placeObject.city ?? addressObject.city,
+        province: placeObject.state ?? addressObject.state,
+        postal_code: placeObject.postalCode ?? addressObject.postalCode,
+        neighborhood: placeObject.neighborhood,
+        building: placeObject.building,
+        security_access_code: null,
+        country: placeObject.country ?? addressObject.country,
+        location: [placeObject.latitude, placeObject.longitude],
+        phone: null,
+        meta: {
+            ...meta,
+            location: addressObject.others
+        }
+    };
+
+    return new Place(attributes, adapter);
+}
+
+export function restoreFleetbasePlace(data, type = null) {
+    // If is a resource already
+    if (isResource(data)) {
+        return data;
+    }
+
+    // If serialized resource object
+    if (isSerializedResource(data) && type) {
+        return new Place(data, adapter);
+    }
+
+    // If POJO resource object
+    if (isPojoResource(data)) {
+        return new Place(data.attributes, adapter);
+    }
+
+    // If array of resources
+    if (isArray(data) && data.length) {
+        return data.map(restoreFleetbasePlace);
+    }
+
+    if (isObject(data)) {
+        return new Place(data, adapter);
+    }
+
+    return data;
+}
+
+export function formattedAddressFromPlace(place) {
+    const segments = [
+        place.getAttribute('street1'),
+        place.getAttribute('street2'),
+        place.getAttribute('neighborhood'),
+        place.getAttribute('city'),
+        place.getAttribute('state'),
+        place.getAttribute('postal_code'),
+        place.getAttribute('country'),
+    ];
+
+    return segments.filter(Boolean).join(', ');
+}
+
+export function formattedAddressFromSerializedPlace(place) {
+    const segments = [
+        place.street1,
+        place.street2,
+        place.neighborhood,
+        place.city,
+        place.state,
+        place.postal_code,
+        place.country,
+    ];
+
+    return segments.filter(Boolean).join(', ');
+}
+
+export function serializGoogleAddress (googleAddress) {
+    let attributes = {};
+
+    if (googleAddress instanceof GoogleAddress || typeof googleAddress.all === 'function') {
+        attributes = googleAddress.all();
+    } else if (typeof googleAddress.toArray === 'function') {
+        attributes = googleAddress.toArray();
+    }else if (isObject(googleAddress.attributes)) {
+        attributes =googleAddress.attributes;
+    }
+
+    return attributes;
+}
+
+export async function getLiveLocation () {
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
 
-                // Check if user has moved more than 200 meters from the last location
-                if (lastLocation && haversine([latitude, longitude], lastLocation.coordinates) > 200) {
-                    return resolve(lastLocation);
-                }
+                // Save the last known coordinates
+                storage.setArray('_last_known_position', [latitude, longitude]);
 
                 try {
-                     const googleAddress = await geocode(latitude, longitude);
-                     if (googleAddress) {
-                        googleAddress.setAttribute('position', position);
+                    const details = await geocode(latitude, longitude);
+                    const place = createFleetbasePlaceFromDetails(details, { position });
 
-                        const serializedGoogleAddress = googleAddress.all();
-                        setMap('last_current_location', serializedGoogleAddress);
-                        emit('location.updated', Place.fromGoogleAddress(googleAddress));
-                        resolve(serializedGoogleAddress);
-                    } else {
-                        resolve({ address: null, coordinates: [latitude, longitude], position });
-                    }
+                    resolve(place);
                 } catch (error) {
-                    resolve({ address: null, coordinates: [latitude, longitude], position });
+                    const place = new Place({ location: [latitude, longitude], meta: { position } });
+
+                    resolve(place);
                 }
             },
             (error) => resolve(null),
@@ -106,8 +228,43 @@ export async function getCurrentLocation () {
     });
 };
 
-export function getLocation () {
-    return get('location');
+export async function getCurrentLocation () {
+    const lastLocation = restoreFleetbasePlace(storage.getMap('_current_location'));
+
+    return new Promise((resolve) => {
+        Geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // Save the last known coordinates
+                storage.setArray('_last_known_position', [latitude, longitude]);
+
+                // Check if user has moved more than 200 meters from the last location
+                if (lastLocation && haversine([latitude, longitude], lastLocation.getAttribute('location')) > 200) {
+                    return resolve(lastLocation);
+                }
+
+                try {
+                    const details = await geocode(latitude, longitude);
+                    const place = createFleetbasePlaceFromDetails(details, { position });
+
+                    storage.setMap('_current_location', place.serialize());
+                    resolve(place);
+                } catch (error) {
+                    const place = new Place({ location: [latitude, longitude], meta: { position } });
+
+                    storage.setMap('_current_location', place.serialize());
+                    resolve(place);
+                }
+            },
+            (error) => resolve(null),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+    });
+};
+
+export function getLastKnownPosition () {
+    return storage.getArray('_last_known_position') ?? [0, 0];
 }
 
 export function getCoordinates  (location)  {
@@ -156,8 +313,8 @@ export function getLocationName(place) {
 };
 
 export function getLocationFromRouteOrStorage(key, routeParams = {}) {
-    const lastLocation = getMap('last_current_location');
-    const savedLocalLocations = getArray('saved_local_locations');
+    const lastLocation = storage.getMap('_current_location');
+    const localLocations = storage.getArray('_local_locations');
     const locationFromParams = routeParams[key];
 
     if (locationFromParams) {
@@ -168,9 +325,507 @@ export function getLocationFromRouteOrStorage(key, routeParams = {}) {
         return lastLocation;
     }
 
-    if (isArray(savedLocalLocations) && savedLocalLocations.length) {
-        return savedLocalLocations[0];
+    if (isArray(localLocations) && localLocations.length) {
+        return localLocations[0];
     }
 
     return null;
+}
+
+export function parsePlaceDetails(details) {
+    const parsed = {
+        streetNumber: null,
+        street: null,
+        city: null,
+        state: null,
+        postalCode: null,
+        country: null,
+        neighborhood: null,
+        building: null,
+        latitude: null,
+        longitude: null
+    };
+
+    if (!details || !details.address_components) {
+        throw new Error('Invalid place details object.');
+    }
+
+    // Parse address components
+    details.address_components.forEach((component) => {
+        if (component.types.includes('street_number')) {
+            parsed.streetNumber = component.long_name;
+        } else if (component.types.includes('route')) {
+            parsed.street = component.long_name;
+        } else if (component.types.includes('locality')) {
+            parsed.city = component.long_name;
+        } else if (component.types.includes('administrative_area_level_1')) {
+            parsed.state = component.short_name; // Use short_name for state abbreviations
+        } else if (component.types.includes('country')) {
+            parsed.country = component.long_name;
+        } else if (component.types.includes('postal_code')) {
+            parsed.postalCode = component.long_name;
+        } else if (component.types.includes('neighborhood')) {
+            parsed.neighborhood = component.long_name;
+        } else if (component.types.includes('premise')) {
+            parsed.building = component.long_name;
+        } else if (component.types.includes('sublocality') || component.types.includes('sublocality_level_1')) {
+            // Assign sublocality as neighborhood if neighborhood is not already set
+            if (!parsed.neighborhood) {
+                parsed.neighborhood = component.long_name;
+            }
+        }
+    });
+
+    // Add coordinates if available
+    if (details.geometry && details.geometry.location) {
+        parsed.latitude = details.geometry.location.lat;
+        parsed.longitude = details.geometry.location.lng;
+    }
+
+    // Combine street number and route into full street address
+    if (parsed.streetNumber && parsed.street) {
+        parsed.street = `${parsed.streetNumber} ${parsed.street}`;
+        delete parsed.streetNumber; // Clean up streetNumber field
+    }
+
+    return parsed;
+}
+
+export function parseAutocompleteAddress(description = '') {
+    const segments = description
+        .trim()
+        .split(',')
+        .map((s) => s.trim());
+    const result = { street: null, city: null, state: null, postalCode: null, country: null, others: [] };
+
+    // Define regex patterns
+    const patterns = {
+        postalCode: /^\d{5}(-\d{4})?$|^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$|^\d{3,6}$|^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$/, // US/Canada/UK
+        state: /^[A-Z]{2}$|california|texas|new york|ontario|british columbia|quebec|england|scotland/i,
+        city: /^[A-Za-z\s]+$/, // Cities are alphabetical and may have spaces
+        country: /usa|canada|uk|england|france|germany|mongolia|japan|india|china|australia/i,
+    };
+
+    const commonCities = [
+        'New York',
+        'Los Angeles',
+        'Chicago',
+        'Houston',
+        'Phoenix',
+        'Philadelphia',
+        'San Antonio',
+        'San Diego',
+        'Dallas',
+        'San Jose',
+        'Austin',
+        'Jacksonville',
+        'Fort Worth',
+        'Columbus',
+        'San Francisco',
+        'Charlotte',
+        'Indianapolis',
+        'Seattle',
+        'Denver',
+        'Washington',
+        'Boston',
+        'El Paso',
+        'Detroit',
+        'Nashville',
+        'Memphis',
+        'Portland',
+        'Las Vegas',
+        'Louisville',
+        'Baltimore',
+        'Milwaukee',
+        'Albuquerque',
+        'Tucson',
+        'Fresno',
+        'Sacramento',
+        'Kansas City',
+        'Mesa',
+        'Atlanta',
+        'Omaha',
+        'Colorado Springs',
+        'Raleigh',
+        'Miami',
+        'Virginia Beach',
+        'Oakland',
+        'Minneapolis',
+        'Tulsa',
+        'Arlington',
+        'Tampa',
+        'New Orleans',
+        'Wichita',
+        'Cleveland',
+        'Bakersfield',
+        'Aurora',
+        'Anaheim',
+        'Honolulu',
+        'Toronto',
+        'Vancouver',
+        'Montreal',
+        'Calgary',
+        'Ottawa',
+        'Edmonton',
+        'Winnipeg',
+        'Quebec City',
+        'Hamilton',
+        'Kitchener',
+        'London',
+        'Victoria',
+        'Halifax',
+        'Oshawa',
+        'Windsor',
+        'Saskatoon',
+        'Regina',
+        "St. John's",
+        'Barrie',
+        'Kelowna',
+        'Sherbrooke',
+        'Guelph',
+        'Abbotsford',
+        'Kingston',
+        'London',
+        'Manchester',
+        'Birmingham',
+        'Glasgow',
+        'Liverpool',
+        'Bristol',
+        'Leeds',
+        'Edinburgh',
+        'Sheffield',
+        'Cardiff',
+        'Leicester',
+        'Belfast',
+        'Nottingham',
+        'Newcastle',
+        'Coventry',
+        'Brighton',
+        'Hull',
+        'Plymouth',
+        'Stoke-on-Trent',
+        'Wolverhampton',
+        'Derby',
+        'Southampton',
+        'Paris',
+        'Marseille',
+        'Lyon',
+        'Berlin',
+        'Munich',
+        'Hamburg',
+        'Frankfurt',
+        'Rome',
+        'Milan',
+        'Naples',
+        'Madrid',
+        'Barcelona',
+        'Valencia',
+        'Lisbon',
+        'Dublin',
+        'Amsterdam',
+        'The Hague',
+        'Vienna',
+        'Brussels',
+        'Zurich',
+        'Geneva',
+        'Prague',
+        'Warsaw',
+        'Stockholm',
+        'Copenhagen',
+        'Oslo',
+        'Helsinki',
+        'Athens',
+        'Budapest',
+        'Belgrade',
+        'Tokyo',
+        'Seoul',
+        'Beijing',
+        'Shanghai',
+        'Shenzhen',
+        'Hong Kong',
+        'Singapore',
+        'Bangkok',
+        'Jakarta',
+        'Kuala Lumpur',
+        'Manila',
+        'New Delhi',
+        'Mumbai',
+        'Bangalore',
+        'Chennai',
+        'Karachi',
+        'Dhaka',
+        'Riyadh',
+        'Jeddah',
+        'Doha',
+        'Istanbul',
+        'Tehran',
+        'Dubai',
+        'Abu Dhabi',
+        'Taipei',
+        'Sydney',
+        'Melbourne',
+        'Brisbane',
+        'Perth',
+        'Adelaide',
+        'Canberra',
+        'Gold Coast',
+        'Hobart',
+        'Darwin',
+        'Auckland',
+        'Wellington',
+        'Christchurch',
+        'Hamilton',
+        'Dunedin',
+        'Cairo',
+        'Lagos',
+        'Johannesburg',
+        'Nairobi',
+        'Cape Town',
+        'Accra',
+        'Addis Ababa',
+        'Casablanca',
+        'Algiers',
+        'Kampala',
+        'Durban',
+        'Tunis',
+        'Luanda',
+        'Gaborone',
+        'Harare',
+        'São Paulo',
+        'Rio de Janeiro',
+        'Buenos Aires',
+        'Lima',
+        'Bogotá',
+        'Santiago',
+        'Caracas',
+        'Quito',
+        'Montevideo',
+        'La Paz',
+        'Brasília',
+        'Medellín',
+        'Asunción',
+        'Cali',
+        'Salvador',
+    ];
+    const commonStates = [
+        'California',
+        'CA',
+        'Texas',
+        'TX',
+        'Florida',
+        'FL',
+        'New York',
+        'NY',
+        'Illinois',
+        'IL',
+        'Pennsylvania',
+        'PA',
+        'Ohio',
+        'OH',
+        'Georgia',
+        'GA',
+        'North Carolina',
+        'NC',
+        'Michigan',
+        'MI',
+        'New Jersey',
+        'NJ',
+        'Virginia',
+        'VA',
+        'Washington',
+        'WA',
+        'Arizona',
+        'AZ',
+        'Massachusetts',
+        'MA',
+        'Tennessee',
+        'TN',
+        'Indiana',
+        'IN',
+        'Missouri',
+        'MO',
+        'Maryland',
+        'MD',
+        'Wisconsin',
+        'WI',
+        'Minnesota',
+        'MN',
+        'Colorado',
+        'CO',
+        'Alabama',
+        'AL',
+        'South Carolina',
+        'SC',
+        'Kentucky',
+        'KY',
+        'Oregon',
+        'OR',
+        'Oklahoma',
+        'OK',
+        'Connecticut',
+        'CT',
+        'Iowa',
+        'IA',
+        'Utah',
+        'UT',
+        'Nevada',
+        'NV',
+        'Arkansas',
+        'AR',
+        'Mississippi',
+        'MS',
+        'Kansas',
+        'KS',
+        'New Mexico',
+        'NM',
+        'Nebraska',
+        'NE',
+        'West Virginia',
+        'WV',
+        'Idaho',
+        'ID',
+        'Hawaii',
+        'HI',
+        'Maine',
+        'ME',
+        'Montana',
+        'MT',
+        'Delaware',
+        'DE',
+        'South Dakota',
+        'SD',
+        'North Dakota',
+        'ND',
+        'Alaska',
+        'AK',
+        'Vermont',
+        'VT',
+        'Wyoming',
+        'WY',
+        'Ontario',
+        'British Columbia',
+        'Quebec',
+        'Alberta',
+        'Manitoba',
+        'Saskatchewan',
+        'Nova Scotia',
+        'Newfoundland and Labrador',
+        'New Brunswick',
+        'Prince Edward Island',
+        'England',
+        'Scotland',
+        'Wales',
+        'Northern Ireland',
+        'New South Wales',
+        'Victoria',
+        'Queensland',
+        'Western Australia',
+        'South Australia',
+        'Tasmania',
+        'Northern Territory',
+        'Australian Capital Territory',
+        'ACT',
+        'Maharashtra',
+        'Karnataka',
+        'Tamil Nadu',
+        'Uttar Pradesh',
+        'Gujarat',
+        'Kerala',
+        'Punjab',
+        'West Bengal',
+        'Rajasthan',
+        'Madhya Pradesh',
+        'Bihar',
+        'Haryana',
+        'Delhi',
+        'Assam',
+        'Gauteng',
+        'Western Cape',
+        'KwaZulu-Natal',
+        'Eastern Cape',
+        'Free State',
+        'Limpopo',
+        'Mpumalanga',
+        'Northern Cape',
+        'North West',
+        'São Paulo',
+        'Rio de Janeiro',
+        'Minas Gerais',
+        'Bahia',
+        'Paraná',
+        'Pernambuco',
+        'Santa Catarina',
+        'Ceará',
+        'Rio Grande do Sul',
+    ];
+
+    // Iterate over segments from last to first
+    for (let i = segments.length - 1; i >= 0; i--) {
+        const segment = segments[i];
+
+        // Match country
+        if (!result.country && patterns.country.test(segment)) {
+            result.country = segment;
+            continue;
+        }
+
+        // Match postal code code
+        if (!result.postalCode && patterns.postalCode.test(segment)) {
+            result.postalCode = segment;
+            continue;
+        }
+
+        // Match state
+        if (!result.state && (patterns.state.test(segment) || commonStates.includes(segment))) {
+            result.state = segment;
+            continue;
+        }
+
+        // Match city
+        if (!result.city && (patterns.city.test(segment) || commonCities.includes(segment))) {
+            result.city = segment;
+            continue;
+        }
+
+        // Default to "others" or "street"
+        if (i === 0) {
+            result.street = segment;
+        } else {
+            result.others.unshift(segment);
+        }
+    }
+
+    // Reprocess "others" intelligently
+    result.others = result.others.filter((segment) => {
+        // Check if the segment contains both a state and postal code
+        const statePotalCodeMatch = segment.match(/^([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+        if (statePotalCodeMatch) {
+            const [, state, postalCode] = statePotalCodeMatch; // Destructure match
+            if (!result.state) result.state = state;
+            if (!result.postalCode) result.postalCode = postalCode;
+            return false; // Remove from others after processing
+        }
+
+        // Assign city if still not assigned and segment matches city patterns or common cities
+        if (!result.city && (patterns.city.test(segment) || commonCities.includes(segment))) {
+            result.city = segment;
+            return false;
+        }
+
+        // Assign state if still not assigned and segment matches state patterns or common states
+        if (!result.state && (patterns.state.test(segment) || commonStates.includes(segment))) {
+            result.state = segment;
+            return false;
+        }
+
+        // Assign postal code if still not assigned and segment matches postal code patterns
+        if (!result.postalCode && patterns.postalCode.test(segment)) {
+            result.postalCode = segment;
+            return false;
+        }
+
+        return true; // Keep in others if not matched
+    });
+
+    return result;
 }

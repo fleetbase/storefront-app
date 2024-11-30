@@ -144,7 +144,7 @@ export function formatCurrency(amount = 0, currency = 'USD', currencyDisplay = '
     }
 
     const currencyData = getCurrency(currency);
-    const locale = countryLocaleMap.getLocaleByAlpha2(currencyData?.iso2)?.replace('_', '-') ?? 'en-US';
+    const locale = countryLocaleMap.getLocaleByAlpha2(currencyData.iso2).replace('_', '-');
 
     if (currencyData?.precision === 0) {
         options.minimumFractionDigits = 0;

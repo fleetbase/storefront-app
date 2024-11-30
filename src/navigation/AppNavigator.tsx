@@ -26,7 +26,7 @@ const RootStack = createNativeStackNavigator({
         },
         StoreNavigator: {
             screen: StoreNavigator,
-            options: { headerShown: false },
+            options: { headerShown: false, gestureEnabled: false, animation: 'none' },
         },
     },
 });
