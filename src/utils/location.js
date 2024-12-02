@@ -2,9 +2,9 @@ import Geolocation from '@react-native-community/geolocation';
 import { Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { GoogleAddress, Place } from '@fleetbase/sdk';
+import { GoogleAddress, Place, Point } from '@fleetbase/sdk';
 import { StoreLocation } from '@fleetbase/storefront';
-import { adapter } from '../hooks/use-storefront';
+import { adapter } from '../hooks/use-fleetbase';
 import { haversine } from './math';
 import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializedResource, isPojoResource } from './';
 import storage from './storage';
@@ -38,6 +38,13 @@ export async function geocode(latitude: number, longitude: number, options = {})
             throw new Error('No geocode results for provided coordinates.');
         }
 
+        // Allow full results
+        if (options.withAllResults === true) {
+            return response.data.results.map((result) => {
+                return options.asGoogleAddress === true ? new GoogleAddress(result) : result;
+            });
+        }
+
         const result = response.data.results[0];
         return options.asGoogleAddress === true ? new GoogleAddress(result) : result;
     } catch (error) {
@@ -50,7 +57,7 @@ export async function geocodeAutocomplete(input, coordinates = null) {
     try {
         const params = {
             input,
-            types: 'address', // Restrict results to addresses only
+            // types: 'address', // Restrict results to addresses only
             language: 'en-US',
             key: config('GOOGLE_MAPS_KEY'),
         };
@@ -112,7 +119,7 @@ export function createFleetbasePlaceFromDetails(details, meta = {}) {
     const placeObject = parsePlaceDetails(details);
 
     const attributes = {
-        name: null,
+        name: details.name ?? null,
         street1: placeObject.street ?? addressObject.street,
         city: placeObject.city ?? addressObject.city,
         province: placeObject.state ?? addressObject.state,
@@ -121,10 +128,11 @@ export function createFleetbasePlaceFromDetails(details, meta = {}) {
         building: placeObject.building,
         security_access_code: null,
         country: placeObject.country ?? addressObject.country,
-        location: [placeObject.latitude, placeObject.longitude],
+        location: new Point(placeObject.latitude, placeObject.longitude),
         phone: null,
         meta: {
             ...meta,
+            coordinates: [placeObject.latitude, placeObject.longitude],
             location: addressObject.others
         }
     };
@@ -215,9 +223,15 @@ export async function getLiveLocation () {
                     const details = await geocode(latitude, longitude);
                     const place = createFleetbasePlaceFromDetails(details, { position });
 
+                    // Save the last known location
+                    storage.setMap('_last_known_location', place.serialize());
+
                     resolve(place);
                 } catch (error) {
-                    const place = new Place({ location: [latitude, longitude], meta: { position } });
+                    const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+
+                    // Save the last known location
+                    storage.setMap('_last_known_location', place.serialize());
 
                     resolve(place);
                 }
@@ -251,7 +265,7 @@ export async function getCurrentLocation () {
                     storage.setMap('_current_location', place.serialize());
                     resolve(place);
                 } catch (error) {
-                    const place = new Place({ location: [latitude, longitude], meta: { position } });
+                    const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
 
                     storage.setMap('_current_location', place.serialize());
                     resolve(place);
@@ -267,30 +281,57 @@ export function getLastKnownPosition () {
     return storage.getArray('_last_known_position') ?? [0, 0];
 }
 
-export function getCoordinates  (location)  {
-    if (!location) return [];
+// NOTICE: when fleetbase returns a geojson point the coordinates will always be in order of [longitude, latitude]
+export function getCoordinates  (target, options = { fallback: [0, 0] })  {
+    if (!target) {
+        return [];
+    }
 
-    if (location instanceof Place && location.coordinates) {
-        const [longitude, latitude] = location.coordinates;
+    if (isResource(target, 'place')) {
+        const [longitude, latitude] = target.getAttribute('location').coordinates;
         return [latitude, longitude];
     }
 
-    if (location instanceof StoreLocation) {
-        const point = location.getAttribute('place.location');
-        if (point) {
-            const [longitude, latitude] = point.coordinates;
-            return [latitude, longitude];
+    if (isResource(target, 'store-location')) {
+        const location = target.getAttribute('place');
+        return getCoordinates(location);
+    }
+
+    if (isPojoResource(target) && target.resource === 'place') {
+        const [longitude, latitude] = typeof target.getAttribute === 'function' ? (target.getAttribute('location').coordinates ?? fallback) : (target.attributes?.location?.coordinates ?? fallback);
+        return [latitude, longitude]
+    }
+
+    if (isPojoResource(target) && isObject(target.attributes.place) && target.resource === 'store-location') {
+        return getCoordinates(target.attributes.place);
+    }
+
+    if (isSerializedResource(target)) {
+        if (isObject(target.location)) {
+            const [longitude, latitude] = target.location.coordinates;
+            return [latitude, longitude]
         }
+
+        if (isObject(target.place)) {
+            return getCoordinates(target.place);
+        }
+
+        return fallback;
     }
 
-    if (isArray(location)) return location;
-
-    if (typeof location === 'object' && location.type === 'Point') {
-        const [longitude, latitude] = location.coordinates;
-        return [latitude, longitude];
+    if (isArray(target)) {
+        return target;
     }
 
-    return [0, 0];
+    if (isObject(target) && target.type === 'Point') {
+        return target.coordinates;
+    }
+
+    if (isObject(target) && target.latitude && target.longitude) {
+        return [target.latitude, target.longitude];
+    }
+
+    return fallback;
 };
 
 export function getDistance (origin, destination) {
@@ -313,23 +354,26 @@ export function getLocationName(place) {
 };
 
 export function getLocationFromRouteOrStorage(key, routeParams = {}) {
-    const lastLocation = storage.getMap('_current_location');
-    const localLocations = storage.getArray('_local_locations');
+    let location;
     const locationFromParams = routeParams[key];
+    const lastKnownLocation = storage.getMap('_last_known_location')
+    const currentLocation = storage.getMap('_current_location');
+    const localLocations = storage.getArray('_local_locations');
+    const customerLocations = storage.getArray('_customer_locations');
 
     if (locationFromParams) {
-        return locationFromParams;
+        location = locationFromParams;
+    } else if (lastKnownLocation) {
+        location = lastKnownLocation;
+    } else if (currentLocation) {
+        location = currentLocation;
+    } else if (isArray(customerLocations) && customerLocations.length) {
+        location = customerLocations[0];
+    }else if (isArray(localLocations) && localLocations.length) {
+        location = localLocations[0];
     }
 
-    if (lastLocation) {
-        return lastLocation;
-    }
-
-    if (isArray(localLocations) && localLocations.length) {
-        return localLocations[0];
-    }
-
-    return null;
+    return restoreFleetbasePlace(location);
 }
 
 export function parsePlaceDetails(details) {

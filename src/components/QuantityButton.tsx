@@ -65,11 +65,11 @@ const QuantityButton = ({
                 disabled={currentQuantity <= min || disabled}
                 theme={currentQuantity > min ? 'primary' : 'gray'}
                 hoverStyle={{
-                    scale: 0.75,
+                    scale: 0.95,
                     opacity: 0.5,
                 }}
                 pressStyle={{
-                    scale: 0.75,
+                    scale: 0.95,
                     opacity: 0.5,
                 }}
                 {...incrementButtonProps}
@@ -88,11 +88,11 @@ const QuantityButton = ({
                 disabled={currentQuantity >= max || disabled}
                 theme={currentQuantity < max ? 'primary' : 'gray'}
                 hoverStyle={{
-                    scale: 0.75,
+                    scale: 0.95,
                     opacity: 0.5,
                 }}
                 pressStyle={{
-                    scale: 0.75,
+                    scale: 0.95,
                     opacity: 0.5,
                 }}
                 {...decrementButtonProps}

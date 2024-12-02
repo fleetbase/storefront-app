@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Animated, Easing } from 'react-native';
-import { XStack, YStack, Text, Button, Separator, useTheme } from 'tamagui';
+import { Spinner, XStack, YStack, Text, Button, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { isNone } from '../utils';
@@ -28,8 +28,8 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
     const dropdownAnimation = useRef(new Animated.Value(0)).current;
 
     // Animated values for the dropdown toggle
-    const toggleScale = useRef(new Animated.Value(0)).current;
-    const toggleOpacity = useRef(new Animated.Value(0)).current;
+    const toggleScale = useRef(new Animated.Value(selectedOption ? 1 : 0)).current;
+    const toggleOpacity = useRef(new Animated.Value(selectedOption ? 1 : 0)).current;
 
     useEffect(() => {
         // Initialize optionAnimations when options change
@@ -260,7 +260,7 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
 
     // Ensure optionAnimations are ready before rendering
     if (optionAnimations.length !== options.length) {
-        return null; // or render a loading indicator
+        return <Spinner color='$gray-700' />; // or render a loading indicator
     }
 
     // Render options or dropdown toggle based on state
@@ -274,7 +274,6 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
 
     return (
         <YStack space='$4' width='100%'>
-            {/* Selected Option */}
             <Animated.View
                 style={{
                     opacity: toggleOpacity,
@@ -286,6 +285,8 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                     onPressIn={onPressIn}
                     onPressOut={onPressOut}
                     size='$5'
+                    flex={1}
+                    width='100%'
                     justifyContent='space-between'
                     bg='white'
                     borderWidth={1}
@@ -315,7 +316,6 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                 </Button>
             </Animated.View>
 
-            {/* Dropdown Options */}
             {shouldRenderDropdown && (
                 <Animated.View
                     style={{

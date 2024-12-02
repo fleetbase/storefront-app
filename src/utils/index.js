@@ -68,11 +68,11 @@ export function isEmpty(target) {
 }
 
 export function isResource(target, type = null) {
-    if (typeof type === 'string') {
+    if (isObject(target) && typeof type === 'string') {
         return hasResouceProperties(target) && target.resource === type;
     }
 
-    return hasResouceProperties(target);
+    return isObject(target) && hasResouceProperties(target);
 }
 
 export function isSerializedResource(target) {

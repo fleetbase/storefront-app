@@ -5,12 +5,12 @@ import { YStack } from 'tamagui';
 import { getLocationFromRouteOrStorage } from '../utils/location';
 
 const StoreMapScreen = ({ route }) => {
-    const initialLocation = getLocationFromRouteOrStorage('initialLocation', route.params || {});
+    const initialLocation = getLocationFromRouteOrStorage('initialLocation', route.params);
     const [mapRegion, setMapRegion] = useState({
-        latitude: initialLocation?.latitude || 37.7749,
-        longitude: initialLocation?.longitude || -122.4194,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
+        latitude: initialLocation?.getAttribute('location')[0] ?? 37.7749,
+        longitude: initialLocation?.getAttribute('location')[1] ?? -122.4194,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
     });
 
     return (

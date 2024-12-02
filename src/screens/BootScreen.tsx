@@ -15,6 +15,8 @@ const BootScreen = () => {
     const [info, setInfo] = useStorage('info', {});
     const navigation = useNavigation();
 
+    console.log('[BootScreen]');
+
     useEffect(() => {
         const checkLocationPermission = async () => {
             const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;

@@ -10,9 +10,10 @@ import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import BackButton from '../components/BackButton';
 
-const AddNewLocationScreen = () => {
+const AddNewLocationScreen = ({ route = { params: {} } }) => {
     const navigation = useNavigation();
     const theme = useTheme();
+    const { params } = route;
     const { liveLocation: currentLocation, getCurrentLocationCoordinates } = useCurrentLocation();
     const [inputFocused, setInputFocused] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -32,7 +33,7 @@ const AddNewLocationScreen = () => {
         try {
             const details = await getPlaceDetails(location.place_id);
             const place = createFleetbasePlaceFromDetails(details);
-            navigation.navigate('EditLocation', { place: place.serialize() });
+            navigation.navigate('EditLocation', { place: place.serialize(), redirectTo: params.redirectTo });
         } catch (error) {
             toast.error(error.message);
         }
@@ -40,10 +41,15 @@ const AddNewLocationScreen = () => {
 
     const handleUseCurrentLocation = async () => {
         try {
-            navigation.navigate('EditLocation', { place: currentLocation.serialize() });
+            navigation.navigate('EditLocation', { place: currentLocation.serialize(), redirectTo: params.redirectTo });
         } catch (error) {
             toast.error(error.message);
         }
+    };
+
+    const handleUseMapLocation = () => {
+        console.log('[handleUseMapLocation triggered!]');
+        navigation.navigate('LocationPicker');
     };
 
     const searchPlaces = useCallback(async () => {
@@ -195,7 +201,7 @@ const AddNewLocationScreen = () => {
                                             </XStack>
                                         </TouchableOpacity>
                                     ))}
-                                <TouchableOpacity onPress={() => navigation.navigate('LocationPicker')}>
+                                <TouchableOpacity onPress={handleUseMapLocation}>
                                     <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                         <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                             <Circle size={40} bg='$background'>

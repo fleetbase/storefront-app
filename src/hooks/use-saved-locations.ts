@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { restoreFleetbasePlace } from '../utils/location';
-import { isResource } from '../utils';
+import { isResource, isEmpty } from '../utils';
 import { useAuth } from '../contexts/AuthContext';
 import useStorage from './use-storage';
 import useFleetbase from './use-fleetbase';
@@ -38,11 +38,44 @@ const useSavedLocations = () => {
         }
     };
 
+    // Handle location update
+    const updateLocation = async (attributes = {}) => {
+        const place = restoreFleetbasePlace(attributes);
+
+        try {
+            const updatedPlace = await place.save();
+            setCustomerLocations((prevLocations) => prevLocations.map((location) => (location.id === place.id ? place.serialize() : location)));
+            return updatedPlace;
+        } catch (err) {
+            setError(err);
+        }
+    };
+
+    // Handle delete location by ID
+    const deleteLocationById = async (placeId) => {
+        try {
+            const place = restoreFleetbasePlace({ id: placeId });
+            const deletedPlace = await place.destroy();
+            setCustomerLocations((prevLocations) => prevLocations.filter((location) => location.id !== deletedPlace.id));
+        } catch (err) {
+            setError(err);
+        }
+    };
+
+    // Handle delete location
+    const deleteLocation = async (place) => {
+        try {
+            const deletedPlace = await place.destroy();
+            setCustomerLocations((prevLocations) => prevLocations.filter((location) => location.id !== deletedPlace.id));
+        } catch (err) {
+            setError(err);
+        }
+    };
+
     // Add location
     const addLocation = async (attributes = {}) => {
-        console.log('[addLocation isAuthenticated]', isAuthenticated);
         if (isAuthenticated) {
-            return addCustomerLocation(attributes);
+            return isEmpty(attributes.id) ? addCustomerLocation(attributes) : updateLocation(attributes);
         }
 
         return addLocalLocationPromise(attributes);
@@ -86,6 +119,9 @@ const useSavedLocations = () => {
         addCustomerLocation,
         addLocalLocation,
         addLocalLocationPromise,
+        updateLocation,
+        deleteLocation,
+        deleteLocationById,
         isLoadingSavedLocations: loading,
         savedLocationsError: error,
     };

@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useNavigation } from '@react-navigation/native';
 import { Animated, SafeAreaView, TouchableOpacity, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
@@ -9,6 +8,7 @@ import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { formatCurrency } from '../utils/format';
 import { delay, loadPersistedResource } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 
@@ -20,9 +20,9 @@ const CartScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
-    const rowRefs = useRef({});
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
+    const rowRefs = useRef({});
 
     // Make sure cart items is latest
     useEffect(() => {

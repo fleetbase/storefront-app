@@ -5,6 +5,8 @@ import AddNewLocationScreen from '../../screens/AddNewLocationScreen';
 import EditLocationScreen from '../../screens/EditLocationScreen';
 import AddressBookScreen from '../../screens/AddressBookScreen';
 import BackButton from '../../components/BackButton';
+import HeaderButton from '../../components/HeaderButton';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getTheme } from '../../utils';
 
 export const LocationPermission = {
@@ -28,6 +30,7 @@ export const AddressBook = {
             title: 'Address Book',
             headerTransparent: true,
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerRight: () => <HeaderButton icon={faPlus} onPress={() => navigation.navigate('AddNewLocation', { redirectTo: 'AddressBook' })} size={40} />,
             headerBlurEffect: 'light',
         };
     },

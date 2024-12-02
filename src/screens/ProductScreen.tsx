@@ -141,11 +141,11 @@ const ProductScreen = ({ route = {} }) => {
                         disabled={!ready || isLoading('addToCart')}
                         opacity={ready ? 1 : 0.5}
                         hoverStyle={{
-                            scale: 0.75,
+                            scale: 0.95,
                             opacity: 0.5,
                         }}
                         pressStyle={{
-                            scale: 0.75,
+                            scale: 0.95,
                             opacity: 0.5,
                         }}
                     >

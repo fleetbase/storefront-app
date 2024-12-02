@@ -1,49 +1,129 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, FlatList, Pressable } from 'react-native';
-import { Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
+import { Animated, SafeAreaView, TouchableOpacity, FlatList, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Spinner, Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
 import { formattedAddressFromPlace } from '../utils/location';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
+import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const AddressBookScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const { currentLocation, setCustomerDefaultLocation } = useCurrentLocation();
-    const { savedLocations } = useSavedLocations();
+    const { runWithLoading, isLoading } = usePromiseWithLoading();
+    const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
+    const { savedLocations, deleteLocation } = useSavedLocations();
+    const rowRefs = useRef({});
 
-    const renderSavedLocation = ({ item }) => (
-        <Pressable
-            onPress={() => navigation.navigate('EditLocation', { place: item.serialize() })}
-            style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-            })}
-        >
-            <YStack flex={1} mb='$1' padding='$4' bg={item.id === currentLocation?.id ? '$primary' : 'transparent'}>
-                <Text color={item.id === currentLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
-                    {item.getAttribute('name')}
-                </Text>
-                <Text color={item.id === currentLocation?.id ? 'white' : '$textSecondary'}>{formattedAddressFromPlace(item)}</Text>
-            </YStack>
-        </Pressable>
+    const handleEdit = (place) => {
+        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo: 'AddressBook' });
+    };
+
+    const handleDelete = async (place) => {
+        // In case deleting place is current location get the next place and make it the default location using `handleMakeDefaultLocation`
+        const isCurrentLocation = currentLocation?.id === place.id;
+        const nextPlace = savedLocations.find((loc) => loc.id !== place.id);
+        const placeName = place.getAttribute('name');
+
+        try {
+            await runWithLoading(deleteLocation(place), 'deleting');
+
+            // If the deleted place was the current location and there’s another saved location, make it the default
+            if (isCurrentLocation && nextPlace) {
+                handleMakeDefaultLocation(nextPlace);
+            }
+
+            toast.success(`${placeName} was deleted.`);
+        } catch (error) {
+            console.error('Error deleting saved place: ', error);
+            toast.error(error.message);
+        }
+    };
+
+    const handleMakeDefaultLocation = async (place) => {
+        try {
+            await runWithLoading(updateDefaultLocationPromise(place), 'defaulting');
+            toast.success(`${place.getAttribute('name')} is now your default location.`);
+        } catch (error) {
+            console.log('Error making address default location:', error);
+            toast.error(error.message);
+        }
+    };
+
+    const renderRightActions = (place) => (
+        <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleDelete(place)}>
+                <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
+                    {isLoading('deleting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
+                </YStack>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleEdit(place)}>
+                <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
+                    <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
+                </YStack>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{ flex: 1 }}
+                onPress={() => handleMakeDefaultLocation(place)}
+                opacity={currentLocation.id === place.id ? 0.5 : 1}
+                disabled={currentLocation.id === place.id}
+            >
+                <YStack flex={1} width='100%' height='100%' bg='$primary' justifyContent='center' alignItems='center' borderRadius={0}>
+                    {isLoading('defaulting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faStar} size={20} color='white' />}
+                </YStack>
+            </TouchableOpacity>
+        </XStack>
     );
+
+    const renderItem = ({ item: place, index }) => {
+        const opacity = new Animated.Value(1);
+        const translateX = new Animated.Value(0);
+        rowRefs.current[place.id || index] = { opacity, translateX };
+
+        return (
+            <Animated.View
+                style={[
+                    {
+                        borderBottomWidth: 1,
+                        borderColor: theme.borderColor.val,
+                        backgroundColor: theme.background.val,
+                        opacity,
+                        transform: [{ translateX }],
+                    },
+                ]}
+            >
+                <Swipeable renderRightActions={() => renderRightActions(place)}>
+                    <TouchableOpacity onPress={() => handleEdit(place)} style={{ flex: 1 }}>
+                        <YStack flex={1} padding='$4' bg={place.id === currentLocation?.id ? '$primary' : '$background'} minHeight={100} maxHeight={125}>
+                            <Text color={place.id === currentLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
+                                {place.getAttribute('name')}
+                            </Text>
+                            <Text color={place.id === currentLocation?.id ? 'white' : '$textSecondary'}>{formattedAddressFromPlace(place)}</Text>
+                        </YStack>
+                    </TouchableOpacity>
+                </Swipeable>
+            </Animated.View>
+        );
+    };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' space='$3' padding='$4'>
-                <YStack borderColor='$borderColorWithShadow' borderWidth={1} borderRadius='$4' overflow='hidden' bg='$surface'>
-                    <FlatList
-                        data={savedLocations}
-                        keyExtractor={(item, index) => item.id || index}
-                        renderItem={renderSavedLocation}
-                        ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
-                    />
-                </YStack>
+            <YStack flex={1} bg='$background' pt='$2'>
+                <Animated.FlatList
+                    data={savedLocations}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => item.id || index}
+                    contentContainerStyle={{ paddingBottom: 16 }}
+                    ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                />
             </YStack>
         </SafeAreaView>
     );

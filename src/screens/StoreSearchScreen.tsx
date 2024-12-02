@@ -139,11 +139,11 @@ const StoreSearch = (route = {}) => {
                                 width={40}
                                 animation='quick'
                                 hoverStyle={{
-                                    scale: 0.75,
+                                    scale: 0.95,
                                     opacity: 0.5,
                                 }}
                                 pressStyle={{
-                                    scale: 0.75,
+                                    scale: 0.95,
                                     opacity: 0.5,
                                 }}
                             >
@@ -180,11 +180,11 @@ const StoreSearch = (route = {}) => {
                             bg='transparent'
                             animation='quick'
                             hoverStyle={{
-                                scale: 0.75,
+                                scale: 0.95,
                                 opacity: 0.5,
                             }}
                             pressStyle={{
-                                scale: 0.75,
+                                scale: 0.95,
                                 opacity: 0.5,
                             }}
                         >

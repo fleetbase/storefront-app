@@ -78,6 +78,20 @@ const useCurrentLocation = () => {
         }
     };
 
+    // Update current location/default location as a promise
+    const updateDefaultLocationPromise = (instance) => {
+        return new Promise(async (resolve) => {
+            await updateDefaultLocation(instance);
+            resolve(instance);
+        });
+    };
+
+    // Update current location/default location as a promise
+    const updateDefaultLocation = (instance) => {
+        updateCurrentLocation(instance);
+        setCustomerDefaultLocation(instance);
+    };
+
     // Set initial current location
     useEffect(() => {
         initializeLiveLocation();
@@ -93,6 +107,8 @@ const useCurrentLocation = () => {
         liveLocation: restoreFleetbasePlace(liveLocation),
         updateCurrentLocation,
         setCurrentLocation,
+        updateDefaultLocationPromise,
+        updateDefaultLocation,
         getCurrentLocationCoordinates,
         setCustomerDefaultLocation,
         initializeCurrentLocation,

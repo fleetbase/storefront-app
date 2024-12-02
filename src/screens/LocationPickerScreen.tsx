@@ -1,11 +1,17 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Input, View, Image, Button, Text, YStack, useTheme } from 'tamagui';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { Input, View, Image, Button, Text, XStack, YStack, useTheme } from 'tamagui';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { Portal } from '@gorhom/portal';
+import { Place } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
-import { getLocationFromRouteOrStorage } from '../utils/location';
+import { geocode, createFleetbasePlaceFromDetails, getLocationFromRouteOrStorage, formattedAddressFromPlace, getCoordinates } from '../utils/location';
 import LocationMarker from '../components/LocationMarker';
+import useStorefront from '../hooks/use-storefront';
+import useCurrentLocation from '../hooks/use-current-location';
 
 const LOCATION_MARKER_SIZE = { height: 70, width: 40 };
 const styles = StyleSheet.create({
@@ -21,58 +27,112 @@ const styles = StyleSheet.create({
     },
 });
 
+const formatAddressSecondaryIdentifier = (place) => {
+    if (place.getAttribute('building')) {
+        return `Building: ${place.getAttribute('building')}`;
+    }
+
+    if (place.getAttribute('neighborhood')) {
+        return `Neighborhood: ${place.getAttribute('neighborhood')}`;
+    }
+
+    if (place.getAttribute('postal_code')) {
+        return `Postal Code: ${place.getAttribute('postal_code')}`;
+    }
+};
+
 const LocationPickerScreen = ({ route }) => {
-    const { onLocationSelected } = route.params || {};
     const navigation = useNavigation();
     const theme = useTheme();
+    const { storefront } = useStorefront();
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const initialLocation = getLocationFromRouteOrStorage('initialLocation', route.params || {});
-    const [selectedLocation, setSelectedLocation] = useState(initialLocation || null);
+    const initialLocation = getLocationFromRouteOrStorage('initialLocation', route.params);
+    const [latitude, longitude] = getCoordinates(initialLocation);
+    const [results, setResults] = useState([]);
     const [mapRegion, setMapRegion] = useState({
-        latitude: initialLocation?.latitude || 37.7749,
-        longitude: initialLocation?.longitude || -122.4194,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
     });
     const [isPanning, setIsPanning] = useState(false);
-    const snapPoints = useMemo(() => [200, 400, 600], []);
+    const snapPoints = useMemo(() => ['35%'], []);
+
+    // Bottom sheet controls
+    const openBottomSheet = () => {
+        bottomSheetRef.current?.collapse();
+    };
+
+    const closeBottomSheet = () => {
+        bottomSheetRef.current?.close();
+    };
 
     // Handle panning tracking
     const handleTouchStart = () => setIsPanning(true);
     const handlePanDrag = () => setIsPanning(true);
     const handleTouchEnd = () => setIsPanning(false);
 
+    // Zoom controls
+    const zoomIn = () => {
+        setMapRegion((prev) => ({
+            ...prev,
+            latitudeDelta: prev.latitudeDelta / 2,
+            longitudeDelta: prev.longitudeDelta / 2,
+        }));
+    };
+
+    const zoomOut = () => {
+        setMapRegion((prev) => ({
+            ...prev,
+            latitudeDelta: prev.latitudeDelta * 2,
+            longitudeDelta: prev.longitudeDelta * 2,
+        }));
+    };
+
     // Function to handle region change and update the center location
     const handleRegionChangeComplete = (region) => {
         setIsPanning(false);
         setMapRegion(region);
-        console.log('Region changed', region);
-        // Optionally perform geocoding here with region.latitude and region.longitude
+        updateNearbyResults(region);
     };
 
-    const confirmLocation = () => {
-        if (mapRegion) {
-            const selected = {
-                latitude: mapRegion.latitude,
-                longitude: mapRegion.longitude,
-            };
-            onLocationSelected?.(selected);
-            navigation.goBack(); // Go back to the previous screen
+    const updateNearbyResults = async ({ latitude, longitude }) => {
+        try {
+            const results = await geocode(latitude, longitude, { withAllResults: true });
+            setResults(
+                results.map((result) => {
+                    return createFleetbasePlaceFromDetails(result);
+                })
+            );
+            openBottomSheet();
+        } catch (error) {
+            console.error('Error fetching nearby locations: ', error);
+            toast.error(error.message);
         }
     };
 
-    const onLocationSelect = (event) => {
-        const { latitude, longitude } = event.nativeEvent.coordinate;
-        setSelectedLocation({ latitude, longitude });
+    const handleLocationSelect = (place) => {
+        closeBottomSheet();
+        navigation.navigate('EditLocation', { place: place.serialize() });
     };
 
-    const onFocusSearchInput = ({ nativeEvent }) => {
-        console.log('onFocusSearchInput', nativeEvent);
-        bottomSheetRef.current.snapToIndex(2);
+    const handleMarkerLocationSelect = () => {
+        closeBottomSheet();
+        const geocoded = results[0] ?? new Place();
+        const place = new Place({
+            location: [mapRegion.latitude, mapRegion.longitude],
+            street1: geocoded.getAttribute('street1'),
+            city: geocoded.getAttribute('city'),
+            province: geocoded.getAttribute('province'),
+            neighborhood: geocoded.getAttribute('neighborhood'),
+            postal_code: geocoded.getAttribute('postal_code'),
+            country: geocoded.getAttribute('country'),
+        });
+        navigation.navigate('EditLocation', { place: place.serialize() });
     };
 
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
+    useEffect(() => {
+        updateNearbyResults(mapRegion);
     }, []);
 
     return (
@@ -81,45 +141,90 @@ const LocationPickerScreen = ({ route }) => {
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}
                 onPress={handleTouchStart}
                 onPanDrag={handlePanDrag}
-                onRegionChangeComplete={handleTouchEnd}
+                onRegionChangeComplete={handleRegionChangeComplete}
                 initialRegion={mapRegion}
-            >
-                {selectedLocation && <Marker coordinate={selectedLocation} />}
-            </MapView>
+            />
             <View style={styles.markerFixed}>
                 <LocationMarker lifted={isPanning} />
             </View>
-            {/* <BottomSheet
-                ref={bottomSheetRef}
-                snapPoints={snapPoints}
-                enableDynamicSizing={false}
-                onChange={handleSheetChanges}
-                backgroundStyle={{ backgroundColor: theme.background.val }}
-                handleStyle={{ backgroundColor: theme.background.val, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
-                handleIndicatorStyle={{ backgroundColor: theme.borderColor.val }}
-            >
-                <BottomSheetView style={styles.bottomSheetViewContainer}>
-                    <YStack flex={1} paddingHorizontal='$3' space='$2'>
-                        <View paddingHorizontal='$1'>
-                            <Text fontWeight={900} fontSize={20} color={theme.textSecondary.val}>
-                                Add new address
-                            </Text>
-                        </View>
-                        <View>
-                            <Input
-                                onFocus={onFocusSearchInput}
-                                autoFocus={true}
+            <Portal hostName='MainPortal'>
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    keyboardBehavior='extend'
+                    keyboardBlurBehavior='none'
+                    enableDynamicSizing={false}
+                    style={{ flex: 1, padding: 10, width: '100%' }}
+                >
+                    <BottomSheetView style={{ flex: 1 }}>
+                        <YStack>
+                            <Button
+                                onPress={handleMarkerLocationSelect}
                                 size='$4'
-                                borderWidth={2}
-                                placeholder='Search for your address'
-                                bg='$surface'
-                                borderColor='$borderColor'
-                                color='$color'
+                                bg='$blue-100'
+                                justifyContent='space-between'
+                                space='$1'
+                                mb='$3'
+                                px='$4'
+                                py='$3'
+                                hoverStyle={{
+                                    scale: 0.9,
+                                    opacity: 0.5,
+                                }}
+                                pressStyle={{
+                                    scale: 0.9,
+                                    opacity: 0.5,
+                                }}
+                            >
+                                <XStack space='$2'>
+                                    <YStack pt='$1'>
+                                        <FontAwesomeIcon icon={faLocationDot} color={theme.primary.val} size={20} />
+                                    </YStack>
+                                    <YStack>
+                                        <Text color='$primary' fontWeight='bold' numberOfLines={1}>
+                                            Use Marker Position
+                                        </Text>
+                                        <Text color='$blue-500'>Use exact marker position</Text>
+                                    </YStack>
+                                </XStack>
+                            </Button>
+                            <BottomSheetFlatList
+                                data={results}
+                                keyExtractor={(item, index) => index}
+                                renderItem={({ item }) => (
+                                    <Button
+                                        onPress={() => handleLocationSelect(item)}
+                                        size='$4'
+                                        bg='$secondary'
+                                        justifyContent='space-between'
+                                        space='$1'
+                                        mb='$3'
+                                        px='$4'
+                                        py='$3'
+                                        hoverStyle={{
+                                            scale: 0.9,
+                                            opacity: 0.5,
+                                        }}
+                                        pressStyle={{
+                                            scale: 0.9,
+                                            opacity: 0.5,
+                                        }}
+                                    >
+                                        <YStack>
+                                            <Text color='$textPrimary' fontWeight='bold' numberOfLines={1}>
+                                                {formattedAddressFromPlace(item)}
+                                            </Text>
+                                            <Text color='$textSecondary'>{formatAddressSecondaryIdentifier(item)}</Text>
+                                        </YStack>
+                                    </Button>
+                                )}
                             />
-                        </View>
-                    </YStack>
-                </BottomSheetView>
-            </BottomSheet> */}
+                            <YStack height={200} />
+                        </YStack>
+                    </BottomSheetView>
+                </BottomSheet>
+            </Portal>
         </YStack>
     );
 };

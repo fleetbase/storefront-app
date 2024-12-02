@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBuildingUser, faHouse, faBuilding, faHotel, faHospital, faSchool, faChair } from '@fortawesome/free-solid-svg-icons';
+import { faBuildingUser, faHouse, faBuilding, faHotel, faHospital, faSchool, faChair, faAsterisk } from '@fortawesome/free-solid-svg-icons';
 import { Place } from '@fleetbase/sdk';
 import { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
-import { formattedAddressFromSerializedPlace } from '../utils/location';
+import { formattedAddressFromSerializedPlace, restoreFleetbasePlace } from '../utils/location';
 import { isEmpty } from '../utils';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import useStorefront from '../hooks/use-storefront';
+import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import ExpandableSelect from '../components/ExpandableSelect';
+import PlaceMapView from '../components/PlaceMapView';
 
 const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     return (
@@ -36,22 +38,41 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     );
 };
 
-const EditLocationScreen = ({ route }) => {
+const EditLocationScreen = ({ route = { params: {} } }) => {
     const navigation = useNavigation();
     const theme = useTheme();
+    const { params } = route;
     const { customer, isAuthenticated } = useAuth();
     const { storefront } = useStorefront();
-    const { runWithLoading, isLoading } = usePromiseWithLoading();
-    const { addLocation } = useSavedLocations();
-    const [place, setPlace] = useState({ ...route.params.place });
+    const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
+    const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
+    const { savedLocations, addLocation, deleteLocation } = useSavedLocations();
+    const [place, setPlace] = useState({ ...params.place });
     const [name, setName] = useState(place.name);
     const [street1, setStreet1] = useState(place.street1);
     const [street2, setStreet2] = useState(place.street2);
     const [neighborhood, setNeighborhood] = useState(place.neighborhood);
     const [city, setCity] = useState(place.city);
     const [postalCode, setPostalCode] = useState(place.postal_code);
-    const [instructions, setInstructions] = useState('');
-    const ready = !isEmpty(place.type) && !isEmpty(place.name) && !isEmpty(place.street1);
+    const [instructions, setInstructions] = useState(place.meta.instructions);
+    const redirectTo = route.params.redirectTo ?? 'StoreHome';
+    const isDefaultLocation = currentLocation?.id === place?.id;
+
+    const isReady = useMemo(() => {
+        if (isEmpty(place.id)) {
+            return !isEmpty(place.type) && !isEmpty(place.name) && !isEmpty(place.street1);
+        }
+
+        return (
+            name !== place.name ||
+            street1 !== place.street1 ||
+            street2 !== place.street2 ||
+            neighborhood !== place.neighborhood ||
+            city !== place.city ||
+            postalCode !== place.postal_code ||
+            instructions !== place.meta?.instructions
+        );
+    }, [place.type, name, street1, street2, neighborhood, city, postalCode, instructions]);
 
     useEffect(() => {
         setPlace({
@@ -61,17 +82,66 @@ const EditLocationScreen = ({ route }) => {
         });
     }, [name, street1]);
 
+    const handleRedirect = () => {
+        navigation.reset({
+            index: 0,
+            routes: [
+                {
+                    name: redirectTo,
+                },
+            ],
+        });
+    };
+
     const handleSavePlace = async () => {
-        if (!ready) {
+        if (!isReady) {
             return;
         }
 
         try {
-            await runWithLoading(addLocation({ ...place, street1, street2, neighborhood, city, postal_code: postalCode, meta: { instructions } }));
+            await runWithLoading(addLocation({ ...place, street1, street2, neighborhood, city, postal_code: postalCode, meta: { instructions } }), 'saving');
             toast.success('Address saved.');
-            navigation.navigate('StoreHome');
+            handleRedirect();
         } catch (error) {
+            console.log('Error saving address details:', error);
             toast.error(error.message);
+        }
+    };
+
+    const handleMakeDefaultLocation = async () => {
+        const restoredInstance = restoreFleetbasePlace(place);
+        if (restoredInstance && restoredInstance.isSaved) {
+            try {
+                await runWithLoading(updateDefaultLocationPromise(restoredInstance), 'defaulting');
+                toast.success(`${restoredInstance.getAttribute('name')} is now your default location.`);
+                handleRedirect();
+            } catch (error) {
+                console.log('Error making address default location:', error);
+                toast.error(error.message);
+            }
+        }
+    };
+
+    const handleDelete = async () => {
+        const isCurrentLocation = currentLocation?.id === place.id;
+        const nextPlace = savedLocations.find((loc) => loc.id !== place.id);
+        const restoredInstance = restoreFleetbasePlace(place);
+
+        if (restoredInstance && restoredInstance.isSaved) {
+            try {
+                await runWithLoading(deleteLocation(restoredInstance), 'deleting');
+                toast.success(`${restoredInstance.getAttribute('name')} was deleted.`);
+
+                // If the deleted place was the current location and there’s another saved location, make it the default
+                if (isCurrentLocation && nextPlace) {
+                    handleMakeDefaultLocation(nextPlace);
+                }
+
+                handleRedirect();
+            } catch (error) {
+                console.error('Error deleting saved address: ', error);
+                toast.error(error.message);
+            }
         }
     };
 
@@ -131,15 +201,21 @@ const EditLocationScreen = ({ route }) => {
                             </YStack>
                             <YStack space='$3'>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
-                                        Address label or name
-                                    </Text>
+                                    <XStack>
+                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' pl='$2' pr='$1'>
+                                            Address label or name
+                                        </Text>
+                                        <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
+                                    </XStack>
                                     <LocationPropertyInput value={name} onChange={setName} placeholder='Address label or name' />
                                 </YStack>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
-                                        Street address or P.O. Box
-                                    </Text>
+                                    <XStack>
+                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' pl='$2' pr='$1'>
+                                            Street address or P.O. Box
+                                        </Text>
+                                        <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
+                                    </XStack>
                                     <LocationPropertyInput value={street1} onChange={setStreet1} placeholder='Street address or P.O. Box' />
                                 </YStack>
                                 <YStack>
@@ -187,17 +263,91 @@ const EditLocationScreen = ({ route }) => {
                                         Optional
                                     </Text>
                                 </YStack>
-                                <YStack width='100%' height={100} />
+                                <YStack>
+                                    <XStack paddingVertical='$3' justifyContent='space-between'>
+                                        <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
+                                            Where exactly is the location?
+                                        </Text>
+                                    </XStack>
+                                    <PlaceMapView place={place} height={150} />
+                                </YStack>
+                                <YStack width='100%' height={25} />
+                                {place.id && (
+                                    <YStack space='$2' mt='$4'>
+                                        {!isDefaultLocation && (
+                                            <Button
+                                                animate='bouncy'
+                                                onPress={handleMakeDefaultLocation}
+                                                size='$5'
+                                                bg='$blue-700'
+                                                flex={1}
+                                                opacity={isLoading('defaulting') || isDefaultLocation ? 0.85 : 1}
+                                                disabled={isAnyLoading() || isDefaultLocation ? true : false}
+                                                hoverStyle={{
+                                                    scale: 0.95,
+                                                    opacity: 0.5,
+                                                }}
+                                                pressStyle={{
+                                                    scale: 0.95,
+                                                    opacity: 0.5,
+                                                }}
+                                            >
+                                                <Button.Icon>{isLoading('defaulting') && <Spinner color='$blue-100' />}</Button.Icon>
+                                                <Button.Text color='$blue-100' fontWeight='bold' fontSize='$5'>
+                                                    Make Default Address
+                                                </Button.Text>
+                                            </Button>
+                                        )}
+                                        <Button
+                                            animate='bouncy'
+                                            onPress={handleDelete}
+                                            size='$5'
+                                            bg='$red-700'
+                                            flex={1}
+                                            opacity={isLoading('deleting') ? 0.85 : 1}
+                                            disabled={isAnyLoading() ? true : false}
+                                            hoverStyle={{
+                                                scale: 0.95,
+                                                opacity: 0.5,
+                                            }}
+                                            pressStyle={{
+                                                scale: 0.95,
+                                                opacity: 0.5,
+                                            }}
+                                        >
+                                            <Button.Icon>{isLoading('deleting') && <Spinner color='$red-100' />}</Button.Icon>
+                                            <Button.Text color='$red-100' fontWeight='bold' fontSize='$5'>
+                                                Delete Address
+                                            </Button.Text>
+                                        </Button>
+                                    </YStack>
+                                )}
+                                <YStack width='100%' height={isReady ? 100 : 10} />
                             </YStack>
                         </YStack>
                     )}
                 </YStack>
             </ScrollView>
-            {ready && (
-                <XStack bg='$surface' borderWidthTop={1} borderColor='$borderColorWithShadow' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
-                    <Button onPress={handleSavePlace} size='$5' bg='$blue-500' flex={1} opacity={ready ? 1 : 0.75}>
-                        <Button.Icon>{isLoading() && <Spinner color='$blue-800' />}</Button.Icon>
-                        <Button.Text color='$blue-600' fontWeight='bold' fontSize='$5'>
+            {isReady && (
+                <XStack animate='bouncy' bg='$surface' borderWidth={1} borderTopColor='$borderColorWithShadow' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
+                    <Button
+                        onPress={handleSavePlace}
+                        size='$5'
+                        bg='$blue-700'
+                        flex={1}
+                        opacity={isReady ? 1 : 0.85}
+                        disabled={isAnyLoading() ? true : false}
+                        hoverStyle={{
+                            scale: 0.95,
+                            opacity: 0.5,
+                        }}
+                        pressStyle={{
+                            scale: 0.95,
+                            opacity: 0.5,
+                        }}
+                    >
+                        <Button.Icon>{isLoading('saving') && <Spinner color='$blue-100' />}</Button.Icon>
+                        <Button.Text color='$blue-100' fontWeight='bold' fontSize='$5'>
                             Save
                         </Button.Text>
                     </Button>

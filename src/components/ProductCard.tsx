@@ -85,6 +85,7 @@ const ProductCard = ({
                                 sliderWidth={cardWidth}
                                 sliderHeight={sliderHeight}
                                 sliderStyle={{ borderTopRightRadius: 10, borderTopLeftRadius: 10 }}
+                                onImagePress={handlePress}
                                 autoplay
                             />
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
@@ -106,7 +107,7 @@ const ProductCard = ({
                                 <YStack mt='$2'>
                                     {product.getAttribute('on_sale') ? (
                                         <YStack>
-                                            <Text fontSize='$6' color='$success' fontWeight='bold'>
+                                            <Text fontSize='$6' color='$green-600' fontWeight='bold'>
                                                 {formatCurrency(product.getAttribute('sale_price'), product.getAttribute('currency'))}
                                             </Text>
                                             <Text fontSize='$5' color='$secondary' textDecorationLine='line-through'>
@@ -114,7 +115,7 @@ const ProductCard = ({
                                             </Text>
                                         </YStack>
                                     ) : (
-                                        <Text fontSize='$5' color='$success' fontWeight='bold'>
+                                        <Text fontSize='$5' color='$green-600' fontWeight='bold'>
                                             {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                                         </Text>
                                     )}
@@ -133,11 +134,11 @@ const ProductCard = ({
                                     color='white'
                                     width='100%'
                                     hoverStyle={{
-                                        scale: 0.75,
+                                        scale: 0.95,
                                         opacity: 0.5,
                                     }}
                                     pressStyle={{
-                                        scale: 0.75,
+                                        scale: 0.95,
                                         opacity: 0.5,
                                     }}
                                 >
