@@ -8,7 +8,7 @@ import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/botto
 import { Portal } from '@gorhom/portal';
 import { Place } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
-import { geocode, createFleetbasePlaceFromDetails, getLocationFromRouteOrStorage, formattedAddressFromPlace, getCoordinates } from '../utils/location';
+import { geocode, createFleetbasePlaceFromDetails, getLocationFromRouteOrStorage, formattedAddressFromPlace, formatAddressSecondaryIdentifier, getCoordinates } from '../utils/location';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -26,20 +26,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
-
-const formatAddressSecondaryIdentifier = (place) => {
-    if (place.getAttribute('building')) {
-        return `Building: ${place.getAttribute('building')}`;
-    }
-
-    if (place.getAttribute('neighborhood')) {
-        return `Neighborhood: ${place.getAttribute('neighborhood')}`;
-    }
-
-    if (place.getAttribute('postal_code')) {
-        return `Postal Code: ${place.getAttribute('postal_code')}`;
-    }
-};
 
 const LocationPickerScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -71,23 +57,6 @@ const LocationPickerScreen = ({ route }) => {
     const handleTouchStart = () => setIsPanning(true);
     const handlePanDrag = () => setIsPanning(true);
     const handleTouchEnd = () => setIsPanning(false);
-
-    // Zoom controls
-    const zoomIn = () => {
-        setMapRegion((prev) => ({
-            ...prev,
-            latitudeDelta: prev.latitudeDelta / 2,
-            longitudeDelta: prev.longitudeDelta / 2,
-        }));
-    };
-
-    const zoomOut = () => {
-        setMapRegion((prev) => ({
-            ...prev,
-            latitudeDelta: prev.latitudeDelta * 2,
-            longitudeDelta: prev.longitudeDelta * 2,
-        }));
-    };
 
     // Function to handle region change and update the center location
     const handleRegionChangeComplete = (region) => {

@@ -38,10 +38,10 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     );
 };
 
-const EditLocationScreen = ({ route = { params: {} } }) => {
+const EditLocationScreen = ({ route }) => {
+    const params = route.params || { redirectTo: 'AddressBook' };
     const navigation = useNavigation();
     const theme = useTheme();
-    const { params } = route;
     const { customer, isAuthenticated } = useAuth();
     const { storefront } = useStorefront();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
@@ -55,24 +55,9 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
     const [city, setCity] = useState(place.city);
     const [postalCode, setPostalCode] = useState(place.postal_code);
     const [instructions, setInstructions] = useState(place.meta.instructions);
-    const redirectTo = route.params.redirectTo ?? 'StoreHome';
+    const redirectTo = params.redirectTo;
+    console.log('[EditLocationScreen #redirectTo]', redirectTo);
     const isDefaultLocation = currentLocation?.id === place?.id;
-
-    const isReady = useMemo(() => {
-        if (isEmpty(place.id)) {
-            return !isEmpty(place.type) && !isEmpty(place.name) && !isEmpty(place.street1);
-        }
-
-        return (
-            name !== place.name ||
-            street1 !== place.street1 ||
-            street2 !== place.street2 ||
-            neighborhood !== place.neighborhood ||
-            city !== place.city ||
-            postalCode !== place.postal_code ||
-            instructions !== place.meta?.instructions
-        );
-    }, [place.type, name, street1, street2, neighborhood, city, postalCode, instructions]);
 
     useEffect(() => {
         setPlace({
@@ -83,28 +68,32 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
     }, [name, street1]);
 
     const handleRedirect = () => {
-        navigation.reset({
-            index: 0,
-            routes: [
-                {
-                    name: redirectTo,
-                },
-            ],
-        });
+        if (redirectTo === 'AddressBook') {
+            navigation.goBack();
+        } else {
+            navigation.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: redirectTo,
+                    },
+                ],
+            });
+        }
+    };
+
+    const getUpdatedPlace = () => {
+        return { ...place, street1, street2, neighborhood, city, postal_code: postalCode, meta: { instructions } };
     };
 
     const handleSavePlace = async () => {
-        if (!isReady) {
-            return;
-        }
-
         try {
-            await runWithLoading(addLocation({ ...place, street1, street2, neighborhood, city, postal_code: postalCode, meta: { instructions } }), 'saving');
-            toast.success('Address saved.');
+            await runWithLoading(addLocation(getUpdatedPlace()), 'saving');
+            toast.success('Address saved.', { position: ToastPosition.bottom });
             handleRedirect();
         } catch (error) {
             console.log('Error saving address details:', error);
-            toast.error(error.message);
+            toast.error(error.message, { position: ToastPosition.bottom });
         }
     };
 
@@ -113,11 +102,11 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
         if (restoredInstance && restoredInstance.isSaved) {
             try {
                 await runWithLoading(updateDefaultLocationPromise(restoredInstance), 'defaulting');
-                toast.success(`${restoredInstance.getAttribute('name')} is now your default location.`);
+                toast.success(`${restoredInstance.getAttribute('name')} is now your default location.`, { position: ToastPosition.bottom });
                 handleRedirect();
             } catch (error) {
                 console.log('Error making address default location:', error);
-                toast.error(error.message);
+                toast.error(error.message, { position: ToastPosition.bottom });
             }
         }
     };
@@ -130,7 +119,7 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
         if (restoredInstance && restoredInstance.isSaved) {
             try {
                 await runWithLoading(deleteLocation(restoredInstance), 'deleting');
-                toast.success(`${restoredInstance.getAttribute('name')} was deleted.`);
+                toast.success(`${restoredInstance.getAttribute('name')} was deleted.`, { position: ToastPosition.bottom });
 
                 // If the deleted place was the current location and there’s another saved location, make it the default
                 if (isCurrentLocation && nextPlace) {
@@ -140,16 +129,20 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
                 handleRedirect();
             } catch (error) {
                 console.error('Error deleting saved address: ', error);
-                toast.error(error.message);
+                toast.error(error.message, { position: ToastPosition.bottom });
             }
         }
+    };
+
+    const handleLocationSelect = () => {
+        navigation.navigate('EditLocationCoord', { place: getUpdatedPlace(), redirectTo });
     };
 
     const handleTypeSelection = ({ type }) => {
         try {
             setPlace({ ...place, type });
         } catch (error) {
-            toast.error('Unable to select location type.');
+            toast.error('Unable to select location type.', { position: ToastPosition.bottom });
         }
     };
 
@@ -265,13 +258,13 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
                                 </YStack>
                                 <YStack>
                                     <XStack paddingVertical='$3' justifyContent='space-between'>
-                                        <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                            Where exactly is the location?
+                                        <Text fontSize='$6' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
+                                            Where exactly should we meet you?
                                         </Text>
                                     </XStack>
-                                    <PlaceMapView place={place} height={150} />
+                                    <PlaceMapView onPress={handleLocationSelect} place={place} height={140} zoom={2} />
                                 </YStack>
-                                <YStack width='100%' height={25} />
+                                <YStack width='100%' height={10} />
                                 {place.id && (
                                     <YStack space='$2' mt='$4'>
                                         {!isDefaultLocation && (
@@ -322,37 +315,34 @@ const EditLocationScreen = ({ route = { params: {} } }) => {
                                         </Button>
                                     </YStack>
                                 )}
-                                <YStack width='100%' height={isReady ? 100 : 10} />
+                                <YStack width='100%' height={60} />
                             </YStack>
                         </YStack>
                     )}
                 </YStack>
             </ScrollView>
-            {isReady && (
-                <XStack animate='bouncy' bg='$surface' borderWidth={1} borderTopColor='$borderColorWithShadow' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
-                    <Button
-                        onPress={handleSavePlace}
-                        size='$5'
-                        bg='$blue-700'
-                        flex={1}
-                        opacity={isReady ? 1 : 0.85}
-                        disabled={isAnyLoading() ? true : false}
-                        hoverStyle={{
-                            scale: 0.95,
-                            opacity: 0.5,
-                        }}
-                        pressStyle={{
-                            scale: 0.95,
-                            opacity: 0.5,
-                        }}
-                    >
-                        <Button.Icon>{isLoading('saving') && <Spinner color='$blue-100' />}</Button.Icon>
-                        <Button.Text color='$blue-100' fontWeight='bold' fontSize='$5'>
-                            Save
-                        </Button.Text>
-                    </Button>
-                </XStack>
-            )}
+            <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
+                <Button
+                    onPress={handleSavePlace}
+                    size='$5'
+                    bg='$green-600'
+                    flex={1}
+                    disabled={isAnyLoading() ? true : false}
+                    hoverStyle={{
+                        scale: 0.95,
+                        opacity: 0.5,
+                    }}
+                    pressStyle={{
+                        scale: 0.95,
+                        opacity: 0.5,
+                    }}
+                >
+                    <Button.Icon>{isLoading('saving') && <Spinner color='$green-100' />}</Button.Icon>
+                    <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
+                        Save Address
+                    </Button.Text>
+                </Button>
+            </XStack>
         </SafeAreaView>
     );
 };

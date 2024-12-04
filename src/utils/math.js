@@ -1,5 +1,5 @@
 export function percentage(percentage, number) {
-    return percentage * number;
+    return (percentage / 100) * number;
 }
 
 export function haversine([lat1, lon1], [lat2, lon2], unit = 'meters') {

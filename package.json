@@ -47,7 +47,6 @@
         "date-fns": "^4.1.0",
         "i18n-js": "^4.5.0",
         "inflected": "^2.1.0",
-        "inflector-js": "^1.0.1",
         "language-name-map": "^0.3.0",
         "locale-emoji": "^0.3.0",
         "react": "18.3.1",

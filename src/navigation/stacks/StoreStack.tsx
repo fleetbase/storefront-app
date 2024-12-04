@@ -12,14 +12,6 @@ export const StoreHome = {
     options: ({ route }) => {
         return {
             title: '',
-            headerLeft: () => {
-                return (
-                    <LocationPicker
-                        triggerStyle={{ borderWidth: 1, backgroundColor: 'black', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }}
-                        onPressAddNewLocation={(navigation) => navigation.navigate('StoreHomeTab', { screen: 'AddNewLocation' })}
-                    />
-                );
-            },
             headerTransparent: true,
             headerShadowVisible: false,
             gestureEnabled: false,

@@ -67,7 +67,7 @@ export function formatNumber(number, precision = 2, thousand = ',', decimal = '.
     );
 }
 
-export function unformat(value, decimal) {
+export function unformat(value, decimal = '') {
     // Recursively unformat arrays:
     if (isArray(value)) {
         return value.map(function (val) {
@@ -215,4 +215,9 @@ export function removeNonNumber(string = '') {
 
 export function removeLeadingSpaces(string = '') {
     return string.replace(/^\s+/g, '');
+}
+
+export function numbersOnly(input, castInt = true) {
+    const numbers = String(input).replace(/[^0-9]/g, '');
+    return castInt ? parseInt(numbers) : numbers;
 }

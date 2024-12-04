@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { Text, YStack, XStack, useTheme } from 'tamagui';
 
-const StoreTagCloud = ({ tags = [], maxTags = 20, onTagPress = () => {}, gap = '$2', padding = '$3', fontColor }) => {
+const StoreTagCloud = ({ tags = [], maxTags = 20, onTagPress = () => {}, gap = '$2', padding = '$3', fontColor, bg }) => {
     const theme = useTheme();
 
     // Limit displayed tags
@@ -12,14 +12,14 @@ const StoreTagCloud = ({ tags = [], maxTags = 20, onTagPress = () => {}, gap = '
         <YStack padding={padding} alignItems='center'>
             <XStack gap={gap} flexWrap='wrap' alignItems='center' justifyContent='center'>
                 {displayedTags.map((tag, index) => (
-                    <Tag key={index} label={tag} onPress={() => onTagPress(tag)} theme={theme} color={fontColor ?? theme.textSecondary.val} />
+                    <Tag key={index} label={tag} onPress={() => onTagPress(tag)} bg={bg} theme={theme} fontColor={fontColor} />
                 ))}
             </XStack>
         </YStack>
     );
 };
 
-export const Tag = ({ label, onPress, theme, fontSize = '$5', color }) => {
+export const Tag = ({ label, onPress, theme, fontSize = '$5', bg, fontColor }) => {
     const scale = new Animated.Value(1);
     const opacity = new Animated.Value(1);
 
@@ -57,13 +57,13 @@ export const Tag = ({ label, onPress, theme, fontSize = '$5', color }) => {
                 style={[
                     styles.tag,
                     {
-                        backgroundColor: theme.primary.val,
+                        backgroundColor: bg || theme.primary.val,
                         transform: [{ scale }],
                         opacity,
                     },
                 ]}
             >
-                <Text fontSize='$5' color={color}>
+                <Text fontSize='$5' color={fontColor}>
                     {label}
                 </Text>
             </Animated.View>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
 import { Animated, SafeAreaView, TouchableOpacity, FlatList, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
+import { useNavigation } from '@react-navigation/native';
 import { formattedAddressFromPlace } from '../utils/location';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCurrentLocation from '../hooks/use-current-location';

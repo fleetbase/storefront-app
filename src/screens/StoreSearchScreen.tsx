@@ -204,7 +204,7 @@ const StoreSearch = (route = {}) => {
                 }}
             >
                 <YStack padding='$4'>
-                    <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} color='black' />
+                    <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} bg={theme['$blue-600'].val} fontColor={theme['$blue-200'].val} />
                 </YStack>
             </Animated.View>
             {inputFocused && (

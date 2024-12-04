@@ -4,29 +4,18 @@ import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'ta
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapMarkerAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faStore } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
-import { formattedAddressFromPlace } from '../utils/location';
+import { formattedAddressFromSerializedPlace } from '../utils/location';
 import storage from '../utils/storage';
+import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
-import useCurrentLocation from '../hooks/use-current-location';
-import useSavedLocations from '../hooks/use-saved-locations';
+import useStoreLocations from '../hooks/use-store-locations';
 
-const LocationPicker = ({
-    onPressAddNewLocation,
-    wrapperStyle = {},
-    triggerWrapperStyle = {},
-    triggerStyle = {},
-    triggerTextStyle = {},
-    triggerArrowStyle = {},
-    triggerProps = {},
-    redirectToAfterAddLocation = 'StoreHome',
-    ...props
-}) => {
+const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, triggerStyle = {}, triggerTextStyle = {}, triggerArrowStyle = {}, triggerProps = {}, ...props }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const { currentLocation, isCurrentLocationLoading, updateCurrentLocation, setCustomerDefaultLocation } = useCurrentLocation();
-    const { savedLocations } = useSavedLocations();
+    const { currentStoreLocation, storeLocations, updateCurrentStoreLocation } = useStoreLocations();
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
     const triggerRef = useRef(null);
@@ -45,20 +34,9 @@ const LocationPicker = ({
     };
 
     const handleLocationChange = (newLocation) => {
-        updateCurrentLocation(newLocation);
-        setCustomerDefaultLocation(newLocation);
+        updateCurrentStoreLocation(newLocation);
         setDropdownOpen(false);
     };
-
-    const handleAddNewLocation = () => {
-        setDropdownOpen(false);
-        if (typeof onPressAddNewLocation === 'function') {
-            onPressAddNewLocation(navigation, { redirectTo: redirectToAfterAddLocation });
-        } else {
-            navigation.navigate('AddNewLocationScreen', { redirectTo: redirectToAfterAddLocation });
-        }
-    };
-
     // Close dropdown when navigation state changes
     const navigationState = useNavigationState((state) => state);
     const prevNavigationStateRef = useRef(navigationState);
@@ -85,9 +63,9 @@ const LocationPicker = ({
                 ]}
             >
                 <XStack alignItems='center' space='$2' style={triggerStyle} {...triggerProps}>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} size={14} color={theme['$gray-400'].val} />
+                    <FontAwesomeIcon icon={faStore} size={14} color={theme['$gray-300'].val} />
                     <Text
-                        color='$primary'
+                        color='$gray-300'
                         fontWeight='bold'
                         fontSize='$5'
                         numberOfLines={1}
@@ -102,7 +80,11 @@ const LocationPicker = ({
                             triggerTextStyle,
                         ]}
                     >
-                        {currentLocation ? (currentLocation.isAttributeFilled('name') ? currentLocation.getAttribute('name') : formattedAddressFromPlace(currentLocation)) : 'Loading...'}
+                        {currentStoreLocation
+                            ? currentStoreLocation.isAttributeFilled('name')
+                                ? currentStoreLocation.getAttribute('name')
+                                : formattedAddressFromSerializedPlace(currentStoreLocation.getAttribute('place'))
+                            : 'Loading...'}
                     </Text>
                     <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>
                 </XStack>
@@ -122,8 +104,8 @@ const LocationPicker = ({
                             backgroundColor='transparent'
                             width={dropdownWidth}
                             position='absolute'
-                            top={triggerPosition.height + 70}
-                            left={triggerPosition.x - 15}
+                            top={triggerPosition.y - triggerPosition.height - 20}
+                            left={triggerPosition.width / 2 - 15}
                             zIndex={1}
                             enterStyle={{
                                 opacity: 0,
@@ -145,7 +127,7 @@ const LocationPicker = ({
                         >
                             <BlurView style={StyleSheet.absoluteFillObject} blurType='light' blurAmount={10} borderRadius={10} reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)' />
                             <YStack space='$2' borderRadius='$4'>
-                                {savedLocations.map((location, index) => (
+                                {storeLocations.map((location, index) => (
                                     <TouchableOpacity
                                         key={location.id ?? index}
                                         onPress={() => handleLocationChange(location)}
@@ -156,29 +138,16 @@ const LocationPicker = ({
                                             borderBottomColor: '#d1d5db',
                                         }}
                                     >
-                                        <YStack mb='$1' bg={location.id === currentLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>
-                                            <Text color={location.id === currentLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
+                                        <YStack mb='$1' bg={location.id === currentStoreLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>
+                                            <Text color={location.id === currentStoreLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
                                                 {location.getAttribute('name')}
                                             </Text>
-                                            <Text color={location.id === currentLocation?.id ? '$gray-200' : '$textSecondary'}>{formattedAddressFromPlace(location)}</Text>
+                                            <Text color={location.id === currentStoreLocation?.id ? '$gray-200' : '$textSecondary'}>
+                                                {formattedAddressFromSerializedPlace(location.getAttribute('place'))}
+                                            </Text>
                                         </YStack>
                                     </TouchableOpacity>
                                 ))}
-                                <TouchableOpacity
-                                    onPress={handleAddNewLocation}
-                                    style={{
-                                        paddingVertical: 6,
-                                        paddingHorizontal: 8,
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        backgroundColor: 'transparent',
-                                    }}
-                                >
-                                    <XStack mb='$1' padding='$2'>
-                                        <FontAwesomeIcon icon={faPlus} size={16} style={{ marginRight: 6 }} />
-                                        <Text color='$primaryColor'>Add New Location</Text>
-                                    </XStack>
-                                </TouchableOpacity>
                             </YStack>
                         </Stack>
                     )}
@@ -188,4 +157,4 @@ const LocationPicker = ({
     );
 };
 
-export default LocationPicker;
+export default StoreLocationPicker;

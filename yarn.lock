@@ -1842,11 +1842,11 @@ __metadata:
 
 "@fleetbase/storefront@file:../storefront-js::locator=storefrontapp%40workspace%3A.":
   version: 1.1.6
-  resolution: "@fleetbase/storefront@file:../storefront-js#../storefront-js::hash=8067ee&locator=storefrontapp%40workspace%3A."
+  resolution: "@fleetbase/storefront@file:../storefront-js#../storefront-js::hash=0eef6b&locator=storefrontapp%40workspace%3A."
   dependencies:
     "@fleetbase/sdk": 1.2.1
     date-fns: ^2.22.1
-  checksum: 6f98fef79d04c6f7c6a2c2a453d8fe0ba7b8185505dd03c7e51db913a7b382ff92f83e0a4981b7c7da0cea7e99d247f54d5f6abdbbd34f66ea959350d234b893
+  checksum: 3bab9af6065da9230febb95cb20bd63181bf4000a467d1a5352700123f0aaf904e97c30e4bd814093e288bc3867e24711e8812319b7d14a710b5a7a20a6b8e6a
   languageName: node
   linkType: hard
 
@@ -8310,13 +8310,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inflector-js@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "inflector-js@npm:1.0.1"
-  checksum: 8b4d5082da51b1c279b48350442c2d5302b6294589d7e3eb7ec78e08970bde59fd3f5c72d508fc479e7c3873b2c1ff210e36c60428e081af548f75bb872a5384
-  languageName: node
-  linkType: hard
-
 "inflight@npm:^1.0.4":
   version: 1.0.6
   resolution: "inflight@npm:1.0.6"
@@ -12700,7 +12693,6 @@ __metadata:
     eslint: ^8.19.0
     i18n-js: ^4.5.0
     inflected: ^2.1.0
-    inflector-js: ^1.0.1
     jest: ^29.6.3
     language-name-map: ^0.3.0
     locale-emoji: ^0.3.0

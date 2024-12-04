@@ -11,6 +11,7 @@ import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthConte
 import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
+import CheckoutStack from './stacks/CheckoutStack';
 import CartScreen from '../screens/CartScreen';
 import CartItemScreen from '../screens/CartItemScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -78,6 +79,7 @@ const StoreCartTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        ...CheckoutStack,
     },
 });
 

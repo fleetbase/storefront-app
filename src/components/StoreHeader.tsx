@@ -1,9 +1,12 @@
 import React from 'react';
 import { Animated } from 'react-native';
-import { YStack, Text, XStack, Image } from 'tamagui';
+import { YStack, Text, XStack, Image, useTheme } from 'tamagui';
 import LinearGradient from 'react-native-linear-gradient';
+import StoreLocationPicker from './StoreLocationPicker';
 
-const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 200, wrapperStyle = {} }) => {
+const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {} }) => {
+    const theme = useTheme();
+
     return (
         <Animated.View style={[{ position: 'relative', width: '100%', overflow: 'hidden', height }, wrapperStyle]}>
             <Image
@@ -18,15 +21,15 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                 resizeMode='cover'
             />
 
-            <YStack padding='$4' justifyContent='flex-end' flex={1} position='relative' zIndex={1}>
-                <XStack alignItems='center' space='$2'>
+            <YStack px='$4' space='$1' justifyContent='flex-end' flex={1} position='relative' zIndex={1}>
+                <YStack alignItems='center' space='$1'>
                     {logoUrl && (
                         <YStack>
                             <Image
                                 source={{ uri: logoUrl }}
                                 style={{
-                                    height: 30,
-                                    width: 30,
+                                    height: 45,
+                                    width: 45,
                                 }}
                             />
                         </YStack>
@@ -34,12 +37,19 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                     <Text color='white' fontSize='$8' fontWeight='bold' numberOfLines={1}>
                         {storeName}
                     </Text>
-                </XStack>
-                {description && (
-                    <Text color='white' fontSize='$5' opacity={0.9} mt='$2' numberOfLines={1}>
-                        {description}
-                    </Text>
-                )}
+                </YStack>
+                <YStack>
+                    {description && (
+                        <YStack mt='$2' borderRadius='$4' bg='$gray-900' py='$2' px='$1' alignItems='center' justifyContent='center'>
+                            <Text color='white' fontSize='$5' opacity={0.9} numberOfLines={1}>
+                                {description}
+                            </Text>
+                        </YStack>
+                    )}
+                </YStack>
+                <YStack alignItems='center' justifyContent='center'>
+                    <StoreLocationPicker triggerStyle={{ borderWidth: 1, backgroundColor: theme['$gray-900'].val, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }} />
+                </YStack>
             </YStack>
 
             <LinearGradient

@@ -11,6 +11,7 @@ import { calculateCartTotal } from '../utils/cart';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+import StorefrontConfig from '../../storefront.config';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -28,6 +29,16 @@ const CartScreen = () => {
     useEffect(() => {
         setDisplayedItems(cart ? cart.contents() : []);
     }, [cart]);
+
+    const handleCheckout = () => {
+        if (StorefrontConfig.paymentGateway === 'stripe') {
+            return navigation.navigate('StripeCheckout');
+        }
+
+        if (StorefrontConfig.paymentGateway === 'qpay') {
+            return navigation.navigate('QPayCheckout');
+        }
+    };
 
     const handleEdit = async (cartItem) => {
         const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
@@ -195,7 +206,7 @@ const CartScreen = () => {
                                         <YStack>
                                             <YStack mb='$1'>
                                                 <XStack space='$2' alignItems='center'>
-                                                    <Text fontSize='$5' fontWeight='bold' color='$color' numberOfLines={1}>
+                                                    <Text fontSize='$5' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                                         {cartItem.name}
                                                     </Text>
                                                 </XStack>
@@ -282,7 +293,7 @@ const CartScreen = () => {
                             </Text>
                         </YStack>
                         <YStack>
-                            <Button bg='$success' color='white' width={180} paddingVertical='$2' rounded>
+                            <Button onPress={handleCheckout} bg='$green-600' borderWidth={1} borderColor='$green-700' color='white' width={180} paddingVertical='$2' rounded>
                                 <Button.Text fontSize='$6' fontWeight='bold' color='white'>
                                     Checkout
                                 </Button.Text>

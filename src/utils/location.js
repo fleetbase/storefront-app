@@ -4,6 +4,7 @@ import { EventRegister } from 'react-native-event-listeners';
 import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { GoogleAddress, Place, Point } from '@fleetbase/sdk';
 import { StoreLocation } from '@fleetbase/storefront';
+import { adapter as storefrontAdapter } from '../hooks/use-storefront';
 import { adapter } from '../hooks/use-fleetbase';
 import { haversine } from './math';
 import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializedResource, isPojoResource } from './';
@@ -140,14 +141,14 @@ export function createFleetbasePlaceFromDetails(details, meta = {}) {
     return new Place(attributes, adapter);
 }
 
-export function restoreFleetbasePlace(data, type = null) {
+export function restoreFleetbasePlace(data) {
     // If is a resource already
     if (isResource(data)) {
         return data;
     }
 
     // If serialized resource object
-    if (isSerializedResource(data) && type) {
+    if (isSerializedResource(data)) {
         return new Place(data, adapter);
     }
 
@@ -163,6 +164,50 @@ export function restoreFleetbasePlace(data, type = null) {
 
     if (isObject(data)) {
         return new Place(data, adapter);
+    }
+
+    return data;
+}
+
+export function restoreFleetbaseStoreLocation(data) {
+    // If is a resource already
+    if (isResource(data)) {
+        if (data.place) {
+            data.place = restoreFleetbasePlace(data.place);
+        } 
+
+        return data;
+    }
+
+    // If serialized resource object
+    if (isSerializedResource(data)) {
+        if (data.place) {
+            data.place = restoreFleetbasePlace(data.place);
+        } 
+
+        return new StoreLocation(data, storefrontAdapter);
+    }
+
+    // If POJO resource object
+    if (isPojoResource(data)) {
+        if (data.attributes && data.attributes.place) {
+            data.attributes.place = restoreFleetbasePlace(data.attributes/place);
+        } 
+
+        return new StoreLocation(data.attributes, storefrontAdapter);
+    }
+
+    // If array of resources
+    if (isArray(data) && data.length) {
+        return data.map(restoreFleetbasePlace);
+    }
+
+    if (isObject(data)) {
+        if (data.place) {
+            data.place = restoreFleetbasePlace(data.place);
+        }
+        
+        return new StoreLocation(data, storefrontAdapter);
     }
 
     return data;
@@ -195,6 +240,20 @@ export function formattedAddressFromSerializedPlace(place) {
 
     return segments.filter(Boolean).join(', ');
 }
+
+export function formatAddressSecondaryIdentifier (place) {
+    if (place.getAttribute('building')) {
+        return `Building: ${place.getAttribute('building')}`;
+    }
+
+    if (place.getAttribute('neighborhood')) {
+        return `Neighborhood: ${place.getAttribute('neighborhood')}`;
+    }
+
+    if (place.getAttribute('postal_code')) {
+        return `Postal Code: ${place.getAttribute('postal_code')}`;
+    }
+};
 
 export function serializGoogleAddress (googleAddress) {
     let attributes = {};

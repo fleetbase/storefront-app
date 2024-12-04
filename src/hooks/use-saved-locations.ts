@@ -44,11 +44,16 @@ const useSavedLocations = () => {
 
         try {
             const updatedPlace = await place.save();
-            setCustomerLocations((prevLocations) => prevLocations.map((location) => (location.id === place.id ? place.serialize() : location)));
+            updateLocationState(updatedPlace);
             return updatedPlace;
         } catch (err) {
             setError(err);
         }
+    };
+
+    // Update the place in state only
+    const updateLocationState = (place) => {
+        setCustomerLocations((prevLocations) => prevLocations.map((location) => (location.id === place.id ? place.serialize() : location)));
     };
 
     // Handle delete location by ID
@@ -120,6 +125,7 @@ const useSavedLocations = () => {
         addLocalLocation,
         addLocalLocationPromise,
         updateLocation,
+        updateLocationState,
         deleteLocation,
         deleteLocationById,
         isLoadingSavedLocations: loading,

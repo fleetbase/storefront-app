@@ -14,7 +14,7 @@ const StoreHome = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const headerHeight = useHeaderHeight(); // Default header height
-    const customHeaderHeight = 200; // Adjust if StoreHeader uses a fixed height
+    const customHeaderHeight = 250; // Adjust if StoreHeader uses a fixed height
     const scrollY = useRef(new Animated.Value(0)).current;
     const { info } = useStorefrontInfo();
     const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
@@ -48,7 +48,7 @@ const StoreHome = ({ route }) => {
                 >
                     <LocationPicker
                         triggerStyle={{ borderWidth: 1, backgroundColor: 'black', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }}
-                        onPressAddNewLocation={(navigation) => navigation.navigate('StoreHomeTab', { screen: 'AddNewLocation' })}
+                        onPressAddNewLocation={(_navigation, params = {}) => navigation.navigate('AddNewLocation', params)}
                     />
                 </Animated.View>
             ),
