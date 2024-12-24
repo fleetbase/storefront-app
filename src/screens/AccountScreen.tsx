@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, FlatList, Pressable } from 'react-native';
+import { SafeAreaView, FlatList, Pressable, ScrollView } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { showActionSheet, abbreviateName } from '../utils';
+import { titleize } from '../utils/format';
 import { useAuth } from '../contexts/AuthContext';
+import useAppTheme from '../hooks/use-app-theme';
 import DeviceInfo from 'react-native-device-info';
 import storage from '../utils/storage';
 
 const AccountScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { userColorScheme, appTheme, changeScheme, schemes } = useAppTheme();
     const { customer, logout, isSigningOut } = useAuth();
 
     const handleClearCache = () => {
@@ -52,6 +55,23 @@ const AccountScreen = () => {
         });
     };
 
+    const handleSelectScheme = () => {
+        const options = [...schemes.map((scheme) => titleize(scheme)), 'Cancel'];
+        showActionSheet({
+            options,
+            cancelButtonIndex: options.length - 1,
+            onSelect: (buttonIndex) => {
+                if (buttonIndex !== options.length - 1) {
+                    const selectedScheme = schemes[buttonIndex];
+                    changeScheme(selectedScheme);
+                    toast.success(`Now using ${schemes[buttonIndex]} mode.`, {
+                        position: ToastPosition.BOTTOM,
+                    });
+                }
+            },
+        });
+    };
+
     // Render an item in the menu
     const renderMenuItem = ({ item }) => (
         <Pressable
@@ -67,7 +87,7 @@ const AccountScreen = () => {
         >
             <XStack alignItems='center' space='$3'>
                 {item.leftComponent}
-                <Text fontSize='$6' fontWeight='bold' color='$textPrimary'>
+                <Text fontSize='$6' fontWeight='bold' color='$textSecondary'>
                     {item.title}
                 </Text>
             </XStack>
@@ -83,37 +103,61 @@ const AccountScreen = () => {
         {
             title: 'Profile Photo',
             rightComponent: (
-                <Avatar rounded size='$2'>
+                <Avatar circular size='$2'>
                     <Avatar.Image src={customer.getAttribute('photo_url')} />
-                    <Avatar.Fallback backgroundColor='$blue10'>
-                        <Text color='white' fontWeight='bold'>
+                    <Avatar.Fallback backgroundColor='$primary'>
+                        <Text color='$white' fontWeight='bold'>
                             {abbreviateName(customer.getAttribute('name'))}
                         </Text>
                     </Avatar.Fallback>
                 </Avatar>
             ),
-            rightComponent: null,
             onPress: () => handleChangeProfilePhoto(),
         },
         {
             title: 'Email',
-            rightComponent: <Text color='$textSecondary'>{customer.getAttribute('email')}</Text>,
+            rightComponent: (
+                <Text color='$textSecondary' opacity={0.5}>
+                    {customer.getAttribute('email')}
+                </Text>
+            ),
             onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Email', key: 'email', component: 'input' } }),
         },
         {
             title: 'Phone Number',
-            rightComponent: <Text color='$textSecondary'>{customer.getAttribute('phone')}</Text>,
+            rightComponent: (
+                <Text color='$textSecondary' opacity={0.5}>
+                    {customer.getAttribute('phone')}
+                </Text>
+            ),
             onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Phone Number', key: 'phone', component: 'phone-input' } }),
         },
         {
             title: 'Name',
-            rightComponent: <Text color='$textSecondary'>{customer.getAttribute('name')}</Text>,
+            rightComponent: (
+                <Text color='$textSecondary' opacity={0.5}>
+                    {customer.getAttribute('name')}
+                </Text>
+            ),
             onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Name', key: 'name', component: 'input' } }),
         },
         {
             title: 'Language',
-            rightComponent: <Text color='$textSecondary'>English</Text>, // Replace with dynamic value if available
+            rightComponent: (
+                <Text color='$textSecondary' opacity={0.5}>
+                    English
+                </Text>
+            ), // Replace with dynamic value if available
             onPress: () => navigation.navigate('LanguageSettings'),
+        },
+        {
+            title: 'Theme',
+            rightComponent: (
+                <Text color='$textSecondary' opacity={0.5}>
+                    {titleize(userColorScheme)}
+                </Text>
+            ),
+            onPress: handleSelectScheme,
         },
         {
             title: 'Delete Account',
@@ -148,45 +192,53 @@ const AccountScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' space='$3' padding='$2'>
-                <XStack paddingVertical='$3' paddingHorizontal='$3' justifyContent='space-between'>
-                    <YStack>
-                        <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                            Account
-                        </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <YStack flex={1} bg='$background' space='$8' pt='$8'>
+                    <YStack space='$2'>
+                        <XStack px='$3' justifyContent='space-between'>
+                            <YStack>
+                                <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
+                                    Account
+                                </Text>
+                            </YStack>
+                            <YStack>
+                                <Text fontSize='$3' color='$textSecondary' numberOfLines={1}>
+                                    v{DeviceInfo.getVersion()}
+                                </Text>
+                            </YStack>
+                        </XStack>
+                        <FlatList
+                            data={accountMenu}
+                            keyExtractor={(item) => item.title}
+                            renderItem={renderMenuItem}
+                            ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                            scrollEnabled={false}
+                        />
                     </YStack>
-                    <YStack>
-                        <Text fontSize='$3' color='$textSecondary' numberOfLines={1}>
-                            v{DeviceInfo.getVersion()}
-                        </Text>
+                    <YStack space='$2'>
+                        <YStack px='$3'>
+                            <Text color='$textPrimary' fontSize='$8' fontWeight='bold'>
+                                Data Protection
+                            </Text>
+                        </YStack>
+                        <FlatList
+                            data={dataProtectionMenu}
+                            keyExtractor={(item) => item.title}
+                            renderItem={renderMenuItem}
+                            ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                            scrollEnabled={false}
+                        />
                     </YStack>
-                </XStack>
-                <FlatList
-                    data={accountMenu}
-                    keyExtractor={(item) => item.title}
-                    renderItem={renderMenuItem}
-                    ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
-                />
-
-                <YStack paddingHorizontal='$3'>
-                    <Text fontSize='$6' fontWeight='bold' marginBottom='$1'>
-                        Data Protection
-                    </Text>
+                    <YStack padding='$4' mb='$5'>
+                        <Button marginTop='$4' bg='$red-900' size='$5' onPress={handleSignout} rounded width='100%'>
+                            <Button.Icon>{isSigningOut ? <Spinner color='$red-400' /> : <YStack />}</Button.Icon>
+                            <Button.Text color='$red-400' fontWeight='bold'>
+                                Sign Out
+                            </Button.Text>
+                        </Button>
+                    </YStack>
                 </YStack>
-                <FlatList
-                    data={dataProtectionMenu}
-                    keyExtractor={(item) => item.title}
-                    renderItem={renderMenuItem}
-                    ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
-                />
-
-                <Button marginTop='$4' bg='$red-900' size='$5' onPress={handleSignout} rounded width='100%'>
-                    <Button.Icon>{isSigningOut ? <Spinner color='$red-400' /> : <YStack />}</Button.Icon>
-                    <Button.Text color='$red-400' fontWeight='bold'>
-                        Sign Out
-                    </Button.Text>
-                </Button>
-            </YStack>
+            </ScrollView>
         </SafeAreaView>
     );
 };

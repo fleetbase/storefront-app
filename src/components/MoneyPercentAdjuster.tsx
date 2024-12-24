@@ -10,8 +10,8 @@ const MoneyPercentAdjuster = ({ value: initialValue = 100, currency = 'USD', isP
     const [value, setValue] = useState(initialValue);
     const [isPercent, setIsPercent] = useState(initialIsPercent);
     const formattedValue = isPercent ? `${value}%` : formatCurrency(value, currency);
-    const decrementDisabled = isPercent ? value === 5 : value === 100;
     const incrementTipBy = StorefrontConfig.incrementTipBy || 50;
+    const decrementDisabled = isPercent ? value === 5 : value === incrementTipBy;
 
     const updateValue = (newValue, percent) => {
         setValue(newValue);
@@ -42,32 +42,32 @@ const MoneyPercentAdjuster = ({ value: initialValue = 100, currency = 'USD', isP
     return (
         <XStack ai='center' justifyContent='space-between' style={style}>
             <XStack flex={1} space='$3'>
-                <Button onPress={() => togglePercent(true)} size='$4' circular backgroundColor={isPercent ? '$green-400' : '$gray-200'}>
+                <Button onPress={() => togglePercent(true)} size='$4' circular backgroundColor={isPercent ? '$green-400' : '$secondary'}>
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faPercent} color={theme['green-900'].val} size={20} />
+                        <FontAwesomeIcon icon={faPercent} color={isPercent ? theme['green-900'].val : theme['$textSecondary'].val} size={20} />
                     </Button.Icon>
                 </Button>
-                <Button onPress={() => togglePercent(false)} size='$4' circular backgroundColor={!isPercent ? '$green-400' : '$gray-200'}>
+                <Button onPress={() => togglePercent(false)} size='$4' circular backgroundColor={!isPercent ? '$green-400' : '$secondary'}>
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faMoneyBill} color={theme['green-900'].val} size={24} />
+                        <FontAwesomeIcon icon={faMoneyBill} color={!isPercent ? theme['green-900'].val : theme['$textSecondary'].val} size={24} />
                     </Button.Icon>
                 </Button>
             </XStack>
 
             <XStack flex={1} justifyContent='flex-end' space='$2'>
-                <Button onPress={decrement} size='$4' circular backgroundColor='$gray-200' disabled={decrementDisabled}>
+                <Button onPress={decrement} size='$4' circular backgroundColor='$secondary' disabled={decrementDisabled}>
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faMinus} />
+                        <FontAwesomeIcon icon={faMinus} color={theme['$textSecondary'].val} />
                     </Button.Icon>
                 </Button>
-                <YStack px='$4' py='$2' backgroundColor='$gray-200' borderRadius='$4' justifyContent='center' alignItems='center' minWidth={100}>
+                <YStack px='$4' py='$2' backgroundColor='$secondary' borderRadius='$4' justifyContent='center' alignItems='center' minWidth={100}>
                     <Text color='$textPrimary' fontSize='$6' fontWeight='bold'>
                         {formattedValue}
                     </Text>
                 </YStack>
-                <Button onPress={increment} size='$4' circular backgroundColor='$gray-200'>
+                <Button onPress={increment} size='$4' circular backgroundColor='$secondary'>
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faPlus} />
+                        <FontAwesomeIcon icon={faPlus} color={theme['$textSecondary'].val} />
                     </Button.Icon>
                 </Button>
             </XStack>

@@ -125,15 +125,21 @@ const lightBase = {
     color: colors.gray[900],
     textPrimary: colors.gray[800],
     textSecondary: colors.gray[600],
-    primary: colors.blue[500],
+    textPlaceholder: colors.gray[400],
+    primary: colors.blue[400],
+    primaryDark: colors.blue[500],
+    primaryDarker: colors.blue[600],
     secondary: colors.gray[200],
+    secondaryDark: colors.gray[300],
+    secondaryDarker: colors.gray[400],
     borderColor: colors.gray[200],
     borderColorWithShadow: colors.gray[300],
-    borderActive: colors.blue[500],
-    success: colors.green[500],
-    error: colors.red[500],
-    warning: colors.yellow[500],
-    info: colors.blue[400],
+    shadowColor: colors.gray[900],
+    borderActive: colors.blue[600],
+    success: colors.green[600],
+    error: colors.red[600],
+    warning: colors.yellow[600],
+    info: colors.blue[600],
 };
 
 const darkBase = {
@@ -142,15 +148,21 @@ const darkBase = {
     color: colors.gray[50],
     textPrimary: colors.gray[200],
     textSecondary: colors.gray[400],
+    textPlaceholder: colors.gray[600],
     primary: colors.blue[400],
+    primaryDark: colors.blue[500],
+    primaryDarker: colors.blue[600],
     secondary: colors.gray[700],
-    borderColor: colors.gray[700],
-    borderColorWithShadow: colors.gray[600],
-    borderActive: colors.blue[400],
-    success: colors.green[400],
-    error: colors.red[400],
-    warning: colors.yellow[400],
-    info: colors.blue[300],
+    secondaryDark: colors.gray[800],
+    secondaryDarker: colors.gray[900],
+    borderColor: colors.gray[800],
+    borderColorWithShadow: colors.gray[700],
+    shadowColor: '#000',
+    borderActive: colors.blue[500],
+    success: colors.green[500],
+    error: colors.red[500],
+    warning: colors.yellow[500],
+    info: colors.blue[500],
 };
 
 // Define Themes Using Light and Dark Bases
@@ -158,29 +170,37 @@ export const themes = {
     // Light mode themes
     lightBlue: createTheme({
         ...lightBase,
-        primary: colors.blue[500],
+        primary: colors.blue[600],
     }),
     lightRed: createTheme({
         ...lightBase,
-        primary: colors.red[500],
+        primary: colors.red[600],
     }),
     lightGreen: createTheme({
         ...lightBase,
-        primary: colors.green[500],
+        primary: colors.green[600],
+    }),
+    lightIndigo: createTheme({
+        ...lightBase,
+        primary: colors.indigo[600],
     }),
 
     // Dark mode themes
     darkBlue: createTheme({
         ...darkBase,
-        primary: colors.blue[400],
+        primary: colors.blue[500],
     }),
     darkRed: createTheme({
         ...darkBase,
-        primary: colors.red[400],
+        primary: colors.red[500],
     }),
     darkGreen: createTheme({
         ...darkBase,
-        primary: colors.green[400],
+        primary: colors.green[500],
+    }),
+    darkIndigo: createTheme({
+        ...darkBase,
+        primary: colors.indigo[500],
     }),
 };
 

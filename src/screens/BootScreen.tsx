@@ -3,26 +3,24 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, Platform } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { setI18nConfig } from '../utils/localize';
-import { Spinner, Stack, Text, YStack } from 'tamagui';
+import { Spinner, Stack, Text, YStack, useTheme } from 'tamagui';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
 // import RNBootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from './SetupWarningScreen';
 
 const BootScreen = () => {
-    const [error, setError] = useState<Error | null>(null);
+    const theme = useTheme();
+    const navigation = useNavigation();
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
     const [info, setInfo] = useStorage('info', {});
-    const navigation = useNavigation();
-
-    console.log('[BootScreen]');
+    const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         const checkLocationPermission = async () => {
             const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
 
             const result = await check(permission);
-            console.log('Location Permissions', result);
             if (result === RESULTS.GRANTED) {
                 initializeStorefront(); // Continue the boot process if permission is granted
             } else {
@@ -67,10 +65,10 @@ const BootScreen = () => {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <YStack flex={1} alignItems='center' justifyContent='center' bg='white'>
-                <Spinner size='large' color='$blue10' />
-                <Text mt='$4' color='gray'>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.$background.val }}>
+            <YStack flex={1} alignItems='center' justifyContent='center' bg='$background'>
+                <Spinner size='large' color='$textSecondary' />
+                <Text mt='$4' color='$textPrimary'>
                     Loading Storefront...
                 </Text>
             </YStack>

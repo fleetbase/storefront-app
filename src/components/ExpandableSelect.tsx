@@ -231,7 +231,7 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
             >
                 <Button
                     onPress={() => handleOptionSelect(option)}
-                    bg='white'
+                    bg='$surface'
                     hoverStyle={{ bg: '$surface' }}
                     justifyContent='flex-start'
                     alignItems='center'
@@ -253,20 +253,20 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                         </YStack>
                     </XStack>
                 </Button>
-                {index < options.length - 1 && <Separator />}
+                {index < options.length - 1 && <Separator bg='$borderColorWithShadow' />}
             </Animated.View>
         );
     };
 
     // Ensure optionAnimations are ready before rendering
     if (optionAnimations.length !== options.length) {
-        return <Spinner color='$gray-700' />; // or render a loading indicator
+        return <Spinner color='$textSecondary' />;
     }
 
     // Render options or dropdown toggle based on state
     if (!selectedOption || isAnimating) {
         return (
-            <YStack borderWidth={1} borderColor='$borderColor' borderRadius='$4' bg='$background' width='100%' overflow='hidden'>
+            <YStack borderWidth={1} borderColor='$borderColor' borderRadius='$4' bg='$surface' width='100%' overflow='hidden'>
                 {options.map((option, index) => renderOption(option, index))}
             </YStack>
         );
@@ -288,7 +288,7 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                     flex={1}
                     width='100%'
                     justifyContent='space-between'
-                    bg='white'
+                    bg='$surface'
                     borderWidth={1}
                     borderColor={isDropdownOpen ? '$borderColorWithShadow' : '$borderColor'}
                     hoverStyle={{ borderColor: '$surface' }}
@@ -298,7 +298,7 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                     shadowOpacity={isDropdownOpen ? 0.15 : 0}
                     shadowRadius={isDropdownOpen ? 3 : 0}
                     px='$4'
-                    iconAfter={<FontAwesomeIcon icon={isDropdownOpen ? faChevronUp : faChevronDown} size={16} color={theme.color.val} />}
+                    iconAfter={<FontAwesomeIcon icon={isDropdownOpen ? faChevronUp : faChevronDown} size={16} color={theme.textPrimary.val} />}
                     accessibilityLabel='Toggle options'
                     accessibilityRole='button'
                 >
@@ -321,10 +321,10 @@ const ExpandableSelect = ({ value, optionValue, options = [], onSelect }) => {
                     style={{
                         height: dropdownHeight,
                         overflow: 'hidden',
-                        backgroundColor: '#fff',
+                        backgroundColor: theme['$surface'].val,
                         borderRadius: 8,
                         borderWidth: 1,
-                        borderColor: isDropdownOpen ? theme.borderColorWithShadow.val : theme.borderColor.val,
+                        borderColor: theme.borderColorWithShadow.val,
                         marginTop: 0,
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: isDropdownOpen ? 1 : 0 },

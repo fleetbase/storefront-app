@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
+import { Pressable, Dimensions, StyleSheet } from 'react-native';
 import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
@@ -51,7 +51,7 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
 
     return (
         <YStack space='$3' style={wrapperStyle} {...props}>
-            <TouchableOpacity
+            <Pressable
                 ref={triggerRef}
                 onPress={toggleDropdown}
                 activeOpacity={0.7}
@@ -88,7 +88,7 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                     </Text>
                     <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>
                 </XStack>
-            </TouchableOpacity>
+            </Pressable>
 
             <Portal hostName='LocationPickerPortal'>
                 <AnimatePresence>
@@ -128,7 +128,7 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                             <BlurView style={StyleSheet.absoluteFillObject} blurType='light' blurAmount={10} borderRadius={10} reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)' />
                             <YStack space='$2' borderRadius='$4'>
                                 {storeLocations.map((location, index) => (
-                                    <TouchableOpacity
+                                    <Pressable
                                         key={location.id ?? index}
                                         onPress={() => handleLocationChange(location)}
                                         style={{
@@ -146,7 +146,7 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                                                 {formattedAddressFromSerializedPlace(location.getAttribute('place'))}
                                             </Text>
                                         </YStack>
-                                    </TouchableOpacity>
+                                    </Pressable>
                                 ))}
                             </YStack>
                         </Stack>

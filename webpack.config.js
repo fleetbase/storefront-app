@@ -1,10 +1,10 @@
-// webpack.config.js
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
     entry: './index.web.tsx',
     resolve: {
-        extensions: ['.web.js', '.js', '.tsx', '.ts'],
+        extensions: ['.web.js', '.js', '.jsx', '.tsx', '.ts', '.mjs'],
         alias: {
             'react-native$': 'react-native-web',
         },
@@ -29,7 +29,9 @@ module.exports = {
         ],
     },
     devServer: {
-        contentBase: path.resolve(__dirname, 'dist'),
+        static: {
+            directory: path.resolve(__dirname, 'dist'),
+        },
         compress: true,
         port: 8080,
         hot: true,

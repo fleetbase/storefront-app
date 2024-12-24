@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
+import { Pressable, Dimensions, StyleSheet } from 'react-native';
 import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
@@ -11,6 +11,7 @@ import storage from '../utils/storage';
 import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
+import useAppTheme from '../hooks/use-app-theme';
 
 const LocationPicker = ({
     onPressAddNewLocation,
@@ -25,6 +26,7 @@ const LocationPicker = ({
 }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { isDarkMode } = useAppTheme();
     const { currentLocation, isCurrentLocationLoading, updateCurrentLocation, setCustomerDefaultLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
     const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -73,25 +75,37 @@ const LocationPicker = ({
 
     return (
         <YStack space='$3' style={wrapperStyle} {...props}>
-            <TouchableOpacity
+            <Pressable
                 ref={triggerRef}
                 onPress={toggleDropdown}
                 activeOpacity={0.7}
                 style={[
                     {
-                        backgroundColor: isDropdownOpen ? '$surface' : 'transparent',
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: theme.borderColorWithShadow.val,
+                        paddingHorizontal: 7,
+                        paddingVertical: 5,
                     },
                     triggerWrapperStyle,
                 ]}
             >
-                <XStack alignItems='center' space='$2' style={triggerStyle} {...triggerProps}>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} size={14} color={theme['$gray-400'].val} />
+                <BlurView
+                    style={StyleSheet.absoluteFillObject}
+                    blurType={isDarkMode ? 'dark' : 'light'}
+                    blurAmount={10}
+                    borderRadius={10}
+                    reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                />
+                <XStack alignItems='center' space='$1' style={triggerStyle} {...triggerProps}>
+                    <FontAwesomeIcon icon={faMapMarkerAlt} size={13} color={theme['$textPrimary'].val} />
                     <Text
-                        color='$primary'
+                        color='$textPrimary'
                         fontWeight='bold'
-                        fontSize='$5'
+                        fontSize='$4'
                         numberOfLines={1}
                         px='$1'
+                        mr='$2'
                         style={[
                             {
                                 maxWidth: 200,
@@ -104,15 +118,15 @@ const LocationPicker = ({
                     >
                         {currentLocation ? (currentLocation.isAttributeFilled('name') ? currentLocation.getAttribute('name') : formattedAddressFromPlace(currentLocation)) : 'Loading...'}
                     </Text>
-                    <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>
+                    <Text style={[{ fontSize: 14, color: theme.textPrimary.val, opacity: 0.35 }, triggerArrowStyle]}>▼</Text>
                 </XStack>
-            </TouchableOpacity>
+            </Pressable>
 
             <Portal hostName='LocationPickerPortal'>
                 <AnimatePresence>
                     {isDropdownOpen && (
                         <Stack
-                            borderRadius='$4'
+                            borderRadius={11}
                             borderWidth={1}
                             borderColor='$borderColorWithShadow'
                             shadowColor='$shadowColor'
@@ -122,8 +136,8 @@ const LocationPicker = ({
                             backgroundColor='transparent'
                             width={dropdownWidth}
                             position='absolute'
-                            top={triggerPosition.height + 70}
-                            left={triggerPosition.x - 15}
+                            top={triggerPosition.height + 55}
+                            left={triggerPosition.x - 10}
                             zIndex={1}
                             enterStyle={{
                                 opacity: 0,
@@ -143,17 +157,23 @@ const LocationPicker = ({
                             }}
                             originY={0}
                         >
-                            <BlurView style={StyleSheet.absoluteFillObject} blurType='light' blurAmount={10} borderRadius={10} reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)' />
+                            <BlurView
+                                style={StyleSheet.absoluteFillObject}
+                                blurType={isDarkMode ? 'dark' : 'light'}
+                                blurAmount={10}
+                                borderRadius={10}
+                                reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                            />
                             <YStack space='$2' borderRadius='$4'>
                                 {savedLocations.map((location, index) => (
-                                    <TouchableOpacity
+                                    <Pressable
                                         key={location.id ?? index}
                                         onPress={() => handleLocationChange(location)}
                                         style={{
                                             paddingVertical: 6,
                                             paddingHorizontal: 8,
                                             borderBottomWidth: 1,
-                                            borderBottomColor: '#d1d5db',
+                                            borderBottomColor: theme.borderColor.val,
                                         }}
                                     >
                                         <YStack mb='$1' bg={location.id === currentLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>
@@ -162,9 +182,9 @@ const LocationPicker = ({
                                             </Text>
                                             <Text color={location.id === currentLocation?.id ? '$gray-200' : '$textSecondary'}>{formattedAddressFromPlace(location)}</Text>
                                         </YStack>
-                                    </TouchableOpacity>
+                                    </Pressable>
                                 ))}
-                                <TouchableOpacity
+                                <Pressable
                                     onPress={handleAddNewLocation}
                                     style={{
                                         paddingVertical: 6,
@@ -178,7 +198,7 @@ const LocationPicker = ({
                                         <FontAwesomeIcon icon={faPlus} size={16} style={{ marginRight: 6 }} />
                                         <Text color='$primaryColor'>Add New Location</Text>
                                     </XStack>
-                                </TouchableOpacity>
+                                </Pressable>
                             </YStack>
                         </Stack>
                     )}

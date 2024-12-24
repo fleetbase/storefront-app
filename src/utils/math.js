@@ -1,3 +1,5 @@
+import { numbersOnly } from './format';
+
 export function percentage(percentage, number) {
     return (percentage / 100) * number;
 }
@@ -26,4 +28,14 @@ export function haversine([lat1, lon1], [lat2, lon2], unit = 'meters') {
     }
 
     return finalDistance;
+}
+
+export function calculateTip(tip, subtotal) {
+    let amount = tip;
+    if (typeof tip === 'string' && tip.endsWith('%')) {
+        amount = percentage(numbersOnly(tip), subtotal);
+    }
+
+    amount = parseInt(amount);
+    return isNaN(amount) ? 0 : amount;
 }

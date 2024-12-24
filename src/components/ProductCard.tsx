@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Dimensions, TouchableOpacity } from 'react-native';
+import { Dimensions, Pressable } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { Spinner, Card, Text, YStack, XStack, H2, Paragraph, Button, Image, useTheme } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
@@ -65,7 +65,7 @@ const ProductCard = ({
 
     return (
         <YStack wrapperStyle={wrapperStyle}>
-            <TouchableOpacity
+            <Pressable
                 onPress={handlePress}
                 style={style}
                 disabled={isLoading('addToCart')}
@@ -156,7 +156,7 @@ const ProductCard = ({
                         </YStack>
                     </Card.Footer>
                 </Card>
-            </TouchableOpacity>
+            </Pressable>
         </YStack>
     );
 };

@@ -1,46 +1,61 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, FlatList, Pressable } from 'react-native';
 import { Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { abbreviateName } from '../utils';
+import { abbreviateName, storefrontConfig } from '../utils';
 import { useAuth } from '../contexts/AuthContext';
 import storage from '../utils/storage';
 
-const menuItems = [
-    { id: '1', title: 'Order History', screen: 'OrderHistory' },
-    { id: '2', title: 'Account', screen: 'Account' },
-    { id: '3', title: 'Payment Methods', screen: 'PaymentMethods' },
-    { id: '4', title: 'Address Book', screen: 'AddressBook' },
-];
-
+const PAYMENT_GATEWAYS_NO_PAYMENT_METHODS = ['qpay'];
 const ProfileScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { customer, logout } = useAuth();
 
-    const handleClearCache = () => {
-        storage.clearStore();
-        toast.success('Cache cleared.', { position: ToastPosition.BOTTOM });
-    };
+    const handleManagePaymentMethods = useCallback(() => {
+        if (storefrontConfig('paymentGateway') === 'stripe') {
+            return navigation.navigate('StripeCustomer');
+        }
+    }, [navigation]);
 
-    const handleLogin = () => {
-        navigation.navigate('Login');
-    };
+    const handlePressMenuItem = useCallback(
+        (item) => {
+            if (item && typeof item.handler === 'function') {
+                return item.handler(item);
+            }
 
-    const handleSignout = () => {
-        logout();
-    };
+            return navigation.navigate(item.screen);
+        },
+        [navigation]
+    );
 
-    const handleViewProfile = () => {
-        // navigate to profile view
-    };
+    const handleViewProfile = useCallback(() => {
+        navigation.navigate('Account');
+    }, [navigation]);
+
+    const menuItems = useMemo(() => {
+        const items = [
+            { id: '1', title: 'Order History', screen: 'OrderHistory' },
+            { id: '2', title: 'Account', screen: 'Account' },
+            {
+                id: '3',
+                title: 'Payment Methods',
+                screen: 'PaymentMethods',
+                handler: handleManagePaymentMethods,
+                hidden: PAYMENT_GATEWAYS_NO_PAYMENT_METHODS.includes(storefrontConfig('paymentGateway')),
+            },
+            { id: '4', title: 'Address Book', screen: 'AddressBook' },
+        ];
+
+        return items.filter((item) => !item.hidden);
+    }, [handleManagePaymentMethods]);
 
     const renderMenuItem = ({ item }) => (
         <Pressable
-            onPress={() => navigation.navigate(item.screen)}
+            onPress={() => handlePressMenuItem(item)}
             style={({ pressed }) => ({
                 backgroundColor: pressed ? theme.secondary.val : theme.background.val,
                 padding: 16,
@@ -69,8 +84,8 @@ const ProfileScreen = () => {
                         <Pressable onPress={handleViewProfile}>
                             <Avatar circular size='$7'>
                                 <Avatar.Image accessibilityLabel={customer.getAttribute('name')} src={customer.getAttribute('photo_url')} />
-                                <Avatar.Fallback backgroundColor='$blue10'>
-                                    <Text fontSize='$5' fontWeight='bold' color='white' textTransform='uppercase'>
+                                <Avatar.Fallback backgroundColor='$primary'>
+                                    <Text fontSize='$5' fontWeight='bold' color='$white' textTransform='uppercase'>
                                         {abbreviateName(customer.getAttribute('name'))}
                                     </Text>
                                 </Avatar.Fallback>

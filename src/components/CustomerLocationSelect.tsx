@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { Animated, SafeAreaView, TouchableOpacity, FlatList, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Animated, SafeAreaView, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, Button, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -7,15 +7,15 @@ import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';
-import { formattedAddressFromPlace, formatAddressSecondaryIdentifier } from '../../utils/location';
-import useCurrentLocation from '../../hooks/use-current-location';
-import useSavedLocations from '../../hooks/use-saved-locations';
-import PlaceMapView from '../PlaceMapView';
+import { formattedAddressFromPlace, formatAddressSecondaryIdentifier } from '../utils/location';
+import useCurrentLocation from '../hooks/use-current-location';
+import useSavedLocations from '../hooks/use-saved-locations';
+import PlaceMapView from './PlaceMapView';
 
-const SelectDropoffLocation = ({ onChange, ...props }) => {
+const CustomerLocationSelect = ({ onChange, ...props }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const { currentLocation, updateDefaultLocation } = useCurrentLocation();
+    const { currentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%'], []);
@@ -30,16 +30,10 @@ const SelectDropoffLocation = ({ onChange, ...props }) => {
     };
 
     const handleLocationSelect = async (place) => {
-        try {
-            await updateDefaultLocation(place);
-            closeBottomSheet();
+        closeBottomSheet();
 
-            if (typeof onChange === 'function') {
-                onChange(place);
-            }
-        } catch (error) {
-            console.error('Error updating dropoff location at checkout:', error);
-            toast.error(error.message);
+        if (typeof onChange === 'function') {
+            onChange(place);
         }
     };
 
@@ -92,7 +86,7 @@ const SelectDropoffLocation = ({ onChange, ...props }) => {
                                 renderItem={({ item }) => (
                                     <Button
                                         onPress={() => handleLocationSelect(item)}
-                                        size='$4'
+                                        size='$6'
                                         bg='$secondary'
                                         justifyContent='space-between'
                                         space='$1'
@@ -109,7 +103,10 @@ const SelectDropoffLocation = ({ onChange, ...props }) => {
                                         }}
                                     >
                                         <YStack>
-                                            <Text color='$textPrimary' fontWeight='bold' numberOfLines={1}>
+                                            <Text mb='$1' color='$textPrimary' fontWeight='bold' numberOfLines={1}>
+                                                {item.getAttribute('name')}
+                                            </Text>
+                                            <Text color='$textSecondary' numberOfLines={1}>
                                                 {formattedAddressFromPlace(item)}
                                             </Text>
                                             <Text color='$textSecondary'>{formatAddressSecondaryIdentifier(item)}</Text>
@@ -126,4 +123,4 @@ const SelectDropoffLocation = ({ onChange, ...props }) => {
     );
 };
 
-export default SelectDropoffLocation;
+export default CustomerLocationSelect;

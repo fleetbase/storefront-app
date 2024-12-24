@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Animated, SafeAreaView, TouchableOpacity, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
-import { Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
+import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
@@ -37,6 +37,10 @@ const CartScreen = () => {
 
         if (StorefrontConfig.paymentGateway === 'qpay') {
             return navigation.navigate('QPayCheckout');
+        }
+
+        if (StorefrontConfig.paymentGateway === 'paypal') {
+            return navigation.navigate('PaypalCheckout');
         }
     };
 
@@ -131,17 +135,17 @@ const CartScreen = () => {
     };
 
     const renderRightActions = (cartItem) => (
-        <XStack height='100%' width={200} borderBottomWidth={4} minHeight={100} maxHeight={125} borderColor='$borderColor'>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleEdit(cartItem)}>
+        <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
+            <Pressable style={{ flex: 1 }} onPress={() => handleEdit(cartItem)}>
                 <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
                     <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
                 </YStack>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleDelete(cartItem)}>
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => handleDelete(cartItem)}>
                 <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
                     {isLoading(`removeCartItem_${cartItem.id}`) ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
                 </YStack>
-            </TouchableOpacity>
+            </Pressable>
         </XStack>
     );
 
@@ -163,10 +167,10 @@ const CartScreen = () => {
                 ]}
             >
                 <Swipeable renderRightActions={() => renderRightActions(cartItem)}>
-                    <YStack flex={1} bg='$background' padding='$4' borderBottomWidth={4} minHeight={100} maxHeight={125} borderColor='$borderColor'>
+                    <YStack flex={1} bg='$background' padding='$4' minHeight={100} maxHeight={125}>
                         <XStack space='$3' justifyContent='space-between'>
                             <XStack flex={1}>
-                                <TouchableOpacity onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
+                                <Pressable onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
                                     <XStack flex={1} space='$3' height='100%'>
                                         <YStack>
                                             <XStack width={40} height={40} borderWidth={1} borderColor='$secondary' borderRadius='$3' alignItems='center' justifyContent='center'>
@@ -234,7 +238,7 @@ const CartScreen = () => {
                                             </YStack>
                                         </YStack>
                                     </XStack>
-                                </TouchableOpacity>
+                                </Pressable>
                             </XStack>
                             <YStack width={150} alignItems='flex-end'>
                                 <YStack>
@@ -264,14 +268,20 @@ const CartScreen = () => {
                     )}
                 </XStack>
                 <YStack>
-                    <TouchableOpacity onPress={handleEmpty}>
+                    <Pressable onPress={handleEmpty}>
                         <Text color='$error' fontSize='$4'>
                             Empty Cart
                         </Text>
-                    </TouchableOpacity>
+                    </Pressable>
                 </YStack>
             </XStack>
-            <Animated.FlatList data={displayedItems} renderItem={renderItem} keyExtractor={(item) => item.id} contentContainerStyle={{ paddingBottom: 16 }} />
+            <Animated.FlatList
+                data={displayedItems}
+                renderItem={renderItem}
+                ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 16 }}
+            />
             {cart.isNotEmpty && (
                 <YStack
                     position='absolute'
@@ -287,8 +297,11 @@ const CartScreen = () => {
                     shadowRadius={3}
                 >
                     <XStack alignItems='center' justifyContent='space-between'>
-                        <YStack flex={1}>
-                            <Text fontSize='$9' fontWeight='bold'>
+                        <YStack flex={1} space='$1'>
+                            <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
+                                Total
+                            </Text>
+                            <Text color='$textPrimary' fontSize='$9' fontWeight='bold'>
                                 {formatCurrency(calculateCartTotal(), cart.getAttribute('currency'))}
                             </Text>
                         </YStack>

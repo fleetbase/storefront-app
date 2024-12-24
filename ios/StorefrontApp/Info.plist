@@ -67,6 +67,25 @@
 				</array>
 			</dict>
 		</array>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>qpaywallet</string>
+			<string>khanbank</string>
+			<string>statebankmongolia</string>
+			<string>xacbank</string>
+			<string>tdbbank</string>
+			<string>socialpay-payment</string>
+			<string>most</string>
+			<string>nibank</string>
+			<string>ckbank</string>
+			<string>capitronbank</string>
+			<string>bogdbank</string>
+			<string>transbank</string>
+			<string>mbank</string>
+			<string>ard</string>
+			<string>arig</string>
+			<string>Monpay</string>
+		</array>
 		<key>NSCameraUsageDescription</key>
 		<string>This app may need to use your camera for your profile picture</string>
 		<key>NSContactsUsageDescription</key>

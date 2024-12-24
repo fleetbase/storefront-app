@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { SafeAreaView, TouchableWithoutFeedback, Keyboard, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView, TouchableWithoutFeedback, Keyboard, Pressable, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
@@ -164,7 +164,7 @@ const AddNewLocationScreen = ({ route }) => {
                         >
                             <ScrollView style={{ height: 150 }}>
                                 {currentLocation && searchResults.length === 0 && (
-                                    <TouchableOpacity onPress={handleUseCurrentLocation}>
+                                    <Pressable onPress={handleUseCurrentLocation}>
                                         <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                             <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                                 <Circle size={40} bg='$background'>
@@ -180,11 +180,11 @@ const AddNewLocationScreen = ({ route }) => {
                                                 </Text>
                                             </YStack>
                                         </XStack>
-                                    </TouchableOpacity>
+                                    </Pressable>
                                 )}
                                 {searchResults.length > 0 &&
                                     searchResults.map((location) => (
-                                        <TouchableOpacity onPress={() => handleLocationSelect(location)} key={location.place_id}>
+                                        <Pressable onPress={() => handleLocationSelect(location)} key={location.place_id}>
                                             <XStack animation='quick' space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                                 <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                                     <Circle size={40} bg='$background'>
@@ -200,9 +200,9 @@ const AddNewLocationScreen = ({ route }) => {
                                                     </Text>
                                                 </YStack>
                                             </XStack>
-                                        </TouchableOpacity>
+                                        </Pressable>
                                     ))}
-                                <TouchableOpacity onPress={handleUseMapLocation}>
+                                <Pressable onPress={handleUseMapLocation}>
                                     <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                         <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                             <Circle size={40} bg='$background'>
@@ -218,7 +218,7 @@ const AddNewLocationScreen = ({ route }) => {
                                             </Text>
                                         </YStack>
                                     </XStack>
-                                </TouchableOpacity>
+                                </Pressable>
                             </ScrollView>
                         </YStack>
                     </YStack>

@@ -12,6 +12,7 @@ import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreS
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
+import OrderStack from './stacks/OrderStack';
 import CartScreen from '../screens/CartScreen';
 import CartItemScreen from '../screens/CartItemScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -20,11 +21,15 @@ import PhoneLoginScreen from '../screens/PhoneLoginScreen';
 import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
 import CreateAccountScreen from '../screens/CreateAccountScreen';
 import AccountScreen from '../screens/AccountScreen';
+import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
+import OrderScreen from '../screens/OrderScreen';
+import OrderHistoryScreen from '../screens/OrderHistoryScreen';
 import ProductScreen from '../screens/ProductScreen';
 import LocationPicker from '../components/LocationPicker';
 import BackButton from '../components/BackButton';
 import useCart from '../hooks/use-cart';
+import useAppTheme from '../hooks/use-app-theme';
 
 const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
@@ -79,6 +84,7 @@ const StoreCartTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        ...OrderStack,
         ...CheckoutStack,
     },
 });
@@ -98,7 +104,6 @@ const StoreProfileTab = createNativeStackNavigator({
             options: ({ route, navigation }) => {
                 return {
                     title: '',
-                    headerTitleAlign: 'left',
                     headerTransparent: true,
                     headerShadowVisible: false,
                     headerLeft: () => {
@@ -152,6 +157,15 @@ const StoreProfileTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        StripeCustomer: {
+            if: useIsAuthenticated,
+            screen: StripeCustomerScreen,
+            options: {
+                presentation: 'transparentModal',
+                headerShown: false,
+            },
+        },
+        ...OrderStack,
         ...LocationStack,
     },
 });
@@ -160,11 +174,18 @@ const StoreNavigator = createBottomTabNavigator({
     initialRouteName: 'StoreHomeTab',
     screenOptions: ({ route, navigation }) => {
         const theme = useTheme();
+        const { isDarkMode } = useAppTheme();
+
         return {
             headerShown: false,
-            tabBarBackground: () => <BlurView tint='light' intensity={100} style={StyleSheet.absoluteFill} />,
+            tabBarBackground: () => <BlurView tint={isDarkMode ? 'dark' : 'light'} intensity={100} style={StyleSheet.absoluteFill} />,
             tabBarInactiveTintColor: theme.secondary.val,
             tabBarActiveTintColor: theme.primary.val,
+            tabBarStyle: {
+                backgroundColor: theme.background.val,
+                borderTopWidth: 1,
+                borderTopColor: isDarkMode ? theme.borderColor.val : theme['$gray-600'].val,
+            },
             tabBarIcon: ({ focused }) => {
                 let icon;
                 switch (route.name) {

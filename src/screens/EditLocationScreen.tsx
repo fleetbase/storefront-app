@@ -14,6 +14,7 @@ import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
+import { useAppTheme } from '../hooks/use-app-theme';
 import ExpandableSelect from '../components/ExpandableSelect';
 import PlaceMapView from '../components/PlaceMapView';
 
@@ -30,7 +31,7 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
             borderWidth={1}
             borderColor='$borderColorWithShadow'
             borderRadius='$4'
-            bg='white'
+            bg='$surface'
             autoCapitalize={false}
             autoComplete={false}
             autoCorrect={false}
@@ -56,7 +57,6 @@ const EditLocationScreen = ({ route }) => {
     const [postalCode, setPostalCode] = useState(place.postal_code);
     const [instructions, setInstructions] = useState(place.meta.instructions);
     const redirectTo = params.redirectTo;
-    console.log('[EditLocationScreen #redirectTo]', redirectTo);
     const isDefaultLocation = currentLocation?.id === place?.id;
 
     useEffect(() => {
@@ -147,21 +147,21 @@ const EditLocationScreen = ({ route }) => {
     };
 
     const types = [
-        { id: 1, title: 'Apartment', type: 'apartment', icon: <FontAwesomeIcon icon={faBuildingUser} /> },
-        { id: 2, title: 'House', type: 'house', icon: <FontAwesomeIcon icon={faHouse} /> },
-        { id: 3, title: 'Office', type: 'office', icon: <FontAwesomeIcon icon={faBuilding} /> },
-        { id: 4, title: 'Hotel', type: 'hotel', icon: <FontAwesomeIcon icon={faHotel} /> },
-        { id: 5, title: 'Hospital', type: 'hospital', icon: <FontAwesomeIcon icon={faHospital} /> },
-        { id: 6, title: 'School', type: 'school', icon: <FontAwesomeIcon icon={faSchool} /> },
-        { id: 7, title: 'Other', type: 'other', icon: <FontAwesomeIcon icon={faChair} /> },
+        { id: 1, title: 'Apartment', type: 'apartment', icon: <FontAwesomeIcon icon={faBuildingUser} color={theme.textSecondary.val} /> },
+        { id: 2, title: 'House', type: 'house', icon: <FontAwesomeIcon icon={faHouse} color={theme.textSecondary.val} /> },
+        { id: 3, title: 'Office', type: 'office', icon: <FontAwesomeIcon icon={faBuilding} color={theme.textSecondary.val} /> },
+        { id: 4, title: 'Hotel', type: 'hotel', icon: <FontAwesomeIcon icon={faHotel} color={theme.textSecondary.val} /> },
+        { id: 5, title: 'Hospital', type: 'hospital', icon: <FontAwesomeIcon icon={faHospital} color={theme.textSecondary.val} /> },
+        { id: 6, title: 'School', type: 'school', icon: <FontAwesomeIcon icon={faSchool} color={theme.textSecondary.val} /> },
+        { id: 7, title: 'Other', type: 'other', icon: <FontAwesomeIcon icon={faChair} color={theme.textSecondary.val} /> },
     ];
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                <YStack bg='$background' padding='$5' space='$2'>
+                <YStack bg='$background' padding='$5' space='$5'>
                     <YStack space='$2'>
-                        <XStack paddingVertical='$3' justifyContent='space-between'>
+                        <XStack py='$1' justifyContent='space-between'>
                             <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                 Address
                             </Text>
@@ -173,7 +173,7 @@ const EditLocationScreen = ({ route }) => {
                         </XStack>
                     </YStack>
                     <YStack space='$2'>
-                        <XStack paddingVertical='$3' justifyContent='space-between'>
+                        <XStack py='$1' justifyContent='space-between'>
                             <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                 Location Type
                             </Text>
@@ -183,19 +183,19 @@ const EditLocationScreen = ({ route }) => {
                         </YStack>
                     </YStack>
                     {place.type && (
-                        <YStack space='$2'>
-                            <YStack paddingVertical='$3' justifyContent='space-between'>
+                        <YStack space='$4'>
+                            <YStack py='$1' space='$2' justifyContent='space-between'>
                                 <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                     Address Details
                                 </Text>
-                                <Text fontSize='$4' color='$textSecondary' mt='$3' numberOfLines={1}>
+                                <Text fontSize='$4' color='$textSecondary' numberOfLines={1}>
                                     Add additional address details.
                                 </Text>
                             </YStack>
-                            <YStack space='$3'>
+                            <YStack space='$4'>
                                 <YStack>
-                                    <XStack>
-                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' pl='$2' pr='$1'>
+                                    <XStack mb='$2'>
+                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mr='$2'>
                                             Address label or name
                                         </Text>
                                         <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
@@ -203,8 +203,8 @@ const EditLocationScreen = ({ route }) => {
                                     <LocationPropertyInput value={name} onChange={setName} placeholder='Address label or name' />
                                 </YStack>
                                 <YStack>
-                                    <XStack>
-                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' pl='$2' pr='$1'>
+                                    <XStack mb='$2'>
+                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mr='$2'>
                                             Street address or P.O. Box
                                         </Text>
                                         <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
@@ -212,16 +212,16 @@ const EditLocationScreen = ({ route }) => {
                                     <LocationPropertyInput value={street1} onChange={setStreet1} placeholder='Street address or P.O. Box' />
                                 </YStack>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
                                         Apt, suite, unit, building, floor, etc.
                                     </Text>
                                     <LocationPropertyInput value={street2} onChange={setStreet2} placeholder='Apt, suite, unit, building, floor, etc.' />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
+                                    <Text fontSize='$1' color='$textSecondary' mt='$2'>
                                         Optional
                                     </Text>
                                 </YStack>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
                                         Neighborhood
                                     </Text>
                                     <LocationPropertyInput value={neighborhood} onChange={setNeighborhood} placeholder='Neighborhood' />
@@ -230,7 +230,7 @@ const EditLocationScreen = ({ route }) => {
                                     </Text>
                                 </YStack>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
                                         City or town
                                     </Text>
                                     <LocationPropertyInput value={city} onChange={setCity} placeholder='City or town' />
@@ -239,7 +239,7 @@ const EditLocationScreen = ({ route }) => {
                                     </Text>
                                 </YStack>
                                 <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
                                         Postal or zip code
                                     </Text>
                                     <LocationPropertyInput value={postalCode} onChange={setPostalCode} placeholder='Postal or zip code' />
@@ -248,7 +248,7 @@ const EditLocationScreen = ({ route }) => {
                                     </Text>
                                 </YStack>
                                 <YStack width='100%'>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2' px='$2'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
                                         Additional instructions for the courier
                                     </Text>
                                     <LocationPropertyInput value={instructions} onChange={setInstructions} placeholder='Additional instructions for the courier' />

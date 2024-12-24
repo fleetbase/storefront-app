@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Switch, Text, Label, Separator, YStack, XStack, useTheme } from 'tamagui';
 import TipInput from './TipInput';
-import useStorefrontInfo from '../../hooks/use-storefront-info';
+import useStorefrontInfo from '../hooks/use-storefront-info';
 
-const CheckoutOptions = ({ onChange }) => {
+const CheckoutOptions = ({ onChange, isPickup = false }) => {
     const { info, enabled } = useStorefrontInfo();
     const [leavingTip, setLeavingTip] = useState(false);
     const [tip, setTip] = useState(false);
@@ -33,10 +33,10 @@ const CheckoutOptions = ({ onChange }) => {
                 </>
             )}
 
-            {enabled('delivery_tips') && (
+            {enabled('delivery_tips') && !isPickup && (
                 <>
                     <TipInput
-                        label='Leave a tip for delivery'
+                        label='Leave delivery tip'
                         isTipping={leavingDeliveryTip}
                         setTipping={setLeavingDeliveryTip}
                         tipValue={deliveryTip}

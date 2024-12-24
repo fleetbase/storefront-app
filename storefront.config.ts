@@ -1,9 +1,10 @@
-import { DefaultConfig } from './config/default';
+import { createStorefrontConfig } from './config/default';
 
-const StorefrontConfig = {
-    ...DefaultConfig,
-    paymentGateway: 'stripe',
+export default createStorefrontConfig({
+    paymentGateway: 'qpay',
     incrementTipBy: 500,
-};
-
-export default StorefrontConfig;
+    showDriversOnMap: true,
+    styles: {
+        StoreHeader: {},
+    },
+});

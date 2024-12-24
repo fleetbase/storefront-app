@@ -1,22 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, ScrollView } from 'react-native';
-import { Stack, Text, YStack, useTheme } from 'tamagui';
-import SelectDropoffLocation from '../components/checkout/SelectDropoffLocation';
-import CartContents from '../components/checkout/CartContents';
-import CheckoutOptions from '../components/checkout/CheckoutOptions';
-import CheckoutTotal from '../components/checkout/CheckoutTotal';
-import DeliveryRoutePreview from '../components/checkout/DeliveryRoutePreview';
+import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
+import CustomerLocationSelect from '../components/CustomerLocationSelect';
+import StripeCardFieldSheet from '../components/StripeCardFieldSheet';
+import StripePaymentSheet from '../components/StripePaymentSheet';
+import CartContents from '../components/CartContents';
+import CheckoutOptions from '../components/CheckoutOptions';
+import CheckoutTotal from '../components/CheckoutTotal';
+import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
+import CheckoutButton from '../components/CheckoutButton';
+import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
+import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
+import { storefrontConfig } from '../utils';
 
-const CheckoutScreen = () => {
+const StripeCheckoutScreen = () => {
     const theme = useTheme();
-    const [tip, setTip] = useState(0);
-    const [deliveryTip, setDeliveryTip] = useState(0);
-
-    const handleUpdateOptions = ({ tip, leavingTip, deliveryTip, leavingDeliveryTip }) => {
-        setTip(leavingTip ? tip : 0);
-        setDeliveryTip(leavingDeliveryTip ? deliveryTip : 0);
-    };
+    const navigation = useNavigation();
+    const { handleCompleteOrder, handleDeliveryLocationChange, setTipOptions, setPickup, isPickup, isPickupEnabled, lineItems, totalAmount, isNotReady, isLoading } =
+        useStripeCheckoutContext({
+            onOrderComplete: (order) => {
+                navigation.reset({
+                    index: 1,
+                    routes: [{ name: 'Cart' }, { name: 'Order', params: { order: order.serialize() } }],
+                });
+            },
+        });
 
     return (
         <YStack bg='$background'>
@@ -25,13 +34,20 @@ const CheckoutScreen = () => {
                     <YStack height={300}>
                         <DeliveryRoutePreview />
                     </YStack>
-                    <YStack padding='$3' space='$3'>
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Your delivery location
-                            </Text>
-                            <SelectDropoffLocation />
-                        </YStack>
+                    <YStack padding='$3' space='$5'>
+                        {isPickupEnabled && (
+                            <YStack space='$3'>
+                                <CheckoutPickupSwitch onChange={(isPickup) => setPickup(isPickup)} />
+                            </YStack>
+                        )}
+                        {!isPickup && (
+                            <YStack space='$3'>
+                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                    Your delivery location
+                                </Text>
+                                <CustomerLocationSelect onChange={handleDeliveryLocationChange} />
+                            </YStack>
+                        )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Your cart
@@ -40,22 +56,31 @@ const CheckoutScreen = () => {
                         </YStack>
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                Your payment method
+                            </Text>
+                            {storefrontConfig('stripePaymentMethod') === 'field' ? <StripeCardFieldSheet /> : <StripePaymentSheet />}
+                        </YStack>
+                        <YStack space='$3'>
+                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Checkout options
                             </Text>
-                            <CheckoutOptions onChange={handleUpdateOptions} />
+                            <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
                         </YStack>
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Total
                             </Text>
-                            <CheckoutTotal tip={tip} deliveryTip={deliveryTip} />
+                            <CheckoutTotal lineItems={lineItems} />
                         </YStack>
                         <YStack width='100%' height={200} />
                     </YStack>
                 </YStack>
             </ScrollView>
+            <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
+                <CheckoutButton onPress={handleCompleteOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
+            </XStack>
         </YStack>
     );
 };
 
-export default CheckoutScreen;
+export default StripeCheckoutScreen;

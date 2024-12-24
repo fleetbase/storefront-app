@@ -46,10 +46,7 @@ const StoreHome = ({ route }) => {
                         transform: [{ translateY: headerTranslateY }],
                     }}
                 >
-                    <LocationPicker
-                        triggerStyle={{ borderWidth: 1, backgroundColor: 'black', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }}
-                        onPressAddNewLocation={(_navigation, params = {}) => navigation.navigate('AddNewLocation', params)}
-                    />
+                    <LocationPicker onPressAddNewLocation={(_navigation, params = {}) => navigation.navigate('AddNewLocation', params)} />
                 </Animated.View>
             ),
         });

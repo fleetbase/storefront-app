@@ -1,0 +1,82 @@
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, FlatList, Pressable } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
+import { Separator, Text, XStack, YStack, useTheme } from 'tamagui';
+import { format as formatDate } from 'date-fns';
+import { formatCurrency } from '../utils/format';
+import { restoreFleetbaseInstance } from '../utils';
+import { Store } from '@fleetbase/storefront';
+import { Order } from '@fleetbase/sdk';
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../contexts/AuthContext';
+import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
+import useStorage from '../hooks/use-storage';
+import Badge from '../components/Badge';
+
+const restoreOrders = (orders = []) => {
+    return orders.map((order) => new Order(order, fleetbaseAdapter));
+};
+
+const OrderHistoryScreen = () => {
+    const theme = useTheme();
+    const navigation = useNavigation();
+    const { customer } = useAuth();
+    const [orders, setOrders] = useStorage(`${customer.id}_orders`, []);
+
+    const fetchOrders = async (params = {}) => {
+        try {
+            const orders = await customer.getOrderHistory({ sort: '-created_at', limit: 25, ...params });
+            setOrders(orders.map((order) => order.serialize()));
+        } catch (err) {
+            console.error('Error loading customer orders:', err);
+            toast.error(err.message);
+        }
+    };
+
+    const handleViewOrder = (order) => {
+        navigation.navigate('Order', { order: order.serialize() });
+    };
+
+    useEffect(() => {
+        if (customer) {
+            fetchOrders();
+        }
+    }, [customer]);
+
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+            <FlatList
+                data={restoreOrders(orders)}
+                renderItem={({ item: order }) => (
+                    <Pressable onPress={() => handleViewOrder(order)}>
+                        <XStack justifyContent='space-between' px='$4' py='$3'>
+                            <YStack flex={1} space='$2'>
+                                <Text color='$textPrimary' fontWeight='bold' size='$5' numberOfLines={1}>
+                                    {order.getAttribute('meta.storefront')}
+                                </Text>
+                                <Text color='$textSecondary' numberOfLines={1} size='$4'>
+                                    {formatDate(order.createdAt, 'MMM, do yyyy H:mm aa')}
+                                </Text>
+                            </YStack>
+                            <YStack space='$2'>
+                                <XStack space='$3'>
+                                    <Text color='$textSecondary'>{formatCurrency(order.getAttribute('meta.total'), order.getAttribute('meta.currency'))}</Text>
+                                    <FontAwesomeIcon icon={faChevronRight} size={14} color={theme['$textSecondary'].val} />
+                                </XStack>
+                                <Badge status={order.getAttribute('status')} alignSelf='flex-start' py='$1' px='$2' />
+                            </YStack>
+                        </XStack>
+                    </Pressable>
+                )}
+                keyExtractor={(item, index) => item.id || index}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+            />
+        </SafeAreaView>
+    );
+};
+
+export default OrderHistoryScreen;

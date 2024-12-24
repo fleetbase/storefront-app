@@ -3,17 +3,19 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
-import { restoreFleetbasePlace, getCoordinates } from '../../utils/location';
-import { config } from '../../utils';
-import { formattedAddressFromPlace } from '../../utils/location';
+import { Driver } from '@fleetbase/sdk';
+import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
+import { config } from '../utils';
+import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import LocationMarker from '../LocationMarker';
-import useCurrentLocation from '../../hooks/use-current-location';
-import useStoreLocations from '../../hooks/use-store-locations';
+import LocationMarker from './LocationMarker';
+import DriverMarker from './DriverMarker';
+import useCurrentLocation from '../hooks/use-current-location';
+import useStoreLocations from '../hooks/use-store-locations';
 
 const calculateDeltas = (zoom) => {
-    const baseDelta = 0.8;
+    const baseDelta = 0.005;
     return baseDelta * zoom;
 };
 
@@ -36,13 +38,13 @@ const getPlaceCoords = (place) => {
     return { latitude, longitude };
 };
 
-const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm' }) => {
+const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm' }) => {
     const theme = useTheme();
     const { store, currentStoreLocation } = useStoreLocations();
     const { currentLocation } = useCurrentLocation();
     const mapRef = useRef(null);
-    const start = restoreFleetbasePlace(currentStoreLocation.getAttribute('place'));
-    const end = restoreFleetbasePlace(currentLocation);
+    const start = restoreFleetbasePlace(order.getAttribute('payload.pickup'));
+    const end = restoreFleetbasePlace(order.getAttribute('payload.dropoff'));
     const origin = getPlaceCoords(start);
     const destination = getPlaceCoords(end);
     const initialDeltas = calculateDeltas(zoom);
@@ -53,6 +55,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     });
     const [zoomLevel, setZoomLevel] = useState(calculateZoomLevel(initialDeltas));
     const markerOffset = calculateOffset(zoomLevel);
+    const driverAssigned = order.getAttribute('driver_assigned') ? new Driver(order.getAttribute('driver_assigned')) : null;
 
     const handleRegionChangeComplete = (region) => {
         setMapRegion(region);
@@ -61,10 +64,23 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     };
 
     const fitToRoute = ({ coordinates }) => {
-        mapRef.current?.fitToCoordinates(coordinates, {
-            edgePadding: { top: 200, right: 100, bottom: 100, left: 100 },
+        mapRef.current.fitToCoordinates(coordinates, {
+            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
             animated: true,
         });
+    };
+
+    const focusDriver = ({ coordinates }) => {
+        console.log('[focusDriver()]', coordinates);
+        mapRef.current.animateToRegion(
+            {
+                latitude,
+                longitude,
+                latitudeDelta: initialDeltas,
+                longitudeDelta: initialDeltas,
+            },
+            500
+        );
     };
 
     return (
@@ -76,6 +92,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 onRegionChangeComplete={handleRegionChangeComplete}
                 {...mapViewProps}
             >
+                {driverAssigned && <DriverMarker driver={driverAssigned} onMovement={focusDriver} />}
                 <Marker coordinate={origin} centerOffset={markerOffset}>
                     <YStack
                         mb={8}
@@ -147,4 +164,4 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     );
 };
 
-export default DeliveryRoutePreview;
+export default LiveOrderRoute;

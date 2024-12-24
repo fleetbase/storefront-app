@@ -1,7 +1,7 @@
 import React from 'react';
 import { YStack, XStack, Label, Switch, AnimatePresence } from 'tamagui';
 import { dasherize } from 'inflected';
-import MoneyPercentAdjuster from '../../components/MoneyPercentAdjuster';
+import MoneyPercentAdjuster from './MoneyPercentAdjuster';
 
 const TipInput = ({ label, isTipping, setTipping, tipValue, setTipValue, currency, wrapperProps = {} }) => {
     const id = dasherize(label);

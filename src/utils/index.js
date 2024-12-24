@@ -1,12 +1,19 @@
 import Config from 'react-native-config';
 import { Platform, ActionSheetIOS, Alert } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
-import { lookup } from '@fleetbase/storefront';
+import { lookup as storefrontLookup } from '@fleetbase/storefront';
 import storage, { getString } from './storage';
+import { capitalize } from './format';
 import { adapter, instance as storefrontInstance } from '../hooks/use-storefront';
 import { themes } from '../../tamagui.config';
+import { APP_THEME_KEY } from '../hooks/use-app-theme';
 import { pluralize } from 'inflected';
 import { countries } from 'countries-list';
+import StorefrontConfig from '../../storefront.config';
+
+export function storefrontConfig(key, defaultValue = null) {
+    return get(StorefrontConfig, key, defaultValue);
+}
 
 export function get(target, path, defaultValue = null) {
     let current = target;
@@ -20,7 +27,7 @@ export function get(target, path, defaultValue = null) {
     if (isArray(target) || isObject(target)) {
         for (let i = 0; i < pathArray.length; i++) {
             if (current && current[pathArray[i]] === undefined) {
-                return null;
+                return defaultValue;
             } else if (current) {
                 current = current[pathArray[i]];
 
@@ -121,7 +128,7 @@ export function uniqueArray(array) {
 }
 
 export function getTheme(key = null) {
-    const themeName = getString('user_theme_preference');
+    const themeName = getString(APP_THEME_KEY);
     if (themeName) {
         const targetTheme = themes[themeName];
         if (targetTheme) {
@@ -150,19 +157,19 @@ export function defaults(object, defs) {
 export function restoreStorefrontInstance(data, type = null) {
     // If serialized resource object
     if (isSerializedResource(data) && type) {
-        return lookup('resource', type, data, adapter);
+        return storefrontLookup('resource', type, data, adapter);
     }
 
     // If POJO resource object
     if (isPojoResource(data)) {
-        return lookup('resource', type ? type : data.resource, data.attributes, adapter);
+        return storefrontLookup('resource', type ? type : data.resource, data.attributes, adapter);
     }
 
     // If array of resources
     if (isArray(data) && data.length) {
         const isCollectionData = data.every((_resource) => _resource && isObject(_resource.attributes));
         if (isCollectionData) {
-            const collectionData = data.map(({ resource, attributes }) => lookup('resource', resource, attributes, adapter));
+            const collectionData = data.map(({ resource, attributes }) => storefrontLookup('resource', resource, attributes, adapter));
             return new Collection(collectionData);
         }
     }
@@ -390,4 +397,66 @@ export function showActionSheet({ title, message, options, cancelButtonIndex, de
 
         Alert.alert(title || 'Choose an option', message || '', buttons, { cancelable: true });
     }
+}
+
+export function toBoolean(value) {
+    switch (value) {
+        case 'true':
+        case '1':
+        case 1:
+        case true:
+            return true;
+        case 'false':
+        case '0':
+        case 0:
+        case false:
+        case null:
+        case undefined:
+        case '':
+            return false;
+        default:
+            return false;
+    }
+}
+
+export function consumeAsyncIterator(asyncIterator, onData, onError) {
+    let stopped = false;
+
+    // Define the stop function
+    const stop = () => {
+        stopped = true;
+    };
+
+    const consume = async () => {
+        try {
+            while (!stopped) {
+                const { value, done } = await asyncIterator.next();
+                if (done) {
+                    break;
+                }
+
+                if (onData) {
+                    onData(value);
+                }
+            }
+        } catch (error) {
+            if (onError) {
+                onError(error);
+            } else {
+                console.error('Error in consumeAsyncIterator:', error);
+            }
+        }
+    };
+
+    // Start consuming asynchronously without blocking
+    consume();
+    return stop;
+}
+
+export function isAsyncIterable(input) {
+    if (input == null) {
+        return false;
+    }
+
+    return typeof input[Symbol.asyncIterator] === 'function';
 }

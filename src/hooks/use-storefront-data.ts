@@ -6,7 +6,7 @@ import useStorage from './use-storage';
 import { isObject, isArray, isResource, restoreStorefrontInstance } from '../utils';
 
 const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
-    const { persistKey, defaultValue = null, dependencies = [], restoreType = null } = isObject(onDataLoaded) ? onDataLoaded : options;
+    const { persistKey, defaultValue = null, dependencies = [], restoreType = null, client = null } = isObject(onDataLoaded) ? onDataLoaded : options;
     const { storefront } = useStorefront();
 
     // Use either useState or useStorage depending on whether persistKey is provided
@@ -20,7 +20,7 @@ const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await sdkMethod(storefront);
+                const result = await sdkMethod(client ? client : storefront);
                 setData(result);
                 if (typeof onDataLoaded === 'function') {
                     onDataLoaded(result);

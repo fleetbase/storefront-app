@@ -29,6 +29,9 @@ export const StoreCategory = {
         return {
             title: route.params.category.name,
             headerTitleAlign: 'left',
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
             headerTransparent: true,
             headerShadowVisible: false,
             headerLeft: () => {

@@ -85,6 +85,27 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Update customer meta attributes
+    const updateCustomerMeta = async (newMeta = {}) => {
+        const meta = { ...state.customer.getAttribute('meta'), ...newMeta };
+        try {
+            const customer = await state.customer.update({ meta });
+            setCustomer(customer);
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    // Update customer meta attributes
+    const updateCustomer = async (data = {}) => {
+        try {
+            const customer = await state.customer.update({ ...data });
+            setCustomer(customer);
+        } catch (err) {
+            throw err;
+        }
+    };
+
     // Login: Send verification code
     const login = useCallback(
         async (phone) => {
@@ -154,6 +175,8 @@ export const AuthProvider = ({ children }) => {
             isAuthenticated: !!state.customer,
             isNotAuthenticated: !state.customer,
             updateCustomerLocation,
+            updateCustomerMeta,
+            updateCustomer,
             clearSessionData,
             setCustomer,
             login,

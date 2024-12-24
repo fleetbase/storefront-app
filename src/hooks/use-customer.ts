@@ -58,6 +58,17 @@ const useCustomer = () => {
         }
     };
 
+    // Update customer default location
+    const updateCustomerMeta = async (newMeta = {}) => {
+        const meta = { ...customer.getAttribute('meta'), ...newMeta };
+        try {
+            const customer = await customer.update({ meta });
+            setCustomer(customer);
+        } catch (err) {
+            throw err;
+        }
+    };
+
     // Sync mobile device with the customer on the server
     const syncDevice = useCallback(() => {
         const token = get('token');

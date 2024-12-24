@@ -91,7 +91,7 @@ const CartItemScreen = ({ route = {} }) => {
         <YStack flex={1} bg='$background'>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
                 <Image
-                    source={{ uri: product.getAttribute('primary_image_url') }}
+                    source={{ uri: cartItem.product_image_url }}
                     style={{
                         height: '100%',
                         width: '100%',

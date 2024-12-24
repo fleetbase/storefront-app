@@ -393,6 +393,11 @@ export function getCoordinates  (target, options = { fallback: [0, 0] })  {
     return fallback;
 };
 
+export function getPlaceCoords (place) {
+    const [latitude, longitude] = getCoordinates(place);
+    return { latitude, longitude };
+};
+
 export function getDistance (origin, destination) {
     const originCoordinates = getCoordinates(origin);
     const destinationCoordinates = getCoordinates(destination);

@@ -8,6 +8,7 @@ import AddressBookScreen from '../../screens/AddressBookScreen';
 import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { getTheme } from '../../utils';
 
 export const LocationPermission = {
     screen: LocationPermissionScreen,
@@ -28,10 +29,12 @@ export const AddressBook = {
     options: ({ navigation, route }) => {
         return {
             title: 'Address Book',
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
             headerTransparent: true,
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
             headerRight: () => <HeaderButton icon={faPlus} onPress={() => navigation.navigate('AddNewLocation', { redirectTo: 'AddressBook' })} size={40} />,
-            headerBlurEffect: 'light',
         };
     },
 };
@@ -57,24 +60,13 @@ export const EditLocationCoord = {
 export const EditLocation = {
     screen: EditLocationScreen,
     options: ({ navigation, route }) => {
-        // const redirectTo = route.params.redirectTo ?? 'StoreHome';
-
-        // const handleGoBack = () => {
-        //     navigation.reset({
-        //         index: 0,
-        //         routes: [
-        //             {
-        //                 name: redirectTo,
-        //             },
-        //         ],
-        //     });
-        // };
-
         return {
             title: route.params.place.street1,
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
             headerTransparent: true,
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
-            headerBlurEffect: 'light',
         };
     },
 };
@@ -84,9 +76,11 @@ export const LocationPicker = {
     options: ({ navigation }) => {
         return {
             title: 'Choose delivery location',
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
             headerTransparent: true,
-            headerBlurEffect: 'light',
         };
     },
 };

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ScrollView, View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Image, StyleSheet, Pressable } from 'react-native';
 
 const ImageSlider = ({
     images = [],
@@ -61,7 +61,7 @@ const ImageSlider = ({
                 style={[{ height: sliderHeight }, sliderStyle]}
             >
                 {images.map((image, index) => (
-                    <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => handleImagePress(index)}>
+                    <Pressable key={index} activeOpacity={0.8} onPress={() => handleImagePress(index)}>
                         <Image
                             source={{ uri: image }}
                             style={{
@@ -70,7 +70,7 @@ const ImageSlider = ({
                                 resizeMode: 'cover',
                             }}
                         />
-                    </TouchableOpacity>
+                    </Pressable>
                 ))}
             </ScrollView>
 

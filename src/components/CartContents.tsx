@@ -4,9 +4,9 @@ import { FlatList, Pressable } from 'react-native';
 import { Button, Image, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
-import { formatCurrency } from '../../utils/format';
-import { loadPersistedResource, showActionSheet } from '../../utils';
-import useCart from '../../hooks/use-cart';
+import { formatCurrency } from '../utils/format';
+import { loadPersistedResource, showActionSheet } from '../utils';
+import useCart from '../hooks/use-cart';
 
 const CartContents = ({}) => {
     const theme = useTheme();
@@ -64,6 +64,27 @@ const CartContents = ({}) => {
                             <XStack flex={1}>
                                 <Pressable onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
                                     <XStack flex={1} space='$3'>
+                                        <YStack>
+                                            <XStack
+                                                width={40}
+                                                height={40}
+                                                borderWidth={1}
+                                                bg='$background'
+                                                borderColor='$borderColorWithShadow'
+                                                borderRadius='$3'
+                                                alignItems='center'
+                                                justifyContent='center'
+                                            >
+                                                <XStack alignItems='flex-end'>
+                                                    <Text fontSize='$1' color='$primary'>
+                                                        x
+                                                    </Text>
+                                                    <Text fontSize='$5' fontWeight='bold' color='$primary'>
+                                                        {cartItem.quantity}
+                                                    </Text>
+                                                </XStack>
+                                            </XStack>
+                                        </YStack>
                                         <YStack
                                             borderWidth={1}
                                             borderColor='$borderColor'
@@ -92,12 +113,7 @@ const CartContents = ({}) => {
                                                 {cartItem.name}
                                             </Text>
                                             <XStack space='$1'>
-                                                <YStack pt='$1'>
-                                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary'>
-                                                        x{cartItem.quantity}
-                                                    </Text>
-                                                </YStack>
-                                                <Text numberOfLines={1} fontSize='$5' fontWeight='bold' color='$textSecondary'>
+                                                <Text numberOfLines={1} fontSize='$4' fontWeight='bold' color='$textSecondary'>
                                                     {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
                                                 </Text>
                                             </XStack>
@@ -127,9 +143,9 @@ const CartContents = ({}) => {
                                 </Pressable>
                             </XStack>
                             <YStack space='$1' justifyContent='center'>
-                                <Button size='$2' onPress={() => handleCartItemActions(cartItem)} alignItems='center' justifyContent='center' bg='$gray-200' circular>
+                                <Button size='$2' onPress={() => handleCartItemActions(cartItem)} alignItems='center' justifyContent='center' bg='$background' circular>
                                     <Button.Icon>
-                                        <FontAwesomeIcon icon={faEllipsis} color={theme['gray-600'].val} />
+                                        <FontAwesomeIcon icon={faEllipsis} color={theme['$textSecondary'].val} />
                                     </Button.Icon>
                                 </Button>
                             </YStack>

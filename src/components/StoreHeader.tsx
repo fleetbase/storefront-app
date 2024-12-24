@@ -1,8 +1,9 @@
 import React from 'react';
 import { Animated } from 'react-native';
-import { YStack, Text, XStack, Image, useTheme } from 'tamagui';
+import { Stack, YStack, Text, XStack, Image, useTheme } from 'tamagui';
 import LinearGradient from 'react-native-linear-gradient';
 import StoreLocationPicker from './StoreLocationPicker';
+import { storefrontConfig } from '../utils';
 
 const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {} }) => {
     const theme = useTheme();
@@ -21,8 +22,17 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                 resizeMode='cover'
             />
 
-            <YStack px='$4' space='$1' justifyContent='flex-end' flex={1} position='relative' zIndex={1}>
-                <YStack alignItems='center' space='$1'>
+            <Stack
+                direction={storefrontConfig('styles.StoreHeader.direction', 'column')}
+                px={storefrontConfig('styles.StoreHeader.padding', '$4')}
+                space={storefrontConfig('styles.StoreHeader.space', '$1')}
+                alignItems={storefrontConfig('styles.StoreHeader.alignItems', 'center')}
+                justifyContent={storefrontConfig('styles.StoreHeader.justifyContent', 'flex-end')}
+                flex={1}
+                position='relative'
+                zIndex={1}
+            >
+                <YStack alignItems={storefrontConfig('styles.StoreHeader.alignItems', 'center')} space='$1'>
                     {logoUrl && (
                         <YStack>
                             <Image
@@ -40,7 +50,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                 </YStack>
                 <YStack>
                     {description && (
-                        <YStack mt='$2' borderRadius='$4' bg='$gray-900' py='$2' px='$1' alignItems='center' justifyContent='center'>
+                        <YStack mt='$2' borderRadius='$4' bg='$gray-900' padding='$2' alignItems='center' justifyContent='center'>
                             <Text color='white' fontSize='$5' opacity={0.9} numberOfLines={1}>
                                 {description}
                             </Text>
@@ -50,7 +60,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                 <YStack alignItems='center' justifyContent='center'>
                     <StoreLocationPicker triggerStyle={{ borderWidth: 1, backgroundColor: theme['$gray-900'].val, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }} />
                 </YStack>
-            </YStack>
+            </Stack>
 
             <LinearGradient
                 colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.8)']}

@@ -77,8 +77,8 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
 
     return (
         <YStack space='$4' {...wrapperProps}>
-            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' bg='white'>
-                <Button size='$4' onPress={openBottomSheet} bg='transparent' borderWidth={0} borderRadius={0} borderRightWidth={1} borderColor='$borderColor' width={90} maxWidth={90}>
+            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg='$surface'>
+                <Button size='$4' onPress={openBottomSheet} bg='$surface' borderWidth={0} borderRadius='$5' borderRightWidth={1} borderColor='$borderColor' width={90} maxWidth={90}>
                     <XStack alignItems='center' space='$2'>
                         <Text>{getEmojiFlag(selectedCountry.code)}</Text>
                         <Text>+{selectedCountry.phone}</Text>
@@ -106,7 +106,11 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                     keyboardBehavior='extend'
                     keyboardBlurBehavior='none'
                     enableDynamicSizing={false}
+                    enablePanDownToClose={true}
+                    enableOverDrag={false}
                     style={{ flex: 1, padding: 10, width: '100%' }}
+                    backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
+                    handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                 >
                     <BottomSheetTextInput
                         ref={searchInputRef}
@@ -114,16 +118,19 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                         onChangeText={setSearchTerm}
                         autoCapitalize={false}
                         autoComplete={false}
+                        autoCorrect={false}
                         style={{
+                            color: theme.textPrimary.val,
+                            backgroundColor: theme.background.val,
                             borderWidth: 1,
                             borderColor: theme.borderColor.val,
                             padding: 14,
-                            borderRadius: 6,
+                            borderRadius: 10,
                             fontSize: 13,
                             marginBottom: 10,
                         }}
                     />
-                    <BottomSheetView style={{ flex: 1 }}>
+                    <BottomSheetView style={{ flex: 1, backgroundColor: theme.surface.val }}>
                         <BottomSheetFlatList
                             data={filteredCountries}
                             keyExtractor={(item) => item.code}

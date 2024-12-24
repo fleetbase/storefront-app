@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, Pressable } from 'react-native';
-import { YStack, XStack, Text, Spinner } from 'tamagui';
+import { YStack, XStack, Text, Spinner, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import useStorefrontData from '../hooks/use-storefront-data';
 import ProductCard from './ProductCard';
 
 const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
+    const theme = useTheme();
     const navigation = useNavigation();
     const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id }), {
         defaultValue: [],
@@ -26,10 +27,10 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
                 <XStack space='$4' alignItems='center'>
                     <Pressable onPress={handleCategoryPress} hitSlop={20} style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0, scale: pressed ? 0.8 : 1.0 }]}>
                         <XStack alignItems='center'>
-                            <Text fontWeight='bold' fontSize='$7'>
+                            <Text color='$textPrimary' fontWeight='bold' fontSize='$7'>
                                 {category.getAttribute('name')}
                             </Text>
-                            <FontAwesomeIcon icon={faArrowRight} color='black' size={15} style={{ marginLeft: 7 }} />
+                            <FontAwesomeIcon icon={faArrowRight} color={theme.textPrimary.val} size={15} style={{ marginLeft: 7 }} />
                         </XStack>
                     </Pressable>
                     {isLoadingProducts && <Spinner size='sm' color='$color' />}

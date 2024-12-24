@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { SafeAreaView, Keyboard, Animated, StyleSheet } from 'react-native';
+import { SafeAreaView, Keyboard, Animated, StyleSheet, Pressable } from 'react-native';
 import { Spinner, Button, Stack, Text, YStack, XStack, Input, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMagnifyingGlass, faArrowLeft, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
@@ -26,6 +26,9 @@ const StoreSearch = (route = {}) => {
     // Animated values for the tag cloud
     const tagCloudTranslateY = useRef(new Animated.Value(0)).current;
     const tagCloudOpacity = useRef(new Animated.Value(1)).current;
+
+    // Determine if the dismiss overlay should be active
+    const showDismissOverlay = inputFocused && !isLoading;
 
     // Debounced search function
     const performSearch = debounce(async (query) => {
@@ -104,13 +107,13 @@ const StoreSearch = (route = {}) => {
     return (
         <YStack flex={1} bg='$background'>
             <XStack
-                bg='$surface'
+                bg='$primary'
                 paddingTop={insets.top}
                 paddingHorizontal='$4'
                 paddingBottom='$4'
                 shadowColor='$shadowColor'
                 borderBottomWidth={1}
-                borderColor='$borderColorWithShadow'
+                borderColor='$primary'
                 shadowOffset={{ width: 0, height: 1 }}
                 shadowOpacity={0.15}
                 shadowRadius={3}
@@ -123,7 +126,7 @@ const StoreSearch = (route = {}) => {
                     shadowOpacity={0}
                     shadowRadius={0}
                     borderWidth={1}
-                    borderColor='$borderColorWithShadow'
+                    borderColor='$primaryDark'
                     borderRadius='$4'
                     bg='white'
                     shadowColor='$shadowColor'
@@ -148,12 +151,12 @@ const StoreSearch = (route = {}) => {
                                 }}
                             >
                                 <Button.Icon>
-                                    <FontAwesomeIcon icon={faArrowLeft} color={theme.color.val} size={18} />
+                                    <FontAwesomeIcon icon={faArrowLeft} color={theme.textSecondary.val} size={18} />
                                 </Button.Icon>
                             </Button>
                         ) : (
                             <YStack width={40} bg='transparent' animation='quick' alignItems='center' justifyContent='center'>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} color={theme.color.val} size={18} />
+                                <FontAwesomeIcon icon={faMagnifyingGlass} color={theme.textSecondary.val} size={18} />
                             </YStack>
                         )}
                     </YStack>
@@ -165,7 +168,8 @@ const StoreSearch = (route = {}) => {
                         onChangeText={setSearchQuery}
                         size='$4'
                         placeholder='Search products'
-                        color='$color'
+                        placeholderTextColor='$textPlaceholder'
+                        color='$black'
                         bg='transparent'
                         flex={1}
                         borderWidth={0}
@@ -189,7 +193,7 @@ const StoreSearch = (route = {}) => {
                             }}
                         >
                             <Button.Icon>
-                                <FontAwesomeIcon icon={faCircleXmark} color={theme.color.val} size={18} />
+                                <FontAwesomeIcon icon={faCircleXmark} color={theme.textSecondary.val} size={18} />
                             </Button.Icon>
                         </Button>
                     )}
@@ -203,26 +207,30 @@ const StoreSearch = (route = {}) => {
                     top: 125,
                 }}
             >
-                <YStack padding='$4'>
-                    <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} bg={theme['$blue-600'].val} fontColor={theme['$blue-200'].val} />
-                </YStack>
+                {!results.length && (
+                    <YStack padding='$4'>
+                        <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} bg={theme['primary'].val} fontColor='#fff' />
+                    </YStack>
+                )}
             </Animated.View>
+            {showDismissOverlay && <Pressable style={StyleSheet.absoluteFill} onPress={() => Keyboard.dismiss()} pointerEvents='box-only' />}
+            {results.length && (
+                <YStack animate='quick' flex={1} padding='$3'>
+                    <Text fontSize='$4' color='$textSecondary' marginTop='$2' marginBottom='$4'>
+                        Found {results.length} {pluralize('result', results.length)} for "{searchQuery}"
+                    </Text>
+                    {results.map((result, index) => (
+                        <ProductCard key={index} product={result} sliderHeight={135} style={{ width: 190 }} />
+                    ))}
+                </YStack>
+            )}
             {inputFocused && (
                 <YStack flex={1}>
                     {isLoading ? (
                         <YStack flex={1} alignItems='center' justifyContent='center' position='absolute' style={StyleSheet.absoluteFillObject}>
                             <Spinner size='large' color={theme.primary.val} />
                         </YStack>
-                    ) : results.length ? (
-                        <YStack animate='quick' flex={1} padding='$3'>
-                            <Text fontSize='$4' color='$textSecondary' marginTop='$2' marginBottom='$4'>
-                                Found {results.length} {pluralize('result', results.length)} for "{searchQuery}"
-                            </Text>
-                            {results.map((result, index) => (
-                                <ProductCard key={index} product={result} sliderHeight={135} style={{ width: 190 }} />
-                            ))}
-                        </YStack>
-                    ) : searchQuery.trim() ? (
+                    ) : !results.length && searchQuery.trim() ? (
                         <YStack flex={1} alignItems='center' justifyContent='center' position='absolute' style={StyleSheet.absoluteFillObject}>
                             <Text fontSize='$6' color='$textSecondary' textAlign='center'>
                                 No results found for "{searchQuery}"

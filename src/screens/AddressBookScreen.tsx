@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Animated, SafeAreaView, TouchableOpacity, FlatList, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Animated, SafeAreaView, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -60,26 +60,21 @@ const AddressBookScreen = () => {
 
     const renderRightActions = (place) => (
         <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleDelete(place)}>
+            <Pressable style={{ flex: 1 }} onPress={() => handleDelete(place)}>
                 <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
                     {isLoading('deleting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
                 </YStack>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleEdit(place)}>
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => handleEdit(place)}>
                 <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
                     <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
                 </YStack>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={{ flex: 1 }}
-                onPress={() => handleMakeDefaultLocation(place)}
-                opacity={currentLocation.id === place.id ? 0.5 : 1}
-                disabled={currentLocation.id === place.id}
-            >
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => handleMakeDefaultLocation(place)} opacity={currentLocation.id === place.id ? 0.5 : 1} disabled={currentLocation.id === place.id}>
                 <YStack flex={1} width='100%' height='100%' bg='$primary' justifyContent='center' alignItems='center' borderRadius={0}>
                     {isLoading('defaulting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faStar} size={20} color='white' />}
                 </YStack>
-            </TouchableOpacity>
+            </Pressable>
         </XStack>
     );
 
@@ -101,14 +96,14 @@ const AddressBookScreen = () => {
                 ]}
             >
                 <Swipeable renderRightActions={() => renderRightActions(place)}>
-                    <TouchableOpacity onPress={() => handleEdit(place)} style={{ flex: 1 }}>
+                    <Pressable onPress={() => handleEdit(place)} style={{ flex: 1 }}>
                         <YStack flex={1} padding='$4' bg={place.id === currentLocation?.id ? '$primary' : '$background'} minHeight={100} maxHeight={125}>
                             <Text color={place.id === currentLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
                                 {place.getAttribute('name')}
                             </Text>
                             <Text color={place.id === currentLocation?.id ? 'white' : '$textSecondary'}>{formattedAddressFromPlace(place)}</Text>
                         </YStack>
-                    </TouchableOpacity>
+                    </Pressable>
                 </Swipeable>
             </Animated.View>
         );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, TouchableOpacity } from 'react-native';
+import { Dimensions, Pressable } from 'react-native';
 import { YStack, XStack, Image, Text } from 'tamagui';
 
 const calculateCategoriesPerRow = (numCategories) => {
@@ -51,9 +51,9 @@ const StoreCategoriesGrid = ({
     return (
         <YStack
             paddingHorizontal={sidePadding}
-            bg='$bg'
+            bg='$surface'
             borderWidth={1}
-            borderColor='$borderColor'
+            borderColor='$borderColorWithShadow'
             borderRadius='$4'
             paddingVertical='$2'
             space='$2'
@@ -64,14 +64,14 @@ const StoreCategoriesGrid = ({
             {rows.map((row, rowIndex) => (
                 <XStack key={rowIndex} justifyContent={justifyContent} space={itemSpacing} style={rowStyle} {...rowProps}>
                     {row.map((category, index) => (
-                        <TouchableOpacity key={index} onPress={() => handleCategoryPress(category)}>
+                        <Pressable key={index} onPress={() => handleCategoryPress(category)}>
                             <YStack alignItems='center' justifyContent='center' paddingVertical='$2' space='$2' width={itemWidth} style={itemStyle} {...itemContainerProps}>
                                 <Image source={{ uri: category.getAttribute('icon_url') }} width={50} height={50} borderRadius={25} />
                                 <Text fontSize='$5' fontWeight='bold' textAlign='center' color='$color'>
                                     {category.getAttribute('name')}
                                 </Text>
                             </YStack>
-                        </TouchableOpacity>
+                        </Pressable>
                     ))}
                 </XStack>
             ))}

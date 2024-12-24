@@ -221,3 +221,34 @@ export function numbersOnly(input, castInt = true) {
     const numbers = String(input).replace(/[^0-9]/g, '');
     return castInt ? parseInt(numbers) : numbers;
 }
+
+export function titleize(str, separator = ' ') {
+    if (!str) {
+        return str;
+    }
+
+    // Replace camelCase or PascalCase with space-separated words
+    const spaced = str
+        .replace(/([A-Z])/g, ' $1') // Insert space before uppercase letters
+        .replace(/[_\-]+/g, ' ') // Replace underscores or hyphens with space
+        .trim();
+
+    // Split into words, capitalize each, and join with spaces
+    const words = spaced.split(/\s+/).map((word) => capitalize(word.toLowerCase()));
+    return words.join(' ');
+}
+
+export function lowecase(str) {
+    return str.toLowerCase();
+}
+
+export function uppercase(str) {
+    return str.toUpperCase();
+}
+
+export function capitalize(str) {
+    if (str.length === 0) {
+        return str;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
