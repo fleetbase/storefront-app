@@ -15,6 +15,7 @@ const BootScreen = () => {
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
     const [info, setInfo] = useStorage('info', {});
     const [error, setError] = useState<Error | null>(null);
+    console.log('[BootScreen]');
 
     useEffect(() => {
         const checkLocationPermission = async () => {
