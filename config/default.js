@@ -19,7 +19,7 @@ export const DefaultConfig = {
     },
 };
 
-export function mergeConfigs(defaultConfig, targetConfig) {
+export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
     // If targetConfig is not an object, just return defaultConfig directly
     if (typeof targetConfig !== 'object' || targetConfig === null) {
         return defaultConfig;

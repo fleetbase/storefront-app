@@ -83,7 +83,5 @@ android/app/google-services.json
 
 # Storefront assets/configurations
 #
-assets/*
-config/app.js
-config/interface.js
+storefront.config.js
 vendor
