@@ -17,9 +17,9 @@ export const SocketClusterProvider = ({ children }) => {
         // Initialize the socket connection
         const options = {
             hostname: config('SOCKETCLUSTER_HOST', 'socket.fleetbase.io'),
-            port: parseInt(config('SOCKETCLUSTER_PORT', '8000'), 10),
+            port: parseInt(config('SOCKETCLUSTER_PORT', '8000')),
             path: config('SOCKETCLUSTER_PATH', '/socketcluster/'),
-            secure: toBoolean(config('SOCKETCLUSTER_SECURE'), true),
+            secure: toBoolean(config('SOCKETCLUSTER_SECURE', true)),
         };
 
         const scSocket = socketClusterClient.create(options);
