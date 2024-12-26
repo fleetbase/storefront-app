@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, Platform } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { setI18nConfig } from '../utils/localize';
 import { Spinner, Stack, Text, YStack, useTheme } from 'tamagui';
+import { setI18nConfig } from '../utils/localize';
+import BootSplash from 'react-native-bootsplash';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
-// import RNBootSplash from 'react-native-bootsplash';
+
 import SetupWarningScreen from './SetupWarningScreen';
 
 const BootScreen = () => {
@@ -29,7 +30,7 @@ const BootScreen = () => {
                 if (requestResult === RESULTS.GRANTED) {
                     initializeStorefront();
                 } else {
-                    // setTimeout(() => RNBootSplash.hide(), 300);
+                    setTimeout(() => BootSplash.hide(), 300);
                     navigation.navigate('LocationPermission');
                 }
             }
@@ -54,7 +55,7 @@ const BootScreen = () => {
             } catch (initializationError) {
                 setError(initializationError);
             } finally {
-                // setTimeout(() => RNBootSplash.hide(), 300);
+                setTimeout(() => BootSplash.hide(), 300);
             }
         };
 
