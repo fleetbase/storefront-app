@@ -13,6 +13,8 @@ const authReducer = (state, action) => {
             return { ...state, customer: action.customer };
         case 'LOGIN':
             return { ...state, phone: action.phone, isSendingCode: action.isSendingCode ?? false };
+        case 'CREATING_ACCOUNT':
+            return { ...state, phone: action.phone, isSendingCode: action.isSendingCode ?? false };
         case 'VERIFY':
             return { ...state, customer: action.customer, isVerifyingCode: action.isVerifyingCode ?? false };
         case 'LOGOUT':
@@ -75,6 +77,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getDefaultAddress = (customer) => {
+        const addresses = customer.getAttribute('addresses', []);
+        const addressId = customer.getAttribute('address_id');
+        if (isArray(addresses)) {
+            const defaultLocation = addresses.find((address) => address.id === addressId);
+            return defaultLocation ?? addresses[0];
+        }
+
+        return null;
+    };
+
     // Update customer default location
     const updateCustomerLocation = async (location) => {
         try {
@@ -105,6 +118,45 @@ export const AuthProvider = ({ children }) => {
             throw err;
         }
     };
+
+    // Create Account: Send verification code
+    const requestCreationCode = useCallback(
+        async (phone, method = 'sms') => {
+            dispatch({ type: 'CREATING_ACCOUNT', phone, isSendingCode: true });
+            try {
+                await storefront.customers.requestCreationCode(phone, method);
+                dispatch({ type: 'CREATING_ACCOUNT', phone, isSendingCode: false });
+            } catch (error) {
+                console.error('[AuthContext] Account creation verification failed:', error);
+                throw error;
+            } finally {
+                dispatch({ type: 'CREATING_ACCOUNT', phone, isSendingCode: false });
+            }
+        },
+        [storefront]
+    );
+
+    // Create Account: Verify Code
+    const verifyAccountCreation = useCallback(
+        async (phone, code, attributes = {}) => {
+            dispatch({ type: 'VERIFY', isVerifyingCode: true });
+            try {
+                const customer = await storefront.customers.create(phone, code, attributes);
+                clearSessionData();
+                setCustomerDefaultLocation(customer);
+                setCustomer(customer);
+                // save customer token
+                storage.setString('_customer_token', customer.token);
+                dispatch({ type: 'VERIFY', customer });
+            } catch (error) {
+                console.error('[AuthContext] Account creation verification failed:', error);
+                throw error;
+            } finally {
+                dispatch({ type: 'VERIFY', isVerifyingCode: false });
+            }
+        },
+        [storefront]
+    );
 
     // Login: Send verification code
     const login = useCallback(
@@ -182,6 +234,9 @@ export const AuthProvider = ({ children }) => {
             login,
             verifyCode,
             logout,
+            requestCreationCode,
+            verifyAccountCreation,
+            getDefaultAddress,
         }),
         [state, login, verifyCode, logout]
     );

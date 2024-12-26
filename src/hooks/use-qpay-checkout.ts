@@ -189,6 +189,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
+                toast.error('Unable to calculate delivery fee.', { position: ToastPosition.TOP });
                 console.error('Error fetching service quote:', error);
             }
         };
@@ -198,7 +199,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, cart, deliveryLocation.id]);
+    }, [cartContentsString, cart, deliveryLocation?.id]);
 
     useEffect(() => {
         if (!checkoutId || !checkoutToken || listenerRef.current) {

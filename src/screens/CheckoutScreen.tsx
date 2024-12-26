@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native';
-import { Stack, Text, YStack, useTheme } from 'tamagui';
+import React from 'react';
+import { storefrontConfig } from '../utils';
+import QPayCheckoutScreen from './QPayCheckoutScreen';
+import StripeCheckoutScreen from './StripeCheckoutScreen';
+import PaypalCheckoutScreen from './PaypalCheckoutScreen';
 
 const CheckoutScreen = () => {
-    const theme = useTheme();
+    if (storefrontConfig('paymentGateway') === 'stripe') {
+        return <StripeCheckoutScreen />;
+    }
 
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} alignItems='center' justifyContent='center' bg='$background'></YStack>
-        </SafeAreaView>
-    );
+    if (storefrontConfig('paymentGateway') === 'qpay') {
+        return <QPayCheckoutScreen />;
+    }
+
+    if (storefrontConfig('paymentGateway') === 'paypal') {
+        return <PaypalCheckoutScreen />;
+    }
 };
 
 export default CheckoutScreen;

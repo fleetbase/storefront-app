@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Animated, SafeAreaView, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, Button, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -12,7 +12,7 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import PlaceMapView from './PlaceMapView';
 
-const CustomerLocationSelect = ({ onChange, ...props }) => {
+const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'Checkout', ...props }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { currentLocation } = useCurrentLocation();
@@ -39,6 +39,15 @@ const CustomerLocationSelect = ({ onChange, ...props }) => {
 
     const handleChangeLocation = () => {
         openBottomSheet();
+    };
+
+    const handleSelectNewLocation = () => {
+        closeBottomSheet();
+        if (typeof onSelectNewLocation === 'function') {
+            onSelectNewLocation();
+        } else {
+            navigation.navigate('LocationPicker', { redirectTo, makeDefault: true });
+        }
     };
 
     return (
@@ -69,49 +78,68 @@ const CustomerLocationSelect = ({ onChange, ...props }) => {
                     keyboardBehavior='extend'
                     keyboardBlurBehavior='none'
                     enableDynamicSizing={false}
-                    style={{ flex: 1, padding: 10, width: '100%' }}
+                    enablePanDownToClose={true}
+                    enableOverDrag={false}
+                    style={{ flex: 1, width: '100%' }}
+                    backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
+                    handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                 >
-                    <BottomSheetView style={{ flex: 1 }}>
+                    <BottomSheetView style={{ flex: 1, backgroundColor: theme.surface.val }}>
                         <YStack>
-                            <YStack alignItems='flex-end'>
-                                <Button size='$3' onPress={closeBottomSheet} bg='$gray-300' circular>
-                                    <Button.Icon>
-                                        <FontAwesomeIcon icon={faTimes} />
-                                    </Button.Icon>
-                                </Button>
-                            </YStack>
+                            <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$4'>
+                                <Text fontSize='$6' color='$textPrimary' fontWeight='bold'>
+                                    Select delivery address
+                                </Text>
+                                <XStack space='$2'>
+                                    <Button onPress={handleSelectNewLocation} bg='$primary' px='$3' size='$2' borderRadius='$8' rounded>
+                                        <Button.Icon>
+                                            <FontAwesomeIcon icon={faPlus} color='white' />
+                                        </Button.Icon>
+                                        <Button.Text fontSize='$2' color='white'>
+                                            New Address
+                                        </Button.Text>
+                                    </Button>
+                                    <Button size='$2' onPress={closeBottomSheet} bg='$secondary' circular>
+                                        <Button.Icon>
+                                            <FontAwesomeIcon icon={faTimes} />
+                                        </Button.Icon>
+                                    </Button>
+                                </XStack>
+                            </XStack>
                             <BottomSheetFlatList
                                 data={savedLocations}
                                 keyExtractor={(item, index) => index}
                                 renderItem={({ item }) => (
-                                    <Button
-                                        onPress={() => handleLocationSelect(item)}
-                                        size='$6'
-                                        bg='$secondary'
-                                        justifyContent='space-between'
-                                        space='$1'
-                                        mb='$3'
-                                        px='$4'
-                                        py='$3'
-                                        hoverStyle={{
-                                            scale: 0.9,
-                                            opacity: 0.5,
-                                        }}
-                                        pressStyle={{
-                                            scale: 0.9,
-                                            opacity: 0.5,
-                                        }}
-                                    >
-                                        <YStack>
-                                            <Text mb='$1' color='$textPrimary' fontWeight='bold' numberOfLines={1}>
-                                                {item.getAttribute('name')}
-                                            </Text>
-                                            <Text color='$textSecondary' numberOfLines={1}>
-                                                {formattedAddressFromPlace(item)}
-                                            </Text>
-                                            <Text color='$textSecondary'>{formatAddressSecondaryIdentifier(item)}</Text>
-                                        </YStack>
-                                    </Button>
+                                    <YStack px='$4'>
+                                        <Button
+                                            onPress={() => handleLocationSelect(item)}
+                                            size='$6'
+                                            bg='$secondary'
+                                            justifyContent='space-between'
+                                            space='$1'
+                                            mb='$3'
+                                            px='$4'
+                                            py='$3'
+                                            hoverStyle={{
+                                                scale: 0.9,
+                                                opacity: 0.5,
+                                            }}
+                                            pressStyle={{
+                                                scale: 0.9,
+                                                opacity: 0.5,
+                                            }}
+                                        >
+                                            <YStack>
+                                                <Text mb='$1' color='$textPrimary' fontWeight='bold' numberOfLines={1}>
+                                                    {item.getAttribute('name')}
+                                                </Text>
+                                                <Text color='$textSecondary' numberOfLines={1}>
+                                                    {formattedAddressFromPlace(item)}
+                                                </Text>
+                                                <Text color='$textSecondary'>{formatAddressSecondaryIdentifier(item)}</Text>
+                                            </YStack>
+                                        </Button>
+                                    </YStack>
                                 )}
                             />
                             <YStack height={200} />

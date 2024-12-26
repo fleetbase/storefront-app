@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import useStorage from './use-storage';
 
 const useCurrentLocation = () => {
-    const { isAuthenticated, updateCustomerLocation } = useAuth();
+    const { isAuthenticated, updateCustomerLocation, customer, getDefaultAddress } = useAuth();
     const [currentLocation, setCurrentLocation] = useStorage('_current_location');
     const [liveLocation, setLiveLocation] = useStorage('_live_location');
     const [loading, setLoading] = useState(false);
@@ -43,6 +43,14 @@ const useCurrentLocation = () => {
         setError(null);
 
         try {
+            if (isAuthenticated) {
+                const defaultAddress = getDefaultAddress(customer);
+                if (defaultAddress) {
+                    await updateCurrentLocation(defaultAddress);
+                    return;
+                }
+            }
+
             const location = await fetchCurrentLocation();
             await updateCurrentLocation(location);
         } catch (err) {
@@ -57,7 +65,9 @@ const useCurrentLocation = () => {
     const initializeLiveLocation = async () => {
         try {
             const location = await getLiveLocation();
-            setLiveLocation(location.serialize());
+            if (location) {
+                setLiveLocation(location.serialize());
+            }
         } catch (err) {
             console.error('Error fetching live location:', err);
             setError(err);
@@ -100,7 +110,7 @@ const useCurrentLocation = () => {
             initializeCurrentLocation();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthenticated]);
+    }, [isAuthenticated, customer]);
 
     return {
         currentLocation: restoreFleetbasePlace(currentLocation),

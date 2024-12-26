@@ -26,7 +26,7 @@ const LocationPermissionScreen = () => {
     };
 
     const handleDeny = () => {
-        navigation.navigate('LocationPicker');
+        navigation.navigate('LocationPicker', { redirectTo: 'Boot' });
     };
 
     const openSettings = () => {
@@ -36,7 +36,8 @@ const LocationPermissionScreen = () => {
 
     // Function to check if permission has been granted when returning to the screen
     const checkPermissionStatus = useCallback(async () => {
-        const result = await check(permissionType);
+        const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+        const result = await check(permission);
 
         if (result === RESULTS.GRANTED) {
             navigation.reset({
@@ -46,7 +47,7 @@ const LocationPermissionScreen = () => {
         } else {
             handleDeny();
         }
-    }, [navigation, permissionType]);
+    }, [navigation]);
 
     // Recheck permission status when the screen gains focus
     useFocusEffect(
@@ -62,16 +63,16 @@ const LocationPermissionScreen = () => {
                     <Stack alignItems='center' justifyContent='center'>
                         <Image source={require('../../assets/images/isometric-geolocation-1.png')} width={360} height={360} resizeMode='contain' />
                     </Stack>
-                    <Text fontSize='$8' fontWeight='bold' color='$blue500' mb='$2' textAlign='center'>
+                    <Text fontSize='$8' fontWeight='bold' color='$textPrimary' mb='$2' textAlign='center'>
                         Enable Location Services
                     </Text>
-                    <Text color='$gray600' fontSize='$4' textAlign='center' mb='$6'>
+                    <Text color='$textSecondary' fontSize='$4' textAlign='center' mb='$6'>
                         We need your location to provide a better experience. Please enable location access.
                     </Text>
                 </YStack>
             </YStack>
             <YStack space='$3' alignItems='center' bg='$surface' borderColor='$borderColor' borderTop='1px solid' justifyContent='center' padding='$6' paddingBottom='$10'>
-                <Button size='$5' bg='$primary' color='$textPrimary' width='100%' onPress={requestLocationPermission} icon={<FontAwesomeIcon icon={faMapMarkerAlt} color='white' />}>
+                <Button size='$5' bg='$primary' color='$white' width='100%' onPress={requestLocationPermission} icon={<FontAwesomeIcon icon={faMapMarkerAlt} color='white' />}>
                     Share Location
                 </Button>
                 <Button size='$5' bg='$secondary' color='$textSecondary' width='100%' onPress={handleDeny}>

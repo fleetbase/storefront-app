@@ -59,7 +59,7 @@ const ProductCard = ({
             setQuantity(1);
             toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
         } catch (error) {
-            console.log('Error Adding to Cart', error.message);
+            console.error('Error Adding to Cart', error.message);
         }
     };
 

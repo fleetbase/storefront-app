@@ -8,6 +8,16 @@ import { getTheme } from '../../utils';
 
 export const Checkout = {
     screen: CheckoutScreen,
+    options: ({ route, navigation }) => {
+        return {
+            title: 'Checkout',
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
+            headerTransparent: true,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+        };
+    },
 };
 
 export const StripeCheckout = {

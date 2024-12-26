@@ -77,8 +77,8 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
 
     return (
         <YStack space='$4' {...wrapperProps}>
-            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg='$surface'>
-                <Button size='$4' onPress={openBottomSheet} bg='$surface' borderWidth={0} borderRadius='$5' borderRightWidth={1} borderColor='$borderColor' width={90} maxWidth={90}>
+            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg='$white'>
+                <Button size='$4' onPress={openBottomSheet} bg='$surface' borderWidth={0} borderRightWidth={1} borderColor='$borderColor' width={80} maxWidth={80}>
                     <XStack alignItems='center' space='$2'>
                         <Text>{getEmojiFlag(selectedCountry.code)}</Text>
                         <Text>+{selectedCountry.phone}</Text>
@@ -94,7 +94,7 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                     onFocus={handleInputFocus}
                     borderWidth={0}
                     borderRadius={0}
-                    bg='transparent'
+                    bg='white'
                 />
             </XStack>
 
@@ -108,7 +108,7 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                     enableDynamicSizing={false}
                     enablePanDownToClose={true}
                     enableOverDrag={false}
-                    style={{ flex: 1, padding: 10, width: '100%' }}
+                    style={{ flex: 1, width: '100%' }}
                     backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
                     handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                 >

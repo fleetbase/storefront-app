@@ -15,8 +15,8 @@ import axios from 'axios';
 Geolocation.setRNConfiguration({
     authorizationLevel: 'whenInUse',
     enableBackgroundLocationUpdates: false,
-    locationProvider: 'auto'
-})
+    locationProvider: 'auto',
+});
 
 const emit = EventRegister.emit;
 
@@ -24,7 +24,13 @@ export function createGoogleAddress(...args) {
     return new GoogleAddress(...args);
 }
 
-export async function geocode(latitude: number, longitude: number, options = {}) {
+export async function geocode(latitude, longitude, options = {}) {
+    if (!latitude || !longitude) {
+        const fallbackCoordinates = getDefaultCoordinates();
+        latitude = fallbackCoordinates.latitude;
+        longitude = fallbackCoordinates.longitude;
+    }
+
     try {
         const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
             params: {
@@ -52,7 +58,7 @@ export async function geocode(latitude: number, longitude: number, options = {})
         console.error('Geocoding error:', error);
         return null;
     }
-};
+}
 
 export async function geocodeAutocomplete(input, coordinates = null) {
     try {
@@ -73,14 +79,14 @@ export async function geocodeAutocomplete(input, coordinates = null) {
         });
 
         // Extract predictions from response
-        const predictions = response.data.predictions.map(prediction => {
+        const predictions = response.data.predictions.map((prediction) => {
             const segments = parseAutocompleteAddress(prediction.description);
 
             return {
                 description: prediction.description,
                 place_id: prediction.place_id,
-                ...segments
-             };
+                ...segments,
+            };
         });
 
         return predictions;
@@ -98,8 +104,8 @@ export async function getPlaceDetails(placeId) {
                 place_id: placeId,
                 key: config('GOOGLE_MAPS_KEY'),
                 // You can include 'fields' to limit the data retrieved or omit it for all available details
-                fields: 'name,formatted_address,geometry,place_id,types,international_phone_number,website,address_components'
-            }
+                fields: 'name,formatted_address,geometry,place_id,types,international_phone_number,website,address_components',
+            },
         });
 
         // Handle API response
@@ -134,8 +140,8 @@ export function createFleetbasePlaceFromDetails(details, meta = {}) {
         meta: {
             ...meta,
             coordinates: [placeObject.latitude, placeObject.longitude],
-            location: addressObject.others
-        }
+            location: addressObject.others,
+        },
     };
 
     return new Place(attributes, adapter);
@@ -174,7 +180,7 @@ export function restoreFleetbaseStoreLocation(data) {
     if (isResource(data)) {
         if (data.place) {
             data.place = restoreFleetbasePlace(data.place);
-        } 
+        }
 
         return data;
     }
@@ -183,7 +189,7 @@ export function restoreFleetbaseStoreLocation(data) {
     if (isSerializedResource(data)) {
         if (data.place) {
             data.place = restoreFleetbasePlace(data.place);
-        } 
+        }
 
         return new StoreLocation(data, storefrontAdapter);
     }
@@ -191,8 +197,8 @@ export function restoreFleetbaseStoreLocation(data) {
     // If POJO resource object
     if (isPojoResource(data)) {
         if (data.attributes && data.attributes.place) {
-            data.attributes.place = restoreFleetbasePlace(data.attributes/place);
-        } 
+            data.attributes.place = restoreFleetbasePlace(data.attributes / place);
+        }
 
         return new StoreLocation(data.attributes, storefrontAdapter);
     }
@@ -206,7 +212,7 @@ export function restoreFleetbaseStoreLocation(data) {
         if (data.place) {
             data.place = restoreFleetbasePlace(data.place);
         }
-        
+
         return new StoreLocation(data, storefrontAdapter);
     }
 
@@ -228,20 +234,12 @@ export function formattedAddressFromPlace(place) {
 }
 
 export function formattedAddressFromSerializedPlace(place) {
-    const segments = [
-        place.street1,
-        place.street2,
-        place.neighborhood,
-        place.city,
-        place.state,
-        place.postal_code,
-        place.country,
-    ];
+    const segments = [place.street1, place.street2, place.neighborhood, place.city, place.state, place.postal_code, place.country];
 
     return segments.filter(Boolean).join(', ');
 }
 
-export function formatAddressSecondaryIdentifier (place) {
+export function formatAddressSecondaryIdentifier(place) {
     if (place.getAttribute('building')) {
         return `Building: ${place.getAttribute('building')}`;
     }
@@ -253,23 +251,23 @@ export function formatAddressSecondaryIdentifier (place) {
     if (place.getAttribute('postal_code')) {
         return `Postal Code: ${place.getAttribute('postal_code')}`;
     }
-};
+}
 
-export function serializGoogleAddress (googleAddress) {
+export function serializGoogleAddress(googleAddress) {
     let attributes = {};
 
     if (googleAddress instanceof GoogleAddress || typeof googleAddress.all === 'function') {
         attributes = googleAddress.all();
     } else if (typeof googleAddress.toArray === 'function') {
         attributes = googleAddress.toArray();
-    }else if (isObject(googleAddress.attributes)) {
-        attributes =googleAddress.attributes;
+    } else if (isObject(googleAddress.attributes)) {
+        attributes = googleAddress.attributes;
     }
 
     return attributes;
 }
 
-export async function getLiveLocation () {
+export async function getLiveLocation() {
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(
             async (position) => {
@@ -299,9 +297,9 @@ export async function getLiveLocation () {
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
     });
-};
+}
 
-export async function getCurrentLocation () {
+export async function getCurrentLocation() {
     const lastLocation = restoreFleetbasePlace(storage.getMap('_current_location'));
 
     return new Promise((resolve) => {
@@ -334,16 +332,17 @@ export async function getCurrentLocation () {
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
     });
-};
+}
 
-export function getLastKnownPosition () {
+export function getLastKnownPosition() {
     return storage.getArray('_last_known_position') ?? [0, 0];
 }
 
 // NOTICE: when fleetbase returns a geojson point the coordinates will always be in order of [longitude, latitude]
-export function getCoordinates  (target, options = { fallback: [0, 0] })  {
+export function getCoordinates(target, options = {}) {
+    const { latitude: fallbackLatitude, longitude: fallbackLongitude } = getDefaultCoordinates();
     if (!target) {
-        return [];
+        return [fallbackLatitude, fallbackLongitude];
     }
 
     if (isResource(target, 'place')) {
@@ -357,8 +356,11 @@ export function getCoordinates  (target, options = { fallback: [0, 0] })  {
     }
 
     if (isPojoResource(target) && target.resource === 'place') {
-        const [longitude, latitude] = typeof target.getAttribute === 'function' ? (target.getAttribute('location').coordinates ?? fallback) : (target.attributes?.location?.coordinates ?? fallback);
-        return [latitude, longitude]
+        const [longitude, latitude] =
+            typeof target.getAttribute === 'function'
+                ? (target.getAttribute('location').coordinates ?? [fallbackLatitude, fallbackLongitude])
+                : (target.attributes?.location?.coordinates ?? [fallbackLatitude, fallbackLongitude]);
+        return [latitude, longitude];
     }
 
     if (isPojoResource(target) && isObject(target.attributes.place) && target.resource === 'store-location') {
@@ -368,14 +370,14 @@ export function getCoordinates  (target, options = { fallback: [0, 0] })  {
     if (isSerializedResource(target)) {
         if (isObject(target.location)) {
             const [longitude, latitude] = target.location.coordinates;
-            return [latitude, longitude]
+            return [latitude, longitude];
         }
 
         if (isObject(target.place)) {
             return getCoordinates(target.place);
         }
 
-        return fallback;
+        return [fallbackLatitude, fallbackLongitude];
     }
 
     if (isArray(target)) {
@@ -390,19 +392,19 @@ export function getCoordinates  (target, options = { fallback: [0, 0] })  {
         return [target.latitude, target.longitude];
     }
 
-    return fallback;
-};
+    return [fallbackLatitude, fallbackLongitude];
+}
 
-export function getPlaceCoords (place) {
+export function getPlaceCoords(place) {
     const [latitude, longitude] = getCoordinates(place);
     return { latitude, longitude };
-};
+}
 
-export function getDistance (origin, destination) {
+export function getDistance(origin, destination) {
     const originCoordinates = getCoordinates(origin);
     const destinationCoordinates = getCoordinates(destination);
     return haversine(originCoordinates, destinationCoordinates);
-};
+}
 
 export function getLocationName(place) {
     if (isObject(place)) {
@@ -415,12 +417,12 @@ export function getLocationName(place) {
     }
 
     return 'Uknown Location';
-};
+}
 
 export function getLocationFromRouteOrStorage(key, routeParams = {}) {
     let location;
     const locationFromParams = routeParams[key];
-    const lastKnownLocation = storage.getMap('_last_known_location')
+    const lastKnownLocation = storage.getMap('_last_known_location');
     const currentLocation = storage.getMap('_current_location');
     const localLocations = storage.getArray('_local_locations');
     const customerLocations = storage.getArray('_customer_locations');
@@ -433,7 +435,7 @@ export function getLocationFromRouteOrStorage(key, routeParams = {}) {
         location = currentLocation;
     } else if (isArray(customerLocations) && customerLocations.length) {
         location = customerLocations[0];
-    }else if (isArray(localLocations) && localLocations.length) {
+    } else if (isArray(localLocations) && localLocations.length) {
         location = localLocations[0];
     }
 
@@ -451,7 +453,7 @@ export function parsePlaceDetails(details) {
         neighborhood: null,
         building: null,
         latitude: null,
-        longitude: null
+        longitude: null,
     };
 
     if (!details || !details.address_components) {
@@ -936,4 +938,13 @@ export function parseAutocompleteAddress(description = '') {
     });
 
     return result;
+}
+
+export function getDefaultCoordinates() {
+    const DEFAULT_LATITUDE = 1.369;
+    const DEFAULT_LONGITUDE = 103.8864;
+    const DEFAULT_COORDINATES = config('DEFAULT_COORDINATES', `${DEFAULT_LATITUDE},${DEFAULT_LONGITUDE}`);
+    const [latitude, longitude] = DEFAULT_COORDINATES.split(',');
+
+    return { latitude, longitude };
 }

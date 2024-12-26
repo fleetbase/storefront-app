@@ -77,7 +77,7 @@ const StripeCheckoutScreen = () => {
                 </YStack>
             </ScrollView>
             <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
-                <CheckoutButton onPress={handleCompleteOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
+                <CheckoutButton onCheckout={handleCompleteOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
         </YStack>
     );

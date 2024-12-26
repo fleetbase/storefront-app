@@ -20,6 +20,7 @@ import LoginScreen from '../screens/LoginScreen';
 import PhoneLoginScreen from '../screens/PhoneLoginScreen';
 import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
 import CreateAccountScreen from '../screens/CreateAccountScreen';
+import CreateAccountVerifyScreen from '../screens/CreateAccountVerifyScreen';
 import AccountScreen from '../screens/AccountScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
@@ -153,6 +154,13 @@ const StoreProfileTab = createNativeStackNavigator({
         CreateAccount: {
             if: useIsNotAuthenticated,
             screen: CreateAccountScreen,
+            options: {
+                headerShown: false,
+            },
+        },
+        CreateAccountVerify: {
+            if: useIsNotAuthenticated,
+            screen: CreateAccountVerifyScreen,
             options: {
                 headerShown: false,
             },

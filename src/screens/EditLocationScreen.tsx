@@ -9,7 +9,7 @@ import { Place } from '@fleetbase/sdk';
 import { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { formattedAddressFromSerializedPlace, restoreFleetbasePlace } from '../utils/location';
-import { isEmpty } from '../utils';
+import { isEmpty, toBoolean } from '../utils';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -57,6 +57,8 @@ const EditLocationScreen = ({ route }) => {
     const [postalCode, setPostalCode] = useState(place.postal_code);
     const [instructions, setInstructions] = useState(place.meta.instructions);
     const redirectTo = params.redirectTo;
+    const redirectToScreen = params.redirectToScreen;
+    const makeDefault = toBoolean(params.makeDefault);
     const isDefaultLocation = currentLocation?.id === place?.id;
 
     useEffect(() => {
@@ -67,18 +69,48 @@ const EditLocationScreen = ({ route }) => {
         });
     }, [name, street1]);
 
+    const handleRedirectToCheckoutScreen = () => {
+        navigation.reset({
+            index: 0,
+            routes: [
+                {
+                    name: 'StoreNavigator',
+                    state: {
+                        index: 0,
+                        routes: [
+                            {
+                                name: 'StoreCartTab',
+                                state: {
+                                    index: 1,
+                                    routes: [{ name: 'Cart' }, { name: 'Checkout' }],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        });
+    };
+
     const handleRedirect = () => {
         if (redirectTo === 'AddressBook') {
             navigation.goBack();
+        } else if (redirectTo === 'Checkout') {
+            handleRedirectToCheckoutScreen();
         } else {
-            navigation.reset({
+            const reset = {
                 index: 0,
                 routes: [
                     {
                         name: redirectTo,
                     },
                 ],
-            });
+            };
+            if (redirectToScreen) {
+                reset.routes[0].params = { screen: redirectToScreen };
+            }
+
+            navigation.reset(reset);
         }
     };
 
@@ -88,7 +120,7 @@ const EditLocationScreen = ({ route }) => {
 
     const handleSavePlace = async () => {
         try {
-            await runWithLoading(addLocation(getUpdatedPlace()), 'saving');
+            await runWithLoading(addLocation(getUpdatedPlace(), makeDefault), 'saving');
             toast.success('Address saved.', { position: ToastPosition.bottom });
             handleRedirect();
         } catch (error) {

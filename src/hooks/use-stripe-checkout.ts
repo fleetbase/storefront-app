@@ -342,6 +342,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
+                toast.error('Unable to calculate delivery fee.', { position: ToastPosition.TOP });
                 console.error('Error fetching service quote:', error);
             }
         };

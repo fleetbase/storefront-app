@@ -8,7 +8,16 @@ import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/botto
 import { Portal } from '@gorhom/portal';
 import { Place } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
-import { geocode, createFleetbasePlaceFromDetails, getLocationFromRouteOrStorage, formattedAddressFromPlace, formatAddressSecondaryIdentifier, getCoordinates } from '../utils/location';
+import {
+    getDefaultCoordinates,
+    geocode,
+    createFleetbasePlaceFromDetails,
+    getLocationFromRouteOrStorage,
+    formattedAddressFromPlace,
+    formatAddressSecondaryIdentifier,
+    getCoordinates,
+} from '../utils/location';
+import { isArray, toBoolean } from '../utils';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -28,11 +37,12 @@ const styles = StyleSheet.create({
 });
 
 const LocationPickerScreen = ({ route }) => {
+    const params = route.params || {};
     const navigation = useNavigation();
     const theme = useTheme();
     const { storefront } = useStorefront();
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const initialLocation = getLocationFromRouteOrStorage('initialLocation', route.params);
+    const initialLocation = getLocationFromRouteOrStorage('initialLocation', params);
     const [latitude, longitude] = getCoordinates(initialLocation);
     const [results, setResults] = useState([]);
     const [mapRegion, setMapRegion] = useState({
@@ -43,6 +53,9 @@ const LocationPickerScreen = ({ route }) => {
     });
     const [isPanning, setIsPanning] = useState(false);
     const snapPoints = useMemo(() => ['35%'], []);
+    const redirectTo = params.redirectTo;
+    const redirectToScreen = params.redirectToScreen;
+    const makeDefault = toBoolean(params.makeDefault);
 
     // Bottom sheet controls
     const openBottomSheet = () => {
@@ -68,12 +81,14 @@ const LocationPickerScreen = ({ route }) => {
     const updateNearbyResults = async ({ latitude, longitude }) => {
         try {
             const results = await geocode(latitude, longitude, { withAllResults: true });
-            setResults(
-                results.map((result) => {
-                    return createFleetbasePlaceFromDetails(result);
-                })
-            );
-            openBottomSheet();
+            if (isArray(results)) {
+                setResults(
+                    results.map((result) => {
+                        return createFleetbasePlaceFromDetails(result);
+                    })
+                );
+                openBottomSheet();
+            }
         } catch (error) {
             console.error('Error fetching nearby locations: ', error);
             toast.error(error.message);
@@ -82,7 +97,7 @@ const LocationPickerScreen = ({ route }) => {
 
     const handleLocationSelect = (place) => {
         closeBottomSheet();
-        navigation.navigate('EditLocation', { place: place.serialize() });
+        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo, redirectToScreen, makeDefault });
     };
 
     const handleMarkerLocationSelect = () => {
@@ -97,11 +112,15 @@ const LocationPickerScreen = ({ route }) => {
             postal_code: geocoded.getAttribute('postal_code'),
             country: geocoded.getAttribute('country'),
         });
-        navigation.navigate('EditLocation', { place: place.serialize() });
+        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo });
     };
 
     useEffect(() => {
         updateNearbyResults(mapRegion);
+
+        return () => {
+            closeBottomSheet();
+        };
     }, []);
 
     return (
@@ -124,10 +143,14 @@ const LocationPickerScreen = ({ route }) => {
                     keyboardBehavior='extend'
                     keyboardBlurBehavior='none'
                     enableDynamicSizing={false}
-                    style={{ flex: 1, padding: 10, width: '100%' }}
+                    enablePanDownToClose={true}
+                    enableOverDrag={false}
+                    style={{ flex: 1, width: '100%' }}
+                    backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
+                    handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                 >
                     <BottomSheetView style={{ flex: 1 }}>
-                        <YStack>
+                        <YStack px='$3' py='$2'>
                             <Button
                                 onPress={handleMarkerLocationSelect}
                                 size='$4'

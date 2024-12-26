@@ -34,52 +34,52 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 
 ## Table of Contents
 
--   [About](#about)
-    -   [Use cases](#use-cases)
--   [Screenshots](#screenshots)
--   [Prerequisites](#prerequisites)
--   [Installation](#installation)
-    -   [Configure Environment](#configure-environment)
--   [Running in Simulator](#running-in-simulator)
-    -   [Run the app in iOS Simulator](#run-the-app-in-ios-simulator)
-    -   [Run the app in Android Simulator](#run-the-app-in-android-simulator)
--   [Push Notifications](#push-notifications)
-    -   [APNS Push Notifications](#apns-push-notifications)
-    -   [FCM Push Notifications](#fcm-push-notifications)
--   [Generate Assets](#generate-assets)
--   [Configuration](#configuration)
-    -   [Application Configuration](#appconfig)
-    -   [Interface Configuration](#uiconfig)
--   [Internationalization and Translations](#internationalization-and-translations)
-    -   [Internationalization](#internationalization)
-    -   [Translations](#translations)
--   [Payment Gateways](#payment-gateways)
-    -   [Stripe](#stripe)
--   [Store Locations](#store-locations)
-    -   [Store Hours](#store-hours)
--   [Multi-Vendor](#multi-vendor)
-    -   [Creating a network](#creating-a-network)
-    -   [Inviting to network](#inviting-to-network)
-    -   [Configuring network](#configuring-network)
-    -   [Launch network on app](#launch-network-on-app)
--   [Cart](#cart)
--   [Customer Authentication](#customer-authentication)
-    -   [Creating a customer account](#creating-a-customer-account)
-    -   [Logging in a customer](#logging-in-a-customer)
--   [Delivery/ Service Rates](#delivery-service-rates)
-    -   [Location based quote](#location-based-quote)
--   [Checkout](#checkout)
-    -   [Creating a checkout token](#creating-a-checkout-token)
-    -   [Capture checkout](#capture-checkout)
--   [Driver/Agent App](#driver-agent-app)
-    -   [Proof of delivery](#proof-of-delivery)
--   [Orders](#orders)
-    -   [Auto-accept orders](#auto-accept-orders)
-    -   [Manually accept orders](#manually-accept-orders)
-    -   [Auto-assign orders](#auto-assign-orders)
-    -   [Manually assign orders](#manually-assign-orders)
--   [Documentation](#documentation)
--   [Roadmap](#roadmap)
+- [About](#about)
+    - [Use cases](#use-cases)
+- [Screenshots](#screenshots)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+    - [Configure Environment](#configure-environment)
+- [Running in Simulator](#running-in-simulator)
+    - [Run the app in iOS Simulator](#run-the-app-in-ios-simulator)
+    - [Run the app in Android Simulator](#run-the-app-in-android-simulator)
+- [Push Notifications](#push-notifications)
+    - [APNS Push Notifications](#apns-push-notifications)
+    - [FCM Push Notifications](#fcm-push-notifications)
+- [Generate Assets](#generate-assets)
+- [Configuration](#configuration)
+    - [Application Configuration](#appconfig)
+    - [Interface Configuration](#uiconfig)
+- [Internationalization and Translations](#internationalization-and-translations)
+    - [Internationalization](#internationalization)
+    - [Translations](#translations)
+- [Payment Gateways](#payment-gateways)
+    - [Stripe](#stripe)
+- [Store Locations](#store-locations)
+    - [Store Hours](#store-hours)
+- [Multi-Vendor](#multi-vendor)
+    - [Creating a network](#creating-a-network)
+    - [Inviting to network](#inviting-to-network)
+    - [Configuring network](#configuring-network)
+    - [Launch network on app](#launch-network-on-app)
+- [Cart](#cart)
+- [Customer Authentication](#customer-authentication)
+    - [Creating a customer account](#creating-a-customer-account)
+    - [Logging in a customer](#logging-in-a-customer)
+- [Delivery/ Service Rates](#delivery-service-rates)
+    - [Location based quote](#location-based-quote)
+- [Checkout](#checkout)
+    - [Creating a checkout token](#creating-a-checkout-token)
+    - [Capture checkout](#capture-checkout)
+- [Driver/Agent App](#driver-agent-app)
+    - [Proof of delivery](#proof-of-delivery)
+- [Orders](#orders)
+    - [Auto-accept orders](#auto-accept-orders)
+    - [Manually accept orders](#manually-accept-orders)
+    - [Auto-assign orders](#auto-assign-orders)
+    - [Manually assign orders](#manually-assign-orders)
+- [Documentation](#documentation)
+- [Roadmap](#roadmap)
 
 ### About
 
@@ -89,15 +89,15 @@ _Notice: Network/ Multi-vendor functionality is still a work in progress._
 
 #### Use Cases
 
--   Food delivery app
--   Services booking app
--   Hyperlocal shopping app
--   Hyperlocal marketplace app
--   Alcohol delivery app
--   Cannabis delivery app
--   Lawn care booking app
--   Transportation booking app
--   and much more...
+- Food delivery app
+- Services booking app
+- Hyperlocal shopping app
+- Hyperlocal marketplace app
+- Alcohol delivery app
+- Cannabis delivery app
+- Lawn care booking app
+- Transportation booking app
+- and much more...
 
 ### Screenshots
 
@@ -106,10 +106,10 @@ _Notice: Network/ Multi-vendor functionality is still a work in progress._
 
 ### Prerequisites
 
--   [Yarn](https://yarnpkg.com/) or [NPM](https://nodejs.org/en/)
--   [React Native CLI](https://reactnative.dev/docs/environment-setup)
--   Xcode 12+
--   Android Studio
+- [Yarn](https://yarnpkg.com/) or [NPM](https://nodejs.org/en/)
+- [React Native CLI](https://reactnative.dev/docs/environment-setup)
+- Xcode 12+
+- Android Studio
 
 ### Installation
 
@@ -128,7 +128,7 @@ corepack enable
 corepack prepare yarn@3.6.4 --activate
 yarn
 bundle install
-cd ios 
+cd ios
 bundle exec pod install
 touch .env
 ```
@@ -516,8 +516,8 @@ If you would like to make contributions to the Fleetbase Javascript SDK document
 
 ### Roadmap
 
--   Global state management with redux
--   Write proper react hooks for sdks
--   Add debounce on products search
--   Add network/marketplace views
--   Shopify & Woocommerce adapters
+- Global state management with redux
+- Write proper react hooks for sdks
+- Add debounce on products search
+- Add network/marketplace views
+- Shopify & Woocommerce adapters

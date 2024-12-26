@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { formatCurrency } from '../utils/format';
-import { delay, loadPersistedResource } from '../utils';
+import { delay, loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCart from '../hooks/use-cart';
@@ -31,15 +31,15 @@ const CartScreen = () => {
     }, [cart]);
 
     const handleCheckout = () => {
-        if (StorefrontConfig.paymentGateway === 'stripe') {
+        if (storefrontConfig('paymentGateway') === 'stripe') {
             return navigation.navigate('StripeCheckout');
         }
 
-        if (StorefrontConfig.paymentGateway === 'qpay') {
+        if (storefrontConfig('paymentGateway') === 'qpay') {
             return navigation.navigate('QPayCheckout');
         }
 
-        if (StorefrontConfig.paymentGateway === 'paypal') {
+        if (storefrontConfig('paymentGateway') === 'paypal') {
             return navigation.navigate('PaypalCheckout');
         }
     };
