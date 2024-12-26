@@ -59,18 +59,18 @@ const PhoneLoginScreen = () => {
                 <YStack space='$3' width='100%'>
                     <Button onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded>
                         <Button.Icon>
-                            <FontAwesomeIcon icon={faKey} color={theme['gray-500'].val} />
+                            <FontAwesomeIcon icon={faKey} color={theme['textPrimary'].val} />
                         </Button.Icon>
-                        <Button.Text color='$gray-500' fontWeight='bold'>
+                        <Button.Text color='$textPrimary' fontWeight='bold'>
                             Login using Another Method
                         </Button.Text>
                     </Button>
                     <Button onPress={handleCreateAccount} bg='$indigo-600' width='100%' rounded>
-                        <Button.Text color='$indigo-100' fontWeight='bold'>
+                        <Button.Text color='$white' fontWeight='bold'>
                             Create a new Account
                         </Button.Text>
                         <Button.Icon>
-                            <FontAwesomeIcon icon={faArrowRight} color={theme['indigo-100'].val} />
+                            <FontAwesomeIcon icon={faArrowRight} color={theme['white'].val} />
                         </Button.Icon>
                     </Button>
                 </YStack>
