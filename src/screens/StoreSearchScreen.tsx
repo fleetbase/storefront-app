@@ -214,7 +214,7 @@ const StoreSearch = (route = {}) => {
                 )}
             </Animated.View>
             {showDismissOverlay && <Pressable style={StyleSheet.absoluteFill} onPress={() => Keyboard.dismiss()} pointerEvents='box-only' />}
-            {results.length && (
+            {results.length > 0 && (
                 <YStack animate='quick' flex={1} padding='$3'>
                     <Text fontSize='$4' color='$textSecondary' marginTop='$2' marginBottom='$4'>
                         Found {results.length} {pluralize('result', results.length)} for "{searchQuery}"
