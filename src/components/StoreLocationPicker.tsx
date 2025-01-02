@@ -107,7 +107,7 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                             width={dropdownWidth}
                             position='absolute'
                             top={triggerPosition.y - triggerPosition.height - 30}
-                            left={triggerPosition.x - 25}
+                            left={triggerPosition.x - 20}
                             zIndex={1}
                             enterStyle={{
                                 opacity: 0,

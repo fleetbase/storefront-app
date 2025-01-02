@@ -15,11 +15,12 @@ const PhoneLoginScreen = () => {
     const { login, isSendingCode, phone: phoneState } = useAuth();
     const [phone, setPhone] = useState(phoneState);
 
-    const handleSendVerificationCode = useCallback(async () => {
+    const handleSendVerificationCode = async () => {
         if (isSendingCode) {
             return;
         }
 
+        console.log('[phone]', phone);
         if (!isValidPhoneNumber(phone)) {
             return toast.error('Invalid phone number provided.');
         }
@@ -30,7 +31,7 @@ const PhoneLoginScreen = () => {
         } catch (error) {
             toast.error(error.message);
         }
-    }, [login]);
+    };
 
     const handleUseAnotherMethod = () => {
         navigation.navigate('Login');

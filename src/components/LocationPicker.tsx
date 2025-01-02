@@ -94,7 +94,7 @@ const LocationPicker = ({
                     style={StyleSheet.absoluteFillObject}
                     blurType={isDarkMode ? 'dark' : 'light'}
                     blurAmount={10}
-                    borderRadius={10}
+                    borderRadius={20}
                     reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
                 />
                 <XStack alignItems='center' space='$1' style={triggerStyle} {...triggerProps}>
