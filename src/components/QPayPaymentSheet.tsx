@@ -133,6 +133,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                 renderItem={renderItem}
                                 contentContainerStyle={styles.listContent}
                                 showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                             />
                             <YStack height={100} />
                         </YStack>

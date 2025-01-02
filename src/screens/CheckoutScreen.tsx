@@ -3,10 +3,15 @@ import { storefrontConfig } from '../utils';
 import QPayCheckoutScreen from './QPayCheckoutScreen';
 import StripeCheckoutScreen from './StripeCheckoutScreen';
 import PaypalCheckoutScreen from './PaypalCheckoutScreen';
+import { StripeCheckoutProvider } from '../contexts/StripeCheckoutContext';
 
 const CheckoutScreen = () => {
     if (storefrontConfig('paymentGateway') === 'stripe') {
-        return <StripeCheckoutScreen />;
+        return (
+            <StripeCheckoutProvider>
+                <StripeCheckoutScreen />
+            </StripeCheckoutProvider>
+        );
     }
 
     if (storefrontConfig('paymentGateway') === 'qpay') {

@@ -95,10 +95,10 @@ const OrderScreen = ({ route }) => {
 
     return (
         <YStack flex={1} bg='$background'>
-            <YStack width='100%' height={400} borderBottomWidth={1} borderColor='$borderColorWithShadow'>
-                <LiveOrderRoute order={order} zoom={4} />
-            </YStack>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+                <YStack width='100%' height={400} borderBottomWidth={1} borderColor='$borderColorWithShadow'>
+                    <LiveOrderRoute order={order} zoom={4} />
+                </YStack>
                 <YStack space='$2'>
                     <YStack mt='$4' px='$4' py='$2' alignItems='center' justifyContent='center' space='$2'>
                         <Image mb='$2' width={80} height={80} bg='white' source={{ uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}` }} />

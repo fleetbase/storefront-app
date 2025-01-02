@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { SafeAreaView, TouchableWithoutFeedback, Keyboard, Pressable, ScrollView } from 'react-native';
+import { SafeAreaView, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
@@ -74,157 +74,159 @@ const AddNewLocationScreen = ({ route }) => {
     }, [inputValue, searchPlaces]);
 
     return (
-        <TouchableWithoutFeedback onPress={handleDismissFocus}>
-            <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-                <YStack bg='$background' width='100%' height='100%' padding='$4' space='$5'>
-                    <YStack
-                        space='$3'
-                        animation='quick'
-                        opacity={inputFocused ? 0 : 1}
-                        style={{
-                            transform: [{ scale: inputFocused ? 0.5 : 1 }],
-                            transition: 'opacity 0.3s, transform 0.3s',
-                        }}
-                    >
-                        <BackButton onPress={() => navigation.goBack()} />
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+            <YStack bg='$background' width='100%' height='100%' padding='$4' space='$5'>
+                <YStack
+                    space='$3'
+                    animation='quick'
+                    opacity={inputFocused ? 0 : 1}
+                    style={{
+                        transform: [{ scale: inputFocused ? 0.5 : 1 }],
+                        transition: 'opacity 0.3s, transform 0.3s',
+                    }}
+                >
+                    <BackButton onPress={() => navigation.goBack()} />
 
-                        <Text fontSize={25} fontWeight={800} color='$color'>
-                            Add new address
-                        </Text>
-                    </YStack>
+                    <Text fontSize={25} fontWeight={800} color='$color'>
+                        Add new address
+                    </Text>
+                </YStack>
 
-                    <YStack flex={1} justifyContent='flex-start'>
-                        <AnimatePresence>
-                            <XStack
-                                animation='quick'
-                                justifyContent='center'
-                                alignItems='center'
-                                width='100%'
-                                position='absolute'
-                                top={inputFocused ? 0 : 'auto'}
-                                left={0}
-                                right={0}
-                                bg={inputFocused ? '$borderColor' : '$surface'}
-                                borderRadius='$3'
-                                borderWidth={2}
-                                borderColor='$borderColor'
-                                style={{
-                                    transform: [{ translateY: inputFocused ? -120 : 0 }],
-                                    elevation: inputFocused ? 4 : 0,
-                                }}
-                            >
-                                {inputFocused && (
-                                    <Button size={40} onPress={handleDismissFocus} bg='transparent' animation='quick'>
-                                        <Button.Icon>
-                                            <FontAwesomeIcon icon={faArrowLeft} color={theme.color.val} />
-                                        </Button.Icon>
-                                    </Button>
-                                )}
-                                <Input
-                                    ref={searchInput}
-                                    size='$5'
-                                    placeholder='Street name and number'
-                                    bg='transparent'
-                                    color='$color'
-                                    flex={1}
-                                    borderWidth={0}
-                                    paddingHorizontal='$2'
-                                    shadowOpacity={0}
-                                    shadowRadius={0}
-                                    value={inputValue}
-                                    onFocus={handleFocus}
-                                    onBlur={handleBlur}
-                                    onChangeText={setInputValue}
-                                    autoCapitalize={false}
-                                    autoComplete={false}
-                                    autoCorrect={false}
-                                />
-                                {inputFocused && (
-                                    <Button size={40} onPress={handleClearInput} bg='transparent' animation='quick'>
-                                        <Button.Icon>
-                                            <FontAwesomeIcon icon={faCircleXmark} color={theme.color.val} />
-                                        </Button.Icon>
-                                    </Button>
-                                )}
-                            </XStack>
-                        </AnimatePresence>
-
-                        <YStack
+                <YStack justifyContent='flex-start'>
+                    <AnimatePresence>
+                        <XStack
                             animation='quick'
-                            bg='$borderColor'
+                            justifyContent='center'
+                            alignItems='center'
+                            width='100%'
+                            position='absolute'
+                            top={inputFocused ? 0 : 'auto'}
+                            left={0}
+                            right={0}
+                            bg={inputFocused ? '$borderColor' : '$surface'}
+                            borderRadius='$3'
                             borderWidth={2}
                             borderColor='$borderColor'
-                            borderRadius='$3'
-                            height={150}
-                            opacity={inputFocused ? 1 : 0}
                             style={{
-                                transform: [{ translateY: inputFocused ? -50 : 0 }],
-                                elevation: 4,
+                                transform: [{ translateY: inputFocused ? -120 : 0 }],
+                                elevation: inputFocused ? 4 : 0,
                             }}
                         >
-                            <ScrollView style={{ height: 150 }}>
-                                {currentLocation && searchResults.length === 0 && (
-                                    <Pressable onPress={handleUseCurrentLocation}>
-                                        <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
-                                            <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
-                                                <Circle size={40} bg='$background'>
-                                                    <FontAwesomeIcon icon={faLocationArrow} />
-                                                </Circle>
-                                            </YStack>
-                                            <YStack flex={1} space='$1'>
-                                                <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                    {formattedAddressFromPlace(currentLocation)}
-                                                </Text>
-                                                <Text color='$textSecondary' numberOfLines={1}>
-                                                    We think you're around here
-                                                </Text>
-                                            </YStack>
-                                        </XStack>
-                                    </Pressable>
-                                )}
-                                {searchResults.length > 0 &&
-                                    searchResults.map((location) => (
-                                        <Pressable onPress={() => handleLocationSelect(location)} key={location.place_id}>
-                                            <XStack animation='quick' space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
-                                                <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
-                                                    <Circle size={40} bg='$background'>
-                                                        <FontAwesomeIcon icon={faLocationDot} />
-                                                    </Circle>
-                                                </YStack>
-                                                <YStack flex={1} space='$1'>
-                                                    <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                        {location.description}
-                                                    </Text>
-                                                    <Text color='$textSecondary' numberOfLines={1}>
-                                                        {[location.city, location.state, location.country].filter(Boolean).join(', ')}
-                                                    </Text>
-                                                </YStack>
-                                            </XStack>
-                                        </Pressable>
-                                    ))}
-                                <Pressable onPress={handleUseMapLocation}>
+                            {inputFocused && (
+                                <Button size={40} onPress={handleDismissFocus} bg='transparent' animation='quick'>
+                                    <Button.Icon>
+                                        <FontAwesomeIcon icon={faArrowLeft} color={theme.color.val} />
+                                    </Button.Icon>
+                                </Button>
+                            )}
+                            <Input
+                                ref={searchInput}
+                                size='$5'
+                                placeholder='Street name and number'
+                                bg='transparent'
+                                color='$color'
+                                flex={1}
+                                borderWidth={0}
+                                paddingHorizontal='$2'
+                                shadowOpacity={0}
+                                shadowRadius={0}
+                                value={inputValue}
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
+                                onChangeText={setInputValue}
+                                autoCapitalize={false}
+                                autoComplete={false}
+                                autoCorrect={false}
+                            />
+                            {inputFocused && (
+                                <Button size={40} onPress={handleClearInput} bg='transparent' animation='quick'>
+                                    <Button.Icon>
+                                        <FontAwesomeIcon icon={faCircleXmark} color={theme.color.val} />
+                                    </Button.Icon>
+                                </Button>
+                            )}
+                        </XStack>
+                    </AnimatePresence>
+
+                    <YStack
+                        animation='quick'
+                        bg='$borderColor'
+                        borderWidth={2}
+                        borderColor='$borderColor'
+                        borderRadius='$3'
+                        height={150}
+                        opacity={inputFocused ? 1 : 0}
+                        style={{
+                            transform: [{ translateY: inputFocused ? -50 : 0 }],
+                            elevation: 4,
+                        }}
+                    >
+                        <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled' style={{ height: 150 }}>
+                            {currentLocation && searchResults.length === 0 && (
+                                <Pressable onPress={handleUseCurrentLocation}>
                                     <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
                                         <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
                                             <Circle size={40} bg='$background'>
-                                                <FontAwesomeIcon icon={faMapLocation} />
+                                                <FontAwesomeIcon icon={faLocationArrow} color={theme.textPrimary.val} />
                                             </Circle>
                                         </YStack>
                                         <YStack flex={1} space='$1'>
                                             <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                Can't find your address?
+                                                {formattedAddressFromPlace(currentLocation)}
                                             </Text>
                                             <Text color='$textSecondary' numberOfLines={1}>
-                                                Use a map to do this instead
+                                                We think you're around here
                                             </Text>
                                         </YStack>
                                     </XStack>
                                 </Pressable>
-                            </ScrollView>
-                        </YStack>
+                            )}
+                            {searchResults.length > 0 &&
+                                searchResults.map((location) => (
+                                    <Pressable onPress={() => handleLocationSelect(location)} key={location.place_id}>
+                                        <XStack animation='quick' space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
+                                            <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
+                                                <Circle size={40} bg='$background'>
+                                                    <FontAwesomeIcon icon={faLocationDot} color={theme.textPrimary.val} />
+                                                </Circle>
+                                            </YStack>
+                                            <YStack flex={1} space='$1'>
+                                                <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
+                                                    {location.description}
+                                                </Text>
+                                                <Text color='$textSecondary' numberOfLines={1}>
+                                                    {[location.city, location.state, location.country].filter(Boolean).join(', ')}
+                                                </Text>
+                                            </YStack>
+                                        </XStack>
+                                    </Pressable>
+                                ))}
+                            <Pressable onPress={handleUseMapLocation}>
+                                <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
+                                    <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
+                                        <Circle size={40} bg='$background'>
+                                            <FontAwesomeIcon icon={faMapLocation} color={theme.textPrimary.val} />
+                                        </Circle>
+                                    </YStack>
+                                    <YStack flex={1} space='$1'>
+                                        <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
+                                            Can't find your address?
+                                        </Text>
+                                        <Text color='$textSecondary' numberOfLines={1}>
+                                            Use a map to do this instead
+                                        </Text>
+                                    </YStack>
+                                </XStack>
+                            </Pressable>
+                        </ScrollView>
                     </YStack>
                 </YStack>
-            </SafeAreaView>
-        </TouchableWithoutFeedback>
+
+                <YStack flex={1} position='relative' width='100%'>
+                    <Pressable style={StyleSheet.absoluteFill} onPress={handleDismissFocus} pointerEvents='box-only' />
+                </YStack>
+            </YStack>
+        </SafeAreaView>
     );
 };
 

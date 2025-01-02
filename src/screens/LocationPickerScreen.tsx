@@ -52,7 +52,7 @@ const LocationPickerScreen = ({ route }) => {
         longitudeDelta: 0.01,
     });
     const [isPanning, setIsPanning] = useState(false);
-    const snapPoints = useMemo(() => ['35%'], []);
+    const snapPoints = useMemo(() => ['35%', '50%', '65%'], []);
     const redirectTo = params.redirectTo;
     const redirectToScreen = params.redirectToScreen;
     const makeDefault = toBoolean(params.makeDefault);
@@ -184,6 +184,8 @@ const LocationPickerScreen = ({ route }) => {
                             <BottomSheetFlatList
                                 data={results}
                                 keyExtractor={(item, index) => index}
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 renderItem={({ item }) => (
                                     <Button
                                         onPress={() => handleLocationSelect(item)}

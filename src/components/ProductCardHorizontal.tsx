@@ -13,11 +13,10 @@ import useCart from '../hooks/use-cart';
 
 const { width } = Dimensions.get('window');
 
-const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, carouselStyle = {}, buttonStyle = {}, quantityButtonStyle = {}, sliderHeight = 175 }) => {
+const ProductCardHorizontal = ({ product, onPress, onAddToCart, style = {}, wrapperStyle = {}, favoriteIcon, carouselStyle = {}, buttonStyle = {}, quantityButtonStyle = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
-    const [cardWidth, setCardWidth] = useState(0);
     const [cart, updateCart] = useCart();
     const [quantity, setQuantity] = useState(1);
 
@@ -50,37 +49,26 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
 
     return (
         <YStack>
-            <Pressable
-                onPress={handlePress}
-                style={style}
-                disabled={isLoading('addToCart')}
-                onLayout={({
-                    nativeEvent: {
-                        layout: { width },
-                    },
-                }) => {
-                    setCardWidth((prevWidth) => (prevWidth !== width ? width : prevWidth));
-                }}
-            >
-                <Card bordered borderWidth={1} borderColor='$borderColorWithShadow'>
-                    <Card.Header padding={0}>
+            <Pressable onPress={handlePress} style={[style, { width: '100%' }]} disabled={isLoading('addToCart')}>
+                <XStack width='100%' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' overflow='hidden'>
+                    <YStack padding={0}>
                         <YStack position='relative'>
                             <ImageSlider
                                 images={product.getAttribute('images')}
-                                sliderWidth={cardWidth}
-                                sliderHeight={sliderHeight}
-                                sliderStyle={{ borderTopRightRadius: 8, borderTopLeftRadius: 8 }}
+                                sliderWidth={110}
+                                sliderHeight={110}
+                                sliderStyle={{ borderBottomLeftRadius: 10, borderTopLeftRadius: 10 }}
                                 onImagePress={handlePress}
                                 autoplay
                             />
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
                         </YStack>
-                    </Card.Header>
-                    <Card.Footer overflow='hidden'>
-                        <YStack flex={1} space='$2' padding='$2'>
-                            <YStack minHeight={90}>
+                    </YStack>
+                    <YStack flex={1} width='100%'>
+                        <YStack space='$2' px='$3' py='$2'>
+                            <YStack>
                                 <YStack>
-                                    <Text color='$color' fontWeight='bold' fontSize='$7' numberOfLines={1}>
+                                    <Text color='$color' fontWeight='bold' fontSize='$7' mb='$2' numberOfLines={1}>
                                         {product.getAttribute('name')}
                                     </Text>
                                     {product.isAttributeFilled('description') && (
@@ -106,44 +94,12 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                                     )}
                                 </YStack>
                             </YStack>
-                            <YStack minHeight={90} space='$2'>
-                                <QuantityButton style={quantityButtonStyle} onChange={setQuantity} wrapperProps={{ minHeight: 35, width: '100%', flex: 1 }} />
-                                <Button
-                                    animation='bouncy'
-                                    onPress={handleAddToCart}
-                                    size='$4'
-                                    style={buttonStyle}
-                                    alignSelf='center'
-                                    borderRadius='$4'
-                                    bg='$primary'
-                                    color='white'
-                                    width='100%'
-                                    hoverStyle={{
-                                        scale: 0.95,
-                                        opacity: 0.5,
-                                    }}
-                                    pressStyle={{
-                                        scale: 0.95,
-                                        opacity: 0.5,
-                                    }}
-                                >
-                                    {isLoading('addToCart') && (
-                                        <Button.Icon>
-                                            <Spinner />
-                                        </Button.Icon>
-                                    )}
-
-                                    <Button.Text fontSize='$6' fontWeight='$5'>
-                                        Add to Cart
-                                    </Button.Text>
-                                </Button>
-                            </YStack>
                         </YStack>
-                    </Card.Footer>
-                </Card>
+                    </YStack>
+                </XStack>
             </Pressable>
         </YStack>
     );
 };
 
-export default ProductCard;
+export default ProductCardHorizontal;

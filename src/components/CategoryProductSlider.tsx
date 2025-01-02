@@ -4,6 +4,7 @@ import { YStack, XStack, Text, Spinner, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
+import { isArray } from '../utils';
 import useStorefrontData from '../hooks/use-storefront-data';
 import ProductCard from './ProductCard';
 
@@ -21,6 +22,11 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
         }
     };
 
+    if (isArray(products) && products.length === 0) {
+        style.height = 0;
+        style.opacity = 0;
+    }
+
     return (
         <YStack space='$3' style={style}>
             <XStack justiftContent='space-between' paddingHorizontal='$4'>
@@ -36,8 +42,8 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
                     {isLoadingProducts && <Spinner size='sm' color='$color' />}
                 </XStack>
             </XStack>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack space='$4' paddingVertical='$1' paddingHorizontal='$4'>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+                <XStack space='$4' paddingVertical='$1' paddingHorizontal='$4' minHeight={330}>
                     {products.map((product, index) => (
                         <ProductCard key={index} product={product} sliderHeight={135} style={{ width: 190 }} />
                     ))}

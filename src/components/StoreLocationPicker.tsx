@@ -11,10 +11,12 @@ import storage from '../utils/storage';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
 import useStoreLocations from '../hooks/use-store-locations';
+import useAppTheme from '../hooks/use-app-theme';
 
 const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, triggerStyle = {}, triggerTextStyle = {}, triggerArrowStyle = {}, triggerProps = {}, ...props }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { isDarkMode } = useAppTheme();
     const { currentStoreLocation, storeLocations, updateCurrentStoreLocation } = useStoreLocations();
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
@@ -104,8 +106,8 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                             backgroundColor='transparent'
                             width={dropdownWidth}
                             position='absolute'
-                            top={triggerPosition.y - triggerPosition.height - 20}
-                            left={triggerPosition.width / 2 - 15}
+                            top={triggerPosition.y - triggerPosition.height - 30}
+                            left={triggerPosition.x - 25}
                             zIndex={1}
                             enterStyle={{
                                 opacity: 0,
@@ -125,7 +127,13 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                             }}
                             originY={0}
                         >
-                            <BlurView style={StyleSheet.absoluteFillObject} blurType='light' blurAmount={10} borderRadius={10} reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)' />
+                            <BlurView
+                                style={StyleSheet.absoluteFillObject}
+                                blurType={isDarkMode ? 'dark' : 'light'}
+                                blurAmount={10}
+                                borderRadius={10}
+                                reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                            />
                             <YStack space='$2' borderRadius='$4'>
                                 {storeLocations.map((location, index) => (
                                     <Pressable
@@ -134,8 +142,8 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                                         style={{
                                             paddingVertical: 6,
                                             paddingHorizontal: 8,
-                                            borderBottomWidth: 1,
-                                            borderBottomColor: '#d1d5db',
+                                            borderBottomWidth: storeLocations.length - 1 === index ? 0 : 1,
+                                            borderBottomColor: theme.borderColorWithShadow.val,
                                         }}
                                     >
                                         <YStack mb='$1' bg={location.id === currentStoreLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>

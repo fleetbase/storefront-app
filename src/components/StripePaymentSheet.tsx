@@ -18,6 +18,18 @@ const StripePaymentSheet = () => {
         createPaymentSheet();
     }, [storefront, customer, cart, serviceQuote]);
 
+    if (!customer) {
+        return (
+            <YStack>
+                <XStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' alignItems='center' space='$2' px='$4' py='$3'>
+                    <Text fontWeight='bold' fontSize='$4' color='$textPrimary'>
+                        Login to continue checkout
+                    </Text>
+                </XStack>
+            </YStack>
+        );
+    }
+
     if (!paymentSheetEnabled) {
         return (
             <YStack>

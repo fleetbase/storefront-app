@@ -8,6 +8,7 @@ import StoreTagCloud from '../components/StoreTagCloud';
 import ProductCard from '../components/ProductCard';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useStorefront from '../hooks/use-storefront';
+import useAppTheme from '../hooks/use-app-theme';
 import { debounce, delay } from '../utils';
 import { pluralize } from 'inflected';
 
@@ -16,6 +17,7 @@ const StoreSearch = (route = {}) => {
     const insets = useSafeAreaInsets();
     const { info } = useStorefrontInfo();
     const { storefront } = useStorefront();
+    const { isDarkMode } = useAppTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -107,13 +109,13 @@ const StoreSearch = (route = {}) => {
     return (
         <YStack flex={1} bg='$background'>
             <XStack
-                bg='$primary'
+                bg='$surface'
                 paddingTop={insets.top}
                 paddingHorizontal='$4'
                 paddingBottom='$4'
                 shadowColor='$shadowColor'
                 borderBottomWidth={1}
-                borderColor='$primary'
+                borderColor='$borderColorWithShadow'
                 shadowOffset={{ width: 0, height: 1 }}
                 shadowOpacity={0.15}
                 shadowRadius={3}
@@ -126,12 +128,12 @@ const StoreSearch = (route = {}) => {
                     shadowOpacity={0}
                     shadowRadius={0}
                     borderWidth={1}
-                    borderColor='$primaryDark'
+                    borderColor='$borderColorWithShadow'
                     borderRadius='$4'
                     bg='white'
                     shadowColor='$shadowColor'
                     shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={0.15}
+                    shadowOpacity={0.05}
                     shadowRadius={3}
                 >
                     <YStack>
@@ -228,7 +230,7 @@ const StoreSearch = (route = {}) => {
                 <YStack flex={1}>
                     {isLoading ? (
                         <YStack flex={1} alignItems='center' justifyContent='center' position='absolute' style={StyleSheet.absoluteFillObject}>
-                            <Spinner size='large' color={theme.primary.val} />
+                            <Spinner size='large' color={theme.textPrimary.val} />
                         </YStack>
                     ) : !results.length && searchQuery.trim() ? (
                         <YStack flex={1} alignItems='center' justifyContent='center' position='absolute' style={StyleSheet.absoluteFillObject}>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, Pressable, Keyboard, StyleSheet } from 'react-native';
 import { Spinner, Button, Input, Stack, Text, YStack, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -46,20 +46,23 @@ const PhoneLoginVerifyScreen = () => {
                     focusColor={theme.primary.val}
                     theme={{ pinCodeContainerStyle: { borderColor: theme['blue-300'].val, height: 50, width: 50 }, pinCodeTextStyle: { color: theme.primary.val, fontSize: 25 } }}
                 />
-                <Button onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifyingCode ? 0.75 : 1} disabled={isVerifyingCode} rounded>
+                <Button size='$5' onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifyingCode ? 0.75 : 1} disabled={isVerifyingCode} rounded>
                     <Button.Icon>{isVerifyingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faCheck} color={theme.white.val} />}</Button.Icon>
                     <Button.Text color='$white' fontWeight='bold'>
                         Verify Code
                     </Button.Text>
                 </Button>
-                <Button onPress={handleRetry} bg='$secondary' width='100%' rounded>
+                <Button size='$5' onPress={handleRetry} bg='$secondary' width='100%' rounded>
                     <Button.Icon>
                         <FontAwesomeIcon icon={faArrowRotateRight} color={theme['gray-500'].val} />
                     </Button.Icon>
-                    <Button.Text color='$gray-500' fontWeight='bold'>
+                    <Button.Text color='$textPrimary' fontWeight='bold'>
                         Retry
                     </Button.Text>
                 </Button>
+            </YStack>
+            <YStack flex={1} position='relative' width='100%'>
+                <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
             </YStack>
         </SafeAreaView>
     );

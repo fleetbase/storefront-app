@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useStripe } from '@stripe/stripe-react-native';
+import { useStripe, initStripe } from '@stripe/stripe-react-native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
@@ -35,6 +35,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
+    const [stripeInitialized, setStripeInitialized] = useState(false);
     const [setupIntentLoading, setSetupIntentLoading] = useState(false);
     const [paymentIntentId, setPaymentIntentId] = useState(null);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
@@ -74,17 +75,19 @@ export default function useStripeCheckout({ onOrderComplete }) {
             });
         }
 
-        if (serviceQuote) {
-            baseItems.push({
-                name: 'Service Fee',
-                value: serviceQuote.getAttribute('amount'),
-            });
-        } else {
-            baseItems.push({
-                name: 'Service Fee',
-                value: 0,
-                loading: true,
-            });
+        if (!checkoutOptions.pickup) {
+            if (serviceQuote) {
+                baseItems.push({
+                    name: 'Service Fee',
+                    value: serviceQuote.getAttribute('amount'),
+                });
+            } else if (deliveryLocation?.id) {
+                baseItems.push({
+                    name: 'Service Fee',
+                    value: 0,
+                    loading: true,
+                });
+            }
         }
 
         const total = baseItems.reduce((acc, item) => acc + numbersOnly(item.value), 0);
@@ -140,6 +143,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     returnURL: `${APP_IDENTIFIER}://stripe-redirect`,
                 });
 
+                if (error) {
+                    setError(error.message);
+                    return;
+                }
+
                 setPaymentIntentId(paymentIntent);
                 setPaymentSheetEnabled(true);
                 // Set the payment method
@@ -157,7 +165,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setStripeLoading(false);
             }
         },
-        [customer, cart, storefront, serviceQuote, checkoutOptions]
+        [customer, cart, storefront, serviceQuote, checkoutOptions, checkoutOptions.pickup]
     );
 
     const createSetupIntent = useCallback(async () => {
@@ -246,7 +254,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     );
 
     const handleCompleteOrderViaSheet = useCallback(
-        async (_onOrderComplete) => {
+        async (callback) => {
             setIsLoading(true);
 
             try {
@@ -265,11 +273,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
 
-                    if (!onOrderComplete && typeof _onOrderComplete === 'function') {
-                        _onOrderComplete(order);
+                    if (!onOrderComplete && typeof callback === 'function') {
+                        callback(order);
                     }
 
-                    if (!_onOrderComplete && typeof onOrderComplete === 'function') {
+                    if (!callback && typeof onOrderComplete === 'function') {
                         onOrderComplete(order);
                     }
                 }
@@ -284,7 +292,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     );
 
     const handleCompleteOrderViaField = useCallback(
-        async (onOrderComplete) => {
+        async (callback) => {
             setIsLoading(true);
 
             try {
@@ -306,7 +314,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
 
-                    if (typeof onOrderComplete === 'function') {
+                    if (!onOrderComplete && typeof callback === 'function') {
+                        callback(order);
+                    }
+
+                    if (!callback && typeof onOrderComplete === 'function') {
                         onOrderComplete(order);
                     }
                 }
@@ -321,18 +333,22 @@ export default function useStripeCheckout({ onOrderComplete }) {
     );
 
     const handleCompleteOrder = useCallback(
-        async (onOrderComplete) => {
+        async (callback) => {
             if (storefrontConfig('stripePaymentMethod') === 'field') {
-                return handleCompleteOrderViaField(onOrderComplete);
+                return handleCompleteOrderViaField(callback);
             }
 
-            return handleCompleteOrderViaSheet(onOrderComplete);
+            return handleCompleteOrderViaSheet(callback);
         },
         [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment]
     );
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
+        if (checkoutOptions.pickup) {
+            return;
+        }
+
         let isMounted = true;
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
@@ -352,7 +368,18 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, deliveryLocation.id]);
+    }, [cartContentsString, checkoutOptions.pickup, deliveryLocation.id]);
+
+    useEffect(() => {
+        if (stripeInitialized === false) {
+            initStripe({
+                publishableKey: STRIPE_KEY,
+                merchantIdentifier: APP_IDENTIFIER,
+                setReturnUrlSchemeOnAndroid: true,
+            });
+            setStripeInitialized(true);
+        }
+    }, [stripeInitialized]);
 
     return {
         cart,

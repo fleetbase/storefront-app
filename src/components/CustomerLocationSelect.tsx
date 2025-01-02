@@ -88,7 +88,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                         <YStack>
                             <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$4'>
                                 <Text fontSize='$6' color='$textPrimary' fontWeight='bold'>
-                                    Select delivery address
+                                    Select address
                                 </Text>
                                 <XStack space='$2'>
                                     <Button onPress={handleSelectNewLocation} bg='$primary' px='$3' size='$2' borderRadius='$8' rounded>
@@ -109,6 +109,8 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                             <BottomSheetFlatList
                                 data={savedLocations}
                                 keyExtractor={(item, index) => index}
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 renderItem={({ item }) => (
                                     <YStack px='$4'>
                                         <Button

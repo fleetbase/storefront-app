@@ -4,7 +4,7 @@ import useStripeCheckout from '../hooks/use-stripe-checkout'; // adjust path as 
 const StripeCheckoutContext = createContext(null);
 
 export const StripeCheckoutProvider = ({ children }) => {
-    const stripeCheckout = useStripeCheckout();
+    const stripeCheckout = useStripeCheckout({});
 
     return <StripeCheckoutContext.Provider value={stripeCheckout}>{children}</StripeCheckoutContext.Provider>;
 };

@@ -1,13 +1,16 @@
+import { mergeConfigs, config, toBoolean } from '../src/utils';
+import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+
 export const DefaultConfig = {
-    theme: 'blue',
-    paymentGateway: 'stripe',
-    incrementTipBy: 50,
-    stripePaymentMethod: 'sheet', // `sheet` or `field`
+    theme: config('APP_THEME', 'blue'),
+    paymentGateway: config('PAYMENT_GATEWAY', 'stripe'),
+    incrementTipBy: config('TIP_INCREMENT', 50),
+    stripePaymentMethod: config('STRIPE_PAYMENT_UI', 'sheet'), // `sheet` or `field`
     stripePaymentSheetOptions: {
-        applePay: false,
-        googlePay: false,
+        applePay: toBoolean(config('STRIPE_ENABLE_APPLE_PAY', false)),
+        googlePay: toBoolean(config('STRIPE_ENABLE_GOOGLE_PAY', false)),
     },
-    showDriversOnMap: false,
+    showDriversOnMap: toBoolean(config('MAP_DISPLAY_DRIVERS', false)),
     styles: {
         StoreHeader: {
             direction: 'column',
@@ -17,35 +20,34 @@ export const DefaultConfig = {
             padding: '$4',
         },
     },
+    tabs: [
+        {
+            name: 'StoreHomeTab',
+            icon: faHome,
+            label: 'Home',
+        },
+        {
+            name: 'StoreSearchTab',
+            icon: faMagnifyingGlass,
+            label: 'Search',
+        },
+        {
+            name: 'StoreMapTab',
+            icon: faMap,
+            label: 'Map',
+        },
+        {
+            name: 'StoreCartTab',
+            icon: faShoppingCart,
+            label: 'Cart',
+        },
+        {
+            name: 'StoreProfileTab',
+            icon: faUser,
+            label: 'Profile',
+        },
+    ],
 };
-
-export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
-    // If targetConfig is not an object, just return defaultConfig directly
-    if (typeof targetConfig !== 'object' || targetConfig === null) {
-        return defaultConfig;
-    }
-
-    const result = { ...defaultConfig };
-
-    for (const key in targetConfig) {
-        // If both defaultConfig[key] and targetConfig[key] are objects, merge them deeply
-        if (
-            typeof targetConfig[key] === 'object' &&
-            targetConfig[key] !== null &&
-            !Array.isArray(targetConfig[key]) &&
-            typeof result[key] === 'object' &&
-            result[key] !== null &&
-            !Array.isArray(result[key])
-        ) {
-            result[key] = mergeConfigs(result[key], targetConfig[key]);
-        } else {
-            // Otherwise, overwrite the value with the user's provided value
-            result[key] = targetConfig[key];
-        }
-    }
-
-    return result;
-}
 
 export function createStorefrontConfig(userConfig = {}) {
     return mergeConfigs(DefaultConfig, userConfig);

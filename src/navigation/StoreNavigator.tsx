@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from 'tamagui';
 import { getCartCount } from '../utils/cart';
+import { storefrontConfig, get } from '../utils';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
 import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
@@ -31,6 +32,94 @@ import LocationPicker from '../components/LocationPicker';
 import BackButton from '../components/BackButton';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
+
+function getTabConfig(name, key, defaultValue = null) {
+    const tabs = storefrontConfig('tabs');
+    const tab = tabs.find(({ name: tabName }) => name === tabName);
+    if (tab) {
+        return get(tab, key, defaultValue);
+    }
+
+    return defaultValue;
+}
+
+function createTabScreens() {
+    const tabs = storefrontConfig('tabs');
+    const screens = {
+        StoreHomeTab: {
+            screen: StoreHomeTab,
+            options: {
+                tabBarLabel: getTabConfig('StoreHomeTab', 'label', 'Home'),
+            },
+        },
+        StoreSearchTab: {
+            screen: StoreSearchTab,
+            options: {
+                tabBarLabel: getTabConfig('StoreSearchTab', 'label', 'Search'),
+            },
+        },
+        StoreMapTab: {
+            screen: StoreMapTab,
+            options: {
+                tabBarLabel: getTabConfig('StoreMapTab', 'label', 'Map'),
+            },
+        },
+        StoreCartTab: {
+            screen: StoreCartTab,
+            options: () => {
+                const [cart] = useCart();
+                const count = cart ? cart.contents().length : 0;
+                return {
+                    tabBarLabel: getTabConfig('StoreCartTab', 'label', 'Cart'),
+                    tabBarBadge: count,
+                    tabBarBadgeStyle: {
+                        marginRight: -5,
+                        opacity: count ? 1 : 0.5,
+                    },
+                };
+            },
+        },
+        StoreProfileTab: {
+            screen: StoreProfileTab,
+            options: {
+                tabBarLabel: getTabConfig('StoreProfileTab', 'label', 'Profile'),
+            },
+        },
+    };
+
+    const screenTabs = {};
+    for (let i = 0; i < tabs.length; i++) {
+        const tab = tabs[i];
+        if (tab) {
+            screenTabs[tab.name] = screens[tab.name];
+        }
+    }
+
+    return screenTabs;
+}
+
+function getDefaultTabIcon(routeName) {
+    let icon;
+    switch (routeName) {
+        case 'StoreHomeTab':
+            icon = faHome;
+            break;
+        case 'StoreSearchTab':
+            icon = faMagnifyingGlass;
+            break;
+        case 'StoreMapTab':
+            icon = faMap;
+            break;
+        case 'StoreCartTab':
+            icon = faShoppingCart;
+            break;
+        case 'StoreProfileTab':
+            icon = faUser;
+            break;
+    }
+
+    return icon;
+}
 
 const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
@@ -118,13 +207,7 @@ const StoreProfileTab = createNativeStackNavigator({
             screen: EditAccountPropertyScreen,
             options: ({ route, navigation }) => {
                 return {
-                    title: '',
-                    headerTitleAlign: 'left',
-                    headerTransparent: true,
-                    headerShadowVisible: false,
-                    headerLeft: () => {
-                        return <BackButton onPress={() => navigation.goBack()} />;
-                    },
+                    headerShown: false,
                 };
             },
         },
@@ -195,24 +278,7 @@ const StoreNavigator = createBottomTabNavigator({
                 borderTopColor: isDarkMode ? theme.borderColor.val : theme['$gray-600'].val,
             },
             tabBarIcon: ({ focused }) => {
-                let icon;
-                switch (route.name) {
-                    case 'StoreHomeTab':
-                        icon = faHome;
-                        break;
-                    case 'StoreSearchTab':
-                        icon = faMagnifyingGlass;
-                        break;
-                    case 'StoreMapTab':
-                        icon = faMap;
-                        break;
-                    case 'StoreCartTab':
-                        icon = faShoppingCart;
-                        break;
-                    case 'StoreProfileTab':
-                        icon = faUser;
-                        break;
-                }
+                const icon = getTabConfig(route.name, 'icon', getDefaultTabIcon(route.name));
 
                 return <FontAwesomeIcon icon={icon} size={20} color={focused ? theme.primary.val : theme.secondary.val} />;
             },
@@ -225,47 +291,7 @@ const StoreNavigator = createBottomTabNavigator({
             },
         };
     },
-    screens: {
-        StoreHomeTab: {
-            screen: StoreHomeTab,
-            options: {
-                tabBarLabel: 'Home',
-            },
-        },
-        StoreSearchTab: {
-            screen: StoreSearchTab,
-            options: {
-                tabBarLabel: 'Search',
-            },
-        },
-        StoreMapTab: {
-            screen: StoreMapTab,
-            options: {
-                tabBarLabel: 'Map',
-            },
-        },
-        StoreCartTab: {
-            screen: StoreCartTab,
-            options: ({}) => {
-                const [cart] = useCart();
-                const count = cart ? cart.contents().length : 0;
-                return {
-                    tabBarLabel: 'Cart',
-                    tabBarBadge: count,
-                    tabBarBadgeStyle: {
-                        marginRight: -5,
-                        opacity: count ? 1 : 0.5,
-                    },
-                };
-            },
-        },
-        StoreProfileTab: {
-            screen: StoreProfileTab,
-            options: {
-                tabBarLabel: 'Profile',
-            },
-        },
-    },
+    screens: createTabScreens(),
 });
 
 export default StoreNavigator;

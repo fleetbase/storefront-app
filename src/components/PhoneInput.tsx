@@ -5,6 +5,7 @@ import BottomSheet, { BottomSheetView, BottomSheetFlatList, BottomSheetTextInput
 import { useTheme, View, Text, Button, XStack, YStack, Input } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { getCountryByPhoneCode, getCountryByISO2, parsePhoneNumber, debounce } from '../utils';
+import useAppTheme from '../hooks/use-app-theme';
 
 function getDefaultValues(value = null, fallbackCountry = 'US') {
     if (typeof value === 'string' && value.startsWith('+')) {
@@ -29,9 +30,10 @@ const countryList = Object.entries(countries).map(([code, details]) => ({
     emoji: getEmojiFlag(code),
 }));
 
-const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US', wrapperProps = {} }) => {
+const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 'US', size = '$5', wrapperProps = {} }) => {
     const defaultValue = getDefaultValues(value, defaultCountryCode);
     const theme = useTheme();
+    const { isDarkMode } = useAppTheme();
     const [selectedCountry, setSelectedCountry] = useState(defaultValue.country);
     const [phoneNumber, setPhoneNumber] = useState(defaultValue.phoneNumber);
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,6 +41,7 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
     const phoneInputRef = useRef(null);
     const searchInputRef = useRef(null);
     const snapPoints = useMemo(() => ['50%', '75%'], []);
+    const backgroundColor = bg ? bg : isDarkMode ? '$surface' : '$white';
 
     const filteredCountries = useMemo(() => {
         return countryList.filter(({ name, code, phone }) => {
@@ -77,14 +80,15 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
 
     return (
         <YStack space='$4' {...wrapperProps}>
-            <XStack width='100%' space='$2' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg='$white'>
-                <Button size='$4' onPress={openBottomSheet} bg='$surface' borderWidth={0} borderRightWidth={1} borderColor='$borderColor' width={80} maxWidth={80}>
+            <XStack width='100%' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg={backgroundColor}>
+                <Button size={size} onPress={openBottomSheet} bg={backgroundColor} borderWidth={0} width={80} maxWidth={80}>
                     <XStack alignItems='center' space='$2'>
-                        <Text>{getEmojiFlag(selectedCountry.code)}</Text>
-                        <Text>+{selectedCountry.phone}</Text>
+                        <Text fontSize={size}>{getEmojiFlag(selectedCountry.code)}</Text>
+                        <Text fontSize={size}>+{selectedCountry.phone}</Text>
                     </XStack>
                 </Button>
                 <Input
+                    size={size}
                     ref={phoneInputRef}
                     flex={1}
                     placeholder='Enter phone number'
@@ -92,9 +96,12 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                     value={phoneNumber}
                     onChangeText={setPhoneNumber}
                     onFocus={handleInputFocus}
-                    borderWidth={0}
+                    bg={backgroundColor}
+                    color='$textPrimary'
                     borderRadius={0}
-                    bg='white'
+                    borderTopRightRadius='$3'
+                    borderBottomRightRadius='$3'
+                    overflow='hidden'
                 />
             </XStack>
 
@@ -109,28 +116,32 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                     enablePanDownToClose={true}
                     enableOverDrag={false}
                     style={{ flex: 1, width: '100%' }}
-                    backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
+                    backgroundStyle={{ backgroundColor: theme.background.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
                     handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                 >
-                    <BottomSheetTextInput
-                        ref={searchInputRef}
-                        placeholder='Search country'
-                        onChangeText={setSearchTerm}
-                        autoCapitalize={false}
-                        autoComplete={false}
-                        autoCorrect={false}
-                        style={{
-                            color: theme.textPrimary.val,
-                            backgroundColor: theme.background.val,
-                            borderWidth: 1,
-                            borderColor: theme.borderColor.val,
-                            padding: 14,
-                            borderRadius: 10,
-                            fontSize: 13,
-                            marginBottom: 10,
-                        }}
-                    />
-                    <BottomSheetView style={{ flex: 1, backgroundColor: theme.surface.val }}>
+                    <YStack px='$2'>
+                        <BottomSheetTextInput
+                            ref={searchInputRef}
+                            placeholder='Search country'
+                            onChangeText={setSearchTerm}
+                            autoCapitalize={false}
+                            autoComplete={false}
+                            autoCorrect={false}
+                            style={{
+                                color: theme.textPrimary.val,
+                                backgroundColor: theme.surface.val,
+                                borderWidth: 1,
+                                borderColor: theme.borderColor.val,
+                                padding: 14,
+                                borderRadius: 12,
+                                fontSize: 13,
+                                marginBottom: 10,
+                            }}
+                        />
+                    </YStack>
+                    <BottomSheetView
+                        style={{ flex: 1, backgroundColor: theme.background.val, paddingHorizontal: 8, borderColor: theme.borderColorWithShadow.val, borderWidth: 1, borderTopWidth: 0 }}
+                    >
                         <BottomSheetFlatList
                             data={filteredCountries}
                             keyExtractor={(item) => item.code}
@@ -138,10 +149,11 @@ const PhoneInput = ({ value, onChange, width = '100%', defaultCountryCode = 'US'
                                 <Button
                                     size='$4'
                                     onPress={() => handleCountrySelect({ code: item.code, phone: item.phone })}
-                                    bg='$secondary'
+                                    bg='$surface'
                                     justifyContent='space-between'
                                     space='$2'
                                     mb='$2'
+                                    px='$3'
                                     hoverStyle={{
                                         scale: 0.9,
                                         opacity: 0.5,

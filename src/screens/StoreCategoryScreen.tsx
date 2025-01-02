@@ -5,6 +5,8 @@ import { Stack, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import LoadingIndicator from '../components/LoadingIndicator';
 import ProductCard from '../components/ProductCard';
+import ProductCardHorizontal from '../components/ProductCardHorizontal';
+import ProductCardHorizontalLTR from '../components/ProductCardHorizontalLTR';
 import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 
@@ -27,7 +29,7 @@ const StoreCategoryScreen = ({ route }) => {
                         </XStack>
                     </Portal>
                 )}
-                <XStack width='100%' space='$3' paddingHorizontal='$4'>
+                <XStack flex={1} width='100%' gap='$3' px='$4'>
                     {products.map((product, index) => (
                         <YStack key={product.id} width='50%'>
                             <ProductCard product={product} sliderHeight={135} onPress={() => navigation.navigate('Product', { product: product.serialize() })} />

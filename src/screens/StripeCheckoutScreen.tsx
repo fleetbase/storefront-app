@@ -17,19 +17,21 @@ import { storefrontConfig } from '../utils';
 const StripeCheckoutScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const { handleCompleteOrder, handleDeliveryLocationChange, setTipOptions, setPickup, isPickup, isPickupEnabled, lineItems, totalAmount, isNotReady, isLoading } =
-        useStripeCheckoutContext({
-            onOrderComplete: (order) => {
-                navigation.reset({
-                    index: 1,
-                    routes: [{ name: 'Cart' }, { name: 'Order', params: { order: order.serialize() } }],
-                });
-            },
+    const { customer, handleCompleteOrder, handleDeliveryLocationChange, setTipOptions, setPickup, isPickup, isPickupEnabled, lineItems, totalAmount, isNotReady, isLoading } =
+        useStripeCheckoutContext();
+
+    const completeOrder = useCallback(() => {
+        handleCompleteOrder((order) => {
+            navigation.reset({
+                index: 1,
+                routes: [{ name: 'Cart' }, { name: 'Order', params: { order: order.serialize() } }],
+            });
         });
+    }, [handleCompleteOrder]);
 
     return (
         <YStack bg='$background'>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
                         <DeliveryRoutePreview />
@@ -48,18 +50,20 @@ const StripeCheckoutScreen = () => {
                                 <CustomerLocationSelect onChange={handleDeliveryLocationChange} />
                             </YStack>
                         )}
-                        <YStack space='$3'>
+                        <YStack space='$3' mb={!customer ? '$5' : 0}>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Your cart
                             </Text>
                             <CartContents />
                         </YStack>
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Your payment method
-                            </Text>
-                            {storefrontConfig('stripePaymentMethod') === 'field' ? <StripeCardFieldSheet /> : <StripePaymentSheet />}
-                        </YStack>
+                        {customer && (
+                            <YStack space='$3'>
+                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                    Your payment method
+                                </Text>
+                                {storefrontConfig('stripePaymentMethod') === 'field' ? <StripeCardFieldSheet /> : <StripePaymentSheet />}
+                            </YStack>
+                        )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Checkout options
@@ -77,7 +81,7 @@ const StripeCheckoutScreen = () => {
                 </YStack>
             </ScrollView>
             <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
-                <CheckoutButton onCheckout={handleCompleteOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
+                <CheckoutButton onCheckout={completeOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
         </YStack>
     );

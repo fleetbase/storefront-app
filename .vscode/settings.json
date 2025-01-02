@@ -9,5 +9,8 @@
     "editor.formatOnPaste": true,
     "editor.formatOnType": false,
     "prettier.configPath": ".prettierrc",
-    "prettier.ignorePath": ".prettierignore"
+    "prettier.ignorePath": ".prettierignore",
+    "[dotenv]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    }
 }

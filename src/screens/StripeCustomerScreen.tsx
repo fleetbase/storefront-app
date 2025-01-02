@@ -86,15 +86,16 @@ const StripeCustomerScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <YStack bg='transparent' width='100%' height='100%' justifyContent='flex-end'>
+            <YStack bg='transparent' width='100%' height='100%' justifyContent='flex-end' px='$1'>
                 <YStack
                     height={150}
                     width='100%'
-                    bg='$white'
+                    bg='$surface'
                     alignItems='center'
                     justifyContent='center'
                     padding='$4'
                     borderWidth={1}
+                    borderBottomWidth={0}
                     borderColor='$borderColorWithShadow'
                     borderTopRightRadius={20}
                     borderTopLeftRadius={20}

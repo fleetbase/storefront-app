@@ -58,6 +58,14 @@ export function isArray(target) {
     return Array.isArray(target);
 }
 
+export function toArray(target, delimiter = ',') {
+    if (typeof target === 'string') {
+        return target.split(delimiter);
+    }
+
+    return Array.from(target);
+}
+
 export function isObject(target) {
     return target && typeof target === 'object' && Object.prototype.toString.call(target) === '[object Object]';
 }
@@ -459,4 +467,32 @@ export function isAsyncIterable(input) {
     }
 
     return typeof input[Symbol.asyncIterator] === 'function';
+}
+
+export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
+    // If targetConfig is not an object, just return defaultConfig directly
+    if (typeof targetConfig !== 'object' || targetConfig === null) {
+        return defaultConfig;
+    }
+
+    const result = { ...defaultConfig };
+
+    for (const key in targetConfig) {
+        // If both defaultConfig[key] and targetConfig[key] are objects, merge them deeply
+        if (
+            typeof targetConfig[key] === 'object' &&
+            targetConfig[key] !== null &&
+            !Array.isArray(targetConfig[key]) &&
+            typeof result[key] === 'object' &&
+            result[key] !== null &&
+            !Array.isArray(result[key])
+        ) {
+            result[key] = mergeConfigs(result[key], targetConfig[key]);
+        } else {
+            // Otherwise, overwrite the value with the user's provided value
+            result[key] = targetConfig[key];
+        }
+    }
+
+    return result;
 }
