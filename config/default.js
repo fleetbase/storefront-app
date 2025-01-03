@@ -11,6 +11,7 @@ export const DefaultConfig = {
         googlePay: toBoolean(config('STRIPE_ENABLE_GOOGLE_PAY', false)),
     },
     showDriversOnMap: toBoolean(config('MAP_DISPLAY_DRIVERS', false)),
+    prioritizePickup: toBoolean(config('PRIORITIZE_PICKUP', false)),
     styles: {
         StoreHeader: {
             direction: 'column',

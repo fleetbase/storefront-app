@@ -29,7 +29,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         tip: 0,
         leavingDeliveryTip: false,
         deliveryTip: 0,
-        pickup: 0,
+        pickup: storefrontConfig('prioritizePickup') ? 1 : 0,
     });
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isLoading, setIsLoading] = useState(false);

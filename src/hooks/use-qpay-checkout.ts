@@ -6,7 +6,7 @@ import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
-import { get } from '../utils';
+import { get, storefrontConfig } from '../utils';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -27,7 +27,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         tip: 0,
         leavingDeliveryTip: false,
         deliveryTip: 0,
-        pickup: 0,
+        pickup: storefrontConfig('prioritizePickup') ? 1 : 0,
     });
     const [invoice, setInvoice] = useState();
     const [checkoutId, setCheckoutId] = useState();
