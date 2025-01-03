@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
+import { getCoordinates } from '../utils/location';
 import { get } from '../utils';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -176,15 +177,16 @@ export default function useQPayCheckout({ onOrderComplete }) {
     }, [setupGateway, customer, cart, serviceQuote]);
 
     useEffect(() => {
-        if (!deliveryLocation?.id || !cart) {
+        if (checkoutOptions.pickup || !cart) {
             return;
         }
 
+        let destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         let isMounted = true;
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
             try {
-                const quote = await getServiceQuote(currentStoreLocation, deliveryLocation, cart);
+                const quote = await getServiceQuote(currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }

@@ -5,8 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
-import { get } from '../utils';
-import { config, storefrontConfig } from '../utils';
+import { getCoordinates } from '../utils/location';
+import { config, storefrontConfig, get } from '../utils';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -48,7 +48,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === 'Total');
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && !isLoading && !stripeLoading;
+    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading;
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
 
     function computeLineItems() {
@@ -345,15 +345,16 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
-        if (checkoutOptions.pickup) {
+        if (checkoutOptions.pickup || !cart) {
             return;
         }
 
+        let destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         let isMounted = true;
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
             try {
-                const quote = await getServiceQuote(currentStoreLocation, deliveryLocation, cart);
+                const quote = await getServiceQuote(currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }

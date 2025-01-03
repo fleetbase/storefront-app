@@ -29,6 +29,7 @@ const OrderTotal = ({ order }) => {
     const tip = order.getAttribute('meta.tip');
     const deliveryTip = order.getAttribute('meta.delivery_tip');
     const total = order.getAttribute('meta.total');
+    const isPickup = order.getAttribute('meta.is_pickup');
 
     const lineItems = useMemo(() => {
         const items = [
@@ -38,7 +39,7 @@ const OrderTotal = ({ order }) => {
             },
         ];
 
-        if (deliveryFee) {
+        if (deliveryFee && !isPickup) {
             items.push({
                 name: 'Delivery Fee',
                 value: deliveryFee,

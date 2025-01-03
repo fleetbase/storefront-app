@@ -84,4 +84,5 @@ android/app/google-services.json
 # Storefront assets/configurations
 #
 storefront.config.js
+.tamagui
 vendor

@@ -36,12 +36,13 @@ const StripeCustomerScreen = () => {
 
                 if (error) {
                     console.error('Error initializing stripe customer sheet:', error);
-                    return;
+                    return navigation.goBack();
                 }
 
                 setCustomerSheetReady(true);
             } catch (err) {
                 console.error('Error initializing stripe customer sheet:', err);
+                return navigation.goBack();
             }
         };
 

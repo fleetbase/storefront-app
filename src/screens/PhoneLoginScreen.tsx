@@ -20,7 +20,6 @@ const PhoneLoginScreen = () => {
             return;
         }
 
-        console.log('[phone]', phone);
         if (!isValidPhoneNumber(phone)) {
             return toast.error('Invalid phone number provided.');
         }

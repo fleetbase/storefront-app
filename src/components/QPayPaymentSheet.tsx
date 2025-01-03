@@ -78,7 +78,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
         ({ item: bank }: { item: Bank }) => (
             <Pressable onPress={() => openLink(bank)}>
                 <YStack py='$3' borderBottomWidth={1} borderColor='$borderColor'>
-                    <XStack px='$5' style={styles.row}>
+                    <XStack space='$2' px='$4' style={styles.row}>
                         <YStack style={styles.logoContainer}>
                             <Image source={{ uri: bank.logo }} width={40} height={40} borderRadius='$5' />
                         </YStack>
