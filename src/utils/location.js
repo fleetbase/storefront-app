@@ -948,3 +948,13 @@ export function getDefaultCoordinates() {
 
     return { latitude, longitude };
 }
+
+export function createFauxStoreLocation() {
+    return new StoreLocation({
+        place: new Place({ location: new Point(DEFAULT_LATITUDE, DEFAULT_LONGITUDE) }),
+    });
+}
+
+export function createFauxPlace() {
+    return new Place({ location: new Point(DEFAULT_LATITUDE, DEFAULT_LONGITUDE) });
+}

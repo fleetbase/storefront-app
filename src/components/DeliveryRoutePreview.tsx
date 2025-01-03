@@ -3,7 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
-import { restoreFleetbasePlace, getPlaceCoords } from '../utils/location';
+import { restoreFleetbasePlace, getPlaceCoords, createFauxPlace } from '../utils/location';
 import { config } from '../utils';
 import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -36,7 +36,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     const { store, currentStoreLocation } = useStoreLocations();
     const { currentLocation } = useCurrentLocation();
     const mapRef = useRef(null);
-    const start = restoreFleetbasePlace(currentStoreLocation.getAttribute('place'));
+    const start = currentStoreLocation === undefined ? createFauxPlace() : restoreFleetbasePlace(currentStoreLocation.getAttribute('place'));
     const end = restoreFleetbasePlace(currentLocation);
     const origin = getPlaceCoords(start);
     const destination = getPlaceCoords(end);
