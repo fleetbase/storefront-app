@@ -227,7 +227,7 @@ const StoreSearch = (route = {}) => {
                 </YStack>
             )}
             {inputFocused && (
-                <YStack flex={1}>
+                <YStack flex={1} alignItems='center' justifyContent='center'>
                     {isLoading ? (
                         <YStack flex={1} alignItems='center' justifyContent='center' position='absolute' style={StyleSheet.absoluteFillObject}>
                             <Spinner size='large' color={theme.textPrimary.val} />
