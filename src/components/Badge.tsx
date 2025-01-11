@@ -12,12 +12,14 @@ function getColorFromStatus(status) {
         case 'operational':
         case 'active':
         case 'completed':
+        case 'pickup_ready':
             return 'green';
         case 'dispatched':
         case 'assigned':
             return 'indigo';
         case 'disabled':
         case 'canceled':
+        case 'order_canceled':
         case 'incomplete':
         case 'unable':
         case 'failed':

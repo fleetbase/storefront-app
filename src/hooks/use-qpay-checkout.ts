@@ -177,7 +177,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     }, [setupGateway, customer, cart, serviceQuote]);
 
     useEffect(() => {
-        if (checkoutOptions.pickup || !cart) {
+        if (!cart) {
             return;
         }
 

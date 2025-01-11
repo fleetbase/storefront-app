@@ -345,7 +345,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
-        if (checkoutOptions.pickup || !cart) {
+        if (!cart) {
             return;
         }
 

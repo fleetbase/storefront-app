@@ -40,10 +40,9 @@ const OrderScreen = ({ route }) => {
     }, [order]);
 
     const reloadOrder = useCallback(async () => {
-        console.log('[order]', order);
         try {
-            // const order = await order.reload();
-            // setOrder(order);
+            const reloadedOrder = await order.reload();
+            setOrder(reloadedOrder);
         } catch (err) {
             console.error('Error reloading order:', err);
         }
@@ -70,14 +69,21 @@ const OrderScreen = ({ route }) => {
     }, []);
 
     useEffect(() => {
-        if (!order || listenerRef.current) {
+        if (!order) {
+            return;
+        }
+
+        getDistanceMatrix();
+    }, [order]);
+
+    useEffect(() => {
+        if (listenerRef.current) {
             return;
         }
 
         const listenForUpdates = async () => {
             const listener = await listen(`order.${order.id}`, (event) => {
                 reloadOrder();
-                getDistanceMatrix();
             });
             if (listener) {
                 listenerRef.current = listener;
@@ -91,7 +97,7 @@ const OrderScreen = ({ route }) => {
                 listenerRef.current.stop();
             }
         };
-    }, [listen, order]);
+    }, [listen, order.id]);
 
     return (
         <YStack flex={1} bg='$background'>

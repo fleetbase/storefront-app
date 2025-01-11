@@ -23,6 +23,7 @@ const OrderHistoryScreen = () => {
     const navigation = useNavigation();
     const { customer } = useAuth();
     const [orders, setOrders] = useStorage(`${customer.id}_orders`, []);
+    const [refreshing, setRefreshing] = useState(false);
 
     const fetchOrders = async (params = {}) => {
         try {
@@ -32,6 +33,12 @@ const OrderHistoryScreen = () => {
             console.error('Error loading customer orders:', err);
             toast.error(err.message);
         }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchOrders();
+        setRefreshing(false);
     };
 
     const handleViewOrder = (order) => {
@@ -60,7 +67,7 @@ const OrderHistoryScreen = () => {
                                 </Text>
                             </YStack>
                             <YStack space='$2'>
-                                <XStack space='$3'>
+                                <XStack space='$3' justifyContent='flex-end'>
                                     <Text color='$textSecondary'>{formatCurrency(order.getAttribute('meta.total'), order.getAttribute('meta.currency'))}</Text>
                                     <FontAwesomeIcon icon={faChevronRight} size={14} color={theme['$textSecondary'].val} />
                                 </XStack>
@@ -74,6 +81,8 @@ const OrderHistoryScreen = () => {
                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
             />
         </SafeAreaView>
     );
