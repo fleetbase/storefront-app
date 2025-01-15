@@ -4,7 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import { Button, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { useAuth } from '../contexts/AuthContext';
 import { CustomerSheetBeta, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
+import { Portal } from '@gorhom/portal';
 import { config } from '../utils';
+import useAppTheme from '../hooks/use-app-theme';
 
 const APP_IDENTIFIER = config('APP_IDENTIFIER');
 const STRIPE_KEY = config('STRIPE_KEY');
@@ -12,6 +14,7 @@ const STRIPE_KEY = config('STRIPE_KEY');
 const StripeCustomerScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { isDarkMode } = useAppTheme();
     const { customer, updateCustomerMeta } = useAuth();
     const [customerSheetReady, setCustomerSheetReady] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -24,14 +27,15 @@ const StripeCustomerScreen = () => {
         // Initialize the customer sheet
         const initializeCustomerSheet = async () => {
             try {
-                const { setupIntent } = await customer.getStripeSetupIntent();
+                const { setupIntent, customerId } = await customer.getStripeSetupIntent();
                 const { ephemeralKey } = await customer.getStripeEphemeralKey();
                 const { error } = await CustomerSheetBeta.initialize({
                     setupIntentClientSecret: setupIntent,
                     customerEphemeralKeySecret: ephemeralKey,
-                    customerId: customer.getAttribute('meta.stripe_id'),
+                    customerId,
                     headerTextForSelectionScreen: 'Manage your payment method',
                     returnURL: `${APP_IDENTIFIER}://stripe-customer`,
+                    style: isDarkMode ? 'alwaysDark' : 'alwaysLight',
                 });
 
                 if (error) {
@@ -86,10 +90,10 @@ const StripeCustomerScreen = () => {
     }, [customerSheetReady]);
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <YStack bg='transparent' width='100%' height='100%' justifyContent='flex-end' px='$1'>
+        <Portal hostName='MainPortal'>
+            <YStack position='absolute' bottom={0} left={0} right={0}>
                 <YStack
-                    height={150}
+                    height={210}
                     width='100%'
                     bg='$surface'
                     alignItems='center'
@@ -103,16 +107,20 @@ const StripeCustomerScreen = () => {
                     shadowColor='$shadowColor'
                     shadowOffset={{ width: 0, height: 1 }}
                     shadowRadius={3}
-                    shadowOpacity={0.25}
-                    opacity={customerSheetReady ? 0 : 1}
+                    shadowOpacity={0.1}
+                    style={{
+                        transform: [{ scale: isLoading ? 1.05 : 1 }, { translateY: isLoading ? -210 : 0 }],
+                    }}
                 >
                     <XStack space='$2'>
                         <Spinner />
-                        <Text color='$textPrimary'>Loading payment methods...</Text>
+                        <Text color='$textPrimary' fontWeight='bold'>
+                            Loading payment methods...
+                        </Text>
                     </XStack>
                 </YStack>
             </YStack>
-        </SafeAreaView>
+        </Portal>
     );
 };
 

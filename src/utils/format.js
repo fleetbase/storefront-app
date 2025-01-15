@@ -154,10 +154,6 @@ export function formatCurrency(amount = 0, currency = 'USD', currencyDisplay = '
     return formatMoney(!currencyData.decimalSeparator ? amount : amount / 100, currencyData.symbol, currencyData.precision, currencyData.thousandSeparator, currencyData.decimalSeparator);
 }
 
-export function capitalize([first, ...rest]) {
-    return first.toUpperCase() + rest.join('');
-}
-
 export function km(km) {
     return `${Math.round(km)}km`;
 }

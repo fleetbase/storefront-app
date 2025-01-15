@@ -42,15 +42,6 @@ export function productInCart(product) {
     return false;
 }
 
-export function getProductCartItem(product) {
-    const contents = getCartContents();
-    if (contents) {
-        return contents.find((item) => item.product_id === product.id);
-    }
-
-    return null;
-}
-
 export function calculateProductSubtotal(product, variations = {}, addons = {}) {
     // Start with the base product price
     let sum = Number(product.isOnSale ? product.getAttribute('sale_price') : product.getAttribute('price')) || 0;

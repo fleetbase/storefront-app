@@ -12,5 +12,8 @@
     "prettier.ignorePath": ".prettierignore",
     "[dotenv]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[swift]": {
+        "editor.defaultFormatter": "vknabel.vscode-swiftformat"
     }
 }
