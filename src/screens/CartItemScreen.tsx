@@ -14,6 +14,7 @@ import ProductOptionsForm from '../components/ProductOptionsForm';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+import FastImage from 'react-native-fast-image';
 
 const CartItemScreen = ({ route = {} }) => {
     const theme = useTheme();
@@ -90,7 +91,7 @@ const CartItemScreen = ({ route = {} }) => {
     return (
         <YStack flex={1} bg='$background'>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
-                <Image
+                <FastImage
                     source={{ uri: cartItem.product_image_url }}
                     style={{
                         height: '100%',
@@ -99,7 +100,6 @@ const CartItemScreen = ({ route = {} }) => {
                         top: 0,
                         left: 0,
                     }}
-                    resizeMode='cover'
                 />
                 <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} padding='$4' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>

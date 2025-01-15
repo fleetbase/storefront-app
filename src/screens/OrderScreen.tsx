@@ -17,6 +17,7 @@ import OrderItems from '../components/OrderItems';
 import OrderTotal from '../components/OrderTotal';
 import Badge from '../components/Badge';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
+import FastImage from 'react-native-fast-image';
 
 const OrderScreen = ({ route }) => {
     const params = route.params || {};
@@ -126,7 +127,7 @@ const OrderScreen = ({ route }) => {
                     <YStack px='$4' py='$2'>
                         <XStack px='$4' py='$3' bg='$surface' borderRadius='$4' borderWidth={1} borderColor='$borderColorWithShadow'>
                             <YStack mr='$3'>
-                                <Image source={{ uri: store.logo_url }} width={40} height={40} borderRadius='$4' />
+                                <FastImage source={{ uri: store.logo_url }} style={{ width: 40, height: 40, borderRadius: 6 }} />
                             </YStack>
                             <YStack>
                                 <Text color='$textPrimary' fontSize='$5' fontWeight='bold'>

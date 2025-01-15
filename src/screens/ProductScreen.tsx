@@ -11,9 +11,11 @@ import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
+import ProductYoutubeVideos from '../components/ProductYoutubeVideos';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+import FastImage from 'react-native-fast-image';
 
 const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
@@ -22,6 +24,7 @@ const ProductScreen = ({ route = {} }) => {
     const [cart, updateCart] = useCart();
     const product = restoreStorefrontInstance(route.params.product, 'product');
     const isService = product.getAttribute('is_service') === true;
+    const youtubeUrls = product.getAttribute('youtube_urls', []);
     const [selectedAddons, setSelectedAddons] = useState({});
     const [selectedVariants, setSelectedVariants] = useState({});
     const [subtotal, setSubtotal] = useState(calculateProductSubtotal(product, selectedVariants, selectedAddons));
@@ -61,10 +64,12 @@ const ProductScreen = ({ route = {} }) => {
         }
     };
 
+    console.log('youtubes', product.getAttribute('youtube_urls', []));
+
     return (
         <YStack flex={1} bg='$background'>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
-                <Image
+                <FastImage
                     source={{ uri: product.getAttribute('primary_image_url') }}
                     style={{
                         height: '100%',
@@ -73,7 +78,6 @@ const ProductScreen = ({ route = {} }) => {
                         top: 0,
                         left: 0,
                     }}
-                    resizeMode='cover'
                 />
                 <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} padding='$4' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
@@ -120,6 +124,7 @@ const ProductScreen = ({ route = {} }) => {
                             </XStack>
                         )}
                     </YStack>
+                    {youtubeUrls.length > 0 && <ProductYoutubeVideos product={product} />}
                     <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} wrapperProps={{ space: '$4' }} />
                 </YStack>
             </ScrollView>

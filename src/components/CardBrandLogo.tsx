@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'tamagui';
+import FastImage from 'react-native-fast-image';
 
 // Map Stripe's brand strings to your local PNG assets.
 const brandLogos = {
@@ -19,7 +19,7 @@ const defaultLogo = require('../../assets/images/payment-logos/default-card.png'
 
 const CardBrandLogo = ({ brand, width = 55, height = 35 }) => {
     const logoSource = brandLogos[brand] || defaultLogo;
-    return <Image source={logoSource} borderRadius='$3' style={{ width, height, resizeMode: 'contain' }} />;
+    return <FastImage source={logoSource} style={{ width, height, borderRadius: 6 }} />;
 };
 
 export default CardBrandLogo;

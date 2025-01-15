@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { SafeAreaView } from 'react-native';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { useAuth } from '../contexts/AuthContext';
-import { CustomerSheetBeta, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
+import { CustomerSheet, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
 import { Portal } from '@gorhom/portal';
 import { config } from '../utils';
 import useAppTheme from '../hooks/use-app-theme';
@@ -19,6 +19,9 @@ const StripeCustomerScreen = () => {
     const [customerSheetReady, setCustomerSheetReady] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Animated value for sliding the panel
+    const slideAnim = useRef(new Animated.Value(300)).current;
+
     useEffect(() => {
         if (!customer || customerSheetReady) {
             return;
@@ -29,7 +32,7 @@ const StripeCustomerScreen = () => {
             try {
                 const { setupIntent, customerId } = await customer.getStripeSetupIntent();
                 const { ephemeralKey } = await customer.getStripeEphemeralKey();
-                const { error } = await CustomerSheetBeta.initialize({
+                const { error } = await CustomerSheet.initialize({
                     setupIntentClientSecret: setupIntent,
                     customerEphemeralKeySecret: ephemeralKey,
                     customerId,
@@ -44,6 +47,7 @@ const StripeCustomerScreen = () => {
                 }
 
                 setCustomerSheetReady(true);
+                setIsLoading(false);
             } catch (err) {
                 console.error('Error initializing stripe customer sheet:', err);
                 return navigation.goBack();
@@ -67,7 +71,7 @@ const StripeCustomerScreen = () => {
     useEffect(() => {
         const showCustomerSheet = async () => {
             try {
-                const { error, paymentMethod } = await CustomerSheetBeta.present();
+                const { error, paymentMethod } = await CustomerSheet.present();
                 if (error) {
                     if (error.code === CustomerSheetError.Canceled) {
                         return navigation.goBack();
@@ -89,37 +93,63 @@ const StripeCustomerScreen = () => {
         }
     }, [customerSheetReady]);
 
+    // Animate panel into view
+    useEffect(() => {
+        if (isLoading) {
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 700,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isLoading]);
+
     return (
         <Portal hostName='MainPortal'>
-            <YStack position='absolute' bottom={0} left={0} right={0}>
-                <YStack
-                    height={210}
-                    width='100%'
-                    bg='$surface'
-                    alignItems='center'
-                    justifyContent='center'
-                    padding='$4'
-                    borderWidth={1}
-                    borderBottomWidth={0}
-                    borderColor='$borderColorWithShadow'
-                    borderTopRightRadius={20}
-                    borderTopLeftRadius={20}
-                    shadowColor='$shadowColor'
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowRadius={3}
-                    shadowOpacity={0.1}
-                    style={{
-                        transform: [{ scale: isLoading ? 1.05 : 1 }, { translateY: isLoading ? -210 : 0 }],
-                    }}
-                >
-                    <XStack space='$2'>
-                        <Spinner />
-                        <Text color='$textPrimary' fontWeight='bold'>
-                            Loading payment methods...
-                        </Text>
-                    </XStack>
+            {isLoading && (
+                <YStack position='absolute' zIndex={1} flex={1} bg='rgba(0, 0, 0, .20)' width='100%' height='100%'>
+                    <Animated.View
+                        style={{
+                            transform: [{ translateY: slideAnim }],
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            zIndex: 2,
+                        }}
+                    >
+                        <YStack
+                            height={230}
+                            width='100%'
+                            position='absolute'
+                            bottom={0}
+                            left={0}
+                            right={0}
+                            bg='$background'
+                            alignItems='center'
+                            justifyContent='center'
+                            padding='$4'
+                            borderWidth={1}
+                            borderBottomWidth={0}
+                            borderColor='$borderColorWithShadow'
+                            borderTopRightRadius={20}
+                            borderTopLeftRadius={20}
+                            shadowColor='$shadowColor'
+                            shadowOffset={{ width: 0, height: 1 }}
+                            shadowRadius={3}
+                            shadowOpacity={0.1}
+                            opacity={isLoading ? 1 : 0}
+                        >
+                            <XStack space='$3'>
+                                <Spinner size='small' />
+                                <Text fontSize='$4' color='$textPrimary'>
+                                    Loading account info...
+                                </Text>
+                            </XStack>
+                        </YStack>
+                    </Animated.View>
                 </YStack>
-            </YStack>
+            )}
         </Portal>
     );
 };

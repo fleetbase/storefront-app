@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency } from '../utils/format';
 import { loadPersistedResource, showActionSheet } from '../utils';
+import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
 
 const CartContents = ({}) => {
@@ -95,7 +96,7 @@ const CartContents = ({}) => {
                                             justifyContent='center'
                                             position='relative'
                                         >
-                                            <Image
+                                            <FastImage
                                                 source={{ uri: cartItem.product_image_url }}
                                                 style={{
                                                     height: '100%',
@@ -105,7 +106,6 @@ const CartContents = ({}) => {
                                                     left: 0,
                                                     borderRadius: 5,
                                                 }}
-                                                resizeMode='cover'
                                             />
                                         </YStack>
                                         <YStack flex={1}>

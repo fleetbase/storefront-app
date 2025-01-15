@@ -1,6 +1,7 @@
 import React from 'react';
 import { Animated } from 'react-native';
-import { Stack, YStack, Text, XStack, Image, useTheme } from 'tamagui';
+import { Stack, YStack, Text, XStack, useTheme } from 'tamagui';
+import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 import StoreLocationPicker from './StoreLocationPicker';
 import { storefrontConfig } from '../utils';
@@ -10,7 +11,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
 
     return (
         <Animated.View style={[{ position: 'relative', width: '100%', overflow: 'hidden', height }, wrapperStyle]}>
-            <Image
+            <FastImage
                 source={{ uri: backgroundUrl }}
                 style={{
                     height: '100%',
@@ -19,7 +20,6 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                     top: 0,
                     left: 0,
                 }}
-                resizeMode='cover'
             />
 
             <Stack
@@ -35,7 +35,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                 <YStack alignItems={storefrontConfig('styles.StoreHeader.alignItems', 'center')} space='$1'>
                     {logoUrl && (
                         <YStack>
-                            <Image
+                            <FastImage
                                 source={{ uri: logoUrl }}
                                 style={{
                                     height: 45,

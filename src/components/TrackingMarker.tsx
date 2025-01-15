@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { Animated, Easing } from 'react-native';
-import { Image } from 'tamagui';
+import FastImage from 'react-native-fast-image';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import { isObject } from '../utils';
 import { SvgCssUri } from 'react-native-svg/css';
@@ -82,7 +82,7 @@ const TrackingMarker = forwardRef(
                     {isRemoteSvg ? (
                         <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} />
                     ) : (
-                        <Image source={imageSource} style={{ width: size.width, height: size.height }} resizeMode='contain' />
+                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} />
                     )}
                 </Animated.View>
             </AnimatedMarker>

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency } from '../utils/format';
 import { loadPersistedResource, showActionSheet } from '../utils';
+import FastImage from 'react-native-fast-image';
 
 const OrderItems = ({ order }) => {
     const theme = useTheme();
@@ -53,7 +54,7 @@ const OrderItems = ({ order }) => {
                                         justifyContent='center'
                                         position='relative'
                                     >
-                                        <Image
+                                        <FastImage
                                             source={{ uri: entity.photo_url }}
                                             style={{
                                                 height: '100%',
@@ -63,7 +64,6 @@ const OrderItems = ({ order }) => {
                                                 left: 0,
                                                 borderRadius: 5,
                                             }}
-                                            resizeMode='cover'
                                         />
                                     </YStack>
                                     <YStack flex={1}>

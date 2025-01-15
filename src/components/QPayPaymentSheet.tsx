@@ -6,6 +6,7 @@ import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import FastImage from 'react-native-fast-image';
 import { Portal } from '@gorhom/portal';
 import { isArray } from '../utils';
 
@@ -80,7 +81,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                 <YStack py='$3' borderBottomWidth={1} borderColor='$borderColor'>
                     <XStack space='$2' px='$4' style={styles.row}>
                         <YStack style={styles.logoContainer}>
-                            <Image source={{ uri: bank.logo }} width={40} height={40} borderRadius='$5' />
+                            <FastImage source={{ uri: bank.logo }} style={{ width: 40, height: 40, borderRadius: 8 }} />
                         </YStack>
                         <YStack space='$1'>
                             <Text size='$4' color='$textPrimary' fontWeight='bold' numberOfLines={1}>

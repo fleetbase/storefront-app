@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ScrollView, View, Image, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, StyleSheet, Pressable } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 const ImageSlider = ({
     images = [],
@@ -62,12 +63,11 @@ const ImageSlider = ({
             >
                 {images.map((image, index) => (
                     <Pressable key={index} activeOpacity={0.8} onPress={() => handleImagePress(index)}>
-                        <Image
+                        <FastImage
                             source={{ uri: image }}
                             style={{
                                 width: sliderWidth,
                                 height: sliderHeight,
-                                resizeMode: 'cover',
                             }}
                         />
                     </Pressable>

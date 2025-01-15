@@ -9,6 +9,7 @@ import { storefrontConfig } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import DriverMarker from '../components/DriverMarker';
 import useStoreLocations from '../hooks/use-store-locations';
+import FastImage from 'react-native-fast-image';
 
 const StoreMapScreen = ({ route }) => {
     const { fleetbase } = useFleetbase();
@@ -47,7 +48,7 @@ const StoreMapScreen = ({ route }) => {
                 {storeLocationCoordinates.map((storeLocationCoords, index) => (
                     <Marker key={index} coordinate={storeLocationCoords}>
                         <YStack borderWidth={2} borderColor='$white' borderRadius='$3'>
-                            <Image
+                            <FastImage
                                 source={{ uri: store.getAttribute('logo_url') }}
                                 style={{
                                     height: 45,

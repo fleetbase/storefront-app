@@ -9,6 +9,7 @@ import { formatCurrency } from '../utils/format';
 import { delay, loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import StorefrontConfig from '../../storefront.config';
@@ -194,7 +195,7 @@ const CartScreen = () => {
                                             justifyContent='center'
                                             position='relative'
                                         >
-                                            <Image
+                                            <FastImage
                                                 source={{ uri: cartItem.product_image_url }}
                                                 style={{
                                                     height: '100%',
@@ -204,7 +205,6 @@ const CartScreen = () => {
                                                     left: 0,
                                                     borderRadius: 5,
                                                 }}
-                                                resizeMode='cover'
                                             />
                                         </YStack>
                                         <YStack>
