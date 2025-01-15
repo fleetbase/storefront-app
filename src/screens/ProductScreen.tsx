@@ -98,7 +98,7 @@ const ProductScreen = ({ route = {} }) => {
                     }}
                 />
             </YStack>
-            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
                 <YStack space='$3'>
                     <YStack borderBottomWidth={1} borderColor='$borderColor' paddingVertical='$4'>
                         <XStack space='$2' paddingHorizontal='$4' mb='$1'>

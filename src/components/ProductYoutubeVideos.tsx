@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Pressable, StyleSheet, FlatList, Linking } from 'react-native';
-import { Text } from 'tamagui';
+import { View, Pressable, StyleSheet, FlatList, Linking, Dimensions } from 'react-native';
+import { Text, YStack, useTheme } from 'tamagui';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import FastImage from 'react-native-fast-image';
 
 /**
@@ -49,7 +51,10 @@ const openYoutubeVideo = async (videoId) => {
 };
 
 const ProductYoutubeVideos = ({ product }) => {
-    const urls = product.getAttribute('youtube_urls', []) ?? [];
+    const theme = useTheme();
+    const urls = product.getAttribute('youtube_urls', []);
+    const screenWidth = Dimensions.get('window').width;
+    const thumbnailWidth = screenWidth / 2 - 20;
 
     /**
      * Renders each item in the grid.
@@ -63,10 +68,17 @@ const ProductYoutubeVideos = ({ product }) => {
 
         return (
             <Pressable style={styles.videoContainer} onPress={() => openYoutubeVideo(videoId)}>
-                <FastImage source={{ uri: thumbnailUrl }} style={styles.thumbnail} resizeMode='cover' />
-                <Text color='$textPrimary' style={styles.title}>
-                    Video #{index + 1}
-                </Text>
+                <YStack width={thumbnailWidth}>
+                    <YStack position='relative'>
+                        <FastImage source={{ uri: thumbnailUrl }} style={styles.thumbnail} resizeMode='cover' />
+                        <YStack alignItems='center' justifyContent='center' position='absolute' top={0} left={0} right={0} bottom={0} backgroundColor='rgba(0, 0, 0, 0.3)'>
+                            <FontAwesomeIcon icon={faPlay} color={theme['$textPrimary'].val} size={35} />
+                        </YStack>
+                    </YStack>
+                    <Text color='$textPrimary' style={styles.title}>
+                        Video #{index + 1}
+                    </Text>
+                </YStack>
             </Pressable>
         );
     };
@@ -85,8 +97,6 @@ const styles = StyleSheet.create({
     },
     videoContainer: {
         flex: 1,
-        margin: 8,
-        alignItems: 'center',
     },
     thumbnail: {
         width: '100%',
