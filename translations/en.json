@@ -1,415 +1,15 @@
 {
-    "Account": {
-        "AccountScreen": {
-            "title": "Create an account or login",
-            "loginButtonText": "Login",
-            "createAccountButtonText": "Create Account",
-            "userGreetingTitle": "Hello, {{customerName}}",
-            "accountMenuTitle": "My Account",
-            "profileLinkText": "Profile",
-            "ordersLinkText": "Orders",
-            "placesLinkText": "Places",
-            "signoutButtonText": "Sign Out"
-        },
-        "ChangePasswordScreen": {
-            "title": "Change Password"
-        },
-        "EditProfileScreen": {
-            "title": "Your profile",
-            "nameLabelText": "Your name",
-            "emailLabelText": "Your email address",
-            "phoneLabelText": "Your mobile number",
-            "saveButtonText": "Save Profile"
-        },
-        "OrderHistoryScreen": {
-            "title": "Your Orders",
-            "emptyStateText": "Looks like you haven't made any orders.",
-            "bodyTitle": "You have no orders",
-            "bodyTitleLoading": "Loading your order history"
-        },
-        "SavedPlacesScreen": {
-            "title": "Your saved places",
-            "loadingYourSavedPlaces": "Loading your saved places",
-            "youHaveNoSavedPlaces": "You have no saved places",
-            "emptyStateText": "Looks like you haven't saved any addresses.",
-            "addNewAddress": "Add new address"
-        }
-    },
-    "Auth": {
-        "CreateAccountScreen": {
-            "title": "Create Account",
-            "greetingTitle": "Hello, and welcome to {{infoName}}.",
-            "greetingSubtitle": "Create your account with only your phone and name below",
-            "sendVerificationCodeButtonText": "Send Verification Code",
-            "awaitingVerificationTitle": "Thank you, {{name}}!",
-            "awaitingVerificationSubtitle": "Now you should have received a code to your phone via SMS, verify the code to create your account!",
-            "retryButtonText": "Retry?",
-            "verifyCodeButtonText": "Verify Code",
-            "codeInputPlaceholder": "Enter verification code",
-            "nameInputPlaceholder": "Your name"
-        },
-        "LoginScreen": {
-            "title": "Login",
-            "sendVerificationCodeButtonText": "Send Verification Code",
-            "createAccountButtonText": "or Create Account",
-            "retryButtonText": "Retry?",
-            "verifyCodeButtonText": "Verify Code",
-            "codeInputPlaceholder": "Enter verification code"
-        }
-    },
-    "Browser": {
-        "CategoryScreen": {},
-        "HomeScreen": {
-            "categoryPickerHeaderTitle": "Shop by category"
-        },
-        "ProductScreen": {
-            "updateInCartActionText": "Update in Cart",
-            "addAnotherActionText": "Add Another",
-            "addToCartActionText": "Add to Cart",
-            "basePriceLabel": "Base Price",
-            "optionalAddonLabel": "Optional, max {{addonsCount}}",
-            "hasItemsAlertTitle": "Cart Has Items!",
-            "hasItemsAlertDecription": "Your cart already has items from another store, if you continue your cart will be emptied.",
-            "hasItemsAlertCancelActionText": "Cancel",
-            "hasItemsAlertContinueActionText": "Continue",
-            "displayBookingDetailsTitle": "Your booking",
-            "displayBookingDateLabelText": "Date",
-            "displayBookingTimeLabelText": "Time",
-            "confirmBookingActionSheetTitle": "Confirm booking date and time",
-            "confirmBookingActionSheetDateLabelText": "Date",
-            "confirmBookingActionSheetTimeLabelText": "Time",
-            "confirmBookingActionSheetButtonText": "Confirm Booking",
-            "viewProductMediaTitle": "Viewing media",
-            "serviceIdentifierText": "(Service)",
-            "youtubeVidsSectionTitle": "YouTube Videos",
-            "updateBookingActionText": "Update Booking",
-            "addAnotherBookingActionText": "Book Another",
-            "bookServiceActionText": "Book Service"
-        }
-    },
-    "Cart": {
-        "components": {
-            "CartCheckoutPanel": {
-                "cartTotalLabelText": "Total",
-                "checkoutButtonText": "Checkout"
-            },
-            "CartFooter": {
-                "optionsLabelText": "Options",
-                "pickupOrderLabelText": "Pickup order",
-                "askTipLabelText": "Leave a tip",
-                "askDeliveryTipLabelText": "Tip delivery",
-                "costLabelText": "Cost",
-                "deliveryFeeLabelText": "Delivery fee",
-                "tipLabelText": "Tip",
-                "deliveryTipLabelText": "Delivery Tip",
-                "cartSubtotalLabelText": "Subtotal",
-                "cartTotalLabelText": "Total"
-            },
-            "CartHeader": {
-                "title": "{{cartItemsCount}} items in your cart",
-                "multiCartVendorsSubtitle": "from {{storeCount}} vendors",
-                "removeAllItemsButtonText": "Remove All Items",
-                "cartSummaryLabelText": "Cart Summary",
-                "addMoreButtonText": "Add more"
-            }
-        },
-        "CartScreen": {
-            "reloadCartButtonText": "Reload Cart",
-            "emptyStateTitle": "Your Cart is Empty",
-            "emptyStateSubtitle": "Looks like you haven't added anything to your cart yet.",
-            "goToBrowserButtonText": "Start Shopping",
-            "quantityExplenation": "(each {{cost}})"
-        },
-        "CheckoutScreen": {
-            "gatewayDetails": {
-                "cash": {
-                    "title": "Cash",
-                    "description": "Cash on delivery or pickup"
-                },
-                "stripe": {
-                    "title": "Stripe",
-                    "description": "Pay by card, powered by Stripe"
-                },
-                "qpay": {
-                    "title": "QPay",
-                    "description": "Pay by QPay bank transfer"
-                }
-            },
-            "selectPaymentMethodActionSheetTitle": "Select your payment method",
-            "checkoutLabelText": "Checkout",
-            "loginToCheckoutWarningText": "You must login or signup to checkout",
-            "loginButtonText": "Login",
-            "addressLabelText": "Delivery Address",
-            "selectAddressLabelText": "Select a delivery location",
-            "paymentMethodLabelText": "Payment Method",
-            "selectPaymentMethodLabelText": "Select payment method",
-            "cashGatewayName": "Cash",
-            "noPaymentMethodLabelText": "No payment method",
-            "cartLabelText": "Cart ({{cartUniqueItemsCount}})",
-            "orderSummaryLabelText": "Order Summary",
-            "subtotalLabelText": "Subtotal",
-            "deliveryFeeLabelText": "Delivery Fee",
-            "tipLabelText": "Tip",
-            "deliveryTipLabelText": "Delivery Tip",
-            "orderTotalLabelText": "Order Total",
-            "submitOrderButtonText": "Place Order",
-            "confirmButtonText": "Confirm"
-        }
-    },
-    "Core": {
-        "BootScreen": {},
-        "NetworkScreen": {},
-        "StorefrontScreen": {}
-    },
-    "Exceptions": {
-        "SetupWarningScreen": {
-            "title": "Configurations Missing!",
-            "subtitle": "Looks like you haven't properly configured your app.",
-            "envMissingText": "is missing from environment!"
-        }
-    },
-    "Network": {
-        "ExploreScreen": {
-            "searchPlaces": "Search places"
-        },
-        "MapScreen": {
-            "searchPlaces": "Search places"
-        },
-        "NetworkCategoryScreen": {},
-        "StoreScreen": {
-            "loadingText": "Loading...",
-            "displayHoursToggleText": "Hours",
-            "displayHoursTodayLabel": "Today",
-            "weekdayMonday": "Monday",
-            "weekdayTuesday": "Tuesday",
-            "weekdayWednesday": "Wednesday",
-            "weekdayThursday": "Thursday",
-            "weekdayFriday": "Friday",
-            "weekdaySaturday": "Saturday",
-            "weekdaySunday": "Sunday",
-            "shareStoreTitleText": "{{storeName}} found on {{networkName}}",
-            "shareStoreSubjectText": "{{storeName}} found on {{networkName}}",
-            "shareStoreMessageText": "Hey look what I found on {{networkName}}! Checkout {{storeName}}!",
-            "photosButtonText": "Photos",
-            "reviewsButtonText": "Reviews",
-            "mapButtonText": "Map",
-            "websiteButtonText": "Website",
-            "contactButtonText": "Contact",
-            "shareButtonText": "Share",
-            "searchButtonText": "Search",
-            "browseButtonText": "Browse",
-            "contactActionSheetTitle": "Contact {{storeName}}",
-            "contactActionSheetCallActionButtonText": "Call {{phone}}",
-            "contactActionSheetEmailActionButtonText": "Email {{email}}",
-            "contactActionSheetFacebookActionButtonText": "Facebook",
-            "contactActionSheetInstagramActionButtonText": "Instagram",
-            "contactActionSheetTwitterActionButtonText": "Twitter",
-            "serviceIndicatorText": "(Service)",
-            "descriptionMissing": "No description",
-            "closed": "Closed"
-        }
-    },
-    "Places": {
-        "EditPlaceScreen": {
-            "title": "Save new place",
-            "name": "Name",
-            "namePlaceholder": "e.g. Home / Work / School",
-            "streetAddress": "Street address or P.O. Box",
-            "streetAddress2": "Apt, suite, unit, building, floor, etc.",
-            "city": "City",
-            "state": "State or province",
-            "postalCode": "Postal code",
-            "country": "Country",
-            "phoneNumber": "Phone number",
-            "savePlaceDetails": "Save place details",
-            "makeDefault": "Make default",
-            "deletePlace": "Delete place"
-        },
-        "SearchPlacesScreen": {
-            "title": "Add a new place",
-            "enterAddress": "Enter address...",
-            "currentLocationLabel": "Current Location"
-        }
-    },
-    "Shared": {
-        "OrderCompletedScreen": {
-            "title": "Order received!",
-            "pickupOrderFrom": "Pickup order from",
-            "orderNotes": "Order Notes",
-            "qrCode": "QR Code",
-            "orderSummary": "Order Summary",
-            "cash": "Cash",
-            "subtotal": "Subtotal",
-            "deliveryFee": "Delivery Fee",
-            "tip": "Tip",
-            "deliveryTip": "Delivery Tip",
-            "total": "Total"
-        },
-        "OrderScreen": {
-            "title": "Order {{orderStatus}}",
-            "arrivingIn": "Arriving in {{estimatedDuration}}",
-            "pickupOrderFrom": "Pickup order from",
-            "orderNotes": "Order Notes",
-            "qrCode": "QR Code",
-            "orderSummary": "Order Summary",
-            "cash": "Cash",
-            "subtotal": "Subtotal",
-            "deliveryFee": "Delivery Fee",
-            "tip": "Tip",
-            "deliveryTip": "Delivery Tip",
-            "total": "Total"
-        },
-        "StoreLocationScreen": {
-            "hideDirections": "Hide Directions",
-            "displayDirections": "Display Directions",
-            "focusOn": "Focus on {{storeName}}",
-            "call": "Call",
-            "from": "From:",
-            "to": "To:",
-            "distance": "Distance:",
-            "km": "km",
-            "duration": "Duration:",
-            "min": "min",
-            "loading": "Loading..."
-        },
-        "StorePhotosScreen": {
-            "title": "Photos ({{storeMediaCount}})",
-            "viewingPhoto": "Viewing photo"
-        },
-        "StoreReviewsScreen": {
-            "title": "{{storeName}} Reviews",
-            "overallRating": "Overall rating",
-            "review": "review",
-            "reviews": "reviews",
-            "writeAReview": "Write a Review",
-            "createdAgo": "{{reviewCreatedAgo}} ago",
-            "sort": "Sort",
-            "filter": "Filter",
-            "starRatings": "{{filter}} star ratings",
-            "actionSheetTitle": "{{action}} reviews",
-            "filterOptionText": "{{rating}} stars",
-            "allRatings": "All ratings",
-            "newestFirst": "Newest first",
-            "oldestFirst": "Oldest first",
-            "highestRated": "Highest rated",
-            "lowestRated": "Lowest rated",
-            "defaultSortOption": "{{networkName}} Sort"
-        },
-        "WriteReviewScreen": {
-            "loginToReviewWarningText": "You must login or signup to leave a review",
-            "login": "Login",
-            "selectYourRating": "Select your rating",
-            "submitReview": "Submit Review"
-        }
-    },
-    "components": {
-        "interface": {
-            "headers": {
-                "NetworkHeader": {
-                    "search": "Search"
-                },
-                "StorefrontHeader": {}
-            },
-            "CartSubtotalView": {},
-            "CartTotalView": {},
-            "CategoryProductSlider": {},
-            "LocationPicker": {
-                "enterDeliveryLocation": "Enter delivery location",
-                "enterAddress": "Enter address...",
-                "selectDeliveryLocation": "Select delivery location",
-                "tapToAddNewDeliveryLocation": "Tap to add new delivery location",
-                "tapToChange": "Tap to change",
-                "tapToAddDeliveryLocation": "Tap to add delivery location",
-                "deliverTo": "Deliver to:",
-                "selectLocation": "Select location",
-                "currentLocation": "Current location"
-            },
-            "LangPicker": {
-                "title": "Select language"
-            },
-            "NetworkCategoryBlock": {
-                "categories": "Categories"
-            },
-            "NetworkSearch": {
-                "searching": "Searching...",
-                "noDescription": "No description"
-            },
-            "PhoneInput": {
-                "selectCountry": "Select Country"
-            },
-            "ProductPriceView": {},
-            "ProductCard": {
-                "serviceIndicator": "(Service)",
-                "unavailable": "Unavailable"
-            },
-            "ServiceQuoteFeeView": {},
-            "StoreCategoryPicker": {
-                "viewCategories": "View Categories",
-                "categories": "Categories"
-            },
-            "StorePicker": {},
-            "StoreSearch": {
-                "inputPlaceholderText": "Search {{storeName}}"
-            },
-            "TipInput": {},
-            "TipView": {},
-            "ExploreBar": {
-                "clearAllFilters": "Clear all filters",
-                "map": "Map",
-                "nearestFirst": "Nearest first",
-                "highestRated": "Highest rated",
-                "lowestRated": "Lowest rated",
-                "newestFirst": "Newest first",
-                "oldestFirst": "Oldest first",
-                "mostPopular": "Most popular",
-                "trending": "Trending"
-            }
-        },
-        "widgets": {
-            "StoreReviewsWidget": {
-                "title": "Recommended Reviews",
-                "overallRating": "Overall rating",
-                "review": "review",
-                "reviews": "reviews",
-                "writeAReview": "Write a Review",
-                "createdAgo": "{{reviewCreatedAgo}} ago",
-                "sort": "Sort",
-                "filter": "Filter",
-                "starRatings": "{{filter}} star ratings",
-                "actionSheetTitle": "{{action}} reviews",
-                "filterOptionText": "{{rating}} stars",
-                "allRatings": "All ratings",
-                "newestFirst": "Newest first",
-                "oldestFirst": "Oldest first",
-                "highestRated": "Highest rated",
-                "lowestRated": "Lowest rated",
-                "defaultSortOption": "{{networkName}} Sort"
-            },
-            "StoreMapWidget": {
-                "getDirections": "Get Directions",
-                "call": "Call"
-            },
-            "StorePhotosWidget": {
-                "title": "Photos"
-            },
-            "StoreRelatedWidget": {
-                "title": "More like this"
-            },
-            "StoreInfoWidget": {
-                "title": "Info"
-            }
-        }
-    },
-    "terms": {
-        "edit": "Edit",
+    "common": {
+        "fleetbase": "Fleetbase",
+        "storefront": "Storefront",
+        "apiKey": "API Key",
+        "cancel": "Cancel",
+        "new": "New",
+        "create": "Create",
         "delete": "Delete",
-        "loading": "Loading...",
-        "more": "More",
-        "sort": "Sort",
-        "filter": "Filter",
-        "search": "Search"
+        "edit": "Edit"
     },
-    "status": {
+    "orderStatuses": {
         "created": "Created",
         "preparing": "Preparing",
         "dispatched": "Dispatched",
@@ -417,5 +17,45 @@
         "pending": "Pending",
         "in_progress": "In progress",
         "completed": "Completed"
+    },
+    "BootScreen": {
+        "missingRequiredConfigurationKeys": "Missing required configuration keys"
+    },
+    "AccountScreen": {
+        "changeProfilePhotoOptions": {
+            "takePhoto": "Take Photo",
+            "photoLibrary": "Photo Library",
+            "deleteProfilePhoto": "Delete Profile Photo"
+        },
+        "profilePhoto": "Profile Photo",
+        "email": "Email",
+        "phoneNumber": "Phone Number",
+        "name": "Name",
+        "language": "Language",
+        "theme": "Theme",
+        "deleteAccount": "Delete Account",
+        "termsOfService": "Terms of Service",
+        "privacyPolicy": "Privacy Policy",
+        "tracking": "Tracking",
+        "account": "Account",
+        "dataProtection": "Data Protection",
+        "clearCache": "Clear Cache",
+        "signOut": "Sign Out",
+        "signedOut": "Signed Out.",
+        "cacheCleared": "Cache Cleared.",
+        "schemeChanged": "Now using {{selectedScheme}} mode.",
+        "languageChanged": "Now using {{selectedLanguage}}."
+    },
+    "AddNewLocationScreen": {
+        "addNewAddress": "Add new address",
+        "streetName": "Street name and number",
+        "weThinkYoureAroundHere": "We think you're around here",
+        "cantFindYourAddress": "Can't find your address?",
+        "useMapInstead": "Use a map to do this instead"
+    },
+    "SetupWarningScreen": {
+        "configurationMissing": "Configurations Missing!",
+        "unconfiguredApp": "Looks like you haven't properly configured your app.",
+        "envMissing": "is missing from environment!"
     }
 }

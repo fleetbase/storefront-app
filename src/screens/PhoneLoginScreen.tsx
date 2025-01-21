@@ -4,7 +4,7 @@ import { SafeAreaView, Pressable, Keyboard, StyleSheet } from 'react-native';
 import { Spinner, Input, Stack, Text, YStack, useTheme, Button } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPaperPlane, faKey, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faKey, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { isValidPhoneNumber } from '../utils';
 import { useAuth } from '../contexts/AuthContext';
 import PhoneInput from '../components/PhoneInput';
@@ -33,7 +33,7 @@ const PhoneLoginScreen = () => {
     };
 
     const handleUseAnotherMethod = () => {
-        navigation.navigate('Login');
+        navigation.goBack();
     };
 
     const handleCreateAccount = () => {
@@ -63,7 +63,7 @@ const PhoneLoginScreen = () => {
                 <YStack space='$4' width='100%' padding='$5'>
                     <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded>
                         <Button.Icon>
-                            <FontAwesomeIcon icon={faKey} color={theme['textPrimary'].val} />
+                            <FontAwesomeIcon icon={faArrowLeft} color={theme['textPrimary'].val} />
                         </Button.Icon>
                         <Button.Text color='$textPrimary' fontWeight='bold'>
                             Login using Another Method

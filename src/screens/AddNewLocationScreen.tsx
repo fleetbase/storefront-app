@@ -6,6 +6,7 @@ import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, C
 import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { geocodeAutocomplete, getPlaceDetails, createFleetbasePlaceFromDetails, formattedAddressFromPlace } from '../utils/location';
+import { useLanguage } from '../contexts/LanguageContext';
 import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import BackButton from '../components/BackButton';
@@ -14,6 +15,7 @@ const AddNewLocationScreen = ({ route }) => {
     const params = route.params || {};
     const navigation = useNavigation();
     const theme = useTheme();
+    const { t } = useLanguage();
     const { liveLocation: currentLocation, getCurrentLocationCoordinates } = useCurrentLocation();
     const [inputFocused, setInputFocused] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -88,7 +90,7 @@ const AddNewLocationScreen = ({ route }) => {
                     <BackButton onPress={() => navigation.goBack()} />
 
                     <Text fontSize={25} fontWeight={800} color='$color'>
-                        Add new address
+                        {t('AddNewLocationScreen.addNewAddress')}
                     </Text>
                 </YStack>
 
@@ -122,7 +124,7 @@ const AddNewLocationScreen = ({ route }) => {
                             <Input
                                 ref={searchInput}
                                 size='$5'
-                                placeholder='Street name and number'
+                                placeholder={t('AddNewLocationScreen.streetName')}
                                 bg='transparent'
                                 color='$color'
                                 flex={1}
@@ -175,7 +177,7 @@ const AddNewLocationScreen = ({ route }) => {
                                                 {formattedAddressFromPlace(currentLocation)}
                                             </Text>
                                             <Text color='$textSecondary' numberOfLines={1}>
-                                                We think you're around here
+                                                {t('AddNewLocationScreen.weThinkYoureAroundHere')}
                                             </Text>
                                         </YStack>
                                     </XStack>
@@ -210,10 +212,10 @@ const AddNewLocationScreen = ({ route }) => {
                                     </YStack>
                                     <YStack flex={1} space='$1'>
                                         <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                            Can't find your address?
+                                            {t('AddNewLocationScreen.cantFindYourAddress')}
                                         </Text>
                                         <Text color='$textSecondary' numberOfLines={1}>
-                                            Use a map to do this instead
+                                            {t('AddNewLocationScreen.useMapInstead')}
                                         </Text>
                                     </YStack>
                                 </XStack>

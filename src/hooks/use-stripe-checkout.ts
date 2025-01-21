@@ -14,6 +14,7 @@ import useStoreLocations from '../hooks/use-store-locations';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 
 const APP_IDENTIFIER = config('APP_IDENTIFIER');
+const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
 const STRIPE_KEY = config('STRIPE_KEY');
 
 export default function useStripeCheckout({ onOrderComplete }) {
@@ -140,7 +141,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     merchantCountryCode: info.country ?? 'US',
                     style: 'alwaysLight',
                     merchantDisplayName: info.name,
-                    returnURL: `${APP_IDENTIFIER}://stripe-redirect`,
+                    returnURL: `${APP_LINK_PREFIX}://stripe-redirect`,
                 });
 
                 if (error) {

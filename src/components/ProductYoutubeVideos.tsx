@@ -54,7 +54,7 @@ const ProductYoutubeVideos = ({ product }) => {
     const theme = useTheme();
     const urls = product.getAttribute('youtube_urls', []);
     const screenWidth = Dimensions.get('window').width;
-    const thumbnailWidth = screenWidth / 2 - 20;
+    const videoContainerWidth = screenWidth / 2;
 
     /**
      * Renders each item in the grid.
@@ -67,12 +67,12 @@ const ProductYoutubeVideos = ({ product }) => {
         const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
         return (
-            <Pressable style={styles.videoContainer} onPress={() => openYoutubeVideo(videoId)}>
-                <YStack width={thumbnailWidth}>
+            <Pressable style={{ width: videoContainerWidth }} onPress={() => openYoutubeVideo(videoId)}>
+                <YStack px='$2' py='$2' justifyContent='center' alignItems='center'>
                     <YStack position='relative'>
                         <FastImage source={{ uri: thumbnailUrl }} style={styles.thumbnail} resizeMode='cover' />
                         <YStack alignItems='center' justifyContent='center' position='absolute' top={0} left={0} right={0} bottom={0} backgroundColor='rgba(0, 0, 0, 0.3)'>
-                            <FontAwesomeIcon icon={faPlay} color={theme['$textPrimary'].val} size={35} />
+                            <FontAwesomeIcon icon={faPlay} color={theme['$textPrimary'].val} size={40} />
                         </YStack>
                     </YStack>
                     <Text color='$textPrimary' style={styles.title}>
@@ -95,13 +95,10 @@ const styles = StyleSheet.create({
     row: {
         justifyContent: 'space-between',
     },
-    videoContainer: {
-        flex: 1,
-    },
     thumbnail: {
         width: '100%',
-        aspectRatio: 16 / 9, // keeps 16:9 ratio
-        borderRadius: 6,
+        aspectRatio: 16 / 9,
+        borderRadius: 9,
         backgroundColor: '#ccc',
     },
     title: {

@@ -22,8 +22,52 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(APP_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(APP_LINK_PREFIX)</string>
+				<string>fb$(FACEBOOK_APP_ID)</string>
+				<string>$(APP_IDENTIFIER)</string>
+				<string>com.googleusercontent.apps.$(GOOGLE_IOS_CLIENT_ID)</string> 
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FacebookAppID</key>
+	<string>$(FACEBOOK_APP_ID)</string>
+	<key>FacebookClientToken</key>
+	<string>$(FACEBOOK_CLIENT_TOKEN)</string>
+	<key>FacebookDisplayName</key>
+	<string>$(APP_NAME)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>qpaywallet</string>
+		<string>khanbank</string>
+		<string>statebankmongolia</string>
+		<string>xacbank</string>
+		<string>tdbbank</string>
+		<string>socialpay-payment</string>
+		<string>most</string>
+		<string>nibank</string>
+		<string>ckbank</string>
+		<string>capitronbank</string>
+		<string>bogdbank</string>
+		<string>transbank</string>
+		<string>mbank</string>
+		<string>ard</string>
+		<string>arig</string>
+		<string>Monpay</string>
+		<string>fbapi</string>
+		<string>fbauth2</string>
+		<string>fb-messenger-share-api</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -55,40 +99,13 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>$(APP_IDENTIFIER)</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>$(APP_LINK_PREFIX)</string>
-			</array>
-		</dict>
-	</array>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>qpaywallet</string>
-		<string>khanbank</string>
-		<string>statebankmongolia</string>
-		<string>xacbank</string>
-		<string>tdbbank</string>
-		<string>socialpay-payment</string>
-		<string>most</string>
-		<string>nibank</string>
-		<string>ckbank</string>
-		<string>capitronbank</string>
-		<string>bogdbank</string>
-		<string>transbank</string>
-		<string>mbank</string>
-		<string>ard</string>
-		<string>arig</string>
-		<string>Monpay</string>
-	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app may need to use your camera for your profile picture</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app may need to access your contacts for sharing</string>
+	<key>NSLocalUsageDescription</key>
+	<string>This app requires access to send you notifications about order status updates and
+		other important information.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
 		when the app is in use</string>
@@ -98,11 +115,10 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
 		when the app is in use</string>
-	<key>NSLocalUsageDescription</key>
-	<string>This app requires access to send you notifications about order status updates and
-		other important information.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app allows you to upload photos from your photo library</string>
+	<key>NSUserAuthenticationUsageDescription</key>
+	<string>Sign in with Apple is used to authenticate your account.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

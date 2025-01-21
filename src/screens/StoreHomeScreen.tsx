@@ -5,10 +5,12 @@ import { ScrollView, Animated } from 'react-native';
 import { YStack, useTheme } from 'tamagui';
 import StoreHeader from '../components/StoreHeader';
 import StoreCategoriesGrid from '../components/StoreCategoriesGrid';
+import StoreCategoriesPills from '../components/StoreCategoriesPills';
 import CategoryProductSlider from '../components/CategoryProductSlider';
 import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import LocationPicker from '../components/LocationPicker';
+import { storefrontConfig } from '../utils';
 
 const StoreHome = ({ route }) => {
     const theme = useTheme();
@@ -18,6 +20,7 @@ const StoreHome = ({ route }) => {
     const scrollY = useRef(new Animated.Value(0)).current;
     const { info } = useStorefrontInfo();
     const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
+    const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
 
     // Interpolated animations
     const headerOpacity = scrollY.interpolate({
@@ -77,13 +80,25 @@ const StoreHome = ({ route }) => {
                 showsVerticalScrollIndicator={false}
             >
                 <YStack space='$3'>
-                    <YStack padding='$3'>
-                        <StoreCategoriesGrid
-                            categories={categories || []}
-                            justifyContent='start'
-                            itemContainerWidth={100}
-                            onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}
-                        />
+                    <YStack>
+                        {categoriesDisplay === 'grid' && (
+                            <YStack padding='$3'>
+                                <StoreCategoriesGrid
+                                    categories={categories || []}
+                                    justifyContent='start'
+                                    itemContainerWidth={100}
+                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}
+                                />
+                            </YStack>
+                        )}
+                        {categoriesDisplay === 'pills' && (
+                            <YStack py='$3'>
+                                <StoreCategoriesPills
+                                    categories={categories || []}
+                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}
+                                />
+                            </YStack>
+                        )}
                     </YStack>
                     <YStack space='$4'>
                         {categories.map((category, index) => (

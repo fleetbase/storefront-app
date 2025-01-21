@@ -8,6 +8,7 @@ import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { showActionSheet, abbreviateName } from '../utils';
 import { titleize } from '../utils/format';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import useAppTheme from '../hooks/use-app-theme';
 import DeviceInfo from 'react-native-device-info';
 import storage from '../utils/storage';
@@ -15,22 +16,28 @@ import storage from '../utils/storage';
 const AccountScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t, language, languages, setLocale } = useLanguage();
     const { userColorScheme, appTheme, changeScheme, schemes } = useAppTheme();
     const { customer, logout, isSigningOut } = useAuth();
 
     const handleClearCache = () => {
         storage.clearStore();
-        toast.success('Cache cleared.', { position: ToastPosition.BOTTOM });
+        toast.success(t('AccountScreen.cacheCleared'), { position: ToastPosition.BOTTOM });
     };
 
     const handleSignout = () => {
         logout();
-        toast.success('Signed out.');
+        toast.success(t('AccountScreen.signedOut'));
     };
 
     const handleChangeProfilePhoto = () => {
         showActionSheet({
-            options: ['Take Photo', 'Photo Library', 'Delete Profile Photo', 'Cancel'],
+            options: [
+                t('AccountScreen.changeProfilePhotoOptions.takePhoto'),
+                t('AccountScreen.changeProfilePhotoOptions.photoLibrary'),
+                t('AccountScreen.changeProfilePhotoOptions.deleteProfilePhoto'),
+                t('common.cancel'),
+            ],
             cancelButtonIndex: 3,
             destructiveButtonIndex: 2,
             onSelect: (buttonIndex) => {
@@ -56,7 +63,7 @@ const AccountScreen = () => {
     };
 
     const handleSelectScheme = () => {
-        const options = [...schemes.map((scheme) => titleize(scheme)), 'Cancel'];
+        const options = [...schemes.map((scheme) => titleize(scheme)), t('common.cancel')];
         showActionSheet({
             options,
             cancelButtonIndex: options.length - 1,
@@ -64,7 +71,24 @@ const AccountScreen = () => {
                 if (buttonIndex !== options.length - 1) {
                     const selectedScheme = schemes[buttonIndex];
                     changeScheme(selectedScheme);
-                    toast.success(`Now using ${schemes[buttonIndex]} mode.`, {
+                    toast.success(t('AccountScreen.schemeChanged', { selectedScheme }), {
+                        position: ToastPosition.BOTTOM,
+                    });
+                }
+            },
+        });
+    };
+
+    const handleLanguageSelect = () => {
+        const options = [...languages.map((lang) => lang.native), t('common.cancel')];
+        showActionSheet({
+            options,
+            cancelButtonIndex: options.length - 1,
+            onSelect: (buttonIndex) => {
+                if (buttonIndex !== options.length - 1) {
+                    const selectedLanguage = languages[buttonIndex];
+                    setLocale(selectedLanguage.code);
+                    toast.success(t('AccountScreen.languageChanged', { selectedLanguage: selectedLanguage.native }), {
                         position: ToastPosition.BOTTOM,
                     });
                 }
@@ -101,7 +125,7 @@ const AccountScreen = () => {
     // Account menu items
     const accountMenu = [
         {
-            title: 'Profile Photo',
+            title: t('AccountScreen.profilePhoto'),
             rightComponent: (
                 <Avatar circular size='$2'>
                     <Avatar.Image src={customer.getAttribute('photo_url')} />
@@ -115,43 +139,43 @@ const AccountScreen = () => {
             onPress: () => handleChangeProfilePhoto(),
         },
         {
-            title: 'Email',
+            title: t('AccountScreen.email'),
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {customer.getAttribute('email')}
                 </Text>
             ),
-            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Email', key: 'email', component: 'input' } }),
+            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.email'), key: 'email', component: 'input' } }),
         },
         {
-            title: 'Phone Number',
+            title: t('AccountScreen.phoneNumber'),
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {customer.getAttribute('phone')}
                 </Text>
             ),
-            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Phone Number', key: 'phone', component: 'phone-input' } }),
+            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.phoneNumber'), key: 'phone', component: 'phone-input' } }),
         },
         {
-            title: 'Name',
+            title: t('AccountScreen.name'),
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {customer.getAttribute('name')}
                 </Text>
             ),
-            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: 'Name', key: 'name', component: 'input' } }),
+            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.name'), key: 'name', component: 'input' } }),
         },
         {
             title: 'Language',
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
-                    English
+                    {language.native}
                 </Text>
-            ), // Replace with dynamic value if available
-            onPress: () => navigation.navigate('LanguageSettings'),
+            ),
+            onPress: handleLanguageSelect,
         },
         {
-            title: 'Theme',
+            title: t('AccountScreen.theme'),
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {titleize(userColorScheme)}
@@ -160,12 +184,12 @@ const AccountScreen = () => {
             onPress: handleSelectScheme,
         },
         {
-            title: 'Delete Account',
+            title: t('AccountScreen.deleteAccount'),
             rightComponent: null,
             onPress: () => navigation.navigate('DeleteAccount'),
         },
         {
-            title: 'Terms of Service',
+            title: t('AccountScreen.termsOfService'),
             rightComponent: null,
             onPress: () => navigation.navigate('TermsOfService'),
         },
@@ -174,17 +198,17 @@ const AccountScreen = () => {
     // Data Protection menu items
     const dataProtectionMenu = [
         {
-            title: 'Privacy Policy',
+            title: t('AccountScreen.privacyPolicy'),
             rightComponent: null,
             onPress: () => navigation.navigate('PrivacyPolicy'),
         },
         {
-            title: 'Clear Cache',
+            title: t('AccountScreen.clearCache'),
             rightComponent: null,
             onPress: handleClearCache,
         },
         {
-            title: 'Tracking',
+            title: t('AccountScreen.tracking'),
             rightComponent: <Text color='$textSecondary'>Enabled</Text>, // Replace with dynamic value if available
             onPress: () => navigation.navigate('TrackingSettings'),
         },
@@ -198,7 +222,7 @@ const AccountScreen = () => {
                         <XStack px='$3' justifyContent='space-between'>
                             <YStack>
                                 <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                    Account
+                                    {t('AccountScreen.account')}
                                 </Text>
                             </YStack>
                             <YStack>
@@ -218,7 +242,7 @@ const AccountScreen = () => {
                     <YStack space='$2'>
                         <YStack px='$3'>
                             <Text color='$textPrimary' fontSize='$8' fontWeight='bold'>
-                                Data Protection
+                                {t('AccountScreen.dataProtection')}
                             </Text>
                         </YStack>
                         <FlatList
@@ -230,10 +254,10 @@ const AccountScreen = () => {
                         />
                     </YStack>
                     <YStack padding='$4' mb='$5'>
-                        <Button marginTop='$4' bg='$red-900' size='$5' onPress={handleSignout} rounded width='100%'>
-                            <Button.Icon>{isSigningOut ? <Spinner color='$red-400' /> : <YStack />}</Button.Icon>
-                            <Button.Text color='$red-400' fontWeight='bold'>
-                                Sign Out
+                        <Button marginTop='$4' bg='$red-900' borderWidth={1} borderColor='$red-600' size='$5' onPress={handleSignout} rounded width='100%'>
+                            <Button.Icon>{isSigningOut ? <Spinner color='$red-100' /> : <YStack />}</Button.Icon>
+                            <Button.Text color='$red-100' fontWeight='bold'>
+                                {t('AccountScreen.signOut')}
                             </Button.Text>
                         </Button>
                     </YStack>

@@ -11,11 +11,13 @@ import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import SetupWarningScreen from './SetupWarningScreen';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const APP_NAME = config('APP_NAME');
 const BootScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t } = useLanguage();
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
     const { currentLocation } = useCurrentLocation();
     const [info, setInfo] = useStorage('info', {});
@@ -31,7 +33,7 @@ const BootScreen = () => {
             if (result === RESULTS.GRANTED) {
                 initializeStorefront();
             } else {
-                // if user has manually set their current location bypass location services permission
+                // IF user has manually set their current location bypass location services permission
                 if (currentLocation) {
                     return initializeStorefront();
                 }
@@ -44,10 +46,8 @@ const BootScreen = () => {
 
         const initializeStorefront = async () => {
             if (!hasStorefrontConfig()) {
-                return setError(new Error('Missing required configuration keys'));
+                return setError(new Error(t('BootScreen.missingRequiredConfigurationKeys')));
             }
-
-            // setI18nConfig();
 
             try {
                 if (!storefront) {

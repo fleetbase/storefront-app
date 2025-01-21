@@ -1,8 +1,9 @@
-import { mergeConfigs, config, toBoolean } from '../src/utils';
+import { mergeConfigs, config, toBoolean } from '../src/utils/config';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export const DefaultConfig = {
     theme: config('APP_THEME', 'blue'),
+    defaultLocale: config('DEFAULT_LOCALE', 'en'),
     paymentGateway: config('PAYMENT_GATEWAY', 'stripe'),
     incrementTipBy: config('TIP_INCREMENT', 50),
     stripePaymentMethod: config('STRIPE_PAYMENT_UI', 'sheet'), // `sheet` or `field`
@@ -12,6 +13,11 @@ export const DefaultConfig = {
     },
     showDriversOnMap: toBoolean(config('MAP_DISPLAY_DRIVERS', false)),
     prioritizePickup: toBoolean(config('PRIORITIZE_PICKUP', false)),
+    storeCategoriesDisplay: config('STORE_CATEGORIES_DISPLAY', 'grid'), // `pills` or `grid`
+    productCardStyle: config('PRODUCT_CARD_STYLE', 'bordered'), // `bordered`, `outlined`, `visio`
+    backgroundImages: {
+        LoginScreen: require('../assets/images/storefront-photo-1.jpg'),
+    },
     styles: {
         StoreHeader: {
             direction: 'column',

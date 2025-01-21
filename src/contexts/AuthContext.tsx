@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect, useCallback } from 'react';
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
-import { later, isArray } from '../utils';
+import { later, isArray, storefrontConfig } from '../utils';
 import useStorage, { storage } from '../hooks/use-storage';
 import useStorefront, { adapter } from '../hooks/use-storefront';
+import { useLanguage } from './LanguageContext';
+import { LoginManager as FacebookLoginManager } from 'react-native-fbsdk-next';
 
 const AuthContext = createContext();
 
@@ -26,6 +28,7 @@ const authReducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
     const { storefront } = useStorefront();
+    const { setLocale } = useLanguage();
     const [storedCustomer, setStoredCustomer] = useStorage('customer');
     const [state, dispatch] = useReducer(authReducer, {
         isSendingCode: false,
@@ -142,11 +145,7 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'VERIFY', isVerifyingCode: true });
             try {
                 const customer = await storefront.customers.create(phone, code, attributes);
-                clearSessionData();
-                setCustomerDefaultLocation(customer);
-                setCustomer(customer);
-                // save customer token
-                storage.setString('_customer_token', customer.token);
+                createCustomerSession(customer);
                 dispatch({ type: 'VERIFY', customer });
             } catch (error) {
                 console.error('[AuthContext] Account creation verification failed:', error);
@@ -180,6 +179,9 @@ export const AuthProvider = ({ children }) => {
         storage.removeItem('_current_location');
         storage.removeItem('_local_locations');
         storage.removeItem('_customer_token');
+
+        // If logged in with facebook
+        FacebookLoginManager.logOut();
     };
 
     // Verify code
@@ -188,11 +190,7 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'VERIFY', isVerifyingCode: true });
             try {
                 const customer = await storefront.customers.verifyCode(state.phone, code);
-                clearSessionData();
-                setCustomerDefaultLocation(customer);
-                setCustomer(customer);
-                // save customer token
-                storage.setString('_customer_token', customer.token);
+                createCustomerSession(customer);
                 dispatch({ type: 'VERIFY', customer });
             } catch (error) {
                 console.error('[AuthContext] Code verification failed:', error);
@@ -204,6 +202,14 @@ export const AuthProvider = ({ children }) => {
         [storefront, state.phone, setCustomer]
     );
 
+    // Create a session from customer data/JSON
+    const createCustomerSession = (customer) => {
+        clearSessionData();
+        setCustomerDefaultLocation(customer);
+        setCustomer(customer);
+        storage.setString('_customer_token', customer.token);
+    };
+
     // Logout: Clear session
     const logout = useCallback(() => {
         setCustomer(null);
@@ -211,6 +217,9 @@ export const AuthProvider = ({ children }) => {
 
         // Clear storage/ cache
         clearSessionData();
+
+        // Reset locale
+        setLocale(storefrontConfig('defaultLocale', 'en'));
 
         later(() => {
             dispatch({ type: 'LOGOUT', isSigningOut: false });
@@ -237,6 +246,7 @@ export const AuthProvider = ({ children }) => {
             requestCreationCode,
             verifyAccountCreation,
             getDefaultAddress,
+            createCustomerSession,
         }),
         [state, login, verifyCode, logout]
     );
