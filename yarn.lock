@@ -1947,14 +1947,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fleetbase/storefront@npm:^1.1.11":
-  version: 1.1.11
-  resolution: "@fleetbase/storefront@npm:1.1.11"
+"@fleetbase/storefront@npm:^1.1.12":
+  version: 1.1.12
+  resolution: "@fleetbase/storefront@npm:1.1.12"
   dependencies:
     "@fleetbase/sdk": ^1.2.11
     countries-list: ^3.1.1
     date-fns: ^4.1.0
-  checksum: ae90d243b0eadbbe4731cb403abe8827da6dbf79e987ed46ed7d8eb397fd4edd5d26f54ebe8d557fae3c78705912be0dacdce009698307f0b32fe8e39ac1134d
+  checksum: 297542cea74789fba75a5a90d569188c7e6cdfd5ba6775f8cbda4638c4d53dd4e87fd3d020360c454e778996b7cc471f28fae681b0460b7993cc40755855dd2e
   languageName: node
   linkType: hard
 
@@ -2693,15 +2693,6 @@ __metadata:
     "@nodelib/fs.scandir": 2.1.5
     fastq: ^1.6.0
   checksum: 190c643f156d8f8f277bf2a6078af1ffde1fd43f498f187c2db24d35b4b4b5785c02c7dc52e356497b9a1b65b13edc996de08de0b961c32844364da02986dc53
-  languageName: node
-  linkType: hard
-
-"@notifee/react-native@npm:^9.1.8":
-  version: 9.1.8
-  resolution: "@notifee/react-native@npm:9.1.8"
-  peerDependencies:
-    react-native: "*"
-  checksum: a144f7c5aa54a7e774c95b3a91341653865dfa4c8540b34ead3f281edd733830975c4f86bdfe422467d18ae97879b75be09ca25bb1818ba2ecfc56808cb570b1
   languageName: node
   linkType: hard
 
@@ -13489,6 +13480,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-notifications@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "react-native-notifications@npm:5.1.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 27a201942fcb9e12c4d96ad9b0cb53f547da833e5864193285c68e2dcf03808601d396ea8292e13f7608228784ca70eb34447a13564758d8b7725492a59fc975
+  languageName: node
+  linkType: hard
+
 "react-native-otp-entry@npm:^1.7.3":
   version: 1.8.2
   resolution: "react-native-otp-entry@npm:1.8.2"
@@ -14895,7 +14896,7 @@ __metadata:
     "@babel/runtime": ^7.25.0
     "@backpackapp-io/react-native-toast": ^0.12.1
     "@fleetbase/sdk": ^1.2.11
-    "@fleetbase/storefront": ^1.1.11
+    "@fleetbase/storefront": ^1.1.12
     "@fortawesome/fontawesome-svg-core": ^6.5.1
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1
@@ -14903,7 +14904,6 @@ __metadata:
     "@gorhom/bottom-sheet": ^5
     "@gorhom/portal": ^1.0.14
     "@invertase/react-native-apple-authentication": ^2.4.0
-    "@notifee/react-native": ^9.1.8
     "@react-native-async-storage/async-storage": ^1.21.0
     "@react-native-community/blur": ^4.4.1
     "@react-native-community/cli": 15.0.1
@@ -14960,6 +14960,7 @@ __metadata:
     react-native-maps: ^1.20.0
     react-native-maps-directions: ^1.9.0
     react-native-mmkv-storage: ^0.11.0
+    react-native-notifications: ^5.1.0
     react-native-otp-entry: ^1.7.3
     react-native-permissions: ^4.1.1
     react-native-reanimated: ^3.16.1

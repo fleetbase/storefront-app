@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
-import { restoreStorefrontInstance, isEmpty } from '../utils';
+import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
@@ -22,7 +22,7 @@ const CartItemScreen = ({ route = {} }) => {
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [cartItem, setCartItem] = useState(route.params.cartItem);
-    const [product, setProduct] = useState(restoreStorefrontInstance(route.params.product, 'product'));
+    const [product, setProduct] = useState(restoreSdkInstance(route.params.product, 'product'));
     const [selectedAddons, setSelectedAddons] = useState(getAddonSelectionsFromCartItem(cartItem, product));
     const [selectedVariants, setSelectedVariants] = useState(getVariantSelectionsFromCartItem(cartItem, product));
     const [subtotal, setSubtotal] = useState(0);

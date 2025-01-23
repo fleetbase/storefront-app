@@ -3,14 +3,16 @@ import { authorize } from 'react-native-app-auth';
 import { config } from '../utils';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
-import { adapter } from '../hooks/use-storefront';
+import useStorefront, { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { Settings as FacebookSDKSettings, LoginManager as FacebookLoginManager, Profile as FacebookProfile } from 'react-native-fbsdk-next';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
 
 const useOAuth = () => {
+    const { storefront } = useStorefront();
     const { createCustomerSession } = useAuth();
     const [authState, setAuthState] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ const useOAuth = () => {
             });
             console.log('[appleAuthResponse]', appleAuthResponse);
 
-            const { identityToken, authorizationCode, email, fullName, user } = appleAuthResponse;
+            const { identityToken, authorizationCode, email, fullName, user: appleUserId } = appleAuthResponse;
             if (!identityToken || !authorizationCode) {
                 return toast.error('Apple Sign-In failed: Missing token or authorization code.');
             }
@@ -63,15 +65,9 @@ const useOAuth = () => {
             const name = fullName.givenName ?? fullName.nickname ?? fullName.familyName;
 
             // Login customer with apple credentials
-            const customer = await adapter.post('customers/login-with-apple', {
-                appleUserId: user,
-                identityToken,
-                authorizationCode,
-                email,
-                name,
-            });
+            const customerJson = await storefront.customers.loginWithApple(appleUserId, identityToken, authorizationCode, email, name);
 
-            createCustomerSession(customer);
+            const customer = createCustomerSession(customerJson);
             return customer;
         } catch (err) {
             setError(err.message);
@@ -117,14 +113,14 @@ const useOAuth = () => {
     };
 
     const authenticateWithFacebookProfile = async (profile) => {
-        const customer = await adapter.post('customers/login-with-facebook', {
+        const customerJson = await adapter.post('customers/login-with-facebook', {
             facebookUserId: profile.userID,
             email: profile.email,
             name: profile.name,
             avatarUrl: profile.imageURL,
         });
 
-        createCustomerSession(customer);
+        const customer = createCustomerSession(customerJson);
         return customer;
     };
 
@@ -139,12 +135,12 @@ const useOAuth = () => {
             console.log('[googleAuthResponse]', googleAuthResponse);
 
             const { idToken, user } = googleAuthResponse.data;
-            const customer = await adapter.post('customers/login-with-google', {
+            const customerJson = await adapter.post('customers/login-with-google', {
                 idToken,
                 clientId: `${config('GOOGLE_CLIENT_ID')}.apps.googleusercontent.com`,
             });
 
-            createCustomerSession(customer);
+            const customer = createCustomerSession(customerJson);
             return customer;
         } catch (err) {
             setError(err.message);

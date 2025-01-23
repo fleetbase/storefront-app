@@ -13,7 +13,7 @@ import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreS
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
-import OrderStack from './stacks/OrderStack';
+import OrderStack, { OrderModal } from './stacks/OrderStack';
 import CartScreen from '../screens/CartScreen';
 import CartItemScreen from '../screens/CartItemScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -32,6 +32,7 @@ import LocationPicker from '../components/LocationPicker';
 import BackButton from '../components/BackButton';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
+import StoreLayout from '../layouts/StoreLayout';
 
 function getTabConfig(name, key, defaultValue = null) {
     const tabs = storefrontConfig('tabs');
@@ -121,6 +122,17 @@ function getDefaultTabIcon(routeName) {
     return icon;
 }
 
+const ModalScreens = {
+    ProductModal: {
+        screen: ProductScreen,
+        options: {
+            presentation: 'modal',
+            headerShown: false,
+        },
+    },
+    OrderModal,
+};
+
 const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
     screens: {
@@ -134,6 +146,7 @@ const StoreHomeTab = createNativeStackNavigator({
             },
         },
         ...LocationStack,
+        ...ModalScreens,
     },
 });
 
@@ -148,6 +161,7 @@ const StoreSearchTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        ...ModalScreens,
     },
 });
 
@@ -176,6 +190,7 @@ const StoreCartTab = createNativeStackNavigator({
         },
         ...OrderStack,
         ...CheckoutStack,
+        ...ModalScreens,
     },
 });
 
@@ -258,11 +273,13 @@ const StoreProfileTab = createNativeStackNavigator({
         },
         ...OrderStack,
         ...LocationStack,
+        ...ModalScreens,
     },
 });
 
 const StoreNavigator = createBottomTabNavigator({
     initialRouteName: 'StoreHomeTab',
+    layout: StoreLayout,
     screenOptions: ({ route, navigation }) => {
         const theme = useTheme();
         const { isDarkMode } = useAppTheme();

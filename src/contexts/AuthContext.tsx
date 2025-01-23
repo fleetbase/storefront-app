@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect, useCallback } from 'react';
+import { Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
 import { later, isArray, storefrontConfig } from '../utils';
 import useStorage, { storage } from '../hooks/use-storage';
 import useStorefront, { adapter } from '../hooks/use-storefront';
 import { useLanguage } from './LanguageContext';
+import { useNotification } from './NotificationContext';
 import { LoginManager as FacebookLoginManager } from 'react-native-fbsdk-next';
 
 const AuthContext = createContext();
@@ -29,6 +31,7 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
     const { storefront } = useStorefront();
     const { setLocale } = useLanguage();
+    const { deviceToken } = useNotification();
     const [storedCustomer, setStoredCustomer] = useStorage('customer');
     const [state, dispatch] = useReducer(authReducer, {
         isSendingCode: false,
@@ -122,6 +125,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Register customer's device and platform
+    const syncDevice = async (customer, token) => {
+        try {
+            await customer.syncDevice(token, Platform.OS);
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    // Register current state customer's device and platform
+    const registerDevice = async (token) => {
+        try {
+            await state.customer.syncDevice(token, Platform.OS);
+        } catch (err) {
+            throw err;
+        }
+    };
+
     // Create Account: Send verification code
     const requestCreationCode = useCallback(
         async (phone, method = 'sms') => {
@@ -203,11 +224,24 @@ export const AuthProvider = ({ children }) => {
     );
 
     // Create a session from customer data/JSON
-    const createCustomerSession = (customer) => {
+    const createCustomerSession = async (customer, callback = null) => {
         clearSessionData();
         setCustomerDefaultLocation(customer);
         setCustomer(customer);
         storage.setString('_customer_token', customer.token);
+
+        // run a callback with the customer instance
+        const instance = new Customer(customer, adapter);
+        if (typeof callback === 'function') {
+            callback(instance);
+        }
+
+        // Sync the customer device
+        if (deviceToken) {
+            syncDevice(instance, deviceToken);
+        }
+
+        return instance;
     };
 
     // Logout: Clear session
@@ -247,6 +281,8 @@ export const AuthProvider = ({ children }) => {
             verifyAccountCreation,
             getDefaultAddress,
             createCustomerSession,
+            syncDevice,
+            registerDevice,
         }),
         [state, login, verifyCode, logout]
     );

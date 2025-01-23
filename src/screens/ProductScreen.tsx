@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
-import { restoreStorefrontInstance } from '../utils';
+import { restoreSdkInstance } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
@@ -22,7 +22,7 @@ const ProductScreen = ({ route = {} }) => {
     const navigation = useNavigation();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
-    const product = restoreStorefrontInstance(route.params.product, 'product');
+    const product = restoreSdkInstance(route.params.product, 'product');
     const isService = product.getAttribute('is_service') === true;
     const youtubeUrls = product.getAttribute('youtube_urls', []);
     const [selectedAddons, setSelectedAddons] = useState({});

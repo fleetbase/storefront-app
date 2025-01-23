@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { getTheme } from '../utils';
 import { Boot } from './stacks/CoreStack';
 import { LocationPermission, LocationPicker, EditLocation, EditLocationCoord } from './stacks/LocationStack';
+import { OrderModal } from './stacks/OrderStack';
 import StoreNavigator from './StoreNavigator';
 import NetworkHomeScreen from '../screens/NetworkHomeScreen';
 
@@ -14,6 +15,7 @@ const RootStack = createNativeStackNavigator({
         LocationPicker,
         EditLocation,
         EditLocationCoord,
+        OrderModal,
         NetworkHome: {
             screen: NetworkHomeScreen,
             options: ({ route }) => {

@@ -11,6 +11,7 @@ import { CartProvider } from './src/contexts/CartContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider, useThemeContext } from './src/contexts/ThemeContext';
+import { NotificationProvider } from './src/contexts/NotificationContext';
 import config from './tamagui.config';
 
 function AppContent(): React.JSX.Element {
@@ -22,19 +23,21 @@ function AppContent(): React.JSX.Element {
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <SafeAreaProvider>
                         <BottomSheetModalProvider>
-                            <LanguageProvider>
-                                <AuthProvider>
-                                    <SocketClusterProvider>
-                                        <CartProvider>
-                                            <AppNavigator />
-                                            <Toasts extraInsets={{ bottom: 80 }} />
-                                            <PortalHost name='MainPortal' />
-                                            <PortalHost name='BottomSheetPanelPortal' />
-                                            <PortalHost name='LocationPickerPortal' />
-                                        </CartProvider>
-                                    </SocketClusterProvider>
-                                </AuthProvider>
-                            </LanguageProvider>
+                            <NotificationProvider>
+                                <LanguageProvider>
+                                    <AuthProvider>
+                                        <SocketClusterProvider>
+                                            <CartProvider>
+                                                <AppNavigator />
+                                                <Toasts extraInsets={{ bottom: 80 }} />
+                                                <PortalHost name='MainPortal' />
+                                                <PortalHost name='BottomSheetPanelPortal' />
+                                                <PortalHost name='LocationPickerPortal' />
+                                            </CartProvider>
+                                        </SocketClusterProvider>
+                                    </AuthProvider>
+                                </LanguageProvider>
+                            </NotificationProvider>
                         </BottomSheetModalProvider>
                     </SafeAreaProvider>
                 </GestureHandlerRootView>

@@ -1,7 +1,7 @@
 import Config from 'react-native-config';
 import { Platform, ActionSheetIOS, Alert } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
-import { lookup as storefrontLookup } from '@fleetbase/storefront';
+import { lookup } from '@fleetbase/storefront';
 import storage, { getString } from './storage';
 import { capitalize } from './format';
 import { adapter, instance as storefrontInstance } from '../hooks/use-storefront';
@@ -165,19 +165,42 @@ export function defaults(object, defs) {
 export function restoreStorefrontInstance(data, type = null) {
     // If serialized resource object
     if (isSerializedResource(data) && type) {
-        return storefrontLookup('resource', type, data, adapter);
+        return lookup('resource', type, data, adapter);
     }
 
     // If POJO resource object
     if (isPojoResource(data)) {
-        return storefrontLookup('resource', type ? type : data.resource, data.attributes, adapter);
+        return lookup('resource', type ? type : data.resource, data.attributes, adapter);
     }
 
     // If array of resources
     if (isArray(data) && data.length) {
         const isCollectionData = data.every((_resource) => _resource && isObject(_resource.attributes));
         if (isCollectionData) {
-            const collectionData = data.map(({ resource, attributes }) => storefrontLookup('resource', resource, attributes, adapter));
+            const collectionData = data.map(({ resource, attributes }) => lookup('resource', resource, attributes, adapter));
+            return new Collection(collectionData);
+        }
+    }
+
+    return data;
+}
+
+export function restoreSdkInstance(data, type = null) {
+    // If serialized resource object
+    if (isSerializedResource(data) && type) {
+        return lookup('resource', type, data, adapter);
+    }
+
+    // If POJO resource object
+    if (isPojoResource(data)) {
+        return lookup('resource', type ? type : data.resource, data.attributes, adapter);
+    }
+
+    // If array of resources
+    if (isArray(data) && data.length) {
+        const isCollectionData = data.every((_resource) => _resource && isObject(_resource.attributes));
+        if (isCollectionData) {
+            const collectionData = data.map(({ resource, attributes }) => lookup('resource', resource, attributes, adapter));
             return new Collection(collectionData);
         }
     }
@@ -186,7 +209,7 @@ export function restoreStorefrontInstance(data, type = null) {
 }
 
 export async function loadPersistedResource(request, options = {}) {
-    const { persistKey = null, type = null, defaultValue = null } = options;
+    const { persistKey = null, type = null, defaultValue = null, client = null } = options;
 
     try {
         if (persistKey) {
@@ -197,14 +220,14 @@ export async function loadPersistedResource(request, options = {}) {
             if (dataPair && dataPair[1]) {
                 console.log(`[loadPersistedResource] Found persisted data for key: ${persistKey}`);
 
-                // Use `restoreStorefrontInstance` to process the data
-                return restoreStorefrontInstance(dataPair[1], type) || defaultValue;
+                // Use `restoreSdkInstance` to process the data
+                return restoreSdkInstance(dataPair[1], type) || defaultValue;
             }
         }
 
         // Fetch data from the request function if not found in storage
         console.log(`[loadPersistedResource] Fetching data from request for key: ${persistKey}`);
-        const fetchedData = await request(storefrontInstance);
+        const fetchedData = await request(client ?? storefrontInstance);
 
         // Optional: Save fetched data to storage for future use
         if (persistKey && fetchedData) {
@@ -215,7 +238,7 @@ export async function loadPersistedResource(request, options = {}) {
             }
         }
 
-        return restoreStorefrontInstance(fetchedData, type) || defaultValue;
+        return restoreSdkInstance(fetchedData, type) || defaultValue;
     } catch (error) {
         console.error('[loadPersistedResource] Error loading resource:', error);
         return defaultValue; // Ensure a fallback value

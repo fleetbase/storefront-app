@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Collection } from '@fleetbase/sdk';
 import { lookup } from '@fleetbase/storefront';
-import useStorefront from './use-storefront';
+import useFleetbase from './use-fleetbase';
 import useStorage from './use-storage';
 import { isObject, isArray, isResource, restoreSdkInstance } from '../utils';
 
-const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
+const useFleetbaseData = (sdkMethod, onDataLoaded, options = {}) => {
     const { persistKey, defaultValue = null, dependencies = [], restoreType = null, client = null } = isObject(onDataLoaded) ? onDataLoaded : options;
-    const { storefront } = useStorefront();
+    const { fleetbase } = useFleetbase();
 
     // Use either useState or useStorage depending on whether persistKey is provided
     const [data, setData] = persistKey ? useStorage(persistKey, defaultValue) : useState(defaultValue);
@@ -15,12 +15,12 @@ const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!storefront || typeof sdkMethod !== 'function') return;
+        if (!fleetbase || typeof sdkMethod !== 'function') return;
 
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await sdkMethod(client ? client : storefront);
+                const result = await sdkMethod(client ? client : fleetbase);
                 setData(result);
                 if (typeof onDataLoaded === 'function') {
                     onDataLoaded(result);
@@ -39,4 +39,4 @@ const useStorefrontData = (sdkMethod, onDataLoaded, options = {}) => {
     return { data: persistKey ? restoreSdkInstance(data, restoreType) : data, error, loading };
 };
 
-export default useStorefrontData;
+export default useFleetbaseData;
