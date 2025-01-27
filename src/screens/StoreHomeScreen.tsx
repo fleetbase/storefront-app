@@ -92,7 +92,7 @@ const StoreHome = ({ route }) => {
                             </YStack>
                         )}
                         {categoriesDisplay === 'pills' && (
-                            <YStack py='$3'>
+                            <YStack pt='$4' pb='$2'>
                                 <StoreCategoriesPills
                                     categories={categories || []}
                                     onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}

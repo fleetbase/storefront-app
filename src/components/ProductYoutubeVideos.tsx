@@ -83,7 +83,17 @@ const ProductYoutubeVideos = ({ product }) => {
         );
     };
 
-    return <FlatList data={urls} keyExtractor={(item, index) => index} renderItem={renderItem} numColumns={2} columnWrapperStyle={styles.row} contentContainerStyle={styles.listContainer} />;
+    return (
+        <FlatList
+            data={urls}
+            keyExtractor={(item, index) => index}
+            renderItem={renderItem}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.listContainer}
+            nestedScrollEnabled={true}
+        />
+    );
 };
 
 export default ProductYoutubeVideos;

@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { formatCurrency } from '../utils/format';
 import { productHasOptions } from '../utils/product';
+import { storefrontConfig } from '../utils';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import QuantityButton from './QuantityButton';
 import ImageSlider from './ImageSlider';
@@ -20,6 +21,29 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
     const [cardWidth, setCardWidth] = useState(0);
     const [cart, updateCart] = useCart();
     const [quantity, setQuantity] = useState(1);
+    const productCardStyle = storefrontConfig('productCardStyle', 'bordered');
+    let cardBorderWidth = 1;
+    let cardBorderColor = '$borderColorWithShadow';
+    let cardFooterBg = '$background';
+    let cardFooterPx = '$2';
+    let cardFooterPy = '$2';
+    let additionalSliderStyles = {};
+
+    if (productCardStyle === 'outlined') {
+        cardBorderWidth = 6;
+        cardFooterPx = 0;
+        cardBorderColor = '$surface';
+        cardFooterBg = '$surface';
+    }
+
+    if (productCardStyle === 'visio') {
+        cardBorderWidth = 0;
+        cardFooterPx = 0;
+        additionalSliderStyles = {
+            borderBottomLeftRadius: 8,
+            borderBottomRightRadius: 8,
+        };
+    }
 
     const handlePress = () => {
         if (isLoading('addToCart')) {
@@ -62,22 +86,22 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                     setCardWidth((prevWidth) => (prevWidth !== width ? width : prevWidth));
                 }}
             >
-                <Card bordered borderWidth={1} borderColor='$borderColorWithShadow'>
+                <Card bordered borderWidth={cardBorderWidth} borderColor={cardBorderColor} borderRadius={12}>
                     <Card.Header padding={0}>
                         <YStack position='relative'>
                             <ImageSlider
                                 images={product.getAttribute('images')}
                                 sliderWidth={cardWidth}
                                 sliderHeight={sliderHeight}
-                                sliderStyle={{ borderTopRightRadius: 8, borderTopLeftRadius: 8 }}
+                                sliderStyle={{ borderTopRightRadius: 8, borderTopLeftRadius: 8, ...additionalSliderStyles }}
                                 onImagePress={handlePress}
                                 autoplay
                             />
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
                         </YStack>
                     </Card.Header>
-                    <Card.Footer overflow='hidden'>
-                        <YStack flex={1} space='$2' padding='$2'>
+                    <Card.Footer bg={cardFooterBg} overflow='hidden'>
+                        <YStack flex={1} space='$2' px={cardFooterPx} py={cardFooterPy}>
                             <YStack minHeight={90}>
                                 <YStack>
                                     <Text color='$color' fontWeight='bold' fontSize='$7' numberOfLines={1}>

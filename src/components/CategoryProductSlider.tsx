@@ -42,7 +42,7 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
                     {isLoadingProducts && <Spinner size='sm' color='$color' />}
                 </XStack>
             </XStack>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
                 <XStack space='$4' paddingVertical='$1' paddingHorizontal='$4' minHeight={330}>
                     {products.map((product, index) => (
                         <ProductCard key={index} product={product} sliderHeight={135} style={{ width: 190 }} />

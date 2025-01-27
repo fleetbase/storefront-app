@@ -100,8 +100,8 @@ const ProductScreen = ({ route = {} }) => {
             </YStack>
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
                 <YStack space='$3'>
-                    <YStack borderBottomWidth={1} borderColor='$borderColor' paddingVertical='$4'>
-                        <XStack space='$2' paddingHorizontal='$4' mb='$1'>
+                    <YStack borderBottomWidth={1} borderColor='$borderColor' py='$4'>
+                        <XStack space='$2' px='$4' mb='$1'>
                             <Text fontSize='$9' fontWeight='bold' color='$color'>
                                 {product.getAttribute('name')}
                             </Text>
@@ -111,21 +111,25 @@ const ProductScreen = ({ route = {} }) => {
                                 </Text>
                             )}
                         </XStack>
-                        <XStack paddingHorizontal='$4' alignItems='center' justifyContent='space-between'>
+                        <XStack px='$4' alignItems='center' justifyContent='space-between'>
                             <Text fontSize='$6' fontWeight='bold' color='$green8'>
                                 {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                             </Text>
                         </XStack>
                         {product.isAttributeFilled('description') && (
-                            <XStack paddingHorizontal='$4' alignItems='center' justifyContent='space-between'>
+                            <XStack mt='$2' px='$4' alignItems='center' justifyContent='space-between'>
                                 <Paragraph fontSize='$6' color='$color'>
                                     {product.getAttribute('description')}
                                 </Paragraph>
                             </XStack>
                         )}
                     </YStack>
-                    {youtubeUrls.length > 0 && <ProductYoutubeVideos product={product} />}
-                    <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} wrapperProps={{ space: '$4' }} />
+                    {youtubeUrls.length > 0 && (
+                        <YStack borderBottomWidth={1} borderColor='$borderColor' py='$1'>
+                            <ProductYoutubeVideos product={product} />
+                        </YStack>
+                    )}
+                    <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} />
                 </YStack>
             </ScrollView>
             <XStack position='absolute' paddingHorizontal='$4' paddingTop='$2' paddingBottom='$8' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>

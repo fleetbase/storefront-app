@@ -14,6 +14,7 @@ import {
     isVariantSelected,
     getSelectedVariantId,
 } from '../utils/product';
+import Spacer from './Spacer';
 
 const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, defaultSelectedAddons = null, defaultSelectedVariants = null, wrapperProps = {} }) => {
     const theme = useTheme();
@@ -45,9 +46,9 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
     }, [selectedAddons]);
 
     return (
-        <YStack {...wrapperProps}>
+        <YStack space='$5' {...wrapperProps}>
             {product.variants().length > 0 && (
-                <YStack paddingHorizontal='$4'>
+                <YStack space='$5' px='$4'>
                     {product.variants().map((variation, i) => (
                         <YStack key={i}>
                             <XStack space='$1'>
@@ -95,7 +96,7 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
                 </YStack>
             )}
             {product.addons().length > 0 && (
-                <YStack paddingHorizontal='$4'>
+                <YStack space='$5' px='$4'>
                     {product.addons().map((addonCategory, i) => (
                         <YStack key={i}>
                             <XStack space='$1'>
@@ -103,7 +104,7 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
                                     {addonCategory.name}
                                 </Text>
                             </XStack>
-                            <XStack mt='$1' mb='$2'>
+                            <XStack mt='$1' mb='$3'>
                                 <Text fontSize='$4' color='$color'>
                                     Choose up to 4 items
                                 </Text>
@@ -152,6 +153,7 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
                     ))}
                 </YStack>
             )}
+            <Spacer height={200} />
         </YStack>
     );
 };

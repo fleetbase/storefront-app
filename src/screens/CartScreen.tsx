@@ -168,7 +168,7 @@ const CartScreen = () => {
                 ]}
             >
                 <Swipeable renderRightActions={() => renderRightActions(cartItem)}>
-                    <YStack flex={1} bg='$background' padding='$4' minHeight={100} maxHeight={125}>
+                    <YStack flex={1} bg='$background' padding='$4' height={125} minHeight={100} maxHeight={350}>
                         <XStack space='$3' justifyContent='space-between'>
                             <XStack flex={1}>
                                 <Pressable onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
