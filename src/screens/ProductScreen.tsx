@@ -12,6 +12,8 @@ import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } fro
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
 import ProductYoutubeVideos from '../components/ProductYoutubeVideos';
+import ContainerDimensions from '../components/ContainerDimensions';
+import ImageSlider from '../components/ImageSlider';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
@@ -64,22 +66,21 @@ const ProductScreen = ({ route = {} }) => {
         }
     };
 
-    console.log('youtubes', product.getAttribute('youtube_urls', []));
-
     return (
         <YStack flex={1} bg='$background'>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
-                <FastImage
-                    source={{ uri: product.getAttribute('primary_image_url') }}
-                    style={{
-                        height: '100%',
-                        width: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                    }}
-                />
-                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} padding='$4' zIndex={1}>
+                <ContainerDimensions>
+                    {(width, height) => (
+                        <ImageSlider
+                            images={product.getAttribute('images')}
+                            sliderWidth={width}
+                            sliderHeight={height}
+                            sliderStyle={{ borderTopRightRadius: 8, borderTopLeftRadius: 8 }}
+                            autoplay
+                        />
+                    )}
+                </ContainerDimensions>
+                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} py='$2' px='$2' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faTimes} />
@@ -98,7 +99,7 @@ const ProductScreen = ({ route = {} }) => {
                     }}
                 />
             </YStack>
-            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled' nestedScrollEnabled={true} scrollEventThrottle={16}>
                 <YStack space='$3'>
                     <YStack borderBottomWidth={1} borderColor='$borderColor' py='$4'>
                         <XStack space='$2' px='$4' mb='$1'>
@@ -124,6 +125,7 @@ const ProductScreen = ({ route = {} }) => {
                             </XStack>
                         )}
                     </YStack>
+                    {console.log('youtubeUrls.length', youtubeUrls.length, youtubeUrls)}
                     {youtubeUrls.length > 0 && (
                         <YStack borderBottomWidth={1} borderColor='$borderColor' py='$1'>
                             <ProductYoutubeVideos product={product} />

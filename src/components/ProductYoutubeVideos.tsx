@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Pressable, StyleSheet, FlatList, Linking, Dimensions } from 'react-native';
 import { Text, YStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import FastImage from 'react-native-fast-image';
+import useStorage from '../hooks/use-storage';
 
 /**
  * Helper function to extract the YouTube video ID from various
@@ -13,16 +14,22 @@ import FastImage from 'react-native-fast-image';
 const getYoutubeVideoId = (url) => {
     let videoId = '';
 
-    // Match the standard watch URL
+    // Match the standard YouTube watch URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)
     const match = url.match(/[?&]v=([^&]+)/);
     if (match && match[1]) {
         videoId = match[1];
     }
 
-    // Match the short youtu.be URL
+    // Match the short YouTube URL (e.g., https://youtu.be/VIDEO_ID)
     const shortLinkMatch = url.match(/youtu\.be\/([^?]+)/);
     if (shortLinkMatch && shortLinkMatch[1]) {
         videoId = shortLinkMatch[1];
+    }
+
+    // Match YouTube Shorts URL (e.g., https://www.youtube.com/shorts/VIDEO_ID)
+    const shortsMatch = url.match(/youtube\.com\/shorts\/([^?]+)/);
+    if (shortsMatch && shortsMatch[1]) {
+        videoId = shortsMatch[1];
     }
 
     return videoId;
@@ -50,11 +57,38 @@ const openYoutubeVideo = async (videoId) => {
     }
 };
 
+const fetchYoutubeVideoTitle = async (videoId, fallback = null) => {
+    try {
+        const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+        const data = await response.json();
+        return data.title || fallback;
+    } catch (error) {
+        console.warn('Error fetching video title:', error);
+        return fallback;
+    }
+};
+
 const ProductYoutubeVideos = ({ product }) => {
     const theme = useTheme();
     const urls = product.getAttribute('youtube_urls', []);
     const screenWidth = Dimensions.get('window').width;
     const videoContainerWidth = screenWidth / 2;
+    const [videoTitles, setVideoTitles] = useStorage(`${product.id}_youtube_titles`, {});
+
+    useEffect(() => {
+        const loadTitles = async () => {
+            const titles = {};
+            for (const url of urls) {
+                const videoId = getYoutubeVideoId(url);
+                if (videoId) {
+                    titles[videoId] = await fetchYoutubeVideoTitle(videoId);
+                }
+            }
+            setVideoTitles(titles);
+        };
+
+        loadTitles();
+    }, [urls]);
 
     /**
      * Renders each item in the grid.
@@ -65,6 +99,7 @@ const ProductYoutubeVideos = ({ product }) => {
 
         // YouTube thumbnail URL format
         const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        const videoTitle = videoTitles[videoId];
 
         return (
             <Pressable style={{ width: videoContainerWidth }} onPress={() => openYoutubeVideo(videoId)}>
@@ -76,7 +111,7 @@ const ProductYoutubeVideos = ({ product }) => {
                         </YStack>
                     </YStack>
                     <Text color='$textPrimary' style={styles.title}>
-                        Video #{index + 1}
+                        {videoTitle ? videoTitle : `Video #{${index + 1}}`}
                     </Text>
                 </YStack>
             </Pressable>
@@ -92,6 +127,7 @@ const ProductYoutubeVideos = ({ product }) => {
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.listContainer}
             nestedScrollEnabled={true}
+            scrollEnabled={false}
         />
     );
 };

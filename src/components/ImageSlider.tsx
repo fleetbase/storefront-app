@@ -60,6 +60,7 @@ const ImageSlider = ({
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 style={[{ height: sliderHeight }, sliderStyle]}
+                nestedScrollEnabled={true}
             >
                 {images.map((image, index) => (
                     <Pressable key={index} activeOpacity={0.8} onPress={() => handleImagePress(index)}>
