@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, FlatList, Pressable } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
-import { Separator, Text, XStack, YStack, useTheme } from 'tamagui';
+import { Spinner, Separator, Text, XStack, YStack, useTheme } from 'tamagui';
+import { Portal } from '@gorhom/portal';
 import { format as formatDate } from 'date-fns';
 import { formatCurrency } from '../utils/format';
 import { restoreFleetbaseInstance } from '../utils';
@@ -11,6 +13,7 @@ import { Order } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
+import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import useStorage from '../hooks/use-storage';
 import Badge from '../components/Badge';
 
@@ -22,12 +25,13 @@ const OrderHistoryScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { customer } = useAuth();
+    const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [orders, setOrders] = useStorage(`${customer.id}_orders`, []);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchOrders = async (params = {}) => {
         try {
-            const orders = await customer.getOrderHistory({ sort: '-created_at', limit: 25, ...params });
+            const orders = await runWithLoading(customer.getOrderHistory({ sort: '-created_at', limit: 25, ...params }));
             setOrders(orders.map((order) => order.serialize()));
         } catch (err) {
             console.error('Error loading customer orders:', err);
@@ -51,8 +55,23 @@ const OrderHistoryScreen = () => {
         }
     }, [customer]);
 
+    useFocusEffect(
+        useCallback(() => {
+            if (customer) {
+                fetchOrders();
+            }
+        }, [customer])
+    );
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+            {isLoading() && !refreshing && (
+                <Portal hostName='LoadingIndicatorPortal'>
+                    <XStack>
+                        <Spinner size='sm' color='$color' />
+                    </XStack>
+                </Portal>
+            )}
             <FlatList
                 data={restoreOrders(orders)}
                 renderItem={({ item: order }) => (

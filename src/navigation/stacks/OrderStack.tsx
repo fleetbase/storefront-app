@@ -2,6 +2,7 @@ import OrderScreen from '../../screens/OrderScreen';
 import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
 import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
+import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -57,6 +58,9 @@ export const OrderHistory = {
             headerShadowVisible: false,
             headerLeft: () => {
                 return <BackButton onPress={() => navigation.goBack()} />;
+            },
+            headerRight: () => {
+                return <PortalHost name='LoadingIndicatorPortal' />;
             },
         };
     },

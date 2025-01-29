@@ -11,10 +11,12 @@ import { loadPersistedResource } from '../utils';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { adapter as storefrontAdapter } from '../hooks/use-storefront';
+import { useAuth } from '../contexts/AuthContext';
 import useStorage from '../hooks/use-storage';
 import PlaceCard from '../components/PlaceCard';
 import OrderItems from '../components/OrderItems';
 import OrderTotal from '../components/OrderTotal';
+import AlertPromptBox from '../components/AlertPromptBox';
 import Badge from '../components/Badge';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import FastImage from 'react-native-fast-image';
@@ -22,19 +24,33 @@ import FastImage from 'react-native-fast-image';
 const OrderScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
+    const { customer } = useAuth();
     const { info } = useStorefrontInfo();
     const { listen } = useSocketClusterClient();
     const [order, setOrder] = useState(new Order(params.order, fleetbaseAdapter));
-    const [distanceMatrix, setDistanceMatrix] = useState();
     const [store, setStore] = useStorage(`${order.getAttribute('meta.storefront_id')}`, info);
+    const [distanceMatrix, setDistanceMatrix] = useState();
+    const distanceLoadedRef = useRef(false);
     const isPickup = order.getAttribute('meta.is_pickup');
+    const isPickupReady = isPickup && order.getAttribute('status') === 'pickup_ready';
     const isEnroute = order.getAttribute('status') === 'driver_enroute';
     const listenerRef = useRef();
 
-    const getDistanceMatrix = useCallback(async () => {
+    const confirmOrderPickup = useCallback(async () => {
         try {
-            const distanceMatrix = await order.getDistanceAndTime();
-            setDistanceMatrix(distanceMatrix);
+            await customer.performAuthorizedRequest('orders/picked-up', { order: order.id }, 'PUT');
+            reloadOrder();
+        } catch (err) {
+            console.error('Error confirming order pickup:', err);
+        }
+    }, [order, customer]);
+
+    const getDistanceMatrix = useCallback(async () => {
+        if (distanceLoadedRef.current) return;
+        try {
+            const distanceMatrixData = await order.getDistanceAndTime();
+            setDistanceMatrix(distanceMatrixData);
+            distanceLoadedRef.current = true;
         } catch (err) {
             console.error('Error loading order distance matrix:', err);
         }
@@ -44,6 +60,7 @@ const OrderScreen = ({ route }) => {
         try {
             const reloadedOrder = await order.reload();
             setOrder(reloadedOrder);
+            distanceLoadedRef.current = false;
         } catch (err) {
             console.error('Error reloading order:', err);
         }
@@ -70,12 +87,10 @@ const OrderScreen = ({ route }) => {
     }, []);
 
     useEffect(() => {
-        if (!order) {
-            return;
+        if (order && !distanceLoadedRef.current) {
+            getDistanceMatrix();
         }
-
-        getDistanceMatrix();
-    }, [order]);
+    }, [order, getDistanceMatrix]);
 
     useEffect(() => {
         if (listenerRef.current) {
@@ -84,7 +99,10 @@ const OrderScreen = ({ route }) => {
 
         const listenForUpdates = async () => {
             const listener = await listen(`order.${order.id}`, (event) => {
-                reloadOrder();
+                // only reload order if status changed
+                if (order.getAttribute('status') !== event.data.status) {
+                    reloadOrder();
+                }
             });
             if (listener) {
                 listenerRef.current = listener;
@@ -123,6 +141,19 @@ const OrderScreen = ({ route }) => {
                                 </Text>
                             </YStack>
                         )}
+                        <AlertPromptBox
+                            show={isPickupReady}
+                            promptTitle='Your order is ready for pickup'
+                            prompt='Once collected please confirm your order has been picked up by pressing the confirm button below.'
+                            confirmTitle='Order Picked Up'
+                            confirmMessage='Has your order been collected and received by you?'
+                            confirmAlertButtonText='Yes'
+                            confirmButtonText='Confirm Pickup'
+                            confirmButtonText='Confirm Pickup'
+                            colorScheme='green'
+                            onConfirm={confirmOrderPickup}
+                            mt='$2'
+                        />
                     </YStack>
                     <YStack px='$4' py='$2'>
                         <XStack px='$4' py='$3' bg='$surface' borderRadius='$4' borderWidth={1} borderColor='$borderColorWithShadow'>
