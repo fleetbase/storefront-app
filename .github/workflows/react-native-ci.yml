@@ -165,6 +165,15 @@ jobs:
                       echo "❌ Simulator failed to boot within 60 seconds."
                       exit 1
                   fi
+
+            - name: Debug Available Xcode Destinations
+              run: xcodebuild -showsdks
+
+            - name: Debug Xcode Schemes
+              run: |
+                  cd ios
+                  xcodebuild -list
+
             - name: Build iOS app
               run: |
                   cd ios
@@ -172,17 +181,18 @@ jobs:
                     -scheme StorefrontApp \
                     -configuration Debug \
                     -sdk iphonesimulator \
-                    -derivedDataPath build
+                    -destination "platform=iOS Simulator,name=iPhone 15 Pro" \
+                    -derivedDataPath build \
+                    -allowProvisioningUpdates
 
             - name: Debug iOS Build Output
               run: |
-                  echo "📂 Listing iOS build output..."
-                  find ios/build -name "*.app" || echo "❌ No app build found!"
-
-            - name: Debug Xcode Schemes
-              run: |
-                  cd ios
-                  xcodebuild -list
+                  echo "📂 Checking iOS build output..."
+                  if [ -d "ios/build" ]; then
+                    find ios/build -name "*.app" || echo "❌ No app build found!"
+                  else
+                    echo "❌ Build folder does not exist!"
+                  fi
 
             - name: Run iOS app on simulator
               run: |
