@@ -12,6 +12,7 @@ import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
+import { wasAccessedFromCartModal, firstRouteName } from '../utils';
 
 const QPayCheckoutScreen = () => {
     const theme = useTheme();
@@ -21,7 +22,7 @@ const QPayCheckoutScreen = () => {
         onOrderComplete: (order) => {
             navigation.reset({
                 index: 1,
-                routes: [{ name: 'Cart' }, { name: 'Order', params: { order: order.serialize() } }],
+                routes: [{ name: firstRouteName(navigation) }, { name: 'Order', params: { order: order.serialize() } }],
             });
         },
     });

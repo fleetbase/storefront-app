@@ -55,7 +55,7 @@ const LocationPicker = ({
     const handleAddNewLocation = () => {
         setDropdownOpen(false);
         if (typeof onPressAddNewLocation === 'function') {
-            onPressAddNewLocation(navigation, { redirectTo: redirectToAfterAddLocation });
+            onPressAddNewLocation({ navigation, params: { redirectTo: redirectToAfterAddLocation } });
         } else {
             navigation.navigate('AddNewLocationScreen', { redirectTo: redirectToAfterAddLocation });
         }

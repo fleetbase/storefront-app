@@ -59,6 +59,10 @@ export function isArray(target) {
 }
 
 export function toArray(target, delimiter = ',') {
+    if (isArray(target)) {
+        return target;
+    }
+
     if (typeof target === 'string') {
         return target.split(delimiter);
     }
@@ -518,4 +522,44 @@ export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
     }
 
     return result;
+}
+
+export function hexToRGBA(hex, opacity = 1) {
+    if (!hex) return `rgba(0, 0, 0, ${opacity})`; // Default to black if no color is provided
+
+    // Remove `#` if it exists
+    hex = hex.replace(/^#/, '');
+
+    // Convert shorthand hex `#RGB` to full form `#RRGGBB`
+    if (hex.length === 3) {
+        hex = hex
+            .split('')
+            .map((char) => char + char)
+            .join('');
+    }
+
+    // Parse RGB values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
+export function firstRouteName(navigation, routeName) {
+    const state = navigation.getState();
+    const routes = state.routes || [];
+
+    return routes.length >= 0 ? routes[0].name : null;
+}
+
+export function routeWasAccessed(navigation, routeName) {
+    const state = navigation.getState();
+    const routes = state.routes || [];
+
+    return routes.some((route) => route.name === routeName);
+}
+
+export function wasAccessedFromCartModal(navigation) {
+    return routeWasAccessed(navigation, 'CartModal');
 }

@@ -4,18 +4,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from 'tamagui';
-import { getCartCount } from '../utils/cart';
-import { storefrontConfig, get } from '../utils';
+import { storefrontConfig, get, config, toArray } from '../utils';
+import { configCase } from '../utils/format';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
 import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
 import OrderStack, { OrderModal } from './stacks/OrderStack';
-import CartScreen from '../screens/CartScreen';
-import CartItemScreen from '../screens/CartItemScreen';
+import CartStack from './stacks/CartStack';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
 import PhoneLoginScreen from '../screens/PhoneLoginScreen';
@@ -28,11 +27,23 @@ import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
 import OrderScreen from '../screens/OrderScreen';
 import OrderHistoryScreen from '../screens/OrderHistoryScreen';
 import ProductScreen from '../screens/ProductScreen';
-import LocationPicker from '../components/LocationPicker';
+import FoodTruckScreen from '../screens/FoodTruckScreen';
+import CatalogScreen from '../screens/CatalogScreen';
 import BackButton from '../components/BackButton';
+import CartButton from '../components/CartButton';
+import LocationPicker from '../components/LocationPicker';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
+
+const importedIconsMap = {
+    faHome,
+    faMagnifyingGlass,
+    faMap,
+    faShoppingCart,
+    faUser,
+    faTruck,
+};
 
 function getTabConfig(name, key, defaultValue = null) {
     const tabs = storefrontConfig('tabs');
@@ -45,24 +56,24 @@ function getTabConfig(name, key, defaultValue = null) {
 }
 
 function createTabScreens() {
-    const tabs = storefrontConfig('tabs');
+    const tabs = toArray(storefrontConfig('storeNavigator.tabs'));
     const screens = {
         StoreHomeTab: {
             screen: StoreHomeTab,
             options: {
-                tabBarLabel: getTabConfig('StoreHomeTab', 'label', 'Home'),
+                tabBarLabel: config('STORE_HOME_TAB_LABEL', 'Home'),
             },
         },
         StoreSearchTab: {
             screen: StoreSearchTab,
             options: {
-                tabBarLabel: getTabConfig('StoreSearchTab', 'label', 'Search'),
+                tabBarLabel: config('STORE_SEARCH_TAB_LABEL', 'Search'),
             },
         },
         StoreMapTab: {
             screen: StoreMapTab,
             options: {
-                tabBarLabel: getTabConfig('StoreMapTab', 'label', 'Map'),
+                tabBarLabel: config('STORE_MAP_TAB_LABEL', 'Map'),
             },
         },
         StoreCartTab: {
@@ -71,7 +82,7 @@ function createTabScreens() {
                 const [cart] = useCart();
                 const count = cart ? cart.contents().length : 0;
                 return {
-                    tabBarLabel: getTabConfig('StoreCartTab', 'label', 'Cart'),
+                    tabBarLabel: config('STORE_CART_TAB_LABEL', 'Cart'),
                     tabBarBadge: count,
                     tabBarBadgeStyle: {
                         marginRight: -5,
@@ -83,7 +94,13 @@ function createTabScreens() {
         StoreProfileTab: {
             screen: StoreProfileTab,
             options: {
-                tabBarLabel: getTabConfig('StoreProfileTab', 'label', 'Profile'),
+                tabBarLabel: config('STORE_PROFILE_TAB_LABEL', 'Profile'),
+            },
+        },
+        StoreFoodTruckTab: {
+            screen: StoreFoodTruckTab,
+            options: {
+                tabBarLabel: config('STORE_FOOD_TRUCK_TAB_LABEL', 'Trucks'),
             },
         },
     };
@@ -92,7 +109,7 @@ function createTabScreens() {
     for (let i = 0; i < tabs.length; i++) {
         const tab = tabs[i];
         if (tab) {
-            screenTabs[tab.name] = screens[tab.name];
+            screenTabs[tab] = screens[tab];
         }
     }
 
@@ -100,6 +117,12 @@ function createTabScreens() {
 }
 
 function getDefaultTabIcon(routeName) {
+    // Check if able to load from config/env setting first
+    const routeIconConfig = config(`${configCase(routeName)}_ICON`);
+    if (routeIconConfig && importedIconsMap[routeIconConfig]) {
+        return importedIconsMap[routeIconConfig];
+    }
+
     let icon;
     switch (routeName) {
         case 'StoreHomeTab':
@@ -117,6 +140,9 @@ function getDefaultTabIcon(routeName) {
         case 'StoreProfileTab':
             icon = faUser;
             break;
+        case 'StoreFoodTruckTab':
+            icon = faTruck;
+            break;
     }
 
     return icon;
@@ -132,6 +158,44 @@ const ModalScreens = {
     },
     OrderModal,
 };
+
+const StoreFoodTruckTab = createNativeStackNavigator({
+    initialRouteName: 'FoodTruckHome',
+    screens: {
+        FoodTruckHome: {
+            screen: FoodTruckScreen,
+            options: {
+                title: '',
+                headerTransparent: true,
+                headerShadowVisible: false,
+                gestureEnabled: false,
+                headerLeft: () => (
+                    <LocationPicker onPressAddNewLocation={({ navigation, params }) => navigation.navigate('AddNewLocation', params)} redirectToAfterAddLocation={'FoodTruckHome'} />
+                ),
+                headerRight: () => <CartButton onPress={({ navigation }) => navigation.navigate('CartModal')} />,
+            },
+        },
+        Catalog: {
+            screen: CatalogScreen,
+            options: {
+                presentation: 'modal',
+                headerShown: false,
+            },
+        },
+        Product: {
+            screen: ProductScreen,
+            options: {
+                presentation: 'modal',
+                headerShown: false,
+            },
+        },
+        ...CartStack,
+        ...CheckoutStack,
+        ...LocationStack,
+        ...OrderStack,
+        ...ModalScreens,
+    },
+});
 
 const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
@@ -175,19 +239,7 @@ const StoreMapTab = createNativeStackNavigator({
 const StoreCartTab = createNativeStackNavigator({
     initialRouteName: 'Cart',
     screens: {
-        Cart: {
-            screen: CartScreen,
-            options: {
-                headerShown: false,
-            },
-        },
-        CartItem: {
-            screen: CartItemScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
-            },
-        },
+        ...CartStack,
         ...OrderStack,
         ...CheckoutStack,
         ...ModalScreens,
@@ -278,7 +330,7 @@ const StoreProfileTab = createNativeStackNavigator({
 });
 
 const StoreNavigator = createBottomTabNavigator({
-    initialRouteName: 'StoreHomeTab',
+    // initialRouteName: storefrontConfig('storeNavigator.defaultTab', 'StoreHomeTab'),
     layout: StoreLayout,
     screenOptions: ({ route, navigation }) => {
         const theme = useTheme();
@@ -295,7 +347,7 @@ const StoreNavigator = createBottomTabNavigator({
                 borderTopColor: isDarkMode ? theme.borderColor.val : theme['$gray-600'].val,
             },
             tabBarIcon: ({ focused }) => {
-                const icon = getTabConfig(route.name, 'icon', getDefaultTabIcon(route.name));
+                const icon = getDefaultTabIcon(route.name);
 
                 return <FontAwesomeIcon icon={icon} size={20} color={focused ? theme.primary.val : theme.secondary.val} />;
             },

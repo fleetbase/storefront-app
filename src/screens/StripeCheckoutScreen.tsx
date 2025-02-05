@@ -12,7 +12,7 @@ import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
 import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
-import { storefrontConfig } from '../utils';
+import { storefrontConfig, firstRouteName } from '../utils';
 
 const StripeCheckoutScreen = () => {
     const theme = useTheme();
@@ -24,10 +24,10 @@ const StripeCheckoutScreen = () => {
         handleCompleteOrder((order) => {
             navigation.reset({
                 index: 1,
-                routes: [{ name: 'Cart' }, { name: 'Order', params: { order: order.serialize() } }],
+                routes: [{ name: firstRouteName(navigation) }, { name: 'Order', params: { order: order.serialize() } }],
             });
         });
-    }, [handleCompleteOrder]);
+    }, [handleCompleteOrder, navigation]);
 
     return (
         <YStack bg='$background'>

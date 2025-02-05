@@ -218,6 +218,10 @@ export function numbersOnly(input, castInt = true) {
     return castInt ? parseInt(numbers) : numbers;
 }
 
+export function configCase(str) {
+    return uppercase(titleize(str)).replace(/\s+/g, '_');
+}
+
 export function titleize(str, separator = ' ') {
     if (!str) {
         return str;

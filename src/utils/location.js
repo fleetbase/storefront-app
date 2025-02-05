@@ -345,7 +345,7 @@ export function getCoordinates(target, options = {}) {
         return [fallbackLatitude, fallbackLongitude];
     }
 
-    if (isResource(target, 'place')) {
+    if (isResource(target, 'place') || isResource(target, 'driver') || isResource(target, 'vehicle') || isResource(target, 'food-truck')) {
         const [longitude, latitude] = target.getAttribute('location').coordinates;
         return [latitude, longitude];
     }
@@ -957,4 +957,90 @@ export function createFauxStoreLocation() {
 
 export function createFauxPlace() {
     return new Place({ location: new Point(DEFAULT_LATITUDE, DEFAULT_LONGITUDE) });
+}
+
+/**
+ * Determines if a given point is inside a GeoJSON polygon.
+ *
+ * @param {number[]} point - The point as [latitude, longitude].
+ * @param {Object} polygon - A GeoJSON polygon object.
+ * @returns {boolean} - True if the point is inside the polygon, false otherwise.
+ *
+ * GeoJSON polygon format:
+ * {
+ *   "type": "Polygon",
+ *   "coordinates": [
+ *     [ [lon, lat], [lon, lat], ... ],       // Outer ring
+ *     [ [lon, lat], [lon, lat], ... ],       // (Optional) Hole(s)
+ *     ...
+ *   ]
+ * }
+ */
+export function isPointInGeoJSONPolygon(point, polygon) {
+    if (!polygon || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates)) {
+        throw new Error('Invalid GeoJSON polygon');
+    }
+
+    // Convert the provided point from [lat, lon] to [lon, lat] to match GeoJSON.
+    const testPoint = [point[1], point[0]];
+
+    // Get the outer ring (first coordinate array).
+    const outerRing = polygon.coordinates[0];
+    if (!Array.isArray(outerRing) || outerRing.length === 0) {
+        return false;
+    }
+
+    // Check if the point is inside the outer ring.
+    if (!rayCastPointInRing(testPoint, outerRing)) {
+        return false;
+    }
+
+    // If there are inner rings (holes), ensure the point is not inside any of them.
+    for (let i = 1; i < polygon.coordinates.length; i++) {
+        const hole = polygon.coordinates[i];
+        if (rayCastPointInRing(testPoint, hole)) {
+            // The point is inside a hole – so it's not considered inside the polygon.
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Uses the ray-casting algorithm to determine if a point is inside a ring.
+ *
+ * @param {number[]} point - The point as [lon, lat].
+ * @param {number[][]} ring - An array of positions forming a closed ring.
+ * @returns {boolean} - True if the point is inside the ring, false otherwise.
+ */
+export function rayCastPointInRing(point, ring) {
+    let inside = false;
+    // Loop through each edge of the ring.
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0],
+            yi = ring[i][1];
+        const xj = ring[j][0],
+            yj = ring[j][1];
+
+        // Check if the ray from the point to the right intersects with the edge.
+        const intersect = yi > point[1] !== yj > point[1] && point[0] < ((xj - xi) * (point[1] - yi)) / (yj - yi) + xi;
+
+        if (intersect) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
+/**
+ * Wraps a coordinate's longitude to the range [-180, 180].
+ *
+ * @param {number[]} coord - An array [latitude, longitude].
+ * @returns {number[]} A new coordinate array with a wrapped longitude.
+ */
+export function leafletWrapCoordinate(coord) {
+    const [lat, lng] = coord;
+    const wrappedLng = ((((lng + 180) % 360) + 360) % 360) - 180;
+    return [lat, wrappedLng];
 }

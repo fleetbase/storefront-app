@@ -1937,24 +1937,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fleetbase/sdk@npm:^1.2.11":
-  version: 1.2.11
-  resolution: "@fleetbase/sdk@npm:1.2.11"
+"@fleetbase/sdk@npm:^1.2.13":
+  version: 1.2.13
+  resolution: "@fleetbase/sdk@npm:1.2.13"
   dependencies:
     "@babel/runtime": ^7.26.0
     axios: ^1.7.0
-  checksum: b47881f4c9ac1d165ce173e64f5a5775996640c52b65d82509ba7d9b1f48d8da14bc4ee5c0c17a851721f9561738cd1a1a090e144226f0fa116b270e13eb7c49
+  checksum: 1c6a278ba479950291faa8dbab60406be2d5b6acf7250741305481d32b404b7afc1bdf8eeaa4fa577f0ee20d727056893807ae2ce1d7e1d206419f566a82b10e
   languageName: node
   linkType: hard
 
-"@fleetbase/storefront@npm:^1.1.12":
-  version: 1.1.12
-  resolution: "@fleetbase/storefront@npm:1.1.12"
+"@fleetbase/storefront@npm:^1.1.13":
+  version: 1.1.13
+  resolution: "@fleetbase/storefront@npm:1.1.13"
   dependencies:
-    "@fleetbase/sdk": ^1.2.11
+    "@fleetbase/sdk": ^1.2.13
     countries-list: ^3.1.1
     date-fns: ^4.1.0
-  checksum: 297542cea74789fba75a5a90d569188c7e6cdfd5ba6775f8cbda4638c4d53dd4e87fd3d020360c454e778996b7cc471f28fae681b0460b7993cc40755855dd2e
+  checksum: 0c7543ef7aa9b3dd8256e8af3c4b8ec65988d4f2a34c1b45a12043d90ec27c0d058013642dc357e86c9b73f5773811619bf2ee7f60c99a3288d448bc2637167c
   languageName: node
   linkType: hard
 
@@ -14895,8 +14895,8 @@ __metadata:
     "@babel/preset-react": ^7.25.9
     "@babel/runtime": ^7.25.0
     "@backpackapp-io/react-native-toast": ^0.12.1
-    "@fleetbase/sdk": ^1.2.11
-    "@fleetbase/storefront": ^1.1.12
+    "@fleetbase/sdk": ^1.2.13
+    "@fleetbase/storefront": ^1.1.13
     "@fortawesome/fontawesome-svg-core": ^6.5.1
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1

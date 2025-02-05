@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
@@ -16,22 +17,25 @@ import ContainerDimensions from '../components/ContainerDimensions';
 import ImageSlider from '../components/ImageSlider';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
+import useStorefront from '../hooks/use-storefront';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import FastImage from 'react-native-fast-image';
 
 const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
-    const product = restoreSdkInstance(route.params.product, 'product');
+    const product = new Product(route.params.product, storefrontAdapter);
     const isService = product.getAttribute('is_service') === true;
-    const youtubeUrls = product.getAttribute('youtube_urls', []);
+    const youtubeUrls = product.getAttribute('youtube_urls', []).filter(Boolean);
     const [selectedAddons, setSelectedAddons] = useState({});
     const [selectedVariants, setSelectedVariants] = useState({});
     const [subtotal, setSubtotal] = useState(calculateProductSubtotal(product, selectedVariants, selectedAddons));
     const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
     const [ready, setReady] = useState(false);
+    const storeLocationId = route.params.storeLocationId ?? null;
 
     useEffect(() => {
         setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
@@ -57,7 +61,7 @@ const ProductScreen = ({ route = {} }) => {
         const variants = getSelectedVariants(selectedVariants);
 
         try {
-            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants }), 'addToCart');
+            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }), 'addToCart');
             updateCart(updatedCart);
             toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
             navigation.goBack();
@@ -125,7 +129,6 @@ const ProductScreen = ({ route = {} }) => {
                             </XStack>
                         )}
                     </YStack>
-                    {console.log('youtubeUrls.length', youtubeUrls.length, youtubeUrls)}
                     {youtubeUrls.length > 0 && (
                         <YStack borderBottomWidth={1} borderColor='$borderColor' py='$1'>
                             <ProductYoutubeVideos product={product} />

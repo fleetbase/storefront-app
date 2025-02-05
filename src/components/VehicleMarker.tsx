@@ -3,8 +3,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import TrackingMarker from './TrackingMarker';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useEventBuffer from '../hooks/use-event-buffer';
+import { getCoordinates } from '../utils/location';
 
-const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, ...props }) => {
+const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement, ...props }) => {
     const markerRef = useRef();
     const listenerRef = useRef();
     const handleEvent = useCallback((data) => {
@@ -46,7 +47,7 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
     useFocusEffect(
         useCallback(() => {
             const trackDriverMovement = async () => {
-                const listener = await listen(`driver.${driver.id}`, (event) => addEvent(event));
+                const listener = await listen(`vehicle.${vehicle.id}`, (event) => addEvent(event));
                 if (listener) {
                     listenerRef.current = listener;
                 }
@@ -60,18 +61,12 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
                 }
                 clearEvents();
             };
-        }, [listen, driver.id])
+        }, [listen, vehicle.id])
     );
 
-    return (
-        <TrackingMarker
-            ref={markerRef}
-            coordinate={{ latitude: driver.latitude, longitude: driver.longitude }}
-            imageSource={{ uri: driver.getAttribute('avatar_url') }}
-            size={{ width: 50, height: 50 }}
-            {...props}
-        />
-    );
+    const [latitude, longitude] = getCoordinates(vehicle);
+    console.log(`${vehicle.id} coordinates: ${latitude} ${longitude}`);
+    return <TrackingMarker ref={markerRef} coordinate={{ latitude, longitude }} imageSource={{ uri: vehicle.getAttribute('avatar_url') }} size={{ width: 50, height: 50 }} {...props} />;
 };
 
-export default DriverMarker;
+export default VehicleMarker;

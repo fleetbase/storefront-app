@@ -1,8 +1,14 @@
 import { mergeConfigs, config, toBoolean } from '../src/utils/config';
+import { toArray } from '../src/utils';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export const DefaultConfig = {
     theme: config('APP_THEME', 'blue'),
+    storeNavigator: {
+        tabs: toArray(config('STORE_NAVIGATOR_TABS', 'StoreHomeTab,StoreSearchTab,StoreMapTab,StoreCartTab,StoreProfileTab')), // Additional tabs: StoreFoodTruckTab,
+        defaultTab: toArray(config('STORE_NAVIGATOR_DEFAULT_TAB', 'StoreHomeTab')),
+    },
+    defaultServiceArea: config('DEFAULT_SERVICE_AREA'),
     defaultLocale: config('DEFAULT_LOCALE', 'en'),
     paymentGateway: config('PAYMENT_GATEWAY', 'stripe'),
     incrementTipBy: config('TIP_INCREMENT', 50),
@@ -27,33 +33,6 @@ export const DefaultConfig = {
             padding: '$4',
         },
     },
-    tabs: [
-        {
-            name: 'StoreHomeTab',
-            icon: faHome,
-            label: 'Home',
-        },
-        {
-            name: 'StoreSearchTab',
-            icon: faMagnifyingGlass,
-            label: 'Search',
-        },
-        {
-            name: 'StoreMapTab',
-            icon: faMap,
-            label: 'Map',
-        },
-        {
-            name: 'StoreCartTab',
-            icon: faShoppingCart,
-            label: 'Cart',
-        },
-        {
-            name: 'StoreProfileTab',
-            icon: faUser,
-            label: 'Profile',
-        },
-    ],
 };
 
 export function createStorefrontConfig(userConfig = {}) {

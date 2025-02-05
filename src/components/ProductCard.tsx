@@ -14,7 +14,7 @@ import useCart from '../hooks/use-cart';
 
 const { width } = Dimensions.get('window');
 
-const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, carouselStyle = {}, buttonStyle = {}, quantityButtonStyle = {}, sliderHeight = 175 }) => {
+const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, carouselStyle = {}, buttonStyle = {}, quantityButtonStyle = {}, sliderHeight = 175, storeLocationId }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
@@ -59,11 +59,11 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
         }
 
         if (productHasOptions(product)) {
-            return navigation.navigate('Product', { product: product.serialize(), quantity });
+            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId });
         }
 
         try {
-            const updatedCart = await runWithLoading(cart.add(product.id, quantity), 'addToCart');
+            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { store_location: storeLocationId }), 'addToCart');
             updateCart(updatedCart);
             setQuantity(1);
             toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
@@ -100,7 +100,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
                         </YStack>
                     </Card.Header>
-                    <Card.Footer bg={cardFooterBg} overflow='hidden'>
+                    <Card.Footer bg={cardFooterBg} borderRadius={12} overflow='hidden'>
                         <YStack flex={1} space='$2' px={cardFooterPx} py={cardFooterPy}>
                             <YStack minHeight={90}>
                                 <YStack>

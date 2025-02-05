@@ -49,7 +49,7 @@ const StoreHome = ({ route }) => {
                         transform: [{ translateY: headerTranslateY }],
                     }}
                 >
-                    <LocationPicker onPressAddNewLocation={(_navigation, params = {}) => navigation.navigate('AddNewLocation', params)} />
+                    <LocationPicker onPressAddNewLocation={({ params }) => navigation.navigate('AddNewLocation', params)} />
                 </Animated.View>
             ),
         });

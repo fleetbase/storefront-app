@@ -3,7 +3,6 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, ImageBackground, StyleSheet } from 'react-native';
 import { Spinner, Stack, Text, YStack, useTheme, Button } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { titleize } from '../utils/format';
 import { storefrontConfig } from '../utils';
 import { PhoneLoginButton, AppleLoginButton, FacebookLoginButton, GoogleLoginButton } from '../components/Buttons';

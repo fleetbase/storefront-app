@@ -152,6 +152,7 @@ const lightBase = {
     error: colors.red[600],
     warning: colors.yellow[600],
     info: colors.blue[600],
+    ...flattenTailwindCssColorsObject(colors),
 };
 
 const darkBase = {
@@ -175,6 +176,7 @@ const darkBase = {
     error: colors.red[500],
     warning: colors.yellow[500],
     info: colors.blue[500],
+    ...flattenTailwindCssColorsObject(colors),
 };
 
 // Define Themes Using Light and Dark Bases

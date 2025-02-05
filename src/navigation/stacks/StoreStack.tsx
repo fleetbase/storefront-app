@@ -15,7 +15,7 @@ export const StoreHome = {
             headerTransparent: true,
             headerShadowVisible: false,
             gestureEnabled: false,
-            animation: 'none',
+            // animation: 'none',
             headerStyle: {
                 transform: [{ translateY: -15 }],
             },
