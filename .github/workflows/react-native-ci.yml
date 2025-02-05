@@ -168,6 +168,24 @@ jobs:
 
             - name: Run iOS app on simulator
               run: |
-                  SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | awk '{print $NF}' | tr -d '()')
+                  SIMULATOR_NAME="iPhone 15 Pro"
+                  SIMULATOR_ID=$(xcrun simctl list devices available | grep -i "$SIMULATOR_NAME (" | head -n 1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+
+                  if [ -z "$SIMULATOR_ID" ]; then
+                    echo "❌ No available simulator ID found for $SIMULATOR_NAME"
+                    exit 1
+                  fi
+
+                  echo "✅ Using Simulator ID: $SIMULATOR_ID"
+
+                  # Debugging: Confirm simulator state
+                  echo "📝 Checking simulator status..."
+                  xcrun simctl list devices | grep "$SIMULATOR_ID"
+
+                  # Install the app on the simulator
+                  echo "📥 Installing app on simulator..."
                   xcrun simctl install "$SIMULATOR_ID" ios/build/Build/Products/Debug-iphonesimulator/StorefrontApp.app
+
+                  # Launch the app
+                  echo "🚀 Launching app on simulator..."
                   xcrun simctl launch "$SIMULATOR_ID" com.storefront.app
