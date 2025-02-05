@@ -134,28 +134,6 @@ jobs:
             - name: Boot iOS Simulator
               run: |
                   SIMULATOR_NAME="iPhone 15 Pro"
-                  SIMULATOR_ID=$(xcrun simctl list devices available | grep "$SIMULATOR_NAME" | awk '{print $NF}' | tr -d '()')
-
-                  if [ -z "$SIMULATOR_ID" ]; then
-                    echo "❌ No available simulator found for $SIMULATOR_NAME"
-                    exit 1
-                  fi
-
-                  echo "✅ Found simulator ID: $SIMULATOR_ID"
-                  xcrun simctl boot "$SIMULATOR_ID"
-
-                  echo "⏳ Waiting for simulator to be ready..."
-                  until xcrun simctl bootstatus "$SIMULATOR_ID" | grep -q "Booted"; do
-                    sleep 5
-                  done
-                  echo "✅ Simulator is booted and ready."
-
-            - name: Start Metro Bundler in the background
-              run: yarn start --reset-cache &
-
-            - name: Boot iOS Simulator
-              run: |
-                  SIMULATOR_NAME="iPhone 15 Pro"
                   SIMULATOR_ID=$(xcrun simctl list devices available | grep -m 1 "$SIMULATOR_NAME (" | sed -E 's/.*\(([-A-F0-9]+)\).*/\1/')
 
                   if [ -z "$SIMULATOR_ID" ]; then
