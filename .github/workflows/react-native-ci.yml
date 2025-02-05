@@ -125,5 +125,19 @@ jobs:
             - name: Install iOS pods
               run: cd ios && pod install
 
-            - name: Build iOS
-              run: npx react-native run-ios
+            - name: Start Metro Bundler in the background
+              run: yarn start --reset-cache &
+
+            - name: Boot iOS Simulator
+              run: |
+                  SIMULATOR_NAME="iPhone 15 Pro"
+                  xcrun simctl boot "$SIMULATOR_NAME" || echo "$SIMULATOR_NAME already booted"
+
+            - name: Build iOS app
+              run: cd ios && xcodebuild -workspace StorefrontApp.xcworkspace -scheme StorefrontApp -configuration Debug -sdk iphonesimulator -derivedDataPath build
+
+            - name: Run iOS app on simulator
+              run: |
+                  SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | awk '{print $NF}' | tr -d '()')
+                  xcrun simctl install "$SIMULATOR_ID" ios/build/Build/Products/Debug-iphonesimulator/StorefrontApp.app
+                  xcrun simctl launch "$SIMULATOR_ID" com.storefront.app

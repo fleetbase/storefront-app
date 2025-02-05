@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { getLangNameFromCode } from 'language-name-map';
+import { storefrontConfig } from '../utils';
 import useStorage from '../hooks/use-storage';
 import I18n from 'react-native-i18n';
 import en from '../../translations/en.json';
@@ -24,7 +25,7 @@ const LanguageContext = createContext<LanguageContextProps>({
 });
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-    const [locale, setLocaleState] = useStorage<string>('_locale', 'en');
+    const [locale, setLocaleState] = useStorage<string>('_locale', storefrontConfig('defaultLocale', 'en'));
 
     const languages = Object.keys(I18n.translations).map((code) => {
         return { code, ...getLangNameFromCode(code) };

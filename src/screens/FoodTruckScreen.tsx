@@ -12,6 +12,7 @@ import { storefrontConfig, isArray, isNone, hexToRGBA, later } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
+import useAppTheme from '../hooks/use-app-theme';
 import useCurrentLocation from '../hooks/use-current-location';
 import VehicleMarker from '../components/VehicleMarker';
 import LocationPicker from '../components/LocationPicker';
@@ -62,6 +63,7 @@ const FoodTruckScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const headerHeight = useHeaderHeight();
+    const { isDarkMode } = useAppTheme();
     const { fleetbase, adapter: fleetbaseAdapter } = useFleetbase();
     const { storefront } = useStorefront();
     const { liveLocation } = useCurrentLocation();
@@ -219,6 +221,9 @@ const FoodTruckScreen = () => {
         })();
     }, [fleetbase, loadServiceArea]);
 
+    const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
+    const infoColor = isDarkMode ? theme['$blue-400'].val : theme['$blue-600'].val;
+
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
             <MapView ref={mapRef} style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }} initialRegion={mapRegion}>
@@ -243,10 +248,10 @@ const FoodTruckScreen = () => {
                 <YStack bg='$background' borderRadius='$5'>
                     <XStack alignItems='center' py='$4' px='$4' borderBottomWidth={1} borderColor='$borderColor'>
                         <YStack width={32}>
-                            <FontAwesomeIcon icon={faCircleInfo} color={theme['$blue-400'].val} size={20} />
+                            <FontAwesomeIcon icon={faCircleInfo} color={infoColor} size={20} />
                         </YStack>
                         <XStack flex={1}>
-                            <Text color='$blue-400' fontSize={15} numberOfLines={1}>
+                            <Text color={infoColor} fontSize={15} numberOfLines={1}>
                                 Tap trucks on the map to view products.
                             </Text>
                         </XStack>
@@ -254,14 +259,14 @@ const FoodTruckScreen = () => {
                     <Pressable onPress={handlePressCurrentZone}>
                         <XStack alignItems='center' py='$4' px='$4'>
                             <YStack width={32}>
-                                <FontAwesomeIcon icon={faMapLocationDot} color={currentZone ? theme['$green-400'].val : theme['$red-400'].val} size={20} />
+                                <FontAwesomeIcon icon={faMapLocationDot} color={currentZoneColor} size={20} />
                             </YStack>
                             <XStack flex={1}>
-                                <Text color={currentZone ? theme['$green-400'].val : theme['$red-400'].val} fontSize={15} numberOfLines={1}>
+                                <Text color={currentZoneColor} fontSize={15} numberOfLines={1}>
                                     {currentZone ? `Your zone is: ` : 'Out of zone, delivery unavailable 🙁'}
                                 </Text>
                                 {currentZone && (
-                                    <Text fontWeight='bold' color='$green-400' fontSize={15} numberOfLines={1}>
+                                    <Text fontWeight='bold' color={currentZoneColor} fontSize={15} numberOfLines={1}>
                                         {currentZone.name}
                                     </Text>
                                 )}
