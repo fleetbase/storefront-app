@@ -134,7 +134,7 @@ jobs:
             - name: Boot iOS Simulator
               run: |
                   SIMULATOR_NAME="iPhone 15 Pro"
-                  SIMULATOR_ID=$(xcrun simctl list devices available | awk -v name="$SIMULATOR_NAME" '$0 ~ name && match($0, /\(([A-F0-9-]+)\)/, m) { print m[1]; exit }')
+                  SIMULATOR_ID=$(xcrun simctl list devices available | grep -i "$SIMULATOR_NAME (" | head -n 1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
 
                   if [ -z "$SIMULATOR_ID" ]; then
                     echo "❌ No available simulator found for $SIMULATOR_NAME"
