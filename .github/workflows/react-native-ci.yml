@@ -165,11 +165,24 @@ jobs:
                       echo "❌ Simulator failed to boot within 60 seconds."
                       exit 1
                   fi
+            - name: Build iOS app
+              run: |
+                  cd ios
+                  xcodebuild -workspace StorefrontApp.xcworkspace \
+                    -scheme StorefrontApp \
+                    -configuration Debug \
+                    -sdk iphonesimulator \
+                    -derivedDataPath build
 
             - name: Debug iOS Build Output
               run: |
-                  echo "📂 Listing files in iOS build directory..."
-                  ls -R ios/build/Build/Products/Debug-iphonesimulator || echo "❌ No app build found!"
+                  echo "📂 Listing iOS build output..."
+                  find ios/build -name "*.app" || echo "❌ No app build found!"
+
+            - name: Debug Xcode Schemes
+              run: |
+                  cd ios
+                  xcodebuild -list
 
             - name: Run iOS app on simulator
               run: |
