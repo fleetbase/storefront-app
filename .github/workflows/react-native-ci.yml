@@ -153,19 +153,24 @@ jobs:
             - name: Start Metro Bundler in the background
               run: yarn start --reset-cache &
 
-            - name: Build iOS app
+            - name: Boot iOS Simulator
               run: |
-                  SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | awk '{print $NF}' | tr -d '()')
+                  SIMULATOR_NAME="iPhone 15 Pro"
+                  SIMULATOR_ID=$(xcrun simctl list devices available | grep "$SIMULATOR_NAME (" | awk -F '[()]' '{print $2}' | head -n 1)
+
                   if [ -z "$SIMULATOR_ID" ]; then
-                    echo "❌ Failed to find an available iPhone 15 Pro simulator."
+                    echo "❌ No available simulator found for $SIMULATOR_NAME"
                     exit 1
                   fi
-                  cd ios && xcodebuild -workspace StorefrontApp.xcworkspace \
-                  -scheme StorefrontApp \
-                  -configuration Debug \
-                  -sdk iphonesimulator \
-                  -destination "id=$SIMULATOR_ID" \
-                  -derivedDataPath build
+
+                  echo "✅ Found simulator ID: $SIMULATOR_ID"
+                  xcrun simctl boot "$SIMULATOR_ID"
+
+                  echo "⏳ Waiting for simulator to be ready..."
+                  until xcrun simctl bootstatus "$SIMULATOR_ID" | grep -q "Booted"; do
+                    sleep 5
+                  done
+                  echo "✅ Simulator is booted and ready."
 
             - name: Run iOS app on simulator
               run: |
