@@ -166,6 +166,11 @@ jobs:
                       exit 1
                   fi
 
+            - name: Debug iOS Build Output
+              run: |
+                  echo "📂 Listing files in iOS build directory..."
+                  ls -R ios/build/Build/Products/Debug-iphonesimulator || echo "❌ No app build found!"
+
             - name: Run iOS app on simulator
               run: |
                   SIMULATOR_NAME="iPhone 15 Pro"
@@ -182,9 +187,16 @@ jobs:
                   echo "📝 Checking simulator status..."
                   xcrun simctl list devices | grep "$SIMULATOR_ID"
 
+                  # Debugging: Confirm the app file exists
+                  APP_PATH="ios/build/Build/Products/Debug-iphonesimulator/StorefrontApp.app"
+                  if [ ! -d "$APP_PATH" ]; then
+                    echo "❌ App bundle not found at $APP_PATH"
+                    exit 1
+                  fi
+
                   # Install the app on the simulator
                   echo "📥 Installing app on simulator..."
-                  xcrun simctl install "$SIMULATOR_ID" ios/build/Build/Products/Debug-iphonesimulator/StorefrontApp.app
+                  xcrun simctl install "$SIMULATOR_ID" "$APP_PATH"
 
                   # Launch the app
                   echo "🚀 Launching app on simulator..."
