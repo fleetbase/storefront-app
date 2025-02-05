@@ -134,7 +134,7 @@ jobs:
             - name: Boot iOS Simulator
               run: |
                   SIMULATOR_NAME="iPhone 15 Pro"
-                  SIMULATOR_ID=$(xcrun simctl list devices available | grep -m 1 "$SIMULATOR_NAME (" | sed -E 's/.*\(([-A-F0-9]+)\).*/\1/')
+                  SIMULATOR_ID=$(xcrun simctl list devices available | awk -v name="$SIMULATOR_NAME" '$0 ~ name && match($0, /\(([A-F0-9-]+)\)/, m) { print m[1]; exit }')
 
                   if [ -z "$SIMULATOR_ID" ]; then
                     echo "❌ No available simulator found for $SIMULATOR_NAME"
@@ -144,11 +144,27 @@ jobs:
                   echo "✅ Found simulator ID: $SIMULATOR_ID"
                   xcrun simctl boot "$SIMULATOR_ID"
 
-                  echo "⏳ Waiting for simulator to be ready..."
-                  until xcrun simctl bootstatus "$SIMULATOR_ID" | grep -q "Booted"; do
-                    sleep 5
+                  # Debugging: Print simulator status
+                  echo "📝 Checking simulator status..."
+                  xcrun simctl list devices | grep "$SIMULATOR_ID"
+
+                  # Prevent infinite hang: Limit wait time to 60 seconds
+                  echo "⏳ Waiting for simulator to be ready (max 60s)..."
+                  for i in {1..12}; do
+                      STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_ID")
+                      if [[ "$STATUS" == *"(Booted)"* ]]; then
+                          echo "✅ Simulator is booted!"
+                          break
+                      fi
+                      sleep 5
                   done
-                  echo "✅ Simulator is booted and ready."
+
+                  # Final check
+                  FINAL_STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_ID")
+                  if [[ "$FINAL_STATUS" != *"(Booted)"* ]]; then
+                      echo "❌ Simulator failed to boot within 60 seconds."
+                      exit 1
+                  fi
 
             - name: Run iOS app on simulator
               run: |
