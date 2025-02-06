@@ -132,9 +132,10 @@ dependencies {
     implementation("com.facebook.react:react-android")
     
     // Installed dependencies
+    implementation project(':react-native-notifications')
     implementation project(':react-native-i18n')
     implementation project(':react-native-config')
-    implementation "androidx.core:core-splashscreen:1.0.0-alpha02" 
+    implementation 'androidx.core:core-splashscreen:1.0.0-alpha02' 
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -142,3 +143,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

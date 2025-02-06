@@ -11,3 +11,5 @@ include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
 include ':app', ':react-native-i18n'
 project(':react-native-i18n').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-i18n/android')
+include ':react-native-notifications'
+project(':react-native-notifications').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-notifications/lib/android/app')
