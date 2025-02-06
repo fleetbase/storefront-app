@@ -7,7 +7,5 @@
         tools:targetApi="28"
         tools:ignore="GoogleAppIndexingWarning"
         android:appComponentFactory="whateverString"
-        tools:replace="android:appComponentFactory"
-        tools:ignore="GoogleAppIndexingWarning" />
-    </application>
+        tools:replace="android:appComponentFactory" />
 </manifest>
