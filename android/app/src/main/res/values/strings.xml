@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">StorefrontApp</string>
+    <string name="facebook_app_id">@string/facebook_app_id</string>
+    <string name="facebook_client_token">@string/facebook_client_token</string>
 </resources>

@@ -20,8 +20,6 @@ class MainApplication : Application(), ReactApplication {
           object : DefaultReactNativeHost(this) {
             override fun getPackages(): List<ReactPackage> =
                     PackageList(this).packages.apply {
-                      add(RNI18nPackage())
-                      add(RNCConfigPackage())
                     }
 
             override fun getJSMainModuleName(): String = "index"

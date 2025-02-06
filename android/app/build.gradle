@@ -89,6 +89,10 @@ android {
         manifestPlaceholders = [
             appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX")
         ]
+
+        // StorefrontApp Config Resolutions
+        resValue "string", "facebook_client_token", project.hasProperty('FACEBOOK_CLIENT_TOKEN') ? FACEBOOK_CLIENT_TOKEN : 'StorefrontAppFacebookToken'
+        resValue "string", "facebook_app_id", project.hasProperty('FACEBOOK_APP_ID') ? FACEBOOK_APP_ID : 'StorefrontAppFacebookId'
     }
     configurations.all {
         resolutionStrategy {

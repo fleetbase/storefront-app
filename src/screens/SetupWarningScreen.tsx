@@ -53,7 +53,7 @@ const SetupWarningScreen = ({ error }: { error?: Error }) => {
                     )}
                     {error && (
                         <XStack alignSelf='center' alignItems='center' justifyContent='center' bg='$red-100' borderWidth={1} borderColor='$red-400' borderRadius='$4' px='$4' py='$2' mt='$2'>
-                            <Text color='$red-700' fontWeight='600' fontSize='14'>
+                            <Text color='$red-700' fontWeight='600' fontSize={14}>
                                 {error.message}
                             </Text>
                         </XStack>

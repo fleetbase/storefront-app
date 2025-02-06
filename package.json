@@ -58,7 +58,7 @@
         "react-native": "0.77.0-rc.6",
         "react-native-bootsplash": "^5.3.0",
         "react-native-config": "^1.5.3",
-        "react-native-device-info": "^14.0.0",
+        "react-native-device-info": "^14.0.4",
         "react-native-event-listeners": "^1.0.7",
         "react-native-fast-image": "^8.6.3",
         "react-native-fbsdk-next": "^13.4.0",
@@ -122,6 +122,7 @@
         "node": ">=18"
     },
     "resolutions": {
-        "react-native-i18n@^2.0.15": "patch:react-native-i18n@npm%3A2.0.15#./.yarn/patches/react-native-i18n-npm-2.0.15-7f3cf7cee6.patch"
+        "react-native-i18n@^2.0.15": "patch:react-native-i18n@npm%3A2.0.15#./.yarn/patches/react-native-i18n-npm-2.0.15-7f3cf7cee6.patch",
+        "react-native-notifications@^5.1.0": "patch:react-native-notifications@npm%3A5.1.0#./.yarn/patches/react-native-notifications-npm-5.1.0-3e3b2ea3f8.patch"
     }
 }
