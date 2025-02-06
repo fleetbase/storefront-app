@@ -31,6 +31,7 @@ local.properties
 *.iml
 android/*.hprof
 android/app/build
+android/.kotlin
 
 # node.js
 #

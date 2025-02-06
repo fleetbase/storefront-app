@@ -125,7 +125,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                             placeholder='Search country'
                             onChangeText={setSearchTerm}
                             autoCapitalize={false}
-                            autoComplete={false}
+                            autoComplete='off'
                             autoCorrect={false}
                             style={{
                                 color: theme.textPrimary.val,

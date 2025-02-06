@@ -176,7 +176,7 @@ const StoreSearch = (route = {}) => {
                         flex={1}
                         borderWidth={0}
                         autoCapitalize={false}
-                        autoComplete={false}
+                        autoComplete='off'
                         autoCorrect={false}
                     />
                     {inputFocused && (

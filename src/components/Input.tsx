@@ -16,7 +16,7 @@ const Input = ({ size = '$5', color = '$textPrimary', borderColor = '$borderColo
                 borderWidth={1}
                 flex={1}
                 autoCapitalize={false}
-                autoComplete={false}
+                autoComplete='off'
                 autoCorrect={false}
                 shadowOpacity={0}
                 shadowRadius={0}
