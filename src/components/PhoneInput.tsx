@@ -149,7 +149,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                             ref={searchInputRef}
                             placeholder='Search country'
                             onChangeText={setSearchTerm}
-                            autoCapitalize={false}
+                            autoCapitalize='none'
                             autoComplete='off'
                             autoCorrect={false}
                             style={{

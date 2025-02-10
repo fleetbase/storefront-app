@@ -33,8 +33,7 @@ const PhoneLoginScreen = () => {
     };
 
     const handleUseAnotherMethod = () => {
-        // navigation.goBack();
-        navigation.navigate('Login');
+        navigation.goBack();
     };
 
     const handleCreateAccount = () => {
