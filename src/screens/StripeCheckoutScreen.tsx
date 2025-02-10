@@ -11,15 +11,16 @@ import CheckoutTotal from '../components/CheckoutTotal';
 import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
 import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
+import useStorefrontInfo from '../hooks/use-storefront-info';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
 import { storefrontConfig, firstRouteName } from '../utils';
 
 const StripeCheckoutScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { enabled } = useStorefrontInfo();
     const { customer, handleCompleteOrder, handleDeliveryLocationChange, setTipOptions, setPickup, isPickup, isPickupEnabled, lineItems, totalAmount, isNotReady, isLoading } =
         useStripeCheckoutContext();
-
     const completeOrder = useCallback(() => {
         handleCompleteOrder((order) => {
             navigation.reset({
@@ -28,6 +29,7 @@ const StripeCheckoutScreen = () => {
             });
         });
     }, [handleCompleteOrder, navigation]);
+    const hasCheckoutOptions = enabled('tips') || enabled('delivery_tips');
 
     return (
         <YStack bg='$background'>
@@ -64,12 +66,14 @@ const StripeCheckoutScreen = () => {
                                 {storefrontConfig('stripePaymentMethod') === 'field' ? <StripeCardFieldSheet /> : <StripePaymentSheet />}
                             </YStack>
                         )}
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Checkout options
-                            </Text>
-                            <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
-                        </YStack>
+                        {hasCheckoutOptions && (
+                            <YStack space='$3'>
+                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                    Checkout options
+                                </Text>
+                                <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
+                            </YStack>
+                        )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Total

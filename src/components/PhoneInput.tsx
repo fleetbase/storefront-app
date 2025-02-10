@@ -4,8 +4,9 @@ import { countries, getEmojiFlag } from 'countries-list';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useTheme, View, Text, Button, XStack, YStack, Input } from 'tamagui';
 import { Portal } from '@gorhom/portal';
-import { getCountryByPhoneCode, getCountryByISO2, parsePhoneNumber, debounce } from '../utils';
+import { getCountryByPhoneCode, getCountryByISO2, parsePhoneNumber, debounce, storefrontConfig } from '../utils';
 import useAppTheme from '../hooks/use-app-theme';
+import { getLocales } from 'react-native-localize';
 
 function getDefaultValues(value = null, fallbackCountry = 'US') {
     if (typeof value === 'string' && value.startsWith('+')) {
@@ -30,8 +31,22 @@ const countryList = Object.entries(countries).map(([code, details]) => ({
     emoji: getEmojiFlag(code),
 }));
 
-const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 'US', size = '$5', wrapperProps = {} }) => {
-    const defaultValue = getDefaultValues(value, defaultCountryCode);
+const getDefaultCountryCode = (defaultValue = null, fallback = 'US') => {
+    const locales = getLocales();
+    const defaultLocale = storefrontConfig('defaultLocale', 'en');
+    const currentLocale = locales.find((registeredLocale) => {
+        return registeredLocale.languageCode === defaultLocale;
+    });
+
+    if (currentLocale) {
+        return currentLocale.countryCode;
+    }
+
+    return defaultValue ?? fallback;
+};
+const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = null, size = '$5', wrapperProps = {} }) => {
+    const countryCode = getDefaultCountryCode(defaultCountryCode);
+    const defaultValue = getDefaultValues(value, countryCode);
     const theme = useTheme();
     const { isDarkMode } = useAppTheme();
     const [selectedCountry, setSelectedCountry] = useState(defaultValue.country);
@@ -81,7 +96,17 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
     return (
         <YStack space='$4' {...wrapperProps}>
             <XStack width='100%' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg={backgroundColor}>
-                <Button size={size} onPress={openBottomSheet} bg={backgroundColor} borderWidth={0} width={80} maxWidth={80}>
+                <Button
+                    size={size}
+                    onPress={openBottomSheet}
+                    bg={backgroundColor}
+                    borderWidth={0}
+                    width={80}
+                    maxWidth={80}
+                    borderRadius='$5'
+                    borderBottomRightRadius={0}
+                    borderTopRightRadius={0}
+                >
                     <XStack alignItems='center' space='$2'>
                         <Text fontSize={size}>{getEmojiFlag(selectedCountry.code)}</Text>
                         <Text fontSize={size}>+{selectedCountry.phone}</Text>

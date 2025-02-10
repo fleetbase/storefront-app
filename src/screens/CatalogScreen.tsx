@@ -2,7 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView, Dimensions } from 'react-native';
 import { YStack, Text, XStack, useTheme } from 'tamagui';
-import { Product } from '@fleetbase/storefront';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faTruck } from '@fortawesome/free-solid-svg-icons';
+import { Product, FoodTruck } from '@fleetbase/storefront';
 import { SimpleGrid } from 'react-native-super-grid';
 import { storefrontConfig } from '../utils';
 import useStorefront from '../hooks/use-storefront';
@@ -11,12 +13,14 @@ import StoreCategoriesPills from '../components/StoreCategoriesPills';
 import CategoryProductSlider from '../components/CategoryProductSlider';
 import ProductCard from '../components/ProductCard';
 import Spacer from '../components/Spacer';
+import CartButton from '../components/CartButton';
 
 const CatalogScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
     const navigation = useNavigation();
     const catalogs = params.catalogs || [];
+    const foodTruck = new FoodTruck(params.foodTruck);
     const foodTruckId = params.foodTruckId ?? null;
     const { adapter: storefrontAdapter } = useStorefront();
     const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
@@ -31,15 +35,19 @@ const CatalogScreen = ({ route }) => {
 
     return (
         <YStack flex={1} bg='$background'>
+            <XStack py='$2' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
+                <XStack flex={1} gap='$2' alignItems='center'>
+                    <FontAwesomeIcon icon={faTruck} color={theme['$blue-500'].val} size={20} />
+                    <Text color='$textPrimary' fontSize='$7' fontWeight='bold' numberOfLines={1}>
+                        {foodTruck.getAttribute('vehicle.plate_number')}
+                    </Text>
+                </XStack>
+                <CartButton size={40} onPress={() => navigation.navigate('CartModal')} />
+            </XStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                <YStack py='$4' px='$3'>
+                <YStack py='$2' px='$3'>
                     {catalogs.map((catalog) => (
                         <YStack key={catalog.id}>
-                            {/* <YStack mb='$3'>
-                                <Text color='$textSecondary' fontSize='$8' fontWeight='bold'>
-                                    {catalog.name}
-                                </Text>
-                            </YStack> */}
                             {catalog.categories.map((category) => (
                                 <YStack key={category.id}>
                                     <YStack mb='$3'>

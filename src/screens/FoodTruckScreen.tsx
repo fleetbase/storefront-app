@@ -2,13 +2,13 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { StyleSheet, Pressable } from 'react-native';
-import MapView, { Polygon } from 'react-native-maps';
+import MapView, { Polygon, Marker } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapLocationDot, faTruck, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
-import { restoreFleetbasePlace, getCoordinates, isPointInGeoJSONPolygon } from '../utils/location';
-import { storefrontConfig, isArray, isNone, hexToRGBA, later } from '../utils';
+import { restoreFleetbasePlace, getCoordinates, isPointInGeoJSONPolygon, formattedAddressFromPlace } from '../utils/location';
+import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
@@ -66,11 +66,11 @@ const FoodTruckScreen = () => {
     const { isDarkMode } = useAppTheme();
     const { fleetbase, adapter: fleetbaseAdapter } = useFleetbase();
     const { storefront } = useStorefront();
-    const { liveLocation } = useCurrentLocation();
-    const userCoordinates = getCoordinates(liveLocation);
+    const { currentLocation } = useCurrentLocation();
+    const currentLocationCoordinates = getCoordinates(currentLocation);
     const [mapRegion, setMapRegion] = useState({
-        latitude: userCoordinates[0],
-        longitude: userCoordinates[1],
+        latitude: currentLocationCoordinates[0],
+        longitude: currentLocationCoordinates[1],
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
     });
@@ -140,7 +140,7 @@ const FoodTruckScreen = () => {
                 const serializedZones = zonesResult.map((zone) => zone.serialize());
                 setZones(serializedZones);
 
-                const foundCurrentZone = findCurrentZone(userCoordinates, serializedZones);
+                const foundCurrentZone = findCurrentZone(currentLocationCoordinates, serializedZones);
                 if (foundCurrentZone) {
                     setCurrentZone(foundCurrentZone);
                 } else {
@@ -176,23 +176,19 @@ const FoodTruckScreen = () => {
 
     const handlePressFoodTruck = (foodTruck) => {
         const vehicle = new Vehicle(foodTruck.vehicle, fleetbaseAdapter);
-        const coordinates = getCoordinates(vehicle);
+        const [longitude, latitude] = vehicle.getAttribute('location.coordinates');
 
-        if (mapRef.current && coordinates) {
-            // Define a new region centered on the food truck with a tighter zoom.
+        if (mapRef.current && !isNone(latitude) && !isNone(longitude)) {
             const newRegion = {
-                latitude: coordinates[0],
-                longitude: coordinates[1],
-                latitudeDelta: 0.01, // adjust for desired zoom level
+                latitude,
+                longitude,
+                latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
             };
-            // Animate the map to the new region over 1 second.
             mapRef.current.animateToRegion(newRegion, 1000);
         }
 
-        later(() => {
-            navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruckId: foodTruck.id });
-        }, 100);
+        navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruck: foodTruck });
     };
 
     const handlePressCurrentZone = () => {
@@ -229,11 +225,31 @@ const FoodTruckScreen = () => {
             <MapView ref={mapRef} style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }} initialRegion={mapRegion}>
                 {availableFoodTrucks.map((foodTruck) => (
                     <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
-                        <YStack opacity={0.8} mt='$2' bg='$background' borderRadius='$6' px='$3' py='$2' alignItems='center' justifyContent='center'>
-                            <Text color='$textPrimary'>Truck {foodTruck.vehicle.plate_number}</Text>
+                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                Truck {foodTruck.vehicle.plate_number}
+                            </Text>
                         </YStack>
                     </VehicleMarker>
                 ))}
+                {currentLocation && (
+                    <Marker coordinate={{ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] }}>
+                        <YStack alignItems='center' justifyContent='center'>
+                            <YStack bg='$blue-600' padding='$2' alignItems='center' justifyContent='center' borderRadius='$4'>
+                                <FontAwesomeIcon icon={faHome} color={theme['$blue-100'].val} size={25} />
+                            </YStack>
+                            <YStack opacity={1} mt='$2' bg='$blue-600' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center' maxWidth={180}>
+                                <Text fontSize={14} color='$blue-100' numberOfLines={1}>
+                                    {currentLocation
+                                        ? currentLocation.isAttributeFilled('name')
+                                            ? currentLocation.getAttribute('name')
+                                            : formattedAddressFromPlace(currentLocation)
+                                        : 'Loading...'}
+                                </Text>
+                            </YStack>
+                        </YStack>
+                    </Marker>
+                )}
                 {!isNone(currentZone) && (
                     <Polygon
                         coordinates={getPolygonCoordinates(currentZone.border)}

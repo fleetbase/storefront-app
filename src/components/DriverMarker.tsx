@@ -12,7 +12,7 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
         const movementData = { data };
 
         if (data.location && data.location.coordinates) {
-            const [latitude, longitude] = data.location.coordinates;
+            const [longitude, latitude] = data.location.coordinates;
             if (markerRef.current) {
                 markerRef.current.move(latitude, longitude);
             }

@@ -12,11 +12,13 @@ import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
+import useStorefrontInfo from '../hooks/use-storefront-info';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
 
 const QPayCheckoutScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { enabled } = useStorefrontInfo();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
     const { invoice, totalAmount, handleDeliveryLocationChange, receivingOptions, setPickup, isPickup, isPickupEnabled, lineItems, setTipOptions, isNotReady, isLoading } = useQpayCheckout({
         onOrderComplete: (order) => {
@@ -26,6 +28,7 @@ const QPayCheckoutScreen = () => {
             });
         },
     });
+    const hasCheckoutOptions = enabled('tips') || enabled('delivery_tips');
 
     return (
         <YStack bg='$background'>
@@ -54,12 +57,14 @@ const QPayCheckoutScreen = () => {
                             </Text>
                             <CartContents />
                         </YStack>
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Checkout options
-                            </Text>
-                            <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
-                        </YStack>
+                        {hasCheckoutOptions && (
+                            <YStack space='$3'>
+                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                    Checkout options
+                                </Text>
+                                <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
+                            </YStack>
+                        )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 Total

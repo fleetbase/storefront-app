@@ -16,6 +16,10 @@ const CheckoutOptions = ({ onChange, isPickup = false }) => {
         }
     }, [tip, leavingTip, deliveryTip, leavingDeliveryTip]);
 
+    if (!enabled('tips') && !enabled('delivery_tips')) {
+        return null;
+    }
+
     return (
         <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' space='$2'>
             {enabled('tips') && (

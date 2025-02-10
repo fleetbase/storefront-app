@@ -12,11 +12,7 @@ import Input from '../components/Input';
 const RenderAccountProperty = ({ property, value, onChange }) => {
     return (
         <YStack flex={1} width='100%'>
-            {property.component === 'phone-input' ? (
-                <PhoneInput value={value} onChange={onChange} wrapperProps={{ flex: 1 }} />
-            ) : (
-                <Input value={value} onChangeText={onChange} size='$5' placeholder={property.name} />
-            )}
+            {property.component === 'phone-input' ? <PhoneInput value={value} onChange={onChange} /> : <Input value={value} onChangeText={onChange} size='$5' placeholder={property.name} />}
         </YStack>
     );
 };

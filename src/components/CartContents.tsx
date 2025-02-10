@@ -118,7 +118,7 @@ const CartContents = ({}) => {
                                                 </Text>
                                             </XStack>
                                             {cartItem.description && (
-                                                <Text fontSize='$4' color='$textSecondary'>
+                                                <Text fontSize='$4' color='$textSecondary' numberOfLines={2}>
                                                     {cartItem.description}
                                                 </Text>
                                             )}
