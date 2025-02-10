@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import Storefront from '@fleetbase/storefront';
 import Config from 'react-native-config';
+import useStorage from './use-storage';
 
 const { STOREFRONT_KEY, FLEETBASE_HOST } = Config;
 export const instance = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
@@ -11,20 +12,24 @@ const hasStorefrontConfig = () => {
 };
 
 const useStorefront = () => {
-    // State to store the storefront instance and any initialization errors
     const [storefront, setStorefront] = useState<Storefront | null>(null);
     const [error, setError] = useState<Error | null>(null);
+    const [authToken, setAuthToken] = useStorage('_customer_token');
 
-    const adapter = useMemo(() => {
-        // Initialize adapter once and memoize it
+    const storefrontAdapter = useMemo(() => {
         if (storefront) {
-            return adapter;
+            return storefront.getAdapter();
         }
-        return null;
+
+        return adapter;
     }, [storefront]);
 
     useEffect(() => {
-        // Initialize the Storefront SDK once
+        if (authToken) {
+            const authorizedAdapter = adapter.setHeaders({ 'Customer-Token': authToken });
+            instance.setAdapter(authorizedAdapter);
+        }
+
         try {
             setStorefront(instance);
         } catch (initializationError) {
@@ -33,7 +38,7 @@ const useStorefront = () => {
     }, []);
 
     // Return both the storefront instance and any adapter for easier access in components
-    return { storefront, adapter, error, hasStorefrontConfig };
+    return { storefront, adapter: storefrontAdapter, error, hasStorefrontConfig };
 };
 
 export default useStorefront;

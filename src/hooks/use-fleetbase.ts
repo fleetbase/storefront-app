@@ -1,26 +1,31 @@
 import { useMemo, useState, useEffect } from 'react';
 import Fleetbase from '@fleetbase/sdk';
 import Config from 'react-native-config';
+import useStorage from './use-storage';
 
 const { FLEETBASE_KEY, FLEETBASE_HOST } = Config;
-export const instance = new Fleetbase(FLEETBASE_KEY, { host: FLEETBASE_HOST });
-export const adapter = instance.getAdapter();
+export let instance = new Fleetbase(FLEETBASE_KEY, { host: FLEETBASE_HOST });
+export let adapter = instance.getAdapter();
 
 const useFleetbase = () => {
-    // State to store the storefront instance and any initialization errors
     const [fleetbase, setFleetbase] = useState<Fleetbase | null>(null);
     const [error, setError] = useState<Error | null>(null);
+    const [authToken, setAuthToken] = useStorage('_customer_token');
 
-    const adapter = useMemo(() => {
-        // Initialize adapter once and memoize it
+    const fleetbaseAdapter = useMemo(() => {
         if (fleetbase) {
-            return adapter;
+            return fleetbase.getAdapter();
         }
-        return null;
+
+        return adapter;
     }, [fleetbase]);
 
     useEffect(() => {
-        // Initialize the Fleetbase SDK once
+        if (authToken) {
+            const authorizedAdapter = adapter.setHeaders({ 'Customer-Token': authToken });
+            instance.setAdapter(authorizedAdapter);
+        }
+
         try {
             setFleetbase(instance);
         } catch (initializationError) {
@@ -28,8 +33,7 @@ const useFleetbase = () => {
         }
     }, []);
 
-    // Return both the fleetbase instance and any adapter for easier access in components
-    return { fleetbase, adapter, error };
+    return { fleetbase, adapter: fleetbaseAdapter, error };
 };
 
 export default useFleetbase;

@@ -17,10 +17,6 @@ import {
 import Spacer from './Spacer';
 
 const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, defaultSelectedAddons = null, defaultSelectedVariants = null, wrapperProps = {} }) => {
-    console.log('[product]', product);
-    console.log('[product.variants]', typeof product.variants);
-    console.log('[product.addons]', typeof product.addons);
-    return <YStack />;
     const theme = useTheme();
     const [selectedAddons, setSelectedAddons] = useState(isEmpty(defaultSelectedAddons) ? createAddonSelectionDefaults(product) : defaultSelectedAddons);
     const [selectedVariants, setSelectedVariants] = useState(isEmpty(defaultSelectedVariants) ? createVariationSelectionDefaults(product) : defaultSelectedVariants);

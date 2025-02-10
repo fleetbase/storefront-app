@@ -2,6 +2,7 @@ import StoreHomeScreen from '../../screens/StoreHomeScreen';
 import StoreMapScreen from '../../screens/StoreMapScreen';
 import StoreSearchScreen from '../../screens/StoreSearchScreen';
 import StoreCategoryScreen from '../../screens/StoreCategoryScreen';
+import StoreInfoScreen from '../../screens/StoreInfoScreen';
 import BackButton from '../../components/BackButton';
 import LocationPicker from '../../components/LocationPicker';
 import { PortalHost } from '@gorhom/portal';
@@ -62,11 +63,22 @@ export const StoreSearch = {
     },
 };
 
+export const StoreInfo = {
+    screen: StoreInfoScreen,
+    options: ({ route }) => {
+        return {
+            presentation: 'modal',
+            headerShown: false,
+        };
+    },
+};
+
 const StoreStack = {
     StoreHome,
     StoreMap,
     StoreSearch,
     StoreCategory,
+    StoreInfo,
 };
 
 export default StoreStack;

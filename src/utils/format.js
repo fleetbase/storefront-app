@@ -238,7 +238,7 @@ export function titleize(str, separator = ' ') {
     return words.join(' ');
 }
 
-export function lowecase(str) {
+export function lowercase(str) {
     return str.toLowerCase();
 }
 

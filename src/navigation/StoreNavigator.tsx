@@ -9,7 +9,7 @@ import { useTheme } from 'tamagui';
 import { storefrontConfig, get, config, toArray } from '../utils';
 import { configCase } from '../utils/format';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
-import { StoreHome, StoreSearch, StoreMap, StoreCategory } from './stacks/StoreStack';
+import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreInfo } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
@@ -233,6 +233,7 @@ const StoreMapTab = createNativeStackNavigator({
     initialRouteName: 'StoreMap',
     screens: {
         StoreMap,
+        StoreInfo,
     },
 });
 

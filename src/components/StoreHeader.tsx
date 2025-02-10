@@ -6,7 +6,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import StoreLocationPicker from './StoreLocationPicker';
 import { storefrontConfig } from '../utils';
 
-const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {} }) => {
+const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {}, defaultStoreLocation = null }) => {
     const theme = useTheme();
 
     return (
@@ -58,7 +58,10 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                     )}
                 </YStack>
                 <YStack alignItems='center' justifyContent='center'>
-                    <StoreLocationPicker triggerStyle={{ borderWidth: 1, backgroundColor: theme['$gray-900'].val, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }} />
+                    <StoreLocationPicker
+                        defaultStoreLocation={defaultStoreLocation}
+                        triggerStyle={{ borderWidth: 1, backgroundColor: theme['$gray-900'].val, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3 }}
+                    />
                 </YStack>
             </Stack>
 

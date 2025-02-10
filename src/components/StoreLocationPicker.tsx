@@ -13,7 +13,16 @@ import useStorage from '../hooks/use-storage';
 import useStoreLocations from '../hooks/use-store-locations';
 import useAppTheme from '../hooks/use-app-theme';
 
-const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, triggerStyle = {}, triggerTextStyle = {}, triggerArrowStyle = {}, triggerProps = {}, ...props }) => {
+const StoreLocationPicker = ({
+    defaultStoreLocation = null,
+    wrapperStyle = {},
+    triggerWrapperStyle = {},
+    triggerStyle = {},
+    triggerTextStyle = {},
+    triggerArrowStyle = {},
+    triggerProps = {},
+    ...props
+}) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { isDarkMode } = useAppTheme();
@@ -21,6 +30,9 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
     const triggerRef = useRef(null);
+
+    // Get the store location to display as the default
+    const displayStoreLocation = defaultStoreLocation ? defaultStoreLocation : currentStoreLocation;
 
     // Get screen width and calculate 75% of it
     const screenWidth = Dimensions.get('window').width;
@@ -82,10 +94,10 @@ const StoreLocationPicker = ({ wrapperStyle = {}, triggerWrapperStyle = {}, trig
                             triggerTextStyle,
                         ]}
                     >
-                        {currentStoreLocation
-                            ? currentStoreLocation.isAttributeFilled('name')
-                                ? currentStoreLocation.getAttribute('name')
-                                : formattedAddressFromSerializedPlace(currentStoreLocation.getAttribute('place'))
+                        {displayStoreLocation
+                            ? displayStoreLocation.isAttributeFilled('name')
+                                ? displayStoreLocation.getAttribute('name')
+                                : formattedAddressFromSerializedPlace(displayStoreLocation.getAttribute('place'))
                             : 'Loading...'}
                     </Text>
                     <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>

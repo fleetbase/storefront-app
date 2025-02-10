@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     const { setLocale } = useLanguage();
     const { deviceToken } = useNotification();
     const [storedCustomer, setStoredCustomer] = useStorage('customer');
+    const [authToken, setAuthToken] = useStorage('_customer_token');
     const [state, dispatch] = useReducer(authReducer, {
         isSendingCode: false,
         isVerifyingCode: false,
@@ -61,14 +62,14 @@ export const AuthProvider = ({ children }) => {
             const customerInstance = newCustomer instanceof Customer ? newCustomer : new Customer(newCustomer, adapter);
 
             // Restore customer token if needed
-            if (!customerInstance.token && storage.getString('_customer_token')) {
-                customerInstance.setAttribute('token', storage.getString('_customer_token'));
+            if (!customerInstance.token && authToken) {
+                customerInstance.setAttribute('token', authToken);
             }
 
             setStoredCustomer(customerInstance.serialize());
             EventRegister.emit('customer.updated', customerInstance);
         },
-        [storefront, setStoredCustomer]
+        [storefront, setStoredCustomer, authToken]
     );
 
     // Set customer default location
@@ -227,8 +228,8 @@ export const AuthProvider = ({ children }) => {
     const createCustomerSession = async (customer, callback = null) => {
         clearSessionData();
         setCustomerDefaultLocation(customer);
+        setAuthToken(customer.token);
         setCustomer(customer);
-        storage.setString('_customer_token', customer.token);
 
         // run a callback with the customer instance
         const instance = new Customer(customer, adapter);
