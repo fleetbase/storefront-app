@@ -18,6 +18,12 @@ export function flattenTailwindCssColorsObject(colors = {}) {
     return flattened;
 }
 
+const globalColors = {
+    transparent: 'rgba(0,0,0,0)',
+    white: '#FFFFFF',
+    black: '#000000',
+};
+
 // Full Tailwind CSS Color Palette
 const colors = {
     gray: {
@@ -132,6 +138,7 @@ const colors = {
 
 // Define Light and Dark Bases Using Tailwind Colors
 const lightBase = {
+    ...globalColors,
     background: colors.gray[50],
     surface: colors.gray[100],
     color: colors.gray[900],
@@ -156,6 +163,7 @@ const lightBase = {
 };
 
 const darkBase = {
+    ...globalColors,
     background: colors.gray[900],
     surface: colors.gray[800],
     color: colors.gray[50],
@@ -221,10 +229,8 @@ export const themes = {
 const tokens = createTokens({
     ...baseConfig.tokens,
     color: {
+        ...globalColors,
         ...flattenTailwindCssColorsObject(colors),
-        transparent: 'rgba(0,0,0,0)',
-        white: '#FFFFFF',
-        black: '#000000',
     },
 });
 
