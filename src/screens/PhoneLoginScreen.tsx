@@ -49,7 +49,7 @@ const PhoneLoginScreen = () => {
                     </Text>
                     <PhoneInput value={phone} onChange={(phoneNumber) => setPhone(phoneNumber)} />
                     <Button size='$5' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
-                        <Button.Icon>{isSendingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faPaperPlane} color={theme.white.val} />}</Button.Icon>
+                        <Button.Icon>{isSendingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faPaperPlane} color='white' />}</Button.Icon>
                         <Button.Text color='$white' fontWeight='bold'>
                             Send Verification Code
                         </Button.Text>
@@ -63,7 +63,7 @@ const PhoneLoginScreen = () => {
                 <YStack space='$4' width='100%' padding='$5'>
                     <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded>
                         <Button.Icon>
-                            <FontAwesomeIcon icon={faArrowLeft} color={theme['textPrimary'].val} />
+                            <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />
                         </Button.Icon>
                         <Button.Text color='$textPrimary' fontWeight='bold'>
                             Login using Another Method
@@ -74,7 +74,7 @@ const PhoneLoginScreen = () => {
                             Create a new Account
                         </Button.Text>
                         <Button.Icon>
-                            <FontAwesomeIcon icon={faArrowRight} color={theme['white'].val} />
+                            <FontAwesomeIcon icon={faArrowRight} color='white' />
                         </Button.Icon>
                     </Button>
                 </YStack>
