@@ -141,7 +141,9 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                                     style={buttonStyle}
                                     alignSelf='center'
                                     borderRadius='$4'
-                                    bg='$primary'
+                                    bg='$blue-900'
+                                    borderWidth={1}
+                                    borderColor='$blue-600'
                                     color='white'
                                     width='100%'
                                     hoverStyle={{
