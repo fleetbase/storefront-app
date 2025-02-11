@@ -86,18 +86,20 @@ const StripePaymentSheet = () => {
     }
 
     return (
-        <XStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$4' py='$3' justifyContent='space-between'>
-            <XStack space='$2'>
-                {paymentMethod.image && <Image source={{ uri: `data:image/png;base64,${paymentMethod.image}` }} width={55} height={35} />}
-                <YStack py='$1'>
-                    <Text color='$textPrimary' fontSize='$4' fontWeight='bold'>
+        <XStack bg='$surface' alignItems='center' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$3' py='$2' justifyContent='space-between'>
+            <XStack alignItems='center' flex={1} space={4}>
+                <YStack>{paymentMethod.image && <Image source={{ uri: `data:image/png;base64,${paymentMethod.image}` }} width={40} height={25} borderRadius={2} />}</YStack>
+                <YStack flex={1}>
+                    <Text color='$textPrimary' fontSize='$4' numberOfLines={1}>
                         Card ending in {paymentMethod.label}
                     </Text>
                 </YStack>
             </XStack>
             <YStack>
-                <Button onPress={handleAddPaymentMethodViaSheet} rounded bg='$blue-600' borderWidth={1} borderColor='$blue-700' disabled={!paymentSheetEnabled}>
-                    <Button.Text color='$blue-100'>Change</Button.Text>
+                <Button onPress={handleAddPaymentMethodViaSheet} bg='$blue-900' borderWidth={1} borderColor='$blue-600' px='$3' py='$1' disabled={!paymentSheetEnabled}>
+                    <Button.Text fontSize={13} color='$blue-100'>
+                        Change
+                    </Button.Text>
                 </Button>
             </YStack>
         </XStack>

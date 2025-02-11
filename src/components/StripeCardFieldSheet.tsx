@@ -94,17 +94,17 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                         </Pressable>
                     </YStack>
                 ) : (
-                    <XStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$4' py='$3' justifyContent='space-between'>
-                        <XStack space='$2'>
+                    <XStack alignItems='center' bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$4' py='$3' justifyContent='space-between'>
+                        <XStack alignItems='center' space='$2'>
                             <CardBrandLogo brand={paymentMethod.brand} />
-                            <YStack py='$1'>
-                                <Text color='$textPrimary' fontSize='$4' fontWeight='bold'>
+                            <YStack>
+                                <Text color='$textPrimary' fontSize='$4'>
                                     Card ending in {paymentMethod.label}
                                 </Text>
                             </YStack>
                         </XStack>
                         <YStack>
-                            <Button onPress={openBottomSheet} rounded bg='$blue-600' borderWidth={1} borderColor='$blue-700'>
+                            <Button onPress={openBottomSheet} bg='$blue-900' borderWidth={1} borderColor='$blue-600'>
                                 {isLoading ? <Spinner color='$blue-100' /> : <FontAwesomeIcon icon={faPenToSquare} color={theme['blue-100'].val} size={15} />}
                                 <Button.Text color='$blue-100'>Change</Button.Text>
                             </Button>
@@ -152,7 +152,16 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                             />
 
                             <XStack justifyContent='flex-end'>
-                                <Button onPress={handleSavePaymentMethod} size='$5' bg='$green-600' flex={1} opacity={disabled ? 0.75 : 1} disabled={disabled}>
+                                <Button
+                                    onPress={handleSavePaymentMethod}
+                                    size='$5'
+                                    bg='$green-900'
+                                    borderWidth={1}
+                                    borderColor='$green-600'
+                                    flex={1}
+                                    opacity={disabled ? 0.75 : 1}
+                                    disabled={disabled}
+                                >
                                     <Button.Icon>{isSaving ? <Spinner color='$green-100' /> : <FontAwesomeIcon icon={faSave} color={theme['green-100'].val} />}</Button.Icon>
                                     <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
                                         {isSaving ? 'Saving...' : 'Save Payment Method'}

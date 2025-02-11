@@ -28,7 +28,7 @@
         "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
         "@backpackapp-io/react-native-toast": "^0.12.1",
         "@fleetbase/sdk": "^1.2.13",
-        "@fleetbase/storefront": "^1.1.13",
+        "@fleetbase/storefront": "^1.1.14",
         "@fortawesome/fontawesome-svg-core": "^6.5.1",
         "@fortawesome/free-brands-svg-icons": "^6.5.1",
         "@fortawesome/free-solid-svg-icons": "^6.5.1",

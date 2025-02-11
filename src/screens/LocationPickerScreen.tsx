@@ -17,7 +17,7 @@ import {
     formatAddressSecondaryIdentifier,
     getCoordinates,
 } from '../utils/location';
-import { isArray, toBoolean } from '../utils';
+import { isArray, toBoolean, later } from '../utils';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -59,7 +59,7 @@ const LocationPickerScreen = ({ route }) => {
 
     // Bottom sheet controls
     const openBottomSheet = () => {
-        bottomSheetRef.current?.collapse();
+        bottomSheetRef.current?.snapToPosition('35%');
     };
 
     const closeBottomSheet = () => {
@@ -78,22 +78,28 @@ const LocationPickerScreen = ({ route }) => {
         updateNearbyResults(region);
     };
 
-    const updateNearbyResults = async ({ latitude, longitude }) => {
-        try {
-            const results = await geocode(latitude, longitude, { withAllResults: true });
-            if (isArray(results)) {
-                setResults(
-                    results.map((result) => {
-                        return createFleetbasePlaceFromDetails(result);
-                    })
-                );
-                openBottomSheet();
+    const updateNearbyResults = useCallback(
+        async ({ latitude, longitude }) => {
+            try {
+                const results = await geocode(latitude, longitude, { withAllResults: true });
+                if (isArray(results)) {
+                    setResults(
+                        results.map((result) => {
+                            return createFleetbasePlaceFromDetails(result);
+                        })
+                    );
+
+                    later(() => {
+                        openBottomSheet();
+                    }, 300);
+                }
+            } catch (error) {
+                console.error('Error fetching nearby locations: ', error);
+                toast.error(error.message);
             }
-        } catch (error) {
-            console.error('Error fetching nearby locations: ', error);
-            toast.error(error.message);
-        }
-    };
+        },
+        [setResults]
+    );
 
     const handleLocationSelect = (place) => {
         closeBottomSheet();

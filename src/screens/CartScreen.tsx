@@ -207,29 +207,29 @@ const CartScreen = () => {
                                                 }}
                                             />
                                         </YStack>
-                                        <YStack>
-                                            <YStack mb='$1'>
+                                        <YStack height={125} minHeight={100} maxHeight={350} overflow='hidden' width='90%' space='$1'>
+                                            <YStack>
                                                 <XStack space='$2' alignItems='center'>
                                                     <Text fontSize='$5' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                                         {cartItem.name}
                                                     </Text>
                                                 </XStack>
                                                 {cartItem.description && (
-                                                    <Text fontSize='$4' color='$textSecondary'>
+                                                    <Text fontSize='$4' color='$textSecondary' numberOfLines={2}>
                                                         {cartItem.description}
                                                     </Text>
                                                 )}
                                             </YStack>
                                             <YStack>
-                                                {cartItem.variants.filter(Boolean).map((variant) => (
-                                                    <XStack key={variant.id} alignItems='center' space='$2'>
+                                                {cartItem.variants.filter(Boolean).map((variant, index) => (
+                                                    <XStack key={index} space='$2'>
                                                         <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
                                                             {variant.name}
                                                         </Text>
                                                     </XStack>
                                                 ))}
-                                                {cartItem.addons.filter(Boolean).map((addon) => (
-                                                    <XStack key={addon.id} alignItems='center' space='$2'>
+                                                {cartItem.addons.filter(Boolean).map((addon, index) => (
+                                                    <XStack key={index} space='$2'>
                                                         <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
                                                             {addon.name}
                                                         </Text>
@@ -306,7 +306,7 @@ const CartScreen = () => {
                             </Text>
                         </YStack>
                         <YStack>
-                            <Button onPress={handleCheckout} bg='$green-600' borderWidth={1} borderColor='$green-700' color='white' width={180} paddingVertical='$2' rounded>
+                            <Button onPress={handleCheckout} bg='$green-900' borderWidth={1} borderColor='$green-600' color='white' width={180} paddingVertical='$2' rounded>
                                 <Button.Text fontSize='$6' fontWeight='bold' color='white'>
                                     Checkout
                                 </Button.Text>

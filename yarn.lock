@@ -1959,7 +1959,7 @@ __metadata:
     "@babel/runtime": ^7.25.0
     "@backpackapp-io/react-native-toast": ^0.12.1
     "@fleetbase/sdk": ^1.2.13
-    "@fleetbase/storefront": ^1.1.13
+    "@fleetbase/storefront": ^1.1.14
     "@fortawesome/fontawesome-svg-core": ^6.5.1
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1
@@ -2046,14 +2046,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fleetbase/storefront@npm:^1.1.13":
-  version: 1.1.13
-  resolution: "@fleetbase/storefront@npm:1.1.13"
+"@fleetbase/storefront@npm:^1.1.14":
+  version: 1.1.14
+  resolution: "@fleetbase/storefront@npm:1.1.14"
   dependencies:
     "@fleetbase/sdk": ^1.2.13
     countries-list: ^3.1.1
     date-fns: ^4.1.0
-  checksum: 0c7543ef7aa9b3dd8256e8af3c4b8ec65988d4f2a34c1b45a12043d90ec27c0d058013642dc357e86c9b73f5773811619bf2ee7f60c99a3288d448bc2637167c
+  checksum: 09ad89e62273d92a194e568369a05bf4fc8c2709cf7e03378e83dde1518f5bc84fc73316f25f54108db986fa85a553db856151a1537f7da31124c43f12739e6c
   languageName: node
   linkType: hard
 

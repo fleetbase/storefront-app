@@ -44,6 +44,7 @@ const getDefaultCountryCode = (defaultValue = null, fallback = 'US') => {
 
     return defaultValue ?? fallback;
 };
+
 const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = null, size = '$5', wrapperProps = {} }) => {
     const countryCode = getDefaultCountryCode(defaultCountryCode);
     const defaultValue = getDefaultValues(value, countryCode);

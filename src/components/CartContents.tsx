@@ -123,15 +123,15 @@ const CartContents = ({}) => {
                                                 </Text>
                                             )}
                                             <YStack>
-                                                {cartItem.variants.filter(Boolean).map((variant) => (
-                                                    <XStack key={variant.id} alignItems='center' space='$2'>
+                                                {cartItem.variants.filter(Boolean).map((variant, i) => (
+                                                    <XStack key={i} alignItems='center' space='$2'>
                                                         <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
                                                             {variant.name}
                                                         </Text>
                                                     </XStack>
                                                 ))}
-                                                {cartItem.addons.filter(Boolean).map((addon) => (
-                                                    <XStack key={addon.id} alignItems='center' space='$2'>
+                                                {cartItem.addons.filter(Boolean).map((addon, i) => (
+                                                    <XStack key={i} alignItems='center' space='$2'>
                                                         <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
                                                             {addon.name}
                                                         </Text>

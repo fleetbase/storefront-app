@@ -27,6 +27,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
     let cardFooterBg = '$background';
     let cardFooterPx = '$2';
     let cardFooterPy = '$2';
+    let cardFooterBorderRadius = 12;
     let additionalSliderStyles = {};
 
     if (productCardStyle === 'outlined') {
@@ -34,6 +35,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
         cardFooterPx = 0;
         cardBorderColor = '$surface';
         cardFooterBg = '$surface';
+        cardFooterBorderRadius = 0;
     }
 
     if (productCardStyle === 'visio') {
@@ -100,7 +102,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
                         </YStack>
                     </Card.Header>
-                    <Card.Footer bg={cardFooterBg} borderRadius={12} overflow='hidden'>
+                    <Card.Footer bg={cardFooterBg} borderRadius={cardFooterBorderRadius} overflow='hidden'>
                         <YStack flex={1} space='$2' px={cardFooterPx} py={cardFooterPy}>
                             <YStack minHeight={90}>
                                 <YStack>

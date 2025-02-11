@@ -13,6 +13,7 @@ import useStoreLocations from '../hooks/use-store-locations';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useCart from '../hooks/use-cart';
+import useStorage from '../hooks/use-storage';
 
 export default function useQPayCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
@@ -35,6 +36,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const listenerRef = useRef();
     const cartContentsString = JSON.stringify(cart.contents() || []);
     const subtotal = cart.subtotal();
@@ -142,7 +144,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             const status = payment.payment_status;
             if (status === 'PAID') {
                 try {
-                    const order = await storefront.checkout.captureOrder(checkoutToken);
+                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
 
@@ -282,6 +284,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
         error,
         isReady,
         isNotReady,
+        orderNotes,
+        setOrderNotes,
         listener: listenerRef.current,
     };
 }

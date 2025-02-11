@@ -12,6 +12,7 @@ import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
 import useStorefrontInfo from '../hooks/use-storefront-info';
+import useStorage from '../hooks/use-storage';
 
 const APP_IDENTIFIER = config('APP_IDENTIFIER');
 const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
@@ -41,6 +42,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const [paymentIntentId, setPaymentIntentId] = useState(null);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
     const [setupIntentClientSecret, setSetupIntentClientSecret] = useState(null);
+    const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const [error, setError] = useState(null);
     const cartContentsString = JSON.stringify(cart.contents() || []);
     const subtotal = cart.subtotal();
@@ -270,7 +272,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message, { position: ToastPosition.BOTTOM });
                 } else {
-                    const order = await storefront.checkout.captureOrder(checkoutToken);
+                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
 
@@ -311,7 +313,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message, { position: ToastPosition.BOTTOM });
                 } else if (paymentIntent && paymentIntent.status === 'Succeeded') {
-                    const order = await storefront.checkout.captureOrder(checkoutToken);
+                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
 
@@ -415,6 +417,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
         setupIntentLoading,
         error,
         isReady,
+        orderNotes,
+        setOrderNotes,
         isNotReady: !isReady,
     };
 }

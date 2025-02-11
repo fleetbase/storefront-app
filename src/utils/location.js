@@ -11,6 +11,9 @@ import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializ
 import storage from './storage';
 import axios from 'axios';
 
+const DEFAULT_LATITUDE = 1.369;
+const DEFAULT_LONGITUDE = 103.8864;
+
 /** Configure GeoLocation */
 Geolocation.setRNConfiguration({
     authorizationLevel: 'whenInUse',
@@ -941,8 +944,6 @@ export function parseAutocompleteAddress(description = '') {
 }
 
 export function getDefaultCoordinates() {
-    const DEFAULT_LATITUDE = 1.369;
-    const DEFAULT_LONGITUDE = 103.8864;
     const DEFAULT_COORDINATES = config('DEFAULT_COORDINATES', `${DEFAULT_LATITUDE},${DEFAULT_LONGITUDE}`);
     const [latitude, longitude] = DEFAULT_COORDINATES.split(',');
 
