@@ -6,6 +6,7 @@ import { Place, Point } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
 import LocationMarker from '../components/LocationMarker';
+import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 import useSavedLocations from '../hooks/use-saved-locations';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 
@@ -132,18 +133,22 @@ const EditLocationCoordScreen = ({ route }) => {
             <YStack style={styles.markerFixed}>
                 <LocationMarker lifted={isPanning} />
             </YStack>
-            <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5} space='$3'>
-                <Button onPress={handleSave} size='$5' bg='$blue-700' flex={1}>
-                    <Button.Icon>{isLoading() && <Spinner color='$blue-100' />}</Button.Icon>
-                    <Button.Text color='$blue-100' fontWeight='bold' fontSize='$5'>
-                        Save Position
-                    </Button.Text>
-                </Button>
-                <Button onPress={handleReset} size='$5' bg='$secondary' flex={1}>
-                    <Button.Text color='$textSecondary' fontWeight='bold' fontSize='$5'>
-                        Reset
-                    </Button.Text>
-                </Button>
+            <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} zIndex={5}>
+                <AbsoluteTabBarScreenWrapper>
+                    <XStack padding='$4' space='$2'>
+                        <Button onPress={handleSave} size='$5' bg='$success' borderColor='$successBorder' borderWidth={1} flex={1}>
+                            <Button.Icon>{isLoading() && <Spinner color='$textSuccess' />}</Button.Icon>
+                            <Button.Text color='$textSuccess' fontWeight='bold' fontSize='$5'>
+                                Save Position
+                            </Button.Text>
+                        </Button>
+                        <Button onPress={handleReset} size='$5' bg='$secondary' borderWidth={1} borderColor='$borderColor' flex={1}>
+                            <Button.Text color='$textSecondary' fontWeight='bold' fontSize='$5'>
+                                Reset
+                            </Button.Text>
+                        </Button>
+                    </XStack>
+                </AbsoluteTabBarScreenWrapper>
             </XStack>
         </YStack>
     );

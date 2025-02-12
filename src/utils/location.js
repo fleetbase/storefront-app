@@ -1045,3 +1045,13 @@ export function leafletWrapCoordinate(coord) {
     const wrappedLng = ((((lng + 180) % 360) + 360) % 360) - 180;
     return [lat, wrappedLng];
 }
+
+export function getCurrentLocationFromStorage() {
+    const currentLocation = storage.getMap('_current_location');
+    return currentLocation ? restoreFleetbasePlace(currentLocation) : null;
+}
+
+export function getLiveLocationLocationFromStorage() {
+    const liveLocation = storage.getMap('_live_location');
+    return liveLocation ? restoreFleetbasePlace(liveLocation) : null;
+}

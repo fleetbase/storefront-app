@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         } else {
             dispatch({ type: 'RESTORE_SESSION', customer: null });
         }
-    }, [storedCustomer, storefront]);
+    }, [storedCustomer]);
 
     const setCustomer = useCallback(
         (newCustomer) => {
@@ -285,7 +285,7 @@ export const AuthProvider = ({ children }) => {
             syncDevice,
             registerDevice,
         }),
-        [state, login, verifyCode, logout]
+        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -15,7 +15,6 @@ import useStorage from '../hooks/use-storage';
 import useAppTheme from '../hooks/use-app-theme';
 import useCurrentLocation from '../hooks/use-current-location';
 import VehicleMarker from '../components/VehicleMarker';
-import LocationPicker from '../components/LocationPicker';
 
 function findCurrentZone(coordinates, zones = []) {
     return zones.find((zone) => {
@@ -86,7 +85,7 @@ const FoodTruckScreen = () => {
         }
 
         return findAvailableTrucks(currentZone, foodTrucks);
-    }, [currentZone, foodTrucks]);
+    }, [currentLocation, currentZone, foodTrucks]);
 
     const loadServiceArea = useCallback(async () => {
         if (!fleetbase) {
@@ -141,11 +140,12 @@ const FoodTruckScreen = () => {
                 setZones(serializedZones);
 
                 const foundCurrentZone = findCurrentZone(currentLocationCoordinates, serializedZones);
-                if (foundCurrentZone) {
-                    setCurrentZone(foundCurrentZone);
-                } else {
-                    setCurrentZone(null);
-                }
+                setCurrentZone((prevZone) => {
+                    if (foundCurrentZone?.id !== prevZone?.id) {
+                        return foundCurrentZone || null;
+                    }
+                    return prevZone;
+                });
 
                 return serializedZones;
             } catch (error) {
@@ -194,7 +194,13 @@ const FoodTruckScreen = () => {
     const handlePressCurrentZone = () => {
         if (!mapRef.current || !currentZone?.border) return;
 
-        const polygonCoordinates = getPolygonCoordinates(currentZone.border);
+        focusZone(currentZone);
+    };
+
+    const focusZone = (zone) => {
+        if (!mapRef.current || !zone?.border) return;
+
+        const polygonCoordinates = getPolygonCoordinates(zone.border);
         const boundingBox = getPolygonBoundingBox(polygonCoordinates);
 
         if (boundingBox) {
@@ -206,16 +212,31 @@ const FoodTruckScreen = () => {
     };
 
     useEffect(() => {
+        if (!currentLocation || !zones) return;
+
+        const foundCurrentZone = findCurrentZone(currentLocationCoordinates, zones);
+        setCurrentZone((prevZone) => {
+            if (foundCurrentZone?.id !== prevZone?.id) {
+                focusZone(foundCurrentZone);
+                return foundCurrentZone || null;
+            }
+            return prevZone;
+        });
+    }, [currentLocation?.id, zones.length]);
+
+    useEffect(() => {
         if (!fleetbase) return;
 
-        (async () => {
+        const load = async () => {
             const area = await loadServiceArea();
             if (area) {
                 await loadZones(area);
                 await loadFoodTrucks(area);
             }
-        })();
-    }, [fleetbase, loadServiceArea]);
+        };
+
+        load();
+    }, [fleetbase]);
 
     const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
     const infoColor = isDarkMode ? theme['$blue-400'].val : theme['$blue-600'].val;
@@ -273,11 +294,11 @@ const FoodTruckScreen = () => {
                         </XStack>
                     </XStack>
                     <Pressable onPress={handlePressCurrentZone}>
-                        <XStack alignItems='center' py='$4' px='$4'>
+                        <XStack py='$4' px='$4'>
                             <YStack width={32}>
                                 <FontAwesomeIcon icon={faMapLocationDot} color={currentZoneColor} size={20} />
                             </YStack>
-                            <XStack flex={1}>
+                            <YStack flex={1}>
                                 <Text color={currentZoneColor} fontSize={15} numberOfLines={1}>
                                     {currentZone ? `Your zone is: ` : 'Out of zone, delivery unavailable 🙁'}
                                 </Text>
@@ -286,7 +307,7 @@ const FoodTruckScreen = () => {
                                         {currentZone.name}
                                     </Text>
                                 )}
-                            </XStack>
+                            </YStack>
                         </XStack>
                     </Pressable>
                     {availableFoodTrucks.map((foodTruck) => (

@@ -4,7 +4,6 @@ import StoreSearchScreen from '../../screens/StoreSearchScreen';
 import StoreCategoryScreen from '../../screens/StoreCategoryScreen';
 import StoreInfoScreen from '../../screens/StoreInfoScreen';
 import BackButton from '../../components/BackButton';
-import LocationPicker from '../../components/LocationPicker';
 import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
 

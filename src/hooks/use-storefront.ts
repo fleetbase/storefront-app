@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import Storefront from '@fleetbase/storefront';
 import Config from 'react-native-config';
-import useStorage from './use-storage';
+import { getString } from './use-storage';
 
 const { STOREFRONT_KEY, FLEETBASE_HOST } = Config;
 export const instance = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
@@ -14,7 +14,6 @@ const hasStorefrontConfig = () => {
 const useStorefront = () => {
     const [storefront, setStorefront] = useState<Storefront | null>(null);
     const [error, setError] = useState<Error | null>(null);
-    const [authToken, setAuthToken] = useStorage('_customer_token');
 
     const storefrontAdapter = useMemo(() => {
         if (storefront) {
@@ -25,6 +24,7 @@ const useStorefront = () => {
     }, [storefront]);
 
     useEffect(() => {
+        const authToken = getString('_customer_token');
         if (authToken) {
             const authorizedAdapter = adapter.setHeaders({ 'Customer-Token': authToken });
             instance.setAdapter(authorizedAdapter);

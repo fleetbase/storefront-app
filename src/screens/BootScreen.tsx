@@ -6,11 +6,11 @@ import { Image, Spinner, XStack, Text, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
 import { setI18nConfig } from '../utils/localize';
 import { config, toArray, isArray } from '../utils';
+import { getCurrentLocationFromStorage } from '../utils/location';
 import BootSplash from 'react-native-bootsplash';
+import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
-import useCurrentLocation from '../hooks/use-current-location';
-import SetupWarningScreen from './SetupWarningScreen';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const APP_NAME = config('APP_NAME');
@@ -19,7 +19,7 @@ const BootScreen = () => {
     const navigation = useNavigation();
     const { t } = useLanguage();
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
-    const { currentLocation } = useCurrentLocation();
+    const currentLocation = getCurrentLocationFromStorage();
     const [info, setInfo] = useStorage('info', {});
     const [error, setError] = useState<Error | null>(null);
     const backgroundColor = toArray(config('BOOTSCREEN_BACKGROUND_COLOR', '$background'));

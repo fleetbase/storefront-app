@@ -54,7 +54,6 @@ const useOAuth = () => {
                 requestedOperation: appleAuth.Operation.LOGIN,
                 requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
             });
-            console.log('[appleAuthResponse]', appleAuthResponse);
 
             const { identityToken, authorizationCode, email, fullName, user: appleUserId } = appleAuthResponse;
             if (!identityToken || !authorizationCode) {
@@ -90,7 +89,6 @@ const useOAuth = () => {
 
             // Perform Facebook Sign-In
             const facebookAuthResponse = await FacebookLoginManager.logInWithPermissions(['public_profile', 'email']);
-            console.log('[facebookAuthResponse]', facebookAuthResponse);
             if (facebookAuthResponse.isCancelled) {
                 console.log('Facebook Sign-In was Canceled');
                 return setLoading(false);
@@ -132,7 +130,6 @@ const useOAuth = () => {
             // Perform Google Sign-In
             await GoogleSignin.hasPlayServices();
             const googleAuthResponse = await GoogleSignin.signIn();
-            console.log('[googleAuthResponse]', googleAuthResponse);
 
             const { idToken, user } = googleAuthResponse.data;
             const customerJson = await adapter.post('customers/login-with-google', {

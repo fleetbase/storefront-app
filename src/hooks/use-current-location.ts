@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { EventRegister } from 'react-native-event-listeners';
 import { getCurrentLocation as fetchCurrentLocation, getLiveLocation, restoreFleetbasePlace, getLastKnownPosition } from '../utils/location';
 import { isResource, isArray } from '../utils';
@@ -7,41 +7,48 @@ import useStorage from './use-storage';
 
 const useCurrentLocation = () => {
     const { isAuthenticated, updateCustomerLocation, customer, getDefaultAddress } = useAuth();
+
+    // Using useStorage to persist values
     const [currentLocation, setCurrentLocation] = useStorage('_current_location');
     const [liveLocation, setLiveLocation] = useStorage('_live_location');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Function to update current location
-    const updateCurrentLocation = async (location) => {
-        const place = restoreFleetbasePlace(location);
+    // Memoized function to update the current location
+    const updateCurrentLocation = useCallback(
+        async (location) => {
+            const place = restoreFleetbasePlace(location);
+            // Only update if the new location is different
+            setCurrentLocation((prevLocation) => {
+                if (JSON.stringify(prevLocation) !== JSON.stringify(place)) {
+                    EventRegister.emit('current_location.updated', place);
+                    return place;
+                }
+                return prevLocation;
+            });
+        },
+        [setCurrentLocation]
+    );
 
-        setCurrentLocation(place);
-        EventRegister.emit('current_location.updated', place);
-    };
-
-    // Get current location coordinates
-    const getCurrentLocationCoordinates = () => {
+    // Memoized function to compute current location coordinates
+    const getCurrentLocationCoordinates = useCallback(() => {
         if (isResource(currentLocation)) {
             return currentLocation.getAttribute('location');
         }
-
-        if (isArray(currentLocation.location)) {
+        if (isArray(currentLocation?.location)) {
             return currentLocation.location;
         }
-
-        if (currentLocation.latitude && currentLocation.longitude) {
+        if (currentLocation?.latitude && currentLocation?.longitude) {
             return [currentLocation.latitude, currentLocation.longitude];
         }
-
         return getLastKnownPosition();
-    };
+    }, [currentLocation]);
 
-    // Function to initialize current location
-    const initializeCurrentLocation = async () => {
+    // Memoized function to initialize the current location
+    const initializeCurrentLocation = useCallback(async () => {
         setLoading(true);
         setError(null);
-
         try {
             if (isAuthenticated) {
                 const defaultAddress = getDefaultAddress(customer);
@@ -50,7 +57,6 @@ const useCurrentLocation = () => {
                     return;
                 }
             }
-
             const location = await fetchCurrentLocation();
             await updateCurrentLocation(location);
         } catch (err) {
@@ -59,10 +65,10 @@ const useCurrentLocation = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated, customer, getDefaultAddress, updateCurrentLocation]);
 
-    // Get live location
-    const initializeLiveLocation = async () => {
+    // Memoized function to initialize live location updates
+    const initializeLiveLocation = useCallback(async () => {
         try {
             const location = await getLiveLocation();
             if (location) {
@@ -72,60 +78,87 @@ const useCurrentLocation = () => {
             console.error('Error fetching live location:', err);
             setError(err);
         }
-    };
+    }, [setLiveLocation]);
 
-    // Set the customer default location
-    const setCustomerDefaultLocation = async (location) => {
-        if (!isAuthenticated) {
-            return;
-        }
+    // Memoized function to update the customer's default location
+    const setCustomerDefaultLocation = useCallback(
+        async (location) => {
+            if (!isAuthenticated) return;
+            try {
+                await updateCustomerLocation(location);
+            } catch (err) {
+                console.error('Error updating customer location:', err);
+                throw err;
+            }
+        },
+        [isAuthenticated, updateCustomerLocation]
+    );
 
-        try {
-            await updateCustomerLocation(location);
-        } catch (err) {
-            console.error('Error updating customer location:', err);
-            throw err;
-        }
-    };
+    // Memoized function to update the location and also update the customer default
+    const updateDefaultLocation = useCallback(
+        (instance) => {
+            updateCurrentLocation(instance);
+            setCustomerDefaultLocation(instance);
+        },
+        [updateCurrentLocation, setCustomerDefaultLocation]
+    );
 
-    // Update current location/default location as a promise
-    const updateDefaultLocationPromise = (instance) => {
-        return new Promise(async (resolve) => {
-            await updateDefaultLocation(instance);
-            resolve(instance);
-        });
-    };
+    // Return a promise-based updater
+    const updateDefaultLocationPromise = useCallback(
+        (instance) => {
+            return new Promise(async (resolve) => {
+                await updateDefaultLocation(instance);
+                resolve(instance);
+            });
+        },
+        [updateDefaultLocation]
+    );
 
-    // Update current location/default location as a promise
-    const updateDefaultLocation = (instance) => {
-        updateCurrentLocation(instance);
-        setCustomerDefaultLocation(instance);
-    };
-
-    // Set initial current location
+    // On mount (or when initializeLiveLocation changes), start live location updates.
     useEffect(() => {
         initializeLiveLocation();
+    }, [initializeLiveLocation?.id, initializeLiveLocation]);
 
+    // On mount and when currentLocation changes, initialize the current location if not set.
+    useEffect(() => {
         if (!currentLocation) {
             initializeCurrentLocation();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthenticated, customer]);
+    }, [currentLocation?.id, initializeCurrentLocation]);
 
-    return {
-        currentLocation: restoreFleetbasePlace(currentLocation),
-        liveLocation: restoreFleetbasePlace(liveLocation),
-        updateCurrentLocation,
-        setCurrentLocation,
-        updateDefaultLocationPromise,
-        updateDefaultLocation,
-        getCurrentLocationCoordinates,
-        setCustomerDefaultLocation,
-        initializeCurrentLocation,
-        initializeLiveLocation,
-        isLoadingCurrentLocation: loading,
-        currentLocationError: error,
-    };
+    // Memoize the hook's return value to avoid unnecessary re-renders in consumers
+    const value = useMemo(
+        () => ({
+            currentLocation: currentLocation ? restoreFleetbasePlace(currentLocation) : null,
+            liveLocation: liveLocation ? restoreFleetbasePlace(liveLocation) : null,
+            updateCurrentLocation,
+            setCurrentLocation,
+            updateDefaultLocationPromise,
+            updateDefaultLocation,
+            getCurrentLocationCoordinates,
+            setCustomerDefaultLocation,
+            initializeCurrentLocation,
+            initializeLiveLocation,
+            isLoadingCurrentLocation: loading,
+            currentLocationError: error,
+        }),
+        [
+            currentLocation,
+            liveLocation,
+            updateCurrentLocation,
+            setCurrentLocation,
+            updateDefaultLocationPromise,
+            updateDefaultLocation,
+            getCurrentLocationCoordinates,
+            setCustomerDefaultLocation,
+            initializeCurrentLocation,
+            initializeLiveLocation,
+            loading,
+            error,
+        ]
+    );
+
+    return value;
 };
 
 export default useCurrentLocation;
