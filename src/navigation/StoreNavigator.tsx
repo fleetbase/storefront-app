@@ -340,7 +340,7 @@ const StoreNavigator = createBottomTabNavigator({
         const backgroundColor = background === 'blur' ? 'transparent' : theme[background].val;
         const borderColor = background === 'blur' ? 'transparent' : theme[`${background}Border`].val;
         const activeColor = background === 'blur' ? theme.primary.val : theme[`${background}Text`].val;
-        const inactiveColor = background === 'blur' ? theme.secondary.val : adjustOpacity(theme[`${background}Text`].val, isDarkMode ? 0.35 : 1);
+        const inactiveColor = background === 'blur' ? theme.secondary.val : adjustOpacity(theme[`${background}Text`].val, isDarkMode ? 0.5 : 1);
 
         return {
             headerShown: false,
