@@ -14,11 +14,27 @@ import useCart from '../hooks/use-cart';
 
 const { width } = Dimensions.get('window');
 
-const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, carouselStyle = {}, buttonStyle = {}, quantityButtonStyle = {}, sliderHeight = 175, storeLocationId }) => {
+const ProductCard = ({
+    product,
+    onPress,
+    onAddToCart,
+    style = {},
+    favoriteIcon,
+    wrapperStyle = {},
+    cardContainerStyle = {},
+    cardHeaderStyle = {},
+    cardFooterStyle = {},
+    carouselStyle = {},
+    buttonStyle = {},
+    quantityButtonStyle = {},
+    sliderHeight = 175,
+    storeLocationId,
+    width = null,
+}) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
-    const [cardWidth, setCardWidth] = useState(0);
+    const [cardWidth, setCardWidth] = useState(width);
     const [cart, updateCart] = useCart();
     const [quantity, setQuantity] = useState(1);
     const productCardStyle = storefrontConfig('productCardStyle', 'bordered');
@@ -74,22 +90,24 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
         }
     };
 
+    const handleSetCardWidth = useCallback(
+        ({
+            nativeEvent: {
+                layout: { width },
+            },
+        }) => {
+            if (cardWidth === null) {
+                setCardWidth((prevWidth) => (prevWidth !== width ? width : prevWidth));
+            }
+        },
+        [setCardWidth]
+    );
+
     return (
-        <YStack>
-            <Pressable
-                onPress={handlePress}
-                style={style}
-                disabled={isLoading('addToCart')}
-                onLayout={({
-                    nativeEvent: {
-                        layout: { width },
-                    },
-                }) => {
-                    setCardWidth((prevWidth) => (prevWidth !== width ? width : prevWidth));
-                }}
-            >
-                <Card bordered borderWidth={cardBorderWidth} borderColor={cardBorderColor} borderRadius={12}>
-                    <Card.Header padding={0}>
+        <YStack style={[wrapperStyle, { width }]} width={width}>
+            <Pressable onPress={handlePress} style={[style]} disabled={isLoading('addToCart')} onLayout={handleSetCardWidth}>
+                <Card style={[cardContainerStyle]} bordered borderWidth={cardBorderWidth} borderColor={cardBorderColor} borderRadius={12}>
+                    <Card.Header style={[cardHeaderStyle]} padding={0}>
                         <YStack position='relative'>
                             <ImageSlider
                                 images={product.getAttribute('images')}
@@ -102,7 +120,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                             <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
                         </YStack>
                     </Card.Header>
-                    <Card.Footer bg={cardFooterBg} borderRadius={cardFooterBorderRadius} overflow='hidden'>
+                    <Card.Footer style={[cardFooterStyle]} bg={cardFooterBg} borderRadius={cardFooterBorderRadius} overflow='hidden'>
                         <YStack flex={1} space='$2' px={cardFooterPx} py={cardFooterPy}>
                             <YStack minHeight={90}>
                                 <YStack>

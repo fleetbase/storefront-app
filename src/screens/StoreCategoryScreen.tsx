@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native';
 import { Stack, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
+import { FlatGrid } from 'react-native-super-grid';
 import LoadingIndicator from '../components/LoadingIndicator';
 import ProductCard from '../components/ProductCard';
 import ProductCardHorizontal from '../components/ProductCardHorizontal';
 import ProductCardHorizontalLTR from '../components/ProductCardHorizontalLTR';
+import Spacer from '../components/Spacer';
 import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
+import useDimensions from '../hooks/use-dimensions';
 
 const StoreCategoryScreen = ({ route }) => {
     const category = route.params.category;
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
+    const { screenWidth } = useDimensions();
     const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id }), {
         defaultValue: [],
         persistKey: `${category.id}_products`,
@@ -21,7 +27,7 @@ const StoreCategoryScreen = ({ route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' paddingVertical='$4'>
+            <YStack flex={1} bg='$background'>
                 {isLoadingProducts && (
                     <Portal hostName='LoadingIndicatorPortal'>
                         <XStack>
@@ -29,13 +35,19 @@ const StoreCategoryScreen = ({ route }) => {
                         </XStack>
                     </Portal>
                 )}
-                <XStack flex={1} width='100%' gap='$3' px='$4'>
-                    {products.map((product, index) => (
-                        <YStack key={product.id} width='50%'>
-                            <ProductCard product={product} sliderHeight={135} onPress={() => navigation.navigate('Product', { product: product.serialize() })} />
-                        </YStack>
-                    ))}
-                </XStack>
+                <FlatGrid
+                    ListHeaderComponent={<Spacer height={10} />}
+                    ListFooterComponent={<Spacer height={tabBarHeight} />}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    maxItemsPerRow={2}
+                    itemDimension={screenWidth / 2}
+                    spacing={0}
+                    data={products}
+                    renderItem={({ item: result, index }) => (
+                        <ProductCard key={index} product={result} sliderHeight={135} wrapperStyle={{ paddingLeft: 6, paddingRight: 6, paddingBottom: 10 }} />
+                    )}
+                />
             </YStack>
         </SafeAreaView>
     );
