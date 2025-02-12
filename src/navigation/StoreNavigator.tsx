@@ -6,7 +6,7 @@ import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from 'tamagui';
-import { storefrontConfig, get, config, toArray } from '../utils';
+import { storefrontConfig, get, config, toArray, adjustOpacity } from '../utils';
 import { configCase } from '../utils/format';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
 import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreInfo } from './stacks/StoreStack';
@@ -334,28 +334,40 @@ const StoreNavigator = createBottomTabNavigator({
     // initialRouteName: storefrontConfig('storeNavigator.defaultTab', 'StoreHomeTab'),
     layout: StoreLayout,
     screenOptions: ({ route, navigation }) => {
-        const theme = useTheme();
         const { isDarkMode } = useAppTheme();
+        const theme = useTheme();
+        const background = storefrontConfig('storeNavigator.tabBarBackgroundColor', 'blur');
+        const backgroundColor = background === 'blur' ? 'transparent' : theme[background].val;
+        const borderColor = background === 'blur' ? 'transparent' : theme[`${background}Border`].val;
+        const activeColor = background === 'blur' ? theme.primary.val : theme[`${background}Text`].val;
+        const inactiveColor = background === 'blur' ? theme.secondary.val : adjustOpacity(theme[`${background}Text`].val, isDarkMode ? 0.35 : 1);
 
         return {
             headerShown: false,
-            tabBarBackground: () => (
-                <View style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-                    <BlurView tint={isDarkMode ? 'dark' : 'light'} intensity={100} style={StyleSheet.absoluteFill} />
-                </View>
-            ),
-            tabBarInactiveTintColor: theme.secondary.val,
-            tabBarActiveTintColor: theme.primary.val,
+            tabBarBackground: () => {
+                if (background === 'blur') {
+                    return (
+                        <View style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'transparent' }}>
+                            <BlurView tint={isDarkMode ? 'dark' : 'xlight'} blurAmount={6} style={StyleSheet.absoluteFill} />
+                        </View>
+                    );
+                }
+
+                return <View style={[StyleSheet.absoluteFill, { width: '100%', height: '100%', backgroundColor, borderColor }]} />;
+            },
+            tabBarInactiveTintColor: inactiveColor,
+            tabBarActiveTintColor: activeColor,
             tabBarStyle: {
-                backgroundColor: theme.background.val,
+                position: 'absolute',
+                backgroundColor,
                 borderTopWidth: 1,
-                borderTopColor: isDarkMode ? theme.borderColor.val : theme['$gray-600'].val,
-                position: 'relative',
+                borderTopColor: borderColor,
+                elevation: 0,
             },
             tabBarIcon: ({ focused }) => {
                 const icon = getDefaultTabIcon(route.name);
 
-                return <FontAwesomeIcon icon={icon} size={20} color={focused ? theme.primary.val : theme.secondary.val} />;
+                return <FontAwesomeIcon icon={icon} size={20} color={focused ? activeColor : inactiveColor} />;
             },
             tabBarLabelStyle: ({ focused }) => {
                 return {

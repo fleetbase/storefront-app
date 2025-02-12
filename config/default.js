@@ -7,6 +7,7 @@ export const DefaultConfig = {
     storeNavigator: {
         tabs: toArray(config('STORE_NAVIGATOR_TABS', 'StoreHomeTab,StoreSearchTab,StoreMapTab,StoreCartTab,StoreProfileTab')), // Additional tabs: StoreFoodTruckTab,
         defaultTab: toArray(config('STORE_NAVIGATOR_DEFAULT_TAB', 'StoreHomeTab')),
+        tabBarBackgroundColor: config('STORE_NAVIGATOR_TAB_BAR_BG', 'blur'),
     },
     defaultServiceArea: config('DEFAULT_SERVICE_AREA'),
     defaultLocale: config('DEFAULT_LOCALE', 'en'),

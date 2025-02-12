@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { ScrollView, Animated } from 'react-native';
 import { YStack, useTheme } from 'tamagui';
 import StoreHeader from '../components/StoreHeader';
@@ -10,6 +11,7 @@ import CategoryProductSlider from '../components/CategoryProductSlider';
 import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import LocationPicker from '../components/LocationPicker';
+import Spacer from '../components/Spacer';
 import { storefrontConfig } from '../utils';
 
 const StoreHome = ({ route }) => {
@@ -21,6 +23,7 @@ const StoreHome = ({ route }) => {
     const { info } = useStorefrontInfo();
     const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
     const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
+    const tabBarHeight = useBottomTabBarHeight();
 
     // Interpolated animations
     const headerOpacity = scrollY.interpolate({
@@ -106,6 +109,7 @@ const StoreHome = ({ route }) => {
                         ))}
                     </YStack>
                 </YStack>
+                <Spacer height={tabBarHeight} />
             </ScrollView>
         </YStack>
     );

@@ -147,7 +147,9 @@ const ProductScreen = ({ route = {} }) => {
                         size='$4'
                         alignSelf='center'
                         borderRadius='$4'
+                        borderWidth={1}
                         bg='$primary'
+                        borderColor='$primaryBorder'
                         color='white'
                         width='100%'
                         alignItems='center'
@@ -168,10 +170,10 @@ const ProductScreen = ({ route = {} }) => {
                                 <Spinner />
                             </Button.Icon>
                         )}
-                        <Button.Text fontSize='$5' fontWeight='normal'>
+                        <Button.Text color='$primaryText' fontSize='$5' fontWeight='normal'>
                             Add to Cart
                         </Button.Text>
-                        <Button.Text fontSize='$6' fontWeight='bold'>
+                        <Button.Text color='white' fontSize='$6' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}
                         </Button.Text>
                     </Button>

@@ -42,14 +42,28 @@ const MoneyPercentAdjuster = ({ value: initialValue = 100, currency = 'USD', isP
     return (
         <XStack ai='center' justifyContent='space-between' style={style}>
             <XStack flex={1} space='$3'>
-                <Button onPress={() => togglePercent(true)} size='$4' circular backgroundColor={isPercent ? '$green-400' : '$secondary'}>
+                <Button
+                    onPress={() => togglePercent(true)}
+                    size='$4'
+                    circular
+                    borderWidth={1}
+                    bg={isPercent ? '$success' : '$secondary'}
+                    borderColor={isPercent ? '$successBorder' : '$secondary'}
+                >
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faPercent} color={isPercent ? theme['green-900'].val : theme['$textSecondary'].val} size={20} />
+                        <FontAwesomeIcon icon={faPercent} color={isPercent ? theme['$successText'].val : theme['$textSecondary'].val} size={20} />
                     </Button.Icon>
                 </Button>
-                <Button onPress={() => togglePercent(false)} size='$4' circular backgroundColor={!isPercent ? '$green-400' : '$secondary'}>
+                <Button
+                    onPress={() => togglePercent(false)}
+                    size='$4'
+                    circular
+                    borderWidth={1}
+                    bg={!isPercent ? '$success' : '$secondary'}
+                    borderColor={!isPercent ? '$successBorder' : '$secondary'}
+                >
                     <Button.Icon>
-                        <FontAwesomeIcon icon={faMoneyBill} color={!isPercent ? theme['green-900'].val : theme['$textSecondary'].val} size={24} />
+                        <FontAwesomeIcon icon={faMoneyBill} color={!isPercent ? theme['$successText'].val : theme['$textSecondary'].val} size={24} />
                     </Button.Icon>
                 </Button>
             </XStack>

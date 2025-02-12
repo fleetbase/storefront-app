@@ -5,6 +5,7 @@ import { isOrderNotification } from '../utils/notifications';
 import { loadPersistedResource } from '../utils';
 import { useNotification } from '../contexts/NotificationContext';
 import useFleetbase from '../hooks/use-fleetbase';
+import Spacer from '../components/Spacer';
 
 const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }) => {
     const navigation = useNavigation();

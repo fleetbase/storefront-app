@@ -141,9 +141,9 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                                     style={buttonStyle}
                                     alignSelf='center'
                                     borderRadius='$4'
-                                    bg='$blue-900'
                                     borderWidth={1}
-                                    borderColor='$blue-600'
+                                    bg='$primary'
+                                    borderColor='$primaryBorder'
                                     color='white'
                                     width='100%'
                                     hoverStyle={{
@@ -161,7 +161,7 @@ const ProductCard = ({ product, onPress, onAddToCart, style = {}, favoriteIcon, 
                                         </Button.Icon>
                                     )}
 
-                                    <Button.Text fontSize='$6' fontWeight='$5'>
+                                    <Button.Text color='$primaryText' fontSize='$6' fontWeight='$5'>
                                         Add to Cart
                                     </Button.Text>
                                 </Button>

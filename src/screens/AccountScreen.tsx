@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, FlatList, Pressable, ScrollView } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
@@ -12,10 +13,12 @@ import { useLanguage } from '../contexts/LanguageContext';
 import useAppTheme from '../hooks/use-app-theme';
 import DeviceInfo from 'react-native-device-info';
 import storage from '../utils/storage';
+import Spacer from '../components/Spacer';
 
 const AccountScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
     const { t, language, languages, setLocale } = useLanguage();
     const { userColorScheme, appTheme, changeScheme, schemes } = useAppTheme();
     const { customer, logout, isSigningOut } = useAuth();
@@ -254,14 +257,15 @@ const AccountScreen = () => {
                         />
                     </YStack>
                     <YStack padding='$4' mb='$5'>
-                        <Button marginTop='$4' bg='$red-900' borderWidth={1} borderColor='$red-600' size='$5' onPress={handleSignout} rounded width='100%'>
-                            <Button.Icon>{isSigningOut ? <Spinner color='$red-100' /> : <YStack />}</Button.Icon>
-                            <Button.Text color='$red-100' fontWeight='bold'>
+                        <Button marginTop='$4' bg='$error' borderColor='$errorBorder' borderWidth={1} size='$5' onPress={handleSignout} rounded width='100%'>
+                            <Button.Icon>{isSigningOut ? <Spinner color='$errorText' /> : <YStack />}</Button.Icon>
+                            <Button.Text color='$errorText' fontWeight='bold'>
                                 {t('AccountScreen.signOut')}
                             </Button.Text>
                         </Button>
                     </YStack>
                 </YStack>
+                <Spacer height={tabBarHeight} />
             </ScrollView>
         </SafeAreaView>
     );

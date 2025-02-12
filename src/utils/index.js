@@ -524,6 +524,24 @@ export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
     return result;
 }
 
+export function firstRouteName(navigation, routeName) {
+    const state = navigation.getState();
+    const routes = state.routes || [];
+
+    return routes.length >= 0 ? routes[0].name : null;
+}
+
+export function routeWasAccessed(navigation, routeName) {
+    const state = navigation.getState();
+    const routes = state.routes || [];
+
+    return routes.some((route) => route.name === routeName);
+}
+
+export function wasAccessedFromCartModal(navigation) {
+    return routeWasAccessed(navigation, 'CartModal');
+}
+
 export function hexToRGBA(hex, opacity = 1) {
     if (!hex) return `rgba(0, 0, 0, ${opacity})`; // Default to black if no color is provided
 
@@ -543,23 +561,66 @@ export function hexToRGBA(hex, opacity = 1) {
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
 
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    return `rgba(${r}, ${g}, ${b}, ${opacity.toFixed(2)})`;
 }
 
-export function firstRouteName(navigation, routeName) {
-    const state = navigation.getState();
-    const routes = state.routes || [];
+export function adjustOpacity(color, opacityFactor) {
+    let r,
+        g,
+        b,
+        a = 1;
 
-    return routes.length >= 0 ? routes[0].name : null;
+    if (color.startsWith('#')) {
+        // Convert HEX to RGBA and set opacity directly
+        return hexToRGBA(color, opacityFactor);
+    }
+
+    if (color.startsWith('rgba')) {
+        // Extract RGBA values
+        [r, g, b, a] = color.match(/\d+(\.\d+)?/g).map(Number);
+    } else if (color.startsWith('rgb')) {
+        // Extract RGB values and assume full opacity
+        [r, g, b] = color.match(/\d+/g).map(Number);
+        a = 1; // Default full opacity if not provided
+    } else if (color.startsWith('hsla')) {
+        return adjustHslaOpacity(color, opacityFactor);
+    } else if (color.startsWith('hsl')) {
+        return adjustHslaOpacity(color.replace('hsl', 'hsla').replace(')', ', 1)'), opacityFactor);
+    } else {
+        throw new Error('Invalid color format');
+    }
+
+    // Directly set opacity instead of multiplying it
+    a = Math.max(0, Math.min(1, opacityFactor)); // Direct assignment instead of multiplication
+
+    return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`;
 }
 
-export function routeWasAccessed(navigation, routeName) {
-    const state = navigation.getState();
-    const routes = state.routes || [];
-
-    return routes.some((route) => route.name === routeName);
+export function adjustHslaOpacity(hsla, opacityFactor) {
+    let [h, s, l, a = 1] = hsla.match(/\d+(\.\d+)?/g).map(Number);
+    a = Math.max(0, Math.min(1, opacityFactor));
+    return `hsla(${h}, ${s}%, ${l}%, ${a.toFixed(2)})`;
 }
 
-export function wasAccessedFromCartModal(navigation) {
-    return routeWasAccessed(navigation, 'CartModal');
+export function lightenColor(color, factor = 0.75) {
+    return adjustOpacity(color, factor);
+}
+
+export function darkenColor(color, factor = 0.5) {
+    return adjustOpacity(color, factor);
+}
+
+export function parseConfigObjectString(objectString) {
+    if (!objectString || typeof objectString !== 'string' || objectString.trim() === '') {
+        return {};
+    }
+
+    return objectString.split(',').reduce((acc, pair) => {
+        let [key, value] = pair.split(':');
+        if (key && value !== undefined) {
+            // Ensure key exists and value is not undefined
+            acc[key.trim()] = value.trim();
+        }
+        return acc;
+    }, {});
 }

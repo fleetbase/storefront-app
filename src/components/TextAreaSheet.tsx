@@ -101,11 +101,11 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onChang
                         />
                     </YStack>
                     <YStack position='absolute' left={0} right={0} bottom={0} padding='$4'>
-                        <Button bg='$blue-900' borderWidth={1} borderColor='$blue-600' onPress={closeBottomSheet}>
+                        <Button borderWidth={1} bg='$primary' borderColor='$primaryBorder' onPress={closeBottomSheet}>
                             <Button.Icon>
-                                <FontAwesomeIcon icon={faSave} />
+                                <FontAwesomeIcon icon={faSave} color={theme['$primaryText'].val} />
                             </Button.Icon>
-                            <Button.Text>Done</Button.Text>
+                            <Button.Text color='$primaryText'>Done</Button.Text>
                         </Button>
                     </YStack>
                 </BottomSheet>

@@ -96,8 +96,8 @@ const StripePaymentSheet = () => {
                 </YStack>
             </XStack>
             <YStack>
-                <Button onPress={handleAddPaymentMethodViaSheet} bg='$blue-900' borderWidth={1} borderColor='$blue-600' px='$3' py='$1' disabled={!paymentSheetEnabled}>
-                    <Button.Text fontSize={13} color='$blue-100'>
+                <Button onPress={handleAddPaymentMethodViaSheet} borderWidth={1} bg='$primary' borderColor='$primaryBorder' px='$3' py='$1' disabled={!paymentSheetEnabled}>
+                    <Button.Text fontSize={13} color='$primaryText'>
                         Change
                     </Button.Text>
                 </Button>

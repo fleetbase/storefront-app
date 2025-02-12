@@ -104,9 +104,9 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                             </YStack>
                         </XStack>
                         <YStack>
-                            <Button onPress={openBottomSheet} bg='$blue-900' borderWidth={1} borderColor='$blue-600'>
-                                {isLoading ? <Spinner color='$blue-100' /> : <FontAwesomeIcon icon={faPenToSquare} color={theme['blue-100'].val} size={15} />}
-                                <Button.Text color='$blue-100'>Change</Button.Text>
+                            <Button onPress={openBottomSheet} borderWidth={1} bg='$primary' borderColor='$primaryBorder'>
+                                {isLoading ? <Spinner color='$primaryText' /> : <FontAwesomeIcon icon={faPenToSquare} color={theme['$primaryText'].val} size={15} />}
+                                <Button.Text color='$primaryText'>Change</Button.Text>
                             </Button>
                         </YStack>
                     </XStack>

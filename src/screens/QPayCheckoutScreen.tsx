@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
@@ -18,6 +19,7 @@ import { wasAccessedFromCartModal, firstRouteName } from '../utils';
 const QPayCheckoutScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
     const { enabled } = useStorefrontInfo();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
     const { invoice, totalAmount, handleDeliveryLocationChange, receivingOptions, setPickup, isPickup, isPickupEnabled, lineItems, setTipOptions, isNotReady, isLoading } = useQpayCheckout({
@@ -75,7 +77,7 @@ const QPayCheckoutScreen = () => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={0} left={0} right={0} padding='$5' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
                 <CheckoutButton onCheckout={() => paymentSheetRef.current.open()} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} />

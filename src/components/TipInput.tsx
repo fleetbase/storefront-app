@@ -15,7 +15,7 @@ const TipInput = ({ label, isTipping, setTipping, tipValue, setTipValue, currenc
                     </Label>
                 </YStack>
                 <YStack flex={1} alignItems='flex-end'>
-                    <Switch id={id} onCheckedChange={setTipping} checked={isTipping} bg={isTipping ? '$green-500' : '$gray-500'} borderColor='$gray-500'>
+                    <Switch id={id} onCheckedChange={setTipping} checked={isTipping} bg={isTipping ? '$success' : '$gray-500'} borderColor={isTipping ? '$successBorder' : '$gray-800'}>
                         <Switch.Thumb animation='quick' />
                     </Switch>
                 </YStack>

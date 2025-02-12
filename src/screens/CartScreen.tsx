@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -21,6 +22,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const CartScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
@@ -139,12 +141,16 @@ const CartScreen = () => {
         <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
             <Pressable style={{ flex: 1 }} onPress={() => handleEdit(cartItem)}>
                 <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
-                    <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
+                    <FontAwesomeIcon icon={faPencilAlt} size={20} color={theme['$warningText'].val} />
                 </YStack>
             </Pressable>
             <Pressable style={{ flex: 1 }} onPress={() => handleDelete(cartItem)}>
                 <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
-                    {isLoading(`removeCartItem_${cartItem.id}`) ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
+                    {isLoading(`removeCartItem_${cartItem.id}`) ? (
+                        <Spinner size={40} color={theme['$errorText'].val} />
+                    ) : (
+                        <FontAwesomeIcon icon={faTrash} size={20} color={theme['$errorText'].val} />
+                    )}
                 </YStack>
             </Pressable>
         </XStack>
@@ -174,12 +180,12 @@ const CartScreen = () => {
                                 <Pressable onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
                                     <XStack flex={1} space='$3' height='100%'>
                                         <YStack>
-                                            <XStack width={40} height={40} borderWidth={1} borderColor='$secondary' borderRadius='$3' alignItems='center' justifyContent='center'>
+                                            <XStack width={40} height={40} borderWidth={1} borderColor='$borderColor' borderRadius='$3' alignItems='center' justifyContent='center'>
                                                 <XStack alignItems='flex-end'>
-                                                    <Text fontSize='$1' color='$primary'>
+                                                    <Text fontSize='$1' color='$textPrimary'>
                                                         x
                                                     </Text>
-                                                    <Text fontSize='$5' fontWeight='bold' color='$primary'>
+                                                    <Text fontSize='$5' fontWeight='bold' color='$textPrimary'>
                                                         {cartItem.quantity}
                                                     </Text>
                                                 </XStack>
@@ -242,7 +248,7 @@ const CartScreen = () => {
                             </XStack>
                             <YStack width={150} alignItems='flex-end'>
                                 <YStack>
-                                    <Text fontSize='$5' color='$primary' fontWeight='bold'>
+                                    <Text fontSize='$5' color='$textPrimary' fontWeight='bold'>
                                         {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
                                     </Text>
                                 </YStack>
@@ -269,7 +275,7 @@ const CartScreen = () => {
                 </XStack>
                 <YStack>
                     <Pressable onPress={handleEmpty}>
-                        <Text color='$error' fontSize='$4'>
+                        <Text color='$errorBorder' fontSize='$4'>
                             Empty Cart
                         </Text>
                     </Pressable>
@@ -286,7 +292,7 @@ const CartScreen = () => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={0}
+                    bottom={tabBarHeight}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -306,8 +312,8 @@ const CartScreen = () => {
                             </Text>
                         </YStack>
                         <YStack>
-                            <Button onPress={handleCheckout} bg='$green-900' borderWidth={1} borderColor='$green-600' color='white' width={180} paddingVertical='$2' rounded>
-                                <Button.Text fontSize='$6' fontWeight='bold' color='white'>
+                            <Button onPress={handleCheckout} bg='$success' borderColor='$successBorder' borderWidth={1} width={180} paddingVertical='$2' rounded>
+                                <Button.Text fontSize='$6' fontWeight='bold' color='$successText'>
                                     Checkout
                                 </Button.Text>
                             </Button>
