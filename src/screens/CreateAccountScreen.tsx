@@ -66,7 +66,7 @@ const CreateAccountScreen = ({ route }) => {
                     <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                 </YStack>
 
-                <YStack space='$3' width='100%' padding='$5'>
+                <YStack space='$3' width='100%' px='$4'>
                     <Button size='$5' onPress={handleLogin} bg='$secondary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
                         <Button.Text color='$textPrimary' fontWeight='bold'>
                             Have an account already? Login

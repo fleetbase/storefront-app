@@ -8,6 +8,7 @@ import { storefrontConfig } from '../utils';
 import { PhoneLoginButton, AppleLoginButton, FacebookLoginButton, GoogleLoginButton } from '../components/Buttons';
 import useOAuth from '../hooks/use-oauth';
 import LinearGradient from 'react-native-linear-gradient';
+import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 
 const LoginScreen = () => {
     const navigation = useNavigation();
@@ -30,19 +31,21 @@ const LoginScreen = () => {
     return (
         <ImageBackground source={storefrontConfig('backgroundImages.LoginScreen')} style={[styles.background, { backgroundColor: theme.background.val }]} resizeMode='cover'>
             <LinearGradient colors={['rgba(0, 0, 0, 0.0)', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.8)']} style={StyleSheet.absoluteFillObject} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} />
-            <SafeAreaView style={{ flex: 1 }}>
-                <YStack flex={1} justifyContent='flex-end' alignItems='center' space='$3' padding='$5'>
-                    <PhoneLoginButton onPress={handlePhoneLogin} />
-                    {loginSupported('apple') && <AppleLoginButton onPress={() => handleOAuthLogin('apple')} />}
-                    {loginSupported('facebook') && <FacebookLoginButton onPress={() => handleOAuthLogin('facebook')} />}
-                    {loginSupported('google') && <GoogleLoginButton onPress={() => handleOAuthLogin('google')} />}
-                </YStack>
-            </SafeAreaView>
-            {loading && (
-                <YStack justifyContent='center' alignItems='center' bg='rgba(0, 0, 0, 0.6)' position='absolute' top={0} bottom={0} left={0} right={0}>
-                    <Spinner size='large' color='white' />
-                </YStack>
-            )}
+            <AbsoluteTabBarScreenWrapper>
+                <SafeAreaView style={{ flex: 1 }}>
+                    <YStack flex={1} justifyContent='flex-end' alignItems='center' space='$3' padding='$4'>
+                        <PhoneLoginButton onPress={handlePhoneLogin} />
+                        {loginSupported('apple') && <AppleLoginButton onPress={() => handleOAuthLogin('apple')} />}
+                        {loginSupported('facebook') && <FacebookLoginButton onPress={() => handleOAuthLogin('facebook')} />}
+                        {loginSupported('google') && <GoogleLoginButton onPress={() => handleOAuthLogin('google')} />}
+                    </YStack>
+                </SafeAreaView>
+                {loading && (
+                    <YStack justifyContent='center' alignItems='center' bg='rgba(0, 0, 0, 0.6)' position='absolute' top={0} bottom={0} left={0} right={0}>
+                        <Spinner size='large' color='white' />
+                    </YStack>
+                )}
+            </AbsoluteTabBarScreenWrapper>
         </ImageBackground>
     );
 };

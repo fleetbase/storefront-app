@@ -5,21 +5,22 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Spacer from './Spacer';
 
-const AbsoluteTabBarScreenWrapper = ({ children, scrollable = false }) => {
-    const theme = useTheme();
-    const tabBarHeight = useBottomTabBarHeight();
-    const insets = useSafeAreaInsets();
-    const paddingBottom = tabBarHeight;
+const AbsoluteTabBarScreenWrapper = ({ children, scrollable = false, ...props }) => {
+    const paddingBottom = useBottomTabBarHeight();
 
     if (scrollable) {
         return (
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom }} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} {...props}>
                 {children}
             </ScrollView>
         );
     }
 
-    return <View style={{ flex: 1, backgroundColor: theme.background.val, paddingBottom }}>{children}</View>;
+    return (
+        <View style={{ flex: 1, paddingBottom }} {...props}>
+            {children}
+        </View>
+    );
 };
 
 export default AbsoluteTabBarScreenWrapper;
