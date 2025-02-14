@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
-import { Driver } from '@fleetbase/sdk';
+import { Driver, Vehicle } from '@fleetbase/sdk';
 import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
-import { config, storefrontConfig } from '../utils';
+import { config, storefrontConfig, getFoodTruckById } from '../utils';
 import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import LocationMarker from './LocationMarker';
 import DriverMarker from './DriverMarker';
+import VehicleMarker from './VehicleMarker';
+import LoadingOverlay from './LoadingOverlay';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
+import useStorefront from '../hooks/use-storefront';
+import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
 
+/* Helper functions for calculating map region values */
 const calculateDeltas = (zoom) => {
     const baseDelta = 0.005;
     return baseDelta * zoom;
@@ -38,13 +43,18 @@ const getCoordinatesObject = (place) => {
     return { latitude, longitude };
 };
 
-const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm' }) => {
+const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm', customOrigin }) => {
     const theme = useTheme();
-    const { store, currentStoreLocation } = useStoreLocations();
-    const { currentLocation } = useCurrentLocation();
+    const { storefront } = useStorefront();
+    const { store } = useStoreLocations();
     const mapRef = useRef(null);
-    const start = restoreFleetbasePlace(order.getAttribute('payload.pickup'));
-    const end = restoreFleetbasePlace(order.getAttribute('payload.dropoff'));
+
+    // Determine the initial origin from the current store location.
+    const pickup = order.getAttribute('payload.pickup');
+    const dropoff = order.getAttribute('payload.dropoff');
+    const initialOrigin = pickup === undefined ? createFauxPlace() : restoreFleetbasePlace(pickup);
+    const [start, setStart] = useState(initialOrigin);
+    const end = restoreFleetbasePlace(dropoff);
     const origin = getCoordinatesObject(start);
     const destination = getCoordinatesObject(end);
     const initialDeltas = calculateDeltas(zoom);
@@ -54,8 +64,10 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         longitudeDelta: initialDeltas,
     });
     const [zoomLevel, setZoomLevel] = useState(calculateZoomLevel(initialDeltas));
+    const [findingOrigin, setFindingOrigin] = useState(false);
     const markerOffset = calculateOffset(zoomLevel);
     const driverAssigned = order.getAttribute('driver_assigned') ? new Driver(order.getAttribute('driver_assigned')) : null;
+    const isOriginFoodTruck = start.resource === 'food-truck';
 
     const handleRegionChangeComplete = (region) => {
         setMapRegion(region);
@@ -82,8 +94,66 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         );
     };
 
+    const updateOriginFromCustomOrigin = useCallback(async () => {
+        if (!customOrigin) return;
+
+        if (typeof customOrigin !== 'string') {
+            // Assume customOrigin is already an origin object.
+            if (customOrigin.id && customOrigin.id !== start.id) {
+                setStart(customOrigin);
+            }
+            return;
+        }
+
+        // Will be loading a new origin
+        setFindingOrigin(true);
+
+        // customOrigin is a string ID.
+        if (customOrigin.startsWith('food_truck')) {
+            const cachedFoodTruck = getFoodTruckById(customOrigin);
+            if (cachedFoodTruck) {
+                setStart(cachedFoodTruck);
+                setFindingOrigin(false);
+            }
+
+            try {
+                const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
+                setStart(foodTruck);
+            } catch (error) {
+                console.error('Error fetching food truck origin:', error);
+            } finally {
+                setFindingOrigin(false);
+            }
+        } else if (customOrigin.startsWith('store_location')) {
+            if (customOrigin !== start.store_location_id) {
+                try {
+                    const storeLocation = await store.getLocation(customOrigin);
+                    setStart(
+                        restoreFleetbasePlace({
+                            ...storeLocation.getAttribute('place'),
+                            store_location_id: storeLocation.id,
+                        })
+                    );
+                } catch (error) {
+                    console.error('Error fetching store location origin:', error);
+                } finally {
+                    setFindingOrigin(false);
+                }
+            }
+        }
+    }, [customOrigin, storefront, store, start]);
+
+    // Run the update when customOrigin changes.
+    useEffect(() => {
+        console.log('use effect called');
+        if (!storefront || !store) return;
+
+        updateOriginFromCustomOrigin();
+    }, [storefront, store]);
+
     return (
         <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>
+            <LoadingOverlay visible={findingOrigin} />
             <MapView
                 ref={mapRef}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}
@@ -92,37 +162,48 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 {...mapViewProps}
             >
-                {driverAssigned && <DriverMarker driver={driverAssigned} onMovement={focusDriver} />}
-                <Marker coordinate={origin} centerOffset={markerOffset}>
-                    <YStack
-                        mb={8}
-                        px='$3'
-                        py='$2'
-                        bg='$gray-900'
-                        borderRadius='$4'
-                        space='$1'
-                        shadowColor='$shadowColor'
-                        shadowOffset={markerOffset}
-                        shadowOpacity={0.25}
-                        shadowRadius={3}
-                        width={180}
-                    >
-                        <XStack space='$2'>
-                            <YStack justifyContent='center'>
-                                <FontAwesomeIcon icon={faStore} color={theme['$gray-200'].val} size={20} />
-                            </YStack>
-                            <YStack flex={1} space='$1'>
-                                <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                    {start.getAttribute('name', `${store.getAttribute('name')} Location`)}
-                                </Text>
-                                <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
-                                    {formattedAddressFromPlace(start)}
-                                </Text>
-                            </YStack>
-                        </XStack>
-                    </YStack>
-                    <LocationMarker size={markerSize} />
-                </Marker>
+                {driverAssigned && !isOriginFoodTruck && <DriverMarker driver={driverAssigned} onMovement={focusDriver} />}
+                {isOriginFoodTruck && (
+                    <VehicleMarker key={start.id} vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}>
+                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                Truck {start.getAttribute('vehicle.plate_number')}
+                            </Text>
+                        </YStack>
+                    </VehicleMarker>
+                )}
+                {!isOriginFoodTruck && (
+                    <Marker coordinate={origin} centerOffset={markerOffset}>
+                        <YStack
+                            mb={8}
+                            px='$3'
+                            py='$2'
+                            bg='$gray-900'
+                            borderRadius='$4'
+                            space='$1'
+                            shadowColor='$shadowColor'
+                            shadowOffset={markerOffset}
+                            shadowOpacity={0.25}
+                            shadowRadius={3}
+                            width={180}
+                        >
+                            <XStack space='$2'>
+                                <YStack justifyContent='center'>
+                                    <FontAwesomeIcon icon={faStore} color={theme['$gray-200'].val} size={20} />
+                                </YStack>
+                                <YStack flex={1} space='$1'>
+                                    <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
+                                        {start.getAttribute('name', `${store.getAttribute('name')} Location`)}
+                                    </Text>
+                                    <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
+                                        {formattedAddressFromPlace(start)}
+                                    </Text>
+                                </YStack>
+                            </XStack>
+                        </YStack>
+                        <LocationMarker size={markerSize} />
+                    </Marker>
+                )}
                 <Marker coordinate={destination} centerOffset={markerOffset}>
                     <YStack
                         mb={8}

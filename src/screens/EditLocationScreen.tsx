@@ -3,7 +3,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBuildingUser, faHouse, faBuilding, faHotel, faHospital, faSchool, faChair, faAsterisk } from '@fortawesome/free-solid-svg-icons';
 import { Place } from '@fleetbase/sdk';
@@ -11,6 +10,7 @@ import { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { formattedAddressFromSerializedPlace, restoreFleetbasePlace } from '../utils/location';
 import { isEmpty, toBoolean } from '../utils';
+import { toast } from '../utils/toast';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -127,11 +127,11 @@ const EditLocationScreen = ({ route }) => {
     const handleSavePlace = async () => {
         try {
             await runWithLoading(addLocation(getUpdatedPlace(), makeDefault), 'saving');
-            toast.success('Address saved.', { position: ToastPosition.bottom });
+            toast.success('Address saved.');
             handleRedirect();
         } catch (error) {
             console.log('Error saving address details:', error);
-            toast.error(error.message, { position: ToastPosition.bottom });
+            toast.error(error.message);
         }
     };
 
@@ -140,11 +140,11 @@ const EditLocationScreen = ({ route }) => {
         if (restoredInstance && restoredInstance.isSaved) {
             try {
                 await runWithLoading(updateDefaultLocationPromise(restoredInstance), 'defaulting');
-                toast.success(`${restoredInstance.getAttribute('name')} is now your default location.`, { position: ToastPosition.bottom });
+                toast.success(`${restoredInstance.getAttribute('name')} is now your default location.`);
                 handleRedirect();
             } catch (error) {
                 console.log('Error making address default location:', error);
-                toast.error(error.message, { position: ToastPosition.bottom });
+                toast.error(error.message);
             }
         }
     };
@@ -157,7 +157,7 @@ const EditLocationScreen = ({ route }) => {
         if (restoredInstance && restoredInstance.isSaved) {
             try {
                 await runWithLoading(deleteLocation(restoredInstance), 'deleting');
-                toast.success(`${restoredInstance.getAttribute('name')} was deleted.`, { position: ToastPosition.bottom });
+                toast.success(`${restoredInstance.getAttribute('name')} was deleted.`);
 
                 // If the deleted place was the current location and there’s another saved location, make it the default
                 if (isCurrentLocation && nextPlace) {
@@ -167,7 +167,7 @@ const EditLocationScreen = ({ route }) => {
                 handleRedirect();
             } catch (error) {
                 console.error('Error deleting saved address: ', error);
-                toast.error(error.message, { position: ToastPosition.bottom });
+                toast.error(error.message);
             }
         }
     };
@@ -180,7 +180,7 @@ const EditLocationScreen = ({ route }) => {
         try {
             setPlace({ ...place, type });
         } catch (error) {
-            toast.error('Unable to select location type.', { position: ToastPosition.bottom });
+            toast.error('Unable to select location type.');
         }
     };
 

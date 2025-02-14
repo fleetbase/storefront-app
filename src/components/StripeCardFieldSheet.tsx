@@ -3,7 +3,6 @@ import { Pressable } from 'react-native';
 import { Spinner, Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faSave, faPlus, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useStripe, CardForm } from '@stripe/stripe-react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';

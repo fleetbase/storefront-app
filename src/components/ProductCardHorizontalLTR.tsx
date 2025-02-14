@@ -3,7 +3,7 @@ import { Dimensions, Pressable } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { Spinner, Card, Text, YStack, XStack, H2, Paragraph, Button, Image, useTheme } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
 import { productHasOptions } from '../utils/product';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
@@ -41,7 +41,7 @@ const ProductCardHorizontalLTR = ({ product, onPress, onAddToCart, style = {}, f
             const updatedCart = await runWithLoading(cart.add(product.id, quantity), 'addToCart');
             updateCart(updatedCart);
             setQuantity(1);
-            toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${product.getAttribute('name')} added to cart.`);
         } catch (error) {
             console.error('Error Adding to Cart', error.message);
         }

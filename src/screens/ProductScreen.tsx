@@ -4,9 +4,9 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
+import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
@@ -63,7 +63,7 @@ const ProductScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }), 'addToCart');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} added to cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${product.getAttribute('name')} added to cart.`);
             navigation.goBack();
         } catch (error) {
             console.log('Error Adding to Cart', error.message);

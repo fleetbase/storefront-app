@@ -3,7 +3,6 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { PortalHost } from '@gorhom/portal';
 import CustomerLocationSelect from '../components/CustomerLocationSelect';
 import CartContents from '../components/CartContents';

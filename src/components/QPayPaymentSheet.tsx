@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Linking } from 'react-native';
 import { Image, Text, YStack, XStack, Separator, useTheme, Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { toast } from '../utils/toast';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import FastImage from 'react-native-fast-image';
@@ -77,7 +77,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                     if (supported) {
                         await Linking.openURL(bank.link);
                     } else {
-                        toast.error('Unable to open bank app.', { position: ToastPosition.BOTTOM });
+                        toast.error('Unable to open bank app.');
                     }
                 } catch (err) {
                     console.error('Unable to open bank link:', err);

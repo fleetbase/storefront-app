@@ -1,7 +1,7 @@
 import Config from 'react-native-config';
 import { Platform, ActionSheetIOS, Alert } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
-import { lookup } from '@fleetbase/storefront';
+import { lookup, FoodTruck } from '@fleetbase/storefront';
 import storage, { getString } from './storage';
 import { capitalize } from './format';
 import { adapter, instance as storefrontInstance } from '../hooks/use-storefront';
@@ -623,4 +623,16 @@ export function parseConfigObjectString(objectString) {
         }
         return acc;
     }, {});
+}
+
+export function getFoodTruckById(id) {
+    const foodTrucks = storage.getArray('food_trucks');
+    if (isArray(foodTrucks)) {
+        const foundFoodTruck = foodTrucks.find((foodTruck) => foodTruck.id === id);
+        if (foundFoodTruck) {
+            return new FoodTruck(foundFoodTruck, adapter);
+        }
+    }
+
+    return null;
 }

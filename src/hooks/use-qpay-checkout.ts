@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
 import { get, storefrontConfig } from '../utils';
+import { toast } from '../utils/toast';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -174,7 +174,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     }
                 } catch (error) {
                     console.error('Error capturing order:', error);
-                    toast.error(error.message, { position: ToastPosition.BOTTOM });
+                    toast.error(error.message);
                     // Optionally, allow a retry by resetting the flag on error:
                     // hasOrderCompleted.current = false;
                 } finally {
@@ -193,7 +193,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Handle payment errors (avoid showing errors for not found payment)
     const handlePaymentError = useCallback(({ error, message }) => {
         if (error === 'PAYMENT_NOTFOUND') return;
-        toast.error(message, { position: ToastPosition.BOTTOM });
+        if (message) {
+            toast.error(message);
+        }
     }, []);
 
     // Extracted payment check function
@@ -235,7 +237,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                toast.error('Unable to calculate delivery fee.', { position: ToastPosition.TOP });
+                toast.error('Unable to calculate delivery fee.');
                 console.error('Error fetching service quote:', error);
             }
         };

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, FlatList, Pressable, ScrollView } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { showActionSheet, abbreviateName } from '../utils';
+import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,7 +23,7 @@ const AccountScreen = () => {
 
     const handleClearCache = () => {
         storage.clearStore();
-        toast.success(t('AccountScreen.cacheCleared'), { position: ToastPosition.BOTTOM });
+        toast.success(t('AccountScreen.cacheCleared'));
     };
 
     const handleSignout = () => {
@@ -72,9 +72,7 @@ const AccountScreen = () => {
                 if (buttonIndex !== options.length - 1) {
                     const selectedScheme = schemes[buttonIndex];
                     changeScheme(selectedScheme);
-                    toast.success(t('AccountScreen.schemeChanged', { selectedScheme }), {
-                        position: ToastPosition.BOTTOM,
-                    });
+                    toast.success(t('AccountScreen.schemeChanged', { selectedScheme }));
                 }
             },
         });
@@ -89,9 +87,7 @@ const AccountScreen = () => {
                 if (buttonIndex !== options.length - 1) {
                     const selectedLanguage = languages[buttonIndex];
                     setLocale(selectedLanguage.code);
-                    toast.success(t('AccountScreen.languageChanged', { selectedLanguage: selectedLanguage.native }), {
-                        position: ToastPosition.BOTTOM,
-                    });
+                    toast.success(t('AccountScreen.languageChanged', { selectedLanguage: selectedLanguage.native }));
                 }
             },
         });

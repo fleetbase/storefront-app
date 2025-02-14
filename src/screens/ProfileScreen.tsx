@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, FlatList, Pressable } from 'react-native';
 import { Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { abbreviateName, storefrontConfig } from '../utils';

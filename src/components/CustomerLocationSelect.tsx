@@ -3,7 +3,6 @@ import { Animated, SafeAreaView, Pressable, FlatList, LayoutAnimation, UIManager
 import { Spinner, Button, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';

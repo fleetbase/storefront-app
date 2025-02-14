@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, ImageBackground, StyleSheet } from 'react-native';
 import { Spinner, Stack, Text, YStack, useTheme, Button } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
 import { storefrontConfig } from '../utils';
 import { PhoneLoginButton, AppleLoginButton, FacebookLoginButton, GoogleLoginButton } from '../components/Buttons';

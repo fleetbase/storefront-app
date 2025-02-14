@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useStripe, initStripe } from '@stripe/stripe-react-native';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
+import { toast } from '../utils/toast';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -181,7 +181,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
             } catch (error) {
                 console.error('Error creating payment sheet:', error);
                 setError(error.message);
-                toast.error(error.message, { position: ToastPosition.BOTTOM });
+                toast.error(error.message);
             } finally {
                 setStripeLoading(false);
             }
@@ -235,14 +235,14 @@ export default function useStripeCheckout({ onOrderComplete }) {
             }
         } catch (err) {
             console.error('Error saving payment method:', err);
-            toast.error('Failed to save payment method.', { position: ToastPosition.BOTTOM });
+            toast.error('Failed to save payment method.');
         }
     }, [presentPaymentSheet, setPaymentMethod]);
 
     const handleAddPaymentMethod = useCallback(
         async (callback) => {
             if (!setupIntentClientSecret) {
-                toast.error('No setup intent available. Please try again.', { position: ToastPosition.BOTTOM });
+                toast.error('No setup intent available. Please try again.');
                 return;
             }
 
@@ -254,7 +254,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
                 if (error) {
                     console.error('Error confirming setup intent:', error);
-                    toast.error(error.message, { position: ToastPosition.BOTTOM });
+                    toast.error(error.message);
                 } else if (setupIntent && setupIntent.paymentMethodId) {
                     await updateCustomerMeta({ stripe_payment_method_id: setupIntent.paymentMethodId });
 
@@ -266,7 +266,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (err) {
                 console.error('Error saving payment method:', err);
-                toast.error('Failed to save payment method.', { position: ToastPosition.BOTTOM });
+                toast.error('Failed to save payment method.');
             } finally {
                 setStripeLoading(false);
             }
@@ -288,7 +288,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
                 if (paymentError) {
                     console.error('Error completing order:', paymentError);
-                    toast.error(paymentError.message, { position: ToastPosition.BOTTOM });
+                    toast.error(paymentError.message);
                 } else {
                     const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
@@ -304,7 +304,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
-                toast.error(error.message, { position: ToastPosition.BOTTOM });
+                toast.error(error.message);
             } finally {
                 setIsLoading(false);
             }
@@ -329,7 +329,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
                 if (paymentError) {
                     console.error('Error completing order:', paymentError);
-                    toast.error(paymentError.message, { position: ToastPosition.BOTTOM });
+                    toast.error(paymentError.message);
                 } else if (paymentIntent && paymentIntent.status === 'Succeeded') {
                     const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
@@ -345,7 +345,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
-                toast.error(error.message, { position: ToastPosition.BOTTOM });
+                toast.error(error.message);
             } finally {
                 setIsLoading(false);
             }
@@ -380,7 +380,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                toast.error('Unable to calculate delivery fee.', { position: ToastPosition.TOP });
+                toast.error('Unable to calculate delivery fee.');
                 console.error('Error fetching service quote:', error);
             }
         };

@@ -4,10 +4,10 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
+import { toast } from '../utils/toast';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
@@ -60,10 +60,10 @@ const CartItemScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.remove(cartItem.id), 'removeCartItem');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} removed from cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${product.getAttribute('name')} removed from cart.`);
             navigation.goBack();
         } catch (error) {
-            toast.error('Failed to remove item from cart', { position: ToastPosition.BOTTOM });
+            toast.error('Failed to remove item from cart');
             console.error('Error removing cart item:', error.message);
         }
     };
@@ -81,7 +81,7 @@ const CartItemScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.update(cartItem.id, quantity, { addons, variants }), 'updateCart');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} updated in cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${product.getAttribute('name')} updated in cart.`);
             navigation.goBack();
         } catch (error) {
             console.log('Error Adding to Cart', error.message);

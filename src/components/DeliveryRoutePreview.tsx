@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
 import { restoreFleetbasePlace, getCoordinatesObject, createFauxPlace, formattedAddressFromPlace } from '../utils/location';
-import { config, storefrontConfig } from '../utils';
+import { config, storefrontConfig, getFoodTruckById } from '../utils';
 import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import LocationMarker from './LocationMarker';
@@ -73,13 +73,13 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         setZoomLevel(newZoomLevel);
     };
 
-    /**
-     * updateOriginFromCustomOrigin:
-     * If a customOrigin prop is provided, this function determines whether it’s a string ID.
-     * If it is, and the ID starts with 'food_truck', it fetches the food truck data.
-     * If it starts with 'store_location' and is different from the default, it fetches that store location.
-     * If customOrigin is an object, it is assumed to be the new origin.
-     */
+    const fitToRoute = ({ coordinates }) => {
+        mapRef.current?.fitToCoordinates(coordinates, {
+            edgePadding: { top: 20, right: 0, bottom: 20, left: 0 },
+            animated: true,
+        });
+    };
+
     const updateOriginFromCustomOrigin = useCallback(async () => {
         if (!customOrigin) return;
 
@@ -96,6 +96,12 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
 
         // customOrigin is a string ID.
         if (customOrigin.startsWith('food_truck')) {
+            const cachedFoodTruck = getFoodTruckById(customOrigin);
+            if (cachedFoodTruck) {
+                setStart(cachedFoodTruck);
+                setFindingOrigin(false);
+            }
+
             try {
                 const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
                 setStart(foodTruck);
@@ -121,7 +127,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 }
             }
         }
-    }, [customOrigin, storefront, store]);
+    }, [customOrigin, storefront, store, start]);
 
     // Run the update when customOrigin changes.
     useEffect(() => {
@@ -129,13 +135,6 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
 
         updateOriginFromCustomOrigin();
     }, [storefront, store]);
-
-    const fitToRoute = ({ coordinates }) => {
-        mapRef.current?.fitToCoordinates(coordinates, {
-            edgePadding: { top: 20, right: 0, bottom: 20, left: 0 },
-            animated: true,
-        });
-    };
 
     return (
         <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>

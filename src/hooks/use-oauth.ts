@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { authorize } from 'react-native-app-auth';
 import { config } from '../utils';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { toast } from '../utils/toast';
 import useStorefront, { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';

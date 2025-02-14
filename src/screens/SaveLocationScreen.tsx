@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native';
 import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { Place } from '@fleetbase/sdk';
 import { adapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import { formattedAddressFromPlace, savePlaceLocally } from '../utils/location';
+import { toast } from '../utils/toast';
 
 const SaveLocationScreen = ({ route }) => {
     const place = new Place(route.params.place, adapter);

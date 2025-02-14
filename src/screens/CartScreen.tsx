@@ -5,7 +5,7 @@ import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManag
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
+import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
 import { delay, loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
@@ -29,11 +29,6 @@ const CartScreen = ({ route }) => {
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
     const isModalScreen = typeof routeName === 'string' && routeName.endsWith('Modal');
-
-    // Make sure cart items is latest
-    useEffect(() => {
-        setDisplayedItems(cart ? cart.contents() : []);
-    }, [cart]);
 
     const handleCheckout = () => {
         const params = {};
@@ -61,7 +56,7 @@ const CartScreen = ({ route }) => {
         const rowRef = rowRefs.current[cartItem.id];
 
         if (!rowRef) {
-            toast.error('Could not find item to delete.', { position: ToastPosition.BOTTOM });
+            toast.error('Could not find item to delete.');
             return;
         }
 
@@ -83,7 +78,7 @@ const CartScreen = ({ route }) => {
 
             // Remove item visually
             setDisplayedItems((prevItems) => prevItems.filter((item) => item.id !== cartItem.id));
-            toast.success(`${cartItem.name} removed from cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${cartItem.name} removed from cart.`);
 
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -99,7 +94,7 @@ const CartScreen = ({ route }) => {
         const cartItems = cart.contents();
 
         if (!cartItems.length) {
-            toast.error('Cart is already empty', { position: ToastPosition.BOTTOM });
+            toast.error('Cart is already empty');
             return;
         }
 
@@ -128,7 +123,7 @@ const CartScreen = ({ route }) => {
             });
 
             await Promise.all(animations);
-            toast.success('Cart emptied', { position: ToastPosition.BOTTOM });
+            toast.success('Cart emptied');
 
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -139,6 +134,11 @@ const CartScreen = ({ route }) => {
             console.error('Error emptying cart:', error.message);
         }
     };
+
+    // Make sure cart items is latest
+    useEffect(() => {
+        setDisplayedItems(cart ? cart.contents() : []);
+    }, [cart]);
 
     const renderRightActions = (cartItem) => (
         <XStack height='100%' width={200} minHeight={100} maxHeight={125}>

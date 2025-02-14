@@ -35,6 +35,7 @@ const OrderScreen = ({ route }) => {
     const isPickupReady = isPickup && order.getAttribute('status') === 'pickup_ready';
     const isEnroute = order.getAttribute('status') === 'driver_enroute';
     const listenerRef = useRef();
+    const foodTruckId = order.getAttribute('meta.food_truck_id');
 
     const confirmOrderPickup = useCallback(async () => {
         try {
@@ -122,7 +123,7 @@ const OrderScreen = ({ route }) => {
         <YStack flex={1} bg='$background'>
             <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                 <YStack width='100%' height={400} borderBottomWidth={1} borderColor='$borderColorWithShadow'>
-                    <LiveOrderRoute order={order} zoom={4} />
+                    <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruckId} />
                 </YStack>
                 <YStack space='$2'>
                     <YStack mt='$4' px='$4' py='$2' alignItems='center' justifyContent='center' space='$2'>

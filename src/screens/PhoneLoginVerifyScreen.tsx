@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, Pressable, Keyboard, StyleSheet } from 'react-native';
 import { Spinner, Button, Input, Stack, Text, YStack, useTheme } from 'tamagui';
-import { toast, ToastPosition } from '@backpackapp-io/react-native-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faArrowRotateRight } from '@fortawesome/free-solid-svg-icons';
 import { OtpInput } from 'react-native-otp-entry';
+import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 

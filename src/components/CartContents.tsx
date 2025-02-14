@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency } from '../utils/format';
 import { loadPersistedResource, showActionSheet } from '../utils';
+import { toast } from '../utils/toast';
 import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
 
@@ -46,7 +47,7 @@ const CartContents = ({}) => {
         try {
             const updatedCart = await cart.remove(cartItem.id);
             updateCart(updatedCart);
-            toast.success(`${cartItem.name} removed from cart.`, { position: ToastPosition.BOTTOM });
+            toast.success(`${cartItem.name} removed from cart.`);
         } catch (error) {
             toast.error('Failed to remove item from cart');
             console.error('Error removing cart item:', error.message);
