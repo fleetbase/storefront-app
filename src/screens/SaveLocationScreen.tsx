@@ -29,8 +29,6 @@ const SaveLocationScreen = ({ route }) => {
         }
     };
 
-    console.log('[place]', place);
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
             <YStack flex={1} bg='$background' space='$3' padding='$5'>

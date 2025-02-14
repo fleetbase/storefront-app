@@ -358,6 +358,11 @@ export function getCoordinates(target, options = {}) {
         return getCoordinates(location);
     }
 
+    if (isResource(target, 'food-truck')) {
+        const location = target.getAttribute('vehicle');
+        return getCoordinates(location);
+    }
+
     if (isPojoResource(target) && target.resource === 'place') {
         const [longitude, latitude] =
             typeof target.getAttribute === 'function'
@@ -398,7 +403,7 @@ export function getCoordinates(target, options = {}) {
     return [fallbackLatitude, fallbackLongitude];
 }
 
-export function getPlaceCoords(place) {
+export function getCoordinatesObject(place) {
     const [latitude, longitude] = getCoordinates(place);
     return { latitude, longitude };
 }

@@ -7,7 +7,7 @@ import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
-import { restoreFleetbasePlace, getCoordinates, isPointInGeoJSONPolygon, formattedAddressFromPlace } from '../utils/location';
+import { restoreFleetbasePlace, getCoordinates, getCoordinatesObject, isPointInGeoJSONPolygon, formattedAddressFromPlace } from '../utils/location';
 import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
@@ -188,7 +188,21 @@ const FoodTruckScreen = () => {
             mapRef.current.animateToRegion(newRegion, 1000);
         }
 
-        navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruck: foodTruck });
+        navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruckId: foodTruck.id });
+    };
+
+    const handlePressCurrentLocation = (currentLocation) => {
+        const [longitude, latitude] = currentLocation.getAttribute('location.coordinates');
+
+        if (mapRef.current && !isNone(latitude) && !isNone(longitude)) {
+            const newRegion = {
+                latitude,
+                longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            };
+            mapRef.current.animateToRegion(newRegion, 1000);
+        }
     };
 
     const handlePressCurrentZone = () => {
@@ -243,7 +257,12 @@ const FoodTruckScreen = () => {
 
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
-            <MapView ref={mapRef} style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }} initialRegion={mapRegion}>
+            <MapView
+                ref={mapRef}
+                style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
+                initialRegion={mapRegion}
+                mapType={storefrontConfig('defaultMapType', 'standard')}
+            >
                 {availableFoodTrucks.map((foodTruck) => (
                     <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
                         <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
@@ -254,7 +273,7 @@ const FoodTruckScreen = () => {
                     </VehicleMarker>
                 ))}
                 {currentLocation && (
-                    <Marker coordinate={{ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] }}>
+                    <Marker coordinate={{ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] }} onPress={() => handlePressCurrentLocation(currentLocation)}>
                         <YStack alignItems='center' justifyContent='center'>
                             <YStack bg='$blue-600' padding='$2' alignItems='center' justifyContent='center' borderRadius='$4'>
                                 <FontAwesomeIcon icon={faHome} color={theme['$blue-100'].val} size={25} />

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { Driver } from '@fleetbase/sdk';
 import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
-import { config } from '../utils';
+import { config, storefrontConfig } from '../utils';
 import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
@@ -33,7 +33,7 @@ const calculateOffset = (zoomLevel) => {
     };
 };
 
-const getPlaceCoords = (place) => {
+const getCoordinatesObject = (place) => {
     const [latitude, longitude] = getCoordinates(place);
     return { latitude, longitude };
 };
@@ -45,8 +45,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     const mapRef = useRef(null);
     const start = restoreFleetbasePlace(order.getAttribute('payload.pickup'));
     const end = restoreFleetbasePlace(order.getAttribute('payload.dropoff'));
-    const origin = getPlaceCoords(start);
-    const destination = getPlaceCoords(end);
+    const origin = getCoordinatesObject(start);
+    const destination = getCoordinatesObject(end);
     const initialDeltas = calculateDeltas(zoom);
     const [mapRegion, setMapRegion] = useState({
         ...origin,
@@ -71,7 +71,6 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     };
 
     const focusDriver = ({ coordinates }) => {
-        console.log('[focusDriver()]', coordinates);
         mapRef.current.animateToRegion(
             {
                 latitude,
@@ -90,6 +89,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}
                 initialRegion={mapRegion}
                 onRegionChangeComplete={handleRegionChangeComplete}
+                mapType={storefrontConfig('defaultMapType', 'standard')}
                 {...mapViewProps}
             >
                 {driverAssigned && <DriverMarker driver={driverAssigned} onMovement={focusDriver} />}

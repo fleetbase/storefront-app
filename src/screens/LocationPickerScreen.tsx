@@ -17,7 +17,7 @@ import {
     formatAddressSecondaryIdentifier,
     getCoordinates,
 } from '../utils/location';
-import { isArray, toBoolean, later } from '../utils';
+import { isArray, toBoolean, later, storefrontConfig } from '../utils';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -137,6 +137,7 @@ const LocationPickerScreen = ({ route }) => {
                 onPanDrag={handlePanDrag}
                 onRegionChangeComplete={handleRegionChangeComplete}
                 initialRegion={mapRegion}
+                mapType={storefrontConfig('defaultMapType', 'standard')}
             />
             <View style={styles.markerFixed}>
                 <LocationMarker lifted={isPanning} />

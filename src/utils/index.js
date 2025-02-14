@@ -116,7 +116,7 @@ export function hasProperties(obj, keys, strict = false) {
     }
 
     return keys.every((key) => {
-        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (!(key in obj)) {
             return false;
         }
         if (strict && (obj[key] === null || obj[key] === undefined)) {

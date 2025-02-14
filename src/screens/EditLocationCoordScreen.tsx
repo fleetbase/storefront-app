@@ -5,6 +5,7 @@ import { Spinner, Button, Text, XStack, YStack, useTheme } from 'tamagui';
 import { Place, Point } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
+import { storefrontConfig } from '../utils';
 import LocationMarker from '../components/LocationMarker';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 import useSavedLocations from '../hooks/use-saved-locations';
@@ -68,9 +69,7 @@ const EditLocationCoordScreen = ({ route }) => {
 
     // Save place
     const handleSave = async () => {
-        console.log('[place.isNew]', place.isNew);
         if (place.isNew) {
-            console.log('[place]', place);
             try {
                 place.setAttribute('location', new Point(mapRegion.latitude, mapRegion.longitude));
                 return handleRedirect();
@@ -128,6 +127,7 @@ const EditLocationCoordScreen = ({ route }) => {
                 onPress={handleTouchStart}
                 onPanDrag={handlePanDrag}
                 onRegionChangeComplete={handleRegionChangeComplete}
+                mapType={storefrontConfig('defaultMapType', 'standard')}
                 initialRegion={mapRegion}
             />
             <YStack style={styles.markerFixed}>

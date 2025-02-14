@@ -10,6 +10,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+import Spacer from '../components/Spacer';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -118,6 +119,7 @@ const AddressBookScreen = () => {
                     keyExtractor={(item, index) => item.id || index}
                     contentContainerStyle={{ paddingBottom: 16 }}
                     ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                    ListFooterComponent={<Spacer height={100} />}
                 />
             </YStack>
         </SafeAreaView>

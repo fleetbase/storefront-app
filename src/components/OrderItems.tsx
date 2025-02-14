@@ -71,7 +71,7 @@ const OrderItems = ({ order }) => {
                                             {entity.name}
                                         </Text>
                                         {entity.description && (
-                                            <Text fontSize='$4' color='$textSecondary'>
+                                            <Text fontSize='$4' color='$textSecondary' numberOfLines={2}>
                                                 {entity.description}
                                             </Text>
                                         )}

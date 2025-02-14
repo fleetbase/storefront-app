@@ -37,8 +37,15 @@ const useStorefront = () => {
         }
     }, []);
 
-    // Return both the storefront instance and any adapter for easier access in components
-    return { storefront, adapter: storefrontAdapter, error, hasStorefrontConfig };
+    return useMemo(
+        () => ({
+            storefront,
+            adapter: storefrontAdapter,
+            error,
+            hasStorefrontConfig,
+        }),
+        [storefront, storefrontAdapter, error]
+    );
 };
 
 export default useStorefront;

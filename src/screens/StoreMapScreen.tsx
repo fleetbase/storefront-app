@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useFocusEffect } from '@react-navigation/native';
 import { YStack, Image } from 'tamagui';
-import { restoreFleetbasePlace, getPlaceCoords } from '../utils/location';
+import { restoreFleetbasePlace, getCoordinatesObject } from '../utils/location';
 import { listen } from '../utils/socket';
 import { storefrontConfig } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
@@ -17,7 +17,7 @@ const StoreMapScreen = ({ route }) => {
     const { fleetbase } = useFleetbase();
     const { store, currentStoreLocation, storeLocations } = useStoreLocations();
     const initialLocation = restoreFleetbasePlace(currentStoreLocation.getAttribute('place'));
-    const initialCoordinates = getPlaceCoords(initialLocation);
+    const initialCoordinates = getCoordinatesObject(initialLocation);
     const [mapRegion, setMapRegion] = useState({
         ...initialCoordinates,
         latitudeDelta: 0.05,
@@ -28,7 +28,7 @@ const StoreMapScreen = ({ route }) => {
         return storeLocations.map((storeLocation) => {
             return {
                 ...storeLocation.serialize(),
-                coords: getPlaceCoords(restoreFleetbasePlace(storeLocation.getAttribute('place'))),
+                coords: getCoordinatesObject(restoreFleetbasePlace(storeLocation.getAttribute('place'))),
             };
         });
     }, [storeLocations]);
@@ -56,7 +56,7 @@ const StoreMapScreen = ({ route }) => {
 
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
-            <MapView style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }} initialRegion={mapRegion}>
+            <MapView style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }} initialRegion={mapRegion} mapType={storefrontConfig('defaultMapType', 'standard')}>
                 {storefrontConfig('showDriversOnMap', false) && drivers.map((driver) => <DriverMarker key={driver.id} driver={driver} />)}
                 {locations.map((location, index) => (
                     <Marker key={index} coordinate={location.coords} onPress={() => viewStore(store, location)}>

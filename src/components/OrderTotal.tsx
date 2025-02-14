@@ -46,7 +46,7 @@ const OrderTotal = ({ order }) => {
             });
         }
 
-        if (deliveryTip) {
+        if (deliveryTip > 0) {
             items.push({
                 name: 'Delivery Tip',
                 value: calculateTip(deliveryTip, subtotal),
@@ -54,7 +54,7 @@ const OrderTotal = ({ order }) => {
             });
         }
 
-        if (tip) {
+        if (tip > 0) {
             items.push({
                 name: 'Tip',
                 value: calculateTip(tip, subtotal),
@@ -68,7 +68,7 @@ const OrderTotal = ({ order }) => {
         });
 
         return items;
-    }, [order]);
+    }, [order, tip, deliveryTip, deliveryFee, isPickup]);
 
     return (
         <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' space='$2'>

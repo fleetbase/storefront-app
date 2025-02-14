@@ -104,6 +104,24 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote]);
 
+    const storeLocationId = useMemo(() => {
+        if (!cart?.contents || typeof cart.contents !== 'function') return null;
+
+        const storeLocationIds = cart.contents().map((item) => item.store_location_id);
+        const uniqueStoreLocationIds = [...new Set(storeLocationIds)];
+
+        return uniqueStoreLocationIds[0] || null;
+    }, [cartContentsString]);
+
+    const foodTruckId = useMemo(() => {
+        if (!cart?.contents || typeof cart.contents !== 'function') return null;
+
+        const foodTruckIds = cart.contents().map((item) => item.food_truck_id);
+        const uniqueFoodTruckIds = [...new Set(foodTruckIds)];
+
+        return uniqueFoodTruckIds[0] || null;
+    }, [cartContentsString]);
+
     const setTipOptions = useCallback((newOptions) => {
         setCheckoutOptions((prev) => ({ ...prev, ...newOptions }));
     }, []);
@@ -419,6 +437,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
         isReady,
         orderNotes,
         setOrderNotes,
+        foodTruckId,
+        storeLocationId,
+        originLocationId: foodTruckId ?? storeLocationId,
         isNotReady: !isReady,
     };
 }

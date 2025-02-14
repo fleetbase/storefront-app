@@ -7,13 +7,14 @@ import { faTimes, faSave } from '@fortawesome/free-solid-svg-icons';
 import { Portal } from '@gorhom/portal';
 import useAppTheme from '../hooks/use-app-theme';
 
-const TextAreaSheet = ({ value = null, title = null, placeholder = null, onChange }) => {
+const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed, portalHost = 'MainPortal', onChange }) => {
     const theme = useTheme();
     const { isDarkMode } = useAppTheme();
     const [text, setText] = useState(value);
     const textAreaInputRef = useRef(null);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['90%'], []);
+    const renderPlaceholder = !text && typeof placeholder === 'string';
 
     const openBottomSheet = () => {
         bottomSheetRef.current?.snapToPosition('90%');
@@ -25,7 +26,24 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onChang
         bottomSheetRef.current?.close();
     };
 
-    const renderPlaceholder = !text && typeof placeholder === 'string';
+    const handleBottomSheetPositionChange = useCallback(
+        (fromIndex, toIndex) => {
+            const isOpen = toIndex >= 0;
+
+            if (typeof onBottomSheetPositionChanged === 'function') {
+                onBottomSheetPositionChanged(isOpen, fromIndex, toIndex);
+            }
+
+            if (isOpen === true && typeof onBottomSheetOpened === 'function') {
+                onBottomSheetOpened(isOpen, fromIndex, toIndex);
+            }
+
+            if (isOpen === false && typeof onBottomSheetClosed === 'function') {
+                onBottomSheetClosed(isOpen, fromIndex, toIndex);
+            }
+        },
+        [bottomSheetRef.current, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed]
+    );
 
     useEffect(() => {
         if (typeof onChange === 'function') {
@@ -59,11 +77,12 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onChang
                 )}
             </Button>
 
-            <Portal hostName='MainPortal'>
+            <Portal hostName={portalHost}>
                 <BottomSheet
                     ref={bottomSheetRef}
                     index={-1}
                     snapPoints={snapPoints}
+                    onAnimate={handleBottomSheetPositionChange}
                     keyboardBehavior='extend'
                     keyboardBlurBehavior='none'
                     enableDynamicSizing={false}
@@ -82,6 +101,7 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onChang
                         <BottomSheetTextInput
                             ref={textAreaInputRef}
                             placeholder={placeholder}
+                            value={text}
                             onChangeText={setText}
                             autoCapitalize='none'
                             autoComplete='off'

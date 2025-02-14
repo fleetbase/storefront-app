@@ -16,6 +16,7 @@ import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import useStorage from '../hooks/use-storage';
 import Badge from '../components/Badge';
+import Spacer from '../components/Spacer';
 
 const restoreOrders = (orders = []) => {
     return orders.map((order) => new Order(order, fleetbaseAdapter));
@@ -102,6 +103,7 @@ const OrderHistoryScreen = () => {
                 showsVerticalScrollIndicator={false}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
+                ListFooterComponent={<Spacer height={100} />}
             />
         </SafeAreaView>
     );

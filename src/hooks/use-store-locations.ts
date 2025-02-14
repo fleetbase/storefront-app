@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { isResource } from '../utils';
 import { restoreFleetbaseStoreLocation } from '../utils/location';
 import { adapter } from './use-storefront';
@@ -23,41 +23,45 @@ const useStoreLocations = () => {
     const [error, setError] = useState(null);
 
     // Function to get the default store location
-    const getDefaultStoreLocation = (storeLocations = []) => {
-        let defaultStoreLocation = null;
+    const getDefaultStoreLocation = useCallback(
+        (storeLocations = []) => {
+            let defaultStoreLocation = null;
 
-        if (currentStoreLocationId) {
-            defaultStoreLocation = storeLocations.find((location) => location.id === currentStoreLocationId);
-        }
+            if (currentStoreLocationId) {
+                defaultStoreLocation = storeLocations.find((location) => location.id === currentStoreLocationId);
+            }
 
-        if (storeLocations.length && !defaultStoreLocation) {
-            defaultStoreLocation = storeLocations[0];
-        }
+            if (storeLocations.length && !defaultStoreLocation) {
+                defaultStoreLocation = storeLocations[0];
+            }
 
-        return defaultStoreLocation && typeof defaultStoreLocation.serialize === 'function' ? serializeStoreLocation(defaultStoreLocation) : defaultStoreLocation;
-    };
+            return defaultStoreLocation && typeof defaultStoreLocation.serialize === 'function' ? serializeStoreLocation(defaultStoreLocation) : defaultStoreLocation;
+        },
+        [currentStoreLocationId]
+    );
 
     // Function to update the current store location which will be used for loading and checkout
-    const updateCurrentStoreLocation = (storeLocation) => {
-        setCurrentStoreLocationId(storeLocation.id);
-        setCurrentStoreLocation(serializeStoreLocation(storeLocation));
-    };
+    const updateCurrentStoreLocation = useCallback(
+        (storeLocation) => {
+            setCurrentStoreLocationId(storeLocation.id);
+            setCurrentStoreLocation(serializeStoreLocation(storeLocation));
+        },
+        [setCurrentStoreLocationId, setCurrentStoreLocation]
+    );
 
     // Function to load customer locations
-    const loadStoreLocations = async () => {
+    const loadStoreLocations = useCallback(async () => {
         if (!store) {
             setError(new Error('Store instance is not set'));
             return;
         }
-
         setLoading(true);
         setError(null);
-
         try {
             const locations = await store.getLocations();
-            const storeLocations = locations.map(serializeStoreLocation);
-            setStoreLocations(storeLocations);
-            setCurrentStoreLocation(getDefaultStoreLocation(storeLocations));
+            const serializedLocations = locations.map(serializeStoreLocation);
+            setStoreLocations(serializedLocations);
+            setCurrentStoreLocation(getDefaultStoreLocation(serializedLocations));
             return locations;
         } catch (err) {
             console.error('Error fetching store locations:', err);
@@ -65,20 +69,23 @@ const useStoreLocations = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [store, getDefaultStoreLocation, setStoreLocations, setCurrentStoreLocation]);
 
     useEffect(() => {
         loadStoreLocations();
-    }, []);
+    }, [store]);
 
-    return {
-        currentStoreLocation: restoreFleetbaseStoreLocation(currentStoreLocation),
-        storeLocations: restoreFleetbaseStoreLocation(storeLocations),
-        store,
-        updateCurrentStoreLocation,
-        isLoadingStoreLocations: loading,
-        storeLocationsError: error,
-    };
+    return useMemo(
+        () => ({
+            currentStoreLocation: restoreFleetbaseStoreLocation(currentStoreLocation),
+            storeLocations: restoreFleetbaseStoreLocation(storeLocations),
+            store,
+            updateCurrentStoreLocation,
+            isLoadingStoreLocations: loading,
+            storeLocationsError: error,
+        }),
+        [currentStoreLocation, storeLocations, store, updateCurrentStoreLocation, loading, error]
+    );
 };
 
 export default useStoreLocations;

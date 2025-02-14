@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
+import { PortalHost } from '@gorhom/portal';
 import CustomerLocationSelect from '../components/CustomerLocationSelect';
 import StripeCardFieldSheet from '../components/StripeCardFieldSheet';
 import StripePaymentSheet from '../components/StripePaymentSheet';
@@ -54,7 +55,7 @@ const StripeCheckoutScreen = () => {
                     <YStack height={300}>
                         <DeliveryRoutePreview />
                     </YStack>
-                    <YStack padding='$3' space='$5'>
+                    <YStack px='$3' py='$1' space='$5'>
                         {isPickupEnabled && (
                             <YStack space='$3'>
                                 <CheckoutPickupSwitch onChange={(isPickup) => setPickup(isPickup)} />
@@ -109,6 +110,7 @@ const StripeCheckoutScreen = () => {
             <XStack animate='bouncy' position='absolute' bottom={tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
                 <CheckoutButton onCheckout={completeOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
+            <PortalHost name='StripeCheckoutPortal' />
         </YStack>
     );
 };

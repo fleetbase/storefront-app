@@ -20,6 +20,13 @@
         "android:clean": "cd android && ./gradlew clean && cd ../",
         "adb:reverse": "adb reverse tcp:8081 tcp:8081",
         "adb:devmenu": "adb shell input keyevent 82",
+        "adb:reload": "adb shell input text 'RR'",
+        "adb:restart": "adb shell am broadcast -a react.native.RELOAD",
+        "adb:open-settings": "adb shell am start -a android.settings.SETTINGS",
+        "adb:logcat": "adb logcat *:S ReactNative:V ReactNativeJS:V",
+        "adb:logcat:errors": "adb logcat *:E",
+        "adb:logcat:grep": "adb logcat | grep 'ReactNativeJS'",
+        "adb:devices": "adb devices",
         "generate:app-icon": "npx app-icon generate -i ./assets/app-icon.png",
         "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#FFFFFF --logo-width=100 --flavor=main"
     },

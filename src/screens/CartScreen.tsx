@@ -19,7 +19,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const CartScreen = () => {
+const CartScreen = ({ route }) => {
+    const routeName = route.name;
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
@@ -27,6 +28,7 @@ const CartScreen = () => {
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
+    const isModalScreen = typeof routeName === 'string' && routeName.endsWith('Modal');
 
     // Make sure cart items is latest
     useEffect(() => {
@@ -34,16 +36,17 @@ const CartScreen = () => {
     }, [cart]);
 
     const handleCheckout = () => {
+        const params = {};
         if (storefrontConfig('paymentGateway') === 'stripe') {
-            return navigation.navigate('StripeCheckout');
+            return navigation.navigate('StripeCheckout', params);
         }
 
         if (storefrontConfig('paymentGateway') === 'qpay') {
-            return navigation.navigate('QPayCheckout');
+            return navigation.navigate('QPayCheckout', params);
         }
 
         if (storefrontConfig('paymentGateway') === 'paypal') {
-            return navigation.navigate('PaypalCheckout');
+            return navigation.navigate('PaypalCheckout', params);
         }
     };
 
@@ -216,12 +219,12 @@ const CartScreen = () => {
                                         <YStack height={125} minHeight={100} maxHeight={350} overflow='hidden' width='90%' space='$1'>
                                             <YStack>
                                                 <XStack space='$2' alignItems='center'>
-                                                    <Text fontSize='$5' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
+                                                    <Text fontSize='$4' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                                         {cartItem.name}
                                                     </Text>
                                                 </XStack>
                                                 {cartItem.description && (
-                                                    <Text fontSize='$4' color='$textSecondary' numberOfLines={2}>
+                                                    <Text fontSize='$3' color='$textSecondary' numberOfLines={2}>
                                                         {cartItem.description}
                                                     </Text>
                                                 )}
@@ -248,7 +251,7 @@ const CartScreen = () => {
                             </XStack>
                             <YStack width={150} alignItems='flex-end'>
                                 <YStack>
-                                    <Text fontSize='$5' color='$textPrimary' fontWeight='bold'>
+                                    <Text fontSize='$4' color='$textPrimary' fontWeight='bold'>
                                         {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
                                     </Text>
                                 </YStack>
@@ -292,7 +295,7 @@ const CartScreen = () => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={tabBarHeight}
+                    bottom={isModalScreen ? 0 : tabBarHeight}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -302,7 +305,7 @@ const CartScreen = () => {
                     shadowOpacity={0.15}
                     shadowRadius={3}
                 >
-                    <XStack alignItems='center' justifyContent='space-between'>
+                    <XStack alignItems='center' justifyContent='space-between' paddingBottom={isModalScreen ? 25 : 0}>
                         <YStack flex={1} space='$1'>
                             <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
                                 Total

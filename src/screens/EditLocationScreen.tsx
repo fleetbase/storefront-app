@@ -18,6 +18,7 @@ import useSavedLocations from '../hooks/use-saved-locations';
 import { useAppTheme } from '../hooks/use-app-theme';
 import ExpandableSelect from '../components/ExpandableSelect';
 import PlaceMapView from '../components/PlaceMapView';
+import PhoneInput from '../components/PhoneInput';
 import Spacer from '../components/Spacer';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 
@@ -59,6 +60,7 @@ const EditLocationScreen = ({ route }) => {
     const [neighborhood, setNeighborhood] = useState(place.neighborhood);
     const [city, setCity] = useState(place.city);
     const [postalCode, setPostalCode] = useState(place.postal_code);
+    const [phone, setPhone] = useState(place.phone);
     const [instructions, setInstructions] = useState(place.meta.instructions);
     const redirectTo = params.redirectTo;
     const redirectToScreen = params.redirectToScreen;
@@ -119,7 +121,7 @@ const EditLocationScreen = ({ route }) => {
     };
 
     const getUpdatedPlace = () => {
-        return { ...place, street1, street2, neighborhood, city, postal_code: postalCode, meta: { instructions } };
+        return { ...place, street1, street2, neighborhood, city, phone, postal_code: postalCode, meta: { instructions } };
     };
 
     const handleSavePlace = async () => {
@@ -279,6 +281,15 @@ const EditLocationScreen = ({ route }) => {
                                         Postal or zip code
                                     </Text>
                                     <LocationPropertyInput value={postalCode} onChange={setPostalCode} placeholder='Postal or zip code' />
+                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
+                                        Optional
+                                    </Text>
+                                </YStack>
+                                <YStack width='100%'>
+                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
+                                        Phone number
+                                    </Text>
+                                    <PhoneInput value={phone} onChange={setPhone} placeholder='Phone number for courier to contact for delivery' />
                                     <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
                                         Optional
                                     </Text>

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { adapter } from './use-storefront';
 import { Store } from '@fleetbase/storefront';
 import { get } from '../utils';
@@ -6,7 +6,7 @@ import useStorage from './use-storage';
 
 const useStorefrontInfo = () => {
     const [info, setInfo] = useStorage('info', {});
-    const store = new Store(info, adapter);
+    const store = useMemo(() => new Store(info, adapter), [info]);
 
     const updateInfo = useCallback(
         (newInfo) => {
@@ -15,19 +15,25 @@ const useStorefrontInfo = () => {
         [setInfo]
     );
 
-    const enabled = (key) => {
-        if (!key.endsWith('_enabled')) {
-            key = `${key}_enabled`;
-        }
-        return get(info.options, key) === true;
-    };
+    const enabled = useCallback(
+        (key) => {
+            if (!key.endsWith('_enabled')) {
+                key = `${key}_enabled`;
+            }
+            return get(info.options, key) === true;
+        },
+        [info.options]
+    );
 
-    return {
-        info,
-        store,
-        setInfo: updateInfo,
-        enabled,
-    };
+    return useMemo(
+        () => ({
+            info,
+            store,
+            setInfo: updateInfo,
+            enabled,
+        }),
+        [info, store, updateInfo, enabled]
+    );
 };
 
 export default useStorefrontInfo;

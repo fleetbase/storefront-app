@@ -90,7 +90,6 @@ const StoreScreen = ({ navigation, route }) => {
     const toggleHours = () => setIsHoursVisible(!isHoursVisible);
 
     const transitionToCategory = useCallback((category, actionSheet) => {
-        console.log('transitionToCategory', category, actionSheet);
         navigation.navigate('CategoryScreen', { attributes: category.serialize(), storeData: data });
         actionSheet?.hide();
     });
