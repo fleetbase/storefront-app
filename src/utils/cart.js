@@ -56,7 +56,7 @@ export function calculateProductSubtotal(product, variations = {}, addons = {}) 
 
     // Add addon costs
     for (const addonCategoryId in addons) {
-        if (Array.isArray(addons[addonCategoryId])) {
+        if (isArray(addons[addonCategoryId])) {
             addons[addonCategoryId].forEach((addon) => {
                 if (addon) {
                     const addonCost = addon.is_on_sale ? addon.sale_price : addon.price;

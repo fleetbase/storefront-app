@@ -509,10 +509,10 @@ export function mergeConfigs(defaultConfig = {}, targetConfig = {}) {
         if (
             typeof targetConfig[key] === 'object' &&
             targetConfig[key] !== null &&
-            !Array.isArray(targetConfig[key]) &&
+            !isArray(targetConfig[key]) &&
             typeof result[key] === 'object' &&
             result[key] !== null &&
-            !Array.isArray(result[key])
+            !isArray(result[key])
         ) {
             result[key] = mergeConfigs(result[key], targetConfig[key]);
         } else {

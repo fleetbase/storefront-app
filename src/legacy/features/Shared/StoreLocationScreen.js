@@ -239,7 +239,7 @@ const StoreLocationScreen = ({ navigation, route }) => {
                                     destination={destination}
                                     onReady={onDirectionsReady}
                                     onError={onDirectionsError}
-                                    apikey={config('GOOGLE_MAPS_KEY')}
+                                    apikey={config('GOOGLE_MAPS_API_KEY')}
                                     strokeWidth={3}
                                     strokeColor='hotpink'
                                 />

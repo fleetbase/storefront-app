@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Pressable, Dimensions, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Platform } from 'react-native';
 import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
@@ -12,7 +12,9 @@ import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import useAppTheme from '../hooks/use-app-theme';
+import useDimensions from '../hooks/use-dimensions';
 
+const isAndroid = Platform.OS === 'android';
 const LocationPicker = ({
     onPressAddNewLocation,
     wrapperStyle = {},
@@ -29,12 +31,12 @@ const LocationPicker = ({
     const { isDarkMode } = useAppTheme();
     const { currentLocation, isCurrentLocationLoading, updateCurrentLocation, setCustomerDefaultLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
+    const { screenWidth } = useDimensions();
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
     const triggerRef = useRef(null);
 
     // Get screen width and calculate 75% of it
-    const screenWidth = Dimensions.get('window').width;
     const dropdownWidth = screenWidth * 0.75;
 
     const toggleDropdown = () => {
@@ -86,6 +88,7 @@ const LocationPicker = ({
                         borderColor: theme.borderColorWithShadow.val,
                         paddingHorizontal: 7,
                         paddingVertical: 5,
+                        overflow: 'hidden',
                     },
                     triggerWrapperStyle,
                 ]}
@@ -136,8 +139,8 @@ const LocationPicker = ({
                             backgroundColor='transparent'
                             width={dropdownWidth}
                             position='absolute'
-                            top={triggerPosition.height + 55}
-                            left={triggerPosition.x - 10}
+                            top={isAndroid ? triggerPosition.height + 15 : triggerPosition.height + 55}
+                            left={isAndroid ? triggerPosition.x : triggerPosition.x - 10}
                             zIndex={1}
                             enterStyle={{
                                 opacity: 0,

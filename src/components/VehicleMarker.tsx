@@ -3,6 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import TrackingMarker from './TrackingMarker';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useEventBuffer from '../hooks/use-event-buffer';
+import { makeCoordinatesFloat } from '../utils/location';
 
 const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement, ...props }) => {
     const markerRef = useRef();
@@ -67,7 +68,15 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const longitude = vehicle.getAttribute('location.coordinates.0');
 
     console.log(`${vehicle.id} coordinates: ${latitude} ${longitude}`);
-    return <TrackingMarker ref={markerRef} coordinate={{ latitude, longitude }} imageSource={{ uri: vehicle.getAttribute('avatar_url') }} size={{ width: 50, height: 50 }} {...props} />;
+    return (
+        <TrackingMarker
+            ref={markerRef}
+            coordinate={makeCoordinatesFloat({ latitude, longitude })}
+            imageSource={{ uri: vehicle.getAttribute('avatar_url') }}
+            size={{ width: 50, height: 50 }}
+            {...props}
+        />
+    );
 };
 
 export default VehicleMarker;

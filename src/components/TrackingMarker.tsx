@@ -4,6 +4,7 @@ import { Spinner, YStack } from 'tamagui';
 import FastImage from 'react-native-fast-image';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import { isObject } from '../utils';
+import { makeCoordinatesFloat } from '../utils/location';
 import { SvgCssUri } from 'react-native-svg/css';
 
 // Create an animated version of Marker
@@ -91,7 +92,7 @@ const TrackingMarker = forwardRef(
         };
 
         return (
-            <AnimatedMarker coordinate={plainCoordinate} onPress={onPress}>
+            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress}>
                 <Animated.View
                     style={{
                         transform: [

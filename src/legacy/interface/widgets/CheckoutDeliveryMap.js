@@ -167,7 +167,7 @@ const CheckoutDeliveryMap = ({ info, origin, destination, wrapperStyle, containe
                             waypoints={waypoints}
                             onReady={onDirectionsReady}
                             onError={onDirectionsError}
-                            apikey={config('GOOGLE_MAPS_KEY')}
+                            apikey={config('GOOGLE_MAPS_API_KEY')}
                             strokeWidth={3}
                             strokeColor='hotpink'
                         />

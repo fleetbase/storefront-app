@@ -10,7 +10,7 @@ import { haversine } from './Calculate';
 import axios from 'axios';
 import config from 'config';
 
-const { GOOGLE_MAPS_KEY } = config;
+const { GOOGLE_MAPS_API_KEY } = config;
 const { emit } = EventRegister;
 
 /**
@@ -50,7 +50,7 @@ export default class GeoUtil {
                     latlng: `${latitude},${longitude}`,
                     sensor: false,
                     language: 'en-US',
-                    key: GOOGLE_MAPS_KEY,
+                    key: GOOGLE_MAPS_API_KEY,
                 },
             }).then((response) => {
                 const result = response.data.results[0];

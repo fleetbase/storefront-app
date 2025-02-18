@@ -15,7 +15,7 @@ import ActionSheet from 'react-native-actions-sheet';
 import Config from 'react-native-config';
 import tailwind from 'tailwind';
 
-const { GOOGLE_MAPS_KEY } = Config;
+const { GOOGLE_MAPS_API_KEY } = Config;
 const { addEventListener, removeEventListener, emit } = EventRegister;
 const actionSheetRef = createRef();
 const windowHeight = Dimensions.get('window').height;
@@ -164,7 +164,7 @@ const LocationPicker = (props) => {
                     fetchDetails={true}
                     onPress={(data, details = null) => setNewDeliveryLocation(details)}
                     query={{
-                        key: GOOGLE_MAPS_KEY,
+                        key: GOOGLE_MAPS_API_KEY,
                         language: 'en',
                     }}
                     styles={{

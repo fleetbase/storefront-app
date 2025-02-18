@@ -7,7 +7,7 @@ import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
-import { restoreFleetbasePlace, getCoordinates, getCoordinatesObject, isPointInGeoJSONPolygon, formattedAddressFromPlace } from '../utils/location';
+import { restoreFleetbasePlace, getCoordinates, getCoordinatesObject, isPointInGeoJSONPolygon, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
 import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
@@ -260,7 +260,7 @@ const FoodTruckScreen = () => {
             <MapView
                 ref={mapRef}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
-                initialRegion={mapRegion}
+                initialRegion={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
             >
                 {availableFoodTrucks.map((foodTruck) => (
@@ -273,7 +273,10 @@ const FoodTruckScreen = () => {
                     </VehicleMarker>
                 ))}
                 {currentLocation && (
-                    <Marker coordinate={{ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] }} onPress={() => handlePressCurrentLocation(currentLocation)}>
+                    <Marker
+                        coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
+                        onPress={() => handlePressCurrentLocation(currentLocation)}
+                    >
                         <YStack alignItems='center' justifyContent='center'>
                             <YStack bg='$blue-600' padding='$2' alignItems='center' justifyContent='center' borderRadius='$4'>
                                 <FontAwesomeIcon icon={faHome} color={theme['$blue-100'].val} size={25} />
@@ -292,7 +295,7 @@ const FoodTruckScreen = () => {
                 )}
                 {!isNone(currentZone) && (
                     <Polygon
-                        coordinates={getPolygonCoordinates(currentZone.border)}
+                        coordinates={makeCoordinatesFloat(getPolygonCoordinates(currentZone.border))}
                         strokeWidth={2}
                         strokeColor={currentZone.stroke_color}
                         fillColor={hexToRGBA(currentZone.color, 0.05)}

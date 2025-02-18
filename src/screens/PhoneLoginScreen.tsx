@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, Pressable, Keyboard, StyleSheet } from 'react-native';
+import { SafeAreaView, Pressable, Keyboard, StyleSheet, Platform } from 'react-native';
 import { Spinner, Input, Stack, Text, YStack, useTheme, Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faKey, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PhoneInput from '../components/PhoneInput';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 
+const isAndroid = Platform.OS === 'android';
 const PhoneLoginScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
@@ -60,7 +61,7 @@ const PhoneLoginScreen = () => {
                     <YStack flex={1} position='relative' width='100%'>
                         <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                     </YStack>
-                    <YStack space='$4' width='100%' px='$4'>
+                    <YStack space='$4' width='100%' px='$4' pb={isAndroid ? '$4' : 0}>
                         <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded>
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />

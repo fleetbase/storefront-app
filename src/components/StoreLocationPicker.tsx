@@ -12,6 +12,7 @@ import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
 import useStoreLocations from '../hooks/use-store-locations';
 import useAppTheme from '../hooks/use-app-theme';
+import useDimensions from '../hooks/use-dimensions';
 
 const StoreLocationPicker = ({
     defaultStoreLocation = null,
@@ -27,6 +28,7 @@ const StoreLocationPicker = ({
     const navigation = useNavigation();
     const { isDarkMode } = useAppTheme();
     const { currentStoreLocation, storeLocations, updateCurrentStoreLocation } = useStoreLocations();
+    const { screenWidth } = useDimensions();
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
     const triggerRef = useRef(null);
@@ -35,7 +37,6 @@ const StoreLocationPicker = ({
     const displayStoreLocation = defaultStoreLocation ? defaultStoreLocation : currentStoreLocation;
 
     // Get screen width and calculate 75% of it
-    const screenWidth = Dimensions.get('window').width;
     const dropdownWidth = screenWidth * 0.75;
 
     const toggleDropdown = () => {
@@ -117,6 +118,7 @@ const StoreLocationPicker = ({
                             shadowRadius={3}
                             backgroundColor='transparent'
                             width={dropdownWidth}
+                            overflow='hidden'
                             position='absolute'
                             top={triggerPosition.y - triggerPosition.height - 30}
                             left={triggerPosition.x - 20}

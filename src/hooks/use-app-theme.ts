@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useColorScheme, Appearance } from 'react-native';
 import useStorage, { getString } from './use-storage';
 import { storefrontConfig, getTheme } from '../utils';
@@ -24,17 +24,15 @@ export default function useAppTheme() {
             if (storedTheme) {
                 setAppTheme(storedTheme);
             } else {
-                setAppTheme(`${userColorScheme}${baseTheme}`);
+                if (!userColorScheme && !appTheme) {
+                    setAppTheme(`${systemColorScheme}${baseTheme}`);
+                } else {
+                    setAppTheme(`${userColorScheme}${baseTheme}`);
+                }
             }
         };
         initializeTheme();
-    }, [systemColorScheme, baseTheme, setAppTheme, userColorScheme]);
-
-    useEffect(() => {
-        if (!userColorScheme) {
-            setAppTheme(`${systemColorScheme}${baseTheme}`);
-        }
-    }, [systemColorScheme, userColorScheme, baseTheme, setAppTheme]);
+    }, []);
 
     const changeScheme = (newScheme: string) => {
         const newTheme = `${newScheme}${baseTheme}`;
@@ -42,16 +40,21 @@ export default function useAppTheme() {
         setAppTheme(newTheme);
     };
 
-    return {
-        appTheme,
-        userColorScheme,
-        changeScheme,
-        schemes,
-        isDarkMode,
-        isLightMode,
-        textPrimary: getTheme('textPrimary'),
-        textSecondary: getTheme('textSecondary'),
-        primary: getTheme('primary'),
-        secondary: getTheme('secondary'),
-    };
+    const themeContext = useMemo(
+        () => ({
+            appTheme,
+            userColorScheme,
+            changeScheme,
+            schemes,
+            isDarkMode,
+            isLightMode,
+            textPrimary: getTheme('textPrimary'),
+            textSecondary: getTheme('textSecondary'),
+            primary: getTheme('primary'),
+            secondary: getTheme('secondary'),
+        }),
+        [appTheme, userColorScheme, changeScheme, isDarkMode, isLightMode]
+    );
+
+    return themeContext;
 }

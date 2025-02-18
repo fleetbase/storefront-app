@@ -13,6 +13,7 @@ import axios from 'axios';
 
 const DEFAULT_LATITUDE = 1.369;
 const DEFAULT_LONGITUDE = 103.8864;
+const isAndroid = Platform.OS === 'android';
 
 /** Configure GeoLocation */
 Geolocation.setRNConfiguration({
@@ -40,7 +41,7 @@ export async function geocode(latitude, longitude, options = {}) {
                 latlng: `${latitude},${longitude}`,
                 sensor: false,
                 language: 'en-US',
-                key: config('GOOGLE_MAPS_KEY'),
+                key: config('GOOGLE_MAPS_API_KEY'),
             },
         });
 
@@ -69,7 +70,7 @@ export async function geocodeAutocomplete(input, coordinates = null) {
             input,
             // types: 'address', // Restrict results to addresses only
             language: 'en-US',
-            key: config('GOOGLE_MAPS_KEY'),
+            key: config('GOOGLE_MAPS_API_KEY'),
         };
 
         if (isArray(coordinates)) {
@@ -105,7 +106,7 @@ export async function getPlaceDetails(placeId) {
         const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
             params: {
                 place_id: placeId,
-                key: config('GOOGLE_MAPS_KEY'),
+                key: config('GOOGLE_MAPS_API_KEY'),
                 // You can include 'fields' to limit the data retrieved or omit it for all available details
                 fields: 'name,formatted_address,geometry,place_id,types,international_phone_number,website,address_components',
             },
@@ -296,8 +297,11 @@ export async function getLiveLocation() {
                     resolve(place);
                 }
             },
-            (error) => resolve(null),
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+            (error) => {
+                resolve(null);
+                console.error('[LiveLocation] Error getting device current position:', error);
+            },
+            { enableHighAccuracy: !isAndroid, timeout: 20000, maximumAge: 3600000 }
         );
     });
 }
@@ -331,8 +335,11 @@ export async function getCurrentLocation() {
                     resolve(place);
                 }
             },
-            (error) => resolve(null),
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+            (error) => {
+                resolve(null);
+                console.error('[CurrentLocation] Error getting device current position:', error);
+            },
+            { enableHighAccuracy: !isAndroid, timeout: 2000, maximumAge: 3600000 }
         );
     });
 }
@@ -366,7 +373,7 @@ export function getCoordinates(target, options = {}) {
     if (isPojoResource(target) && target.resource === 'place') {
         const [longitude, latitude] =
             typeof target.getAttribute === 'function'
-                ? (target.getAttribute('location').coordinates ?? [fallbackLatitude, fallbackLongitude])
+                ? (target.getAttribute('location.coordinates') ?? [fallbackLatitude, fallbackLongitude])
                 : (target.attributes?.location?.coordinates ?? [fallbackLatitude, fallbackLongitude]);
         return [latitude, longitude];
     }
@@ -983,7 +990,7 @@ export function createFauxPlace() {
  * }
  */
 export function isPointInGeoJSONPolygon(point, polygon) {
-    if (!polygon || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates)) {
+    if (!polygon || polygon.type !== 'Polygon' || !isArray(polygon.coordinates)) {
         throw new Error('Invalid GeoJSON polygon');
     }
 
@@ -992,7 +999,7 @@ export function isPointInGeoJSONPolygon(point, polygon) {
 
     // Get the outer ring (first coordinate array).
     const outerRing = polygon.coordinates[0];
-    if (!Array.isArray(outerRing) || outerRing.length === 0) {
+    if (!isArray(outerRing) || outerRing.length === 0) {
         return false;
     }
 
@@ -1059,4 +1066,64 @@ export function getCurrentLocationFromStorage() {
 export function getLiveLocationLocationFromStorage() {
     const liveLocation = storage.getMap('_live_location');
     return liveLocation ? restoreFleetbasePlace(liveLocation) : null;
+}
+
+export function makeCoordinatesFloat(input) {
+    // Helper to parse a single coordinate (array or object).
+    function parseSingle(coord) {
+        if (isArray(coord) && coord.length >= 2) {
+            const latitude = parseFloat(coord[0]);
+            const longitude = parseFloat(coord[1]);
+            if (isNaN(latitude) || isNaN(longitude)) {
+                throw new Error(`Invalid numeric values in coordinate array: ${JSON.stringify(coord)}`);
+            }
+            return { latitude, longitude };
+        } else if (typeof coord === 'object' && coord !== null) {
+            const newCoord = {};
+            if ('latitude' in coord) {
+                newCoord.latitude = parseFloat(coord.latitude);
+            }
+            if ('longitude' in coord) {
+                newCoord.longitude = parseFloat(coord.longitude);
+            }
+            // Optionally include delta values if present (for regions)
+            if ('latitudeDelta' in coord) {
+                newCoord.latitudeDelta = parseFloat(coord.latitudeDelta);
+            }
+            if ('longitudeDelta' in coord) {
+                newCoord.longitudeDelta = parseFloat(coord.longitudeDelta);
+            }
+            if (isNaN(newCoord.latitude) || isNaN(newCoord.longitude)) {
+                throw new Error(`Invalid numeric values in coordinate object: ${JSON.stringify(coord)}`);
+            }
+            return newCoord;
+        }
+        throw new Error(`Unsupported coordinate format: ${JSON.stringify(coord)}`);
+    }
+
+    // If input is an array...
+    if (isArray(input)) {
+        // Check if it’s an array of coordinates.
+        if (input.length === 0) {
+            return input;
+        }
+        // If the first element is an object or an array (of at least 2 items),
+        // assume it's an array of coordinates.
+        const first = input[0];
+        if ((isArray(first) && first.length >= 2) || (typeof first === 'object' && first !== null && 'latitude' in first)) {
+            return input.map((coord) => parseSingle(coord));
+        }
+        // Otherwise, if the array itself has 2 items, assume it’s a single coordinate.
+        if (input.length === 2) {
+            return parseSingle(input);
+        }
+        throw new Error(`Array format not recognized for coordinates: ${JSON.stringify(input)}`);
+    }
+
+    // If input is an object, assume it's a single coordinate/region.
+    if (typeof input === 'object' && input !== null) {
+        return parseSingle(input);
+    }
+
+    throw new Error(`Unsupported type for coordinates: ${typeof input}`);
 }

@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useFocusEffect } from '@react-navigation/native';
 import { YStack, Image } from 'tamagui';
-import { restoreFleetbasePlace, getCoordinatesObject } from '../utils/location';
+import { restoreFleetbasePlace, getCoordinatesObject, makeCoordinatesFloat } from '../utils/location';
 import { listen } from '../utils/socket';
 import { storefrontConfig } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
@@ -59,7 +59,7 @@ const StoreMapScreen = ({ route }) => {
             <MapView style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }} initialRegion={mapRegion} mapType={storefrontConfig('defaultMapType', 'standard')}>
                 {storefrontConfig('showDriversOnMap', false) && drivers.map((driver) => <DriverMarker key={driver.id} driver={driver} />)}
                 {locations.map((location, index) => (
-                    <Marker key={index} coordinate={location.coords} onPress={() => viewStore(store, location)}>
+                    <Marker key={index} coordinate={makeCoordinatesFloat(location.coords)} onPress={() => viewStore(store, location)}>
                         <YStack borderWidth={2} borderColor='$white' borderRadius='$3'>
                             <FastImage
                                 source={{ uri: store.getAttribute('logo_url') }}

@@ -11,7 +11,7 @@ import config from 'config';
 import tailwind from 'tailwind';
 
 navigator.geolocation = require('react-native-geolocation-service');
-const { GOOGLE_MAPS_KEY } = config;
+const { GOOGLE_MAPS_API_KEY } = config;
 
 const SearchPlacesScreen = ({ navigation, route }) => {
     const storefront = useStorefront();
@@ -56,7 +56,7 @@ const SearchPlacesScreen = ({ navigation, route }) => {
                     fetchDetails={true}
                     onPress={(data, details = null) => selectEditingPlace(details)}
                     query={{
-                        key: GOOGLE_MAPS_KEY,
+                        key: GOOGLE_MAPS_API_KEY,
                         language: 'en',
                     }}
                     styles={{

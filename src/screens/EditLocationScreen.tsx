@@ -36,8 +36,8 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
             borderColor='$borderColorWithShadow'
             borderRadius='$4'
             bg='$surface'
-            autoCapitalize={false}
-            autoComplete={false}
+            autoCapitalize='none'
+            autoComplete='off'
             autoCorrect={false}
         />
     );

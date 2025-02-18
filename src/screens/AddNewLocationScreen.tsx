@@ -136,8 +136,8 @@ const AddNewLocationScreen = ({ route }) => {
                                 onFocus={handleFocus}
                                 onBlur={handleBlur}
                                 onChangeText={setInputValue}
-                                autoCapitalize={false}
-                                autoComplete={false}
+                                autoCapitalize='none'
+                                autoComplete='off'
                                 autoCorrect={false}
                             />
                             {inputFocused && (

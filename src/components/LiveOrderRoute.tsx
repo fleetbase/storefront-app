@@ -4,7 +4,7 @@ import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { Driver, Vehicle } from '@fleetbase/sdk';
-import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
+import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat } from '../utils/location';
 import { config, storefrontConfig, getFoodTruckById } from '../utils';
 import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -173,7 +173,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                     </VehicleMarker>
                 )}
                 {!isOriginFoodTruck && (
-                    <Marker coordinate={origin} centerOffset={markerOffset}>
+                    <Marker coordinate={makeCoordinatesFloat(origin)} centerOffset={markerOffset}>
                         <YStack
                             mb={8}
                             px='$3'
@@ -204,7 +204,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         <LocationMarker size={markerSize} />
                     </Marker>
                 )}
-                <Marker coordinate={destination} centerOffset={markerOffset}>
+                <Marker coordinate={makeCoordinatesFloat(destination)} centerOffset={markerOffset}>
                     <YStack
                         mb={8}
                         px='$3'
@@ -235,7 +235,14 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                     <LocationMarker size={markerSize} />
                 </Marker>
 
-                <MapViewDirections origin={origin} destination={destination} apikey={config('GOOGLE_MAPS_KEY')} strokeWidth={4} strokeColor={theme['$blue-500'].val} onReady={fitToRoute} />
+                <MapViewDirections
+                    origin={origin}
+                    destination={destination}
+                    apikey={config('GOOGLE_MAPS_API_KEY')}
+                    strokeWidth={4}
+                    strokeColor={theme['$blue-500'].val}
+                    onReady={fitToRoute}
+                />
             </MapView>
 
             <YStack position='absolute' style={{ ...StyleSheet.absoluteFillObject }}>

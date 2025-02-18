@@ -25,7 +25,6 @@ import AccountScreen from '../screens/AccountScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
 import OrderScreen from '../screens/OrderScreen';
-import OrderHistoryScreen from '../screens/OrderHistoryScreen';
 import ProductScreen from '../screens/ProductScreen';
 import FoodTruckScreen from '../screens/FoodTruckScreen';
 import CatalogScreen from '../screens/CatalogScreen';
@@ -35,6 +34,8 @@ import LocationPicker from '../components/LocationPicker';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
+
+const isAndroid = Platform.OS === 'android';
 
 const importedIconsMap = {
     faHome,
@@ -331,7 +332,6 @@ const StoreProfileTab = createNativeStackNavigator({
 });
 
 const StoreNavigator = createBottomTabNavigator({
-    // initialRouteName: storefrontConfig('storeNavigator.defaultTab', 'StoreHomeTab'),
     layout: StoreLayout,
     screenOptions: ({ route, navigation }) => {
         const { isDarkMode } = useAppTheme();
@@ -360,7 +360,7 @@ const StoreNavigator = createBottomTabNavigator({
             tabBarStyle: {
                 position: 'absolute',
                 backgroundColor,
-                borderTopWidth: 1,
+                borderTopWidth: isAndroid ? 0 : 1,
                 borderTopColor: borderColor,
                 elevation: 0,
             },
@@ -371,7 +371,7 @@ const StoreNavigator = createBottomTabNavigator({
             },
             tabBarLabelStyle: ({ focused }) => {
                 return {
-                    marginTop: 15,
+                    marginTop: isAndroid ? 5 : 15,
                     fontSize: 15,
                     fontWeight: focued ? 600 : 300,
                 };

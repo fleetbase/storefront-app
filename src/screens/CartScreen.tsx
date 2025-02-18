@@ -15,7 +15,8 @@ import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import StorefrontConfig from '../../storefront.config';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+const isAndroid = Platform.OS === 'android';
+if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -295,7 +296,7 @@ const CartScreen = ({ route }) => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={isModalScreen ? 0 : tabBarHeight}
+                    bottom={isModalScreen ? (isAndroid ? 24 : 0) : tabBarHeight}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -306,7 +307,7 @@ const CartScreen = ({ route }) => {
                     shadowRadius={3}
                 >
                     <XStack alignItems='center' justifyContent='space-between' paddingBottom={isModalScreen ? 25 : 0}>
-                        <YStack flex={1} space='$1'>
+                        <YStack flex={1} space={isAndroid ? 0 : '$1'}>
                             <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
                                 Total
                             </Text>
