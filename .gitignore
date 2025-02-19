@@ -33,6 +33,8 @@ android/*.hprof
 android/app/build
 android/.kotlin
 android/app/releases/*
+android/*keystore
+android/**/*keystore
 
 # node.js
 #
