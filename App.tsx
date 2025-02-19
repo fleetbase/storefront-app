@@ -1,6 +1,6 @@
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { TamaguiProvider, Theme } from 'tamagui';
+import { TamaguiProvider, Theme, useTheme } from 'tamagui';
 import { Toasts } from '@backpackapp-io/react-native-toast';
 import { PortalProvider, PortalHost } from '@gorhom/portal';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider, useThemeContext } from './src/contexts/ThemeContext';
 import { NotificationProvider } from './src/contexts/NotificationContext';
+import { getDefaultStyle as getDefaultToastStyle } from './src/utils/toast';
 import config from './tamagui.config';
 
 function AppContent(): React.JSX.Element {
@@ -29,7 +30,7 @@ function AppContent(): React.JSX.Element {
                                         <SocketClusterProvider>
                                             <CartProvider>
                                                 <AppNavigator />
-                                                <Toasts extraInsets={{ bottom: 80 }} />
+                                                <Toasts extraInsets={{ bottom: 80 }} defaultStyle={getDefaultToastStyle()} />
                                                 <PortalHost name='MainPortal' />
                                                 <PortalHost name='BottomSheetPanelPortal' />
                                                 <PortalHost name='LocationPickerPortal' />

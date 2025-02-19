@@ -11,14 +11,7 @@ export const StoreHome = {
     screen: StoreHomeScreen,
     options: ({ route }) => {
         return {
-            title: '',
-            headerTransparent: true,
-            headerShadowVisible: false,
-            gestureEnabled: false,
-            // animation: 'none',
-            headerStyle: {
-                transform: [{ translateY: -15 }],
-            },
+            headerShown: false,
         };
     },
 };

@@ -9,11 +9,18 @@ import { PhoneLoginButton, AppleLoginButton, FacebookLoginButton, GoogleLoginBut
 import useOAuth from '../hooks/use-oauth';
 import LinearGradient from 'react-native-linear-gradient';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
+import storage from '../utils/storage';
 
+const SHOW_CLEAR_CACHE = false;
 const LoginScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { login, loginSupported, loading } = useOAuth();
+
+    const handleClearCache = () => {
+        storage.clearStore();
+        toast.success('Cache cleared!');
+    };
 
     const handlePhoneLogin = () => {
         navigation.navigate('PhoneLogin');
@@ -38,6 +45,11 @@ const LoginScreen = () => {
                         {loginSupported('apple') && <AppleLoginButton onPress={() => handleOAuthLogin('apple')} />}
                         {loginSupported('facebook') && <FacebookLoginButton onPress={() => handleOAuthLogin('facebook')} />}
                         {loginSupported('google') && <GoogleLoginButton onPress={() => handleOAuthLogin('google')} />}
+                        {SHOW_CLEAR_CACHE && (
+                            <Button bg='$error' borderColor='$errorBorder' borderWidth={1} onPress={handleClearCache} rounded width='100%'>
+                                <Button.Text color='$errorText'>Clear Cache</Button.Text>
+                            </Button>
+                        )}
                     </YStack>
                 </SafeAreaView>
                 {loading && (

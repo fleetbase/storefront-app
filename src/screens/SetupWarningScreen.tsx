@@ -3,7 +3,6 @@ import Config from 'react-native-config';
 import { SafeAreaView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faExclamationTriangle, faExclamation } from '@fortawesome/free-solid-svg-icons';
-import { translate } from '../utils/localize';
 import { Stack, YStack, XStack, Text, useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
 

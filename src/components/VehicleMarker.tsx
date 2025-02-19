@@ -67,7 +67,7 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const latitude = vehicle.getAttribute('location.coordinates.1');
     const longitude = vehicle.getAttribute('location.coordinates.0');
 
-    console.log(`${vehicle.id} coordinates: ${latitude} ${longitude}`);
+    // console.log(`${vehicle.id} coordinates: ${latitude} ${longitude}`);
     return (
         <TrackingMarker
             ref={markerRef}

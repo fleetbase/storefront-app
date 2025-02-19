@@ -44,7 +44,9 @@ const CatalogScreen = ({ route }) => {
                         {foodTruck.getAttribute('vehicle.plate_number')}
                     </Text>
                 </XStack>
-                <CartButton size={40} onPress={() => navigation.navigate('CartModal')} />
+                <YStack>
+                    <CartButton text='Jump to Cart' onPress={() => navigation.navigate('CartModal')} />
+                </YStack>
             </XStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <YStack py='$2' px='$3'>

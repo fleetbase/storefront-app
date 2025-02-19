@@ -166,14 +166,7 @@ const StoreFoodTruckTab = createNativeStackNavigator({
         FoodTruckHome: {
             screen: FoodTruckScreen,
             options: {
-                title: '',
-                headerTransparent: true,
-                headerShadowVisible: false,
-                gestureEnabled: false,
-                headerLeft: () => (
-                    <LocationPicker onPressAddNewLocation={({ navigation, params }) => navigation.navigate('AddNewLocation', params)} redirectToAfterAddLocation={'FoodTruckHome'} />
-                ),
-                headerRight: () => <CartButton onPress={({ navigation }) => navigation.navigate('CartModal')} />,
+                headerShown: false,
             },
         },
         Catalog: {

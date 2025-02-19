@@ -8,6 +8,7 @@ import { adapter as storefrontAdapter } from '../hooks/use-storefront';
 import { adapter } from '../hooks/use-fleetbase';
 import { haversine } from './math';
 import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializedResource, isPojoResource } from './';
+import { getLocale } from './localize';
 import storage from './storage';
 import axios from 'axios';
 
@@ -29,6 +30,7 @@ export function createGoogleAddress(...args) {
 }
 
 export async function geocode(latitude, longitude, options = {}) {
+    const language = getLocale();
     if (!latitude || !longitude) {
         const fallbackCoordinates = getDefaultCoordinates();
         latitude = fallbackCoordinates.latitude;
@@ -40,13 +42,13 @@ export async function geocode(latitude, longitude, options = {}) {
             params: {
                 latlng: `${latitude},${longitude}`,
                 sensor: false,
-                language: 'en-US',
+                language,
                 key: config('GOOGLE_MAPS_API_KEY'),
             },
         });
 
         if (isEmpty(response.data.results)) {
-            throw new Error('No geocode results for provided coordinates.');
+            throw new Error(`No geocode results for provided coordinates: ${latitude},${longitude}`, response);
         }
 
         // Allow full results
@@ -59,23 +61,24 @@ export async function geocode(latitude, longitude, options = {}) {
         const result = response.data.results[0];
         return options.asGoogleAddress === true ? new GoogleAddress(result) : result;
     } catch (error) {
-        console.error('Geocoding error:', error);
+        console.warn('Geocoding error:', error);
         return null;
     }
 }
 
 export async function geocodeAutocomplete(input, coordinates = null) {
+    const language = getLocale();
+
     try {
         const params = {
             input,
-            // types: 'address', // Restrict results to addresses only
-            language: 'en-US',
+            language,
             key: config('GOOGLE_MAPS_API_KEY'),
         };
 
         if (isArray(coordinates)) {
             params.location = `${coordinates[0]},${coordinates[1]}`;
-            params.radius = 5000; // 5km radius
+            params.radius = 5000;
         }
 
         const response = await axios.get('https://maps.googleapis.com/maps/api/place/autocomplete/json', {
@@ -95,7 +98,7 @@ export async function geocodeAutocomplete(input, coordinates = null) {
 
         return predictions;
     } catch (error) {
-        console.error('Autocomplete error:', error);
+        console.warn('Autocomplete error:', error);
         return [];
     }
 }
@@ -107,7 +110,6 @@ export async function getPlaceDetails(placeId) {
             params: {
                 place_id: placeId,
                 key: config('GOOGLE_MAPS_API_KEY'),
-                // You can include 'fields' to limit the data retrieved or omit it for all available details
                 fields: 'name,formatted_address,geometry,place_id,types,international_phone_number,website,address_components',
             },
         });
@@ -120,7 +122,7 @@ export async function getPlaceDetails(placeId) {
         // Return the full result object from Google
         return response.data.result;
     } catch (error) {
-        console.error('Error fetching place details:', error.message);
+        console.warn(`Error fetching place details for ID: ${placeId}`, error.message);
         return null;
     }
 }
@@ -234,6 +236,12 @@ export function formattedAddressFromPlace(place) {
         place.getAttribute('country'),
     ];
 
+    // Worst case scenario fallback to coordinates
+    if (segments.filter(Boolean).length === 0) {
+        const { latitude, longitude } = getDefaultCoordinates();
+        segments.push(...(place.getAttribute('location.coordinates', [longitude, latitude]) ?? [longitude, latitude]).map((coord) => (coord ? parseFloat(coord).toFixed(4) : coord)));
+    }
+
     return segments.filter(Boolean).join(', ');
 }
 
@@ -271,6 +279,10 @@ export function serializGoogleAddress(googleAddress) {
     return attributes;
 }
 
+export function createPlaceFromCoordinates(latitude, longitude, attributes = {}) {
+    return new Place({ location: new Point(latitude, longitude), ...attributes });
+}
+
 export async function getLiveLocation() {
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(
@@ -282,14 +294,23 @@ export async function getLiveLocation() {
 
                 try {
                     const details = await geocode(latitude, longitude);
-                    const place = createFleetbasePlaceFromDetails(details, { position });
+                    if (details) {
+                        const place = createFleetbasePlaceFromDetails(details, { position });
+                        // Save the last known location
+                        storage.setMap('_last_known_location', place.serialize());
+                        resolve(place);
+                    } else {
+                        const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+                        console.warn('Defaulting live location to coordinate based place:', place);
 
-                    // Save the last known location
-                    storage.setMap('_last_known_location', place.serialize());
-
-                    resolve(place);
+                        storage.setMap('_last_known_location', place.serialize());
+                        resolve(place);
+                    }
                 } catch (error) {
+                    console.warn('Error attempting to geocode live/current position:', error);
+
                     const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+                    console.warn('Defaulting live location to coordinate based place:', place);
 
                     // Save the last known location
                     storage.setMap('_last_known_location', place.serialize());
@@ -299,7 +320,7 @@ export async function getLiveLocation() {
             },
             (error) => {
                 resolve(null);
-                console.error('[LiveLocation] Error getting device current position:', error);
+                console.error('Error getting device current position:', error);
             },
             { enableHighAccuracy: !isAndroid, timeout: 20000, maximumAge: 3600000 }
         );
@@ -324,12 +345,21 @@ export async function getCurrentLocation() {
 
                 try {
                     const details = await geocode(latitude, longitude);
-                    const place = createFleetbasePlaceFromDetails(details, { position });
+                    if (details) {
+                        const place = createFleetbasePlaceFromDetails(details, { position });
+                        storage.setMap('_current_location', place.serialize());
+                        resolve(place);
+                    } else {
+                        const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+                        console.warn('Defaulting live location to coordinate based place:', place);
 
-                    storage.setMap('_current_location', place.serialize());
-                    resolve(place);
+                        storage.setMap('_last_known_location', place.serialize());
+                        resolve(place);
+                    }
                 } catch (error) {
                     const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+                    console.warn('Error attempting to geocode current position:', error);
+                    console.warn('Defaulting current location to coordinate based place:', place);
 
                     storage.setMap('_current_location', place.serialize());
                     resolve(place);
@@ -337,7 +367,7 @@ export async function getCurrentLocation() {
             },
             (error) => {
                 resolve(null);
-                console.error('[CurrentLocation] Error getting device current position:', error);
+                console.error('Error getting device current position:', error);
             },
             { enableHighAccuracy: !isAndroid, timeout: 2000, maximumAge: 3600000 }
         );

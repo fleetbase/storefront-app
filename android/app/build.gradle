@@ -89,11 +89,6 @@ android {
         manifestPlaceholders = [
             appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX")
         ]
-
-        // StorefrontApp Config Resolutions
-        resValue "string", "facebook_client_token", project.hasProperty('FACEBOOK_CLIENT_TOKEN') ? FACEBOOK_CLIENT_TOKEN : '_FACEBOOK_CLIENT_TOKEN_'
-        resValue "string", "facebook_app_id", project.hasProperty('FACEBOOK_APP_ID') ? FACEBOOK_APP_ID : '_FACEBOOK_APP_ID_'
-        resValue "string", "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : '_GOOGLE_MAPS_API_KEY_'
     }
     configurations.all {
         resolutionStrategy {

@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useHeaderHeight } from '@react-navigation/elements';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { ScrollView, Animated } from 'react-native';
 import { YStack, useTheme } from 'tamagui';
@@ -11,14 +10,14 @@ import CategoryProductSlider from '../components/CategoryProductSlider';
 import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import LocationPicker from '../components/LocationPicker';
+import CustomHeader from '../components/CustomHeader';
 import Spacer from '../components/Spacer';
 import { storefrontConfig } from '../utils';
 
 const StoreHome = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const headerHeight = useHeaderHeight(); // Default header height
-    const customHeaderHeight = 250; // Adjust if StoreHeader uses a fixed height
+    const customHeaderHeight = 250;
     const scrollY = useRef(new Animated.Value(0)).current;
     const { info } = useStorefrontInfo();
     const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
@@ -43,21 +42,6 @@ const StoreHome = ({ route }) => {
         transform: [{ translateY: headerTranslateY }],
     };
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <Animated.View
-                    style={{
-                        opacity: headerOpacity,
-                        transform: [{ translateY: headerTranslateY }],
-                    }}
-                >
-                    <LocationPicker onPressAddNewLocation={({ params }) => navigation.navigate('AddNewLocation', params)} />
-                </Animated.View>
-            ),
-        });
-    }, [navigation, headerOpacity, headerTranslateY]);
-
     return (
         <YStack flex={1} bg='$background'>
             <Animated.View
@@ -70,6 +54,12 @@ const StoreHome = ({ route }) => {
                     storeHeaderWrapperStyle,
                 ]}
             >
+                <CustomHeader
+                    headerRowProps={{ px: '$4' }}
+                    headerTransparent={true}
+                    headerStyle={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 99 }}
+                    headerLeft={<LocationPicker onPressAddNewLocation={({ params }) => navigation.navigate('AddNewLocation', params)} />}
+                />
                 <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} />
             </Animated.View>
             <ScrollView

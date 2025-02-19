@@ -4,7 +4,6 @@ import { Platform } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Image, Spinner, XStack, Text, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
-import { setI18nConfig } from '../utils/localize';
 import { config, toArray, isArray } from '../utils';
 import { getCurrentLocationFromStorage } from '../utils/location';
 import BootSplash from 'react-native-bootsplash';

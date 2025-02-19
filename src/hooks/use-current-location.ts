@@ -7,24 +7,23 @@ import useStorage from './use-storage';
 
 const useCurrentLocation = () => {
     const { isAuthenticated, updateCustomerLocation, customer, getDefaultAddress } = useAuth();
-
-    // Using useStorage to persist values
     const [currentLocation, setCurrentLocation] = useStorage('_current_location');
     const [liveLocation, setLiveLocation] = useStorage('_live_location');
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     // Memoized function to update the current location
     const updateCurrentLocation = useCallback(
         async (location) => {
-            const place = restoreFleetbasePlace(location);
+            const place = typeof location.serialize === 'function' ? location : restoreFleetbasePlace(location);
+            const serializedPlace = place.serialize();
             // Only update if the new location is different
             setCurrentLocation((prevLocation) => {
-                if (JSON.stringify(prevLocation) !== JSON.stringify(place)) {
+                if (JSON.stringify(prevLocation) !== JSON.stringify(serializedPlace)) {
                     EventRegister.emit('current_location.updated', place);
-                    return place;
+                    return serializedPlace;
                 }
+
                 return prevLocation;
             });
         },
