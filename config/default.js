@@ -9,6 +9,8 @@ export const DefaultConfig = {
         defaultTab: toArray(config('STORE_NAVIGATOR_DEFAULT_TAB', 'StoreHomeTab')),
         tabBarBackgroundColor: config('STORE_NAVIGATOR_TAB_BAR_BG', 'blur'),
     },
+    termsUrl: config('TOS_URL'),
+    privacyUrl: config('PRIVACY_URL'),
     defaultMapType: config('DEFAULT_MAP_TYPE', 'standard'),
     defaultServiceArea: config('DEFAULT_SERVICE_AREA'),
     defaultLocale: config('DEFAULT_LOCALE', 'en'),
