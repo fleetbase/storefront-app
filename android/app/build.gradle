@@ -89,6 +89,7 @@ android {
         manifestPlaceholders = [
             appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX")
         ]
+        resValue "string", "build_config_package", "com.storefront.app"
     }
     configurations.all {
         resolutionStrategy {
