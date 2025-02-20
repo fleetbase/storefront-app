@@ -4,6 +4,7 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
 import { toast } from '../utils/toast';
@@ -24,6 +25,7 @@ import FastImage from 'react-native-fast-image';
 const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
@@ -137,7 +139,7 @@ const ProductScreen = ({ route = {} }) => {
                     <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' paddingHorizontal='$4' paddingTop='$2' paddingBottom='$8' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
+            <XStack position='absolute' px='$4' py='$3' bottom={tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
                 <XStack width='38%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} />
                 </XStack>

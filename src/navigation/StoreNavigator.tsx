@@ -149,7 +149,7 @@ function getDefaultTabIcon(routeName) {
     return icon;
 }
 
-const ModalScreens = {
+export const ModalScreens = {
     ProductModal: {
         screen: ProductScreen,
         options: {
@@ -160,7 +160,7 @@ const ModalScreens = {
     OrderModal,
 };
 
-const StoreFoodTruckTab = createNativeStackNavigator({
+export const StoreFoodTruckTab = createNativeStackNavigator({
     initialRouteName: 'FoodTruckHome',
     screens: {
         FoodTruckHome: {
@@ -191,7 +191,7 @@ const StoreFoodTruckTab = createNativeStackNavigator({
     },
 });
 
-const StoreHomeTab = createNativeStackNavigator({
+export const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
     screens: {
         StoreHome,
@@ -208,7 +208,7 @@ const StoreHomeTab = createNativeStackNavigator({
     },
 });
 
-const StoreSearchTab = createNativeStackNavigator({
+export const StoreSearchTab = createNativeStackNavigator({
     initialRouteName: 'StoreSearch',
     screens: {
         StoreSearch,
@@ -223,7 +223,7 @@ const StoreSearchTab = createNativeStackNavigator({
     },
 });
 
-const StoreMapTab = createNativeStackNavigator({
+export const StoreMapTab = createNativeStackNavigator({
     initialRouteName: 'StoreMap',
     screens: {
         StoreMap,
@@ -231,7 +231,7 @@ const StoreMapTab = createNativeStackNavigator({
     },
 });
 
-const StoreCartTab = createNativeStackNavigator({
+export const StoreCartTab = createNativeStackNavigator({
     initialRouteName: 'Cart',
     screens: {
         ...CartStack,
@@ -241,7 +241,7 @@ const StoreCartTab = createNativeStackNavigator({
     },
 });
 
-const StoreProfileTab = createNativeStackNavigator({
+export const StoreProfileTab = createNativeStackNavigator({
     screens: {
         Profile: {
             if: useIsAuthenticated,
@@ -330,24 +330,13 @@ const StoreNavigator = createBottomTabNavigator({
         const { isDarkMode } = useAppTheme();
         const theme = useTheme();
         const background = storefrontConfig('storeNavigator.tabBarBackgroundColor', 'blur');
-        const backgroundColor = background === 'blur' ? 'transparent' : theme[background].val;
-        const borderColor = background === 'blur' ? 'transparent' : theme[`${background}Border`].val;
+        const backgroundColor = background === 'blur' ? (isAndroid ? theme['background'].val : 'transparent') : theme[background].val;
+        const borderColor = background === 'blur' ? (isAndroid ? theme['borderColor'].val : 'transparent') : theme[`${background}Border`].val;
         const activeColor = background === 'blur' ? config('CUSTOM_TAB_BAR_ACTIVE_COLOR', theme.primary.val) : theme[`${background}Text`].val;
         const inactiveColor = background === 'blur' ? config('CUSTOM_TAB_BAR_INACTIVE_COLOR', theme.secondary.val) : adjustOpacity(theme[`${background}Text`].val, isDarkMode ? 0.5 : 1);
 
-        return {
+        const screenOptions = {
             headerShown: false,
-            tabBarBackground: () => {
-                if (background === 'blur') {
-                    return (
-                        <View style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'transparent' }}>
-                            <BlurView tint={isDarkMode ? 'dark' : 'xlight'} blurAmount={6} style={StyleSheet.absoluteFill} />
-                        </View>
-                    );
-                }
-
-                return <View style={[StyleSheet.absoluteFill, { width: '100%', height: '100%', backgroundColor, borderColor }]} />;
-            },
             tabBarInactiveTintColor: inactiveColor,
             tabBarActiveTintColor: activeColor,
             tabBarStyle: {
@@ -355,7 +344,7 @@ const StoreNavigator = createBottomTabNavigator({
                 backgroundColor,
                 borderTopWidth: isAndroid ? 0 : 1,
                 borderTopColor: borderColor,
-                elevation: 0,
+                elevation: isAndroid ? 1 : 0,
             },
             tabBarIcon: ({ focused }) => {
                 const icon = getDefaultTabIcon(route.name);
@@ -370,6 +359,22 @@ const StoreNavigator = createBottomTabNavigator({
                 };
             },
         };
+
+        if (!isAndroid) {
+            screenOptions.tabBarBackground = () => {
+                if (background === 'blur') {
+                    return (
+                        <View style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'transparent' }}>
+                            <BlurView tint={isDarkMode ? 'dark' : 'xlight'} blurAmount={6} style={StyleSheet.absoluteFill} />
+                        </View>
+                    );
+                }
+
+                return <View style={[StyleSheet.absoluteFill, { width: '100%', height: '100%', backgroundColor, borderColor, borderTopWidth: isAndroid ? 0 : 1, borderWidth: 0 }]} />;
+            };
+        }
+
+        return screenOptions;
     },
     screens: createTabScreens(),
 });

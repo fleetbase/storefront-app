@@ -4,6 +4,7 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
@@ -19,6 +20,7 @@ import FastImage from 'react-native-fast-image';
 const CartItemScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [cartItem, setCartItem] = useState(route.params.cartItem);
@@ -156,7 +158,7 @@ const CartItemScreen = ({ route = {} }) => {
                     />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' paddingHorizontal='$4' paddingTop='$2' paddingBottom='$8' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
+            <XStack position='absolute' px='$4' py='$3' bottom={tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
                 <XStack width='35%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} disabled={isLoading('addToCart') || isLoading('removeCartItem')} />
                 </XStack>

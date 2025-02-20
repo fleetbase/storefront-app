@@ -208,7 +208,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                             </YStack>
                             <YStack flex={1} space='$1'>
                                 <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                    {end.getAttribute('name') ?? 'Your Location'}
+                                    {end?.getAttribute('name') ?? 'Your Location'}
                                 </Text>
                                 <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
                                     {formattedAddressFromPlace(end)}

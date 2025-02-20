@@ -18,16 +18,7 @@ const RootStack = createNativeStackNavigator({
         OrderModal,
         NetworkHome: {
             screen: NetworkHomeScreen,
-            options: ({ route }) => {
-                return {
-                    title: route.params.info.name,
-                    headerBackVisible: false,
-                    headerBackButtonMenuEnabled: false,
-                    headerBlurEffect: 'regular',
-                    gestureEnabled: false,
-                    animation: 'none',
-                };
-            },
+            options: { headerShown: false, gestureEnabled: false, animation: 'none' },
         },
         StoreNavigator: {
             screen: StoreNavigator,

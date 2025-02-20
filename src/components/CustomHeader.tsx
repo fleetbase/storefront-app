@@ -10,6 +10,8 @@ const CustomHeader = ({
     headerRight,
     headerStyle,
     headerRowStyle,
+    headerLeftStyle,
+    headerRightStyle,
     headerTitleAlign = 'center',
     headerTransparent = false,
     headerShadowVisible = true,
@@ -33,13 +35,13 @@ const CustomHeader = ({
             ]}
         >
             <XStack height={headerHeight} style={[styles.headerRow, headerRowStyle]} {...headerRowProps}>
-                <YStack height={headerHeight} alignItems='flex-start' justifyContent='center' style={[styles.side]} {...headerLeftProps}>
+                <YStack height={headerHeight} alignItems='flex-start' justifyContent='center' style={[styles.side, headerLeftStyle]} {...headerLeftProps}>
                     {typeof headerLeft === 'function' ? headerLeft() : headerLeft}
                 </YStack>
                 <YStack style={[styles.titleContainer, { alignItems: headerTitleAlign }]} {...titleProps}>
                     <Text style={[styles.title, { color: titleColor }]}>{title}</Text>
                 </YStack>
-                <YStack height={headerHeight} alignItems='flex-end' justifyContent='center' style={[styles.side]} {...headerRightProps}>
+                <YStack height={headerHeight} alignItems='flex-end' justifyContent='center' style={[styles.side, headerRightStyle]} {...headerRightProps}>
                     {typeof headerRight === 'function' ? headerRight() : headerRight}
                 </YStack>
             </XStack>

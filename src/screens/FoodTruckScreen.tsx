@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useHeaderHeight } from '@react-navigation/elements';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, Platform } from 'react-native';
 import MapView, { Polygon, Marker } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -12,6 +11,7 @@ import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
+import useDimensions from '../hooks/use-dimensions';
 import useAppTheme from '../hooks/use-app-theme';
 import useCurrentLocation from '../hooks/use-current-location';
 import VehicleMarker from '../components/VehicleMarker';
@@ -61,12 +61,12 @@ function getPolygonBoundingBox(polygonCoordinates) {
 
     return { minLat, maxLat, minLng, maxLng };
 }
-
+const isAndroid = Platform.OS === 'android';
 const FoodTruckScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
-    const headerHeight = useHeaderHeight();
     const { isDarkMode } = useAppTheme();
+    const { screenWidth } = useDimensions();
     const { fleetbase, adapter: fleetbaseAdapter } = useFleetbase();
     const { storefront } = useStorefront();
     const { currentLocation } = useCurrentLocation();
@@ -310,6 +310,7 @@ const FoodTruckScreen = () => {
             <YStack position='absolute' top={0} left={0} right={0} zIndex={10}>
                 <CustomHeader
                     headerRowProps={{ px: '$4' }}
+                    headerLeftStyle={{ maxWidth: isAndroid ? screenWidth * 0.4 : screenWidth * 0.5 }}
                     headerTransparent={true}
                     headerShadowVisible={false}
                     headerLeft={

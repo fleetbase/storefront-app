@@ -12,6 +12,15 @@ export const Boot = {
 
 export const Test = {
     screen: TestScreen,
+    options: ({ route }) => {
+        const params = route.params || {};
+        const title = params.text ?? 'Hello World';
+        const count = params.count ?? 0;
+
+        return {
+            title: `${title}: ${count}`,
+        };
+    },
 };
 
 const CoreStack = {
