@@ -29,8 +29,9 @@ const LoginScreen = () => {
     const handleOAuthLogin = async (provider) => {
         try {
             const response = await login(provider);
-            toast.success(`Logged in with ${titleize(provider)}`);
+            toast.success(`Logged in with ${titleize(provider)}.`);
         } catch (err) {
+            toast.warning(`Login attempt with ${titleize(provider)} failed.`);
             console.error('Error attempting OAuth login:', err);
         }
     };

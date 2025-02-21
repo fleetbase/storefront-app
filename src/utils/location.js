@@ -226,6 +226,10 @@ export function restoreFleetbaseStoreLocation(data) {
 }
 
 export function formattedAddressFromPlace(place) {
+    if (isEmpty(place) && typeof place.getAttribute !== 'function') {
+        return '';
+    }
+
     const segments = [
         place.getAttribute('street1'),
         place.getAttribute('street2'),

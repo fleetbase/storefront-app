@@ -5,10 +5,13 @@ import { checkMultiple, request, PERMISSIONS, RESULTS } from 'react-native-permi
 import { Button, Text, YStack, Image, Stack, XStack, AlertDialog } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import useDimensions from '../hooks/use-dimensions';
 
 const LocationPermissionScreen = () => {
     const navigation = useNavigation();
+    const { screenWidth, screenHeight } = useDimensions();
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const [hasPermission, setHasPermission] = useState(false);
 
     const requestLocationPermission = async () => {
         const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
@@ -39,6 +42,7 @@ const LocationPermissionScreen = () => {
         const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
         const result = await check(permission);
 
+        setHasPermission(result === RESULTS.GRANTED);
         if (result === RESULTS.GRANTED) {
             navigation.reset({
                 index: 0,
@@ -73,10 +77,10 @@ const LocationPermissionScreen = () => {
             </YStack>
             <YStack space='$3' alignItems='center' bg='$surface' borderColor='$borderColor' borderTop='1px solid' justifyContent='center' padding='$6' paddingBottom='$10'>
                 <Button size='$5' bg='$primary' color='$white' width='100%' onPress={requestLocationPermission} icon={<FontAwesomeIcon icon={faMapMarkerAlt} color='white' />}>
-                    Share Location
+                    {!hasPermission ? 'Share Location & Continue' : 'Continue'}
                 </Button>
                 <Button size='$5' bg='$secondary' color='$textSecondary' width='100%' onPress={handleDeny}>
-                    Maybe Later
+                    Continue without Sharing Location
                 </Button>
             </YStack>
             <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
@@ -84,38 +88,46 @@ const LocationPermissionScreen = () => {
                     <Button display='none'>Show Alert</Button>
                 </AlertDialog.Trigger>
 
-                <AlertDialog.Portal>
+                <AlertDialog.Portal padding={0} margin={0}>
                     <AlertDialog.Overlay key='overlay' animation='quick' opacity={0.5} enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
                     <AlertDialog.Content
                         bordered
                         elevate
                         key='content'
-                        backgroundColor='white'
-                        width='100%'
+                        backgroundColor='$background'
+                        width={screenWidth * 0.9}
+                        height={screenWidth * 0.5}
+                        flexGrow='auto'
                         animation='quick'
                         enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
                         exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
                         x={0}
+                        y={0}
                         scale={1}
                         opacity={1}
-                        y={0}
                     >
-                        <YStack width='100%' space>
-                            <AlertDialog.Title>Location Permission Required</AlertDialog.Title>
-                            <AlertDialog.Description>To enable location-based features, please allow location access in your settings.</AlertDialog.Description>
+                        <YStack flex={1} width='100%' py='$2' space='$4' position='relative'>
+                            <YStack>
+                                <AlertDialog.Title color='$textPrimary' fontSize={27}>
+                                    Location Permission Required
+                                </AlertDialog.Title>
+                                <AlertDialog.Description color='$textSecondary'>To enable location-based features, please allow location access in your settings.</AlertDialog.Description>
+                            </YStack>
 
-                            <XStack gap='$3' justifyContent='flex-end'>
-                                <AlertDialog.Cancel asChild>
-                                    <Button onPress={() => setDialogOpen(false)} backgroundColor='$secondary' color='$textSecondary'>
-                                        Cancel
-                                    </Button>
-                                </AlertDialog.Cancel>
-                                <AlertDialog.Action asChild>
-                                    <Button theme='active' onPress={openSettings} backgroundColor='$primary' color='$textPrimary'>
-                                        Go to Settings
-                                    </Button>
-                                </AlertDialog.Action>
-                            </XStack>
+                            <YStack position='absolute' bottom={0} left={0} right={0}>
+                                <XStack gap='$3' justifyContent='flex-end'>
+                                    <AlertDialog.Cancel asChild>
+                                        <Button onPress={() => setDialogOpen(false)} backgroundColor='$error' borderWidth={1} borderColor='$errorBorder' color='$errorText'>
+                                            Cancel
+                                        </Button>
+                                    </AlertDialog.Cancel>
+                                    <AlertDialog.Action asChild>
+                                        <Button theme='active' onPress={openSettings} backgroundColor='$primary' color='$primaryText' borderWidth={1} borderColor='$primaryBorder'>
+                                            Go to Settings
+                                        </Button>
+                                    </AlertDialog.Action>
+                                </XStack>
+                            </YStack>
                         </YStack>
                     </AlertDialog.Content>
                 </AlertDialog.Portal>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -20,7 +19,6 @@ import ExpandableSelect from '../components/ExpandableSelect';
 import PlaceMapView from '../components/PlaceMapView';
 import PhoneInput from '../components/PhoneInput';
 import Spacer from '../components/Spacer';
-import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 
 const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     return (
@@ -47,7 +45,6 @@ const EditLocationScreen = ({ route }) => {
     const params = route.params || { redirectTo: 'AddressBook' };
     const navigation = useNavigation();
     const theme = useTheme();
-    const tabBarHeight = useBottomTabBarHeight();
     const { customer, isAuthenticated } = useAuth();
     const { storefront } = useStorefront();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
@@ -365,34 +362,32 @@ const EditLocationScreen = ({ route }) => {
                             </YStack>
                         </YStack>
                     )}
-                    <Spacer height={tabBarHeight} />
+                    <Spacer height={90} />
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
-                <AbsoluteTabBarScreenWrapper style={{ width: '100%' }}>
-                    <Button
-                        onPress={handleSavePlace}
-                        size='$5'
-                        bg='$success'
-                        borderColor='$successBorder'
-                        borderWidth={1}
-                        flex={1}
-                        disabled={isAnyLoading() ? true : false}
-                        hoverStyle={{
-                            scale: 0.95,
-                            opacity: 0.5,
-                        }}
-                        pressStyle={{
-                            scale: 0.95,
-                            opacity: 0.5,
-                        }}
-                    >
-                        <Button.Icon>{isLoading('saving') && <Spinner color='$green-100' />}</Button.Icon>
-                        <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
-                            Save Address
-                        </Button.Text>
-                    </Button>
-                </AbsoluteTabBarScreenWrapper>
+            <XStack animate='bouncy' position='absolute' bottom={90} left={0} right={0} padding='$4' zIndex={5}>
+                <Button
+                    onPress={handleSavePlace}
+                    size='$5'
+                    bg='$success'
+                    borderColor='$successBorder'
+                    borderWidth={1}
+                    flex={1}
+                    disabled={isAnyLoading() ? true : false}
+                    hoverStyle={{
+                        scale: 0.95,
+                        opacity: 0.5,
+                    }}
+                    pressStyle={{
+                        scale: 0.95,
+                        opacity: 0.5,
+                    }}
+                >
+                    <Button.Icon>{isLoading('saving') && <Spinner color='$green-100' />}</Button.Icon>
+                    <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
+                        Save Address
+                    </Button.Text>
+                </Button>
             </XStack>
         </SafeAreaView>
     );

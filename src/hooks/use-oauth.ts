@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authorize } from 'react-native-app-auth';
-import { config } from '../utils';
+import { config, toBoolean } from '../utils';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { toast } from '../utils/toast';
 import useStorefront, { adapter } from '../hooks/use-storefront';
@@ -57,7 +57,11 @@ const useOAuth = () => {
 
             const { identityToken, authorizationCode, email, fullName, user: appleUserId } = appleAuthResponse;
             if (!identityToken || !authorizationCode) {
-                return toast.error('Apple Sign-In failed: Missing token or authorization code.');
+                const errorMessage = 'Apple Sign-In failed: Missing token or authorization code.';
+                setError(errorMessage);
+                setLoading(false);
+                throw new Error(errorMessage);
+                return;
             }
 
             // Get the user's name
@@ -71,7 +75,8 @@ const useOAuth = () => {
         } catch (err) {
             setError(err.message);
             setLoading(false);
-            console.error('Apple Sign-In error:', err);
+            console.warn('Apple Sign-In error:', err);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -88,38 +93,46 @@ const useOAuth = () => {
             }
 
             // Perform Facebook Sign-In
-            const facebookAuthResponse = await FacebookLoginManager.logInWithPermissions(['public_profile', 'email']);
+            const facebookAuthResponse = await FacebookLoginManager.logInWithPermissions(['public_profile']);
             if (facebookAuthResponse.isCancelled) {
-                console.log('Facebook Sign-In was Canceled');
+                throw new Error('Facebook Sign-In was Canceled');
+                console.warn('Facebook Sign-In was Canceled');
                 return setLoading(false);
             }
 
             // Authenticate with Storefront
             const profile = await FacebookProfile.getCurrentProfile();
             if (profile) {
-                return authenticateWithFacebookProfile(profile);
+                const customer = await authenticateWithFacebookProfile(profile);
+                return customer;
             }
 
             return facebookAuthResponse;
         } catch (err) {
             setError(err.message);
             setLoading(false);
-            console.error('Facebook Sign-In error:', err);
+            console.warn('Facebook Sign-In error:', err);
+            throw err;
         } finally {
             setLoading(false);
         }
     };
 
     const authenticateWithFacebookProfile = async (profile) => {
-        const customerJson = await adapter.post('customers/login-with-facebook', {
-            facebookUserId: profile.userID,
-            email: profile.email,
-            name: profile.name,
-            avatarUrl: profile.imageURL,
-        });
+        try {
+            const customerJson = await adapter.post('customers/login-with-facebook', {
+                facebookUserId: profile.userID,
+                email: profile.email,
+                name: profile.name,
+                avatarUrl: profile.imageURL,
+            });
 
-        const customer = createCustomerSession(customerJson);
-        return customer;
+            const customer = createCustomerSession(customerJson);
+            return customer;
+        } catch (err) {
+            console.warn(err.message);
+            throw err;
+        }
     };
 
     const googleLogin = async () => {
@@ -142,7 +155,8 @@ const useOAuth = () => {
         } catch (err) {
             setError(err.message);
             setLoading(false);
-            console.error('Google Sign-In error:', err);
+            console.warn('Google Sign-In error:', err);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -150,15 +164,15 @@ const useOAuth = () => {
 
     const loginSupported = (provider) => {
         if (provider === 'apple') {
-            return appleAuth.isSupported;
+            return appleAuth.isSupported && toBoolean(config('APPLE_LOGIN_ENABLED')) === true;
         }
 
         if (provider === 'google') {
-            return typeof config('GOOGLE_CLIENT_ID') === 'string';
+            return typeof config('GOOGLE_CLIENT_ID') === 'string' && toBoolean(config('GOOGLE_LOGIN_ENABLED')) === true;
         }
 
         if (provider === 'facebook') {
-            return typeof config('FACEBOOK_APP_ID') === 'string' && typeof config('FACEBOOK_CLIENT_TOKEN') === 'string';
+            return typeof config('FACEBOOK_APP_ID') === 'string' && typeof config('FACEBOOK_CLIENT_TOKEN') === 'string' && toBoolean(config('FACEBOOK_LOGIN_ENABLED')) === true;
         }
     };
 
