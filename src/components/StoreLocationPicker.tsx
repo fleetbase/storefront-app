@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Pressable, Dimensions, StyleSheet } from 'react-native';
 import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore } from '@fortawesome/free-solid-svg-icons';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { formattedAddressFromSerializedPlace } from '../utils/location';
 import storage from '../utils/storage';
 import useStorefront from '../hooks/use-storefront';
@@ -29,46 +29,52 @@ const StoreLocationPicker = ({
     const { isDarkMode } = useAppTheme();
     const { currentStoreLocation, storeLocations, updateCurrentStoreLocation } = useStoreLocations();
     const { screenWidth } = useDimensions();
-    const [isDropdownOpen, setDropdownOpen] = useState(false);
-    const [triggerPosition, setTriggerPosition] = useState({ x: 28, y: 0, width: 0, height: 20 });
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [triggerPosition, setTriggerPosition] = useState({ x: 0, y: 0 });
     const triggerRef = useRef(null);
-
-    // Get the store location to display as the default
     const displayStoreLocation = defaultStoreLocation ? defaultStoreLocation : currentStoreLocation;
-
-    // Get screen width and calculate 75% of it
     const dropdownWidth = screenWidth * 0.75;
 
-    const toggleDropdown = () => {
-        if (triggerRef.current) {
-            triggerRef.current.measureInWindow((x, y, width, height) => {
-                setTriggerPosition({ x, y, width, height });
-            });
-        }
-        setDropdownOpen(!isDropdownOpen);
-    };
+    const handleToggleDropdown = useCallback(() => {
+        handleTriggerPoisition(() => {
+            setIsDropdownOpen((prev) => !prev);
+        });
+    }, []);
 
-    const handleLocationChange = (newLocation) => {
-        updateCurrentStoreLocation(newLocation);
-        setDropdownOpen(false);
-    };
-    // Close dropdown when navigation state changes
-    const navigationState = useNavigationState((state) => state);
-    const prevNavigationStateRef = useRef(navigationState);
+    const handleTriggerPoisition = useCallback(
+        (callback) => {
+            if (!triggerRef.current) return;
+            triggerRef.current.measureInWindow((x, y, width, height) => {
+                setTriggerPosition({ x: x - width / 2, y: y + height });
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
+        },
+        [triggerRef.current]
+    );
+
+    const handleCloseDropdown = useCallback(() => {
+        setIsDropdownOpen(false);
+    }, []);
+
+    const handleLocationChange = useCallback(
+        (newLocation) => {
+            updateCurrentStoreLocation(newLocation);
+            handleCloseDropdown();
+        },
+        [handleCloseDropdown, updateCurrentStoreLocation]
+    );
 
     useEffect(() => {
-        if (prevNavigationStateRef.current !== navigationState) {
-            // Navigation state has changed
-            setDropdownOpen(false);
-            prevNavigationStateRef.current = navigationState;
-        }
-    }, [navigationState]);
+        handleTriggerPoisition();
+    }, [triggerRef.current]);
 
     return (
         <YStack space='$3' style={wrapperStyle} {...props}>
             <Pressable
                 ref={triggerRef}
-                onPress={toggleDropdown}
+                onPress={handleToggleDropdown}
                 activeOpacity={0.7}
                 style={[
                     {
@@ -108,69 +114,72 @@ const StoreLocationPicker = ({
             <Portal hostName='LocationPickerPortal'>
                 <AnimatePresence>
                     {isDropdownOpen && (
-                        <Stack
-                            borderRadius='$4'
-                            borderWidth={1}
-                            borderColor='$borderColorWithShadow'
-                            shadowColor='$shadowColor'
-                            shadowOffset={{ width: 0, height: 1 }}
-                            shadowOpacity={0.15}
-                            shadowRadius={3}
-                            backgroundColor='transparent'
-                            width={dropdownWidth}
-                            overflow='hidden'
-                            position='absolute'
-                            top={triggerPosition.y - triggerPosition.height - 30}
-                            left={triggerPosition.x - 20}
-                            zIndex={1}
-                            enterStyle={{
-                                opacity: 0,
-                                scale: 0.85,
-                            }}
-                            exitStyle={{
-                                opacity: 0,
-                                scale: 0.85,
-                            }}
-                            animation={{
-                                opacity: { duration: 100 },
-                                scale: {
-                                    type: 'spring',
-                                    damping: 18,
-                                    stiffness: 400,
-                                },
-                            }}
-                            originY={0}
-                        >
-                            <BlurView
-                                style={StyleSheet.absoluteFillObject}
-                                blurType={isDarkMode ? 'dark' : 'light'}
-                                blurAmount={10}
-                                borderRadius={10}
-                                reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
-                            />
-                            <YStack space='$2' borderRadius='$4'>
-                                {storeLocations.map((location, index) => (
-                                    <Pressable
-                                        key={location.id ?? index}
-                                        onPress={() => handleLocationChange(location)}
-                                        style={{
-                                            paddingVertical: 6,
-                                            paddingHorizontal: 8,
-                                            borderBottomWidth: storeLocations.length - 1 === index ? 0 : 1,
-                                            borderBottomColor: theme.borderColorWithShadow.val,
-                                        }}
-                                    >
-                                        <YStack mb='$1' bg={location.id === currentStoreLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>
-                                            <Text color={location.id === currentStoreLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
-                                                {location.getAttribute('name')}
-                                            </Text>
-                                            <Text color={location.id === currentStoreLocation?.id ? '$gray-200' : '$textSecondary'}>
-                                                {formattedAddressFromSerializedPlace(location.getAttribute('place'))}
-                                            </Text>
-                                        </YStack>
-                                    </Pressable>
-                                ))}
-                            </YStack>
+                        <Stack position='absolute' top={0} bottom={0} left={0} right={0} zIndex={1} pointerEvents='box-none'>
+                            <Pressable style={{ flex: 1, zIndex: 2 }} onPress={handleCloseDropdown} pointerEvents='auto' />
+                            <Stack
+                                borderRadius='$4'
+                                borderWidth={1}
+                                borderColor='$borderColorWithShadow'
+                                shadowColor='$shadowColor'
+                                shadowOffset={{ width: 0, height: 1 }}
+                                shadowOpacity={0.15}
+                                shadowRadius={3}
+                                backgroundColor='transparent'
+                                width={dropdownWidth}
+                                overflow='hidden'
+                                position='absolute'
+                                top={triggerPosition.y + 6}
+                                left={triggerPosition.x}
+                                zIndex={1}
+                                enterStyle={{
+                                    opacity: 0,
+                                    scale: 0.85,
+                                }}
+                                exitStyle={{
+                                    opacity: 0,
+                                    scale: 0.85,
+                                }}
+                                animation={{
+                                    opacity: { duration: 100 },
+                                    scale: {
+                                        type: 'spring',
+                                        damping: 18,
+                                        stiffness: 400,
+                                    },
+                                }}
+                                originY={0}
+                            >
+                                <BlurView
+                                    style={StyleSheet.absoluteFillObject}
+                                    blurType={isDarkMode ? 'dark' : 'light'}
+                                    blurAmount={10}
+                                    borderRadius={10}
+                                    reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                                />
+                                <YStack space='$2' borderRadius='$4'>
+                                    {storeLocations.map((location, index) => (
+                                        <Pressable
+                                            key={location.id ?? index}
+                                            onPress={() => handleLocationChange(location)}
+                                            style={{
+                                                paddingVertical: 6,
+                                                paddingHorizontal: 8,
+                                                borderBottomWidth: storeLocations.length - 1 === index ? 0 : 1,
+                                                borderBottomColor: theme.borderColorWithShadow.val,
+                                            }}
+                                        >
+                                            <YStack mb='$1' bg={location.id === currentStoreLocation?.id ? '$primary' : 'transparent'} padding='$2' borderRadius='$3'>
+                                                <Text color={location.id === currentStoreLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
+                                                    {location.getAttribute('name')}
+                                                </Text>
+                                                <Text color={location.id === currentStoreLocation?.id ? '$gray-200' : '$textSecondary'}>
+                                                    {formattedAddressFromSerializedPlace(location.getAttribute('place'))}
+                                                </Text>
+                                            </YStack>
+                                        </Pressable>
+                                    ))}
+                                </YStack>
+                            </Stack>
                         </Stack>
                     )}
                 </AnimatePresence>

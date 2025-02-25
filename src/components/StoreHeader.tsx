@@ -47,16 +47,17 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                     <Text color='white' fontSize='$8' fontWeight='bold' numberOfLines={1}>
                         {storeName}
                     </Text>
+                    <YStack>
+                        {description && (
+                            <YStack alignItems='center' justifyContent='center'>
+                                <Text color='white' fontSize='$5' opacity={0.9} numberOfLines={2} textAlign='center'>
+                                    {description}
+                                </Text>
+                            </YStack>
+                        )}
+                    </YStack>
                 </YStack>
-                <YStack>
-                    {description && (
-                        <YStack mt='$2' borderRadius='$4' bg='$gray-900' padding='$2' alignItems='center' justifyContent='center'>
-                            <Text color='white' fontSize='$5' opacity={0.9} numberOfLines={1}>
-                                {description}
-                            </Text>
-                        </YStack>
-                    )}
-                </YStack>
+
                 <YStack alignItems='center' justifyContent='center'>
                     <StoreLocationPicker
                         defaultStoreLocation={defaultStoreLocation}

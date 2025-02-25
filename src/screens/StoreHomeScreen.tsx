@@ -17,7 +17,7 @@ import { storefrontConfig } from '../utils';
 const StoreHome = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const customHeaderHeight = 250;
+    const customHeaderHeight = 270;
     const scrollY = useRef(new Animated.Value(0)).current;
     const { info } = useStorefrontInfo();
     const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
@@ -55,12 +55,13 @@ const StoreHome = ({ route }) => {
                 ]}
             >
                 <CustomHeader
-                    headerRowProps={{ px: '$4' }}
+                    headerRowProps={{ px: '$3' }}
                     headerTransparent={true}
                     headerStyle={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 99 }}
                     headerLeft={<LocationPicker onPressAddNewLocation={({ params }) => navigation.navigate('AddNewLocation', params)} />}
+                    headerLeftStyle={{ justifyContent: 'flex-start' }}
                 />
-                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} />
+                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} />
             </Animated.View>
             <ScrollView
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
