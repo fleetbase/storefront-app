@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView, ScrollView, Platform } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { PortalHost } from '@gorhom/portal';
@@ -25,6 +26,7 @@ const QPayCheckoutScreen = ({ route }) => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
     const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
     const { enabled } = useStorefrontInfo();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
     const {
@@ -123,7 +125,7 @@ const QPayCheckoutScreen = ({ route }) => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen && !isAndroid ? 25 : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
                 <CheckoutButton onCheckout={() => paymentSheetRef.current?.open()} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />

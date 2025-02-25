@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView, ScrollView, Platform } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { PortalHost } from '@gorhom/portal';
@@ -23,6 +24,7 @@ const StripeCheckoutScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
     const { enabled } = useStorefrontInfo();
     const {
         customer,
@@ -110,7 +112,7 @@ const StripeCheckoutScreen = () => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen && !isAndroid ? 25 : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
                 <CheckoutButton onCheckout={completeOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <PortalHost name='StripeCheckoutPortal' />

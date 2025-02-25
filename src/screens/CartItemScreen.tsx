@@ -4,6 +4,7 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
@@ -21,6 +22,8 @@ const CartItemScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
+    const params = route.params ?? {};
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [cartItem, setCartItem] = useState(route.params.cartItem);
@@ -30,7 +33,7 @@ const CartItemScreen = ({ route = {} }) => {
     const [subtotal, setSubtotal] = useState(0);
     const [quantity, setQuantity] = useState(cartItem.quantity ?? 1);
     const [ready, setReady] = useState(false);
-
+    const isModal = params.isModal ?? false;
     const isService = product && product.getAttribute('is_service') === true;
 
     useEffect(() => {
@@ -158,7 +161,7 @@ const CartItemScreen = ({ route = {} }) => {
                     />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
+            <XStack position='absolute' px='$4' py='$3' bottom={isModal ? insets.bottom : tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
                 <XStack width='35%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} disabled={isLoading('addToCart') || isLoading('removeCartItem')} />
                 </XStack>

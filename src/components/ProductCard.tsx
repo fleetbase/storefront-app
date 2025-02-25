@@ -30,6 +30,7 @@ const ProductCard = ({
     sliderHeight = 175,
     storeLocationId,
     width = null,
+    additionalNavigationParams = {},
 }) => {
     const theme = useTheme();
     const navigation = useNavigation();
@@ -68,7 +69,7 @@ const ProductCard = ({
             return;
         }
 
-        navigation.navigate('Product', { product: product.serialize(), quantity });
+        navigation.navigate('Product', { product: product.serialize(), quantity, ...additionalNavigationParams });
     };
 
     const handleAddToCart = async () => {
@@ -77,7 +78,7 @@ const ProductCard = ({
         }
 
         if (productHasOptions(product)) {
-            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId });
+            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId, ...additionalNavigationParams });
         }
 
         try {

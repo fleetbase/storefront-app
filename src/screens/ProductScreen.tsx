@@ -4,6 +4,7 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
@@ -26,6 +27,8 @@ const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
+    const params = route.params ?? {};
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
@@ -37,7 +40,8 @@ const ProductScreen = ({ route = {} }) => {
     const [subtotal, setSubtotal] = useState(calculateProductSubtotal(product, selectedVariants, selectedAddons));
     const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
     const [ready, setReady] = useState(false);
-    const storeLocationId = route.params.storeLocationId ?? null;
+    const storeLocationId = params.storeLocationId ?? null;
+    const isModal = params.isModal ?? false;
 
     useEffect(() => {
         setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
@@ -139,7 +143,7 @@ const ProductScreen = ({ route = {} }) => {
                     <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
+            <XStack position='absolute' px='$4' py='$3' bottom={isModal ? insets.bottom : tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
                 <XStack width='38%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} />
                 </XStack>

@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -25,6 +26,7 @@ const CartScreen = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
@@ -49,7 +51,7 @@ const CartScreen = ({ route }) => {
     const handleEdit = async (cartItem) => {
         const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
         if (product) {
-            navigation.navigate('CartItem', { cartItem, product: product.serialize() });
+            navigation.navigate('CartItem', { cartItem, product: product.serialize(), isModal: isModalScreen });
         }
     };
 
@@ -296,7 +298,7 @@ const CartScreen = ({ route }) => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={isModalScreen ? (isAndroid ? 24 : 0) : tabBarHeight}
+                    bottom={isModalScreen ? insets.bottom : tabBarHeight}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -306,7 +308,7 @@ const CartScreen = ({ route }) => {
                     shadowOpacity={0.15}
                     shadowRadius={3}
                 >
-                    <XStack alignItems='center' justifyContent='space-between' paddingBottom={isModalScreen ? 25 : 0}>
+                    <XStack alignItems='center' justifyContent='space-between'>
                         <YStack flex={1} space={isAndroid ? 0 : '$1'}>
                             <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
                                 Total

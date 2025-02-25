@@ -27,11 +27,16 @@ const CatalogScreen = ({ route }) => {
     const windowWidth = Dimensions.get('window').width;
     const productCardWidth = windowWidth / 2 - 25;
 
-    console.log('[foodTruckId]', foodTruckId);
-
     const renderProduct = ({ item: product, index }) => (
         <YStack paddingBottom='$4'>
-            <ProductCard key={index} product={new Product(product, storefrontAdapter)} sliderHeight={135} style={{ width: productCardWidth }} storeLocationId={foodTruckId} />
+            <ProductCard
+                key={index}
+                product={new Product(product, storefrontAdapter)}
+                sliderHeight={135}
+                style={{ width: productCardWidth }}
+                storeLocationId={foodTruckId}
+                additionalNavigationParams={{ isModal: true }}
+            />
         </YStack>
     );
 

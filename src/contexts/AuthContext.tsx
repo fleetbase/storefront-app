@@ -19,6 +19,8 @@ const authReducer = (state, action) => {
             return { ...state, phone: action.phone, isSendingCode: action.isSendingCode ?? false };
         case 'CREATING_ACCOUNT':
             return { ...state, phone: action.phone, isSendingCode: action.isSendingCode ?? false };
+        case 'DELETING_ACCOUNT':
+            return { ...state, isSendingCode: action.isSendingCode ?? false };
         case 'VERIFY':
             return { ...state, customer: action.customer, isVerifyingCode: action.isVerifyingCode ?? false };
         case 'LOGOUT':
@@ -29,7 +31,7 @@ const authReducer = (state, action) => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const { storefront } = useStorefront();
+    const { storefront, adapter } = useStorefront();
     const { setLocale } = useLanguage();
     const { deviceToken } = useNotification();
     const [storedCustomer, setStoredCustomer] = useStorage('customer');
@@ -196,6 +198,37 @@ export const AuthProvider = ({ children }) => {
         [storefront]
     );
 
+    // Delete Account: Send verification code
+    const deleteAccount = useCallback(async () => {
+        dispatch({ type: 'DELETING_ACCOUNT', isSendingCode: true });
+        try {
+            await adapter.post('customers/account-closure');
+            dispatch({ type: 'DELETING_ACCOUNT', isSendingCode: false });
+        } catch (error) {
+            console.error('[AuthContext] Delete account request failed:', error);
+            throw error;
+        } finally {
+            dispatch({ type: 'DELETING_ACCOUNT', isSendingCode: false });
+        }
+    }, [adapter]);
+
+    // Delete Account Verification: Verify code
+    const verifyAccountDeletion = useCallback(
+        async (code) => {
+            dispatch({ type: 'VERIFY', isVerifyingCode: true });
+            try {
+                await adapter.post('customers/confirm-account-closure', { code });
+                clearSessionData();
+            } catch (error) {
+                console.error('[AuthContext] Delete account verification failed:', error);
+                throw error;
+            } finally {
+                dispatch({ type: 'VERIFY', isVerifyingCode: false });
+            }
+        },
+        [adapter]
+    );
+
     // Remove local session data
     const clearSessionData = () => {
         storage.removeItem('_current_location');
@@ -284,8 +317,10 @@ export const AuthProvider = ({ children }) => {
             createCustomerSession,
             syncDevice,
             registerDevice,
+            deleteAccount,
+            verifyAccountDeletion,
         }),
-        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer]
+        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer, deleteAccount, verifyAccountDeletion]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
