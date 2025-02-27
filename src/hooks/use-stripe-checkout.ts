@@ -13,6 +13,7 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useStorage from '../hooks/use-storage';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const APP_IDENTIFIER = config('APP_IDENTIFIER');
 const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
@@ -21,6 +22,7 @@ const STRIPE_KEY = config('STRIPE_KEY');
 export default function useStripeCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
     const { info } = useStorefrontInfo();
+    const { t } = useLanguage();
     const [cart, updateCart] = useCart();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
@@ -57,14 +59,14 @@ export default function useStripeCheckout({ onOrderComplete }) {
     function computeLineItems() {
         const baseItems = [
             {
-                name: 'Cart Subtotal',
+                name: t('lineItems.cartSubtotal'),
                 value: subtotal,
             },
         ];
 
         if (checkoutOptions.leavingTip) {
             baseItems.push({
-                name: 'Tip',
+                name: t('lineItems.tip'),
                 value: calculateTip(checkoutOptions.tip, subtotal),
                 tip: checkoutOptions.tip,
             });
@@ -72,7 +74,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
         if (checkoutOptions.leavingDeliveryTip) {
             baseItems.push({
-                name: 'Delivery Tip',
+                name: t('lineItems.deliveryTip'),
                 value: calculateTip(checkoutOptions.deliveryTip, subtotal),
                 tip: checkoutOptions.deliveryTip,
             });
@@ -81,12 +83,12 @@ export default function useStripeCheckout({ onOrderComplete }) {
         if (!checkoutOptions.pickup) {
             if (serviceQuote) {
                 baseItems.push({
-                    name: 'Service Fee',
+                    name: t('lineItems.serviceFee'),
                     value: serviceQuote.getAttribute('amount'),
                 });
             } else if (deliveryLocation?.id) {
                 baseItems.push({
-                    name: 'Service Fee',
+                    name: t('lineItems.serviceFee'),
                     value: 0,
                     loading: true,
                 });
@@ -95,7 +97,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
         const total = baseItems.reduce((acc, item) => acc + numbersOnly(item.value), 0);
         baseItems.push({
-            name: 'Total',
+            name: t('lineItems.total'),
             value: total,
         });
 

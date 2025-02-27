@@ -13,9 +13,9 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import useAppTheme from '../hooks/use-app-theme';
 import useDimensions from '../hooks/use-dimensions';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const isAndroid = Platform.OS === 'android';
-
 const LocationPicker = ({
     onPressAddNewLocation,
     wrapperStyle = {},
@@ -30,6 +30,7 @@ const LocationPicker = ({
     const theme = useTheme();
     const navigation = useNavigation();
     const triggerRef = useRef();
+    const { t } = useLanguage();
     const { isDarkMode } = useAppTheme();
     const { currentLocation, isCurrentLocationLoading, updateCurrentLocation, setCustomerDefaultLocation, initializeCurrentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
@@ -136,7 +137,11 @@ const LocationPicker = ({
                             triggerTextStyle,
                         ]}
                     >
-                        {currentLocation ? (currentLocation.isAttributeFilled?.('name') ? currentLocation.getAttribute?.('name') : formattedAddressFromPlace(currentLocation)) : 'Loading...'}
+                        {currentLocation
+                            ? currentLocation.isAttributeFilled?.('name')
+                                ? currentLocation.getAttribute?.('name')
+                                : formattedAddressFromPlace(currentLocation)
+                            : t('common.loading')}
                     </Text>
                     <Text style={[{ fontSize: 14, color: theme.textPrimary.val, opacity: 0.35 }, triggerArrowStyle]}>▼</Text>
                 </XStack>
@@ -224,7 +229,7 @@ const LocationPicker = ({
                                     >
                                         <XStack mb='$1' padding='$2'>
                                             <FontAwesomeIcon icon={faPlus} size={16} color={theme.textPrimary.val} style={{ marginRight: 6 }} />
-                                            <Text color='$textPrimary'>Add New Location</Text>
+                                            <Text color='$textPrimary'>{t('LocationPicker.addNewLocation')}</Text>
                                         </XStack>
                                     </Pressable>
                                 </YStack>

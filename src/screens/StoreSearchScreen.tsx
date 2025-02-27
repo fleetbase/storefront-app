@@ -5,6 +5,7 @@ import { Spinner, Button, Stack, Text, YStack, XStack, Input, useTheme } from 't
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMagnifyingGlass, faArrowLeft, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FlatGrid } from 'react-native-super-grid';
 import StoreTagCloud from '../components/StoreTagCloud';
 import ProductCard from '../components/ProductCard';
@@ -16,10 +17,11 @@ import useDimensions from '../hooks/use-dimensions';
 import { debounce, delay } from '../utils';
 import { pluralize } from 'inflected';
 
-const StoreSearch = (route = {}) => {
+const StoreSearchScreen = (route = {}) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const tabBarHeight = useBottomTabBarHeight();
+    const { t } = useLanguage();
     const { info } = useStorefrontInfo();
     const { storefront } = useStorefront();
     const { isDarkMode } = useAppTheme();
@@ -175,7 +177,7 @@ const StoreSearch = (route = {}) => {
                         onBlur={handleBlur}
                         onChangeText={setSearchQuery}
                         size='$4'
-                        placeholder='Search products'
+                        placeholder={t('StoreSearchScreen.searchProducts')}
                         placeholderTextColor='$textPlaceholder'
                         color='$black'
                         bg='transparent'
@@ -228,7 +230,7 @@ const StoreSearch = (route = {}) => {
                         ListHeaderComponent={
                             <YStack px='$3' py='$2'>
                                 <Text fontSize='$4' color='$textSecondary' marginTop='$2' marginBottom='$4'>
-                                    Found {results.length} {pluralize('result', results.length)} for "{searchQuery}"
+                                    {t('StoreSearchScreen.foundResults', { count: results.length, result: pluralize(t('StoreSearchScreen.result'), results.length), searchQuery })}
                                 </Text>
                             </YStack>
                         }
@@ -257,7 +259,7 @@ const StoreSearch = (route = {}) => {
                         <YStack alignItems='center' justifyContent='center' position='absolute' style={[StyleSheet.absoluteFill]}>
                             <YStack mt={125}>
                                 <Text fontSize='$6' color='$textSecondary' textAlign='center'>
-                                    No results found for "{searchQuery}"
+                                    {t('StoreSearchScreen.noResults', { searchQuery })}
                                 </Text>
                             </YStack>
                         </YStack>
@@ -265,7 +267,7 @@ const StoreSearch = (route = {}) => {
                         <YStack alignItems='center' justifyContent='center' position='absolute' style={[StyleSheet.absoluteFill]}>
                             <YStack mt={125}>
                                 <Text fontSize='$6' color='$textSecondary' textAlign='center'>
-                                    Search for products, categories, or more!
+                                    {t('StoreSearchScreen.searchPrompt')}
                                 </Text>
                             </YStack>
                         </YStack>
@@ -276,4 +278,4 @@ const StoreSearch = (route = {}) => {
     );
 };
 
-export default StoreSearch;
+export default StoreSearchScreen;

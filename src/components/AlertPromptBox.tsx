@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { View, Text, Button, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTriangleExclamation, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface AlertPromptBoxProps {
     show: boolean;
@@ -19,17 +20,23 @@ const AlertPromptBox: React.FC<AlertPromptBoxProps> = ({
     prompt,
     promptTitle,
     onConfirm,
-    confirmButtonText = 'Confirm',
-    confirmAlertButtonText = 'OK',
-    confirmTitle = 'Confirmation',
-    confirmMessage = 'Are you sure you want to proceed?',
+    confirmButtonText,
+    confirmAlertButtonText,
+    confirmTitle,
+    confirmMessage,
     colorScheme = 'blue',
     ...props
 }) => {
+    const { t } = useLanguage();
     const theme = useTheme();
+    confirmButtonText = confirmButtonText ?? t('common.confirm');
+    confirmAlertButtonText = confirmAlertButtonText ?? t('common.ok');
+    confirmTitle = confirmTitle ?? t('common.confirmation');
+    confirmMessage = confirmMessage ?? t('AlertPromptBox.proceedPrompt');
+
     const handlePress = () => {
         Alert.alert(confirmTitle, confirmMessage, [
-            { text: 'Cancel', style: 'cancel' },
+            { text: t('common.cancel'), style: 'cancel' },
             { text: confirmAlertButtonText, onPress: () => onConfirm() },
         ]);
     };

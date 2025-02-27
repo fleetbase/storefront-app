@@ -12,6 +12,7 @@ import LiveOrderRoute from '../components/LiveOrderRoute';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { adapter as storefrontAdapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import useStorage from '../hooks/use-storage';
 import PlaceCard from '../components/PlaceCard';
 import OrderItems from '../components/OrderItems';
@@ -27,6 +28,7 @@ const OrderScreen = ({ route }) => {
     const { customer } = useAuth();
     const { info } = useStorefrontInfo();
     const { listen } = useSocketClusterClient();
+    const { t } = useLanguage();
     const [order, setOrder] = useState(new Order(params.order, fleetbaseAdapter));
     const [store, setStore] = useStorage(`${order.getAttribute('meta.storefront_id')}`, info);
     const [distanceMatrix, setDistanceMatrix] = useState();
@@ -138,19 +140,19 @@ const OrderScreen = ({ route }) => {
                         {isEnroute && (
                             <YStack>
                                 <Text fontSize='$4' color='$primary'>
-                                    Order arriving in {formatDistance(new Date(), add(new Date(), { seconds: distanceMatrix.time }))}
+                                    {t('OrderScreen.orderArrivingIn', { eta: formatDistance(new Date(), add(new Date(), { seconds: distanceMatrix.time })) })}
                                 </Text>
                             </YStack>
                         )}
                         <AlertPromptBox
                             show={isPickupReady}
-                            promptTitle='Your order is ready for pickup'
-                            prompt='Once collected please confirm your order has been picked up by pressing the confirm button below.'
-                            confirmTitle='Order Picked Up'
-                            confirmMessage='Has your order been collected and received by you?'
-                            confirmAlertButtonText='Yes'
-                            confirmButtonText='Confirm Pickup'
-                            confirmButtonText='Confirm Pickup'
+                            promptTitle={t('OrderScreen.orderReadyForPickup')}
+                            prompt={t('OrderScreen.orderReadyForPickupPrompt')}
+                            confirmTitle={t('OrderScreen.orderPickedUp')}
+                            confirmMessage={t('OrderScreen.orderPickedUpConfirmMessage')}
+                            confirmAlertButtonText={t('OrderScreen.yes')}
+                            confirmButtonText={t('OrderScreen.confirmPickup')}
+                            confirmButtonText={t('OrderScreen.confirmPickup')}
                             colorScheme='green'
                             onConfirm={confirmOrderPickup}
                             mt='$2'
@@ -177,10 +179,10 @@ const OrderScreen = ({ route }) => {
                     <YStack px='$4' py='$2'>
                         <PlaceCard
                             place={isPickup ? order.getAttribute('payload.pickup') : order.getAttribute('payload.dropoff')}
-                            name={isPickup ? 'Pickup Location' : 'Delivery Location'}
+                            name={isPickup ? t('OrderScreen.pickupLocation') : t('OrderScreen.deliveryLocation')}
                             headerComponent={
                                 <Text mb='$2' fontSize='$5' color='$textPrimary' fontWeight='bold'>
-                                    {isPickup ? 'Pickup Location' : 'Delivery Location'}
+                                    {isPickup ? t('OrderScreen.pickupLocation') : t('OrderScreen.deliveryLocation')}
                                 </Text>
                             }
                         />
@@ -188,7 +190,7 @@ const OrderScreen = ({ route }) => {
                     <YStack px='$4' py='$2'>
                         <YStack space='$2' px='$4' py='$3' bg='$surface' borderRadius='$4' borderWidth={1} borderColor='$borderColorWithShadow'>
                             <Text color='$textPrimary' fontSize='$5' fontWeight='bold'>
-                                Order Notes
+                                {t('OrderScreen.orderNotes')}
                             </Text>
                             <Text color='$textSecondary' fontSize='$4'>
                                 {order.getAttribute('notes', 'N/A') ?? 'N/A'}

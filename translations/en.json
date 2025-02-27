@@ -6,8 +6,26 @@
         "cancel": "Cancel",
         "new": "New",
         "create": "Create",
+        "save": "Save",
         "delete": "Delete",
-        "edit": "Edit"
+        "edit": "Edit",
+        "update": "Update",
+        "service": "Service",
+        "retry": "Retry",
+        "loading": "Loading...",
+        "confirm": "Confirm",
+        "confirmation": "Confirmation",
+        "ok": "OK",
+        "done": "Done"
+    },
+    "lineitems": {
+        "cartSubtotal": "Cart Subtotal",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "deliveryFee": "Delivery Fee",
+        "deliveryTip": "Delivery Tip",
+        "tip": "Tip",
+        "serviceFee": "Service Fee"
     },
     "orderStatuses": {
         "created": "Created",
@@ -57,5 +75,265 @@
         "configurationMissing": "Configurations Missing!",
         "unconfiguredApp": "Looks like you haven't properly configured your app.",
         "envMissing": "is missing from environment!"
-    }
+    },
+    "CartItemScreen": {
+        "productRemovedFromCart": "{{productName}} removed from cart.",
+        "failedToRemoveFromCart": "Failed to remove item from cart",
+        "productUpdatedInCart": "{{productName}} updated in cart."
+    },
+    "CartScreen": {
+        "couldNotFindItemToDelete": "Could not find item to delete.",
+        "itemRemovedFromCart": "{{cartItemName}} removed from cart.",
+        "failedToRemoveItemFromCart": "Failed to remove item from cart.",
+        "cartIsAlreadyEmpty": "Cart is already empty.",
+        "cartEmptied": "Cart emptied.",
+        "failedToEmptyCart": "Failed to empty cart.",
+        "orderItems": "Order items ({{count}})",
+        "emptyCart": "Empty Cart",
+        "checkout": "Checkout"
+    },
+    "CatalogScreen": {
+        "jumpToCart": "Jump to Cart"
+    },
+    "CreateAccountScreen": {
+        "invalidPhone": "Invalid phone number provided.",
+        "createAccount": "Create Account",
+        "sendVerificationCode": "Send Verification Code",
+        "haveAccountAlreadyLogin": "Have an account already? Login",
+        "enterYourName": "Enter your name"
+    },
+    "CreateAccountVerifyScreen": {
+        "codeSent": "Code sent to {{phone}}",
+        "verifyCode": "Verify Code"
+    },
+    "DeleteAccountScreen": {
+        "deleteAccount": "Delete Account",
+        "deleteAccountConfirmation": "Are you sure you want to permanently delete your account? This action cannot be undone.",
+        "cancel": "Cancel",
+        "processingRequest": "Processing request...",
+        "deleteMyAccount": "Yes, Delete My Account"
+    },
+    "DeleteAccountVerifyScreen": {
+        "accountDeleted": "Account deleted.",
+        "enterDeletionCode": "Enter Deletion Code",
+        "deletionCodePrompt": "A verification code has been sent to your email or phone number. Please enter the code below to confirm account deletion.",
+        "verifyCode": "Verify Code"
+    },
+    "EditAccountPropertyScreen": {
+        "changesSaved": "{{propertyName}} changes saved."
+    },
+    "EditLocationCoordScreen": {
+        "savePosition": "Save Position",
+        "reset": "Reset"
+    },
+    "EditLocationScreen": {
+        "addressSaved": "Addess saved.",
+        "defaultLocationUpdated": "{{locationName}} is now your default location.",
+        "locationWasDeleted": "{{locationName}} was deleted.",
+        "unableToSelectLocationType": "Unable to select location type.",
+        "apartment": "Apartment",
+        "house": "House",
+        "office": "Office",
+        "hotel": "Hotel",
+        "hospital": "Hospital",
+        "school": "School",
+        "other": "Other",
+        "address": "Address",
+        "locationType": "Location Type",
+        "addressDetails": "Address Details",
+        "additionalAddressDetails": "Add additional address details.",
+        "addressLabel": "Address label or name",
+        "streetAddress": "Street address or P.O. Box",
+        "aptSuiteUnit": "Apt, suite, unit, building, floor, etc.",
+        "optional": "Optional",
+        "neighborhood": "Neighborhood",
+        "city": "City or town",
+        "postalCode": "Postal or zip code",
+        "phoneNumber": "Phone number",
+        "phoneNumberPlaceholder": "Phone number for courier to contact for delivery",
+        "additionalInstructions": "Additional instructions for the courier",
+        "whereExactly": "Where exactly should we meet you?",
+        "makeDefaultAddress": "Make Default Address",
+        "deleteAddress": "Delete Address",
+        "saveAddress": "Save Address"
+    },
+    "FoodTruckScreen": {
+        "tapTrucksPrompt": "Tap trucks on the map to view products.",
+        "yourZoneIs": "Your zone is",
+        "outOfZone": "Out of zone, delivery unavailable 🙁",
+        "truck": "Truck"
+    },
+    "LocationPermissionScreen": {
+        "enableLocationServices": "Enable Location Services",
+        "enableLocationPrompt": "We need your location to provide a better experience.",
+        "shareAndContinue": "Share Location & Continue",
+        "locationPermissionRequired": "Location Permission Required",
+        "locationPermissionPrompt": "To enable location-based features, please allow location access. If you prefer, you can enter your location manually.",
+        "goToSettings": "Go to Settings",
+        "enterLocationManually": "Enter Location Manually"
+    },
+    "LocationPickerScreen": {
+        "useMarkerPosition": "Use Marker Position",
+        "useExactMarkerPosition": "Use exact marker position"
+    },
+    "LoginScreen": {
+        "cacheCleared": "Cache cleared!",
+        "loggedInWithProvider": "Logged in with {{provider}}",
+        "loginAttemptFailed": "Login attempt with {{provider}} failed.",
+        "clearCache": "Clear Cache"
+    },
+    "OrderHistoryScreen": {},
+    "OrderScreen": {
+        "orderArrivingIn": "Order arriving in {eta}",
+        "orderReadyForPickup": "Your order is ready for pickup",
+        "orderReadyForPickupPrompt": "Once collected please confirm your order has been picked up by pressing the confirm button below.",
+        "orderPickedUp": "Order Picked Up",
+        "orderPickedUpConfirmMessage": "Has your order been collected and received by you?",
+        "yes": "Yes",
+        "confirmPickup": "Confirm Pickup",
+        "pickupLocation": "Pickup Location",
+        "deliveryLocation": "Delivery Location",
+        "orderNotes": "Order Notes"
+    },
+    "PaymentMethodScreen": {},
+    "PaypalCheckoutScreen": {},
+    "PhoneLoginScreen": {
+        "invalidPhone": "Invalid phone number provided.",
+        "loginViaSms": "Login via SMS",
+        "sendVerificationCode": "Send Verification Code",
+        "loginUsingAnotherMethod": "Login using Another Method",
+        "createNewAccount": "Create a new Account"
+    },
+    "PhoneLoginVerifyScreen": {
+        "codeSentTo": "Code sent to {{phone}}",
+        "verifyCode": "Verify Code"
+    },
+    "ProductScreen": {
+        "productAddedToCart": "{{productName}} added to cart.",
+        "addToCart": "Add to Cart"
+    },
+    "ProfileScreen": {
+        "orderHistory": "Order History",
+        "account": "Account",
+        "paymentMethods": "Payment Methods",
+        "addressBook": "Address Book",
+        "greeting": "Hi {{customerName}}!"
+    },
+    "QPayCheckoutScreen": {
+        "completingOrder": "Completing order...",
+        "checkingPayment": "Checking payment...",
+        "yourDeliveryLocation": "Your delivery location",
+        "yourCart": "Your cart",
+        "orderNotes": "Order notes",
+        "orderNotesTitle": "Order Notes",
+        "enterAdditionalNotes": "Enter additional notes for order",
+        "checkoutOptions": "Checkout options"
+    },
+    "SavedLocationScreen": {
+        "addressSaved": "Address saved.",
+        "address": "Address"
+    },
+    "StoreCategoryScreen": {},
+    "StoreHomeScreen": {},
+    "StoreInfoScreen": {
+        "reviewsAndRating": "Reviews and Rating"
+    },
+    "StoreMapScreen": {},
+    "StoreOnboardScreen": {},
+    "StoreSearchScreen": {
+        "searchProducts": "Search products",
+        "result": "result",
+        "foundResults": "Found {{count}} {{result}} for \"{{searchQuery}}\"",
+        "noResults": "No results found for \"{{searchQuery}}\"",
+        "searchPrompt": "Search for products, categories, or more!"
+    },
+    "StripeCheckoutScreen": {
+        "yourDeliveryLocation": "Your delivery location",
+        "yourCart": "Your cart",
+        "yourPaymentMethod": "Your payment method",
+        "orderNotes": "Order notes",
+        "orderNotesTitle": "Order Notes",
+        "enterAdditionalNotes": "Enter additional notes for order",
+        "checkoutOptions": "Checkout options"
+    },
+    "StripeCustomerScreen": {
+        "manageYourPaymentMethod": "Manage your payment method",
+        "loadingAccountInfo": "Loading account info..."
+    },
+    "TestScreen": {},
+    "AlertPromptBox": {
+        "proceedPrompt": "Are you sure you want to proceed?"
+    },
+    "Buttons": {
+        "continueWithPhone": "Continue with Phone",
+        "continueWithApple": "Continue with Apple",
+        "continueWithFacebook": "Continue with Facebook",
+        "continueWithInstagram": "Continue with Instagram",
+        "continueWithGoogle": "Continue with Google"
+    },
+    "CartContents": {
+        "updateItem": "Update Item",
+        "removeFromCart": "Remove from Cart",
+        "removedFromCart": "{{cartItemName}} removed from cart.",
+        "failedToRemove": "Failed to remove item from cart."
+    },
+    "CheckoutButton": {
+        "checkout": "Checkout {{total}}",
+        "loginOrCreateAccount": "Login or Create Account"
+    },
+    "CheckoutPickupSwitch": {
+        "delivery": "Delivery",
+        "pickup": "Pickup"
+    },
+    "CheckoutTotal": {},
+    "CustomerLocationSelect": {
+        "selectAddress": "Select address",
+        "newAddress": "New Address"
+    },
+    "LocationPicker": {
+        "addNewLocation": "Add New Location"
+    },
+    "OrderTotal": {},
+    "PhoneInput": {
+        "enterPhoneNumber": "Enter phone number",
+        "searchCountry": "Search country"
+    },
+    "ProductCard": {
+        "productAddedToCart": "{{productName}} added to cart.",
+        "addToCart": "Add to Cart"
+    },
+    "ProductOptionsForm": {
+        "chooseOneItem": "Choose one item",
+        "selectOneItem": "Select one item",
+        "chooseUpToFour": "Choose up to 4 items"
+    },
+    "StoreLocationSchedule": {
+        "Monday": "Monday",
+        "Tuesday": "Tuesday",
+        "Wednesday": "Wednesday",
+        "Thursday": "Thursday",
+        "Friday": "Friday",
+        "Saturday": "Saturday",
+        "Sunday": "Sunday",
+        "open24": "Open 24 Hours",
+        "today": "Today",
+        "closed": "Closed"
+    },
+    "StripeCardFieldSheet": {
+        "loadingPaymentDetails": "Loading payment details...",
+        "addNewPaymentMethod": "Add a new payment method",
+        "cardEndingIn": "Card ending in {{label}}",
+        "change": "Change",
+        "addOrUpdatePaymentMethod": "Add / Update Payment Method",
+        "saving": "Saving...",
+        "savePaymentMethod": "Save Payment Method"
+    },
+    "StripePaymentSheet": {
+        "loginToCheckout": "Login to continue checkout",
+        "loadingPaymentDetails": "Loading payment details...",
+        "addNewPaymentMethod": "Add a new payment method",
+        "cardEndingIn": "Card ending in {{label}}",
+        "change": "Change"
+    },
+    "TextAreaSheet": {}
 }

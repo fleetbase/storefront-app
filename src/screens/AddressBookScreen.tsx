@@ -11,6 +11,7 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import Spacer from '../components/Spacer';
+import { useLanguage } from '../contexts/LanguageContext';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -22,6 +23,7 @@ const AddressBookScreen = () => {
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
     const { savedLocations, deleteLocation } = useSavedLocations();
+    const { t } = useLanguage();
     const rowRefs = useRef({});
 
     const handleEdit = (place) => {

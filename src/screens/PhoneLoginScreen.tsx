@@ -7,6 +7,7 @@ import { faPaperPlane, faKey, faArrowRight, faArrowLeft } from '@fortawesome/fre
 import { isValidPhoneNumber } from '../utils';
 import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import PhoneInput from '../components/PhoneInput';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 
@@ -15,6 +16,7 @@ const PhoneLoginScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { login, isSendingCode, phone: phoneState } = useAuth();
+    const { t } = useLanguage();
     const [phone, setPhone] = useState(phoneState);
 
     const handleSendVerificationCode = async () => {
@@ -23,7 +25,7 @@ const PhoneLoginScreen = () => {
         }
 
         if (!isValidPhoneNumber(phone)) {
-            return toast.error('Invalid phone number provided.');
+            return toast.error(t('PhoneLoginScreen.invalidPhone'));
         }
 
         try {
@@ -48,13 +50,13 @@ const PhoneLoginScreen = () => {
                 <YStack flex={1} alignItems='center' bg='$background' space='$3'>
                     <YStack space='$2' width='100%' px='$5' pt='$5'>
                         <Text color='$textPrimary' fontWeight='bold' fontSize='$8' mb='$3'>
-                            Login via SMS
+                            {t('PhoneLoginScreen.loginViaSms')}
                         </Text>
                         <PhoneInput value={phone} onChange={(phoneNumber) => setPhone(phoneNumber)} />
                         <Button size='$5' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
                             <Button.Icon>{isSendingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faPaperPlane} color='white' />}</Button.Icon>
                             <Button.Text color='$white' fontWeight='bold'>
-                                Send Verification Code
+                                {t('PhoneLoginScreen.sendVerificationCode')}
                             </Button.Text>
                         </Button>
                     </YStack>
@@ -67,12 +69,12 @@ const PhoneLoginScreen = () => {
                                 <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />
                             </Button.Icon>
                             <Button.Text color='$textPrimary' fontWeight='bold'>
-                                Login using Another Method
+                                {t('PhoneLoginScreen.loginUsingAnotherMethod')}
                             </Button.Text>
                         </Button>
                         <Button size='$5' onPress={handleCreateAccount} bg='$indigo-600' width='100%' rounded>
                             <Button.Text color='$white' fontWeight='bold'>
-                                Create a new Account
+                                {t('PhoneLoginScreen.createNewAccount')}
                             </Button.Text>
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faArrowRight} color='white' />

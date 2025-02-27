@@ -12,6 +12,7 @@ import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
+import { useLanguage } from '../contexts/LanguageContext';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
 import ProductYoutubeVideos from '../components/ProductYoutubeVideos';
@@ -31,6 +32,7 @@ const ProductScreen = ({ route = {} }) => {
     const params = route.params ?? {};
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
+    const { t } = useLanguage();
     const [cart, updateCart] = useCart();
     const product = new Product(route.params.product, storefrontAdapter);
     const isService = product.getAttribute('is_service') === true;
@@ -69,7 +71,7 @@ const ProductScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }), 'addToCart');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} added to cart.`);
+            toast.success(t('ProductScreen.productAddedToCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
             console.log('Error Adding to Cart', error.message);
@@ -118,7 +120,7 @@ const ProductScreen = ({ route = {} }) => {
                             </Text>
                             {isService && (
                                 <Text fontSize='$5' color='white' opacity={0.8}>
-                                    Service
+                                    {t('common.service')}
                                 </Text>
                             )}
                         </XStack>
@@ -177,7 +179,7 @@ const ProductScreen = ({ route = {} }) => {
                             </Button.Icon>
                         )}
                         <Button.Text color='$primaryText' fontSize='$5' fontWeight='normal'>
-                            Add to Cart
+                            {t('ProductScreen.addToCart')}
                         </Button.Text>
                         <Button.Text color='white' fontSize='$6' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}

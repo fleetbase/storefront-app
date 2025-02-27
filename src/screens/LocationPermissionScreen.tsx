@@ -5,11 +5,13 @@ import { request, PERMISSIONS, RESULTS, check } from 'react-native-permissions';
 import { Button, Text, YStack, Image, Stack, AlertDialog } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 import useDimensions from '../hooks/use-dimensions';
 
 const LocationPermissionScreen = () => {
     const navigation = useNavigation();
     const { screenWidth } = useDimensions();
+    const { t } = useLanguage();
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [hasPermission, setHasPermission] = useState(false);
     const [permissionAttempted, setPermissionAttempted] = useState(false);
@@ -76,18 +78,16 @@ const LocationPermissionScreen = () => {
                     <Image source={require('../../assets/images/isometric-geolocation-1.png')} width={360} height={360} resizeMode='contain' />
                 </Stack>
                 <Text fontSize='$8' fontWeight='bold' color='$textPrimary' mb='$2' textAlign='center'>
-                    Enable Location Services
+                    {t('LocationPermissionScreen.enableLocationServices')}
                 </Text>
                 <Text color='$textSecondary' fontSize='$4' textAlign='center' mb='$6'>
-                    We need your location to provide a better experience.
+                    {t('LocationPermissionScreen.enableLocationPrompt')}
                 </Text>
-                {/* Single button to trigger the permission prompt */}
                 <Button size='$5' bg='$primary' color='$white' width='100%' onPress={requestLocationPermission} icon={<FontAwesomeIcon icon={faMapMarkerAlt} color='white' />}>
-                    Share Location & Continue
+                    {t('LocationPermissionScreen.shareAndContinue')}
                 </Button>
             </YStack>
 
-            {/* Fallback AlertDialog after native prompt denial */}
             <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
                 <AlertDialog.Trigger asChild>
                     <Button display='none'>Show Alert</Button>
@@ -96,17 +96,16 @@ const LocationPermissionScreen = () => {
                     <AlertDialog.Overlay key='overlay' animation='quick' opacity={0.5} />
                     <AlertDialog.Content bordered elevate key='content' backgroundColor='$background' width={screenWidth * 0.9} padding='$6'>
                         <AlertDialog.Title color='$textPrimary' fontSize={27}>
-                            Location Permission Required
+                            {t('LocationPermissionScreen.locationPermissionRequired')}
                         </AlertDialog.Title>
                         <AlertDialog.Description color='$textSecondary' mb='$4'>
-                            To enable location-based features, please allow location access. If you prefer, you can enter your location manually.
+                            {t('LocationPermissionScreen.locationPermissionPrompt')}
                         </AlertDialog.Description>
-                        {/* Options after the native prompt has been shown */}
                         <Button onPress={openSettings} backgroundColor='$primary' color='$primaryText' mb='$2'>
-                            Go to Settings
+                            {t('LocationPermissionScreen.goToSettings')}
                         </Button>
                         <Button onPress={navigateToLocationPicker} backgroundColor='$secondary' color='$textSecondary'>
-                            Enter Location Manually
+                            {t('LocationPermissionScreen.enterLocationManually')}
                         </Button>
                     </AlertDialog.Content>
                 </AlertDialog.Portal>

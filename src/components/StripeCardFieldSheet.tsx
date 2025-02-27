@@ -8,12 +8,14 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';
 import CardBrandLogo from './CardBrandLogo';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref) => {
     const theme = useTheme();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%'], []);
     const { setupIntentLoading, paymentMethod, createSetupIntent, setupIntentClientSecret, handleAddPaymentMethod, storefront, customer } = useStripeCheckoutContext();
+    const { t } = useLanguage();
 
     const [cardDetailsComplete, setCardDetailsComplete] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -72,7 +74,7 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                         <Spinner color='$blue-600' size='$1' mr='$3' />
                     </YStack>
                     <Text fontWeight='bold' fontSize='$4' color='$blue-600'>
-                        Loading payment details...
+                        {t('StripeCardFieldSheet.loadingPaymentDetails')}
                     </Text>
                 </XStack>
             </YStack>
@@ -87,7 +89,7 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                             <XStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' alignItems='center' space='$2' px='$4' py='$3'>
                                 <YStack>{isLoading ? <Spinner color='$blue-600' size='$1' mr='$3' /> : <FontAwesomeIcon icon={faPlus} color={theme['blue-600'].val} size={15} />}</YStack>
                                 <Text fontWeight='bold' fontSize='$4' color='$blue-600'>
-                                    Add a new payment method
+                                    {t('StripeCardFieldSheet.addNewPaymentMethod')}
                                 </Text>
                             </XStack>
                         </Pressable>
@@ -98,14 +100,14 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                             <CardBrandLogo brand={paymentMethod.brand} />
                             <YStack>
                                 <Text color='$textPrimary' fontSize='$4'>
-                                    Card ending in {paymentMethod.label}
+                                    {t('StripeCardFieldSheet.cardEndingIn', { label: paymentMethod.label })}
                                 </Text>
                             </YStack>
                         </XStack>
                         <YStack>
                             <Button onPress={openBottomSheet} borderWidth={1} bg='$primary' borderColor='$primaryBorder'>
                                 {isLoading ? <Spinner color='$primaryText' /> : <FontAwesomeIcon icon={faPenToSquare} color={theme['$primaryText'].val} size={15} />}
-                                <Button.Text color='$primaryText'>Change</Button.Text>
+                                <Button.Text color='$primaryText'>{t('StripeCardFieldSheet.change')}</Button.Text>
                             </Button>
                         </YStack>
                     </XStack>
@@ -126,7 +128,7 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                             <XStack alignItems='center' justifyContent='space-between' mb='$3'>
                                 <YStack flex={1}>
                                     <Text fontSize='$6' fontWeight='bold' color='$textPrimary' mb='$2'>
-                                        Add / Update Payment Method
+                                        {t('StripeCardFieldSheet.addOrUpdatePaymentMethod')}
                                     </Text>
                                 </YStack>
                                 <Button size='$2' onPress={closeBottomSheet} bg='$gray-300' circular>
@@ -163,7 +165,7 @@ const StripeCardFieldSheet = forwardRef(({ onPaymentMethodSaved, onReady }, ref)
                                 >
                                     <Button.Icon>{isSaving ? <Spinner color='$green-100' /> : <FontAwesomeIcon icon={faSave} color={theme['green-100'].val} />}</Button.Icon>
                                     <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
-                                        {isSaving ? 'Saving...' : 'Save Payment Method'}
+                                        {isSaving ? t('StripeCardFieldSheet.saving') : t('StripeCardFieldSheet.savePaymentMethod')}
                                     </Button.Text>
                                 </Button>
                             </XStack>

@@ -7,6 +7,7 @@ import { faTruck } from '@fortawesome/free-solid-svg-icons';
 import { Product, FoodTruck } from '@fleetbase/storefront';
 import { SimpleGrid } from 'react-native-super-grid';
 import { storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import useStorefront from '../hooks/use-storefront';
 import StoreCategoriesGrid from '../components/StoreCategoriesGrid';
 import StoreCategoriesPills from '../components/StoreCategoriesPills';
@@ -19,6 +20,7 @@ const CatalogScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t } = useLanguage();
     const catalogs = params.catalogs || [];
     const foodTruck = new FoodTruck(params.foodTruck);
     const foodTruckId = params.foodTruckId ?? null;
@@ -50,7 +52,7 @@ const CatalogScreen = ({ route }) => {
                     </Text>
                 </XStack>
                 <YStack>
-                    <CartButton text='Jump to Cart' onPress={() => navigation.navigate('CartModal')} />
+                    <CartButton text={t('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} />
                 </YStack>
             </XStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>

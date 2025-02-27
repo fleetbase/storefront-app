@@ -218,11 +218,6 @@ const AccountScreen = () => {
             rightComponent: null,
             onPress: handleClearCache,
         },
-        {
-            title: t('AccountScreen.tracking'),
-            rightComponent: <Text color='$textSecondary'>Enabled</Text>, // Replace with dynamic value if available
-            onPress: () => navigation.navigate('TrackingSettings'),
-        },
     ];
 
     return (

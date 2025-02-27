@@ -11,6 +11,7 @@ import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import QuantityButton from './QuantityButton';
 import ImageSlider from './ImageSlider';
 import useCart from '../hooks/use-cart';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +35,7 @@ const ProductCard = ({
 }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t } = useLanguage();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [cardWidth, setCardWidth] = useState(width);
     const [cart, updateCart] = useCart();
@@ -86,6 +88,7 @@ const ProductCard = ({
             updateCart(updatedCart);
             setQuantity(1);
             toast.success(`${product.getAttribute('name')} added to cart.`);
+            toast.success(t('ProductCard.productAddedToCart', { productName: product.getAttribute('name') }));
         } catch (error) {
             console.error('Error Adding to Cart', error.message);
         }
@@ -181,7 +184,7 @@ const ProductCard = ({
                                     )}
 
                                     <Button.Text color='$primaryText' fontSize='$6' fontWeight='$5'>
-                                        Add to Cart
+                                        {t('ProductCard.addToCart')}
                                     </Button.Text>
                                 </Button>
                             </YStack>

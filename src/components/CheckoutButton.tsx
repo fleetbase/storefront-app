@@ -4,12 +4,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRocket, faUnlock } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency } from '../utils/format';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import useCart from '../hooks/use-cart';
 
 const CheckoutButton = ({ total = 0, onCheckout, onAuthRequired, disabled = false, isLoading = false }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { isAuthenticated } = useAuth();
+    const { t } = useLanguage();
     const [cart, updateCart] = useCart();
 
     const handleAuthRequired = () => {
@@ -26,7 +28,7 @@ const CheckoutButton = ({ total = 0, onCheckout, onAuthRequired, disabled = fals
                 <Button onPress={onCheckout} size='$5' borderWidth={1} bg='$success' borderColor='$successBorder' flex={1} opacity={disabled ? 0.75 : 1} disabled={disabled}>
                     <Button.Icon>{isLoading ? <Spinner color='$successText' /> : <FontAwesomeIcon icon={faRocket} color={theme['$successText'].val} />}</Button.Icon>
                     <Button.Text color='$successText' fontWeight='bold' fontSize='$5'>
-                        Checkout {formatCurrency(total, cart.getAttribute('currency'))}
+                        {t('CheckoutButton.checkout', { total: formatCurrency(total, cart.getAttribute('currency')) })}
                     </Button.Text>
                 </Button>
             ) : (
@@ -35,7 +37,7 @@ const CheckoutButton = ({ total = 0, onCheckout, onAuthRequired, disabled = fals
                         <FontAwesomeIcon icon={faUnlock} color={theme['$primaryText'].val} />
                     </Button.Icon>
                     <Button.Text color='$primaryText' fontWeight='bold' fontSize='$5'>
-                        Login or Create Account
+                        {t('CheckoutButton.loginOrCreateAccount')}
                     </Button.Text>
                 </Button>
             )}

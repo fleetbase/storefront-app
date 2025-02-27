@@ -8,6 +8,7 @@ import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/fr
 import { Vehicle } from '@fleetbase/sdk';
 import { restoreFleetbasePlace, getCoordinates, getCoordinatesObject, isPointInGeoJSONPolygon, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
 import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
@@ -65,6 +66,7 @@ const isAndroid = Platform.OS === 'android';
 const FoodTruckScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
+    const { t } = useLanguage();
     const { isDarkMode } = useAppTheme();
     const { screenWidth } = useDimensions();
     const { fleetbase, adapter: fleetbaseAdapter } = useFleetbase();
@@ -271,7 +273,7 @@ const FoodTruckScreen = () => {
                     <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
                         <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
                             <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                Truck {foodTruck.vehicle.plate_number}
+                                {t('FoodTruckScreen.truck')} {foodTruck.vehicle.plate_number}
                             </Text>
                         </YStack>
                     </VehicleMarker>
@@ -291,7 +293,7 @@ const FoodTruckScreen = () => {
                                         ? currentLocation.isAttributeFilled('name')
                                             ? currentLocation.getAttribute('name')
                                             : formattedAddressFromPlace(currentLocation)
-                                        : 'Loading...'}
+                                        : t('common.loading')}
                                 </Text>
                             </YStack>
                         </YStack>
@@ -331,7 +333,7 @@ const FoodTruckScreen = () => {
                             </YStack>
                             <XStack flex={1}>
                                 <Text color={infoColor} fontSize={15} numberOfLines={1}>
-                                    Tap trucks on the map to view products.
+                                    {t('FoodTruckScreen.tapTrucksPrompt')}
                                 </Text>
                             </XStack>
                         </XStack>
@@ -342,7 +344,7 @@ const FoodTruckScreen = () => {
                                 </YStack>
                                 <YStack flex={1}>
                                     <Text color={currentZoneColor} fontSize={15} numberOfLines={1}>
-                                        {currentZone ? `Your zone is: ` : 'Out of zone, delivery unavailable 🙁'}
+                                        {currentZone ? `${t('FoodTruckScreen.yourZoneId')}: ` : t('FoodTruckScreen.outOfZone')}
                                     </Text>
                                     {currentZone && (
                                         <Text fontWeight='bold' color={currentZoneColor} fontSize={15} numberOfLines={1}>
@@ -360,7 +362,7 @@ const FoodTruckScreen = () => {
                                     </YStack>
                                     <XStack flex={1}>
                                         <Text color='$textPrimary' fontSize={15} numberOfLines={1}>
-                                            Truck: {foodTruck.vehicle.plate_number}
+                                            {t('FoodTruckScreen.truck')}: {foodTruck.vehicle.plate_number}
                                         </Text>
                                     </XStack>
                                 </XStack>

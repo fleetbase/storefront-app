@@ -7,6 +7,7 @@ import { Portal } from '@gorhom/portal';
 import { getCountryByPhoneCode, getCountryByISO2, parsePhoneNumber, debounce, storefrontConfig } from '../utils';
 import useAppTheme from '../hooks/use-app-theme';
 import { getLocales } from 'react-native-localize';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function getDefaultValues(value = null, fallbackCountry = 'US') {
     if (typeof value === 'string' && value.startsWith('+')) {
@@ -49,6 +50,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
     const countryCode = getDefaultCountryCode(defaultCountryCode);
     const defaultValue = getDefaultValues(value, countryCode);
     const theme = useTheme();
+    const { t } = useLanguage();
     const { isDarkMode } = useAppTheme();
     const [selectedCountry, setSelectedCountry] = useState(defaultValue.country);
     const [phoneNumber, setPhoneNumber] = useState(defaultValue.phoneNumber);
@@ -117,7 +119,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                     size={size}
                     ref={phoneInputRef}
                     flex={1}
-                    placeholder='Enter phone number'
+                    placeholder={t('PhoneInput.enterPhoneNumber')}
                     keyboardType='phone-pad'
                     value={phoneNumber}
                     onChangeText={setPhoneNumber}
@@ -148,7 +150,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                     <YStack px='$2'>
                         <BottomSheetTextInput
                             ref={searchInputRef}
-                            placeholder='Search country'
+                            placeholder={t('PhoneInput.searchCountry')}
                             onChangeText={setSearchTerm}
                             autoCapitalize='none'
                             autoComplete='off'

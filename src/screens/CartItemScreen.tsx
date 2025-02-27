@@ -11,6 +11,7 @@ import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { toast } from '../utils/toast';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
+import { useLanguage } from '../contexts/LanguageContext';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
 import LinearGradient from 'react-native-linear-gradient';
@@ -25,6 +26,7 @@ const CartItemScreen = ({ route = {} }) => {
     const insets = useSafeAreaInsets();
     const params = route.params ?? {};
     const { runWithLoading, isLoading } = usePromiseWithLoading();
+    const { t } = useLanguage();
     const [cart, updateCart] = useCart();
     const [cartItem, setCartItem] = useState(route.params.cartItem);
     const [product, setProduct] = useState(restoreSdkInstance(route.params.product, 'product'));
@@ -65,10 +67,10 @@ const CartItemScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.remove(cartItem.id), 'removeCartItem');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} removed from cart.`);
+            toast.success(t('CartItemScreen.productRemovedFromCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
-            toast.error('Failed to remove item from cart');
+            toast.error(t('CartItemScreen.failedToRemoveFromCart'));
             console.error('Error removing cart item:', error.message);
         }
     };
@@ -86,7 +88,7 @@ const CartItemScreen = ({ route = {} }) => {
         try {
             const updatedCart = await runWithLoading(cart.update(cartItem.id, quantity, { addons, variants }), 'updateCart');
             updateCart(updatedCart);
-            toast.success(`${product.getAttribute('name')} updated in cart.`);
+            toast.success(t('CartItemScreen.productUpdatedInCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
             console.log('Error Adding to Cart', error.message);
@@ -134,7 +136,7 @@ const CartItemScreen = ({ route = {} }) => {
                             </Text>
                             {isService && (
                                 <Text fontSize='$5' color='white' opacity={0.8}>
-                                    Service
+                                    {t('common.service')}
                                 </Text>
                             )}
                         </XStack>
@@ -185,7 +187,7 @@ const CartItemScreen = ({ route = {} }) => {
                             </Button.Icon>
                         )}
                         <Button.Text fontSize='$5' fontWeight='normal'>
-                            Update
+                            {t('common.update')}
                         </Button.Text>
                         <Button.Text fontSize='$6' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}

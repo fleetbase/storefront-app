@@ -9,15 +9,17 @@ import { loadPersistedResource, showActionSheet } from '../utils';
 import { toast } from '../utils/toast';
 import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CartContents = ({}) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t } = useLanguage();
     const [cart, updateCart] = useCart();
 
     const handleCartItemActions = (cartItem) => {
         showActionSheet({
-            options: ['Update Item', 'Remove from Cart', 'Cancel'],
+            options: [t('CartContents.updateItem'), t('CartContents.removeFromCart'), t('common.cancel')],
             cancelButtonIndex: 2,
             destructiveButtonIndex: 1,
             onSelect: (buttonIndex) => {
@@ -47,9 +49,9 @@ const CartContents = ({}) => {
         try {
             const updatedCart = await cart.remove(cartItem.id);
             updateCart(updatedCart);
-            toast.success(`${cartItem.name} removed from cart.`);
+            toast.success(t('CartContents.removedFromCart', { cartItemName: cartItem.name }));
         } catch (error) {
-            toast.error('Failed to remove item from cart');
+            toast.error(t('CartContents.failedToRemove'));
             console.error('Error removing cart item:', error.message);
         }
     };

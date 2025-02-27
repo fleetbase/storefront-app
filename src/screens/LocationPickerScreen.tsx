@@ -18,6 +18,7 @@ import {
     getCoordinates,
 } from '../utils/location';
 import { isArray, toBoolean, later, storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -41,6 +42,7 @@ const LocationPickerScreen = ({ route }) => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { storefront } = useStorefront();
+    const { t } = useLanguage();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const initialLocation = getLocationFromRouteOrStorage('initialLocation', params);
     const [latitude, longitude] = getCoordinates(initialLocation);
@@ -182,9 +184,9 @@ const LocationPickerScreen = ({ route }) => {
                                     </YStack>
                                     <YStack>
                                         <Text color='$primary' fontWeight='bold' numberOfLines={1}>
-                                            Use Marker Position
+                                            {t('LocationPickerScreen.useMarkerPosition')}
                                         </Text>
-                                        <Text color='$blue-500'>Use exact marker position</Text>
+                                        <Text color='$blue-500'>{t('LocationPickerScreen.useExactMarkerPosition')}</Text>
                                     </YStack>
                                 </XStack>
                             </Button>

@@ -17,6 +17,7 @@ import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import TextAreaSheet from '../components/TextAreaSheet';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { storefrontConfig, firstRouteName, wasAccessedFromCartModal } from '../utils';
 
 const isAndroid = Platform.OS === 'android';
@@ -26,6 +27,7 @@ const StripeCheckoutScreen = () => {
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
     const { enabled } = useStorefrontInfo();
+    const { t } = useLanguage();
     const {
         customer,
         handleCompleteOrder,
@@ -69,42 +71,48 @@ const StripeCheckoutScreen = () => {
                         {!isPickup && (
                             <YStack space='$3'>
                                 <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    Your delivery location
+                                    {t('StripeCheckoutScreen.yourDeliveryLocation')}
                                 </Text>
                                 <CustomerLocationSelect onChange={handleDeliveryLocationChange} />
                             </YStack>
                         )}
                         <YStack space='$3' mb={!customer ? '$5' : 0}>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Your cart
+                                {t('StripeCheckoutScreen.yourCart')}
                             </Text>
                             <CartContents />
                         </YStack>
                         {customer && (
                             <YStack space='$3'>
                                 <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    Your payment method
+                                    {t('StripeCheckoutScreen.yourPaymentMethod')}
                                 </Text>
                                 {storefrontConfig('stripePaymentMethod') === 'field' ? <StripeCardFieldSheet /> : <StripePaymentSheet />}
                             </YStack>
                         )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Order notes
+                                {t('StripeCheckoutScreen.orderNotes')}
                             </Text>
-                            <TextAreaSheet value={orderNotes} onChange={setOrderNotes} title='Order Notes' placeholder='Enter additional notes for order' portalHost={portalHost} />
+                            <TextAreaSheet
+                                value={orderNotes}
+                                onChange={setOrderNotes}
+                                title={t('StripeCheckoutScreen.orderNotesTitle')}
+                                placeholder={t('StripeCheckoutScreen.enterAdditionalNotes')}
+                                portalHost={portalHost}
+                            />
                         </YStack>
                         {hasCheckoutOptions && (
                             <YStack space='$3'>
                                 <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    Checkout options
+                                    {t('StripeCheckoutScreen.checkoutOptions')}
                                 </Text>
                                 <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
                             </YStack>
                         )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Total
+                                {t('lineItems.total')}
                             </Text>
                             <CheckoutTotal lineItems={lineItems} />
                         </YStack>
@@ -112,7 +120,7 @@ const StripeCheckoutScreen = () => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={2}>
                 <CheckoutButton onCheckout={completeOrder} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <PortalHost name='StripeCheckoutPortal' />

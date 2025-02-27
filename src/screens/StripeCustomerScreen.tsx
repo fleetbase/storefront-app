@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { CustomerSheet, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
 import { Portal } from '@gorhom/portal';
 import { config } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import useAppTheme from '../hooks/use-app-theme';
 
 const APP_IDENTIFIER = config('APP_IDENTIFIER');
@@ -15,6 +16,7 @@ const StripeCustomerScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { isDarkMode } = useAppTheme();
+    const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const [customerSheetReady, setCustomerSheetReady] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +38,7 @@ const StripeCustomerScreen = () => {
                     setupIntentClientSecret: setupIntent,
                     customerEphemeralKeySecret: ephemeralKey,
                     customerId,
-                    headerTextForSelectionScreen: 'Manage your payment method',
+                    headerTextForSelectionScreen: t('StripeCustomerScreen.manageYourPaymentMethod'),
                     returnURL: `${APP_IDENTIFIER}://stripe-customer`,
                     style: isDarkMode ? 'alwaysDark' : 'alwaysLight',
                 });
@@ -143,7 +145,7 @@ const StripeCustomerScreen = () => {
                             <XStack space='$3'>
                                 <Spinner size='small' />
                                 <Text fontSize='$4' color='$textPrimary'>
-                                    Loading account info...
+                                    {t('StripeCustomerScreen.loadingAccountInfo')}
                                 </Text>
                             </XStack>
                         </YStack>

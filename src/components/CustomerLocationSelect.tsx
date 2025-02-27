@@ -10,12 +10,14 @@ import { formattedAddressFromPlace, formatAddressSecondaryIdentifier } from '../
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import PlaceMapView from './PlaceMapView';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'Checkout', ...props }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { currentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
+    const { t } = useLanguage();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%'], []);
 
@@ -87,7 +89,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                         <YStack>
                             <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$4'>
                                 <Text fontSize='$6' color='$textPrimary' fontWeight='bold'>
-                                    Select address
+                                    {t('CustomerLocationSelect.selectAddress')}
                                 </Text>
                                 <XStack space='$2'>
                                     <Button onPress={handleSelectNewLocation} bg='$primary' px='$3' size='$2' borderRadius='$8' rounded>
@@ -95,7 +97,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                                             <FontAwesomeIcon icon={faPlus} color='white' />
                                         </Button.Icon>
                                         <Button.Text fontSize='$2' color='white'>
-                                            New Address
+                                            {t('CustomerLocationSelect.newAddress')}
                                         </Button.Text>
                                     </Button>
                                     <Button size='$2' onPress={closeBottomSheet} bg='$secondary' circular>

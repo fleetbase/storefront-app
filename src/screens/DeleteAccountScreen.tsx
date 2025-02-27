@@ -4,10 +4,12 @@ import { YStack, Text, Button, Image, Spinner } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const DeleteAccountScreen = () => {
     const navigation = useNavigation();
     const { deleteAccount } = useAuth();
+    const { t } = useLanguage();
     const [isLoading, setIsLoading] = useState(false);
 
     const handleDeleteAccount = useCallback(async () => {
@@ -35,10 +37,10 @@ const DeleteAccountScreen = () => {
                     <Image source={require('../../assets/images/close-account.png')} width={360} height={360} borderRadius={360} resizeMode='contain' />
                 </YStack>
                 <Text fontSize='$8' fontWeight='bold' color='$textPrimary' textAlign='center' marginTop='$3'>
-                    Delete Account
+                    {t('DeleteAccountScreen.deleteAccount')}
                 </Text>
                 <Text color='$textSecondary' fontSize='$4' textAlign='center' marginTop='$2'>
-                    Are you sure you want to permanently delete your account? This action cannot be undone.
+                    {t('DeleteAccountScreen.deleteAccountConfirmation')}
                 </Text>
             </YStack>
             <YStack space='$3' width='100%'>
@@ -48,10 +50,10 @@ const DeleteAccountScreen = () => {
                             <Spinner />
                         </Button.Icon>
                     )}
-                    <Button.Text>{isLoading ? 'Processing request...' : 'Yes, Delete My Account'}</Button.Text>
+                    <Button.Text>{isLoading ? t('DeleteAccountScreen.processingRequest') : t('DeleteAccountScreen.deleteMyAccount')}</Button.Text>
                 </Button>
                 <Button size='$5' bg='$secondary' color='$textPrimary' borderWidth={1} borderColor='$borderColor' width='100%' onPress={handleCancel} rounded>
-                    Cancel
+                    {t('DeleteAccountScreen.cancel')}
                 </Button>
             </YStack>
         </YStack>

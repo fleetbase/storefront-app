@@ -1,11 +1,14 @@
 import TabSwitch from './TabSwitch';
 import { storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CheckoutPickupSwitch = ({ onChange }) => {
+    const { t } = useLanguage();
+
     const prioritizePickup = storefrontConfig('prioritizePickup');
     const receivingOptions = [
-        { label: 'Delivery', value: 'delivery' },
-        { label: 'Pickup', value: 'pickup' },
+        { label: t('CheckoutPickupSwitch.delivery'), value: 'delivery' },
+        { label: t('CheckoutPickupSwitch.pickup'), value: 'pickup' },
     ];
 
     if (prioritizePickup) {

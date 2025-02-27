@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native';
 import { Stack, Text, YStack, useTheme } from 'tamagui';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const StoreOnboardScreen = () => {
     const theme = useTheme();

@@ -5,6 +5,7 @@ import { Spinner, Stack, Text, YStack, useTheme, Button } from 'tamagui';
 import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
 import { storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import { PhoneLoginButton, AppleLoginButton, FacebookLoginButton, GoogleLoginButton } from '../components/Buttons';
 import useOAuth from '../hooks/use-oauth';
 import LinearGradient from 'react-native-linear-gradient';
@@ -16,10 +17,11 @@ const LoginScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { login, loginSupported, loading } = useOAuth();
+    const { t } = useLanguage();
 
     const handleClearCache = () => {
         storage.clearStore();
-        toast.success('Cache cleared!');
+        toast.success(t('LoginScreen.cacheCleared'));
     };
 
     const handlePhoneLogin = () => {
@@ -29,9 +31,9 @@ const LoginScreen = () => {
     const handleOAuthLogin = async (provider) => {
         try {
             const response = await login(provider);
-            toast.success(`Logged in with ${titleize(provider)}.`);
+            toast.success(t('LoginScreen.loggedInWithProvider', { provider: titleize(provider) }));
         } catch (err) {
-            toast.warning(`Login attempt with ${titleize(provider)} failed.`);
+            toast.warning(t('LoginScreen.loginAttemptFailed', { provider: titleize(provider) }));
             console.error('Error attempting OAuth login:', err);
         }
     };
@@ -48,7 +50,7 @@ const LoginScreen = () => {
                         {loginSupported('google') && <GoogleLoginButton onPress={() => handleOAuthLogin('google')} />}
                         {SHOW_CLEAR_CACHE && (
                             <Button bg='$error' borderColor='$errorBorder' borderWidth={1} onPress={handleClearCache} rounded width='100%'>
-                                <Button.Text color='$errorText'>Clear Cache</Button.Text>
+                                <Button.Text color='$errorText'>{t('LoginScreen.clearCache')}</Button.Text>
                             </Button>
                         )}
                     </YStack>

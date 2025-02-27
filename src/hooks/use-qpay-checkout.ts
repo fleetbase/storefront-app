@@ -15,10 +15,12 @@ import useStorefrontInfo from '../hooks/use-storefront-info';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useCart from '../hooks/use-cart';
 import useStorage from '../hooks/use-storage';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function useQPayCheckout({ onOrderComplete }) {
     const { storefront, adapter } = useStorefront();
     const { info } = useStorefrontInfo();
+    const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { currentStoreLocation } = useStoreLocations();
@@ -56,14 +58,14 @@ export default function useQPayCheckout({ onOrderComplete }) {
     function computeLineItems() {
         const baseItems = [
             {
-                name: 'Cart Subtotal',
+                name: t('lineItems.cartSubtotal'),
                 value: subtotal,
             },
         ];
 
         if (checkoutOptions.leavingTip) {
             baseItems.push({
-                name: 'Tip',
+                name: t('lineItems.tip'),
                 value: calculateTip(checkoutOptions.tip, subtotal),
                 tip: checkoutOptions.tip,
             });
@@ -71,7 +73,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
         if (checkoutOptions.leavingDeliveryTip) {
             baseItems.push({
-                name: 'Delivery Tip',
+                name: t('lineItems.deliveryTip'),
                 value: calculateTip(checkoutOptions.deliveryTip, subtotal),
                 tip: checkoutOptions.deliveryTip,
             });
@@ -80,12 +82,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
         if (!checkoutOptions.pickup) {
             if (serviceQuote) {
                 baseItems.push({
-                    name: 'Service Fee',
+                    name: t('lineItems.serviceFee'),
                     value: serviceQuote.getAttribute('amount'),
                 });
             } else if (deliveryLocation?.id) {
                 baseItems.push({
-                    name: 'Service Fee',
+                    name: t('lineItems.serviceFee'),
                     value: 0,
                     loading: true,
                 });
@@ -94,7 +96,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
         const total = baseItems.reduce((acc, item) => acc + numbersOnly(item.value), 0);
         baseItems.push({
-            name: 'Total',
+            name: t('lineItems.total'),
             value: total,
         });
 

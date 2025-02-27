@@ -18,6 +18,7 @@ import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPayment
 import useQpayCheckout from '../hooks/use-qpay-checkout';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const isAndroid = Platform.OS === 'android';
 const QPayCheckoutScreen = ({ route }) => {
@@ -28,6 +29,7 @@ const QPayCheckoutScreen = ({ route }) => {
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
     const { enabled } = useStorefrontInfo();
+    const { t } = useLanguage();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
     const {
         invoice,
@@ -68,7 +70,7 @@ const QPayCheckoutScreen = ({ route }) => {
 
     return (
         <YStack bg='$background'>
-            <LoadingOverlay visible={isCapturingOrder || !isFocused} text={isFocused ? 'Completing order...' : 'Checking payment...'} />
+            <LoadingOverlay visible={isCapturingOrder || !isFocused} text={isFocused ? t('QPayCheckoutScreen.completingOrder') : t('QPayCheckoutScreen.checkingPayment')} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
@@ -83,26 +85,26 @@ const QPayCheckoutScreen = ({ route }) => {
                         {!isPickup && (
                             <YStack space='$3'>
                                 <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    Your delivery location
+                                    {t('QPayCheckoutScreen.yourDeliveryLocation')}
                                 </Text>
                                 <CustomerLocationSelect onChange={handleDeliveryLocationChange} />
                             </YStack>
                         )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Your cart
+                                {t('QPayCheckoutScreen.yourCart')}
                             </Text>
                             <CartContents />
                         </YStack>
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Order notes
+                                {t('QPayCheckoutScreen.orderNotes')}
                             </Text>
                             <TextAreaSheet
                                 value={orderNotes}
                                 onChange={setOrderNotes}
-                                title='Order Notes'
-                                placeholder='Enter additional notes for order'
+                                title={t('QPayCheckoutScreen.orderNotesTitle')}
+                                placeholder={t('QPayCheckoutScreen.enterAdditionalNotes')}
                                 portalHost={portalHost}
                                 onBottomSheetPositionChanged={setIsBottomSheetPresenting}
                             />
@@ -117,7 +119,7 @@ const QPayCheckoutScreen = ({ route }) => {
                         )}
                         <YStack space='$3'>
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                Total
+                                {t('lineItems.total')}
                             </Text>
                             <CheckoutTotal lineItems={lineItems} />
                         </YStack>
@@ -125,7 +127,7 @@ const QPayCheckoutScreen = ({ route }) => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={2}>
                 <CheckoutButton onCheckout={() => paymentSheetRef.current?.open()} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />

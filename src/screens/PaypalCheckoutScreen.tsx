@@ -9,6 +9,7 @@ import CheckoutTotal from '../components/CheckoutTotal';
 import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
 import CheckoutButton from '../components/CheckoutButton';
 import { storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const PaypalCheckoutScreen = () => {
     const theme = useTheme();

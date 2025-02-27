@@ -8,10 +8,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import { formattedAddressFromPlace, savePlaceLocally } from '../utils/location';
 import { toast } from '../utils/toast';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const SaveLocationScreen = ({ route }) => {
     const place = new Place(route.params.place, adapter);
     const { customer, isAuthenticated } = useAuth();
+    const { t } = useLanguage();
     const [ready, setReady] = useState(false);
 
     const handleSavePlace = async () => {
@@ -19,13 +21,13 @@ const SaveLocationScreen = ({ route }) => {
             try {
                 place.setOwner(customer.id);
                 await place.save();
-                toast.success('Address saved.');
+                toast.success(t('SaveLocationScreen.addressSaved'));
             } catch (error) {
                 toast.error(error.message);
             }
         } else {
             savePlaceLocally(place);
-            toast.success('Address saved.');
+            toast.success(t('SaveLocationScreen.addressSaved'));
         }
     };
 
@@ -34,7 +36,7 @@ const SaveLocationScreen = ({ route }) => {
             <YStack flex={1} bg='$background' space='$3' padding='$5'>
                 <XStack paddingVertical='$3' justifyContent='space-between' mb='$1'>
                     <Text fontSize='$9' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                        Address
+                        {t('SaveLocationScreen.address')}
                     </Text>
                 </XStack>
                 <XStack flex={1} width='100%'>
@@ -47,7 +49,7 @@ const SaveLocationScreen = ({ route }) => {
                         <Button onPress={handleSavePlace} size='$5' bg='$blue-500' flex={1} opacity={mutated ? 1 : 0.75} disabled={!mutated}>
                             <Button.Icon>{isLoading() && <Spinner color='$blur-800' />}</Button.Icon>
                             <Button.Text color='$blue-600' fontWeight='bold' fontSize='$5'>
-                                Save
+                                {t('common.save')}
                             </Button.Text>
                         </Button>
                     </XStack>

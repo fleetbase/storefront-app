@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, YStack, XStack, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 import { formatCurrency } from '../utils/format';
 import { isEmpty } from '../utils';
 import {
@@ -22,6 +23,7 @@ function hasPrice(price) {
 
 const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, defaultSelectedAddons = null, defaultSelectedVariants = null, wrapperProps = {} }) => {
     const theme = useTheme();
+    const { t } = useLanguage();
     const [selectedAddons, setSelectedAddons] = useState(isEmpty(defaultSelectedAddons) ? createAddonSelectionDefaults(product) : defaultSelectedAddons);
     const [selectedVariants, setSelectedVariants] = useState(isEmpty(defaultSelectedVariants) ? createVariationSelectionDefaults(product) : defaultSelectedVariants);
 
@@ -63,13 +65,13 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
                             </XStack>
                             <XStack mt='$1' mb='$2'>
                                 <Text fontSize='$4' color='$color'>
-                                    Choose one item
+                                    {t('ProductOptionsForm.chooseOneItem')}
                                 </Text>
                             </XStack>
                             <RadioGroup
                                 value={getSelectedVariantId(variation, selectedVariants)}
                                 onValueChange={(id) => handleVariationToggle(id, variation)}
-                                aria-labelledby='Select one item'
+                                aria-labelledby={t('ProductOptionsForm.selectOneItem')}
                                 defaultValue='3'
                                 name='form'
                             >
@@ -112,7 +114,7 @@ const ProductOptionsForm = ({ product, onAddonsChanged, onVariationsChanged, def
                             </XStack>
                             <XStack mt='$1' mb='$3'>
                                 <Text fontSize='$4' color='$color'>
-                                    Choose up to 4 items
+                                    {t('ProductOptionsForm.chooseUpToFour')}
                                 </Text>
                             </XStack>
                             <YStack space='$2'>

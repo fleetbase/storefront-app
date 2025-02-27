@@ -6,6 +6,7 @@ import { Place, Point } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import { restoreFleetbasePlace, getCoordinates } from '../utils/location';
 import { storefrontConfig } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 import LocationMarker from '../components/LocationMarker';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 import useSavedLocations from '../hooks/use-saved-locations';
@@ -27,6 +28,7 @@ const EditLocationCoordScreen = ({ route }) => {
     const navigation = useNavigation();
     const theme = useTheme();
     const place = restoreFleetbasePlace({ ...params.place });
+    const { t } = useLanguage();
     const { updateLocationState } = useSavedLocations();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [latitude, longitude] = getCoordinates(place);
@@ -139,12 +141,12 @@ const EditLocationCoordScreen = ({ route }) => {
                         <Button onPress={handleSave} size='$5' bg='$success' borderColor='$successBorder' borderWidth={1} flex={1}>
                             <Button.Icon>{isLoading() && <Spinner color='$textSuccess' />}</Button.Icon>
                             <Button.Text color='$textSuccess' fontWeight='bold' fontSize='$5'>
-                                Save Position
+                                {t('EditLocationCoordScreen.savePosition')}
                             </Button.Text>
                         </Button>
                         <Button onPress={handleReset} size='$5' bg='$secondary' borderWidth={1} borderColor='$borderColor' flex={1}>
                             <Button.Text color='$textSecondary' fontWeight='bold' fontSize='$5'>
-                                Reset
+                                {t('EditLocationCoordScreen.reset')}
                             </Button.Text>
                         </Button>
                     </XStack>

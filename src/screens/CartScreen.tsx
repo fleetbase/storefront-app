@@ -10,6 +10,7 @@ import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
 import { delay, loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
+import { useLanguage } from '../contexts/LanguageContext';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
@@ -27,6 +28,7 @@ const CartScreen = ({ route }) => {
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
+    const { t } = useLanguage();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
@@ -59,7 +61,7 @@ const CartScreen = ({ route }) => {
         const rowRef = rowRefs.current[cartItem.id];
 
         if (!rowRef) {
-            toast.error('Could not find item to delete.');
+            toast.error(t('CartScreen.couldNotFindItemToDelete'));
             return;
         }
 
@@ -81,14 +83,14 @@ const CartScreen = ({ route }) => {
 
             // Remove item visually
             setDisplayedItems((prevItems) => prevItems.filter((item) => item.id !== cartItem.id));
-            toast.success(`${cartItem.name} removed from cart.`);
+            toast.success(('CartScreen.itemRemovedFromCart', { cartItemName: cartItem.name }));
 
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
             const updatedCart = await runWithLoading(cart.remove(cartItem.id), `removeCartItem_${cartItem.id}`);
             updateCart(updatedCart);
         } catch (error) {
-            toast.error('Failed to remove item from cart');
+            toast.error(t('CartScreen.failedToRemoveItemFromCart'));
             console.error('Error removing cart item:', error.message);
         }
     };
@@ -97,7 +99,7 @@ const CartScreen = ({ route }) => {
         const cartItems = cart.contents();
 
         if (!cartItems.length) {
-            toast.error('Cart is already empty');
+            toast.error(t('CartScreen.cartIsAlreadyEmpty'));
             return;
         }
 
@@ -126,14 +128,14 @@ const CartScreen = ({ route }) => {
             });
 
             await Promise.all(animations);
-            toast.success('Cart emptied');
+            toast.success(t('CartScreen.cartEmptied'));
 
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
             const emptiedCart = await runWithLoading(cart.empty(), 'emptyCart');
             updateCart(emptiedCart);
         } catch (error) {
-            toast.error('Failed to empty cart');
+            toast.error(t('CartScreen.failedToEmptyCart'));
             console.error('Error emptying cart:', error.message);
         }
     };
@@ -271,7 +273,7 @@ const CartScreen = ({ route }) => {
             <XStack justifyContent='space-between' alignItems='center' padding='$5'>
                 <XStack alignItems='center'>
                     <Text fontSize='$7' fontWeight='bold'>
-                        Order items ({displayedItems.length})
+                        {t('CartScreen.orderItems', { count: displayedItems.length })}
                     </Text>
                     {isAnyLoading() && (
                         <YStack ml='$2'>
@@ -282,7 +284,7 @@ const CartScreen = ({ route }) => {
                 <YStack>
                     <Pressable onPress={handleEmpty}>
                         <Text color='$errorBorder' fontSize='$4'>
-                            Empty Cart
+                            {t('CartScreen.emptyCart')}
                         </Text>
                     </Pressable>
                 </YStack>
@@ -320,7 +322,7 @@ const CartScreen = ({ route }) => {
                         <YStack>
                             <Button onPress={handleCheckout} bg='$success' borderColor='$successBorder' borderWidth={1} width={180} paddingVertical='$2' rounded>
                                 <Button.Text fontSize='$6' fontWeight='bold' color='$successText'>
-                                    Checkout
+                                    {t('CartScreen.checkout')}
                                 </Button.Text>
                             </Button>
                         </YStack>

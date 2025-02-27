@@ -6,6 +6,7 @@ import { Store, StoreLocation } from '@fleetbase/storefront';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCircle, faPhone, faGlobe, faAt } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 import { lowercase } from '../utils/format';
 import useStorefront from '../hooks/use-storefront';
 import StoreHeader from '../components/StoreHeader';
@@ -17,6 +18,7 @@ const StoreInfoScreen = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { adapter } = useStorefront();
+    const { t } = useLanguage();
     const params = route.params ?? {};
     const store = new Store(params.store, adapter);
     const storeLocation = new StoreLocation(params.storeLocation, adapter);
@@ -149,7 +151,7 @@ const StoreInfoScreen = ({ route }) => {
                 <ContentPanel
                     title={
                         <XStack alignItems='center' gap='$2'>
-                            <Text>Reviews and Rating</Text>
+                            <Text>{t('StoreInfoScreen.reviewsAndRating')}</Text>
                             <StoreRating rating={store.getAttribute('rating')} size={15} />
                         </XStack>
                     }

@@ -4,9 +4,11 @@ import { Image, Spinner, Button, Text, YStack, XStack, useTheme } from 'tamagui'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTriangleExclamation, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const StripePaymentSheet = () => {
     const theme = useTheme();
+    const { t } = useLanguage();
     const { createPaymentSheet, paymentSheetEnabled, handleAddPaymentMethodViaSheet, paymentMethod, stripeLoading, serviceQuote, cart, storefront, customer, error } =
         useStripeCheckoutContext();
 
@@ -23,7 +25,7 @@ const StripePaymentSheet = () => {
             <YStack>
                 <XStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' alignItems='center' space='$2' px='$4' py='$3'>
                     <Text fontWeight='bold' fontSize='$4' color='$textPrimary'>
-                        Login to continue checkout
+                        {t('StripePaymentSheet.loginToCheckout')}
                     </Text>
                 </XStack>
             </YStack>
@@ -38,7 +40,7 @@ const StripePaymentSheet = () => {
                         <Spinner color='$blue-600' size='$1' mr='$3' />
                     </YStack>
                     <Text fontWeight='bold' fontSize='$4' color='$blue-600'>
-                        Loading payment details...
+                        {t('StripePaymentSheet.loadingPaymentDetails')}
                     </Text>
                 </XStack>
             </YStack>
@@ -77,7 +79,7 @@ const StripePaymentSheet = () => {
                             <FontAwesomeIcon icon={faPlus} color={theme['blue-600'].val} size={15} />
                         </YStack>
                         <Text fontWeight='bold' fontSize='$4' color='$blue-600'>
-                            Add a new payment method
+                            {t('StripePaymentSheet.addNewPaymentMethod')}
                         </Text>
                     </XStack>
                 </Pressable>
@@ -91,14 +93,14 @@ const StripePaymentSheet = () => {
                 <YStack>{paymentMethod.image && <Image source={{ uri: `data:image/png;base64,${paymentMethod.image}` }} width={40} height={25} borderRadius={2} />}</YStack>
                 <YStack flex={1}>
                     <Text color='$textPrimary' fontSize='$4' numberOfLines={1}>
-                        Card ending in {paymentMethod.label}
+                        {t('StripePaymentSheet.cardEndingIn', { label: paymentMethod.label })}
                     </Text>
                 </YStack>
             </XStack>
             <YStack>
                 <Button onPress={handleAddPaymentMethodViaSheet} borderWidth={1} bg='$primary' borderColor='$primaryBorder' px='$3' py='$1' disabled={!paymentSheetEnabled}>
                     <Button.Text fontSize={13} color='$primaryText'>
-                        Change
+                        {t('StripePaymentSheet.change')}
                     </Button.Text>
                 </Button>
             </YStack>

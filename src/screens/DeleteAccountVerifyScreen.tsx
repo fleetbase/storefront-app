@@ -8,11 +8,13 @@ import { OtpInput } from 'react-native-otp-entry';
 import { toast } from '../utils/toast';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const DeleteAccountVerifyScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { verifyAccountDeletion } = useAuth();
+    const { t } = useLanguage();
     const [code, setCode] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
 
@@ -21,7 +23,7 @@ const DeleteAccountVerifyScreen = () => {
         setIsVerifying(true);
         try {
             await verifyAccountDeletion(enteredCode);
-            toast.success('Account deleted.');
+            toast.success(t('DeleteAccountVerifyScreen.accountDeleted'));
         } catch (error: any) {
             toast.error(error.message);
         } finally {
@@ -39,10 +41,10 @@ const DeleteAccountVerifyScreen = () => {
                 <YStack flex={1} bg='$background' space='$3' padding='$5'>
                     <YStack mb='$4' space='$1'>
                         <Text fontSize={20} fontWeight='bold'>
-                            Enter Deletion Code
+                            {t('DeleteAccountVerifyScreen.enterDeletionCode')}
                         </Text>
                         <Text fontSize='$4' color='$textSecondary'>
-                            A verification code has been sent to your email or phone number. Please enter the code below to confirm account deletion.
+                            {t('DeleteAccountVerifyScreen.deletionCodePrompt')}
                         </Text>
                     </YStack>
                     <OtpInput
@@ -58,7 +60,7 @@ const DeleteAccountVerifyScreen = () => {
                     <Button size='$5' onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifying ? 0.75 : 1} disabled={isVerifying} rounded>
                         <Button.Icon>{isVerifying ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faCheck} color={theme.white.val} />}</Button.Icon>
                         <Button.Text color='$white' fontWeight='bold'>
-                            Verify Code
+                            {t('DeleteAccountVerifyScreen.verifyCode')}
                         </Button.Text>
                     </Button>
                     <Button size='$5' onPress={handleRetry} bg='$secondary' width='100%' rounded>
@@ -66,7 +68,7 @@ const DeleteAccountVerifyScreen = () => {
                             <FontAwesomeIcon icon={faArrowRotateRight} color={theme['gray-500'].val} />
                         </Button.Icon>
                         <Button.Text color='$textPrimary' fontWeight='bold'>
-                            Retry
+                            {t('common.retry')}
                         </Button.Text>
                     </Button>
                 </YStack>

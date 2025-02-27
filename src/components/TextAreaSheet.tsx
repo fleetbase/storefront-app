@@ -6,10 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faSave } from '@fortawesome/free-solid-svg-icons';
 import { Portal } from '@gorhom/portal';
 import useAppTheme from '../hooks/use-app-theme';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed, portalHost = 'MainPortal', onChange }) => {
     const theme = useTheme();
     const { isDarkMode } = useAppTheme();
+    const { t } = useLanguage();
     const [text, setText] = useState(value);
     const textAreaInputRef = useRef(null);
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -125,7 +127,7 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBotto
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faSave} color={theme['$primaryText'].val} />
                             </Button.Icon>
-                            <Button.Text color='$primaryText'>Done</Button.Text>
+                            <Button.Text color='$primaryText'>{t('common.done')}</Button.Text>
                         </Button>
                     </YStack>
                 </BottomSheet>
