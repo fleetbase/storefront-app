@@ -75,7 +75,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
 
     const fitToRoute = ({ coordinates }) => {
         mapRef.current?.fitToCoordinates(coordinates, {
-            edgePadding: { top: 20, right: 0, bottom: 20, left: 0 },
+            edgePadding: { top: 20, right: 50, bottom: 20, left: 50 },
             animated: true,
         });
     };

@@ -5,12 +5,14 @@ import PaypalCheckoutScreen from '../../screens/PaypalCheckoutScreen';
 import BackButton from '../../components/BackButton';
 import { StripeCheckoutProvider } from '../../contexts/StripeCheckoutContext';
 import { getTheme } from '../../utils';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export const Checkout = {
     screen: CheckoutScreen,
     options: ({ route, navigation }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Checkout',
+            title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },
@@ -29,8 +31,9 @@ export const StripeCheckout = {
         );
     },
     options: ({ route, navigation }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Checkout',
+            title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },
@@ -43,8 +46,9 @@ export const StripeCheckout = {
 export const QPayCheckout = {
     screen: QPayCheckoutScreen,
     options: ({ route, navigation }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Checkout',
+            title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },
@@ -57,8 +61,9 @@ export const QPayCheckout = {
 export const PaypalCheckout = {
     screen: PaypalCheckoutScreen,
     options: ({ route, navigation }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Checkout',
+            title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },

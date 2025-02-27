@@ -7,8 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from 'tamagui';
 import { storefrontConfig, get, config, toArray, adjustOpacity } from '../utils';
-import { configCase } from '../utils/format';
+import { configCase, uppercase } from '../utils/format';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreInfo } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
@@ -58,34 +59,44 @@ function getTabConfig(name, key, defaultValue = null) {
     return defaultValue;
 }
 
-function createTabScreens() {
+function createTabScreens(optionsCallbacks = {}) {
     const tabs = toArray(storefrontConfig('storeNavigator.tabs'));
     const screens = {
         StoreHomeTab: {
             screen: StoreHomeTab,
-            options: {
-                tabBarLabel: config('STORE_HOME_TAB_LABEL', 'Home'),
+            options: () => {
+                const { t, locale } = useLanguage();
+                return {
+                    tabBarLabel: config(`STORE_HOME_TAB_LABEL_${uppercase(locale)}`, t('tabs.Home')),
+                };
             },
         },
         StoreSearchTab: {
             screen: StoreSearchTab,
-            options: {
-                tabBarLabel: config('STORE_SEARCH_TAB_LABEL', 'Search'),
+            options: () => {
+                const { t, locale } = useLanguage();
+                return {
+                    tabBarLabel: config(`STORE_SEARCH_TAB_LABEL_${uppercase(locale)}`, t('tabs.Search')),
+                };
             },
         },
         StoreMapTab: {
             screen: StoreMapTab,
-            options: {
-                tabBarLabel: config('STORE_MAP_TAB_LABEL', 'Map'),
+            options: () => {
+                const { t, locale } = useLanguage();
+                return {
+                    tabBarLabel: config(`STORE_MAP_TAB_LABEL_${uppercase(locale)}`, t('tabs.Map')),
+                };
             },
         },
         StoreCartTab: {
             screen: StoreCartTab,
             options: () => {
+                const { t, locale } = useLanguage();
                 const [cart] = useCart();
                 const count = cart ? cart.contents().length : 0;
                 return {
-                    tabBarLabel: config('STORE_CART_TAB_LABEL', 'Cart'),
+                    tabBarLabel: config(`STORE_CART_TAB_LABEL_${uppercase(locale)}`, t('tabs.Cart')),
                     tabBarBadge: count,
                     tabBarBadgeStyle: {
                         marginRight: -5,
@@ -96,14 +107,20 @@ function createTabScreens() {
         },
         StoreProfileTab: {
             screen: StoreProfileTab,
-            options: {
-                tabBarLabel: config('STORE_PROFILE_TAB_LABEL', 'Profile'),
+            options: () => {
+                const { t, locale } = useLanguage();
+                return {
+                    tabBarLabel: config(`STORE_PROFILE_TAB_LABEL_${uppercase(locale)}`, t('tabs.Profile')),
+                };
             },
         },
         StoreFoodTruckTab: {
             screen: StoreFoodTruckTab,
-            options: {
-                tabBarLabel: config('STORE_FOOD_TRUCK_TAB_LABEL', 'Trucks'),
+            options: () => {
+                const { t, locale } = useLanguage();
+                return {
+                    tabBarLabel: config(`STORE_FOOD_TRUCK_TAB_LABEL_${uppercase(locale)}`, t('tabs.Trucks')),
+                };
             },
         },
     };

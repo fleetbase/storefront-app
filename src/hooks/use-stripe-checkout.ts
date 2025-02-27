@@ -50,7 +50,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const subtotal = cart.subtotal();
     const totalAmount = useMemo(() => {
         const lineItems = computeLineItems();
-        const totalItem = lineItems.find((item) => item.name === 'Total');
+        const totalItem = lineItems.find((item) => item.name === t('lineItems.total'));
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
     const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading;

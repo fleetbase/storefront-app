@@ -32,6 +32,7 @@ const QPayCheckoutScreen = ({ route }) => {
     const { t } = useLanguage();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
     const {
+        customer,
         invoice,
         totalAmount,
         handleDeliveryLocationChange,
@@ -70,7 +71,7 @@ const QPayCheckoutScreen = ({ route }) => {
 
     return (
         <YStack bg='$background'>
-            <LoadingOverlay visible={isCapturingOrder || !isFocused} text={isFocused ? t('QPayCheckoutScreen.completingOrder') : t('QPayCheckoutScreen.checkingPayment')} />
+            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.completingOrder') : t('QPayCheckoutScreen.checkingPayment')} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
@@ -127,7 +128,7 @@ const QPayCheckoutScreen = ({ route }) => {
                     </YStack>
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={2}>
+            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={0}>
                 <CheckoutButton onCheckout={() => paymentSheetRef.current?.open()} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
             </XStack>
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />

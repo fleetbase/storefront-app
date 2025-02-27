@@ -9,6 +9,7 @@ import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getTheme } from '../../utils';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export const LocationPermission = {
     screen: LocationPermissionScreen,
@@ -27,8 +28,9 @@ export const SavedLocations = {
 export const AddressBook = {
     screen: AddressBookScreen,
     options: ({ navigation, route }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Address Book',
+            title: t('AddressBookScreen.addressBook'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },

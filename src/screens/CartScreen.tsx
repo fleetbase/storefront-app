@@ -16,6 +16,7 @@ import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import StorefrontConfig from '../../storefront.config';
+import Spacer from '../components/Spacer';
 
 const isAndroid = Platform.OS === 'android';
 if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -83,7 +84,7 @@ const CartScreen = ({ route }) => {
 
             // Remove item visually
             setDisplayedItems((prevItems) => prevItems.filter((item) => item.id !== cartItem.id));
-            toast.success(('CartScreen.itemRemovedFromCart', { cartItemName: cartItem.name }));
+            toast.success(t('CartScreen.itemRemovedFromCart', { cartItemName: cartItem.name }));
 
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -300,7 +301,8 @@ const CartScreen = ({ route }) => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={isModalScreen ? insets.bottom : tabBarHeight}
+                    bottom={isModalScreen ? 0 : tabBarHeight}
+                    paddingBottom={isModalScreen ? insets.bottom : tabBarHeight}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -327,6 +329,7 @@ const CartScreen = ({ route }) => {
                             </Button>
                         </YStack>
                     </XStack>
+                    <Spacer height={isModalScreen ? 20 : 0} />
                 </YStack>
             )}
         </SafeAreaView>

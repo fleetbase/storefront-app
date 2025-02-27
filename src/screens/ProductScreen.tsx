@@ -43,7 +43,9 @@ const ProductScreen = ({ route = {} }) => {
     const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
     const [ready, setReady] = useState(false);
     const storeLocationId = params.storeLocationId ?? null;
-    const isModal = params.isModal ?? false;
+    const isModal = params.isModal ?? true;
+    const hasOptions = product.variants().length > 0 && product.addons().length > 0;
+    const hasYoutubeVideos = youtubeUrls.length > 0;
 
     useEffect(() => {
         setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
@@ -113,7 +115,7 @@ const ProductScreen = ({ route = {} }) => {
             </YStack>
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled' nestedScrollEnabled={true} scrollEventThrottle={16}>
                 <YStack space='$3'>
-                    <YStack borderBottomWidth={1} borderColor='$borderColor' py='$4'>
+                    <YStack borderBottomWidth={hasYoutubeVideos || hasOptions ? 1 : 0} borderColor='$borderColor' py='$4'>
                         <XStack space='$2' px='$4' mb='$1'>
                             <Text fontSize='$9' fontWeight='bold' color='$color'>
                                 {product.getAttribute('name')}

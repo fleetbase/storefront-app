@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { toast } from '../utils/toast';
 import { useNavigation } from '@react-navigation/native';
+import { useLanguage } from '../contexts/LanguageContext';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import FastImage from 'react-native-fast-image';
 import { Portal } from '@gorhom/portal';
@@ -38,6 +39,7 @@ export interface QPayPaymentSheetRef {
 
 const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
     ({ invoice, title, wrapperStyle, onBankSelect, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed, portalHost = 'MainPortal' }, ref) => {
+        const { t } = useLanguage();
         const theme = useTheme();
         const navigation = useNavigation();
         const bottomSheetRef = useRef<BottomSheet>(null);
@@ -77,7 +79,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                     if (supported) {
                         await Linking.openURL(bank.link);
                     } else {
-                        toast.error('Unable to open bank app.');
+                        toast.error(t('QPayPaymentSheet.unableToOpenBank'));
                     }
                 } catch (err) {
                     console.error('Unable to open bank link:', err);
@@ -151,7 +153,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                             <YStack>
                                 <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$2'>
                                     <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                        Select Bank
+                                        {t('QPayPaymentSheet.selectBank')}
                                     </Text>
                                     <Button size='$2' onPress={() => bottomSheetRef.current?.close()} bg='$secondary' circular>
                                         <Button.Icon>
@@ -182,6 +184,7 @@ const styles = StyleSheet.create({
     bottomSheet: {
         flex: 1,
         width: '100%',
+        zIndex: 999,
     },
     bottomSheetView: {
         flex: 1,

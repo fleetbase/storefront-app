@@ -13,6 +13,7 @@ import useStorage from '../hooks/use-storage';
 import useStoreLocations from '../hooks/use-store-locations';
 import useAppTheme from '../hooks/use-app-theme';
 import useDimensions from '../hooks/use-dimensions';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const StoreLocationPicker = ({
     defaultStoreLocation = null,
@@ -26,6 +27,7 @@ const StoreLocationPicker = ({
 }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const { t } = useLanguage();
     const { isDarkMode } = useAppTheme();
     const { currentStoreLocation, storeLocations, updateCurrentStoreLocation } = useStoreLocations();
     const { screenWidth } = useDimensions();
@@ -105,7 +107,7 @@ const StoreLocationPicker = ({
                             ? displayStoreLocation.isAttributeFilled('name')
                                 ? displayStoreLocation.getAttribute('name')
                                 : formattedAddressFromSerializedPlace(displayStoreLocation.getAttribute('place'))
-                            : 'Loading...'}
+                            : t('common.loading')}
                     </Text>
                     <Text style={[{ fontSize: 14, color: '#4b5563' }, triggerArrowStyle]}>▼</Text>
                 </XStack>

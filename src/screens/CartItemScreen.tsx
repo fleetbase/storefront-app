@@ -35,7 +35,7 @@ const CartItemScreen = ({ route = {} }) => {
     const [subtotal, setSubtotal] = useState(0);
     const [quantity, setQuantity] = useState(cartItem.quantity ?? 1);
     const [ready, setReady] = useState(false);
-    const isModal = params.isModal ?? false;
+    const isModal = params.isModal ?? true;
     const isService = product && product.getAttribute('is_service') === true;
 
     useEffect(() => {

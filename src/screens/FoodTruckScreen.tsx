@@ -344,7 +344,7 @@ const FoodTruckScreen = () => {
                                 </YStack>
                                 <YStack flex={1}>
                                     <Text color={currentZoneColor} fontSize={15} numberOfLines={1}>
-                                        {currentZone ? `${t('FoodTruckScreen.yourZoneId')}: ` : t('FoodTruckScreen.outOfZone')}
+                                        {currentZone ? `${t('FoodTruckScreen.yourZoneIs')}: ` : t('FoodTruckScreen.outOfZone')}
                                     </Text>
                                     {currentZone && (
                                         <Text fontWeight='bold' color={currentZoneColor} fontSize={15} numberOfLines={1}>

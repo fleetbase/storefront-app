@@ -309,7 +309,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             cart,
             storefront,
             customer,
-            totalAmount: lineItems.find((item) => item.name === 'Total')?.value || 0,
+            totalAmount: lineItems.find((item) => item.name === t('lineItems.total'))?.value || 0,
             lineItems,
             checkoutOptions,
             serviceQuote,

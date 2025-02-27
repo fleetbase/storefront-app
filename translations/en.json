@@ -18,7 +18,7 @@
         "ok": "OK",
         "done": "Done"
     },
-    "lineitems": {
+    "lineItems": {
         "cartSubtotal": "Cart Subtotal",
         "subtotal": "Subtotal",
         "total": "Total",
@@ -35,6 +35,14 @@
         "pending": "Pending",
         "in_progress": "In progress",
         "completed": "Completed"
+    },
+    "tabs": {
+        "Home": "Home",
+        "Search": "Search",
+        "Map": "Map",
+        "Cart": "Cart",
+        "Profile": "Profile",
+        "Trucks": "Trucks"
     },
     "BootScreen": {
         "missingRequiredConfigurationKeys": "Missing required configuration keys"
@@ -182,7 +190,12 @@
         "loginAttemptFailed": "Login attempt with {{provider}} failed.",
         "clearCache": "Clear Cache"
     },
-    "OrderHistoryScreen": {},
+    "OrderHistoryScreen": {
+        "orderHistory": "Order History"
+    },
+    "AddressBookScreen": {
+        "addressBook": "Address Book"
+    },
     "OrderScreen": {
         "orderArrivingIn": "Order arriving in {eta}",
         "orderReadyForPickup": "Your order is ready for pickup",
@@ -194,6 +207,9 @@
         "pickupLocation": "Pickup Location",
         "deliveryLocation": "Delivery Location",
         "orderNotes": "Order Notes"
+    },
+    "CheckoutScreen": {
+        "checkout": "Checkout"
     },
     "PaymentMethodScreen": {},
     "PaypalCheckoutScreen": {},
@@ -334,6 +350,10 @@
         "addNewPaymentMethod": "Add a new payment method",
         "cardEndingIn": "Card ending in {{label}}",
         "change": "Change"
+    },
+    "QPayPaymentSheet": {
+        "unableToOpenBank": "Unable to open bank app.",
+        "selectBank": "Select Bank"
     },
     "TextAreaSheet": {}
 }

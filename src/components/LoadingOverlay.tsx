@@ -3,39 +3,21 @@ import { YStack, Spinner, Text, useTheme } from 'tamagui';
 import LinearGradient from 'react-native-linear-gradient';
 
 interface LoadingOverlayProps {
-    /** Whether the overlay should be visible */
     visible: boolean;
-    /** Optional text to display below the spinner */
     text?: string;
-    /** Size of the spinner (e.g. 48 or '48px') */
     spinnerSize?: number | string;
-    /** Color for the spinner (e.g. a theme token like '$color' or a hex value) */
     spinnerColor?: string;
-    /** Color for the text (e.g. a theme token like '$color' or a hex value) */
     textColor?: string;
-    /**
-     * Base background color for the overlay.
-     * This will compute a gradient from [$`${bgColor}200`, $`${bgColor}600`, $`${bgColor}900`].
-     * For example, if bgColor is 'gray', the gradient becomes ['$gray200', '$gray600', '$gray900'].
-     */
     bgColor?: string;
-    /** Opacity for the overlay background (0 to 1) */
     overlayOpacity?: number;
 }
 
-/**
- * LoadingOverlay
- *
- * Renders a full-screen loading overlay with a linear gradient background,
- * a centered Spinner from Tamagui, and an optional text label. The appearance
- * of the spinner, text, and background can be customized via props.
- */
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     visible = false,
     text,
     spinnerSize = 48,
-    spinnerColor = '$color',
-    textColor = '$color',
+    spinnerColor = '$textPrimary',
+    textColor = '$textPrimary',
     bgColor = 'gray',
     overlayOpacity = 0.8,
 }) => {
