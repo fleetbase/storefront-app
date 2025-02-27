@@ -37,6 +37,7 @@ const CartItemScreen = ({ route = {} }) => {
     const [ready, setReady] = useState(false);
     const isModal = params.isModal ?? true;
     const isService = product && product.getAttribute('is_service') === true;
+    const hasOptions = product.variants().length > 0 && product.addons().length > 0;
 
     useEffect(() => {
         if (product) {
@@ -129,7 +130,7 @@ const CartItemScreen = ({ route = {} }) => {
             </YStack>
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <YStack space='$3'>
-                    <YStack borderBottomWidth={1} borderColor='$borderColor' paddingVertical='$4'>
+                    <YStack borderBottomWidth={hasOptions ? 1 : 0} borderColor='$borderColor' paddingVertical='$4'>
                         <XStack space='$2' paddingHorizontal='$4' mb='$1'>
                             <Text fontSize='$9' fontWeight='bold' color='$color'>
                                 {product.getAttribute('name')}

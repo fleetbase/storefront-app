@@ -54,7 +54,7 @@ const CartScreen = ({ route }) => {
     const handleEdit = async (cartItem) => {
         const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
         if (product) {
-            navigation.navigate('CartItem', { cartItem, product: product.serialize(), isModal: isModalScreen });
+            navigation.navigate('CartItem', { cartItem, product: product.serialize() });
         }
     };
 
@@ -315,7 +315,7 @@ const CartScreen = ({ route }) => {
                     <XStack alignItems='center' justifyContent='space-between'>
                         <YStack flex={1} space={isAndroid ? 0 : '$1'}>
                             <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
-                                Total
+                                {t('lineItems.total')}
                             </Text>
                             <Text color='$textPrimary' fontSize='$9' fontWeight='bold'>
                                 {formatCurrency(calculateCartTotal(), cart.getAttribute('currency'))}
