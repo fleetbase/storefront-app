@@ -76,8 +76,9 @@ export const EditLocation = {
 export const LocationPicker = {
     screen: LocationPickerScreen,
     options: ({ navigation }) => {
+        const { t } = useLanguage();
         return {
-            title: 'Choose delivery location',
+            title: t('LocationPickerScreen.chooseDeliveryLocation'),
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },

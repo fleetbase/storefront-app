@@ -181,6 +181,7 @@
         "enterLocationManually": "Байршлыг гараар оруулах"
     },
     "LocationPickerScreen": {
+        "chooseDeliveryLocation": "Хүргэлтийн байршлыг сонгох",
         "useMarkerPosition": "Тэмдэг байрлалыг ашиглах",
         "useExactMarkerPosition": "Бодит тэмдэг байрлалыг ашиглах"
     },

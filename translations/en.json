@@ -181,6 +181,7 @@
         "enterLocationManually": "Enter Location Manually"
     },
     "LocationPickerScreen": {
+        "chooseDeliveryLocation": "Choose delivery location",
         "useMarkerPosition": "Use Marker Position",
         "useExactMarkerPosition": "Use exact marker position"
     },
