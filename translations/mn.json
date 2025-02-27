@@ -1,7 +1,7 @@
 {
     "common": {
         "fleetbase": "Fleetbase",
-        "storefront": "Дэлгүүрийн нүүр хуудас",
+        "storefront": "Storefront",
         "apiKey": "API түлхүүр",
         "cancel": "Цуцлах",
         "new": "Шинэ",
@@ -65,10 +65,10 @@
         "tracking": "Хяналт",
         "account": "Бүртгэл",
         "dataProtection": "Мэдээллийн хамгаалалт",
-        "clearCache": "Кэшийг цэвэрлэх",
+        "clearCache": "clearCache",
         "signOut": "Гарах",
         "signedOut": "Гарав.",
-        "cacheCleared": "Кэш цэвэрлэгдлээ.",
+        "cacheCleared": "Cache цэвэрлэгдлээ.",
         "schemeChanged": "Одоо {{selectedScheme}} горим ашиглаж байна.",
         "languageChanged": "Одоо {{selectedLanguage}}."
     },
@@ -86,22 +86,22 @@
     },
     "CartItemScreen": {
         "productRemovedFromCart": "{{productName}} сагснаас устгагдсан.",
-        "failedToRemoveFromCart": "Сагснаас элемэнтийг устгахад амжилтгүй боллоо",
-        "productUpdatedInCart": "{{productName}} сагсанд шинэчлэгдсэн."
+        "failedToRemoveFromCart": "Сагснаас устгахад амжилтгүй боллоо",
+        "productUpdatedInCart": "{{productName}} сагс шинэчлэгдсэн."
     },
     "CartScreen": {
-        "couldNotFindItemToDelete": "Устгах элемэнтийг олж чадахгүй байна.",
+        "couldNotFindItemToDelete": "Устгах барааг олж чадахгүй байна.",
         "itemRemovedFromCart": "{{cartItemName}} сагснаас устгагдсан.",
         "failedToRemoveItemFromCart": "Элемэнтийг сагснаас устгахад амжилтгүй боллоо.",
-        "cartIsAlreadyEmpty": "Сагс аль хэдийн хоосон байна.",
+        "cartIsAlreadyEmpty": "Сагс хоосон байна.",
         "cartEmptied": "Сагс хоосон боллоо.",
-        "failedToEmptyCart": "Сагсыг хоосон болгоход амжилтгүй боллоо.",
-        "orderItems": "Захиалгын зүйлс ({{count}})",
-        "emptyCart": "Сагсыг хоосон болгох",
+        "failedToEmptyCart": "Сагсыг хоослоход амжилтгүй боллоо.",
+        "orderItems": "Захиалгын бараанууд ({{count}})",
+        "emptyCart": "Сагсыг хоослох",
         "checkout": "Гарах"
     },
     "CatalogScreen": {
-        "jumpToCart": "Сагс руу үсрэх"
+        "jumpToCart": "Худалдан авах хийх"
     },
     "CreateAccountScreen": {
         "invalidPhone": "Буруу утасны дугаар байна.",
@@ -136,7 +136,7 @@
     },
     "EditLocationScreen": {
         "addressSaved": "Хаяг хадгалагдсан.",
-        "defaultLocationUpdated": "{{locationName}} таны анхдагч хаяг боллоо.",
+        "defaultLocationUpdated": "{{locationName}} таны үндсэн хаяг боллоо.",
         "locationWasDeleted": "{{locationName}} устгагдсан.",
         "unableToSelectLocationType": "Хаягийн төрлийг сонгоход амжилтгүй байна.",
         "apartment": "Орон сууц",
@@ -151,11 +151,11 @@
         "addressDetails": "Хаягийн дэлгэрэнгүй мэдээлэл",
         "additionalAddressDetails": "Нэмэлт хаягийн дэлгэрэнгүй мэдээлэл оруулах.",
         "addressLabel": "Хаягийн тэмдэглэл эсвэл нэр",
-        "streetAddress": "Гудамжийн хаяг эсвэл Шуудан хайрцаг",
-        "aptSuiteUnit": "Орон сууц, цоорхой, нэгж, барилга, шат гэх мэт.",
+        "streetAddress": "Гудамжийн хаяг ",
+        "aptSuiteUnit": "Орон сууц, Нэгж, Барилга, шат гэх мэт.",
         "optional": "Сонгогдох",
         "neighborhood": "Ойролцоо",
-        "city": "Хот эсвэл хотой",
+        "city": "Хот ",
         "postalCode": "Шуудан эсвэл ZIP код",
         "phoneNumber": "Утасны дугаар",
         "phoneNumberPlaceholder": "Хүргэлтийн үед холбоо барих утасны дугаар",
@@ -173,23 +173,23 @@
     },
     "LocationPermissionScreen": {
         "enableLocationServices": "Байршлын үйлчилгээг идэвхжүүлэх",
-        "enableLocationPrompt": "Сайн туршлага өгөхийн тулд таны байршлыг шаардаж байна.",
+        "enableLocationPrompt": "Таны байршлыг шаардаж байна.",
         "shareAndContinue": "Байршлыг хуваалцаж үргэлжлүүлэх",
         "locationPermissionRequired": "Байршлын зөвшөөрөл шаардлагатай",
-        "locationPermissionPrompt": "Байршлын суурилсан үйлчилгээг идэвхжүүлэхийн тулд, байршлын нэвтрлийг зөвшөөрнө үү. Хүсвэл гараар байршлыг оруулж болно.",
+        "locationPermissionPrompt": "Та утсан дээрх байршилын тохиргоог идэвхжүүлнэ үү!. Хүсвэл гараар байршлыг оруулж болно.",
         "goToSettings": "Тохиргоо руу орох",
         "enterLocationManually": "Байршлыг гараар оруулах"
     },
     "LocationPickerScreen": {
         "chooseDeliveryLocation": "Хүргэлтийн байршлыг сонгох",
-        "useMarkerPosition": "Тэмдэг байрлалыг ашиглах",
-        "useExactMarkerPosition": "Бодит тэмдэг байрлалыг ашиглах"
+        "useMarkerPosition": "Маркер ашиглах",
+        "useExactMarkerPosition": "Маркерээр байршилаа тэмдэглэх"
     },
     "LoginScreen": {
-        "cacheCleared": "Кэш цэвэрлэгдлээ!",
+        "cacheCleared": "Cache цэвэрлэгдлээ!",
         "loggedInWithProvider": "{{provider}}-ээр нэвтэрлээ",
         "loginAttemptFailed": "{{provider}}-ээр нэвтрэх оролдлого амжилтгүй боллоо.",
-        "clearCache": "Кэшийг цэвэрлэх"
+        "clearCache": "Cache цэвэрлэх"
     },
     "OrderHistoryScreen": {
         "orderHistory": "Захиалгын түүх"
@@ -200,7 +200,7 @@
     "OrderScreen": {
         "orderArrivingIn": "Захиалга {eta} хугацаанд ирнэ",
         "orderReadyForPickup": "Таны захиалга авахад бэлэн байна",
-        "orderReadyForPickupPrompt": "Захиалгыг авсны дараа доорх баталгаажуулах товчийг дарж баталгаажуулна уу.",
+        "orderReadyForPickupPrompt": "Захиалгaa авсны дараа доорх баталгаажуулах товчийг дарж баталгаажуулна уу.",
         "orderPickedUp": "Захиалгыг авсан",
         "orderPickedUpConfirmMessage": "Таны захиалга авсан, баталгаажуулсан уу?",
         "yes": "Тийм",
@@ -232,19 +232,19 @@
     "ProfileScreen": {
         "orderHistory": "Захиалгын түүх",
         "account": "Бүртгэл",
-        "paymentMethods": "Төлбөрийн арга",
+        "paymentMethods": "Төлбөрийн хэрэгсэл",
         "addressBook": "Хаягийн бүртгэл",
         "greeting": "Сайн уу, {{customerName}}!"
     },
     "QPayCheckoutScreen": {
-        "completingOrder": "Захиалгыг бүрэн дүүргэж байна...",
+        "completingOrder": "Захиалгыг дуусгаж байна...",
         "checkingPayment": "Төлбөрийг шалгаж байна...",
-        "yourDeliveryLocation": "Таны хүргэлтийн газар",
+        "yourDeliveryLocation": "Хүргэлт хийх байршил",
         "yourCart": "Таны сагс",
         "orderNotes": "Захиалгын тэмдэглэл",
         "orderNotesTitle": "Захиалгын тэмдэглэл",
-        "enterAdditionalNotes": "Захиалгын нэмэлт тэмдэглэл оруулах",
-        "checkoutOptions": "Гарах сонголтууд"
+        "enterAdditionalNotes": "Захиалгад нэмэлт тэмдэглэл оруулах",
+        "checkoutOptions": "Төрбөрийн сонголтууд"
     },
     "SavedLocationScreen": {
         "addressSaved": "Хаяг хадгалагдсан.",
@@ -262,19 +262,19 @@
         "result": "үр дүн",
         "foundResults": "\"{{searchQuery}}\" нь {{count}} {{result}} олдлоо",
         "noResults": "\"{{searchQuery}}\" нь үр дүн олдсонгүй",
-        "searchPrompt": "Бүтээгдэхүүн, ангилал эсвэл бусад зүйлсийг хайх!"
+        "searchPrompt": "Бүтээгдэхүүн, ангилал эсвэл бусад барааг хайх!"
     },
     "StripeCheckoutScreen": {
-        "yourDeliveryLocation": "Таны хүргэлтийн газар",
+        "yourDeliveryLocation": "Таны хүргэлтийн байршил",
         "yourCart": "Таны сагс",
-        "yourPaymentMethod": "Таны төлбөрийн арга",
+        "yourPaymentMethod": "Таны төлбөрийн хэрэгсэл",
         "orderNotes": "Захиалгын тэмдэглэл",
         "orderNotesTitle": "Захиалгын тэмдэглэл",
         "enterAdditionalNotes": "Захиалгын нэмэлт тэмдэглэл оруулах",
-        "checkoutOptions": "Гарах сонголтууд"
+        "checkoutOptions": "Төрбөр төлөх сонголтууд"
     },
     "StripeCustomerScreen": {
-        "manageYourPaymentMethod": "Төлбөрийн аргаа удирдах",
+        "manageYourPaymentMethod": "Төлбөрийн хэрэгсэлээ удирдах",
         "loadingAccountInfo": "Бүртгэлийн мэдээллийг ачааллаж байна..."
     },
     "TestScreen": {},
@@ -282,20 +282,20 @@
         "proceedPrompt": "Үргэлжлүүлэхдээ итгэлтэй байна уу?"
     },
     "Buttons": {
-        "continueWithPhone": "Утас ашиглан үргэлжлүүлэх",
-        "continueWithApple": "Apple ашиглан үргэлжлүүлэх",
-        "continueWithFacebook": "Facebook ашиглан үргэлжлүүлэх",
-        "continueWithInstagram": "Instagram ашиглан үргэлжлүүлэх",
-        "continueWithGoogle": "Google ашиглан үргэлжлүүлэх"
+        "continueWithPhone": "Утас дугаараа нэвтрэх",
+        "continueWithApple": "Apple ашиглан нэвтрэх",
+        "continueWithFacebook": "Facebook ашиглан нэвтрэх",
+        "continueWithInstagram": "Instagram ашиглан нэвтрэх",
+        "continueWithGoogle": "Google ашиглан нэвтрэх"
     },
     "CartContents": {
-        "updateItem": "Элемэнтийг шинэчлэх",
+        "updateItem": "Бүтээгдэхүүн шинэчлэх",
         "removeFromCart": "Сагснаас устгах",
         "removedFromCart": "{{cartItemName}} сагснаас устгагдсан.",
         "failedToRemove": "Элемэнтийг сагснаас устгахад амжилтгүй боллоо."
     },
     "CheckoutButton": {
-        "checkout": "Нийт төлбөр {{total}}",
+        "checkout": "Төлбөр төлөх {{total}}",
         "loginOrCreateAccount": "Нэвтрэх эсвэл бүртгэл үүсгэх"
     },
     "CheckoutPickupSwitch": {
@@ -308,7 +308,7 @@
         "newAddress": "Шинэ хаяг"
     },
     "LocationPicker": {
-        "addNewLocation": "Шинэ газар нэмэх"
+        "addNewLocation": "Шинэ хаяг нэмэх"
     },
     "OrderTotal": {},
     "PhoneInput": {
@@ -320,9 +320,9 @@
         "addToCart": "Сагсанд нэмэх"
     },
     "ProductOptionsForm": {
-        "chooseOneItem": "Нэг зүйлийг сонгоно уу",
-        "selectOneItem": "Нэг зүйлийг сонгоно уу",
-        "chooseUpToFour": "Дөрөв хүртэл сонгоно уу"
+        "chooseOneItem": "Нэг барааг сонгоно уу",
+        "selectOneItem": "Нэг барааг сонгоно уу",
+        "chooseUpToFour": "Дөрөв хүртэл барааг сонгоно уу"
     },
     "StoreLocationSchedule": {
         "Monday": "Даваа",
@@ -338,17 +338,17 @@
     },
     "StripeCardFieldSheet": {
         "loadingPaymentDetails": "Төлбөрийн дэлгэрэнгүй мэдээллийг ачааллаж байна...",
-        "addNewPaymentMethod": "Шинэ төлбөрийн аргыг нэмэх",
+        "addNewPaymentMethod": "Шинэ төлбөрийн хэрэгсэл нэмэх",
         "cardEndingIn": "Картын дуусах хэсэг {{label}}",
         "change": "Өөрчлөх",
-        "addOrUpdatePaymentMethod": "Төлбөрийн арга нэмэх / шинэчлэх",
+        "addOrUpdatePaymentMethod": "Төлбөрийн хэрэгсэл нэмэх / шинэчлэх",
         "saving": "Хадгалж байна...",
-        "savePaymentMethod": "Төлбөрийн аргыг хадгалах"
+        "savePaymentMethod": "Төлбөрийн хэрэгсэл хадгалах"
     },
     "StripePaymentSheet": {
         "loginToCheckout": "Үргэлжлүүлэхийн тулд нэвтэрнэ үү",
         "loadingPaymentDetails": "Төлбөрийн дэлгэрэнгүй мэдээллийг ачааллаж байна...",
-        "addNewPaymentMethod": "Шинэ төлбөрийн аргыг нэмэх",
+        "addNewPaymentMethod": "Шинэ төлбөрийн хэрэгсэл нэмэх",
         "cardEndingIn": "Картын дуусах хэсэг {{label}}",
         "change": "Өөрчлөх"
     },
