@@ -1,14 +1,14 @@
 import React, { createContext, useState, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { getLangNameFromCode } from 'language-name-map';
 import { storefrontConfig } from '../utils';
-import { translations } from '../utils/localize';
+import { getAvailableLocales } from '../utils/localize';
 import localeEmoji from 'locale-emoji';
 import useStorage from '../hooks/use-storage';
 import I18n from 'react-native-i18n';
 
 I18n.fallbacks = true;
 I18n.translations = {
-    ...translations,
+    ...getAvailableLocales(),
 };
 
 interface LanguageContextProps {
