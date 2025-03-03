@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import useStripeCheckout from '../hooks/use-stripe-checkout'; // adjust path as necessary
+import useStripeCheckout from '../hooks/use-stripe-checkout';
 
 const StripeCheckoutContext = createContext(null);
 

@@ -224,7 +224,7 @@ const AccountScreen = () => {
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <AbsoluteTabBarScreenWrapper>
-                    <YStack flex={1} bg='$background' space='$8' pt='$8'>
+                    <YStack flex={1} bg='$background' space='$8' pt='$3'>
                         <YStack space='$2'>
                             <XStack px='$3' justifyContent='space-between'>
                                 <YStack>

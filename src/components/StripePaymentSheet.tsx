@@ -9,16 +9,15 @@ import { useLanguage } from '../contexts/LanguageContext';
 const StripePaymentSheet = () => {
     const theme = useTheme();
     const { t } = useLanguage();
-    const { createPaymentSheet, paymentSheetEnabled, handleAddPaymentMethodViaSheet, paymentMethod, stripeLoading, serviceQuote, cart, storefront, customer, error } =
+    const { checkoutOptions, createPaymentSheet, paymentSheetEnabled, handleAddPaymentMethodViaSheet, paymentMethod, stripeLoading, serviceQuote, cart, storefront, customer, error } =
         useStripeCheckoutContext();
 
     useEffect(() => {
-        if (!customer || !storefront || !cart || !serviceQuote) {
+        if (!customer || !storefront || !cart || (!checkoutOptions.pickup && !serviceQuote)) {
             return;
         }
-
         createPaymentSheet();
-    }, [storefront, customer, cart, serviceQuote]);
+    }, [storefront, customer, cart, serviceQuote, checkoutOptions.pickup]);
 
     if (!customer) {
         return (

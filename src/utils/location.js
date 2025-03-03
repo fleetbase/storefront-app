@@ -17,11 +17,13 @@ const DEFAULT_LONGITUDE = 103.8864;
 const isAndroid = Platform.OS === 'android';
 
 /** Configure GeoLocation */
-Geolocation.setRNConfiguration({
-    authorizationLevel: 'whenInUse',
-    enableBackgroundLocationUpdates: false,
-    locationProvider: 'auto',
-});
+if (Platform.OS !== 'web') {
+    Geolocation.setRNConfiguration({
+        authorizationLevel: 'whenInUse',
+        enableBackgroundLocationUpdates: false,
+        locationProvider: 'auto',
+    });
+}
 
 const emit = EventRegister.emit;
 
@@ -332,7 +334,9 @@ export async function getLiveLocation() {
 }
 
 export async function getCurrentLocation() {
-    const lastLocation = restoreFleetbasePlace(storage.getMap('_current_location'));
+    const stored = storage.getMap('_current_location');
+    console.log('[STORED LOCATION]', stored);
+    const lastLocation = stored ? restoreFleetbasePlace(stored) : null;
 
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(

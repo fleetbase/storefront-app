@@ -36,6 +36,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         pickup: storefrontConfig('prioritizePickup') ? 1 : 0,
     });
     const [serviceQuote, setServiceQuote] = useState(null);
+    const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
@@ -86,6 +87,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     name: t('lineItems.serviceFee'),
                     value: serviceQuote.getAttribute('amount'),
                 });
+            } else if (isServiceQuoteUnavailable) {
+                baseItems.push({
+                    name: t('lineItems.serviceFee'),
+                    value: 0,
+                });
             } else if (deliveryLocation?.id) {
                 baseItems.push({
                     name: t('lineItems.serviceFee'),
@@ -104,7 +110,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
 
     const storeLocationId = useMemo(() => {
         if (!cart?.contents || typeof cart.contents !== 'function') return null;
@@ -368,7 +374,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
-        if (!cart) {
+        if (!cart || checkoutOptions.pickup) {
             return;
         }
 
@@ -382,8 +388,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                toast.error('Unable to calculate delivery fee.');
-                console.error('Error fetching service quote:', error);
+                setIsServiceQuoteUnavailable(true);
+                console.warn('Error fetching service quote:', error);
             }
         };
 
@@ -392,7 +398,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, checkoutOptions.pickup, deliveryLocation.id]);
+    }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id]);
 
     useEffect(() => {
         if (stripeInitialized === false) {
@@ -405,43 +411,86 @@ export default function useStripeCheckout({ onOrderComplete }) {
         }
     }, [stripeInitialized]);
 
-    return {
-        cart,
-        storefront,
-        customer,
-        totalAmount,
-        lineItems,
-        checkoutOptions,
-        serviceQuote,
-        deliveryLocation,
-        paymentMethod,
-        setPaymentMethod,
-        stripeLoading,
-        isLoading,
-        handleDeliveryLocationChange,
-        setTipOptions,
-        isPickupEnabled,
-        setPickup,
-        isPickup: !!checkoutOptions.pickup,
-        setupIntentClientSecret,
-        createSetupIntent,
-        createPaymentSheet,
-        paymentSheetEnabled,
-        handleAddPaymentMethod,
-        handleAddPaymentMethodViaSheet,
-        handlePaymentMethodChange,
-        handleCompleteOrderViaField,
-        handleCompleteOrderViaSheet,
-        handleCompleteOrder,
-        setStripeLoading,
-        setupIntentLoading,
-        error,
-        isReady,
-        orderNotes,
-        setOrderNotes,
-        foodTruckId,
-        storeLocationId,
-        originLocationId: foodTruckId ?? storeLocationId,
-        isNotReady: !isReady,
-    };
+    // Memoize the return value to provide stable references
+    const checkout = useMemo(
+        () => ({
+            cart,
+            storefront,
+            customer,
+            totalAmount,
+            lineItems,
+            checkoutOptions,
+            serviceQuote,
+            deliveryLocation,
+            paymentMethod,
+            setPaymentMethod,
+            stripeLoading,
+            isLoading,
+            handleDeliveryLocationChange,
+            setTipOptions,
+            isPickupEnabled,
+            setPickup,
+            isPickup: !!checkoutOptions.pickup,
+            setupIntentClientSecret,
+            createSetupIntent,
+            createPaymentSheet,
+            paymentSheetEnabled,
+            handleAddPaymentMethod,
+            handleAddPaymentMethodViaSheet,
+            handlePaymentMethodChange,
+            handleCompleteOrderViaField,
+            handleCompleteOrderViaSheet,
+            handleCompleteOrder,
+            setStripeLoading,
+            setupIntentLoading,
+            error,
+            isReady,
+            orderNotes,
+            setOrderNotes,
+            foodTruckId,
+            storeLocationId,
+            originLocationId: foodTruckId ?? storeLocationId,
+            isNotReady: !isReady,
+            isServiceQuoteUnavailable,
+        }),
+        [
+            cart,
+            storefront,
+            customer,
+            totalAmount,
+            lineItems,
+            checkoutOptions,
+            serviceQuote,
+            deliveryLocation,
+            paymentMethod,
+            stripeLoading,
+            isLoading,
+            handleDeliveryLocationChange,
+            setTipOptions,
+            isPickupEnabled,
+            setPickup,
+            checkoutOptions.pickup,
+            setupIntentClientSecret,
+            createSetupIntent,
+            createPaymentSheet,
+            paymentSheetEnabled,
+            handleAddPaymentMethod,
+            handleAddPaymentMethodViaSheet,
+            handlePaymentMethodChange,
+            handleCompleteOrderViaField,
+            handleCompleteOrderViaSheet,
+            handleCompleteOrder,
+            setStripeLoading,
+            setupIntentLoading,
+            error,
+            isReady,
+            orderNotes,
+            setOrderNotes,
+            foodTruckId,
+            storeLocationId,
+            isServiceQuoteUnavailable,
+        ]
+    );
+
+    return checkout;
 }

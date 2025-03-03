@@ -29,7 +29,7 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
 
     return (
         <YStack space='$3' style={style}>
-            <XStack justiftContent='space-between' paddingHorizontal='$4'>
+            <XStack justifyContent='space-between' px='$4'>
                 <XStack space='$4' alignItems='center'>
                     <Pressable onPress={handleCategoryPress} hitSlop={20} style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0, scale: pressed ? 0.8 : 1.0 }]}>
                         <XStack alignItems='center'>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Keyboard } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useTheme, Text, Button, XStack, YStack, Input } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -10,6 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed, portalHost = 'MainPortal', onChange }) => {
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const { isDarkMode } = useAppTheme();
     const { t } = useLanguage();
     const [text, setText] = useState(value);
@@ -122,7 +124,7 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBotto
                             }}
                         />
                     </YStack>
-                    <YStack position='absolute' left={0} right={0} bottom={0} padding='$4'>
+                    <YStack position='absolute' left={0} right={0} bottom={insets.bottom} padding='$4'>
                         <Button borderWidth={1} bg='$primary' borderColor='$primaryBorder' onPress={closeBottomSheet}>
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faSave} color={theme['$primaryText'].val} />

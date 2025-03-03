@@ -37,6 +37,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [checkoutId, setCheckoutId] = useState();
     const [checkoutToken, setCheckoutToken] = useState();
     const [serviceQuote, setServiceQuote] = useState(null);
+    const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
     const [error, setError] = useState(false);
@@ -85,6 +86,11 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     name: t('lineItems.serviceFee'),
                     value: serviceQuote.getAttribute('amount'),
                 });
+            } else if (isServiceQuoteUnavailable) {
+                baseItems.push({
+                    name: t('lineItems.serviceFee'),
+                    value: 0,
+                });
             } else if (deliveryLocation?.id) {
                 baseItems.push({
                     name: t('lineItems.serviceFee'),
@@ -103,7 +109,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
 
     // Memoize store location and food truck IDs based on cart contents
     const storeLocationId = useMemo(() => {
@@ -229,6 +235,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Fetch service quote when cart or delivery location changes
     useEffect(() => {
         if (!cart) return;
+
         let isMounted = true;
         const destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         const fetchServiceQuote = async () => {
@@ -239,8 +246,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                toast.error('Unable to calculate delivery fee.');
-                console.error('Error fetching service quote:', error);
+                setIsServiceQuoteUnavailable(true);
+                console.warn('Error fetching service quote:', error);
             }
         };
 
@@ -303,8 +310,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
         };
     }, [checkPaymentStatus]);
 
-    // Memoize the return value to provide stable references if needed
-    const api = useMemo(
+    // Memoize the return value to provide stable references
+    const checkout = useMemo(
         () => ({
             cart,
             storefront,
@@ -334,6 +341,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             listener: listenerRef.current,
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
+            isServiceQuoteUnavailable,
         }),
         [
             cart,
@@ -354,8 +362,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
             storeLocationId,
             hasOrderCompleted.current,
             isCapturingOrder,
+            isServiceQuoteUnavailable,
         ]
     );
 
-    return api;
+    return checkout;
 }

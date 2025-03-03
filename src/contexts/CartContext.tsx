@@ -28,12 +28,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
+        const cartChanged = (newCart) => {
+            return JSON.stringify(newCart) !== JSON.stringify(storedCart);
+        };
+
         const loadCartFromServer = async () => {
             try {
                 const cartId = await getUniqueId();
                 const cartInstance = await storefront.cart.retrieve(cartId);
-                setCart(cartInstance);
-                setStoredCart(cartInstance.serialize());
+                const serializedCart = cartInstance.serialize();
+                if (cartChanged(serializedCart)) {
+                    setCart(cartInstance);
+                    setStoredCart(serializedCart);
+                }
             } catch (err) {
                 console.error('Error loading cart from server:', err);
             } finally {
@@ -44,7 +51,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const loadCartFromStorage = () => {
             if (storedCart) {
                 const cartInstance = new Cart(storedCart, adapter);
-                setCart(cartInstance);
+                if (cartChanged(cartInstance.serialize())) {
+                    setCart(cartInstance);
+                }
             }
         };
 

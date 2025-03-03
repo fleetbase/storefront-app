@@ -1,9 +1,9 @@
 import React from 'react';
+import LinearGradient from 'react-native-linear-gradient';
 import { Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faFacebook, faInstagram, faGoogle, faApple } from '@fortawesome/free-brands-svg-icons';
 import { faPhone } from '@fortawesome/free-solid-svg-icons';
-import LinearGradient from 'react-native-linear-gradient';
 import { useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
 

@@ -1,23 +1,6 @@
 import { config as baseConfig } from '@tamagui/config/v3';
 import { createTamagui, createTheme, createTokens } from 'tamagui';
-import { config, parseConfigObjectString } from './src/utils';
-
-export function flattenTailwindCssColorsObject(colors = {}) {
-    const flattened = {};
-
-    for (const [color, shades] of Object.entries(colors)) {
-        if (typeof shades === 'object') {
-            for (const [shade, value] of Object.entries(shades)) {
-                flattened[`${color}-${shade}`] = value;
-            }
-        } else {
-            // Handle cases where `colors` might not be nested
-            flattened[color] = shades;
-        }
-    }
-
-    return flattened;
-}
+import { config, parseConfigObjectString, flattenTailwindCssColorsObject } from './src/utils/tamagui';
 
 const customColors = parseConfigObjectString(config('CUSTOM_COLORS', ''));
 const customColorsDark = parseConfigObjectString(config('CUSTOM_COLORS_DARK', ''));

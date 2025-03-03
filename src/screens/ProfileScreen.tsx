@@ -74,7 +74,7 @@ const ProfileScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' space='$3' padding='$5'>
+            <YStack flex={1} bg='$background' space='$3' px='$5'>
                 <XStack paddingVertical='$3' alignItems='center' justifyContent='space-between'>
                     <YStack>
                         <Text fontSize='$7' fontWeight='bold' color='$textPrimary' numberOfLines={1}>

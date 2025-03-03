@@ -87,7 +87,6 @@ const ProductCard = ({
             const updatedCart = await runWithLoading(cart.add(product.id, quantity, { store_location: storeLocationId }), 'addToCart');
             updateCart(updatedCart);
             setQuantity(1);
-            toast.success(`${product.getAttribute('name')} added to cart.`);
             toast.success(t('ProductCard.productAddedToCart', { productName: product.getAttribute('name') }));
         } catch (error) {
             console.error('Error Adding to Cart', error.message);

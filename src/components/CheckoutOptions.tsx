@@ -33,7 +33,7 @@ const CheckoutOptions = ({ onChange, isPickup = false }) => {
                         currency={info.currency}
                         wrapperProps={{ px: '$3' }}
                     />
-                    <Separator />
+                    {enabled('delivery_tips') && !isPickup && <Separator />}
                 </>
             )}
 
@@ -48,7 +48,6 @@ const CheckoutOptions = ({ onChange, isPickup = false }) => {
                         currency={info.currency}
                         wrapperProps={{ px: '$3' }}
                     />
-                    <Separator />
                 </>
             )}
         </YStack>

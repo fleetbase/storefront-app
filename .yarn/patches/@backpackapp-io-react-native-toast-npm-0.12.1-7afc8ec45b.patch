@@ -1,0 +1,12 @@
+diff --git a/lib/module/index.js b/lib/module/index.js
+index d02efb0ae1aa00f55dedebb893eac81e4477fbd9..55c67894c37cde89ea13f0cb609c4c8ef8913cea 100644
+--- a/lib/module/index.js
++++ b/lib/module/index.js
+@@ -1,5 +1,5 @@
+ export { useToaster } from './core/use-toaster';
+ export { Toasts } from './components';
+ export * from './headless';
+-export { ToastPosition, ToastAnimationType } from './core/types';
++export { ToastPosition } from './core/types';
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file
