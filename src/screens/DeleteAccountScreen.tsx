@@ -44,7 +44,7 @@ const DeleteAccountScreen = () => {
                 </Text>
             </YStack>
             <YStack space='$3' width='100%'>
-                <Button size='$5' bg='$error' color='$errorText' borderWidth={1} borderColor='$errorBorder' width='100%' onPress={handleDeleteAccount} disabled={isLoading} rounded>
+                <Button size='$5' bg='$error' color='$errorText' borderWidth={1} borderColor='$errorBorder' width='100%' onPress={handleDeleteAccount} disabled={isLoading} rounded='true'>
                     {isLoading && (
                         <Button.Icon>
                             <Spinner />
@@ -52,7 +52,7 @@ const DeleteAccountScreen = () => {
                     )}
                     <Button.Text>{isLoading ? t('DeleteAccountScreen.processingRequest') : t('DeleteAccountScreen.deleteMyAccount')}</Button.Text>
                 </Button>
-                <Button size='$5' bg='$secondary' color='$textPrimary' borderWidth={1} borderColor='$borderColor' width='100%' onPress={handleCancel} rounded>
+                <Button size='$5' bg='$secondary' color='$textPrimary' borderWidth={1} borderColor='$borderColor' width='100%' onPress={handleCancel} rounded='true'>
                     {t('DeleteAccountScreen.cancel')}
                 </Button>
             </YStack>

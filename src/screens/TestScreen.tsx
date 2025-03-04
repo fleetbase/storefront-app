@@ -53,13 +53,13 @@ const TestScreen = ({ route }) => {
                         </Text>
                     )}
                 </YStack>
-                <Button onPress={handleTest} bg='$info' borderColor='$infoBorder' borderWidth={1} width='100%' rounded>
+                <Button onPress={handleTest} bg='$info' borderColor='$infoBorder' borderWidth={1} width='100%' rounded='true'>
                     <Button.Text color='$infoText'>Continue</Button.Text>
                 </Button>
-                <Button onPress={handleOpenModal} bg='$success' borderColor='$successBorder' borderWidth={1} width='100%' rounded>
+                <Button onPress={handleOpenModal} bg='$success' borderColor='$successBorder' borderWidth={1} width='100%' rounded='true'>
                     <Button.Text color='$successText'>Open Modal</Button.Text>
                 </Button>
-                <Button onPress={handleBack} bg='$warning' borderColor='$warningBorder' borderWidth={1} width='100%' rounded>
+                <Button onPress={handleBack} bg='$warning' borderColor='$warningBorder' borderWidth={1} width='100%' rounded='true'>
                     <Button.Text color='$warningText'>Go Back</Button.Text>
                 </Button>
             </YStack>

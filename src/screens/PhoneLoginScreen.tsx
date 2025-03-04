@@ -53,7 +53,7 @@ const PhoneLoginScreen = () => {
                             {t('PhoneLoginScreen.loginViaSms')}
                         </Text>
                         <PhoneInput value={phone} onChange={(phoneNumber) => setPhone(phoneNumber)} />
-                        <Button size='$5' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
+                        <Button size='$5' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded='true'>
                             <Button.Icon>{isSendingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faPaperPlane} color='white' />}</Button.Icon>
                             <Button.Text color='$white' fontWeight='bold'>
                                 {t('PhoneLoginScreen.sendVerificationCode')}
@@ -64,7 +64,7 @@ const PhoneLoginScreen = () => {
                         <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                     </YStack>
                     <YStack space='$4' width='100%' px='$4' pb={isAndroid ? '$4' : 0}>
-                        <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded>
+                        <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded='true'>
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />
                             </Button.Icon>
@@ -72,7 +72,7 @@ const PhoneLoginScreen = () => {
                                 {t('PhoneLoginScreen.loginUsingAnotherMethod')}
                             </Button.Text>
                         </Button>
-                        <Button size='$5' onPress={handleCreateAccount} bg='$indigo-600' width='100%' rounded>
+                        <Button size='$5' onPress={handleCreateAccount} bg='$indigo-600' width='100%' rounded='true'>
                             <Button.Text color='$white' fontWeight='bold'>
                                 {t('PhoneLoginScreen.createNewAccount')}
                             </Button.Text>

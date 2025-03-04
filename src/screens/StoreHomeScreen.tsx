@@ -14,7 +14,7 @@ import CustomHeader from '../components/CustomHeader';
 import Spacer from '../components/Spacer';
 import { storefrontConfig } from '../utils';
 
-const StoreHome = ({ route }) => {
+const StoreHomeScreen = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const customHeaderHeight = 270;
@@ -106,4 +106,4 @@ const StoreHome = ({ route }) => {
     );
 };
 
-export default StoreHome;
+export default StoreHomeScreen;

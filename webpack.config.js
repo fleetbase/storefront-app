@@ -6,6 +6,65 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { TamaguiPlugin } = require('tamagui-loader');
 const { DefinePlugin, ProvidePlugin } = webpack;
 
+const generateConfig = () => {
+    const STANDARD_KEYS = [
+        'APP_NAME',
+        'APP_IDENTIFIER',
+        'APP_LINK_PREFIX',
+        'SOCKETCLUSTER_HOST',
+        'SOCKETCLUSTER_PORT',
+        'SOCKETCLUSTER_SECURE',
+        'FLEETBASE_HOST',
+        'FLEETBASE_KEY',
+        'STOREFRONT_KEY',
+        'GOOGLE_MAPS_API_KEY',
+        'STRIPE_KEY',
+        'PAYMENT_GATEWAY',
+        'TIP_INCREMENT',
+        'MAP_DISPLAY_DRIVERS',
+        'DEFAULT_COORDINATES',
+        'STORE_NAVIGATOR_TABS',
+        'STORE_NAVIGATOR_DEFAULT_TAB',
+        'STORE_FOOD_TRUCK_TAB_ICON',
+        'DEFAULT_SERVICE_AREA',
+        'BOOTSCREEN_BACKGROUND_COLOR',
+        'DEFAULT_LOCALE',
+        'AVAILABLE_LOCALES',
+        'PRIORITIZE_PICKUP',
+        'STORE_CATEGORIES_DISPLAY',
+        'PRODUCT_CARD_STYLE',
+        'CUSTOM_COLORS',
+        'STORE_NAVIGATOR_TAB_BAR_BG',
+        'CUSTOM_TAB_BAR_ACTIVE_COLOR',
+        'CUSTOM_TAB_BAR_INACTIVE_COLOR',
+        'DEFAULT_MAP_TYPE',
+        'TOS_URL',
+        'PRIVACY_URL',
+        'APPLE_LOGIN_ENABLED',
+        'FACEBOOK_LOGIN_ENABLED',
+        'GOOGLE_LOGIN_ENABLED',
+    ];
+
+    const config = STANDARD_KEYS.reduce((acc, key) => {
+        acc[key] = process.env[key];
+        return acc;
+    }, {});
+
+    // Add locale-based keys.
+    const AVAILABLE_LOCALES = (process.env.AVAILABLE_LOCALES || 'en').split(',');
+    const LOCALE_ENV_VAR_KEYS = ['STORE_HOME_TAB_LABEL', 'STORE_SEARCH_TAB_LABEL', 'STORE_MAP_TAB_LABEL', 'STORE_CART_TAB_LABEL', 'STORE_PROFILE_TAB_LABEL', 'STORE_FOOD_TRUCK_TAB_LABEL'];
+
+    AVAILABLE_LOCALES.forEach((locale) => {
+        const uppercasedLocale = locale.toUpperCase();
+        LOCALE_ENV_VAR_KEYS.forEach((key) => {
+            const localeKey = `${key}_${uppercasedLocale}`;
+            config[localeKey] = process.env[localeKey];
+        });
+    });
+
+    return config;
+};
+
 module.exports = {
     target: 'web',
     mode: 'development',
@@ -115,7 +174,7 @@ module.exports = {
         },
         alias: {
             'react-native$': 'react-native-web',
-            'react-native-linear-gradient': 'react-native-web-linear-gradient',
+            'react-native-linear-gradient': path.resolve(__dirname, 'web/react-native-linear-gradient.web.js'),
             '@gorhom/bottom-sheet': path.resolve(__dirname, 'web/gorhom-bottom-sheet.web.js'),
             'react-native-maps': path.resolve(__dirname, 'web/react-native-maps.web.js'),
             'react-native-svg/css$': path.resolve(__dirname, 'web/react-native-svg-css.web.js'),
@@ -132,22 +191,14 @@ module.exports = {
         new TamaguiPlugin({
             config: path.resolve(__dirname, 'tamagui.config.ts'),
             components: ['tamagui'],
+            outputCSS: path.resolve(__dirname, 'public/tamagui.css'),
         }),
         new ProvidePlugin({
             process: 'process/browser',
         }),
         new DefinePlugin({
             __DEV__: JSON.stringify(true),
-            'process.env.APP_NAME': JSON.stringify(process.env.APP_NAME),
-            'process.env.APP_IDENTIFIER': JSON.stringify(process.env.APP_IDENTIFIER),
-            'process.env.APP_LINK_PREFIX': JSON.stringify(process.env.APP_LINK_PREFIX),
-            'process.env.SOCKETCLUSTER_HOST': JSON.stringify(process.env.SOCKETCLUSTER_HOST),
-            'process.env.SOCKETCLUSTER_PORT': JSON.stringify(process.env.SOCKETCLUSTER_PORT),
-            'process.env.SOCKETCLUSTER_SECURE': JSON.stringify(process.env.SOCKETCLUSTER_SECURE),
-            'process.env.FLEETBASE_HOST': JSON.stringify(process.env.FLEETBASE_HOST),
-            'process.env.FLEETBASE_KEY': JSON.stringify(process.env.FLEETBASE_KEY),
-            'process.env.STOREFRONT_KEY': JSON.stringify(process.env.STOREFRONT_KEY),
-            'process.env.STRIPE_KEY': JSON.stringify(process.env.STRIPE_KEY),
+            CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),
     ],

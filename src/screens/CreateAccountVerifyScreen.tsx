@@ -50,13 +50,13 @@ const CreateAccountVerifyScreen = ({ route }) => {
                     focusColor={theme.primary.val}
                     theme={{ pinCodeContainerStyle: { borderColor: theme['blue-300'].val, height: 50, width: 50 }, pinCodeTextStyle: { color: theme.primary.val, fontSize: 25 } }}
                 />
-                <Button onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifyingCode ? 0.75 : 1} disabled={isVerifyingCode} rounded>
+                <Button onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifyingCode ? 0.75 : 1} disabled={isVerifyingCode} rounded='true'>
                     <Button.Icon>{isVerifyingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faCheck} color={theme.white.val} />}</Button.Icon>
                     <Button.Text color='$white' fontWeight='bold'>
                         {t('CreateAccountVerifyScreen.verifyCode')}
                     </Button.Text>
                 </Button>
-                <Button onPress={handleRetry} bg='$secondary' width='100%' rounded>
+                <Button onPress={handleRetry} bg='$secondary' width='100%' rounded='true'>
                     <Button.Icon>
                         <FontAwesomeIcon icon={faArrowRotateRight} color={theme['gray-500'].val} />
                     </Button.Icon>

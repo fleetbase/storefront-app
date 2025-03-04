@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Platform } from 'react-native';
+import { Platform, SafeAreaView } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Image, Spinner, XStack, Text, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
 import { config, toArray, isArray } from '../utils';
-import { getCurrentLocationFromStorage } from '../utils/location';
+import { getCurrentLocationFromStorage, requestWebGeolocationPermission } from '../utils/location';
 import BootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
@@ -26,6 +26,19 @@ const BootScreen = () => {
 
     useEffect(() => {
         const checkLocationPermission = async () => {
+            if (Platform.OS === 'web') {
+                const granted = await requestWebGeolocationPermission();
+                if (granted) {
+                    return initializeStorefront();
+                }
+                // If a current location exists, we bypass the permission prompt
+                if (currentLocation) {
+                    return initializeStorefront();
+                }
+                // setTimeout(() => BootSplash.hide(), 300);
+                return navigation.navigate('LocationPermission');
+            }
+
             const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
 
             const result = await check(permission);
@@ -73,27 +86,29 @@ const BootScreen = () => {
     }
 
     return (
-        <YStack flex={1} bg={backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%'>
-            {isGradientBackground && (
-                <LinearGradient
-                    colors={backgroundColor}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        height: '100%',
-                        width: '100%',
-                    }}
-                />
-            )}
-            <YStack alignItems='center' justifyContent='center'>
-                <Image source={require('../../assets/splash-screen.png')} width={100} height={100} borderRadius='$4' mb='$1' />
-                <XStack mt='$2' alignItems='center' justifyContent='center' space='$3'>
-                    <Spinner size='small' color='$textPrimary' />
-                </XStack>
+        <SafeAreaView style={{ flex: 1, width: '100%', height: '100%' }}>
+            <YStack flex={1} bg={backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%'>
+                {isGradientBackground && (
+                    <LinearGradient
+                        colors={backgroundColor}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            height: '100%',
+                            width: '100%',
+                        }}
+                    />
+                )}
+                <YStack alignItems='center' justifyContent='center'>
+                    <Image source={require('../../assets/splash-screen.png')} width={100} height={100} borderRadius='$4' mb='$1' />
+                    <XStack mt='$2' alignItems='center' justifyContent='center' space='$3'>
+                        <Spinner size='small' color='$textPrimary' />
+                    </XStack>
+                </YStack>
             </YStack>
-        </YStack>
+        </SafeAreaView>
     );
 };
 

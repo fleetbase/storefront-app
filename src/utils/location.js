@@ -289,44 +289,64 @@ export function createPlaceFromCoordinates(latitude, longitude, attributes = {})
     return new Place({ location: new Point(latitude, longitude), ...attributes });
 }
 
+async function handleIncomingPosition({ position, latitude, longitude, storageKey = '_current_location' }) {
+    const stored = storage.getMap('_current_location');
+    const lastLocation = restoreFleetbasePlace(stored);
+
+    // Save the last known coordinates
+    storage.setArray('_last_known_position', [latitude, longitude]);
+
+    // Check if user has moved more than 200 meters from the last location
+    if (storageKey === '_current_location' && lastLocation && typeof lastLocation.getAttribute === 'function') {
+        const lastLocationCoordinates = getCoordinates(lastLocation);
+        if (haversine([latitude, longitude], lastLocationCoordinates) > 200) {
+            return lastLocation;
+        }
+    }
+
+    try {
+        const details = await geocode(latitude, longitude);
+        if (details) {
+            const place = createFleetbasePlaceFromDetails(details, { position });
+            storage.setMap(storageKey, place.serialize());
+            return place;
+        } else {
+            const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+            console.warn(`Defaulting ${storageKey} to coordinate based place:`, place);
+
+            storage.setMap(storageKey, place.serialize());
+            return place;
+        }
+    } catch (error) {
+        const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
+        console.warn('Error attempting to geocode position:', error);
+        console.warn(`Defaulting ${storageKey} to coordinate based place:`, place);
+
+        storage.setMap(storageKey, place.serialize());
+        return place;
+    }
+
+    return null;
+}
+
 export async function getLiveLocation() {
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
-
-                // Save the last known coordinates
-                storage.setArray('_last_known_position', [latitude, longitude]);
-
-                try {
-                    const details = await geocode(latitude, longitude);
-                    if (details) {
-                        const place = createFleetbasePlaceFromDetails(details, { position });
-                        // Save the last known location
-                        storage.setMap('_last_known_location', place.serialize());
-                        resolve(place);
-                    } else {
-                        const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
-                        console.warn('Defaulting live location to coordinate based place:', place);
-
-                        storage.setMap('_last_known_location', place.serialize());
-                        resolve(place);
-                    }
-                } catch (error) {
-                    console.warn('Error attempting to geocode live/current position:', error);
-
-                    const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
-                    console.warn('Defaulting live location to coordinate based place:', place);
-
-                    // Save the last known location
-                    storage.setMap('_last_known_location', place.serialize());
-
-                    resolve(place);
-                }
+                const hanlder = await handleIncomingPosition({ position, latitude, longitude, storageKey: '_last_known_location' });
+                resolve(hanlder);
             },
-            (error) => {
-                resolve(null);
-                console.error('Error getting device current position:', error);
+            async (error) => {
+                if (Platform.OS === 'web' && window.location.protocol !== 'https:') {
+                    const { latitude, longitude } = getDefaultCoordinates();
+                    const mockPosition = { coords: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) } };
+                    const hanlder = await handleIncomingPosition({ position: mockPosition, latitude, longitude });
+                    resolve(hanlder);
+                } else {
+                    resolve(null);
+                    console.error('Error getting device current position:', error);
+                }
             },
             { enableHighAccuracy: !isAndroid, timeout: 20000, maximumAge: 3600000 }
         );
@@ -335,47 +355,25 @@ export async function getLiveLocation() {
 
 export async function getCurrentLocation() {
     const stored = storage.getMap('_current_location');
-    console.log('[STORED LOCATION]', stored);
-    const lastLocation = stored ? restoreFleetbasePlace(stored) : null;
+    const lastLocation = restoreFleetbasePlace(stored);
 
     return new Promise((resolve) => {
         Geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
-
-                // Save the last known coordinates
-                storage.setArray('_last_known_position', [latitude, longitude]);
-
-                // Check if user has moved more than 200 meters from the last location
-                if (lastLocation && haversine([latitude, longitude], lastLocation.getAttribute('location')) > 200) {
-                    return resolve(lastLocation);
-                }
-
-                try {
-                    const details = await geocode(latitude, longitude);
-                    if (details) {
-                        const place = createFleetbasePlaceFromDetails(details, { position });
-                        storage.setMap('_current_location', place.serialize());
-                        resolve(place);
-                    } else {
-                        const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
-                        console.warn('Defaulting live location to coordinate based place:', place);
-
-                        storage.setMap('_last_known_location', place.serialize());
-                        resolve(place);
-                    }
-                } catch (error) {
-                    const place = new Place({ location: new Point(latitude, longitude), meta: { position } });
-                    console.warn('Error attempting to geocode current position:', error);
-                    console.warn('Defaulting current location to coordinate based place:', place);
-
-                    storage.setMap('_current_location', place.serialize());
-                    resolve(place);
-                }
+                const hanlder = await handleIncomingPosition({ position, latitude, longitude });
+                resolve(hanlder);
             },
-            (error) => {
-                resolve(null);
-                console.error('Error getting device current position:', error);
+            async (error) => {
+                if (Platform.OS === 'web' && window.location.protocol !== 'https:') {
+                    const { latitude, longitude } = getDefaultCoordinates();
+                    const mockPosition = { coords: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) } };
+                    const hanlder = await handleIncomingPosition({ position: mockPosition, latitude, longitude });
+                    resolve(hanlder);
+                } else {
+                    resolve(null);
+                    console.error('Error getting device current position:', error);
+                }
             },
             { enableHighAccuracy: !isAndroid, timeout: 2000, maximumAge: 3600000 }
         );
@@ -1164,4 +1162,31 @@ export function makeCoordinatesFloat(input) {
     }
 
     throw new Error(`Unsupported type for coordinates: ${typeof input}`);
+}
+
+export async function requestWebGeolocationPermission() {
+    if (navigator.permissions && navigator.geolocation) {
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+            if (permissionStatus.state === 'granted') {
+                return true;
+            }
+            if (permissionStatus.state === 'prompt') {
+                // Trigger prompt by calling geolocation. This must be in response to a user gesture.
+                return new Promise((resolve) => {
+                    navigator.geolocation.getCurrentPosition(
+                        () => resolve(true),
+                        () => resolve(false)
+                    );
+                });
+            }
+            return false;
+        } catch (error) {
+            // Fallback: assume not granted
+            return false;
+        }
+    } else {
+        // If the Permissions API isn't available, default to true or handle accordingly
+        return true;
+    }
 }

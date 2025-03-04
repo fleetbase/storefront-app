@@ -9,6 +9,7 @@ import NetworkHomeScreen from '../screens/NetworkHomeScreen';
 
 const RootStack = createNativeStackNavigator({
     initialRouteName: 'Boot',
+    linking: { enabled: 'auto' },
     screens: {
         Boot,
         LocationPermission,

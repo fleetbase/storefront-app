@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useColorScheme, Appearance } from 'react-native';
-import useStorage, { getString } from './use-storage';
+import useStorage, { getString, setString } from './use-storage';
 import { storefrontConfig, getTheme } from '../utils';
 import { capitalize } from '../utils/format';
 
@@ -11,28 +11,28 @@ export const schemes = ['light', 'dark'] as const;
 export default function useAppTheme() {
     const baseTheme = capitalize(storefrontConfig('theme')); // e.g., 'Indigo'
     const systemColorScheme = useColorScheme(); // 'light' or 'dark';
-
     const [userColorScheme, setUserColorScheme] = useStorage<string>(USER_COLOR_SCHEME_KEY, systemColorScheme || 'light');
     const [appTheme, setAppTheme] = useStorage<string>(APP_THEME_KEY, `${userColorScheme}${baseTheme}`);
+    const initializedRef = useRef(false);
 
     const isDarkMode = userColorScheme === 'dark';
     const isLightMode = userColorScheme === 'light';
 
     useEffect(() => {
-        const initializeTheme = async () => {
-            const storedTheme = await getString(APP_THEME_KEY);
-            if (storedTheme) {
-                setAppTheme(storedTheme);
-            } else {
-                if (!userColorScheme && !appTheme) {
-                    setAppTheme(`${systemColorScheme}${baseTheme}`);
-                } else {
-                    setAppTheme(`${userColorScheme}${baseTheme}`);
-                }
-            }
-        };
-        initializeTheme();
-    }, []);
+        if (initializedRef.current) return;
+        initializedRef.current = true;
+
+        // Synchronously check persistent storage.
+        const storedTheme = getString(APP_THEME_KEY);
+        if (!storedTheme) {
+            // Compute the default theme
+            const computedTheme = `${userColorScheme}${baseTheme}`;
+            // Force write the default value to storage directly,
+            // then update state so that both are in sync.
+            setString(APP_THEME_KEY, computedTheme);
+            setAppTheme(computedTheme);
+        }
+    }, [userColorScheme, baseTheme, setAppTheme]);
 
     const changeScheme = (newScheme: string) => {
         const newTheme = `${newScheme}${baseTheme}`;

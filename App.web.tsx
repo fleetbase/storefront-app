@@ -18,20 +18,17 @@ function AppContent(): React.JSX.Element {
     const { appTheme } = useThemeContext();
 
     return (
-        <TamaguiProvider config={config} theme={appTheme}>
+        <TamaguiProvider config={config} defaultTheme={appTheme} disableInjectCSS={true}>
             <Theme name={appTheme}>
-                <GestureHandlerRootView style={{ flex: 1 }}>
+                <GestureHandlerRootView style={{ flex: 1, width: '100%', height: '100%' }}>
                     <SafeAreaProvider>
                         <NotificationProvider>
                             <LanguageProvider>
                                 <AuthProvider>
                                     <SocketClusterProvider>
                                         <CartProvider>
-                                            <View flex={1} alignItems='center' justifyContent='center'>
-                                                <Text>Hello World</Text>
-                                            </View>
                                             <AppNavigator />
-                                            {/* <Toasts extraInsets={{ bottom: 80 }} defaultStyle={getDefaultToastStyle()} /> */}
+                                            <Toasts extraInsets={{ bottom: 80 }} defaultStyle={getDefaultToastStyle()} />
                                             <PortalHost name='MainPortal' />
                                             <PortalHost name='BottomSheetPanelPortal' />
                                             <PortalHost name='LocationPickerPortal' />

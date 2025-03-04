@@ -206,7 +206,7 @@ const CartItemScreen = ({ route = {} }) => {
                         alignItems='center'
                         justifyContent='center'
                         disabled={isLoading('addToCart') || isLoading('removeCartItem')}
-                        rounded
+                        rounded='true'
                     >
                         <Button.Icon>{isLoading('removeCartItem') ? <Spinner size='$4' color='white' /> : <FontAwesomeIcon icon={faTrash} color='white' size={15} />}</Button.Icon>
                     </Button>

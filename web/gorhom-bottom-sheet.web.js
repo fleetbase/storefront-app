@@ -1,9 +1,9 @@
-import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { View, FlatList, TextInput, StyleSheet, Animated, Easing } from 'react-native-web';
 import { createPortal } from 'react-dom';
 
 // A minimal BottomSheet polyfill using a portal and Animated API
-const BottomSheet = forwardRef((props, ref) => {
+export const BottomSheet = forwardRef((props, ref) => {
     const {
         index = -1,
         snapPoints = ['50%'],
@@ -78,7 +78,7 @@ const BottomSheet = forwardRef((props, ref) => {
     }));
 
     // On mount, if index is >= 0 (open), open the sheet to the corresponding snap point.
-    React.useEffect(() => {
+    useEffect(() => {
         if (index >= 0 && snapPoints.length > 0) {
             openSheet(snapPoints[index] || snapPoints[0]);
         }
@@ -118,19 +118,12 @@ const styles = StyleSheet.create({
 });
 
 // A simple wrapper around View for BottomSheetView.
-const BottomSheetView = (props) => <View {...props} />;
+export const BottomSheetView = (props) => <View {...props} />;
 
 // A simple wrapper around FlatList for BottomSheetFlatList.
-const BottomSheetFlatList = (props) => <FlatList {...props} />;
+export const BottomSheetFlatList = (props) => <FlatList {...props} />;
 
 // A simple wrapper around TextInput for BottomSheetTextInput.
-const BottomSheetTextInput = (props) => <TextInput {...props} />;
+export const BottomSheetTextInput = (props) => <TextInput {...props} />;
 
-export { BottomSheet, BottomSheetView, BottomSheetFlatList, BottomSheetTextInput };
-
-export default {
-    BottomSheet,
-    BottomSheetView,
-    BottomSheetFlatList,
-    BottomSheetTextInput,
-};
+export default BottomSheet;

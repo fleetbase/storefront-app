@@ -322,7 +322,7 @@ const CartScreen = ({ route }) => {
                             </Text>
                         </YStack>
                         <YStack>
-                            <Button onPress={handleCheckout} bg='$success' borderColor='$successBorder' borderWidth={1} width={180} paddingVertical='$2' rounded>
+                            <Button onPress={handleCheckout} bg='$success' borderColor='$successBorder' borderWidth={1} width={180} paddingVertical='$2' rounded='true'>
                                 <Button.Text fontSize='$6' fontWeight='bold' color='$successText'>
                                     {t('CartScreen.checkout')}
                                 </Button.Text>

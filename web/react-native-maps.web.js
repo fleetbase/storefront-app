@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker as LeafletMarker, Polyline as LeafletPolyline, useMapEvent, useMap } from 'react-leaflet';
+import React, { useEffect, forwardRef } from 'react';
+import { MapContainer, TileLayer, Marker as LeafletMarker, Polyline as LeafletPolyline, Polygon as LeafletPolygon, useMapEvent, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 function regionToCenterAndZoom(region) {
@@ -50,41 +50,36 @@ function MapEvents({ onRegionChangeComplete, onPress, onPanDrag }) {
     return null;
 }
 
-export const MapView = React.forwardRef((props, ref) => {
-    const { initialRegion, style, onRegionChangeComplete, onPress, onPanDrag, mapType = 'standard', scrollEnabled = true, zoomEnabled = true, ...rest } = props;
+const SetMapRef = ({ setMapRef }) => {
+    const map = useMap();
 
-    // Default center/zoom if no region is provided.
+    useEffect(() => {
+        if (setMapRef) {
+            if (typeof setMapRef === 'function') {
+                setMapRef(map);
+            } else {
+                setMapRef.current = map;
+            }
+        }
+    }, [map, setMapRef]);
+
+    return null;
+};
+
+export const MapView = forwardRef((props, ref) => {
+    const { initialRegion, style, onRegionChangeComplete, onPress, onPanDrag, mapType = 'standard', scrollEnabled = true, zoomEnabled = true, children, ...rest } = props;
     const { center, zoom } = initialRegion ? regionToCenterAndZoom(initialRegion) : { center: [0, 0], zoom: 1 };
-
-    // Choose a tile layer based on mapType.
-    let tileUrl;
-    if (mapType === 'satellite') {
-        tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-    } else {
-        // Default "standard" tile layer (OpenStreetMap).
-        tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    }
+    const tileUrl =
+        mapType === 'satellite'
+            ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
 
     return (
-        <MapContainer
-            center={center}
-            zoom={zoom}
-            style={style}
-            scrollWheelZoom={scrollEnabled}
-            zoomControl={zoomEnabled}
-            whenCreated={(mapInstance) => {
-                if (ref) {
-                    if (typeof ref === 'function') {
-                        ref(mapInstance);
-                    } else {
-                        ref.current = mapInstance;
-                    }
-                }
-            }}
-            {...rest}
-        >
+        <MapContainer center={center} zoom={zoom} style={style} scrollWheelZoom={scrollEnabled} zoomControl={zoomEnabled} {...rest}>
             <TileLayer url={tileUrl} />
+            <SetMapRef setMapRef={ref} />
             <MapEvents onRegionChangeComplete={onRegionChangeComplete} onPress={onPress} onPanDrag={onPanDrag} />
+            {children}
         </MapContainer>
     );
 });
@@ -114,6 +109,26 @@ export const Polyline = ({ coordinates, ...props }) => {
     const { Polyline: LeafletPolyline } = require('react-leaflet');
     const positions = coordinates.map((coord) => [coord.latitude, coord.longitude]);
     return <LeafletPolyline positions={positions} {...props} />;
+};
+
+export const Polygon = (props) => {
+    const { coordinates, strokeWidth, strokeColor, fillColor, lineDashPattern, ...rest } = props;
+
+    // Convert the array of { latitude, longitude } into Leaflet positions.
+    const positions = coordinates.map((coord) => [coord.latitude, coord.longitude]);
+
+    // If a dash pattern is provided, convert it to a string format acceptable by Leaflet.
+    const dashArray = lineDashPattern ? (Array.isArray(lineDashPattern) ? lineDashPattern.join(' ') : lineDashPattern) : undefined;
+
+    // Map react-native-maps style props to Leaflet's pathOptions.
+    const pathOptions = {
+        color: strokeColor, // stroke color
+        weight: strokeWidth, // stroke width
+        fillColor: fillColor, // fill color
+        dashArray, // dash pattern for lines
+    };
+
+    return <LeafletPolygon positions={positions} pathOptions={pathOptions} {...rest} />;
 };
 
 export class AnimatedRegion {
@@ -170,9 +185,4 @@ export class AnimatedRegion {
     }
 }
 
-export default {
-    MapView,
-    Marker,
-    Polyline,
-    AnimatedRegion,
-};
+export default MapView;

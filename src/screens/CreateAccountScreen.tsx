@@ -59,7 +59,7 @@ const CreateAccountScreen = ({ route }) => {
                             <Input value={name} onChangeText={(text) => setName(text)} placeholder={t('CreateAccountScreen.enterYourName')} />
                             <PhoneInput value={phone} onChange={(phoneNumber) => setPhone(phoneNumber)} />
                         </YStack>
-                        <Button size='$5' mt='$2' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
+                        <Button size='$5' mt='$2' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded='true'>
                             <Button.Icon>{isSendingCode ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faPaperPlane} color={theme.white.val} />}</Button.Icon>
                             <Button.Text color='$white' fontWeight='bold'>
                                 {t('CreateAccountScreen.sendVerificationCode')}
@@ -70,7 +70,7 @@ const CreateAccountScreen = ({ route }) => {
                         <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                     </YStack>
                     <YStack space='$3' width='100%' px='$4' pb={isAndroid ? '$4' : 0}>
-                        <Button size='$5' onPress={handleLogin} bg='$secondary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded>
+                        <Button size='$5' onPress={handleLogin} bg='$secondary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded='true'>
                             <Button.Text color='$textPrimary' fontWeight='bold'>
                                 {t('CreateAccountScreen.haveAccountAlreadyLogin')}
                             </Button.Text>

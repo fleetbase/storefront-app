@@ -261,7 +261,7 @@ const AccountScreen = () => {
                             />
                         </YStack>
                         <YStack padding='$4' mb='$5'>
-                            <Button marginTop='$4' bg='$error' borderColor='$errorBorder' borderWidth={1} size='$5' onPress={handleSignout} rounded width='100%'>
+                            <Button marginTop='$4' bg='$error' borderColor='$errorBorder' borderWidth={1} size='$5' onPress={handleSignout} rounded='true' width='100%'>
                                 <Button.Icon>{isSigningOut ? <Spinner color='$errorText' /> : <YStack />}</Button.Icon>
                                 <Button.Text color='$errorText' fontWeight='bold'>
                                     {t('AccountScreen.signOut')}

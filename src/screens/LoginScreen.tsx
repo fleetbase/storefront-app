@@ -49,7 +49,7 @@ const LoginScreen = () => {
                         {loginSupported('facebook') && <FacebookLoginButton onPress={() => handleOAuthLogin('facebook')} />}
                         {loginSupported('google') && <GoogleLoginButton onPress={() => handleOAuthLogin('google')} />}
                         {SHOW_CLEAR_CACHE && (
-                            <Button bg='$error' borderColor='$errorBorder' borderWidth={1} onPress={handleClearCache} rounded width='100%'>
+                            <Button bg='$error' borderColor='$errorBorder' borderWidth={1} onPress={handleClearCache} rounded='true' width='100%'>
                                 <Button.Text color='$errorText'>{t('LoginScreen.clearCache')}</Button.Text>
                             </Button>
                         )}

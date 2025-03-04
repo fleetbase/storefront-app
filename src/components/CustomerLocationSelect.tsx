@@ -92,7 +92,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                                     {t('CustomerLocationSelect.selectAddress')}
                                 </Text>
                                 <XStack space='$2'>
-                                    <Button onPress={handleSelectNewLocation} bg='$primary' px='$3' size='$2' borderRadius='$8' rounded>
+                                    <Button onPress={handleSelectNewLocation} bg='$primary' px='$3' size='$2' borderRadius='$8' rounded='true'>
                                         <Button.Icon>
                                             <FontAwesomeIcon icon={faPlus} color='white' />
                                         </Button.Icon>

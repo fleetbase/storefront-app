@@ -57,13 +57,13 @@ const DeleteAccountVerifyScreen = () => {
                             pinCodeTextStyle: { color: theme.primary.val, fontSize: 25 },
                         }}
                     />
-                    <Button size='$5' onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifying ? 0.75 : 1} disabled={isVerifying} rounded>
+                    <Button size='$5' onPress={() => handleVerifyCode(code)} bg='$primary' width='100%' opacity={isVerifying ? 0.75 : 1} disabled={isVerifying} rounded='true'>
                         <Button.Icon>{isVerifying ? <Spinner color='$white' /> : <FontAwesomeIcon icon={faCheck} color={theme.white.val} />}</Button.Icon>
                         <Button.Text color='$white' fontWeight='bold'>
                             {t('DeleteAccountVerifyScreen.verifyCode')}
                         </Button.Text>
                     </Button>
-                    <Button size='$5' onPress={handleRetry} bg='$secondary' width='100%' rounded>
+                    <Button size='$5' onPress={handleRetry} bg='$secondary' width='100%' rounded='true'>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faArrowRotateRight} color={theme['gray-500'].val} />
                         </Button.Icon>

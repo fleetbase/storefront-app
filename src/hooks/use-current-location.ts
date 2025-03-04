@@ -115,12 +115,26 @@ const useCurrentLocation = () => {
 
     // On mount (or when initializeLiveLocation changes), start live location updates.
     useEffect(() => {
+        // Immediately call the live location initializer on mount
         initializeLiveLocation();
-    }, [initializeLiveLocation?.id, initializeLiveLocation]);
+
+        // Then set an interval to update every 5 minutes (300,000ms)
+        const intervalId = setInterval(
+            () => {
+                initializeLiveLocation();
+            },
+            1000 * 60 * 5
+        );
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
 
     // On mount and when currentLocation changes, initialize the current location if not set.
     useEffect(() => {
         if (!currentLocation) {
+            console.log('INITIALIZING CURRENT LOCATION');
             initializeCurrentLocation();
         }
     }, [currentLocation?.id, initializeCurrentLocation]);
