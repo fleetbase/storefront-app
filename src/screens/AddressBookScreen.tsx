@@ -56,7 +56,7 @@ const AddressBookScreen = () => {
             await runWithLoading(updateDefaultLocationPromise(place), 'defaulting');
             toast.success(`${place.getAttribute('name')} is now your default location.`);
         } catch (error) {
-            console.log('Error making address default location:', error);
+            console.warn('Error making address default location:', error);
             toast.error(error.message);
         }
     };

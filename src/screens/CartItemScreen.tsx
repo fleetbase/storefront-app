@@ -92,7 +92,7 @@ const CartItemScreen = ({ route = {} }) => {
             toast.success(t('CartItemScreen.productUpdatedInCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
-            console.log('Error Adding to Cart', error.message);
+            console.warn('Error Adding to Cart', error.message);
         }
     };
 

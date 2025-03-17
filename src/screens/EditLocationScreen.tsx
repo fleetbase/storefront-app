@@ -60,7 +60,7 @@ const EditLocationScreen = ({ route }) => {
     const [city, setCity] = useState(place.city);
     const [postalCode, setPostalCode] = useState(place.postal_code);
     const [phone, setPhone] = useState(place.phone);
-    const [instructions, setInstructions] = useState(place.meta.instructions);
+    const [instructions, setInstructions] = useState(place.meta?.instructions);
     const redirectTo = params.redirectTo;
     const redirectToScreen = params.redirectToScreen;
     const makeDefault = toBoolean(params.makeDefault);
@@ -129,7 +129,7 @@ const EditLocationScreen = ({ route }) => {
             toast.success(t('EditLocationScreen.addressSaved'));
             handleRedirect();
         } catch (error) {
-            console.log('Error saving address details:', error);
+            console.warn('Error saving address details:', error);
             toast.error(error.message);
         }
     };
@@ -142,7 +142,7 @@ const EditLocationScreen = ({ route }) => {
                 toast.success(t('EditLocationScreen.defaultLocationUpdated', { locationName: restoredInstance.getAttribute('name') }));
                 handleRedirect();
             } catch (error) {
-                console.log('Error making address default location:', error);
+                console.warn('Error making address default location:', error);
                 toast.error(error.message);
             }
         }

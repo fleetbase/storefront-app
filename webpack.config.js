@@ -201,5 +201,13 @@ module.exports = {
             CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),
+        {
+            apply(compiler) {
+                compiler.hooks.afterEmit.tapPromise('PostcssTamaguiFix', async (compilation) => {
+                    const { execa } = await import('execa');
+                    await execa('postcss', ['public/tamagui.css', '-o', 'public/tamagui.css']);
+                });
+            },
+        },
     ],
 };

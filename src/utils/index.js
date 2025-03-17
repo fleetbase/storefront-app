@@ -644,3 +644,10 @@ export function randomElement(arr) {
     const randomIndex = Math.floor(Math.random() * arr.length);
     return arr[randomIndex];
 }
+
+export function handleNavigateNewLocation(navigation, params = {}) {
+    const disabledGeocodingScreen = storefrontConfig('disableGeocodingScreen');
+    const screen = disabledGeocodingScreen ? 'LocationPicker' : 'AddNewLocation';
+
+    return navigation.navigate(screen, params);
+}

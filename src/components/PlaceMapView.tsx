@@ -46,8 +46,8 @@ const PlaceMapView = ({ place: _place, width = '100%', height = 200, markerSize 
     }, [latitude, longitude]);
 
     return (
-        <Pressable onPress={onPress} style={{ flex: 1 }}>
-            <YStack flex={1} position='relative' overflow='hidden' borderRadius='$4' width={width} height={height} {...props}>
+        <Pressable onPress={onPress} style={{ flex: 1, width, height }}>
+            <YStack position='relative' overflow='hidden' borderRadius='$4' width={width} height={height} {...props}>
                 <MapView
                     ref={mapRef}
                     style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}

@@ -134,7 +134,6 @@ const useCurrentLocation = () => {
     // On mount and when currentLocation changes, initialize the current location if not set.
     useEffect(() => {
         if (!currentLocation) {
-            console.log('INITIALIZING CURRENT LOCATION');
             initializeCurrentLocation();
         }
     }, [currentLocation?.id, initializeCurrentLocation]);

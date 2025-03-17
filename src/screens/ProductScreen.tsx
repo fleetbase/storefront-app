@@ -62,7 +62,7 @@ const ProductScreen = ({ route = {} }) => {
 
     const handleAddToCart = async () => {
         if (isLoading('addToCart') || !isProductReadyForCheckout(product, selectedVariants)) {
-            console.log('Product is not ready for checkout');
+            console.warn('Product is not ready for checkout');
             return;
         }
 
@@ -76,7 +76,7 @@ const ProductScreen = ({ route = {} }) => {
             toast.success(t('ProductScreen.productAddedToCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
-            console.log('Error Adding to Cart', error.message);
+            console.warn('Error Adding to Cart', error.message);
         }
     };
 

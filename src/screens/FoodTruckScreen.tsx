@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
 import { restoreFleetbasePlace, getCoordinates, getCoordinatesObject, isPointInGeoJSONPolygon, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
-import { storefrontConfig, isArray, isNone, hexToRGBA } from '../utils';
+import { storefrontConfig, isArray, isNone, hexToRGBA, handleNavigateNewLocation } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import useFleetbase from '../hooks/use-fleetbase';
 import useStorefront from '../hooks/use-storefront';
@@ -316,7 +316,7 @@ const FoodTruckScreen = () => {
                     headerTransparent={true}
                     headerShadowVisible={false}
                     headerLeft={
-                        <LocationPicker onPressAddNewLocation={({ navigation, params }) => navigation.navigate('AddNewLocation', params)} redirectToAfterAddLocation={'FoodTruckHome'} />
+                        <LocationPicker onPressAddNewLocation={({ navigation, params }) => handleNavigateNewLocation(navigation, params)} redirectToAfterAddLocation={'FoodTruckHome'} />
                     }
                     headerRight={
                         <XStack space='$4' alignItems='center'>
@@ -332,7 +332,7 @@ const FoodTruckScreen = () => {
                                 <FontAwesomeIcon icon={faCircleInfo} color={infoColor} size={20} />
                             </YStack>
                             <XStack flex={1}>
-                                <Text color={infoColor} fontSize={15} numberOfLines={1}>
+                                <Text color={infoColor} fontSize={15} numberOfLines={2}>
                                     {t('FoodTruckScreen.tapTrucksPrompt')}
                                 </Text>
                             </XStack>
@@ -343,7 +343,7 @@ const FoodTruckScreen = () => {
                                     <FontAwesomeIcon icon={faMapLocationDot} color={currentZoneColor} size={20} />
                                 </YStack>
                                 <YStack flex={1}>
-                                    <Text color={currentZoneColor} fontSize={15} numberOfLines={1}>
+                                    <Text color={currentZoneColor} fontSize={15} numberOfLines={2}>
                                         {currentZone ? `${t('FoodTruckScreen.yourZoneIs')}: ` : t('FoodTruckScreen.outOfZone')}
                                     </Text>
                                     {currentZone && (

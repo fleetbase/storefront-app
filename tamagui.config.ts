@@ -272,6 +272,10 @@ const appConfig = createTamagui({
     ...baseConfig,
     themes,
     tokens,
+    settings: {
+        ...baseConfig.settings,
+        themeClassNameOnRoot: true,
+    },
 });
 
 export type AppConfig = typeof appConfig;

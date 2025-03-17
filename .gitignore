@@ -91,3 +91,6 @@ android/app/google-services.json
 storefront.config.js
 .tamagui
 vendor
+
+# Web Build Stuff
+public/tamagui.css

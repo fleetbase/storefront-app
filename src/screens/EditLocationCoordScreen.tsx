@@ -76,7 +76,7 @@ const EditLocationCoordScreen = ({ route }) => {
                 place.setAttribute('location', new Point(mapRegion.latitude, mapRegion.longitude));
                 return handleRedirect();
             } catch (error) {
-                console.log('Error saving address coordinates:', error);
+                console.warn('Error saving address coordinates:', error);
                 toast.error(error.message);
             }
         }
@@ -86,7 +86,7 @@ const EditLocationCoordScreen = ({ route }) => {
             updateLocationState(updatedPlace);
             handleRedirect();
         } catch (error) {
-            console.log('Error saving address coordinates:', error);
+            console.warn('Error saving address coordinates:', error);
             toast.error(error.message);
         }
     };

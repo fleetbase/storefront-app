@@ -22,6 +22,7 @@ export const DefaultConfig = {
         applePay: toBoolean(config('STRIPE_ENABLE_APPLE_PAY', false)),
         googlePay: toBoolean(config('STRIPE_ENABLE_GOOGLE_PAY', false)),
     },
+    disableGeocodingScreen: toBoolean(config('DISABLE_GEOCODING_SCREEN', false)),
     showDriversOnMap: toBoolean(config('MAP_DISPLAY_DRIVERS', false)),
     prioritizePickup: toBoolean(config('PRIORITIZE_PICKUP', false)),
     storeCategoriesDisplay: config('STORE_CATEGORIES_DISPLAY', 'grid'), // `pills` or `grid`

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { Portal } from '@gorhom/portal';
-import { Place } from '@fleetbase/sdk';
+import { Place, Point } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import {
     getDefaultCoordinates,
@@ -112,7 +112,7 @@ const LocationPickerScreen = ({ route }) => {
         closeBottomSheet();
         const geocoded = results[0] ?? new Place();
         const place = new Place({
-            location: [mapRegion.latitude, mapRegion.longitude],
+            location: new Point(mapRegion.latitude, mapRegion.longitude),
             street1: geocoded.getAttribute('street1'),
             city: geocoded.getAttribute('city'),
             province: geocoded.getAttribute('province'),

@@ -129,7 +129,7 @@ const OrderScreen = ({ route }) => {
                 </YStack>
                 <YStack space='$2'>
                     <YStack mt='$4' px='$4' py='$2' alignItems='center' justifyContent='center' space='$2'>
-                        <Image mb='$2' width={80} height={80} bg='white' source={{ uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}` }} />
+                        <Image mb='$2' width={80} height={80} bg='white' padding='$1' source={{ uri: `data:image/png;base64,${order.getAttribute('tracking_number.qr_code')}` }} />
                         <Text fontSize='$8' fontWeight='bold'>
                             {order.id}
                         </Text>

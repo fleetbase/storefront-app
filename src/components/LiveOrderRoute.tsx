@@ -145,7 +145,6 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
     // Run the update when customOrigin changes.
     useEffect(() => {
-        console.log('use effect called');
         if (!storefront || !store) return;
 
         updateOriginFromCustomOrigin();
