@@ -126,9 +126,6 @@ const colors = {
 
 // Define Light and Dark Bases Using Tailwind Colors
 const lightBase = {
-    ...globalColors,
-    ...customColors,
-    ...customColorsLight,
     background: colors.gray[50],
     surface: colors.gray[100],
     color: colors.gray[900],
@@ -156,13 +153,13 @@ const lightBase = {
     errorText: colors.red[100],
     warningText: colors.yellow[100],
     infoText: colors.blue[100],
+    ...globalColors,
+    ...customColors,
+    ...customColorsLight,
     ...flattenTailwindCssColorsObject(colors),
 };
 
 const darkBase = {
-    ...globalColors,
-    ...customColors,
-    ...customColorsDark,
     background: colors.gray[900],
     surface: colors.gray[800],
     color: colors.gray[50],
@@ -190,6 +187,9 @@ const darkBase = {
     errorText: colors.red[100],
     warningText: colors.yellow[100],
     infoText: colors.blue[100],
+    ...globalColors,
+    ...customColors,
+    ...customColorsDark,
     ...flattenTailwindCssColorsObject(colors),
 };
 
