@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, FlatList, Pressable, ScrollView, Linking } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { showActionSheet, abbreviateName, storefrontConfig } from '../utils';
@@ -19,7 +20,8 @@ const AccountScreen = () => {
     const navigation = useNavigation();
     const { t, language, languages, setLocale } = useLanguage();
     const { userColorScheme, appTheme, changeScheme, schemes } = useAppTheme();
-    const { customer, logout, isSigningOut } = useAuth();
+    const { customer, logout, isSigningOut, updateCustomer } = useAuth();
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
     const handleClearCache = () => {
         storage.clearStore();
@@ -58,16 +60,37 @@ const AccountScreen = () => {
             onSelect: (buttonIndex) => {
                 switch (buttonIndex) {
                     case 0:
-                        console.log('Take Photo selected');
-                        // Trigger Take Photo functionality here
+                        launchCamera(
+                            {
+                                title: t('AccountScreen.changeProfilePhotoOptions.takePhoto'),
+                                includeBase64: true,
+                                storageOptions: {
+                                    skipBackup: true,
+                                    path: 'images',
+                                },
+                            },
+                            (response) => {
+                                handleUpdateProfilePhoto(response);
+                            }
+                        );
                         break;
                     case 1:
-                        console.log('Photo Library selected');
-                        // Trigger Photo Library functionality here
+                        launchImageLibrary(
+                            {
+                                title: t('AccountScreen.changeProfilePhotoOptions.photoLibrary'),
+                                includeBase64: true,
+                                storageOptions: {
+                                    skipBackup: true,
+                                    path: 'images',
+                                },
+                            },
+                            (response) => {
+                                handleUpdateProfilePhoto(response);
+                            }
+                        );
                         break;
                     case 2:
-                        console.log('Delete Profile Photo selected');
-                        // Trigger Delete functionality here
+                        handleRemoveProfilePhoto();
                         break;
                     default:
                         console.log('Action canceled');
@@ -75,6 +98,36 @@ const AccountScreen = () => {
                 }
             },
         });
+    };
+
+    const handleUpdateProfilePhoto = async (response) => {
+        const asset = response.assets[0];
+        const { type, base64 } = asset;
+        const data = `data:${type};base64,${base64}`;
+
+        setIsUploadingPhoto(true);
+
+        try {
+            await updateCustomer({ photo: base64 });
+            toast.success(t('AccountScreen.photoChanged'));
+        } catch (err) {
+            console.warn('Error updating customer profile photo', err);
+        } finally {
+            setIsUploadingPhoto(false);
+        }
+    };
+
+    const handleRemoveProfilePhoto = async () => {
+        setIsUploadingPhoto(true);
+
+        try {
+            await updateCustomer({ photo: 'REMOVE' });
+            toast.success(t('AccountScreen.photoRemoved'));
+        } catch (err) {
+            console.warn('Error removing customer profile photo', err);
+        } finally {
+            setIsUploadingPhoto(false);
+        }
     };
 
     const handleSelectScheme = () => {
@@ -137,11 +190,13 @@ const AccountScreen = () => {
     const accountMenu = [
         {
             title: t('AccountScreen.profilePhoto'),
-            rightComponent: (
+            rightComponent: isUploadingPhoto ? (
+                <Spinner color='$textPrimary' />
+            ) : (
                 <Avatar circular size='$2'>
                     <Avatar.Image src={customer.getAttribute('photo_url')} />
-                    <Avatar.Fallback backgroundColor='$primary'>
-                        <Text color='$white' fontWeight='bold'>
+                    <Avatar.Fallback delayMs={800} backgroundColor='$primary' textAlign='center' alignItems='center' justifyContent='center'>
+                        <Text color='$white' fontWeight='bold' textAlign='center'>
                             {abbreviateName(customer.getAttribute('name'))}
                         </Text>
                     </Avatar.Fallback>

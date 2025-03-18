@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Platform, SafeAreaView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Image, Spinner, XStack, Text, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
@@ -16,6 +17,7 @@ const APP_NAME = config('APP_NAME');
 const BootScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const { t } = useLanguage();
     const { storefront, error: storefrontError, hasStorefrontConfig } = useStorefront();
     const currentLocation = getCurrentLocationFromStorage();
@@ -86,8 +88,8 @@ const BootScreen = () => {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, width: '100%', height: '100%' }}>
-            <YStack flex={1} bg={backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%'>
+        <YStack style={{ flex: 1, width: '100%', height: '100%' }}>
+            <YStack flex={1} bg={backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%' pt={insets.top} pb={insets.bottom}>
                 {isGradientBackground && (
                     <LinearGradient
                         colors={backgroundColor}
@@ -108,7 +110,7 @@ const BootScreen = () => {
                     </XStack>
                 </YStack>
             </YStack>
-        </SafeAreaView>
+        </YStack>
     );
 };
 

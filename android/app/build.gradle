@@ -136,7 +136,8 @@ dependencies {
     implementation project(':react-native-notifications')
     implementation project(':react-native-i18n')
     implementation project(':react-native-config')
-    implementation 'androidx.core:core-splashscreen:1.0.0-alpha02' 
+    implementation 'androidx.core:core-splashscreen:1.0.0-alpha02'
+    implementation 'androidx.activity:activity:1.9.+'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

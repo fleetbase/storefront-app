@@ -2440,7 +2440,7 @@ __metadata:
     react-native-gesture-handler: ^2.20.2
     react-native-get-random-values: ^1.11.0
     react-native-i18n: ^2.0.15
-    react-native-image-picker: ^7.1.2
+    react-native-image-picker: ^8.2.0
     react-native-keychain: ^9.2.2
     react-native-linear-gradient: ^2.8.3
     react-native-localize: ^3.3.0
@@ -14813,13 +14813,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-image-picker@npm:^7.1.2":
-  version: 7.2.3
-  resolution: "react-native-image-picker@npm:7.2.3"
+"react-native-image-picker@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "react-native-image-picker@npm:8.2.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 96d67516e8e1c1768c593ca1b0a507d5212d8ac5df2610ad9d6f38c188b8d0720966559867849f74b6c19d2500664ce17c907e5fa37ab72487abd363cf493e7d
+  checksum: d261d4f0571b771c5d2d8a1d5c129743a4993318a454e5bf7850db0fa452d4d5da2215a2f2af3879cd38211b864b3ba77d1d09255ff1f43112b3dcf985d6c233
   languageName: node
   linkType: hard
 

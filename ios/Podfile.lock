@@ -1332,7 +1332,7 @@ PODS:
     - Google-Maps-iOS-Utils (= 5.0.0)
     - GoogleMaps (= 8.4.0)
     - React-Core
-  - react-native-image-picker (7.2.3):
+  - react-native-image-picker (8.2.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2526,7 +2526,7 @@ SPEC CHECKSUMS:
   react-native-geolocation: 70b8819c3a45a4613e58c2b13ba694ec1f7de3d2
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-google-maps: 7cc1184afe41fbd15a3dffd53c924819f6587b69
-  react-native-image-picker: 42e3b160d82fb168288345db3b9a2a99aad02afe
+  react-native-image-picker: 0452fc9efc21101946746663bf34e0db5741f00c
   react-native-maps: ee1e65647460c3d41e778071be5eda10e3da6225
   react-native-mmkv-storage: 337a2b668cefb1bc66442eee589e72f15b3cba5c
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4

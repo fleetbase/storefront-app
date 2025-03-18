@@ -57,7 +57,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                 <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$3' py='$3' {...props}>
                     <XStack>
                         <YStack width={100} height={90}>
-                            <PlaceMapView place={currentLocation} zoom={2} markerSize='xs' width={100} borderWidth={1} borderColor='$borderColor' />
+                            <PlaceMapView place={currentLocation} zoom={2} markerSize='xs' width={100} height={90} borderWidth={1} borderColor='$borderColor' />
                         </YStack>
                         <YStack flex={1} px='$3'>
                             <Text size={15} color='$textPrimary' fontWeight='bold' mb={2}>

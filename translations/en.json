@@ -70,7 +70,9 @@
         "signedOut": "Signed Out.",
         "cacheCleared": "Cache Cleared.",
         "schemeChanged": "Now using {{selectedScheme}} mode.",
-        "languageChanged": "Now using {{selectedLanguage}}."
+        "languageChanged": "Now using {{selectedLanguage}}.",
+        "photoChanged": "Profile photo changed.",
+        "photoRemoved": "Profile photo removed."
     },
     "AddNewLocationScreen": {
         "addNewAddress": "Add new address",

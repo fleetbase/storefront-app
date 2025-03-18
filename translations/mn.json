@@ -70,7 +70,9 @@
         "signedOut": "Гарав.",
         "cacheCleared": "Cache цэвэрлэгдлээ.",
         "schemeChanged": "Одоо {{selectedScheme}} горим ашиглаж байна.",
-        "languageChanged": "Одоо {{selectedLanguage}}."
+        "languageChanged": "Одоо {{selectedLanguage}}.",
+        "photoChanged": "Таны зураг солигдсон.",
+        "photoRemoved": "Таны зураг устгагдсан."
     },
     "AddNewLocationScreen": {
         "addNewAddress": "Шинэ хаяг нэмэх",

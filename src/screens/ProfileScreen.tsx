@@ -85,8 +85,8 @@ const ProfileScreen = () => {
                         <Pressable onPress={handleViewProfile}>
                             <Avatar circular size='$7'>
                                 <Avatar.Image accessibilityLabel={customer.getAttribute('name')} src={customer.getAttribute('photo_url')} />
-                                <Avatar.Fallback backgroundColor='$primary'>
-                                    <Text fontSize='$5' fontWeight='bold' color='$white' textTransform='uppercase'>
+                                <Avatar.Fallback delayMs={800} backgroundColor='$primary' textAlign='center' alignItems='center' justifyContent='center'>
+                                    <Text fontSize='$8' fontWeight='bold' color='$white' textTransform='uppercase' textAlign='center'>
                                         {abbreviateName(customer.getAttribute('name'))}
                                     </Text>
                                 </Avatar.Fallback>
