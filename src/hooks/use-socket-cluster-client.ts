@@ -6,7 +6,7 @@ import { consumeAsyncIterator, isAsyncIterable } from '../utils';
  * Custom hook to manage SocketCluster subscriptions and listeners.
  * Provides functionalities to subscribe, listen, and manage channels.
  */
-const useSockerClusterClient = () => {
+const useSocketClusterClient = () => {
     const { socket, isConnected, error, subscribeChannel, closeChannel, killChannel, closeAllChannels, killAllChannels } = useSocketCluster();
 
     /**
@@ -75,4 +75,4 @@ const useSockerClusterClient = () => {
     };
 };
 
-export default useSockerClusterClient;
+export default useSocketClusterClient;

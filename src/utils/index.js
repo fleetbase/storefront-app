@@ -539,7 +539,7 @@ export function routeWasAccessed(navigation, routeName) {
 }
 
 export function wasAccessedFromCartModal(navigation) {
-    return routeWasAccessed(navigation, 'CartModal');
+    return Platform.OS === 'ios' && routeWasAccessed(navigation, 'CartModal');
 }
 
 export function hexToRGBA(hex, opacity = 1) {

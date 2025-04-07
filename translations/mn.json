@@ -98,7 +98,7 @@
         "cartIsAlreadyEmpty": "Сагс хоосон байна.",
         "cartEmptied": "Сагс хоосон боллоо.",
         "failedToEmptyCart": "Сагсыг хоослоход амжилтгүй боллоо.",
-        "orderItems": "Захиалгын бараанууд ({{count}})",
+        "orderItems": "Захиалгууд ({{count}})",
         "emptyCart": "Сагсыг хоослох",
         "checkout": "Үргэлжлүүлэх"
     },

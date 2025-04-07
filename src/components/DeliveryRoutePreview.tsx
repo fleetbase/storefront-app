@@ -106,7 +106,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
                 setStart(foodTruck);
             } catch (error) {
-                console.error('Error fetching food truck origin:', error);
+                console.warn('Error fetching food truck origin:', error);
             } finally {
                 setFindingOrigin(false);
             }
@@ -121,7 +121,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                         })
                     );
                 } catch (error) {
-                    console.error('Error fetching store location origin:', error);
+                    console.warn('Error fetching store location origin:', error);
                 } finally {
                     setFindingOrigin(false);
                 }

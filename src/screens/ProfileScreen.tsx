@@ -100,6 +100,7 @@ const ProfileScreen = () => {
                         keyExtractor={(item) => item.id}
                         renderItem={renderMenuItem}
                         ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                        scrollEnabled={false}
                     />
                 </YStack>
             </YStack>

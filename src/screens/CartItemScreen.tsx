@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, Platform } from 'react-native';
 import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -35,7 +35,7 @@ const CartItemScreen = ({ route = {} }) => {
     const [subtotal, setSubtotal] = useState(0);
     const [quantity, setQuantity] = useState(cartItem.quantity ?? 1);
     const [ready, setReady] = useState(false);
-    const isModal = params.isModal ?? true;
+    const isModal = Platform.OS === 'ios' && (params.isModal ?? true);
     const isService = product && product.getAttribute('is_service') === true;
     const hasOptions = product.variants().length > 0 && product.addons().length > 0;
 

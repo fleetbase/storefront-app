@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
@@ -46,6 +46,7 @@ const LocaleButton = ({ iconSize = 18, blur = false, style = {}, onPress, ...pro
                             paddingHorizontal: 9,
                             paddingVertical: 5,
                             overflow: 'hidden',
+                            backgroundColor: Platform.OS === 'android' ? theme.background.val : 'transparent',
                         },
                     ]}
                     {...props}
@@ -54,7 +55,7 @@ const LocaleButton = ({ iconSize = 18, blur = false, style = {}, onPress, ...pro
                         <Text>{language.emoji}</Text>
                         <Text>{language.native}</Text>
                     </XStack>
-                    {blur && (
+                    {blur && Platform.OS !== 'android' && (
                         <BlurView
                             style={StyleSheet.absoluteFillObject}
                             blurType={isDarkMode ? 'dark' : 'light'}

@@ -32,7 +32,7 @@ function AppContent(): React.JSX.Element {
                                         <SocketClusterProvider>
                                             <CartProvider>
                                                 <AppNavigator />
-                                                <Toasts extraInsets={{ bottom: 80 }} defaultStyle={getDefaultToastStyle()} />
+                                                <Toasts extraInsets={{ bottom: Platform.OS === 'android' ? 25 : 80 }} defaultStyle={getDefaultToastStyle()} />
                                                 <PortalHost name='MainPortal' />
                                                 <PortalHost name='BottomSheetPanelPortal' />
                                                 <PortalHost name='LocationPickerPortal' />

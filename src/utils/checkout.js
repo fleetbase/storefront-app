@@ -9,7 +9,7 @@ export async function getServiceQuote(storeLocation, customerLocation, cart) {
         const serviceQuote = await quote.fetchServiceQuotesFromCart(storeLocation, customerLocation, cart);
         return serviceQuote;
     } catch (error) {
-        console.error('Error fetching service quote:', error);
+        console.warn('Error fetching service quote:', error);
         throw error;
     }
 }

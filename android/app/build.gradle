@@ -91,13 +91,6 @@ android {
         ]
         resValue "string", "build_config_package", "com.storefront.app"
     }
-    configurations.all {
-        resolutionStrategy {
-            force 'androidx.core:core:1.10.0'
-            force 'com.android.support:support-compat:27.1.1'
-            force 'com.facebook.react:hermes-android:0.72.4'
-        }
-    }
     signingConfigs {
         release {
             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
@@ -138,6 +131,7 @@ dependencies {
     implementation project(':react-native-config')
     implementation 'androidx.core:core-splashscreen:1.0.0-alpha02'
     implementation 'androidx.activity:activity:1.9.+'
+    implementation 'androidx.core:core-ktx:1.15.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

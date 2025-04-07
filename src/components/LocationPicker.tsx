@@ -106,18 +106,21 @@ const LocationPicker = ({
                         paddingHorizontal: 7,
                         paddingVertical: 5,
                         overflow: 'hidden',
+                        backgroundColor: Platform.OS === 'android' ? theme.background.val : 'transparent',
                     },
                     triggerWrapperStyle,
                 ]}
                 {...triggerProps}
             >
-                <BlurView
-                    style={StyleSheet.absoluteFillObject}
-                    blurType={isDarkMode ? 'dark' : 'light'}
-                    blurAmount={10}
-                    borderRadius={20}
-                    reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
-                />
+                {Platform.OS !== 'android' && (
+                    <BlurView
+                        style={StyleSheet.absoluteFillObject}
+                        blurType={isDarkMode ? 'dark' : 'light'}
+                        blurAmount={10}
+                        borderRadius={20}
+                        reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                    />
+                )}
                 <XStack alignItems='center' space='$1' style={triggerStyle}>
                     <FontAwesomeIcon icon={faMapMarkerAlt} size={13} color={theme['$textPrimary'].val} />
                     <Text
@@ -160,7 +163,7 @@ const LocationPicker = ({
                                 shadowOffset={{ width: 0, height: 1 }}
                                 shadowOpacity={0.15}
                                 shadowRadius={3}
-                                backgroundColor='transparent'
+                                backgroundColor={Platform.OS === 'android' ? theme.background.val : 'transparent'}
                                 width={dropdownWidth}
                                 position='absolute'
                                 top={triggerPosition.y + 6}
@@ -185,13 +188,15 @@ const LocationPicker = ({
                                 }}
                                 originY={0}
                             >
-                                <BlurView
-                                    style={StyleSheet.absoluteFillObject}
-                                    blurType={isDarkMode ? 'dark' : 'light'}
-                                    blurAmount={10}
-                                    borderRadius={10}
-                                    reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
-                                />
+                                {Platform.OS !== 'android' && (
+                                    <BlurView
+                                        style={StyleSheet.absoluteFillObject}
+                                        blurType={isDarkMode ? 'dark' : 'light'}
+                                        blurAmount={10}
+                                        borderRadius={10}
+                                        reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                                    />
+                                )}
                                 <YStack space='$2' borderRadius='$4'>
                                     {savedLocations.map((location, index) => {
                                         const isActive = location.id === currentLocation?.id;

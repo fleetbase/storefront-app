@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Pressable, Dimensions, StyleSheet } from 'react-native';
+import { Pressable, Dimensions, StyleSheet, Platform } from 'react-native';
 import { View, Text, YStack, XStack, Stack, AnimatePresence, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { BlurView } from '@react-native-community/blur';
@@ -151,13 +151,15 @@ const StoreLocationPicker = ({
                                 }}
                                 originY={0}
                             >
-                                <BlurView
-                                    style={StyleSheet.absoluteFillObject}
-                                    blurType={isDarkMode ? 'dark' : 'light'}
-                                    blurAmount={10}
-                                    borderRadius={10}
-                                    reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
-                                />
+                                {Platform.OS !== 'android' && (
+                                    <BlurView
+                                        style={StyleSheet.absoluteFillObject}
+                                        blurType={isDarkMode ? 'dark' : 'light'}
+                                        blurAmount={10}
+                                        borderRadius={10}
+                                        reducedTransparencyFallbackColor='rgba(255, 255, 255, 0.8)'
+                                    />
+                                )}
                                 <YStack space='$2' borderRadius='$4'>
                                     {storeLocations.map((location, index) => (
                                         <Pressable

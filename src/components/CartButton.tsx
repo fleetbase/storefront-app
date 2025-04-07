@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
@@ -33,7 +33,7 @@ const CartButton = ({ iconSize = 18, blur = false, style, text, onPress, childre
                     {children}
                     <FontAwesomeIcon icon={faShoppingCart} color={theme.color.val} iconSize={iconSize} />
                 </XStack>
-                {blur && (
+                {blur && Platform.OS !== 'android' && (
                     <BlurView
                         style={StyleSheet.absoluteFillObject}
                         blurType={isDarkMode ? 'dark' : 'light'}

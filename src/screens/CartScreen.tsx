@@ -34,7 +34,7 @@ const CartScreen = ({ route }) => {
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
-    const isModalScreen = typeof routeName === 'string' && routeName.endsWith('Modal');
+    const isModalScreen = Platform.OS === 'ios' && typeof routeName === 'string' && routeName.endsWith('Modal');
 
     const handleCheckout = () => {
         const params = {};
