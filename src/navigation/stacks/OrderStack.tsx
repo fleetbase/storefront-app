@@ -59,7 +59,7 @@ export const OrderHistory = {
             headerTransparent: true,
             headerShadowVisible: false,
             headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} />;
+                return <BackButton onPress={() => navigation.goBack()} mr='$3' />;
             },
             headerRight: () => {
                 return <PortalHost name='LoadingIndicatorPortal' />;

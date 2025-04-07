@@ -17,7 +17,7 @@ export const Checkout = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };
@@ -38,7 +38,7 @@ export const StripeCheckout = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };
@@ -53,7 +53,7 @@ export const QPayCheckout = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };
@@ -68,7 +68,7 @@ export const PaypalCheckout = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };

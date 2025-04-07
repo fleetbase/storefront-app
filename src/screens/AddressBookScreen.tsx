@@ -114,7 +114,7 @@ const AddressBookScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' pt='$2'>
+            <YStack flex={1} bg='$background' pt={Platform.OS === 'android' ? 65 : '$2'}>
                 <Animated.FlatList
                     data={savedLocations}
                     renderItem={renderItem}

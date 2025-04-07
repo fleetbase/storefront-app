@@ -65,7 +65,7 @@
         "tracking": "Хяналт",
         "account": "Бүртгэл",
         "dataProtection": "Мэдээллийн хамгаалалт",
-        "clearCache": "clearCache",
+        "clearCache": "Cache цэвэрлэх",
         "signOut": "Гарах",
         "signedOut": "Гарав.",
         "cacheCleared": "Cache цэвэрлэгдлээ.",

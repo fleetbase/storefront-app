@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, FlatList, Pressable } from 'react-native';
+import { SafeAreaView, FlatList, Pressable, Platform } from 'react-native';
 import { Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -83,7 +83,7 @@ const ProfileScreen = () => {
                     </YStack>
                     <YStack>
                         <Pressable onPress={handleViewProfile}>
-                            <Avatar circular size='$7'>
+                            <Avatar circular size={Platform.OS === 'android' ? '$6' : '$7'}>
                                 <Avatar.Image accessibilityLabel={customer.getAttribute('name')} src={customer.getAttribute('photo_url')} />
                                 <Avatar.Fallback delayMs={800} backgroundColor='$primary' textAlign='center' alignItems='center' justifyContent='center'>
                                     <Text fontSize='$8' fontWeight='bold' color='$white' textTransform='uppercase' textAlign='center'>

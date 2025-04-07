@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, FlatList, Pressable, ScrollView, Linking } from 'react-native';
+import { SafeAreaView, FlatList, Pressable, ScrollView, Linking, Platform } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -281,7 +281,7 @@ const AccountScreen = () => {
                 <AbsoluteTabBarScreenWrapper>
                     <YStack flex={1} bg='$background' space='$8' pt='$3'>
                         <YStack space='$2'>
-                            <XStack px='$3' justifyContent='space-between'>
+                            <XStack px='$3' justifyContent='space-between' mt={Platform.OS === 'android' ? 50 : 0}>
                                 <YStack>
                                     <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                         {t('AccountScreen.account')}

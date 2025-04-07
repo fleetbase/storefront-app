@@ -35,8 +35,8 @@ export const AddressBook = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
-            headerRight: () => <HeaderButton icon={faPlus} onPress={() => handleNavigateNewLocation(navigation, { redirectTo: 'AddressBook' })} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} mr='$3' />,
+            headerRight: () => <HeaderButton icon={faPlus} onPress={() => handleNavigateNewLocation(navigation, { redirectTo: 'AddressBook' })} />,
         };
     },
 };
@@ -54,7 +54,7 @@ export const EditLocationCoord = {
         return {
             title: `${route.params.place.name}`,
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };
@@ -68,7 +68,7 @@ export const EditLocation = {
                 color: getTheme('textPrimary'),
             },
             headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         };
     },
 };
@@ -82,7 +82,7 @@ export const LocationPicker = {
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
             },
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} size={40} />,
+            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
             headerTransparent: true,
         };
     },

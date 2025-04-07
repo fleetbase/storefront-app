@@ -246,12 +246,11 @@ export const AuthProvider = ({ children }) => {
             try {
                 const customer = await storefront.customers.verifyCode(state.phone, code);
                 createCustomerSession(customer);
-                dispatch({ type: 'VERIFY', customer });
+                dispatch({ type: 'VERIFY', customer, isVerifyingCode: false });
             } catch (error) {
                 console.error('[AuthContext] Code verification failed:', error);
-                throw error;
-            } finally {
                 dispatch({ type: 'VERIFY', isVerifyingCode: false });
+                throw error;
             }
         },
         [storefront, state.phone, setCustomer]
@@ -336,10 +335,12 @@ export const useAuth = () => {
 
 export const useIsAuthenticated = () => {
     const { isAuthenticated } = useAuth();
+    console.log('[useIsAuthenticated #isAuthenticated]', isAuthenticated);
     return isAuthenticated;
 };
 
 export const useIsNotAuthenticated = () => {
     const { isNotAuthenticated } = useAuth();
+    console.log('[useIsNotAuthenticated #isNotAuthenticated]', isNotAuthenticated);
     return isNotAuthenticated;
 };
