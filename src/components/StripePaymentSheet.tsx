@@ -31,6 +31,19 @@ const StripePaymentSheet = () => {
         );
     }
 
+    if (error) {
+        return (
+            <XStack bg='$red-700' borderWidth={1} borderColor='$red-500' borderRadius='$4' alignItems='center' space='$3' px='$3' py='$3'>
+                <YStack>
+                    <FontAwesomeIcon icon={faTriangleExclamation} color={theme['red-100'].val} size={15} />
+                </YStack>
+                <Text fontSize='$4' color='$red-100'>
+                    {error}
+                </Text>
+            </XStack>
+        );
+    }
+
     if (!paymentSheetEnabled) {
         return (
             <YStack>
@@ -43,19 +56,6 @@ const StripePaymentSheet = () => {
                     </Text>
                 </XStack>
             </YStack>
-        );
-    }
-
-    if (error) {
-        return (
-            <XStack bg='$red-700' borderWidth={1} borderColor='$red-500' borderRadius='$4' alignItems='center' space='$3' px='$3' py='$3'>
-                <YStack>
-                    <FontAwesomeIcon icon={faTriangleExclamation} color={theme['red-100'].val} size={15} />
-                </YStack>
-                <Text fontSize='$4' color='$red-100'>
-                    {error}
-                </Text>
-            </XStack>
         );
     }
 

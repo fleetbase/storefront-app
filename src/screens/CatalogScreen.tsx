@@ -44,15 +44,15 @@ const CatalogScreen = ({ route }) => {
 
     return (
         <YStack flex={1} bg='$background'>
-            <XStack py='$2' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
+            <XStack py='$4' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
                 <XStack flex={1} gap='$2' alignItems='center'>
-                    <FontAwesomeIcon icon={faTruck} color={theme['$blue-500'].val} size={20} />
+                    <FontAwesomeIcon icon={faTruck} color={theme['$blue-500'].val} size={24} />
                     <Text color='$textPrimary' fontSize='$7' fontWeight='bold' numberOfLines={1}>
                         {foodTruck.getAttribute('vehicle.plate_number')}
                     </Text>
                 </XStack>
                 <YStack>
-                    <CartButton text={t('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} />
+                    <CartButton text={t('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} iconSize={23} textSize={16} />
                 </YStack>
             </XStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>

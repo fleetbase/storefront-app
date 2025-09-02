@@ -1,0 +1,181 @@
+name: Tag Dispatcher
+
+on:
+    push:
+        tags:
+            - 'v*'
+
+env:
+    S3_BUCKET: flb-storefront-app-profiles
+
+jobs:
+    dispatch-to-profiles:
+        runs-on: ubuntu-latest
+        outputs:
+            profiles: ${{ steps.discover.outputs.profiles }}
+            version: ${{ steps.extract.outputs.version }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Configure Git
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Extract version from tag
+              id: extract
+              run: |
+                  TAG_NAME=${GITHUB_REF#refs/tags/}
+                  VERSION=${TAG_NAME#v}
+                  echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+                  echo "📋 Processing tag: $TAG_NAME (version: $VERSION)"
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION || 'ap-southeast-1' }}
+
+            - name: Discover profiles from S3
+              id: discover
+              run: |
+                  echo "🔍 Discovering profiles from S3..."
+
+                  # Get all profile directories from S3
+                  PROFILES=$(aws s3 ls s3://${{ env.S3_BUCKET }}/ | grep "PRE " | awk '{print $2}' | sed 's|/||g' | tr '\n' ',' | sed 's/,$//')
+
+                  if [ -z "$PROFILES" ]; then
+                    echo "❌ No profiles found in S3 bucket: ${{ env.S3_BUCKET }}"
+                    exit 1
+                  fi
+
+                  echo "profiles=$PROFILES" >> $GITHUB_OUTPUT
+                  echo "📦 Found profiles: $PROFILES"
+
+            - name: Merge tag to profile branches
+              run: |
+                  TAG_NAME=${{ steps.extract.outputs.tag }}
+                  VERSION=${{ steps.extract.outputs.version }}
+                  PROFILES="${{ steps.discover.outputs.profiles }}"
+
+                  echo "🚀 Merging $TAG_NAME to profile branches..."
+
+                  # Convert comma-separated profiles to array
+                  IFS=',' read -ra PROFILE_ARRAY <<< "$PROFILES"
+
+                  SUCCESSFUL_MERGES=""
+                  FAILED_MERGES=""
+
+                  for profile in "${PROFILE_ARRAY[@]}"; do
+                    echo "📝 Processing profile: $profile"
+                    
+                    # Check if profile branch exists remotely
+                    if git ls-remote --exit-code --heads origin app/$profile > /dev/null 2>&1; then
+                      echo "✅ Profile branch app/$profile exists"
+                      
+                      # Checkout existing profile branch
+                      git checkout -B app/$profile origin/app/$profile
+                    else
+                      echo "🆕 Creating new profile branch app/$profile"
+                      
+                      # Create new profile branch from main
+                      git checkout -b app/$profile main
+                    fi
+                    
+                    # Merge the tagged commit
+                    if git merge $TAG_NAME --no-ff -m "🚀 Release $TAG_NAME for $profile profile
+                    This merge brings the latest changes from main branch to the $profile profile branch.
+
+                    Version: $VERSION
+                    Profile: $profile
+                    Release Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+                    Triggered by: Tag push to main branch
+
+                    Changes included in this release will be built and deployed automatically."; then
+                      
+                      # Push the merge
+                      if git push origin app/$profile; then
+                        echo "✅ Successfully merged and pushed $TAG_NAME to app/$profile"
+                        SUCCESSFUL_MERGES="$SUCCESSFUL_MERGES$profile,"
+                      else
+                        echo "❌ Failed to push merge to app/$profile"
+                        FAILED_MERGES="$FAILED_MERGES$profile,"
+                      fi
+                    else
+                      echo "❌ Failed to merge $TAG_NAME to app/$profile"
+                      FAILED_MERGES="$FAILED_MERGES$profile,"
+                    fi
+                    
+                    echo "---"
+                  done
+
+                  # Remove trailing commas
+                  SUCCESSFUL_MERGES=${SUCCESSFUL_MERGES%,}
+                  FAILED_MERGES=${FAILED_MERGES%,}
+
+                  echo "successful_merges=$SUCCESSFUL_MERGES" >> $GITHUB_ENV
+                  echo "failed_merges=$FAILED_MERGES" >> $GITHUB_ENV
+
+                  # Summary
+                  echo "📊 Merge Summary:"
+                  echo "✅ Successful: $SUCCESSFUL_MERGES"
+                  echo "❌ Failed: $FAILED_MERGES"
+
+            - name: Send Discord notification - Dispatch Summary
+              uses: tsickert/discord-webhook@v5.3.0
+              with:
+                  webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+                  username: Fleetbase
+                  content: |
+                      🏷️ **Storefront App Release Dispatch**
+
+                      **Version:** ${{ steps.extract.outputs.version }}
+                      **Tag:** ${{ steps.extract.outputs.tag }}
+                      **Profiles:** ${{ steps.discover.outputs.profiles }}
+
+                      **Merge Status:**
+                      ✅ **Successful:** ${{ env.successful_merges }}
+                      ${{ env.failed_merges && format('❌ **Failed:** {0}', env.failed_merges) || '' }}
+
+                      🔄 **Next:** Individual profile releases will start automatically
+                      📅 **Time:** <t:${{ github.event.head_commit.timestamp && github.event.head_commit.timestamp || github.event.repository.pushed_at }}:F>
+
+            - name: Create release summary
+              run: |
+                  echo "# 🏷️ Tag Dispatcher Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Tag:** ${{ steps.extract.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+                  echo "**Version:** ${{ steps.extract.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+                  echo "**Profiles:** ${{ steps.discover.outputs.profiles }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "## Merge Results" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  if [ -n "${{ env.successful_merges }}" ]; then
+                    echo "### ✅ Successful Merges" >> $GITHUB_STEP_SUMMARY
+                    IFS=',' read -ra SUCCESS_ARRAY <<< "${{ env.successful_merges }}"
+                    for profile in "${SUCCESS_ARRAY[@]}"; do
+                      echo "- **$profile**: Merged and pushed to \`app/$profile\`" >> $GITHUB_STEP_SUMMARY
+                    done
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  if [ -n "${{ env.failed_merges }}" ]; then
+                    echo "### ❌ Failed Merges" >> $GITHUB_STEP_SUMMARY
+                    IFS=',' read -ra FAILED_ARRAY <<< "${{ env.failed_merges }}"
+                    for profile in "${FAILED_ARRAY[@]}"; do
+                      echo "- **$profile**: Failed to merge or push" >> $GITHUB_STEP_SUMMARY
+                    done
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "Individual profile release workflows will be triggered automatically for successful merges." >> $GITHUB_STEP_SUMMARY
+                  echo "Check the **Actions** tab for profile-specific build and deployment status." >> $GITHUB_STEP_SUMMARY

@@ -3,7 +3,7 @@ import { Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { formattedAddressFromPlace, formatAddressSecondaryIdentifier, restoreFleetbasePlace } from '../utils/location';
 import PlaceMapView from './PlaceMapView';
 
-const PlaceCard = ({ place, name, headerComponent, footerComponent, ...props }) => {
+const PlaceCard = ({ place, name, headerComponent, footerComponent, mapViewHeight = 90, mapViewWidth = 100, ...props }) => {
     const theme = useTheme();
     place = restoreFleetbasePlace(place);
 
@@ -12,8 +12,8 @@ const PlaceCard = ({ place, name, headerComponent, footerComponent, ...props }) 
             <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' px='$4' py='$3' {...props}>
                 {headerComponent}
                 <XStack>
-                    <YStack width={100} height={90}>
-                        <PlaceMapView place={place} zoom={2} markerSize='xs' width={100} borderWidth={1} borderColor='$borderColor' />
+                    <YStack width={mapViewWidth} height={mapViewHeight}>
+                        <PlaceMapView place={place} zoom={2} markerSize='xs' height={mapViewHeight} width={mapViewWidth} borderWidth={1} borderColor='$borderColor' />
                     </YStack>
                     <YStack flex={1} px='$3'>
                         <Text size={15} color='$textPrimary' fontWeight='bold' mb={2}>

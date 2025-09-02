@@ -54,7 +54,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === t('lineItems.total'));
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading;
+    const isReady = Boolean(paymentMethod) && !isLoading && !stripeLoading && (checkoutOptions?.pickup || Boolean(serviceQuote));
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
 
     function computeLineItems() {

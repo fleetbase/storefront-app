@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { ScrollView, SafeAreaView } from 'react-native';
+import { ScrollView, RefreshControl, SafeAreaView } from 'react-native';
 import { Separator, Button, Image, Stack, Text, YStack, XStack, useTheme } from 'tamagui';
+import MapView, { Marker } from 'react-native-maps';
 import { Order } from '@fleetbase/sdk';
 import { Store } from '@fleetbase/storefront';
 import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
@@ -9,12 +10,14 @@ import { format as formatDate, formatDistance, add } from 'date-fns';
 import { formatCurrency } from '../utils/format';
 import { loadPersistedResource } from '../utils';
 import LiveOrderRoute from '../components/LiveOrderRoute';
+import LivePickupRoute from '../components/LivePickupRoute';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { adapter as storefrontAdapter } from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import useStorage from '../hooks/use-storage';
 import PlaceCard from '../components/PlaceCard';
+import PlaceMapView from '../components/PlaceMapView';
 import OrderItems from '../components/OrderItems';
 import OrderTotal from '../components/OrderTotal';
 import AlertPromptBox from '../components/AlertPromptBox';
@@ -32,6 +35,7 @@ const OrderScreen = ({ route }) => {
     const [order, setOrder] = useState(new Order(params.order, fleetbaseAdapter));
     const [store, setStore] = useStorage(`${order.getAttribute('meta.storefront_id')}`, info);
     const [distanceMatrix, setDistanceMatrix] = useState();
+    const [refreshing, setRefreshing] = useState(false);
     const distanceLoadedRef = useRef(false);
     const isPickup = order.getAttribute('meta.is_pickup');
     const isPickupReady = isPickup && order.getAttribute('status') === 'pickup_ready';
@@ -59,15 +63,23 @@ const OrderScreen = ({ route }) => {
         }
     }, [order]);
 
-    const reloadOrder = useCallback(async () => {
-        try {
-            const reloadedOrder = await order.reload();
-            setOrder(reloadedOrder);
-            distanceLoadedRef.current = false;
-        } catch (err) {
-            console.error('Error reloading order:', err);
-        }
-    }, [order]);
+    const reloadOrder = useCallback(
+        async (options = {}) => {
+            if (options.refresh) {
+                setRefreshing(true);
+            }
+            try {
+                const reloadedOrder = await order.reload();
+                setOrder(reloadedOrder);
+                distanceLoadedRef.current = false;
+            } catch (err) {
+                console.error('Error reloading order:', err);
+            } finally {
+                setRefreshing(false);
+            }
+        },
+        [order]
+    );
 
     const getStoreOrderedFrom = async () => {
         if (info.is_store) {
@@ -123,9 +135,13 @@ const OrderScreen = ({ route }) => {
 
     return (
         <YStack flex={1} bg='$background'>
-            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} />}
+            >
                 <YStack width='100%' height={400} borderBottomWidth={1} borderColor='$borderColorWithShadow'>
-                    <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruckId} />
+                    {isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruckId} />}
                 </YStack>
                 <YStack space='$2'>
                     <YStack mt='$4' px='$4' py='$2' alignItems='center' justifyContent='center' space='$2'>
@@ -179,6 +195,7 @@ const OrderScreen = ({ route }) => {
                     <YStack px='$4' py='$2'>
                         <PlaceCard
                             place={isPickup ? order.getAttribute('payload.pickup') : order.getAttribute('payload.dropoff')}
+                            mapViewHeight={100}
                             name={isPickup ? t('OrderScreen.pickupLocation') : t('OrderScreen.deliveryLocation')}
                             headerComponent={
                                 <Text mb='$2' fontSize='$5' color='$textPrimary' fontWeight='bold'>

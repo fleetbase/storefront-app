@@ -23,7 +23,6 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
-    const { currentStoreLocation } = useStoreLocations();
     const { listen } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
     const [checkoutOptions, setCheckoutOptions] = useState({
@@ -237,11 +236,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
         if (!cart) return;
 
         let isMounted = true;
+        const origin = foodTruckId ?? storeLocationId;
         const destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
             try {
-                const quote = await getServiceQuote(currentStoreLocation, destination, cart);
+                const quote = await getServiceQuote(origin, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
@@ -256,7 +256,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, cart, deliveryLocation?.id, currentStoreLocation?.id]);
+    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, storeLocationId]);
 
     // Listen to payment updates via socket (if not already listening)
     useEffect(() => {

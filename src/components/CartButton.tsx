@@ -8,7 +8,7 @@ import { BlurView } from '@react-native-community/blur';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 
-const CartButton = ({ iconSize = 18, blur = false, style, text, onPress, children }) => {
+const CartButton = ({ iconSize = 18, textSize = 14, blur = false, style, text, onPress, children }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { isDarkMode } = useAppTheme();
@@ -27,7 +27,9 @@ const CartButton = ({ iconSize = 18, blur = false, style, text, onPress, childre
                 <XStack justifyContent='center' alignItems='center' bg='transparent' zIndex={2}>
                     {text && (
                         <YStack mr='$2'>
-                            <Text color='$textPrimary'>{text}</Text>
+                            <Text color='$textPrimary' fontSize={textSize}>
+                                {text}
+                            </Text>
                         </YStack>
                     )}
                     {children}

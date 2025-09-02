@@ -55,7 +55,6 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     const end = restoreFleetbasePlace(currentLocation);
     const origin = getCoordinatesObject(start);
     const destination = getCoordinatesObject(end);
-
     const initialDeltas = calculateDeltas(zoom);
     const [mapRegion, setMapRegion] = useState({
         ...origin,
@@ -80,61 +79,64 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         });
     };
 
-    const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (!customOrigin) return;
+    const updateOriginFromCustomOrigin = useCallback(
+        async (customOrigin) => {
+            if (!customOrigin) return;
 
-        if (typeof customOrigin !== 'string') {
-            // Assume customOrigin is already an origin object.
-            if (customOrigin.id && customOrigin.id !== start.id) {
-                setStart(customOrigin);
-            }
-            return;
-        }
-
-        // Will be loading a new origin
-        setFindingOrigin(true);
-
-        // customOrigin is a string ID.
-        if (customOrigin.startsWith('food_truck')) {
-            const cachedFoodTruck = getFoodTruckById(customOrigin);
-            if (cachedFoodTruck) {
-                setStart(cachedFoodTruck);
-                setFindingOrigin(false);
+            if (typeof customOrigin !== 'string') {
+                // Assume customOrigin is already an origin object.
+                if (customOrigin.id && customOrigin.id !== start.id) {
+                    setStart(customOrigin);
+                }
+                return;
             }
 
-            try {
-                const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
-                setStart(foodTruck);
-            } catch (error) {
-                console.warn('Error fetching food truck origin:', error);
-            } finally {
-                setFindingOrigin(false);
-            }
-        } else if (customOrigin.startsWith('store_location')) {
-            if (customOrigin !== start.store_location_id) {
+            // Will be loading a new origin
+            setFindingOrigin(true);
+
+            // customOrigin is a string ID.
+            if (customOrigin.startsWith('food_truck')) {
+                const cachedFoodTruck = getFoodTruckById(customOrigin);
+                if (cachedFoodTruck) {
+                    setStart(cachedFoodTruck);
+                    setFindingOrigin(false);
+                }
+
                 try {
-                    const storeLocation = await store.getLocation(customOrigin);
-                    setStart(
-                        restoreFleetbasePlace({
-                            ...storeLocation.getAttribute('place'),
-                            store_location_id: storeLocation.id,
-                        })
-                    );
+                    const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
+                    setStart(foodTruck);
                 } catch (error) {
-                    console.warn('Error fetching store location origin:', error);
+                    console.warn('Error fetching food truck origin:', error);
                 } finally {
                     setFindingOrigin(false);
                 }
+            } else if (customOrigin.startsWith('store_location')) {
+                if (customOrigin !== start.store_location_id) {
+                    try {
+                        const storeLocation = await store.getLocation(customOrigin);
+                        setStart(
+                            restoreFleetbasePlace({
+                                ...storeLocation.getAttribute('place'),
+                                store_location_id: storeLocation.id,
+                            })
+                        );
+                    } catch (error) {
+                        console.warn('Error fetching store location origin:', error);
+                    } finally {
+                        setFindingOrigin(false);
+                    }
+                }
             }
-        }
-    }, [customOrigin, storefront, store, start]);
+        },
+        [customOrigin, storefront, store, start]
+    );
 
     // Run the update when customOrigin changes.
     useEffect(() => {
         if (!storefront || !store) return;
 
-        updateOriginFromCustomOrigin();
-    }, [storefront, store]);
+        updateOriginFromCustomOrigin(customOrigin);
+    }, [storefront, store, customOrigin]);
 
     return (
         <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>
@@ -219,14 +221,16 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                     <LocationMarker size={markerSize} />
                 </Marker>
 
-                <MapViewDirections
-                    origin={makeCoordinatesFloat(origin)}
-                    destination={makeCoordinatesFloat(destination)}
-                    apikey={config('GOOGLE_MAPS_API_KEY')}
-                    strokeWidth={4}
-                    strokeColor={theme['$blue-500'].val}
-                    onReady={fitToRoute}
-                />
+                {origin && destination && (
+                    <MapViewDirections
+                        origin={makeCoordinatesFloat(origin)}
+                        destination={makeCoordinatesFloat(destination)}
+                        apikey={config('GOOGLE_MAPS_API_KEY')}
+                        strokeWidth={4}
+                        strokeColor={theme['$blue-500'].val}
+                        onReady={fitToRoute}
+                    />
+                )}
             </MapView>
 
             <YStack position='absolute' style={{ ...StyleSheet.absoluteFillObject }}>

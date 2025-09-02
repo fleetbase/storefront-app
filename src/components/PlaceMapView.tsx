@@ -12,7 +12,7 @@ const calculateDeltas = (zoom) => {
     return baseDelta * zoom;
 };
 
-const PlaceMapView = ({ place: _place, width = '100%', height = 200, markerSize = 'md', zoom = 1, onPress, mapViewProps = {}, ...props }) => {
+const PlaceMapView = ({ place: _place, width = '100%', height = 200, markerSize = 'md', borderRadius = '$4', zoom = 1, onPress, mapViewProps = {}, ...props }) => {
     const place = restoreFleetbasePlace(_place);
     const [latitude, longitude] = getCoordinates(place);
     const initialDeltas = calculateDeltas(zoom);
@@ -47,7 +47,7 @@ const PlaceMapView = ({ place: _place, width = '100%', height = 200, markerSize 
 
     return (
         <Pressable onPress={onPress} style={{ flex: 1, width, height }}>
-            <YStack position='relative' overflow='hidden' borderRadius='$4' width={width} height={height} {...props}>
+            <YStack position='relative' overflow='hidden' borderRadius={borderRadius} width={width} height={height} {...props}>
                 <MapView
                     ref={mapRef}
                     style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}

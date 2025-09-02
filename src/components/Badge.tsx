@@ -13,6 +13,7 @@ function getColorFromStatus(status) {
         case 'active':
         case 'completed':
         case 'pickup_ready':
+        case 'accepted':
             return 'green';
         case 'dispatched':
         case 'assigned':
