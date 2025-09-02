@@ -81,6 +81,7 @@ buck-out/
 
 # react-native-config codegen
 ios/tmp.xcconfig
+ios/.xcode.env.local
 
 # Credentials/ Config
 #
