@@ -80,14 +80,14 @@ android {
     
     namespace "com.storefront.app"
     defaultConfig {
-        applicationId project.env.get("APP_IDENTIFIER")
+        applicationId project.env.get("APP_IDENTIFIER") ?: "com.storefront.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode project.env.get("ANDROID_VERSION_CODE")?.toInteger() ?: 1
         versionName project.env.get("ANDROID_VERSION_NAME") ?: "1.0.0"
         missingDimensionStrategy 'react-native-camera', 'general' 
         manifestPlaceholders = [
-            appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX"),
+            appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp",
             appLinkScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp"
         ]
         resValue "string", "build_config_package", "com.storefront.app"
