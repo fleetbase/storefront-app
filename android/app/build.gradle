@@ -87,7 +87,7 @@ android {
         versionName project.env.get("ANDROID_VERSION_NAME") ?: "1.0.0"
         missingDimensionStrategy 'react-native-camera', 'general' 
         manifestPlaceholders = [
-            appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX")
+            appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX"),
             appLinkScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp"
         ]
         resValue "string", "build_config_package", "com.storefront.app"
