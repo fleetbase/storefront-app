@@ -16,6 +16,7 @@
     <domain-config>
         <domain includeSubdomains="true">fleetbase.io</domain>
         <domain includeSubdomains="true">fleetbase.engineering</domain>
+        <domain includeSubdomains="true">fleetbase.loclx.io</domain>
         <trust-anchors>
             <certificates src="user"/>
             <certificates src="system"/>

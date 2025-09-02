@@ -1,0 +1,862 @@
+name: Profile Release
+
+on:
+    push:
+        branches:
+            - 'app/*'
+
+    # Manual workflow dispatch for individual profile testing
+    workflow_dispatch:
+        inputs:
+            profile:
+                description: 'Profile to build and deploy'
+                required: true
+                type: string
+            build_type:
+                description: 'Build type'
+                required: true
+                default: 'debug'
+                type: choice
+                options:
+                    - debug
+                    - release
+            deploy:
+                description: 'Deploy to app stores'
+                required: true
+                default: false
+                type: boolean
+            release_track:
+                description: 'Release track for deployment'
+                required: false
+                default: 'internal'
+                type: choice
+                options:
+                    - internal
+                    - alpha
+                    - beta
+                    - production
+            version:
+                description: 'Version Code (optional override)'
+                required: false
+                type: string
+            build_number:
+                description: 'Build Number (optional override)'
+                required: false
+                type: string
+
+env:
+    S3_BUCKET: flb-storefront-app-profiles
+    NODE_VERSION: '18'
+    JAVA_VERSION: '21'
+    FALLBACK_VERSION_NAME: '2.0.9'
+    FALLBACK_BUILD_NUMBER: '16'
+
+jobs:
+    # Detect profile and release configuration
+    detect-release:
+        runs-on: ubuntu-latest
+        outputs:
+            profile: ${{ steps.detect.outputs.profile }}
+            build_type: ${{ steps.detect.outputs.build_type }}
+            deploy: ${{ steps.detect.outputs.deploy }}
+            release_track: ${{ steps.detect.outputs.release_track }}
+            is_release: ${{ steps.detect.outputs.is_release }}
+            version: ${{ steps.detect.outputs.version }}
+            build_number: ${{ steps.detect.outputs.build_number }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 10
+
+            - name: Detect profile and configuration
+              id: detect
+              run: |
+                  if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+                    # Manual dispatch
+                    echo "profile=${{ github.event.inputs.profile }}" >> $GITHUB_OUTPUT
+                    echo "build_type=${{ github.event.inputs.build_type }}" >> $GITHUB_OUTPUT
+                    echo "deploy=${{ github.event.inputs.deploy }}" >> $GITHUB_OUTPUT
+                    echo "release_track=${{ github.event.inputs.release_track }}" >> $GITHUB_OUTPUT
+                    
+                    # Version detection hierarchy for manual dispatch:
+                    # 1. Use latest Git tag for version name
+                    LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v${FALLBACK_VERSION_NAME}")
+                    echo "version=$LATEST_TAG" >> $GITHUB_OUTPUT
+                    
+                    # 2. Build number detection hierarchy (manual dispatch)
+                    # Keep inputs independent: version = semver string, build_number = integer
+                    if [ -n "${{ github.event.inputs.version }}" ] && [ "${{ github.event.inputs.version }}" != "" ]; then
+                      echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+                    fi
+
+                    if [ -n "${{ github.event.inputs.build_number }}" ] && [ "${{ github.event.inputs.build_number }}" != "" ]; then
+                      echo "build_number=${{ github.event.inputs.build_number }}" >> $GITHUB_OUTPUT
+                    fi
+
+                    # If neither provided, try to derive both from tag later
+                    if [ -z "${{ github.event.inputs.version }}" ] && [ -z "${{ github.event.inputs.build_number }}" ]; then
+                      TAG_COMMIT_MSG=$(git tag -l --format='%(contents)' "$LATEST_TAG" 2>/dev/null || echo "")
+                      # Accept both "[Build 16]" and "[Build No 16]"
+                      BUILD_FROM_TAG=$(echo "$TAG_COMMIT_MSG" | grep -o '\[Build\( No\)\? [0-9]\+\]' | grep -o '[0-9]\+' || echo "")
+                      if [ -n "$BUILD_FROM_TAG" ]; then
+                        echo "build_number=$BUILD_FROM_TAG" >> $GITHUB_OUTPUT
+                      else
+                        echo "build_number=" >> $GITHUB_OUTPUT
+                      fi
+                      # version (semver) continues to come from LATEST_TAG as version name
+                    fi
+                    
+                    echo "is_release=${{ github.event.inputs.build_type == 'release' }}" >> $GITHUB_OUTPUT
+                    
+                  else
+                    # Extract profile from branch name (app/fleetbase -> fleetbase)
+                    PROFILE=${GITHUB_REF#refs/heads/app/}
+                    echo "profile=$PROFILE" >> $GITHUB_OUTPUT
+                    
+                    # Check if this is a release merge by examining commit message
+                    COMMIT_MSG=$(git log -1 --pretty=%B)
+                    echo "Latest commit message: $COMMIT_MSG"
+                    
+                    if [[ "$COMMIT_MSG" == *"🚀 Release v"* ]] || [[ "$COMMIT_MSG" =~ \[[Vv][0-9]+\.[0-9]+\.[0-9]+([.-]?(alpha|beta|rc)[0-9]*)?\] ]]; then
+                      # This is a release merge from tag dispatcher
+                      echo "🚀 Release merge detected"
+                      
+                      # Extract version from commit message
+                      VERSION=$(echo "$COMMIT_MSG" | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+[^[:space:]]*' | head -1)
+                      if [ -z "$VERSION" ]; then
+                        VERSION=$(echo "$COMMIT_MSG" | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+[^[:space:]]*' | head -1)
+                        VERSION="v$VERSION"
+                      fi
+                      
+                      echo "version=$VERSION" >> $GITHUB_OUTPUT
+                      echo "build_type=release" >> $GITHUB_OUTPUT
+                      echo "deploy=true" >> $GITHUB_OUTPUT
+                      echo "is_release=true" >> $GITHUB_OUTPUT
+                      echo "build_number=" >> $GITHUB_OUTPUT
+                      
+                      # Determine release track based on version
+                      if [[ "$VERSION" == *"alpha"* ]] || [[ "$VERSION" == *"beta"* ]] || [[ "$VERSION" == *"rc"* ]]; then
+                        echo "release_track=internal" >> $GITHUB_OUTPUT
+                      else
+                        echo "release_track=production" >> $GITHUB_OUTPUT
+                      fi
+                      
+                    else
+                      # Regular development push
+                      echo "🔧 Development push detected"
+                      echo "version=v${FALLBACK_VERSION_NAME}-dev" >> $GITHUB_OUTPUT
+                      echo "build_type=debug" >> $GITHUB_OUTPUT
+                      echo "deploy=false" >> $GITHUB_OUTPUT
+                      echo "release_track=internal" >> $GITHUB_OUTPUT
+                      echo "is_release=false" >> $GITHUB_OUTPUT
+                      echo "build_number=" >> $GITHUB_OUTPUT
+                    fi
+                  fi
+
+                  echo "📋 Configuration:"
+                  echo "  Profile: $(cat $GITHUB_OUTPUT | grep 'profile=' | cut -d'=' -f2)"
+                  echo "  Version: $(cat $GITHUB_OUTPUT | grep 'version=' | cut -d'=' -f2)"
+                  echo "  Build Type: $(cat $GITHUB_OUTPUT | grep 'build_type=' | cut -d'=' -f2)"
+                  echo "  Deploy: $(cat $GITHUB_OUTPUT | grep 'deploy=' | cut -d'=' -f2)"
+                  echo "  Release Track: $(cat $GITHUB_OUTPUT | grep 'release_track=' | cut -d'=' -f2)"
+                  echo "  Fallback Version Name: ${FALLBACK_VERSION_NAME}"
+                  echo "  Fallback Build Number: ${FALLBACK_BUILD_NUMBER}"
+
+    # Setup base dependencies
+    setup:
+        runs-on: ubuntu-latest
+        needs: detect-release
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: 'yarn'
+
+            - name: Enable Corepack and install dependencies
+              run: |
+                  corepack enable
+                  corepack prepare yarn@3.6.4 --activate
+                  yarn install --immutable
+
+    # Resolve versions once to avoid races (parity across platforms)
+    resolve-versions:
+        runs-on: ubuntu-latest
+        needs: detect-release
+        outputs:
+            version_name: ${{ steps.outvars.outputs.version_name }}
+            build_number: ${{ steps.outvars.outputs.build_number }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # need tags
+                  fetch-tags: true
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION || 'ap-southeast-1' }}
+
+            - name: Download profile configuration
+              run: |
+                  echo "📦 Downloading profile: ${{ needs.detect-release.outputs.profile }}"
+                  aws s3 sync s3://${{ env.S3_BUCKET }}/${{ needs.detect-release.outputs.profile }}/ ./profile-config/
+                  test -f ./profile-config/.env || { echo "❌ Missing ./profile-config/.env"; exit 1; }
+                  echo "✅ Profile config ready"
+
+            - name: Resolve cross-platform versions
+              id: resolve
+              run: |
+                  echo "🔧 Resolving versions with parity (iOS/Android)"
+                  # ---- STEP 1: VERSION_NAME (semver) ----
+                  VERSION="${{ needs.detect-release.outputs.version }}"
+                  if [[ "$VERSION" == v* ]]; then VERSION_NAME=${VERSION#v}; else VERSION_NAME="$VERSION"; fi
+                  # .env fallback if dev/empty; last resort default
+                  if [ "$VERSION_NAME" = "dev" ] || [ -z "$VERSION_NAME" ]; then
+                    ENV_VER=$(grep -E '^ANDROID_VERSION_NAME=' ./profile-config/.env | cut -d'=' -f2 || true)
+                    if [ -n "$ENV_VER" ]; then
+                      VERSION_NAME="$ENV_VER"
+                      echo "✅ Version fallback from .env: $VERSION_NAME"
+                    else
+                      VERSION_NAME="${FALLBACK_VERSION_NAME}"
+                      echo "⚠️ Version fallback defaulted to: $VERSION_NAME"
+                    fi
+                  fi
+                  # manual override already reflected in detect-release.outputs.version
+
+                  # ---- STEP 2: BUILD_NUMBER (strict int, NO AUTOINCREMENT) ----
+                  if [ -n "${{ needs.detect-release.outputs.build_number }}" ] && [ "${{ needs.detect-release.outputs.build_number }}" != "" ]; then
+                    BUILD_NUMBER="${{ needs.detect-release.outputs.build_number }}"
+                    echo "✅ Build number override (manual): $BUILD_NUMBER"
+                  else
+                    TAG="${{ needs.detect-release.outputs.version }}"
+                    TAG_MSG=$(git tag -l --format='%(contents)' "$TAG" 2>/dev/null || echo "")
+                    BUILD_FROM_TAG=$(echo "$TAG_MSG" | grep -o '\[Build\( No\)\? [0-9]\+\]' | grep -o '[0-9]\+' || echo "")
+                    if [ -n "$BUILD_FROM_TAG" ]; then
+                      BUILD_NUMBER="$BUILD_FROM_TAG"
+                      echo "✅ Build number from tag message: $BUILD_FROM_TAG"
+                    else
+                      # Use value from profile .env without increment
+                      CUR=$(grep -E '^ANDROID_VERSION_CODE=' ./profile-config/.env | cut -d'=' -f2 2>/dev/null || echo "")
+                      if [[ "$CUR" =~ ^[0-9]+$ ]]; then
+                        BUILD_NUMBER="$CUR"
+                        echo "ℹ️ Using build number from ANDROID_VERSION_CODE in .env: $BUILD_NUMBER"
+                      else
+                        BUILD_NUMBER="${FALLBACK_BUILD_NUMBER:-1}"
+                        echo "⚠️ No valid build number from inputs, tag, or .env; falling back to global: $BUILD_NUMBER"
+                      fi
+                    fi
+                  fi
+
+                  # Final validation
+                  if ! [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]]; then
+                    echo "❌ ERROR: BUILD_NUMBER not integer: '$BUILD_NUMBER'"
+                    exit 1
+                  fi
+
+                  echo "🎯 Final parity:"
+                  echo "  iOS_VERSION / ANDROID_VERSION_NAME = $VERSION_NAME"
+                  echo "  IOS_BUILD_NUMBER / ANDROID_VERSION_CODE = $BUILD_NUMBER"
+
+                  # Update profile-config/.env (parity)
+                  grep -q '^ANDROID_VERSION_NAME=' ./profile-config/.env && \
+                    sed -i "s/^ANDROID_VERSION_NAME=.*/ANDROID_VERSION_NAME=$VERSION_NAME/" ./profile-config/.env || \
+                    echo "ANDROID_VERSION_NAME=$VERSION_NAME" >> ./profile-config/.env
+                  grep -q '^ANDROID_VERSION_CODE=' ./profile-config/.env && \
+                    sed -i "s/^ANDROID_VERSION_CODE=.*/ANDROID_VERSION_CODE=$BUILD_NUMBER/" ./profile-config/.env || \
+                    echo "ANDROID_VERSION_CODE=$BUILD_NUMBER" >> ./profile-config/.env
+                  grep -q '^IOS_VERSION=' ./profile-config/.env && \
+                    sed -i "s/^IOS_VERSION=.*/IOS_VERSION=$VERSION_NAME/" ./profile-config/.env || \
+                    echo "IOS_VERSION=$VERSION_NAME" >> ./profile-config/.env
+                  grep -q '^IOS_BUILD_NUMBER=' ./profile-config/.env && \
+                    sed -i "s/^IOS_BUILD_NUMBER=.*/IOS_BUILD_NUMBER=$BUILD_NUMBER/" ./profile-config/.env || \
+                    echo "IOS_BUILD_NUMBER=$BUILD_NUMBER" >> ./profile-config/.env
+
+                  # SECURITY FIX: Create a separate versions file with only version info
+                  # This prevents sensitive .env data from being exposed in logs
+                  printf "IOS_VERSION=%s\n" "$VERSION_NAME" > versions.env
+                  printf "IOS_BUILD_NUMBER=%s\n" "$BUILD_NUMBER" >> versions.env
+                  printf "ANDROID_VERSION_NAME=%s\n" "$VERSION_NAME" >> versions.env
+                  printf "ANDROID_VERSION_CODE=%s\n" "$BUILD_NUMBER" >> versions.env
+
+            - name: Upload resolved versions
+              uses: actions/upload-artifact@v4
+              with:
+                  name: versions
+                  path: versions.env
+
+            - name: Set outputs
+              id: outvars
+              run: |
+                  echo "version_name=$(grep '^ANDROID_VERSION_NAME=' versions.env | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+                  echo "build_number=$(grep '^ANDROID_VERSION_CODE=' versions.env | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+
+    # Android build and deployment
+    build-android:
+        runs-on: ubuntu-latest
+        needs: [detect-release, setup, resolve-versions]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: 'yarn'
+
+            - name: Enable Corepack and install dependencies
+              run: |
+                  corepack enable
+                  corepack prepare yarn@3.6.4 --activate
+                  yarn install --immutable
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'temurin'
+                  java-version: ${{ env.JAVA_VERSION }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION || 'ap-southeast-1' }}
+
+            - name: Download profile configuration
+              run: |
+                  echo "📦 Downloading profile: ${{ needs.detect-release.outputs.profile }}"
+                  aws s3 sync s3://${{ env.S3_BUCKET }}/${{ needs.detect-release.outputs.profile }}/ ./profile-config/
+
+                  # Validate required files
+                  required_files=(
+                    "./profile-config/.env"
+                    "./profile-config/google-services.json"
+                    "./profile-config/play-store-credentials.json"
+                    "./profile-config/app-icon.png"
+                    "./profile-config/splash-screen.png"
+                    "./profile-config/android-Fastfile"
+                    "./profile-config/android-Appfile"
+                    "./profile-config/appstore-api-key.p8"
+                  )
+
+                  # Add release.keystore for release builds
+                  if [ "${{ needs.detect-release.outputs.build_type }}" == "release" ]; then
+                    required_files+=("./profile-config/release.keystore")
+                  fi
+
+                  for file in "${required_files[@]}"; do
+                    if [ ! -f "$file" ]; then
+                      echo "❌ Missing required file: $file"
+                      exit 1
+                    fi
+                  done
+
+                  echo "✅ All required files found for profile: ${{ needs.detect-release.outputs.profile }}"
+
+            - name: Download resolved versions
+              uses: actions/download-artifact@v4
+              with:
+                  name: versions
+                  path: .
+
+            - name: Source environment
+              run: |
+                  echo "🔧 Setting up profile environment securely"
+
+                  # Load .env variables into process environment WITHOUT exposing in logs
+                  set -a
+                  source ./profile-config/.env
+                  set +a
+
+                  # Load version overrides from secure artifact
+                  source ./versions.env
+                  echo "Android building: $ANDROID_VERSION_NAME ($ANDROID_VERSION_CODE)"
+
+                  # Export versions
+                  echo "ANDROID_VERSION_NAME=$ANDROID_VERSION_NAME" >> $GITHUB_ENV
+                  echo "ANDROID_VERSION_CODE=$ANDROID_VERSION_CODE" >> $GITHUB_ENV
+
+            - name: Setup profile environment
+              run: |
+                  echo "🔧 Setting up profile environment"
+
+                  # Copy configuration files to correct locations
+                  cp ./profile-config/.env ./.env
+                  cp ./profile-config/google-services.json ./android/app/google-services.json
+                  cp ./profile-config/play-store-credentials.json ./android/app/play-store-credentials.json
+                  cp ./profile-config/app-icon.png ./assets/app-icon.png
+                  cp ./profile-config/splash-screen.png ./assets/splash-screen.png
+
+                  # Copy release keystore for release builds
+                  if [ "${{ needs.detect-release.outputs.build_type }}" == "release" ]; then
+                    cp ./profile-config/release.keystore ./android/app/release.keystore
+                  fi
+
+                  # Setup Fastlane files
+                  mkdir -p android/fastlane
+                  cp ./profile-config/android-Fastfile android/fastlane/Fastfile
+                  cp ./profile-config/android-Appfile android/fastlane/Appfile
+
+                  echo "✅ Profile environment setup completed for: ${{ needs.detect-release.outputs.profile }}"
+                  echo "📱 Version: $ANDROID_VERSION_NAME ($ANDROID_VERSION_CODE)"
+
+            - name: Install ImageMagick & Ninja (Ubuntu)
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y imagemagick ninja-build
+
+            - name: Ensure Android SDK/NDK/CMake toolchain
+              shell: bash
+              env:
+                  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+              run: |
+                  set -e
+
+                  # Find a working sdkmanager (latest if present, else first found)
+                  if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+                    SDKMGR="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+                  else
+                    SDKMGR=$(ls -1d "$ANDROID_SDK_ROOT/cmdline-tools"/*/bin/sdkmanager 2>/dev/null | head -n1 || true)
+                    if [ -z "$SDKMGR" ]; then
+                      echo "No cmdline-tools found; installing 'cmdline-tools;latest' with the preinstalled sdkmanager..."
+                      # Use the prebundled sdkmanager path on GH runners
+                      SDKMGR="$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager"
+                      "$SDKMGR" "cmdline-tools;latest"
+                      SDKMGR="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+                    fi
+                  fi
+
+                  echo "Using sdkmanager at: $SDKMGR"
+
+                  # Accept licenses; don't fail on SIGPIPE from 'yes'
+                  yes | "$SDKMGR" --licenses >/dev/null 2>&1 || true
+
+                  # Helper: install component if missing
+                  need() {
+                    local p="$1"
+                    if ! "$SDKMGR" --list_installed | grep -q "^  $p$"; then
+                      echo "Installing $p"
+                      "$SDKMGR" "$p"
+                    else
+                      echo "✓ $p already installed"
+                    fi
+                  }
+
+                  # Match root gradle pins
+                  need "platforms;android-35"
+                  need "build-tools;35.0.0"
+                  need "ndk;27.1.12297006"
+
+                  # CMake version
+                  need "cmake;3.22.1"
+
+                  # Sanity output
+                  "$ANDROID_SDK_ROOT/cmake/3.22.1/bin/cmake" --version || true
+                  test -f "$ANDROID_SDK_ROOT/ndk/27.1.12297006/source.properties" && echo "✅ NDK 27.1.12297006 installed"
+
+            - name: Generate app icon and splash screen
+              run: |
+                  echo "🎨 Generating app icon and splash screen"
+                  yarn generate:app-icon
+                  yarn generate:launch-screen
+                  echo "✅ App icon and splash screen generated"
+
+            - name: Cache Gradle dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-
+
+            - name: Build or Deploy Android app
+              run: |
+                  set -e
+
+                  # Load .env variables into step
+                  set -a
+                  source ./.env
+                  set +a
+
+                  cd android
+                  chmod +x ./gradlew
+
+                  # Sanity check
+                  ./gradlew :app:signingReport --no-daemon
+
+                  # Install Fastlane for deployment
+                  if [ "${{ needs.detect-release.outputs.deploy }}" == "true" ]; then
+                    echo "🚀 Installing Fastlane for deployment"
+                    sudo gem install fastlane
+                    
+                    echo "📋 Available Fastlane lanes:"
+                    fastlane lanes
+                    
+                    echo "🚀 Deploying to Google Play Store"
+                    echo "Profile: ${{ needs.detect-release.outputs.profile }}"
+                    echo "Release Track: ${{ needs.detect-release.outputs.release_track }}"
+                    
+                    # Use Fastlane to build and deploy (single step)
+                    case "${{ needs.detect-release.outputs.release_track }}" in
+                      "production")
+                        echo "📱 Deploying to production track"
+                        fastlane deploy_production
+                        ;;
+                      "beta")
+                        echo "📱 Deploying to beta track"
+                        fastlane deploy_beta
+                        ;;
+                      "alpha")
+                        echo "📱 Deploying to alpha track"
+                        fastlane deploy_alpha
+                        ;;
+                      "internal"|*)
+                        echo "📱 Deploying to internal testing track"
+                        fastlane deploy_internal
+                        ;;
+                    esac
+                    
+                    echo "✅ Successfully deployed to Google Play"
+                    
+                  else
+                    # Just build for testing/artifacts
+                    echo "🔨 Building Android app (no deployment)"
+                    case "${{ needs.detect-release.outputs.build_type }}" in
+                      "release")
+                        ./gradlew clean bundleRelease --no-daemon --stacktrace
+                        echo "AAB_PATH=android/app/build/outputs/bundle/release/app-release.aab" >> $GITHUB_ENV
+                        echo "BUILD_OUTPUT=Release AAB" >> $GITHUB_ENV
+                        ;;
+                      *)
+                        ./gradlew clean assembleDebug --no-daemon --stacktrace
+                        echo "APK_PATH=android/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+                        echo "BUILD_OUTPUT=Debug APK" >> $GITHUB_ENV
+                        ;;
+                    esac
+                  fi
+
+            - name: Upload build artifacts
+              if: needs.detect-release.outputs.deploy != 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: android-${{ needs.detect-release.outputs.profile }}-${{ needs.detect-release.outputs.build_type }}-${{ needs.detect-release.outputs.version }}
+                  path: ${{ env.APK_PATH || env.AAB_PATH }}
+                  retention-days: 30
+
+    # iOS build and deployment
+    build-ios:
+        runs-on: macos-latest
+        needs: [detect-release, setup, resolve-versions]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: latest-stable
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: 'yarn'
+
+            - name: Enable Corepack and install dependencies
+              run: |
+                  corepack enable
+                  corepack prepare yarn@3.6.4 --activate
+                  yarn install --immutable
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION || 'ap-southeast-1' }}
+
+            - name: Download profile configuration
+              run: |
+                  echo "📦 Downloading profile: ${{ needs.detect-release.outputs.profile }}"
+                  aws s3 sync s3://${{ env.S3_BUCKET }}/${{ needs.detect-release.outputs.profile }}/ ./profile-config/
+
+                  # Validate required files (simplified structure)
+                  required_files=(
+                    "./profile-config/.env"
+                    "./profile-config/app-icon.png"
+                    "./profile-config/splash-screen.png"
+                    "./profile-config/ios-Fastfile"
+                    "./profile-config/ios-Appfile"
+                    "./profile-config/appstore-api-key.p8"
+                  )
+
+                  for file in "${required_files[@]}"; do
+                    if [ ! -f "$file" ]; then
+                      echo "❌ Missing required file: $file"
+                      exit 1
+                    fi
+                  done
+
+            - name: Download resolved versions
+              uses: actions/download-artifact@v4
+              with:
+                  name: versions
+
+            - name: Source versions & bump Info.plist
+              run: |
+                  echo "🔧 Setting up profile environment securely"
+
+                  # Load .env variables into process environment WITHOUT exposing in logs
+                  set -a
+                  source ./profile-config/.env
+                  set +a
+
+                  # Load version overrides from secure artifact
+                  source ./versions.env
+                  echo "iOS building: $IOS_VERSION ($IOS_BUILD_NUMBER)"
+                  # enforce parity in the app:
+                  /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $IOS_VERSION" ios/StorefrontApp/Info.plist
+                  /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $IOS_BUILD_NUMBER" ios/StorefrontApp/Info.plist || true
+
+            - name: Setup profile environment
+              run: |
+                  echo "🔧 Setting up profile environment"
+
+                  # Copy configuration files
+                  cp ./profile-config/.env ./.env
+                  cp ./profile-config/app-icon.png ./assets/app-icon.png
+                  cp ./profile-config/splash-screen.png ./assets/splash-screen.png
+
+                  # Setup Fastlane files
+                  mkdir -p ios/fastlane
+                  cp ./profile-config/ios-Fastfile ios/fastlane/Fastfile
+                  cp ./profile-config/ios-Appfile ios/fastlane/Appfile
+
+                  echo "✅ Profile environment setup completed for: ${{ needs.detect-release.outputs.profile }}"
+                  echo "📱 Version: $IOS_VERSION ($IOS_BUILD_NUMBER)"
+
+            - name: Set up iOS authentication
+              run: |
+                  # Load .env variables into step
+                  set -a
+                  source ./.env
+                  set +a
+
+                  echo "🔐 Setting up iOS authentication (required for all iOS builds)"
+
+                  # Check if Apple credentials are available
+                  if [ -z "$APPSTORE_API_KEY_ID" ] || [ -z "$APPSTORE_API_ISSUER_ID" ]; then
+                    echo "❌ Missing Apple credentials in .env file"
+                    echo "Required: APPSTORE_API_KEY_ID, APPSTORE_API_ISSUER_ID"
+                    exit 1
+                  fi
+
+                  # Check if API key file exists
+                  if [ ! -f "./profile-config/appstore-api-key.p8" ]; then
+                    echo "❌ Missing appstore-api-key.p8 file"
+                    exit 1
+                  fi
+
+                  # Create the API key file for Fastlane and Xcode
+                  mkdir -p ~/.appstoreconnect/private_keys
+                  cp ./profile-config/appstore-api-key.p8 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+
+                  # Set proper permissions
+                  chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+
+                  echo "✅ App Store Connect API key configured for all iOS builds"
+
+            - name: Install ImageMagick (macOS)
+              run: |
+                  brew update
+                  brew install imagemagick
+
+            - name: Generate app icon and splash screen
+              run: |
+                  echo "🎨 Generating app icon and splash screen"
+                  yarn generate:app-icon
+                  yarn generate:launch-screen
+                  echo "✅ App icon and splash screen generated"
+
+            - name: Cache CocoaPods
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ios/Pods
+                      ~/Library/Caches/CocoaPods
+                      ~/.cocoapods
+                  key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pods-
+
+            - name: Install iOS dependencies
+              run: |
+                  echo "📦 Installing iOS dependencies"
+                  cd ios && pod install --repo-update
+
+            - name: Create Gemfile and install Fastlane + plugins
+              run: |
+                  set -e
+                  cat > Gemfile <<'EOF'
+                  source "https://rubygems.org"
+                  gem "fastlane", "~> 2.228"
+                  EOF
+
+                  # Optional: speed up / be deterministic
+                  export BUNDLE_PATH="vendor/bundle"
+                  export BUNDLE_JOBS=4
+                  export BUNDLE_RETRY=3
+                  bundle install
+
+            - name: Build or Deploy iOS app
+              env:
+                  PROFILE: ${{ needs.detect-release.outputs.profile }}
+                  FASTLANE_SKIP_UPDATE_CHECK: '1'
+                  FASTLANE_DISABLE_PROMPTS: '1'
+                  MATCH_S3_BUCKET: ${{ env.S3_BUCKET }}
+                  MATCH_S3_OBJECT_PREFIX: '${{ needs.detect-release.outputs.profile }}/certs/'
+                  MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+                  MATCH_S3_REGION: ${{ secrets.AWS_REGION || 'ap-southeast-1' }}
+              run: |
+                  set -e
+
+                  # Load .env variables into step
+                  set -a
+                  source ./.env
+                  set +a
+
+                  cd ios
+
+                  echo "📋 Available Fastlane lanes:"
+                  bundle exec fastlane lanes
+
+                  if [ "${{ needs.detect-release.outputs.deploy }}" = "true" ]; then
+                    echo "🚀 Deploying to App Store Connect"
+                    echo "Profile: ${{ needs.detect-release.outputs.profile }}"
+                    echo "Release Track: ${{ needs.detect-release.outputs.release_track }}"
+
+                    case "${{ needs.detect-release.outputs.release_track }}" in
+                      "production")
+                        echo "📱 Deploying to App Store for review"
+                        bundle exec fastlane deploy_appstore
+                        ;;
+                      "internal"|"alpha"|"beta"|*)
+                        echo "📱 Deploying to TestFlight"
+                        bundle exec fastlane deploy_testflight
+                        ;;
+                    esac
+
+                    echo "✅ Fastlane finished"
+                  else
+                    echo "🔨 Building iOS app (no deployment)"
+
+                    case "${{ needs.detect-release.outputs.build_type }}" in
+                      "release")
+                        echo "🔨 Building iOS Release Archive with automatic signing"
+                        xcodebuild -workspace StorefrontApp.xcworkspace \
+                          -scheme StorefrontApp \
+                          -configuration Release \
+                          -destination "generic/platform=iOS" \
+                          -archivePath build/StorefrontApp.xcarchive \
+                          -allowProvisioningUpdates \
+                          CODE_SIGN_STYLE=Automatic \
+                          DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM_ID" \
+                          archive
+                        echo "IOS_BUILD_PATH=ios/build/StorefrontApp.xcarchive" >> $GITHUB_ENV
+                        echo "BUILD_OUTPUT=Archive" >> $GITHUB_ENV
+                        ;;
+                      *)
+                        echo "🔨 Building iOS Debug for Simulator (with automatic signing)"
+
+                        SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -o '[A-F0-9-]\{36\}' | head -1)
+                        if [ -n "$SIMULATOR_ID" ]; then
+                          DESTINATION="id=$SIMULATOR_ID"
+                          echo "📱 Using iPhone simulator: $SIMULATOR_ID"
+                        else
+                          DESTINATION="generic/platform=iOS Simulator"
+                          echo "📱 Using generic iOS Simulator"
+                        fi
+
+                        xcodebuild -workspace StorefrontApp.xcworkspace \
+                          -scheme StorefrontApp \
+                          -configuration Debug \
+                          -sdk iphonesimulator \
+                          -destination "$DESTINATION" \
+                          -derivedDataPath build \
+                          -allowProvisioningUpdates \
+                          CODE_SIGN_STYLE=Automatic \
+                          DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM_ID" \
+                          build
+                        echo "IOS_BUILD_PATH=ios/build/Build/Products/Debug-iphonesimulator/" >> $GITHUB_ENV
+                        echo "BUILD_OUTPUT=Debug Build for Simulator" >> $GITHUB_ENV
+                        ;;
+                    esac
+                  fi
+
+            - name: Upload build artifacts
+              if: needs.detect-release.outputs.deploy != 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-${{ needs.detect-release.outputs.profile }}-${{ needs.detect-release.outputs.build_type }}-${{ needs.detect-release.outputs.version }}
+                  path: ${{ env.IOS_BUILD_PATH }}
+                  retention-days: 30
+
+    # Send Discord notification
+    notify:
+        runs-on: ubuntu-latest
+        needs: [detect-release, build-android, build-ios]
+        if: always()
+        steps:
+            - name: Determine overall status
+              run: |
+                  ANDROID_STATUS="${{ needs.build-android.result }}"
+                  IOS_STATUS="${{ needs.build-ios.result }}"
+
+                  if [ "$ANDROID_STATUS" == "success" ] && [ "$IOS_STATUS" == "success" ]; then
+                    echo "OVERALL_STATUS=success" >> $GITHUB_ENV
+                    echo "STATUS_EMOJI=✅" >> $GITHUB_ENV
+                  elif [ "$ANDROID_STATUS" == "failure" ] || [ "$IOS_STATUS" == "failure" ]; then
+                    echo "OVERALL_STATUS=failure" >> $GITHUB_ENV
+                    echo "STATUS_EMOJI=❌" >> $GITHUB_ENV
+                  else
+                    echo "OVERALL_STATUS=partial" >> $GITHUB_ENV
+                    echo "STATUS_EMOJI=⚠️" >> $GITHUB_ENV
+                  fi
+
+            - name: Send Discord notification
+              uses: tsickert/discord-webhook@v5.3.0
+              with:
+                  webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+                  username: Fleetbase
+                  content: |
+                      ${{ env.STATUS_EMOJI }} **Storefront App Release**
+
+                      **Profile:** `${{ needs.detect-release.outputs.profile }}`
+                      **Version:** `${{ needs.detect-release.outputs.version }}`
+                      **Build Number:** `${{ needs.detect-release.outputs.build_number }}`
+                      **Build Type:** `${{ needs.detect-release.outputs.build_type }}`
+                      **Deploy:** `${{ needs.detect-release.outputs.deploy }}`
+
+                      **Build Status:**
+                      • **Android:** ${{ needs.build-android.result == 'success' && '✅ Success' || needs.build-android.result == 'failure' && '❌ Failed' || '⚠️ Skipped' }}
+                      • **iOS:** ${{ needs.build-ios.result == 'success' && '✅ Success' || needs.build-ios.result == 'failure' && '❌ Failed' || '⚠️ Skipped' }}
+
+                      ${{ needs.detect-release.outputs.deploy == 'true' && format('**Release Track:** `{0}`', needs.detect-release.outputs.release_track) || '**Deployment:** Disabled' }}
+                      ${{ needs.detect-release.outputs.is_release == 'true' && '🚀 **Release Build**' || '🔧 **Development Build**' }}
+
+                      **Triggered by:** ${{ github.event_name == 'workflow_dispatch' && 'Manual dispatch' || 'Branch push' }}
+                      **Branch:** `${{ github.ref_name }}`
+                      **Commit:** [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+
+                      [View Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
