@@ -32,12 +32,10 @@
 				<string>$(APP_LINK_PREFIX)</string>
 				<string>fb$(FACEBOOK_APP_ID)</string>
 				<string>$(APP_IDENTIFIER)</string>
-				<string>com.googleusercontent.apps.$(GOOGLE_IOS_CLIENT_ID)</string> 
+				<string>com.googleusercontent.apps.$(GOOGLE_IOS_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>
-	<key>GIDClientID</key>
-	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
@@ -46,6 +44,10 @@
 	<string>$(FACEBOOK_CLIENT_TOKEN)</string>
 	<key>FacebookDisplayName</key>
 	<string>$(APP_NAME)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>qpaywallet</string>
@@ -110,16 +112,16 @@
 	<string>This app may need to access your contacts for sharing</string>
 	<key>NSLocalUsageDescription</key>
 	<string>This app requires access to send you notifications about order status updates and
-		other important information.</string>
+	other important information.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
-		when the app is in use</string>
+	when the app is in use</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
-		when the app is in use</string>
+	when the app is in use</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
-		when the app is in use</string>
+	when the app is in use</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app allows you to upload photos from your photo library</string>
 	<key>NSUserAuthenticationUsageDescription</key>
@@ -128,8 +130,6 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
 	<key>UILaunchStoryboardName</key>
 	<string>BootSplash</string>
 	<key>UIRequiredDeviceCapabilities</key>
