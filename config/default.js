@@ -2,6 +2,11 @@ import { mergeConfigs, config, toBoolean } from '../src/utils/config';
 import { toArray } from '../src/utils';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 
+const backgroundImages = {
+    storefront_photo_1: require('../assets/images/storefront-photo-1.jpg'),
+    storefront_photo_2: require('../assets/images/storefront-photo-2.jpg'),
+};
+
 export const DefaultConfig = {
     theme: config('APP_THEME', 'blue'),
     storeNavigator: {
@@ -28,15 +33,28 @@ export const DefaultConfig = {
     storeCategoriesDisplay: config('STORE_CATEGORIES_DISPLAY', 'grid'), // `pills` or `grid`
     productCardStyle: config('PRODUCT_CARD_STYLE', 'bordered'), // `bordered`, `outlined`, `visio`
     backgroundImages: {
-        LoginScreen: require('../assets/images/storefront-photo-1.jpg'),
+        LoginScreen: backgroundImages[config('LOGIN_BG_IMAGE', 'storefront_photo_1')],
+        BootScreen: backgroundImages[config('BOOTSCREEN_BG_IMAGE')] ?? null,
+    },
+    storeHeader: {
+        showGradient: toBoolean(config('STORE_HEADER_SHOW_GRADIENT', 1)),
+        showLocationPicker: toBoolean(config('STORE_HEADER_SHOW_LOCATION_PICKER', 1)),
+        showTitle: toBoolean(config('STORE_HEADER_SHOW_TITLE', 1)),
+        showDescription: toBoolean(config('STORE_HEADER_SHOW_DESCRIPTION', 1)),
+        showLogo: toBoolean(config('STORE_HEADER_SHOW_LOGO', 1)),
+        logoHeight: parseInt(config('STORE_HEADER_LOGO_HEIGHT', 45)),
+        logoWidth: parseInt(config('STORE_HEADER_LOGO_WIDTH', 45)),
     },
     styles: {
         StoreHeader: {
-            direction: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            space: '$1',
-            padding: '$4',
+            direction: config('STORE_HEADER_FLEX_DIRECTION', 'column'),
+            alignItems: config('STORE_HEADER_ALIGN_ITEMS', 'center'),
+            justifyContent: config('STORE_HEADER_JUSTIFY_CONTENT', 'flex-end'),
+            space: config('STORE_HEADER_SPACING', '$1'),
+            paddingTop: config('STORE_HEADER_PADDING_TOP', 0),
+            paddingBottom: config('STORE_HEADER_PADDING_BOTTOM', 0),
+            paddingLeft: config('STORE_HEADER_PADDING_LEFT', 0),
+            paddingRight: config('STORE_HEADER_PADDING_RIGHT', 0),
         },
     },
 };

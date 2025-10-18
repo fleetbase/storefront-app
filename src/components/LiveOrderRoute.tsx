@@ -64,7 +64,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         longitudeDelta: initialDeltas,
     });
     const [zoomLevel, setZoomLevel] = useState(calculateZoomLevel(initialDeltas));
-    const [findingOrigin, setFindingOrigin] = useState(false);
+    const [findingOrigin, setFindingOrigin] = useState(true);
     const markerOffset = calculateOffset(zoomLevel);
     const driverAssigned = order.getAttribute('driver_assigned') ? new Driver(order.getAttribute('driver_assigned')) : null;
     const isOriginFoodTruck = start.resource === 'food-truck';
@@ -96,7 +96,10 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     };
 
     const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (!customOrigin) return;
+        if (!customOrigin) {
+            setFindingOrigin(false);
+            return;
+        }
 
         if (typeof customOrigin !== 'string') {
             // Assume customOrigin is already an origin object.
@@ -146,10 +149,13 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
     // Run the update when customOrigin changes.
     useEffect(() => {
-        if (!storefront || !store) return;
+        if (!storefront || !store) {
+            setFindingOrigin(false);
+            return;
+        }
 
         updateOriginFromCustomOrigin();
-    }, [storefront, store]);
+    }, [storefront, store, setFindingOrigin]);
 
     return (
         <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>
@@ -235,14 +241,16 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                     <LocationMarker size={markerSize} />
                 </Marker>
 
-                <MapViewDirections
-                    origin={origin}
-                    destination={destination}
-                    apikey={config('GOOGLE_MAPS_API_KEY')}
-                    strokeWidth={4}
-                    strokeColor={theme['$blue-500'].val}
-                    onReady={fitToRoute}
-                />
+                {origin && destination && findingOrigin === false && (
+                    <MapViewDirections
+                        origin={origin}
+                        destination={destination}
+                        apikey={config('GOOGLE_MAPS_API_KEY')}
+                        strokeWidth={4}
+                        strokeColor={theme['$blue-500'].val}
+                        onReady={fitToRoute}
+                    />
+                )}
             </MapView>
 
             <YStack position='absolute' style={{ ...StyleSheet.absoluteFillObject }}>

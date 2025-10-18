@@ -1,6 +1,7 @@
 import { config as baseConfig } from '@tamagui/config/v3';
 import { createTamagui, createTheme, createTokens } from 'tamagui';
 import { config, parseConfigObjectString, flattenTailwindCssColorsObject } from './src/utils/tamagui';
+import { trueveganLightBase, trueveganDarkBase, trueveganColorPalette } from './themes/true-vegan';
 
 const customColors = parseConfigObjectString(config('CUSTOM_COLORS', ''));
 const customColorsDark = parseConfigObjectString(config('CUSTOM_COLORS_DARK', ''));
@@ -122,6 +123,7 @@ const colors = {
         800: '#9d174d',
         900: '#831843',
     },
+    ...trueveganColorPalette,
 };
 
 // Define Light and Dark Bases Using Tailwind Colors
@@ -257,6 +259,24 @@ export const themes = {
         primary: colors.orange[900],
         primaryBorder: colors.orange[600],
         primaryText: colors.orange[100],
+    }),
+
+    // True Vegan Light Theme
+    lightTruevegan: createTheme({
+        ...trueveganLightBase,
+        ...globalColors,
+        ...customColors,
+        ...customColorsLight,
+        ...flattenTailwindCssColorsObject(colors),
+    }),
+
+    // True Vegan Dark Theme
+    darkTruevegan: createTheme({
+        ...trueveganDarkBase,
+        ...globalColors,
+        ...customColors,
+        ...customColorsDark,
+        ...flattenTailwindCssColorsObject(colors),
     }),
 };
 

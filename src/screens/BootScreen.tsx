@@ -1,17 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Platform } from 'react-native';
+import { Platform, ImageBackground } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Image, Spinner, XStack, Text, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
-import { config, toArray, isArray } from '../utils';
+import { config, toArray, isArray, storefrontConfig } from '../utils';
 import { getCurrentLocationFromStorage, requestWebGeolocationPermission } from '../utils/location';
 import BootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
 import useStorage from '../hooks/use-storage';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const BootScreenWrapper = ({ children, backgroundImage, backgroundColor, theme }) => {
+    const bg = (isArray(backgroundColor) ? backgroundColor[0] : backgroundColor) ?? theme.background.val;
+    const source = backgroundImage ?? null;
+
+    return source ? (
+        <ImageBackground style={[{ flex: 1, width: '100%', height: '100%' }, { backgroundColor: bg }]} source={source} resizeMode='cover'>
+            {children}
+        </ImageBackground>
+    ) : (
+        <YStack f={1} w='100%' h='100%' bg={bg}>
+            {children}
+        </YStack>
+    );
+};
 
 const APP_NAME = config('APP_NAME');
 const BootScreen = () => {
@@ -24,7 +39,9 @@ const BootScreen = () => {
     const [info, setInfo] = useStorage('info', {});
     const [error, setError] = useState<Error | null>(null);
     const backgroundColor = toArray(config('BOOTSCREEN_BACKGROUND_COLOR', '$background'));
+    const backgroundImage = storefrontConfig('backgroundImages.BootScreen');
     const isGradientBackground = isArray(backgroundColor) && backgroundColor.length > 1;
+    const hasBgImage = !!backgroundImage;
 
     useEffect(() => {
         const checkLocationPermission = async () => {
@@ -88,8 +105,8 @@ const BootScreen = () => {
     }
 
     return (
-        <YStack style={{ flex: 1, width: '100%', height: '100%' }}>
-            <YStack flex={1} bg={backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%' pt={insets.top} pb={insets.bottom}>
+        <BootScreenWrapper backgroundImage={backgroundImage} backgroundColor={backgroundColor} theme={theme}>
+            <YStack flex={1} bg={hasBgImage ? 'transparent' : backgroundColor[0]} alignItems='center' justifyContent='center' width='100%' height='100%' pt={insets.top} pb={insets.bottom}>
                 {isGradientBackground && (
                     <LinearGradient
                         colors={backgroundColor}
@@ -110,7 +127,7 @@ const BootScreen = () => {
                     </XStack>
                 </YStack>
             </YStack>
-        </YStack>
+        </BootScreenWrapper>
     );
 };
 
