@@ -28,7 +28,7 @@
         "adb:logcat:grep": "adb logcat | grep 'ReactNativeJS'",
         "adb:devices": "adb devices",
         "generate:app-icon": "npx app-icon generate -i ./assets/app-icon.png",
-        "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#FFFFFF --logo-width=100 --flavor=main"
+        "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#355A74 --logo-width=100 --flavor=main"
     },
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
