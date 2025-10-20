@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Pressable, Platform } from 'react-native';
-import MapView, { Polygon, Marker } from 'react-native-maps';
+import MapView, { Polygon, Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
@@ -81,10 +81,39 @@ const FoodTruckScreen = () => {
     });
 
     const mapRef = useRef(null);
+    const bearingRaf = useRef(null);
+    const isPollingBearing = useRef(false);
+    const [bearing, setBearing] = useState(0);
     const [serviceArea, setServiceArea] = useStorage('service_area');
     const [zones, setZones] = useStorage('zones', []);
     const [foodTrucks, setFoodTrucks] = useStorage('food_trucks', []);
     const [currentZone, setCurrentZone] = useStorage('current_zone');
+
+    const startBearingPoll = useCallback(() => {
+        if (isPollingBearing.current) return;
+        isPollingBearing.current = true;
+
+        const tick = async () => {
+            try {
+                const cam = await mapRef.current?.getCamera?.();
+                if (cam?.heading != null) setBearing(cam.heading);
+            } catch {}
+            if (isPollingBearing.current) {
+                bearingRaf.current = requestAnimationFrame(tick);
+            }
+        };
+
+        bearingRaf.current = requestAnimationFrame(tick);
+    }, []);
+
+    const stopBearingPoll = useCallback(() => {
+        isPollingBearing.current = false;
+        if (bearingRaf.current) {
+            cancelAnimationFrame(bearingRaf.current);
+            bearingRaf.current = null;
+        }
+    }, []);
+
     const availableFoodTrucks = useMemo(() => {
         if (!currentZone) {
             return [];
@@ -258,6 +287,8 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
+    useEffect(() => stopBearingPoll, [stopBearingPoll]);
+
     const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
     const infoColor = isDarkMode ? theme['$blue-400'].val : theme['$blue-600'].val;
 
@@ -265,13 +296,23 @@ const FoodTruckScreen = () => {
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
             <MapView
                 ref={mapRef}
+                provider={PROVIDER_DEFAULT}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
                 initialRegion={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
+                showsCompass={false}
+                onRegionChange={() => startBearingPoll()}
+                onRegionChangeComplete={() => stopBearingPoll()}
             >
                 {isArray(availableFoodTrucks) &&
                     availableFoodTrucks.map((foodTruck) => (
-                        <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
+                        <VehicleMarker
+                            key={foodTruck.id}
+                            vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
+                            onPress={() => handlePressFoodTruck(foodTruck)}
+                            mapBearing={bearing}
+                            providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                        >
                             <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
                                 <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
                                     {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
