@@ -1,20 +1,32 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
-import { Animated, Easing } from 'react-native';
-import { Spinner, YStack } from 'tamagui';
-import FastImage from 'react-native-fast-image';
+import { Animated, Easing, View } from 'react-native';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
+import { SvgCssUri } from 'react-native-svg/css';
+import FastImage from 'react-native-fast-image';
+import { Spinner, YStack } from 'tamagui';
 import { isObject } from '../utils';
 import { makeCoordinatesFloat } from '../utils/location';
-import { SvgCssUri } from 'react-native-svg/css';
 
-// Create an animated version of Marker
 const AnimatedMarker = Animated.createAnimatedComponent(Marker);
+const ANCHOR = { x: 0.5, y: 0.5 };
 
 const TrackingMarker = forwardRef(
-    ({ coordinate, imageSource, size = { width: 50, height: 50 }, moveDuration = 1000, initialRotation = 0, baseRotation = 0, rotationDuration = 500, onPress, children }, ref) => {
-        const [svgLoading, setSvgLoading] = useState(true);
-
-        // Set up the animated region for position
+    (
+        {
+            coordinate,
+            imageSource,
+            size = { width: 50, height: 50 },
+            moveDuration = 1000,
+            initialRotation = 0,
+            baseRotation = 0,
+            rotationDuration = 500,
+            onPress,
+            children,
+            mapBearing = 0,
+            providerIsGoogle = true,
+        },
+        ref
+    ) => {
         const animatedRegion = useRef(
             new AnimatedRegion({
                 latitude: coordinate.latitude,
@@ -24,118 +36,137 @@ const TrackingMarker = forwardRef(
             })
         ).current;
 
-        // Maintain a plain coordinate state that is updated from the AnimatedRegion.
         const [plainCoordinate, setPlainCoordinate] = useState({
             latitude: coordinate.latitude,
             longitude: coordinate.longitude,
         });
 
-        // Listen to updates from animatedRegion and update plainCoordinate.
         useEffect(() => {
-            const listener = animatedRegion.addListener((region) => {
-                setPlainCoordinate({
-                    latitude: region.latitude,
-                    longitude: region.longitude,
-                });
+            const listener = animatedRegion.addListener((r) => {
+                setPlainCoordinate({ latitude: r.latitude, longitude: r.longitude });
             });
             return () => animatedRegion.removeListener(listener);
         }, [animatedRegion]);
 
-        // Animated value for rotation.
-        const rotation = useRef(new Animated.Value(initialRotation)).current;
+        const [heading, setHeading] = useState(initialRotation);
+        const rotationAnim = useRef(new Animated.Value(initialRotation)).current;
 
-        // Function to smoothly move the marker.
-        const move = (newLatitude, newLongitude, duration = moveDuration) => {
+        useEffect(() => {
+            const sub = rotationAnim.addListener(({ value }) => {
+                const normalized = ((value % 360) + 360) % 360;
+                setHeading(normalized);
+            });
+            return () => {
+                rotationAnim.removeAllListeners();
+                if (sub) rotationAnim.removeListener(sub);
+            };
+        }, [rotationAnim]);
+
+        const normalizeTurn = (fromDeg, toDeg) => {
+            let d = toDeg - fromDeg;
+            if (Math.abs(d) > 180) d -= 360 * Math.sign(d);
+            return fromDeg + d;
+        };
+
+        const move = (lat, lng, duration = moveDuration) => {
             animatedRegion
                 .timing({
-                    latitude: newLatitude,
-                    longitude: newLongitude,
+                    latitude: lat,
+                    longitude: lng,
                     duration,
-                    useNativeDriver: false,
                     easing: Easing.linear,
+                    useNativeDriver: false,
                 })
                 .start();
         };
 
-        // Function to rotate the marker.
         const rotate = (newHeading, duration = rotationDuration) => {
-            const currentRotation = rotation.__getValue();
-            let delta = newHeading - currentRotation;
-            if (Math.abs(delta) > 180) {
-                delta = delta - 360 * Math.sign(delta);
-            }
-            const finalRotation = (currentRotation + delta) % 360;
-
-            Animated.timing(rotation, {
-                toValue: finalRotation,
+            const current = rotationAnim.__getValue();
+            const target = normalizeTurn(current, newHeading);
+            Animated.timing(rotationAnim, {
+                toValue: target,
                 duration,
                 easing: Easing.linear,
                 useNativeDriver: false,
             }).start();
         };
 
-        // Expose move and rotate via ref.
-        useImperativeHandle(ref, () => ({
-            move,
-            rotate,
-        }));
+        useImperativeHandle(ref, () => ({ move, rotate }));
 
-        // Determine if the image source is an SVG.
+        const [svgLoading, setSvgLoading] = useState(true);
+        const [trackViews, setTrackViews] = useState(true);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
 
-        const onSvgLoadingError = (e) => {
-            setSvgLoading(false);
-        };
+        useEffect(() => {
+            if (svgLoading || !!children) {
+                setTrackViews(true);
+            } else {
+                const t = setTimeout(() => setTrackViews(false), 120);
+                return () => clearTimeout(t);
+            }
+        }, [svgLoading, children]);
 
-        const onSvgLoaded = () => {
-            setSvgLoading(false);
-        };
+        const onSvgLoaded = () => setSvgLoading(false);
+        const onSvgError = () => setSvgLoading(false);
+
+        const providerSupportsRotation = providerIsGoogle;
+        const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
+        const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress}>
-                <Animated.View
+            <AnimatedMarker
+                coordinate={makeCoordinatesFloat(plainCoordinate)}
+                onPress={onPress}
+                anchor={ANCHOR}
+                flat={providerSupportsRotation ? false : true}
+                rotation={providerSupportsRotation ? nativeRotation : 0}
+                tracksViewChanges={trackViews}
+            >
+                <YStack
                     style={{
-                        transform: [
-                            { rotate: `${baseRotation}deg` },
-                            {
-                                rotate: rotation.interpolate({
-                                    inputRange: [0, 360],
-                                    outputRange: ['0deg', '360deg'],
-                                }),
-                            },
-                        ],
+                        width: size.width,
+                        height: size.height,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transform: providerSupportsRotation ? undefined : [{ rotate: `${childRotation}deg` }],
                     }}
+                    pointerEvents='none'
                 >
                     {isRemoteSvg ? (
-                        <YStack
-                            style={{
-                                position: 'relative',
-                                width: size.width,
-                                height: size.height,
-                            }}
-                        >
-                            <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onError={onSvgLoadingError} onLoad={onSvgLoaded} />
+                        <>
+                            <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
                             {svgLoading && (
                                 <YStack
                                     style={{
                                         position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
+                                        inset: 0,
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}
                                 >
-                                    <Spinner color='$textPrimary' size={size.width} />
+                                    <Spinner color='$textPrimary' size={Math.min(size.width, 24)} />
                                 </YStack>
                             )}
-                        </YStack>
+                        </>
                     ) : (
-                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} />
+                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={() => setSvgLoading(false)} />
                     )}
-                </Animated.View>
-                {children && <YStack>{children}</YStack>}
+                </YStack>
+
+                {children && (
+                    <View
+                        pointerEvents='box-none'
+                        style={{
+                            position: 'absolute',
+                            top: size.height,
+                            minWidth: 100,
+                            maxWidth: 150,
+                            marginLeft: -(size.width / 2),
+                        }}
+                    >
+                        {children}
+                    </View>
+                )}
             </AnimatedMarker>
         );
     }
