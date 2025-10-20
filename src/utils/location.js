@@ -1190,3 +1190,10 @@ export async function requestWebGeolocationPermission() {
         return true;
     }
 }
+
+export function getCenterOffsetForAnchor(anchor, markerWidth, markerHeight) {
+    return {
+        x: markerWidth * 0.5 - markerWidth * anchor.x,
+        y: markerHeight * 0.5 - markerHeight * anchor.y,
+    };
+}
