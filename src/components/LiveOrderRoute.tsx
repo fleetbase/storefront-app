@@ -4,8 +4,9 @@ import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { Driver, Vehicle } from '@fleetbase/sdk';
+import { FoodTruck } from '@fleetbase/storefront';
 import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat } from '../utils/location';
-import { config, storefrontConfig, getFoodTruckById } from '../utils';
+import { config, storefrontConfig, getFoodTruckById, isArray } from '../utils';
 import { formattedAddressFromPlace } from '../utils/location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
@@ -65,9 +66,10 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     });
     const [zoomLevel, setZoomLevel] = useState(calculateZoomLevel(initialDeltas));
     const [findingOrigin, setFindingOrigin] = useState(true);
+    const [dontFindOrigin, setDontFindOrigin] = useState(false);
     const markerOffset = calculateOffset(zoomLevel);
     const driverAssigned = order.getAttribute('driver_assigned') ? new Driver(order.getAttribute('driver_assigned')) : null;
-    const isOriginFoodTruck = start.resource === 'food-truck';
+    const isOriginFoodTruck = start instanceof FoodTruck || start.resource === 'food-truck';
     const isPickupOrder = order.getAttribute('meta.is_pickup');
 
     const handleRegionChangeComplete = (region) => {
@@ -96,6 +98,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     };
 
     const updateOriginFromCustomOrigin = useCallback(async () => {
+        if (dontFindOrigin) return;
         if (!customOrigin) {
             setFindingOrigin(false);
             return;
@@ -121,9 +124,14 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
             }
 
             try {
-                const foodTruck = await storefront.foodTrucks.findRecord(customOrigin);
-                setStart(foodTruck);
+                const foodTruck = await storefront.foodTrucks.queryRecord({ public_id: customOrigin, with_deleted: true });
+                if (isArray(foodTruck) && foodTruck.length) {
+                    setStart(foodTruck[0]);
+                } else {
+                    setStart(foodTruck);
+                }
             } catch (error) {
+                setDontFindOrigin(true);
                 console.error('Error fetching food truck origin:', error);
             } finally {
                 setFindingOrigin(false);
@@ -139,6 +147,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         })
                     );
                 } catch (error) {
+                    setDontFindOrigin(true);
                     console.error('Error fetching store location origin:', error);
                 } finally {
                     setFindingOrigin(false);
@@ -155,7 +164,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         }
 
         updateOriginFromCustomOrigin();
-    }, [storefront, store, setFindingOrigin]);
+    }, [storefront, store]);
 
     return (
         <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>

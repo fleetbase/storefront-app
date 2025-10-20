@@ -32,7 +32,7 @@ function findAvailableTrucks(currentZone, foodTrucks = []) {
         return [];
     }
     return foodTrucks.filter((foodTruck) => {
-        return foodTruck.zone && foodTruck.zone.id === currentZone.id;
+        return foodTruck.zone && foodTruck.zone.id === currentZone.id && foodTruck.vehicle;
     });
 }
 
@@ -169,7 +169,7 @@ const FoodTruckScreen = () => {
 
             try {
                 const foodTrucksResult = await storefront.foodTrucks.query({ limit: -1, service_area: currentArea.id });
-                const serializedFoodTrucks = foodTrucksResult.map((foodTruck) => foodTruck.serialize());
+                const serializedFoodTrucks = foodTrucksResult.map((truck) => (typeof truck.serialize === 'function' ? truck.serialize() : truck)).filter((truck) => truck.vehicle);
                 setFoodTrucks(serializedFoodTrucks);
                 return serializedFoodTrucks;
             } catch (error) {
@@ -269,15 +269,16 @@ const FoodTruckScreen = () => {
                 initialRegion={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
             >
-                {availableFoodTrucks.map((foodTruck) => (
-                    <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
-                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                {t('FoodTruckScreen.truck')} {foodTruck.vehicle.plate_number}
-                            </Text>
-                        </YStack>
-                    </VehicleMarker>
-                ))}
+                {isArray(availableFoodTrucks) &&
+                    availableFoodTrucks.map((foodTruck) => (
+                        <VehicleMarker key={foodTruck.id} vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)} onPress={() => handlePressFoodTruck(foodTruck)}>
+                            <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                    {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
+                                </Text>
+                            </YStack>
+                        </VehicleMarker>
+                    ))}
                 {currentLocation && (
                     <Marker
                         coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
@@ -354,20 +355,21 @@ const FoodTruckScreen = () => {
                                 </YStack>
                             </XStack>
                         </Pressable>
-                        {availableFoodTrucks.map((foodTruck) => (
-                            <Pressable key={foodTruck.id} onPress={() => handlePressFoodTruck(foodTruck)}>
-                                <XStack py='$4' px='$4' alignItems='center' borderTopWidth={1} borderColor='$borderColor'>
-                                    <YStack width={32}>
-                                        <FontAwesomeIcon icon={faTruck} color={theme['$textPrimary'].val} size={20} />
-                                    </YStack>
-                                    <XStack flex={1}>
-                                        <Text color='$textPrimary' fontSize={15} numberOfLines={1}>
-                                            {t('FoodTruckScreen.truck')}: {foodTruck.vehicle.plate_number}
-                                        </Text>
+                        {isArray(availableFoodTrucks) &&
+                            availableFoodTrucks.map((foodTruck) => (
+                                <Pressable key={foodTruck.id} onPress={() => handlePressFoodTruck(foodTruck)}>
+                                    <XStack py='$4' px='$4' alignItems='center' borderTopWidth={1} borderColor='$borderColor'>
+                                        <YStack width={32}>
+                                            <FontAwesomeIcon icon={faTruck} color={theme['$textPrimary'].val} size={20} />
+                                        </YStack>
+                                        <XStack flex={1}>
+                                            <Text color='$textPrimary' fontSize={15} numberOfLines={1}>
+                                                {t('FoodTruckScreen.truck')}: {foodTruck.vehicle.plate_number}
+                                            </Text>
+                                        </XStack>
                                     </XStack>
-                                </XStack>
-                            </Pressable>
-                        ))}
+                                </Pressable>
+                            ))}
                     </YStack>
                 </YStack>
             </YStack>
