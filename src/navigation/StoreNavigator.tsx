@@ -195,6 +195,9 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        Category: {
+            ...StoreCategory,
+        },
         Product: {
             screen: ProductScreen,
             options: {
