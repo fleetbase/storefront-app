@@ -16,7 +16,7 @@ import { NotificationProvider } from './src/contexts/NotificationContext';
 import { getDefaultStyle as getDefaultToastStyle } from './src/utils/toast';
 import config from './tamagui.config';
 
-const DEBUG_NAVIGATOR = false;
+const DEBUG_APP = false;
 function AppContent(): React.JSX.Element {
     const { appTheme } = useThemeContext();
 
@@ -82,7 +82,7 @@ function TestContent(): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-    if (DEBUG_NAVIGATOR) {
+    if (DEBUG_APP) {
         return (
             <PortalProvider>
                 <ThemeProvider>

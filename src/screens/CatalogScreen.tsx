@@ -29,8 +29,6 @@ const CatalogScreen = ({ route }) => {
     const windowWidth = Dimensions.get('window').width;
     const productCardWidth = windowWidth / 2 - 25;
     const allCategories = catalogs.flatMap((catalog) => catalog.categories ?? []).map((category) => new Category(category, storefrontAdapter));
-    console.log('[categoriesDisplay]', categoriesDisplay);
-    console.log('[allCategories]', allCategories);
 
     const renderProduct = ({ item: product, index }) => (
         <YStack paddingBottom='$4'>

@@ -459,20 +459,27 @@ export function consumeAsyncIterator(asyncIterator, onData, onError) {
 
     // Define the stop function
     const stop = () => {
+        console.log('something called stop!');
         stopped = true;
     };
 
     const consume = async () => {
         try {
-            while (!stopped) {
-                const { value, done } = await asyncIterator.next();
-                if (done) {
-                    break;
-                }
+            // Manually iterate the async iterator since `for await` is not supported
+            const { value, done } = await asyncIterator.next();
 
-                if (onData) {
-                    onData(value);
-                }
+            if (done || stopped) {
+                console.log('[consumeAsyncIterator is done or has been stopped]', { stopped, done });
+                return;
+            }
+
+            if (onData) {
+                onData(value);
+            }
+
+            // Recursively call consume to process the next event
+            if (!stopped) {
+                consume();
             }
         } catch (error) {
             if (onError) {
