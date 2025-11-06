@@ -6,12 +6,13 @@ import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-
 import { Spinner, Separator, Text, XStack, YStack, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { format as formatDate } from 'date-fns';
-import { formatCurrency } from '../utils/format';
+import { formatCurrency, titleize } from '../utils/format';
 import { restoreFleetbaseInstance } from '../utils';
 import { Store } from '@fleetbase/storefront';
 import { Order } from '@fleetbase/sdk';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
 import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import useStorage from '../hooks/use-storage';
@@ -26,6 +27,7 @@ const OrderHistoryScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { customer } = useAuth();
+    const { t } = useLanguage();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [orders, setOrders] = useStorage(`${customer.id}_orders`, []);
     const [refreshing, setRefreshing] = useState(false);
@@ -91,7 +93,9 @@ const OrderHistoryScreen = () => {
                                     <Text color='$textSecondary'>{formatCurrency(order.getAttribute('meta.total'), order.getAttribute('meta.currency'))}</Text>
                                     <FontAwesomeIcon icon={faChevronRight} size={14} color={theme['$textSecondary'].val} />
                                 </XStack>
-                                <Badge status={order.getAttribute('status')} alignSelf='flex-start' py='$1' px='$2' />
+                                <Badge status={order.getAttribute('status')} alignSelf='flex-start' py='$1' px='$2'>
+                                    {t(`orderStatuses.${order.getAttribute('status')}`, { defaultValue: titleize(order.getAttribute('status')) })}
+                                </Badge>
                             </YStack>
                         </XStack>
                     </Pressable>

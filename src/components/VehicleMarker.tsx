@@ -80,14 +80,14 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
 
     useFocusEffect(
         useCallback(() => {
-            const trackDriverMovement = async () => {
+            const trackVehicleMovement = async () => {
                 const listener = await listen(`vehicle.${vehicle.id}`, (event) => addEvent(event));
                 if (listener) {
                     listenerRef.current = listener;
                 }
             };
 
-            trackDriverMovement();
+            trackVehicleMovement();
 
             return () => {
                 if (listenerRef.current) {

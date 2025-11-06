@@ -16,7 +16,8 @@
         "confirm": "Confirm",
         "confirmation": "Confirmation",
         "ok": "OK",
-        "done": "Done"
+        "done": "Done",
+        "order": "Order"
     },
     "lineItems": {
         "cartSubtotal": "Cart Subtotal",
@@ -29,6 +30,7 @@
     },
     "orderStatuses": {
         "created": "Created",
+        "accepted": "Accepted",
         "preparing": "Preparing",
         "dispatched": "Dispatched",
         "driver_enroute": "Driver en-route",
@@ -210,6 +212,39 @@
         "pickupLocation": "Pickup Location",
         "deliveryLocation": "Delivery Location",
         "orderNotes": "Order Notes"
+    },
+    "ReceiptScreen": {
+        "title": "Ebarimt Receipt",
+        "scan_qr_code": "Scan QR Code",
+        "qr_not_available": "QR code not available",
+        "amount_details": "Amount Details",
+        "total_amount": "Total Amount",
+        "vat_amount": "VAT Amount",
+        "city_tax_amount": "City Tax Amount",
+        "receipt_information": "Receipt Information",
+        "date": "Date",
+        "lottery_number": "Lottery Number",
+        "status": "Status",
+        "receiver_type": "Receiver Type",
+        "receiver_id": "Receiver ID",
+        "merchant_information": "Merchant Information",
+        "merchant_id": "Merchant ID",
+        "register_no": "Register No",
+        "tin": "TIN",
+        "branch_code": "Branch Code",
+        "staff_code": "Staff Code",
+        "provider_information": "Provider Information",
+        "ebarimt_by": "Ebarimt By",
+        "payment_id": "Payment ID",
+        "paid_by": "Paid By",
+        "loading_receipt": "Loading receipt...",
+        "error_title": "Error",
+        "retry": "Retry",
+        "no_receipt_title": "No Receipt",
+        "no_receipt_message": "No receipt data available for this order.",
+        "error_alert_title": "Error",
+        "error_alert_message": "Unable to load receipt. Please try again.",
+        "not_available": "N/A"
     },
     "CheckoutScreen": {
         "checkout": "Checkout"
