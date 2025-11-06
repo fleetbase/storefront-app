@@ -252,3 +252,13 @@ export function capitalize(str) {
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function foodTruckDisplayName(foodTruck) {
+    return [foodTruck.getAttribute('vehicle.year'), foodTruck.getAttribute('vehicle.make'), foodTruck.getAttribute('vehicle.model'), foodTruck.getAttribute('vehicle.plate_number')]
+        .filter(Boolean)
+        .join(' ');
+}
+
+export function vehicleDisplayName(vehicle) {
+    return [vehicle.getAttribute('year'), vehicle.getAttribute('make'), vehicle.getAttribute('model'), vehicle.getAttribute('plate_number')].filter(Boolean).join(' ');
+}

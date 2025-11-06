@@ -94,15 +94,26 @@ const Badge = ({ status, color, inverted = false, icon, iconPlacement = 'left', 
         </YStack>
     ) : null;
 
+    const hasChildren = children !== null && children !== undefined;
+
     return (
         <XStack alignItems='center' borderRadius='$4' borderWidth={1} backgroundColor={bg} borderColor={border} px={px} py={py} space='$1' {...props}>
             {iconPlacement === 'left' && iconElement}
-            {status && (
+
+            {hasChildren ? (
+                typeof children === 'string' ? (
+                    <Text color={text} fontWeight='bold' fontSize={fontSize}>
+                        {children}
+                    </Text>
+                ) : (
+                    children
+                )
+            ) : status ? (
                 <Text color={text} fontWeight='bold' fontSize={fontSize}>
                     {titleize(status)}
                 </Text>
-            )}
-            {children}
+            ) : null}
+
             {iconPlacement === 'right' && iconElement}
         </XStack>
     );

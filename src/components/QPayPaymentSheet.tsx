@@ -151,25 +151,49 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                     >
                         <BottomSheetView style={{ ...styles.bottomSheetView, backgroundColor: theme.surface.val }}>
                             <YStack>
-                                <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$2'>
-                                    <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                        {t('QPayPaymentSheet.selectBank')}
-                                    </Text>
-                                    <Button size='$2' onPress={() => bottomSheetRef.current?.close()} bg='$secondary' circular>
-                                        <Button.Icon>
-                                            <FontAwesomeIcon icon={faTimes} />
-                                        </Button.Icon>
-                                    </Button>
-                                </XStack>
-                                <BottomSheetFlatList
-                                    data={banks}
-                                    keyExtractor={keyExtractor}
-                                    renderItem={renderItem}
-                                    contentContainerStyle={styles.listContent}
-                                    showsVerticalScrollIndicator={false}
-                                    showsHorizontalScrollIndicator={false}
-                                    ListFooterComponent={<Spacer height={100} />}
-                                />
+                                <YStack>
+                                    {typeof invoice?.qr_image === 'string' && (
+                                        <XStack alignItems='center' justifyContent='center' mb='$4'>
+                                            <Image
+                                                width={100}
+                                                height={100}
+                                                bg='white'
+                                                padding='$1'
+                                                borderRadius='$4'
+                                                borderWidth={1}
+                                                borderColor='$borderColor'
+                                                source={{ uri: `data:image/png;base64,${invoice.qr_image}` }}
+                                            />
+                                        </XStack>
+                                    )}
+                                    <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$2'>
+                                        <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                            {t('QPayPaymentSheet.selectBank')}
+                                        </Text>
+                                        <Button size='$2' onPress={() => bottomSheetRef.current?.close()} bg='$secondary' circular>
+                                            <Button.Icon>
+                                                <FontAwesomeIcon icon={faTimes} />
+                                            </Button.Icon>
+                                        </Button>
+                                    </XStack>
+                                </YStack>
+                                {banks.length === 0 && invoice?.error && (
+                                    <YStack alignItems='center' justifyContent='center' py='$4' height={150}>
+                                        <Text color='$color'>{invoice.error}</Text>
+                                        {invoice.message && <Text color='$textSecondary'>{invoice.message}</Text>}
+                                    </YStack>
+                                )}
+                                {banks.length > 0 && (
+                                    <BottomSheetFlatList
+                                        data={banks}
+                                        keyExtractor={keyExtractor}
+                                        renderItem={renderItem}
+                                        contentContainerStyle={styles.listContent}
+                                        showsVerticalScrollIndicator={false}
+                                        showsHorizontalScrollIndicator={false}
+                                        ListFooterComponent={<Spacer height={100} />}
+                                    />
+                                )}
                                 <Spacer height={200} />
                             </YStack>
                         </BottomSheetView>
