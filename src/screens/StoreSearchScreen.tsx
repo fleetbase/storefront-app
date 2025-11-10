@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { SafeAreaView, Keyboard, Animated, StyleSheet, Pressable } from 'react-native';
 import { Spinner, Button, Stack, Text, YStack, XStack, Input, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

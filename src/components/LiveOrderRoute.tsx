@@ -186,7 +186,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
     /* ---------- customOrigin resolution ---------- */
     const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (dontFindOrigin) return;
+        if (dontFindOrigin || findingOrigin) return;
 
         // No custom origin: we’re done (we already seeded start)
         if (!customOrigin) {
@@ -206,12 +206,14 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
+                    setDontFindOrigin(true);
                 } else if (storefront) {
                     const foodTruck = await storefront.foodTrucks.queryRecord({
                         public_id: customOrigin,
                         with_deleted: true,
                     });
                     setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
+                    setDontFindOrigin(true);
                 }
             } else if (customOrigin.startsWith('store_location')) {
                 if (store && customOrigin !== start?.store_location_id) {
@@ -222,6 +224,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                             store_location_id: storeLocation.id,
                         })
                     );
+                    setDontFindOrigin(true);
                 }
             }
         } catch (error) {
@@ -271,8 +274,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 {ready && driverAssigned && !isOriginFoodTruck && (
                     <DriverMarker
                         driver={driverAssigned}
-                        onMovement={(coords) => {
-                            if (shouldFollowMoving) focusMoving(coords);
+                        onMovement={({ coordinates, heading }) => {
+                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
                         }}
                     />
                 )}
@@ -284,8 +287,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}
                         mapBearing={bearing}
                         providerIsGoogle={providerIsGoogle}
-                        onMovement={(coords, opts) => {
-                            if (shouldFollowMoving) focusMoving(coords, { heading: opts?.heading });
+                        onMovement={({ coordinates, heading }) => {
+                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
                         }}
                     >
                         <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>

@@ -79,7 +79,10 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
     useFocusEffect(
         useCallback(() => {
             const trackDriverMovement = async () => {
-                const listener = await listen(`driver.${driver.id}`, (event) => addEvent(event));
+                const listener = await listen(`driver.${driver.id}`, (event) => {
+                    console.log(`[Socket Channel: driver.${driver.id}]`, event);
+                    addEvent(event);
+                });
                 if (listener) {
                     listenerRef.current = listener;
                 }

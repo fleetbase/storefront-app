@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { calculateProductSubtotal, getCartItem } from '../utils/cart';
@@ -187,10 +187,10 @@ const CartItemScreen = ({ route = {} }) => {
                                 <Spinner />
                             </Button.Icon>
                         )}
-                        <Button.Text fontSize='$5' fontWeight='normal'>
+                        <Button.Text fontSize='$4' fontWeight='normal'>
                             {t('common.update')}
                         </Button.Text>
-                        <Button.Text fontSize='$6' fontWeight='bold'>
+                        <Button.Text fontSize='$5' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}
                         </Button.Text>
                     </Button>

@@ -62,6 +62,7 @@ function getPolygonBoundingBox(polygonCoordinates) {
 
     return { minLat, maxLat, minLng, maxLng };
 }
+
 const isAndroid = Platform.OS === 'android';
 const FoodTruckScreen = () => {
     const navigation = useNavigation();
@@ -81,8 +82,11 @@ const FoodTruckScreen = () => {
     });
 
     const mapRef = useRef(null);
+    const cameraRef = useRef(null);
     const bearingRaf = useRef(null);
     const isPollingBearing = useRef(false);
+    const lastFollowTsRef = useRef(0);
+    const isFollowingRef = useRef(true);
     const [bearing, setBearing] = useState(0);
     const [serviceArea, setServiceArea] = useStorage('service_area');
     const [zones, setZones] = useStorage('zones', []);
@@ -260,6 +264,50 @@ const FoodTruckScreen = () => {
         }
     };
 
+    const hasZoomedOutToCityLevel = (cam, region) => {
+        // If camera zoom is available (Google Maps style)
+        if (cam && typeof cam.zoom === 'number') {
+            // Higher zoom = closer. City-level is usually around 11–13.
+            // So if user zooms OUT below ~12, consider it "overview".
+            return cam.zoom <= 12;
+        }
+
+        // Fallback: use latitudeDelta heuristic
+        // Smaller delta = closer. Larger delta = zoomed out.
+        if (region && typeof region.latitudeDelta === 'number') {
+            // Tune this: ~0.1–0.2 is neighborhood/city-ish depending on latitude.
+            return region.latitudeDelta >= 0.15;
+        }
+
+        return false;
+    };
+
+    const focusMoving = useCallback((coords, opts = {}) => {
+        const { latitude, longitude } = coords || {};
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+        // If user disabled follow (by zooming out), do nothing.
+        if (!isFollowingRef.current) return;
+
+        const now = Date.now();
+        if (now - lastFollowTsRef.current < 250) return; // throttle
+        lastFollowTsRef.current = now;
+
+        const prevCam = cameraRef.current;
+
+        const nextCamera = {
+            // always follow the vehicle center
+            center: { latitude, longitude },
+            // preserve user zoom / pitch if we know them
+            zoom: prevCam?.zoom,
+            pitch: prevCam?.pitch,
+            // update heading if provided, else keep last
+            heading: prevCam?.heading ?? 0,
+        };
+
+        mapRef.current?.animateCamera?.(nextCamera, { duration: 280 });
+    }, []);
+
     useEffect(() => {
         if (!currentLocation || !zones) return;
 
@@ -302,7 +350,24 @@ const FoodTruckScreen = () => {
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 showsCompass={false}
                 onRegionChange={() => startBearingPoll()}
-                onRegionChangeComplete={() => stopBearingPoll()}
+                onRegionChangeComplete={async (region, details) => {
+                    stopBearingPoll();
+
+                    // Grab the real camera (has zoom / pitch / heading)
+                    try {
+                        const cam = await mapRef.current?.getCamera?.();
+                        if (cam) {
+                            cameraRef.current = cam;
+                        }
+
+                        // If user zoomed out enough, disable following.
+                        if (hasZoomedOutToCityLevel(cam, region)) {
+                            isFollowingRef.current = false;
+                        }
+                    } catch (e) {
+                        // fail silent is fine
+                    }
+                }}
             >
                 {isArray(availableFoodTrucks) &&
                     availableFoodTrucks.map((foodTruck) => (
@@ -312,6 +377,9 @@ const FoodTruckScreen = () => {
                             onPress={() => handlePressFoodTruck(foodTruck)}
                             mapBearing={bearing}
                             providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                            onMovement={({ coordinates, heading }) => {
+                                focusMoving(coordinates, { heading });
+                            }}
                         >
                             <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
                                 <Text fontSize={14} color='$textPrimary' numberOfLines={1}>

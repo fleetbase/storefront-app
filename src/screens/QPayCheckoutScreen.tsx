@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView, ScrollView, Platform } from 'react-native';
 import { Button, Text, YStack, XStack, useTheme } from 'tamagui';

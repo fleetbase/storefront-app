@@ -81,7 +81,10 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     useFocusEffect(
         useCallback(() => {
             const trackVehicleMovement = async () => {
-                const listener = await listen(`vehicle.${vehicle.id}`, (event) => addEvent(event));
+                const listener = await listen(`vehicle.${vehicle.id}`, (event) => {
+                    console.log(`[Socket Channel: vehicle.${vehicle.id}]`, event);
+                    addEvent(event);
+                });
                 if (listener) {
                     listenerRef.current = listener;
                 }

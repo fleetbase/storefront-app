@@ -40,13 +40,12 @@ const useSocketClusterClient = () => {
             };
 
             // Start consuming the AsyncIterator
-            const stop = consumeAsyncIterator(channel, handleEvent, handleError);
+            const cancel = consumeAsyncIterator(channel, handleEvent, handleError);
 
             /**
              * Stop function to terminate the iteration and close the channel.
              */
             const stopListening = async () => {
-                stop();
                 await closeChannel(channelName);
                 console.log(`Stopped listening for data on channel "${channelName}".`);
             };
@@ -55,7 +54,6 @@ const useSocketClusterClient = () => {
              * Kill function to forcefully terminate the iteration and kill the channel.
              */
             const killListening = async () => {
-                stop();
                 await killChannel(channelName);
                 console.log(`Killed listening for data on channel "${channelName}".`);
             };
