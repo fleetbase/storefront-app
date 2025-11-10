@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { ScrollView, Animated } from 'react-native';
 import { YStack, useTheme } from 'tamagui';
 import StoreHeader from '../components/StoreHeader';

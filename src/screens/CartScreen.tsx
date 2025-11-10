@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
@@ -222,10 +222,10 @@ const CartScreen = ({ route }) => {
                                                 }}
                                             />
                                         </YStack>
-                                        <YStack height={125} minHeight={100} maxHeight={350} overflow='hidden' width='90%' space='$1'>
+                                        <YStack height={125} minHeight={100} maxHeight={350} overflow='hidden' flex={1} space='$1'>
                                             <YStack>
                                                 <XStack space='$2' alignItems='center'>
-                                                    <Text fontSize='$4' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
+                                                    <Text fontSize='$4' fontWeight='bold' color='$textPrimary' numberOfLines={1} ellipsizeMode='tail'>
                                                         {cartItem.name}
                                                     </Text>
                                                 </XStack>
@@ -255,7 +255,7 @@ const CartScreen = ({ route }) => {
                                     </XStack>
                                 </Pressable>
                             </XStack>
-                            <YStack width={150} alignItems='flex-end'>
+                            <YStack maxWidth={150} alignItems='flex-end'>
                                 <YStack>
                                     <Text fontSize='$4' color='$textPrimary' fontWeight='bold'>
                                         {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
@@ -317,7 +317,7 @@ const CartScreen = ({ route }) => {
                             <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
                                 {t('lineItems.subtotal')}
                             </Text>
-                            <Text color='$textPrimary' fontSize='$9' fontWeight='bold'>
+                            <Text color='$textPrimary' fontSize='$8' fontWeight='bold'>
                                 {formatCurrency(calculateCartTotal(), cart.getAttribute('currency'))}
                             </Text>
                         </YStack>
@@ -329,7 +329,7 @@ const CartScreen = ({ route }) => {
                             </Button>
                         </YStack>
                     </XStack>
-                    <Spacer height={isModalScreen ? 20 : 0} />
+                    <Spacer height={isModalScreen ? 25 : 0} />
                 </YStack>
             )}
         </SafeAreaView>

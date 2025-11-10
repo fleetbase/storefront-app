@@ -1,104 +1,72 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
-/**
- * Custom Hook: useEventBuffer
- * Buffers incoming events and processes them at defined intervals.
- *
- * @param {Function} eventHandler - Function to handle each processed event.
- * @param {number} waitTime - Interval time in milliseconds to process events.
- * @returns {Object} - Provides methods to add and clear events.
- */
-const useEventBuffer = (eventHandler, waitTime = 3000) => {
-    const eventsRef = useRef([]);
-    const isProcessingRef = useRef(false);
-    const intervalIdRef = useRef(null);
+const useEventBuffer = (eventHandler) => {
+    const queueRef = useRef([]);
+    const processingRef = useRef(false);
+    const destroyedRef = useRef(false);
 
-    /**
-     * Adds a new event to the buffer.
-     *
-     * @param {Object} event - The event to add.
-     */
-    const addEvent = (event) => {
-        eventsRef.current.push(event);
-    };
+    const processQueue = useCallback(async () => {
+        if (processingRef.current || destroyedRef.current) return;
+        processingRef.current = true;
 
-    /**
-     * Clears all buffered events.
-     */
-    const clearEvents = () => {
-        eventsRef.current = [];
-    };
+        try {
+            // Keep draining until queue is empty
+            // Handles bursts without spawning multiple processors
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const batch = queueRef.current;
+                if (!batch.length || destroyedRef.current) break;
 
-    /**
-     * Delays execution for a specified time.
-     *
-     * @param {number} ms - Milliseconds to delay.
-     * @returns {Promise}
-     */
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+                // Take current batch and reset queue
+                queueRef.current = [];
 
-    /**
-     * Processes buffered events sequentially.
-     */
-    const processEvents = async () => {
-        if (isProcessingRef.current || eventsRef.current.length === 0) return;
+                // Optionally: sort by created_at if present
+                batch.sort((a, b) => {
+                    const ad = a.created_at ? new Date(a.created_at).getTime() : 0;
+                    const bd = b.created_at ? new Date(b.created_at).getTime() : 0;
+                    return ad - bd;
+                });
 
-        isProcessingRef.current = true;
-
-        // Sort events by created_at
-        eventsRef.current.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-        // Process each event
-        for (const event of eventsRef.current) {
-            const { event: eventName, data } = event;
-
-            // Log incoming event
-            console.log(`EventBuffer: ${eventName} - #${data.additionalData.index} (${event.created_at}) [ ${data.location.coordinates.join(' ')} ]`);
-
-            // Execute the event handler
-            if (typeof eventHandler === 'function') {
-                eventHandler(data);
+                for (const event of batch) {
+                    if (destroyedRef.current) break;
+                    const { data } = event;
+                    try {
+                        if (typeof eventHandler === 'function') {
+                            eventHandler(data);
+                        }
+                    } catch (err) {
+                        console.error('Error in eventHandler:', err);
+                    }
+                }
             }
-
-            // Wait before processing the next event
-            await delay(1000);
+        } finally {
+            processingRef.current = false;
         }
+    }, [eventHandler]);
 
-        // Clear the buffer after processing
-        clearEvents();
-        isProcessingRef.current = false;
-    };
+    const addEvent = useCallback(
+        (event) => {
+            if (destroyedRef.current) return;
 
-    /**
-     * Starts the event processing interval.
-     */
-    const start = () => {
-        if (intervalIdRef.current) return; // Prevent multiple intervals
+            queueRef.current.push(event);
 
-        intervalIdRef.current = setInterval(() => {
-            processEvents();
-        }, waitTime);
-    };
+            // Trigger processing immediately (next tick)
+            // If already processing, this is a no-op due to processingRef guard
+            processQueue();
+        },
+        [processQueue]
+    );
 
-    /**
-     * Stops the event processing interval.
-     */
-    const stop = () => {
-        if (intervalIdRef.current) {
-            clearInterval(intervalIdRef.current);
-            intervalIdRef.current = null;
-        }
-    };
+    const clearEvents = useCallback(() => {
+        queueRef.current = [];
+    }, []);
 
     useEffect(() => {
-        start();
-
-        // Clean up on unmount
         return () => {
-            stop();
+            destroyedRef.current = true;
+            queueRef.current = [];
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [waitTime]); // Restart if waitTime changes
+    }, []);
 
     return { addEvent, clearEvents };
 };

@@ -454,38 +454,54 @@ export function toBoolean(value) {
     }
 }
 
-export function consumeAsyncIterator(asyncIterator, onData, onError) {
-    let stopped = false;
+export function consumeAsyncIterator(source, onData, onError) {
+    // Support AsyncIterable (recommended) or direct iterator.
+    const iterator = source && typeof source[Symbol.asyncIterator] === 'function' ? source[Symbol.asyncIterator]() : source;
 
-    // Define the stop function
-    const stop = () => {
-        stopped = true;
-    };
+    let canceled = false;
 
-    const consume = async () => {
-        try {
-            while (!stopped) {
-                const { value, done } = await asyncIterator.next();
-                if (done) {
-                    break;
-                }
+    const cancel = () => {
+        if (canceled) return;
+        console.log(`[consumeAsyncIterator was canceled for [${source.name ?? source.id}]]`);
+        canceled = true;
 
-                if (onData) {
-                    onData(value);
-                }
-            }
-        } catch (error) {
-            if (onError) {
-                onError(error);
-            } else {
-                console.error('Error in consumeAsyncIterator:', error);
+        // Tell underlying iterator we're done if it supports return()
+        if (iterator && typeof iterator.return === 'function') {
+            try {
+                iterator.return();
+            } catch (e) {
+                console.log('Error calling iterator.return()', e);
             }
         }
     };
 
-    // Start consuming asynchronously without blocking
+    const consume = async () => {
+        while (Infinity > 0) {
+            try {
+                const { value, done } = await iterator.next();
+
+                if (canceled || done) {
+                    console.log(`[consumeAsyncIterator is done or has been canceled for [${source.name ?? source.id}]]`, { canceled, done });
+                    break;
+                }
+
+                if (onData) onData(value);
+            } catch (error) {
+                if (canceled) break;
+
+                if (onError) {
+                    onError(error);
+                } else {
+                    console.error('Error in consumeAsyncIterator:', error);
+                }
+            }
+        }
+    };
+
+    // Fire and forget
     consume();
-    return stop;
+
+    return cancel;
 }
 
 export function isAsyncIterable(input) {

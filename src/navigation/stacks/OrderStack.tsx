@@ -1,4 +1,5 @@
 import OrderScreen from '../../screens/OrderScreen';
+import ReceiptScreen from '../../screens/ReceiptScreen';
 import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
 import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
@@ -12,6 +13,25 @@ export const Order = {
     options: ({ navigation, route }) => {
         const params = route.params ?? {};
         return {
+            title: params.order.id,
+            headerTitleStyle: {
+                color: getTheme('textPrimary'),
+            },
+            headerTransparent: true,
+            headerShadowVisible: false,
+            headerLeft: () => {
+                return <BackButton onPress={() => navigation.goBack()} />;
+            },
+        };
+    },
+};
+
+export const Receipt = {
+    screen: ReceiptScreen,
+    options: ({ navigation, route }) => {
+        const params = route.params ?? {};
+        return {
+            presentation: 'modal',
             title: params.order.id,
             headerTitleStyle: {
                 color: getTheme('textPrimary'),
@@ -70,6 +90,7 @@ export const OrderHistory = {
 
 const OrderStack = {
     Order,
+    Receipt,
     OrderHistory,
 };
 

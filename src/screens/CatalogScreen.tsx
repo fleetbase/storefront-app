@@ -4,7 +4,7 @@ import { ScrollView, Dimensions } from 'react-native';
 import { YStack, Text, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTruck } from '@fortawesome/free-solid-svg-icons';
-import { Product, FoodTruck } from '@fleetbase/storefront';
+import { Product, FoodTruck, Category } from '@fleetbase/storefront';
 import { SimpleGrid } from 'react-native-super-grid';
 import { storefrontConfig } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -28,6 +28,7 @@ const CatalogScreen = ({ route }) => {
     const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
     const windowWidth = Dimensions.get('window').width;
     const productCardWidth = windowWidth / 2 - 25;
+    const allCategories = catalogs.flatMap((catalog) => catalog.categories ?? []).map((category) => new Category(category, storefrontAdapter));
 
     const renderProduct = ({ item: product, index }) => (
         <YStack paddingBottom='$4'>
@@ -55,6 +56,11 @@ const CatalogScreen = ({ route }) => {
                     <CartButton text={t('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} iconSize={23} textSize={16} />
                 </YStack>
             </XStack>
+            <YStack>
+                <YStack pt='$4' pb='$2'>
+                    <StoreCategoriesPills categories={allCategories} onPressCategory={(category) => navigation.navigate('Category', { category: category.serialize() })} />
+                </YStack>
+            </YStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <YStack py='$2' px='$3'>
                     {catalogs.map((catalog) => (

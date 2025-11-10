@@ -11,6 +11,8 @@ const StoreCategoriesPills = ({ categories = [], onPressCategory }) => {
     };
 
     const renderCategory = ({ item: category }) => {
+        if (typeof category.getAttribute !== 'function') return;
+        if (typeof category.getAttribute === 'function' && !category.getAttribute('name')) return;
         return (
             <Pressable onPress={() => handleCategoryPress(category)}>
                 <XStack
