@@ -271,8 +271,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 {ready && driverAssigned && !isOriginFoodTruck && (
                     <DriverMarker
                         driver={driverAssigned}
-                        onMovement={(coords) => {
-                            if (shouldFollowMoving) focusMoving(coords);
+                        onMovement={({ coordinates, heading }) => {
+                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
                         }}
                     />
                 )}
@@ -284,8 +284,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}
                         mapBearing={bearing}
                         providerIsGoogle={providerIsGoogle}
-                        onMovement={(coords, opts) => {
-                            if (shouldFollowMoving) focusMoving(coords, { heading: opts?.heading });
+                        onMovement={({ coordinates, heading }) => {
+                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
                         }}
                     >
                         <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>

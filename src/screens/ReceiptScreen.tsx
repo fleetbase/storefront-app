@@ -198,7 +198,7 @@ const ReceiptScreen = ({ route }) => {
                             <QRCode value={receiptData.ebarimt_qr_data} size={180} backgroundColor='white' color='black' />
                         </YStack>
                     ) : (
-                        <Text color={theme.gray10.val}>{t('ReceiptScreen.qr_not_available')}</Text>
+                        <Text color={theme['gray-100'].val}>{t('ReceiptScreen.qr_not_available')}</Text>
                     )}
                 </YStack>
 
