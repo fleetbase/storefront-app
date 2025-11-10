@@ -44,6 +44,16 @@ const ReceiptScreen = ({ route }) => {
     }, [order, response]);
 
     /**
+     * Determine receipt data source
+     * Priority: API response > Order meta > null
+     */
+    const qrData = useMemo(() => {
+        if (response) return null;
+        const orderMeta = order.getAttribute('meta', {}) ?? {};
+        return orderMeta?.ebarimt_qr_data ?? orderMeta?.ebarimt?.ebarimt_qr_data ?? null;
+    }, [order, response]);
+
+    /**
      * Check if receipt data already exists in order meta
      */
     const hasExistingReceipt = useMemo(() => {
@@ -193,9 +203,9 @@ const ReceiptScreen = ({ route }) => {
                     <Text fontSize='$5' fontWeight='600' color={theme.color.val}>
                         {t('ReceiptScreen.scan_qr_code')}
                     </Text>
-                    {receiptData.ebarimt_qr_data ? (
+                    {qrData ? (
                         <YStack padding='$2' backgroundColor='white' borderRadius='$4' borderWidth={1} borderColor={theme.borderColor.val}>
-                            <QRCode value={receiptData.ebarimt_qr_data} size={180} backgroundColor='white' color='black' />
+                            <QRCode value={qrData} size={180} backgroundColor='white' color='black' />
                         </YStack>
                     ) : (
                         <Text color={theme['gray-100'].val}>{t('ReceiptScreen.qr_not_available')}</Text>
