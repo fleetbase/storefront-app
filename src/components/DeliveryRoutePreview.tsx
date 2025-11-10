@@ -234,7 +234,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
 
     /* ---------- customOrigin resolution ---------- */
     const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (dontFindOrigin) return;
+        if (dontFindOrigin || findingOrigin) return;
 
         // No custom origin: we’re done (we already seeded start)
         if (!customOrigin) {
@@ -254,12 +254,14 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
+                    setDontFindOrigin(true);
                 } else if (storefront) {
                     const foodTruck = await storefront.foodTrucks.queryRecord({
                         public_id: customOrigin,
                         with_deleted: true,
                     });
                     setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
+                    setDontFindOrigin(true);
                 }
             } else if (customOrigin.startsWith('store_location')) {
                 if (store && customOrigin !== start?.store_location_id) {
@@ -270,6 +272,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                             store_location_id: storeLocation.id,
                         })
                     );
+                    setDontFindOrigin(true);
                 }
             }
         } catch (error) {
@@ -287,6 +290,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
             setReady(true);
             return;
         }
+
         updateOriginFromCustomOrigin(customOrigin);
     }, [storefront, store, customOrigin, updateOriginFromCustomOrigin]);
 

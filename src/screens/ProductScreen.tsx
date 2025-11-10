@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
 import { toast } from '../utils/toast';
@@ -180,10 +180,10 @@ const ProductScreen = ({ route = {} }) => {
                                 <Spinner />
                             </Button.Icon>
                         )}
-                        <Button.Text color='$primaryText' fontSize='$5' fontWeight='normal'>
+                        <Button.Text color='$primaryText' fontSize='$4' fontWeight='normal'>
                             {t('ProductScreen.addToCart')}
                         </Button.Text>
-                        <Button.Text color='white' fontSize='$6' fontWeight='bold'>
+                        <Button.Text color='white' fontSize='$5' fontWeight='bold'>
                             {formatCurrency(subtotal * quantity, product.getAttribute('currency'))}
                         </Button.Text>
                     </Button>

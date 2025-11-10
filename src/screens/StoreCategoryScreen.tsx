@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { SafeAreaView } from 'react-native';
 import { Stack, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
