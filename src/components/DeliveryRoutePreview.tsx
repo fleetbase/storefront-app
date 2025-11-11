@@ -254,14 +254,12 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
-                    setDontFindOrigin(true);
                 } else if (storefront) {
                     const foodTruck = await storefront.foodTrucks.queryRecord({
                         public_id: customOrigin,
                         with_deleted: true,
                     });
                     setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
-                    setDontFindOrigin(true);
                 }
             } else if (customOrigin.startsWith('store_location')) {
                 if (store && customOrigin !== start?.store_location_id) {
@@ -272,13 +270,12 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                             store_location_id: storeLocation.id,
                         })
                     );
-                    setDontFindOrigin(true);
                 }
             }
         } catch (error) {
-            setDontFindOrigin(true);
             console.error('Error fetching custom origin:', error);
         } finally {
+            setDontFindOrigin(true);
             setFindingOrigin(false);
             setReady(true);
         }
@@ -392,7 +389,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 )}
 
                 {/* DESTINATION (User) */}
-                {destination && Number.isFinite(destination.latitude) && Number.isFinite(destination.longitude) && (
+                {ready && destination && Number.isFinite(destination.latitude) && Number.isFinite(destination.longitude) && (
                     <Marker coordinate={makeCoordinatesFloat(destination)} centerOffset={markerOffset}>
                         <YStack
                             mb={8}
@@ -426,12 +423,14 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 )}
 
                 {/* ROUTE */}
-                {origin &&
+                {ready &&
+                    origin &&
                     destination &&
                     Number.isFinite(origin.latitude) &&
                     Number.isFinite(origin.longitude) &&
                     Number.isFinite(destination.latitude) &&
-                    Number.isFinite(destination.longitude) && (
+                    Number.isFinite(destination.longitude) &&
+                    !findingOrigin && (
                         <MapViewDirections
                             origin={makeCoordinatesFloat(origin)}
                             destination={makeCoordinatesFloat(destination)}
