@@ -101,12 +101,6 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     }, [order]);
 
     const isOriginFoodTruck = useMemo(() => start instanceof FoodTruck || start?.resource === 'food-truck', [start]);
-    console.log('[isOriginFoodTruck]', isOriginFoodTruck);
-    console.log('[driverAssigned]', driverAssigned);
-    console.log('[restoredDropoff]', restoredDropoff);
-    console.log('[start]', start);
-    console.log('[origin]', origin);
-    console.log('[destination]', destination);
 
     // Follow moving marker when present
     const shouldFollowMoving = useMemo(() => ready && ((driverAssigned && !isOriginFoodTruck) || isOriginFoodTruck), [ready, driverAssigned, isOriginFoodTruck]);
