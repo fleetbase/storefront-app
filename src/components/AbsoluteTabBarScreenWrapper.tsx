@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTheme } from 'tamagui';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import Spacer from './Spacer';
 
 const AbsoluteTabBarScreenWrapper = ({ children, scrollable = false, ...props }) => {

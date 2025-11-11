@@ -64,6 +64,17 @@ const OrderScreen = ({ route }) => {
     const qrCodeBase64 = useMemo(() => order.getAttribute('tracking_number.qr_code'), [order]);
     const qrSource = useMemo(() => (qrCodeBase64 ? { uri: `data:image/png;base64,${qrCodeBase64}` } : undefined), [qrCodeBase64]);
 
+    console.log('[order.attributes]', order?.attributes);
+    console.log('[isPickup]', isPickup);
+    console.log('[status]', status);
+    console.log('[isPickupReady]', isPickupReady);
+    console.log('[isEnroute]', isEnroute);
+    console.log('[foodTruckId]', foodTruckId);
+    console.log('[paymentGateway]', paymentGateway);
+    console.log('[usedQpay]', usedQpay);
+    console.log('[pickupName]', pickupName);
+    console.log('[info]', info);
+
     // --- Actions
     const confirmOrderPickup = useCallback(async () => {
         try {
