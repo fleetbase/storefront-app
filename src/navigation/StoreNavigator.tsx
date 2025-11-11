@@ -31,12 +31,14 @@ import OrderScreen from '../screens/OrderScreen';
 import ProductScreen from '../screens/ProductScreen';
 import FoodTruckScreen from '../screens/FoodTruckScreen';
 import CatalogScreen from '../screens/CatalogScreen';
+import CatalogCategoryScreen from '../screens/CatalogCategoryScreen';
 import BackButton from '../components/BackButton';
 import CartButton from '../components/CartButton';
 import LocationPicker from '../components/LocationPicker';
 import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
+import { getTheme } from '../utils';
 
 const isAndroid = Platform.OS === 'android';
 
@@ -196,7 +198,24 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
             },
         },
         Category: {
-            ...StoreCategory,
+            screen: CatalogCategoryScreen,
+            options: ({ route, navigation }) => {
+                return {
+                    title: route.params.category.name,
+                    headerTitleAlign: 'left',
+                    headerTitleStyle: {
+                        color: getTheme('textPrimary'),
+                    },
+                    headerTransparent: true,
+                    headerShadowVisible: false,
+                    headerLeft: () => {
+                        return <BackButton onPress={() => navigation.goBack()} />;
+                    },
+                    headerRight: () => {
+                        return <PortalHost name='LoadingIndicatorPortal' />;
+                    },
+                };
+            },
         },
         Product: {
             screen: ProductScreen,
