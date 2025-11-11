@@ -206,14 +206,12 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
-                    setDontFindOrigin(true);
                 } else if (storefront) {
                     const foodTruck = await storefront.foodTrucks.queryRecord({
                         public_id: customOrigin,
                         with_deleted: true,
                     });
                     setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
-                    setDontFindOrigin(true);
                 }
             } else if (customOrigin.startsWith('store_location')) {
                 if (store && customOrigin !== start?.store_location_id) {
@@ -224,13 +222,12 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                             store_location_id: storeLocation.id,
                         })
                     );
-                    setDontFindOrigin(true);
                 }
             }
         } catch (error) {
-            setDontFindOrigin(true);
             console.error('Error fetching custom origin:', error);
         } finally {
+            setDontFindOrigin(true);
             setFindingOrigin(false);
             setReady(true);
         }
@@ -368,16 +365,23 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 )}
 
                 {/* ROUTE (only when both ends valid; skip auto-fit if following) */}
-                {ready && origin && destination && !findingOrigin && (
-                    <MapViewDirections
-                        origin={origin}
-                        destination={destination}
-                        apikey={config('GOOGLE_MAPS_API_KEY')}
-                        strokeWidth={4}
-                        strokeColor={theme['$blue-500'].val}
-                        onReady={fitToRoute}
-                    />
-                )}
+                {ready &&
+                    origin &&
+                    destination &&
+                    Number.isFinite(origin.latitude) &&
+                    Number.isFinite(origin.longitude) &&
+                    Number.isFinite(destination.latitude) &&
+                    Number.isFinite(destination.longitude) &&
+                    !findingOrigin && (
+                        <MapViewDirections
+                            origin={origin}
+                            destination={destination}
+                            apikey={config('GOOGLE_MAPS_API_KEY')}
+                            strokeWidth={4}
+                            strokeColor={theme['$blue-500'].val}
+                            onReady={fitToRoute}
+                        />
+                    )}
             </MapView>
 
             {/* Overlay slot */}

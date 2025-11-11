@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
-import { Button, Image, Stack, Text, YStack, XStack, useTheme, Separator } from 'tamagui';
+import { Button, Text, YStack, XStack, useTheme, Separator } from 'tamagui';
 import { Order } from '@fleetbase/sdk';
 import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
 import { format as formatDate } from 'date-fns';
@@ -8,65 +8,67 @@ import useStorefront from '../hooks/use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import QRCode from 'react-native-qrcode-svg';
+import useStorage from '../hooks/use-storage';
 
-/**
- * Receipt Screen Component
- *
- * Displays ebarimt receipt information for QPay orders including:
- * - QR code for verification
- * - Amount breakdown (total, VAT, city tax)
- * - Receipt date and lottery number
- * - Merchant information
- * - Ebarimt provider details
- */
 const ReceiptScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
-    const { customer } = useAuth();
     const { t } = useLanguage();
-    const { storefront, adapter: storefrontAdapter } = useStorefront();
-    const [order, setOrder] = useState(() => new Order(params.order, fleetbaseAdapter));
+    const { adapter: storefrontAdapter } = useStorefront();
+
+    const [order] = useState(() => new Order(params.order, fleetbaseAdapter));
     const [response, setResponse] = useState(null);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
 
-    /**
-     * Determine receipt data source
-     * Priority: API response > Order meta > null
-     */
+    // Stable key based on order id
+    const qrStorageKey = `receipt_qr_${order.id}`;
+
+    // Persist QR data across sessions
+    const [cachedQrData, setCachedQrData] = useStorage(qrStorageKey, null);
+
+    /** Receipt data: API response > order meta > null */
     const receiptData = useMemo(() => {
-        if (response) return response;
+        if (response) {
+            return response;
+        }
+
         if (order.getAttribute('payload.payment_method') === 'qpay' && order.getAttribute('meta.ebarimt')) {
             return order.getAttribute('meta.ebarimt');
         }
+
         return null;
     }, [order, response]);
 
-    /**
-     * Determine receipt data source
-     * Priority: API response > Order meta > null
-     */
+    /** QR data: API response > cached storage > order meta */
     const qrData = useMemo(() => {
-        if (response) return null;
-        const orderMeta = order.getAttribute('meta', {}) ?? {};
-        return orderMeta?.ebarimt_qr_data ?? orderMeta?.ebarimt?.ebarimt_qr_data ?? null;
-    }, [order, response]);
+        if (response && response.ebarimt_qr_data) {
+            return response.ebarimt_qr_data;
+        }
 
-    /**
-     * Check if receipt data already exists in order meta
-     */
+        if (cachedQrData) {
+            return cachedQrData;
+        }
+
+        const orderMeta = order.getAttribute('meta', {}) || {};
+        return orderMeta.ebarimt_qr_data || (orderMeta.ebarimt && orderMeta.ebarimt.ebarimt_qr_data) || null;
+    }, [response, cachedQrData, order]);
+
+    /** Whether receipt already exists in order meta */
     const hasExistingReceipt = useMemo(() => {
-        return order.getAttribute('payload.payment_method') === 'qpay' && order.getAttribute('meta.ebarimt') !== null && order.getAttribute('meta.ebarimt') !== undefined;
+        return order.getAttribute('payload.payment_method') === 'qpay' && order.getAttribute('meta.ebarimt') != null;
     }, [order]);
 
-    /**
-     * Fetch receipt data from API
-     */
+    /** Fetch receipt data from API */
     const getReceiptData = useCallback(
-        async (isRefresh = false) => {
-            // Skip API call if receipt already exists in meta and not refreshing
+        async (isRefresh) => {
+            // If we already have receipt in meta and not explicitly refreshing, skip
             if (hasExistingReceipt && !isRefresh) {
+                return;
+            }
+
+            if (!storefrontAdapter) {
                 return;
             }
 
@@ -76,9 +78,13 @@ const ReceiptScreen = ({ route }) => {
                 } else {
                     setLoading(true);
                 }
+
                 setError(null);
 
-                const data = await storefrontAdapter.post('orders/receipt', { order: order.id });
+                const data = await storefrontAdapter.post('orders/receipt', {
+                    order: order.id,
+                });
+
                 setResponse(data);
             } catch (err) {
                 console.error('Error fetching receipt:', err);
@@ -92,25 +98,30 @@ const ReceiptScreen = ({ route }) => {
         [storefrontAdapter, order.id, hasExistingReceipt, t]
     );
 
-    /**
-     * Handle pull-to-refresh
-     */
+    /** Pull-to-refresh handler */
     const onRefresh = useCallback(() => {
         getReceiptData(true);
     }, [getReceiptData]);
 
-    /**
-     * Load receipt data on mount if needed
-     */
+    /** Initial load: only if needed */
     useEffect(() => {
-        if (storefrontAdapter && !hasExistingReceipt) {
-            getReceiptData();
+        if (storefrontAdapter && !hasExistingReceipt && !response) {
+            getReceiptData(false);
         }
-    }, [storefrontAdapter, hasExistingReceipt, getReceiptData]);
+    }, [storefrontAdapter, hasExistingReceipt, response, getReceiptData]);
 
-    /**
-     * Format currency amount
-     */
+    /** Sync qrData into persistent storage (no loops) */
+    useEffect(() => {
+        const orderMeta = order.getAttribute('meta', {}) || {};
+        const metaQr = orderMeta.ebarimt_qr_data || (orderMeta.ebarimt && orderMeta.ebarimt.ebarimt_qr_data) || null;
+        const latest = (response && response.ebarimt_qr_data) || metaQr || null;
+
+        if (latest && latest !== cachedQrData) {
+            setCachedQrData(latest);
+        }
+    }, [order, response, cachedQrData, setCachedQrData]);
+
+    /** Formatters */
     const formatAmount = (amount) => {
         const numAmount = parseFloat(amount || 0);
         return numAmount.toLocaleString('en-US', {
@@ -119,21 +130,17 @@ const ReceiptScreen = ({ route }) => {
         });
     };
 
-    /**
-     * Format date string
-     */
     const formatReceiptDate = (dateString) => {
         if (!dateString) return t('ReceiptScreen.not_available');
+
         try {
             return formatDate(new Date(dateString), 'MMM dd, yyyy HH:mm');
-        } catch (err) {
+        } catch (e) {
             return dateString;
         }
     };
 
-    /**
-     * Render loading state
-     */
+    /** Loading state */
     if (loading && !receiptData) {
         return (
             <YStack flex={1} justifyContent='center' alignItems='center' backgroundColor={theme.background.val}>
@@ -145,9 +152,7 @@ const ReceiptScreen = ({ route }) => {
         );
     }
 
-    /**
-     * Render error state
-     */
+    /** Error state */
     if (error && !receiptData) {
         return (
             <YStack flex={1} justifyContent='center' alignItems='center' padding='$4' backgroundColor={theme.background.val}>
@@ -157,16 +162,14 @@ const ReceiptScreen = ({ route }) => {
                 <Text color={theme.color.val} textAlign='center' marginBottom='$4'>
                     {error}
                 </Text>
-                <Button onPress={() => getReceiptData()} theme='blue'>
+                <Button onPress={() => getReceiptData(false)} theme='blue'>
                     {t('ReceiptScreen.retry')}
                 </Button>
             </YStack>
         );
     }
 
-    /**
-     * Render no receipt state
-     */
+    /** No receipt state */
     if (!receiptData) {
         return (
             <YStack flex={1} justifyContent='center' alignItems='center' padding='$4' backgroundColor={theme.background.val}>
@@ -180,9 +183,7 @@ const ReceiptScreen = ({ route }) => {
         );
     }
 
-    /**
-     * Main receipt display
-     */
+    /** Main receipt display */
     return (
         <ScrollView style={{ flex: 1, backgroundColor: theme.background.val }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.color.val} />}>
             <YStack space='$2'>
@@ -292,7 +293,7 @@ const ReceiptScreen = ({ route }) => {
                         </Text>
                     </XStack>
 
-                    {receiptData.ebarimt_receiver && (
+                    {receiptData.ebarimt_receiver ? (
                         <XStack justifyContent='space-between' alignItems='center'>
                             <Text fontSize='$4' color={theme['gray-200'].val}>
                                 {t('ReceiptScreen.receiver_id')}
@@ -301,7 +302,7 @@ const ReceiptScreen = ({ route }) => {
                                 {receiptData.ebarimt_receiver}
                             </Text>
                         </XStack>
-                    )}
+                    ) : null}
                 </YStack>
 
                 <Separator borderColor={theme.borderColor.val} />
@@ -312,14 +313,14 @@ const ReceiptScreen = ({ route }) => {
                         {t('ReceiptScreen.merchant_information')}
                     </Text>
 
-                    <XStack justifyContent='space-between' alignItems='center'>
+                    {/* <XStack justifyContent='space-between' alignItems='center'>
                         <Text fontSize='$4' color={theme['gray-200'].val}>
                             {t('ReceiptScreen.merchant_id')}
                         </Text>
                         <Text fontSize='$4' color={theme.color.val}>
                             {receiptData.g_merchant_id || t('ReceiptScreen.not_available')}
                         </Text>
-                    </XStack>
+                    </XStack> */}
 
                     <XStack justifyContent='space-between' alignItems='center'>
                         <Text fontSize='$4' color={theme['gray-200'].val}>
