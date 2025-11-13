@@ -36,6 +36,9 @@ export const DefaultConfig = {
         LoginScreen: backgroundImages[config('LOGIN_BG_IMAGE', 'storefront_photo_1')],
         BootScreen: backgroundImages[config('BOOTSCREEN_BG_IMAGE')] ?? null,
     },
+    loginScreen: {
+        showGradient: toBoolean(config('LOGIN_SCREEN_SHOW_GRADIENT', 1)),
+    },
     storeHeader: {
         showGradient: toBoolean(config('STORE_HEADER_SHOW_GRADIENT', 1)),
         showLocationPicker: toBoolean(config('STORE_HEADER_SHOW_LOCATION_PICKER', 1)),

@@ -299,7 +299,7 @@ const AccountScreen = () => {
                             </XStack>
                             <FlatList
                                 data={accountMenu}
-                                keyExtractor={(item) => item.title}
+                                keyExtractor={(item, index) => index}
                                 renderItem={renderMenuItem}
                                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                                 scrollEnabled={false}
@@ -313,7 +313,7 @@ const AccountScreen = () => {
                             </YStack>
                             <FlatList
                                 data={dataProtectionMenu}
-                                keyExtractor={(item) => item.title}
+                                keyExtractor={(item, index) => index}
                                 renderItem={renderMenuItem}
                                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                                 scrollEnabled={false}
