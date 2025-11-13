@@ -18,6 +18,7 @@ const LoginScreen = () => {
     const theme = useTheme();
     const { login, loginSupported, loading } = useOAuth();
     const { t } = useLanguage();
+    const showGradient = storefrontConfig('loginScreen.showGradient', true);
 
     const handleClearCache = () => {
         storage.clearStore();
@@ -40,7 +41,14 @@ const LoginScreen = () => {
 
     return (
         <ImageBackground source={storefrontConfig('backgroundImages.LoginScreen')} style={[styles.background, { backgroundColor: theme.background.val }]} resizeMode='cover'>
-            <LinearGradient colors={['rgba(0, 0, 0, 0.0)', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.8)']} style={StyleSheet.absoluteFillObject} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} />
+            {showGradient && (
+                <LinearGradient
+                    colors={['rgba(0, 0, 0, 0.0)', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.8)']}
+                    style={StyleSheet.absoluteFillObject}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                />
+            )}
             <AbsoluteTabBarScreenWrapper>
                 <SafeAreaView style={{ flex: 1 }}>
                     <YStack flex={1} justifyContent='flex-end' alignItems='center' space='$3' padding='$4'>

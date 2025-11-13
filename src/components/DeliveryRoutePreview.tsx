@@ -291,7 +291,6 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         } catch (error) {
             console.error('Error fetching custom origin:', error);
         } finally {
-            setDontFindOrigin(true);
             setFindingOrigin(false);
             setReady(true);
         }
