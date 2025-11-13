@@ -114,21 +114,14 @@ const TrackingMarker = forwardRef(
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker
-                coordinate={makeCoordinatesFloat(plainCoordinate)}
-                onPress={onPress}
-                anchor={ANCHOR}
-                flat={providerSupportsRotation ? false : true}
-                rotation={providerSupportsRotation ? nativeRotation : 0}
-                tracksViewChanges={trackViews}
-            >
+            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
                 <YStack
                     style={{
                         width: size.width,
                         height: size.height,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transform: providerSupportsRotation ? undefined : [{ rotate: `${childRotation}deg` }],
+                        transform: [{ rotate: `${childRotation}deg` }],
                     }}
                     pointerEvents='none'
                 >

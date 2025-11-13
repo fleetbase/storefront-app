@@ -45,6 +45,7 @@ const OrderScreen = ({ route }) => {
     // --- Refs
     const distanceLoadedRef = useRef(false);
     const listenerRef = useRef();
+    const orderRef = useRef(order);
     const statusRef = useRef(order.getAttribute('status'));
 
     // --- Derived
@@ -63,6 +64,29 @@ const OrderScreen = ({ route }) => {
 
     const qrCodeBase64 = useMemo(() => order.getAttribute('tracking_number.qr_code'), [order]);
     const qrSource = useMemo(() => (qrCodeBase64 ? { uri: `data:image/png;base64,${qrCodeBase64}` } : undefined), [qrCodeBase64]);
+
+    const canRenderRoute = useMemo(() => {
+        if (!order) return false;
+
+        const pickup = order.getAttribute('payload.pickup');
+        const dropoff = order.getAttribute('payload.dropoff');
+        const isPickupOrder = !!order.getAttribute('meta.is_pickup');
+        const ftId = order.getAttribute('meta.food_truck_id');
+
+        // Tune this to how LiveOrderRoute/LivePickupRoute behaves,
+        // but be stricter than "truthy object"
+        if (isPickupOrder) {
+            return !!pickup;
+        }
+
+        // Food truck origin + dropoff OR pickup is usually required
+        if (ftId) {
+            return (!!dropoff || !!pickup) && foodTruck;
+        }
+
+        // Standard delivery: need at least pickup + dropoff
+        return !!pickup && !!dropoff;
+    }, [order, foodTruck]);
 
     // --- Actions
     const confirmOrderPickup = useCallback(async () => {
@@ -87,22 +111,20 @@ const OrderScreen = ({ route }) => {
         }
     }, [order]);
 
-    const reloadOrder = useCallback(
-        async (options = {}) => {
-            if (options.refresh) setRefreshing(true);
-            try {
-                const reloaded = await order.reload();
-                setOrder(reloaded);
-                statusRef.current = reloaded.getAttribute('status');
-                distanceLoadedRef.current = false; // recalc after reload
-            } catch (err) {
-                console.error('Error reloading order:', err);
-            } finally {
-                setRefreshing(false);
-            }
-        },
-        [order]
-    );
+    const reloadOrder = useCallback(async (options = {}) => {
+        if (options.refresh) setRefreshing(true);
+
+        try {
+            const reloaded = await orderRef.current.reload();
+            setOrder(reloaded);
+            statusRef.current = reloaded.getAttribute('status');
+            distanceLoadedRef.current = false;
+        } catch (err) {
+            console.error('Error reloading order:', err);
+        } finally {
+            setRefreshing(false);
+        }
+    }, []);
 
     // Wire confirmOrderPickup after reloadOrder defined to keep hook deps correct
     // (redefine with correct deps)
@@ -202,6 +224,10 @@ const OrderScreen = ({ route }) => {
         statusRef.current = status;
     }, [status]);
 
+    useEffect(() => {
+        orderRef.current = order;
+    }, [order]);
+
     const onRefresh = useCallback(() => reloadOrder({ refresh: true }), [reloadOrder]);
 
     // --- Render
@@ -209,7 +235,9 @@ const OrderScreen = ({ route }) => {
         <YStack flex={1} bg='$background'>
             <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <YStack width='100%' height={400} borderBottomWidth={1} borderColor='$borderColorWithShadow'>
-                    {isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruckId} />}
+                    {canRenderRoute && (
+                        <YStack flex={1}>{isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />}</YStack>
+                    )}
                 </YStack>
 
                 <YStack space='$2'>

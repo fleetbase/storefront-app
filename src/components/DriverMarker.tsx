@@ -9,6 +9,8 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
@@ -80,8 +82,7 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
         useCallback(() => {
             const trackDriverMovement = async () => {
                 const listener = await listen(`driver.${driver.id}`, (event) => {
-                    console.log(`[Socket Channel: driver.${driver.id}]`, event);
-                    addEvent(event);
+                    addEventRef.current(event);
                 });
                 if (listener) {
                     listenerRef.current = listener;
@@ -97,11 +98,14 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
                 clearEvents();
                 lastCoordinatesRef.current = null; // Reset on unmount
             };
-        }, [listen, driver.id, addEvent, clearEvents])
+        }, [listen, driver.id])
     );
 
     const { latitude, longitude } = driver;
+    const heading = driver.getAttribute('heading') ?? 0;
     const coord = makeCoordinatesFloat({ latitude, longitude });
+    const avatarUrl = driver.getAttribute('avatar_url');
+    const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
 
     // Initialize last coordinates with the vehicle's initial position
     useEffect(() => {
@@ -110,7 +114,13 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
         }
     }, [latitude, longitude]);
 
-    return <TrackingMarker ref={markerRef} coordinate={coord} imageSource={{ uri: driver.getAttribute('avatar_url') }} size={{ width: 50, height: 50 }} {...props} />;
+    // Event buffer method refs
+    useEffect(() => {
+        addEventRef.current = addEvent;
+        clearEventsRef.current = clearEvents;
+    }, [addEvent, clearEvents]);
+
+    return <TrackingMarker ref={markerRef} coordinate={coord} initialRotation={heading} imageSource={avatarSource} size={{ width: 50, height: 50 }} {...props} />;
 };
 
 export default DriverMarker;

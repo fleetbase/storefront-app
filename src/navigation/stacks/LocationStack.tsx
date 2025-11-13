@@ -9,7 +9,7 @@ import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getTheme, handleNavigateNewLocation } from '../../utils';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { translate as t } from '../../utils/localize';
 
 export const LocationPermission = {
     screen: LocationPermissionScreen,
@@ -28,7 +28,6 @@ export const SavedLocations = {
 export const AddressBook = {
     screen: AddressBookScreen,
     options: ({ navigation, route }) => {
-        const { t } = useLanguage();
         return {
             title: t('AddressBookScreen.addressBook'),
             headerTitleStyle: {
@@ -76,7 +75,6 @@ export const EditLocation = {
 export const LocationPicker = {
     screen: LocationPickerScreen,
     options: ({ navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('LocationPickerScreen.chooseDeliveryLocation'),
             headerTitleStyle: {

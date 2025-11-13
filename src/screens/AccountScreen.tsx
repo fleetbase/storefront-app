@@ -4,7 +4,7 @@ import { SafeAreaView, FlatList, Pressable, ScrollView, Linking, Platform } from
 import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } from 'tamagui';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faGlobe, faPalette } from '@fortawesome/free-solid-svg-icons';
 import { showActionSheet, abbreviateName, storefrontConfig } from '../utils';
 import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
@@ -175,9 +175,13 @@ const AccountScreen = () => {
         >
             <XStack alignItems='center' space='$3'>
                 {item.leftComponent}
-                <Text fontSize='$6' fontWeight='bold' color='$textSecondary'>
-                    {item.title}
-                </Text>
+                {item.titleComponent ? (
+                    item.titleComponent
+                ) : (
+                    <Text fontSize='$6' fontWeight='bold' color='$textSecondary'>
+                        {item.title}
+                    </Text>
+                )}
             </XStack>
             <XStack alignItems='center' space='$2'>
                 {item.rightComponent}
@@ -232,7 +236,7 @@ const AccountScreen = () => {
             onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.name'), key: 'name', component: 'input' } }),
         },
         {
-            title: 'Language',
+            titleComponent: <FontAwesomeIcon icon={faGlobe} size={22} color={theme.textSecondary.val} />,
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {language.native}
@@ -241,7 +245,7 @@ const AccountScreen = () => {
             onPress: handleLanguageSelect,
         },
         {
-            title: t('AccountScreen.theme'),
+            titleComponent: <FontAwesomeIcon icon={faPalette} size={22} color={theme.textSecondary.val} />,
             rightComponent: (
                 <Text color='$textSecondary' opacity={0.5}>
                     {titleize(userColorScheme)}
