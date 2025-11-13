@@ -5,12 +5,11 @@ import PaypalCheckoutScreen from '../../screens/PaypalCheckoutScreen';
 import BackButton from '../../components/BackButton';
 import { StripeCheckoutProvider } from '../../contexts/StripeCheckoutContext';
 import { getTheme } from '../../utils';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { translate as t } from '../../utils/localize';
 
 export const Checkout = {
     screen: CheckoutScreen,
     options: ({ route, navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
@@ -31,7 +30,6 @@ export const StripeCheckout = {
         );
     },
     options: ({ route, navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
@@ -46,7 +44,6 @@ export const StripeCheckout = {
 export const QPayCheckout = {
     screen: QPayCheckoutScreen,
     options: ({ route, navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {
@@ -61,7 +58,6 @@ export const QPayCheckout = {
 export const PaypalCheckout = {
     screen: PaypalCheckoutScreen,
     options: ({ route, navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('CheckoutScreen.checkout'),
             headerTitleStyle: {

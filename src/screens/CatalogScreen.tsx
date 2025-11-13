@@ -58,7 +58,10 @@ const CatalogScreen = ({ route }) => {
             </XStack>
             <YStack>
                 <YStack pt='$4' pb='$2'>
-                    <StoreCategoriesPills categories={allCategories} onPressCategory={(category) => navigation.navigate('Category', { category: category.serialize() })} />
+                    <StoreCategoriesPills
+                        categories={allCategories}
+                        onPressCategory={(category) => navigation.navigate('Category', { category: category.serialize(), foodTruck: foodTruck?.serialize(), foodTruckId })}
+                    />
                 </YStack>
             </YStack>
             <ScrollView scrollEventThrottle={16} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>

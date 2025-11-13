@@ -11,6 +11,8 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
@@ -82,8 +84,7 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
         useCallback(() => {
             const trackVehicleMovement = async () => {
                 const listener = await listen(`vehicle.${vehicle.id}`, (event) => {
-                    console.log(`[Socket Channel: vehicle.${vehicle.id}]`, event);
-                    addEvent(event);
+                    addEventRef.current(event);
                 });
                 if (listener) {
                     listenerRef.current = listener;
@@ -99,12 +100,15 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
                 clearEvents();
                 lastCoordinatesRef.current = null; // Reset on unmount
             };
-        }, [listen, vehicle.id, addEvent, clearEvents])
+        }, [listen, vehicle.id])
     );
 
+    const heading = vehicle.getAttribute('heading') ?? 0;
     const latitude = vehicle.getAttribute('location.coordinates.1');
     const longitude = vehicle.getAttribute('location.coordinates.0');
     const coord = makeCoordinatesFloat({ latitude, longitude });
+    const avatarUrl = vehicle.getAttribute('avatar_url');
+    const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
 
     // Initialize last coordinates with the vehicle's initial position
     useEffect(() => {
@@ -113,7 +117,13 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
         }
     }, [latitude, longitude]);
 
-    return <TrackingMarker ref={markerRef} coordinate={coord} imageSource={{ uri: vehicle.getAttribute('avatar_url') }} size={{ width: 50, height: 50 }} {...props} />;
+    // Event buffer method refs
+    useEffect(() => {
+        addEventRef.current = addEvent;
+        clearEventsRef.current = clearEvents;
+    }, [addEvent, clearEvents]);
+
+    return <TrackingMarker ref={markerRef} coordinate={coord} initialRotation={heading} imageSource={avatarSource} size={{ width: 50, height: 50 }} {...props} />;
 };
 
 export default VehicleMarker;

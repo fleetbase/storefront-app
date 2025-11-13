@@ -8,6 +8,7 @@ import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
 import { get, storefrontConfig } from '../utils';
 import { toast } from '../utils/toast';
+import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -174,6 +175,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
+
+                    // Push order into local history cache immediately
+                    if (customer?.id) {
+                        addOrderToHistoryCache(customer.id, order);
+                        // optionally: markOrderHistoryDirty(customer.id);
+                    }
 
                     // Ensure callback fires only once using a ref
                     if (typeof onOrderComplete === 'function') {

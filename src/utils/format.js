@@ -254,7 +254,7 @@ export function capitalize(str) {
 }
 
 export function foodTruckDisplayName(foodTruck) {
-    return [foodTruck.getAttribute('vehicle.year'), foodTruck.getAttribute('vehicle.make'), foodTruck.getAttribute('vehicle.model'), foodTruck.getAttribute('vehicle.plate_number')]
+    return [foodTruck?.getAttribute('vehicle.year'), foodTruck?.getAttribute('vehicle.make'), foodTruck?.getAttribute('vehicle.model'), foodTruck?.getAttribute('vehicle.plate_number')]
         .filter(Boolean)
         .join(' ');
 }
