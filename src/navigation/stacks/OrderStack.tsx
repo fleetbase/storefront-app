@@ -6,7 +6,7 @@ import HeaderButton from '../../components/HeaderButton';
 import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { translate as t } from '../../utils/localize';
 
 export const Order = {
     screen: OrderScreen,
@@ -70,7 +70,6 @@ export const OrderModal = {
 export const OrderHistory = {
     screen: OrderHistoryScreen,
     options: ({ navigation }) => {
-        const { t } = useLanguage();
         return {
             title: t('OrderHistoryScreen.orderHistory'),
             headerTitleStyle: {

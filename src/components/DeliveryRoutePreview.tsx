@@ -6,8 +6,9 @@ import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { Vehicle } from '@fleetbase/sdk';
+import { FoodTruck } from '@fleetbase/storefront';
 import { restoreFleetbasePlace, getCoordinatesObject, createFauxPlace, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
-import { config, storefrontConfig, getFoodTruckById, isArray } from '../utils';
+import { config, storefrontConfig, getFoodTruckById, isArray, isObject } from '../utils';
 import LocationMarker from './LocationMarker';
 import VehicleMarker from './VehicleMarker';
 import LoadingOverlay from './LoadingOverlay';
@@ -17,7 +18,6 @@ import useStorefront from '../hooks/use-storefront';
 import { adapter as fleetbaseAdapter } from '../hooks/use-fleetbase';
 
 /* ---------- Helpers ---------- */
-
 const DEFAULT_REGION = {
     latitude: 37.7749,
     longitude: -122.4194,
@@ -74,11 +74,10 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
 
     const [bearing, setBearing] = useState(0);
     const [findingOrigin, setFindingOrigin] = useState(false);
-    const [dontFindOrigin, setDontFindOrigin] = useState(false);
     const [ready, setReady] = useState(false);
 
     // -------- Origin & destination --------
-    const initialOrigin = useMemo(
+    const initialStart = useMemo(
         () =>
             currentStoreLocation === undefined
                 ? createFauxPlace()
@@ -89,7 +88,17 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         [currentStoreLocation]
     );
 
-    const [start, setStart] = useState(initialOrigin);
+    // REFACTORED: Handle object customOrigin immediately without async
+    const resolvedStart = useMemo(() => {
+        // If customOrigin is an object with id, use it directly
+        if (isObject(customOrigin) && customOrigin.id) {
+            return customOrigin;
+        }
+        // Otherwise use initial start (will be fetched async if it's a string ID)
+        return initialStart;
+    }, [customOrigin, initialStart]);
+
+    const [start, setStart] = useState(resolvedStart);
     const end = useMemo(() => restoreFleetbasePlace(currentLocation), [currentLocation]);
     const origin = useMemo(() => getCoordinatesObject(start), [start]);
     const destination = useMemo(() => getCoordinatesObject(end), [end]);
@@ -99,7 +108,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
     const [mapRegion, setMapRegion] = useState(() => getSafeInitialRegion(origin, initialDeltas));
     const [zoomLevel, setZoomLevel] = useState(() => calculateZoomLevel(mapRegion.latitudeDelta));
     const markerOffset = useMemo(() => calculateOffset(zoomLevel), [zoomLevel]);
-    const isOriginFoodTruck = useMemo(() => start?.resource === 'food-truck' || start?.getAttribute?.('resource') === 'food-truck', [start]);
+    const isOriginFoodTruck = useMemo(() => start instanceof FoodTruck || start?.resource === 'food-truck', [start]);
     const providerIsGoogle = Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE;
 
     /* ---------- Bearing polling ---------- */
@@ -232,13 +241,23 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         [destination, mapRegion, initialDeltas]
     );
 
-    /* ---------- customOrigin resolution ---------- */
-    const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (dontFindOrigin || findingOrigin) return;
+    const handleMovement = useCallback(
+        ({ coordinates }) => {
+            if (coordinates) focusMoving(coordinates);
+        },
+        [focusMoving]
+    );
 
-        // No custom origin: we’re done (we already seeded start)
-        if (!customOrigin) {
-            setFindingOrigin(false);
+    /* ---------- REFACTORED: Async fetch for string IDs only ---------- */
+    const fetchOriginFromStringId = useCallback(async () => {
+        // Only fetch if customOrigin is a string ID (not an object)
+        if (!customOrigin || typeof customOrigin !== 'string') {
+            setReady(true);
+            return;
+        }
+
+        // Already fetched
+        if (start?.id === customOrigin || start?.store_location_id === customOrigin) {
             setReady(true);
             return;
         }
@@ -246,11 +265,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
         setFindingOrigin(true);
 
         try {
-            if (typeof customOrigin !== 'string') {
-                if (customOrigin.id && customOrigin.id !== start?.id) {
-                    setStart(customOrigin);
-                }
-            } else if (customOrigin.startsWith('food_truck')) {
+            if (customOrigin.startsWith('food_truck')) {
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
@@ -259,10 +274,11 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                         public_id: customOrigin,
                         with_deleted: true,
                     });
-                    setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
+                    const resolvedFoodTruck = isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck;
+                    setStart(resolvedFoodTruck);
                 }
             } else if (customOrigin.startsWith('store_location')) {
-                if (store && customOrigin !== start?.store_location_id) {
+                if (store) {
                     const storeLocation = await store.getLocation(customOrigin);
                     setStart(
                         restoreFleetbasePlace({
@@ -279,17 +295,16 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
             setFindingOrigin(false);
             setReady(true);
         }
-    }, [customOrigin, dontFindOrigin, start?.id, start?.store_location_id, storefront, store]);
+    }, [customOrigin, start?.id, start?.store_location_id, storefront, store]);
 
     useEffect(() => {
         if (!storefront || !store) {
-            setFindingOrigin(false);
             setReady(true);
             return;
         }
 
-        updateOriginFromCustomOrigin(customOrigin);
-    }, [storefront, store, customOrigin, updateOriginFromCustomOrigin]);
+        fetchOriginFromStringId();
+    }, [storefront, store, customOrigin, fetchOriginFromStringId]);
 
     // Keep initial region sane if origin becomes available later
     useEffect(() => {
@@ -305,6 +320,15 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
             );
         }
     }, [origin, initialDeltas]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            stopBearingPoll();
+            isPollingBearing.current = false;
+            lastFollowTsRef.current = 0;
+        };
+    }, [stopBearingPoll]);
 
     // -------- Render --------
     const initialRegion = useMemo(() => getSafeInitialRegion(origin, initialDeltas), [origin, initialDeltas]);
@@ -324,7 +348,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                 onRegionChangeComplete={handleRegionChangeComplete}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 showsCompass={false}
-                onRegionChange={startBearingPoll}
+                onRegionChange={() => startBearingPoll()}
                 onRegionChangeComplete={(region) => {
                     stopBearingPoll();
                     handleRegionChangeComplete(region);
@@ -338,13 +362,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                         vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}
                         mapBearing={bearing}
                         providerIsGoogle={providerIsGoogle}
-                        onMovement={({ coordinates }) => {
-                            // VehicleMarker internally animates marker;
-                            // here we make the map follow its movement.
-                            if (coordinates) {
-                                focusMoving(coordinates);
-                            }
-                        }}
+                        onMovement={handleMovement}
                     >
                         <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
                             <Text fontSize={14} color='$textPrimary' numberOfLines={1}>

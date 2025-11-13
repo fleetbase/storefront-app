@@ -26,7 +26,8 @@ const OrderHistoryScreen = () => {
     const { runWithLoading, isLoading } = usePromiseWithLoading();
 
     // Persist serialized orders; restore to SDK instances for rendering
-    const [storedOrders, setStoredOrders] = useStorage<any[]>(`${customer?.id}_orders`, []);
+    const [storedOrders, setStoredOrders] = useStorage(`${customer?.id}_orders`, []);
+    const [ordersDirty, setOrdersDirty] = useStorage(`${customer?.id}_orders_dirty`, false);
     const [refreshing, setRefreshing] = useState(false);
     const [fetchingOrders, setFetchingOrders] = useState(false);
 
@@ -53,6 +54,7 @@ const OrderHistoryScreen = () => {
                 );
 
                 setStoredOrders(result.map((order: Order) => order.serialize()));
+                setOrdersDirty(false);
             } catch (err: any) {
                 console.error('Error loading customer orders:', err);
                 // toast.error?.(err.message ?? 'Failed to load orders');
@@ -84,8 +86,18 @@ const OrderHistoryScreen = () => {
     useFocusEffect(
         useCallback(() => {
             if (!customer) return;
-            fetchOrders();
-        }, [customer, fetchOrders])
+
+            // No cache yet? Fetch once.
+            if (!storedOrders || storedOrders.length === 0) {
+                fetchOrders();
+                return;
+            }
+
+            // Only fetch if something marked it dirty (e.g. new order from another session/device)
+            if (ordersDirty) {
+                fetchOrders();
+            }
+        }, [customer, storedOrders, ordersDirty, fetchOrders])
     );
 
     return (
@@ -105,8 +117,13 @@ const OrderHistoryScreen = () => {
                     <Pressable onPress={() => handleViewOrder(order)}>
                         <XStack justifyContent='space-between' px='$4' py='$3'>
                             <YStack flex={1} space='$2'>
-                                <Text color='$textPrimary' fontWeight='bold' size='$5' numberOfLines={1}>
-                                    {order.getAttribute('meta.storefront')}
+                                <XStack space='$2'>
+                                    <Text color='$textPrimary' fontWeight='bold' size='$5' numberOfLines={1}>
+                                        {order.getAttribute('meta.storefront')}
+                                    </Text>
+                                </XStack>
+                                <Text color='$textPrimary' size='$5' numberOfLines={1}>
+                                    {order.getAttribute('id')}
                                 </Text>
                                 <Text color='$textSecondary' numberOfLines={1} size='$4'>
                                     {formatDate(order.createdAt, 'MMM d, yyyy h:mm aa')}
