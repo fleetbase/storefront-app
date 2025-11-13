@@ -91,6 +91,7 @@ android {
             appLinkScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp"
         ]
         resValue "string", "build_config_package", "com.storefront.app"
+        resValue "string", "app_name", project.env.get("APP_NAME")
     }
     signingConfigs {
         release {
