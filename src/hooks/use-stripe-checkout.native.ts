@@ -7,6 +7,7 @@ import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
+import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -301,6 +302,12 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
                     const emptiedCart = await cart.empty();
                     updateCart(emptiedCart);
+
+                    // Push order into local history cache immediately
+                    if (customer?.id) {
+                        addOrderToHistoryCache(customer.id, order);
+                        // optionally: markOrderHistoryDirty(customer.id);
+                    }
 
                     if (!onOrderComplete && typeof callback === 'function') {
                         callback(order);

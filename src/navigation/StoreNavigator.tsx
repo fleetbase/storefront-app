@@ -1,7 +1,7 @@
 import { createStaticNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Platform, View } from 'react-native';
+import { StyleSheet, Platform, View, Text } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser, faTruck } from '@fortawesome/free-solid-svg-icons';
@@ -39,6 +39,7 @@ import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
 import { getTheme } from '../utils';
+import { translate } from '../utils/localize';
 
 const isAndroid = Platform.OS === 'android';
 
@@ -201,18 +202,19 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
             screen: CatalogCategoryScreen,
             options: ({ route, navigation }) => {
                 return {
-                    title: route.params.category.name,
-                    headerTitleAlign: 'left',
-                    headerTitleStyle: {
-                        color: getTheme('textPrimary'),
-                    },
+                    title: null,
                     headerTransparent: true,
-                    headerShadowVisible: false,
+                    headerShadowVisible: true,
                     headerLeft: () => {
-                        return <BackButton onPress={() => navigation.goBack()} />;
+                        return (
+                            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                <BackButton onPress={() => navigation.goBack()} style={{ marginRight: 10 }} />
+                                <Text style={{ color: getTheme('textPrimary'), fontSize: 15, fontWeight: 'bold' }}>{route.params.category.name}</Text>
+                            </View>
+                        );
                     },
                     headerRight: () => {
-                        return <PortalHost name='LoadingIndicatorPortal' />;
+                        return <CartButton text={translate('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} iconSize={23} textSize={15} />;
                     },
                 };
             },
@@ -283,100 +285,103 @@ export const StoreCartTab = createNativeStackNavigator({
 });
 
 export const StoreProfileTab = createNativeStackNavigator({
-    screens: {
-        Profile: {
+    groups: {
+        // Group 1: All authenticated screens (6 screens → 1 hook call)
+        Authenticated: {
             if: useIsAuthenticated,
-            screen: ProfileScreen,
-            options: {
-                headerShown: false,
-            },
-        },
-        Account: {
-            if: useIsAuthenticated,
-            screen: AccountScreen,
-            options: ({ route, navigation }) => {
-                return {
-                    title: '',
-                    headerTransparent: true,
-                    headerShadowVisible: false,
-                    headerLeft: () => {
-                        return <BackButton onPress={() => navigation.goBack()} />;
+            screens: {
+                Profile: {
+                    screen: ProfileScreen,
+                    options: {
+                        headerShown: false,
                     },
-                };
+                },
+                Account: {
+                    screen: AccountScreen,
+                    options: ({ route, navigation }) => {
+                        return {
+                            title: '',
+                            headerTransparent: true,
+                            headerShadowVisible: false,
+                            headerLeft: () => {
+                                return <BackButton onPress={() => navigation.goBack()} />;
+                            },
+                        };
+                    },
+                },
+                EditAccountProperty: {
+                    screen: EditAccountPropertyScreen,
+                    options: ({ route, navigation }) => {
+                        return {
+                            headerShown: false,
+                        };
+                    },
+                },
+                DeleteAccount: {
+                    screen: DeleteAccountScreen,
+                    options: ({ route, navigation }) => {
+                        return {
+                            headerShown: false,
+                        };
+                    },
+                },
+                DeleteAccountVerify: {
+                    screen: DeleteAccountVerifyScreen,
+                    options: ({ route, navigation }) => {
+                        return {
+                            headerShown: false,
+                        };
+                    },
+                },
+                StripeCustomer: {
+                    screen: StripeCustomerScreen,
+                    options: {
+                        presentation: 'transparentModal',
+                        headerShown: false,
+                    },
+                },
             },
         },
-        EditAccountProperty: {
-            if: useIsAuthenticated,
-            screen: EditAccountPropertyScreen,
-            options: ({ route, navigation }) => {
-                return {
-                    headerShown: false,
-                };
-            },
-        },
-        DeleteAccount: {
-            if: useIsAuthenticated,
-            screen: DeleteAccountScreen,
-            options: ({ route, navigation }) => {
-                return {
-                    headerShown: false,
-                };
-            },
-        },
-        DeleteAccountVerify: {
-            if: useIsAuthenticated,
-            screen: DeleteAccountVerifyScreen,
-            options: ({ route, navigation }) => {
-                return {
-                    headerShown: false,
-                };
-            },
-        },
-        Login: {
+        // Group 2: All unauthenticated screens (5 screens → 1 hook call)
+        Unauthenticated: {
             if: useIsNotAuthenticated,
-            screen: LoginScreen,
-            options: {
-                headerShown: false,
+            screens: {
+                Login: {
+                    screen: LoginScreen,
+                    options: {
+                        headerShown: false,
+                    },
+                },
+                PhoneLogin: {
+                    screen: PhoneLoginScreen,
+                    options: {
+                        headerShown: false,
+                        gestureEnabled: false,
+                    },
+                },
+                PhoneLoginVerify: {
+                    screen: PhoneLoginVerifyScreen,
+                    options: {
+                        headerShown: false,
+                        gestureEnabled: false,
+                    },
+                },
+                CreateAccount: {
+                    screen: CreateAccountScreen,
+                    options: {
+                        headerShown: false,
+                    },
+                },
+                CreateAccountVerify: {
+                    screen: CreateAccountVerifyScreen,
+                    options: {
+                        headerShown: false,
+                    },
+                },
             },
         },
-        PhoneLogin: {
-            if: useIsNotAuthenticated,
-            screen: PhoneLoginScreen,
-            options: {
-                headerShown: false,
-                gestureEnabled: false,
-            },
-        },
-        PhoneLoginVerify: {
-            if: useIsNotAuthenticated,
-            screen: PhoneLoginVerifyScreen,
-            options: {
-                headerShown: false,
-                gestureEnabled: false,
-            },
-        },
-        CreateAccount: {
-            if: useIsNotAuthenticated,
-            screen: CreateAccountScreen,
-            options: {
-                headerShown: false,
-            },
-        },
-        CreateAccountVerify: {
-            if: useIsNotAuthenticated,
-            screen: CreateAccountVerifyScreen,
-            options: {
-                headerShown: false,
-            },
-        },
-        StripeCustomer: {
-            if: useIsAuthenticated,
-            screen: StripeCustomerScreen,
-            options: {
-                presentation: 'transparentModal',
-                headerShown: false,
-            },
-        },
+    },
+    screens: {
         ...OrderStack,
         ...LocationStack,
         ...ModalScreens,

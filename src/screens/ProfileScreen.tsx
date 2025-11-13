@@ -14,7 +14,7 @@ const ProfileScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
     const { customer, logout } = useAuth();
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
 
     const handleManagePaymentMethods = useCallback(() => {
         if (storefrontConfig('paymentGateway') === 'stripe') {
@@ -52,7 +52,7 @@ const ProfileScreen = () => {
         ];
 
         return items.filter((item) => !item.hidden);
-    }, [handleManagePaymentMethods]);
+    }, [handleManagePaymentMethods, locale]);
 
     const renderMenuItem = ({ item }) => (
         <Pressable

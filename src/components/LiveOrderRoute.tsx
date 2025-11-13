@@ -6,7 +6,7 @@ import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { Driver, Vehicle } from '@fleetbase/sdk';
 import { FoodTruck } from '@fleetbase/storefront';
 import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat, formattedAddressFromPlace, createFauxPlace } from '../utils/location';
-import { config, storefrontConfig, getFoodTruckById, isArray } from '../utils';
+import { config, storefrontConfig, getFoodTruckById, isArray, isObject } from '../utils';
 import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import LocationMarker from './LocationMarker';
@@ -64,8 +64,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     const lastFollowTsRef = useRef(0);
 
     const [bearing, setBearing] = useState(0);
-    const [findingOrigin, setFindingOrigin] = useState(true);
-    const [dontFindOrigin, setDontFindOrigin] = useState(false);
+    const [findingOrigin, setFindingOrigin] = useState(false);
     const [ready, setReady] = useState(false);
 
     // Raw payload places (may be undefined/null)
@@ -76,9 +75,25 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     const restoredPickup = useMemo(() => (pickup ? restoreFleetbasePlace(pickup) : null), [pickup]);
     const restoredDropoff = useMemo(() => (dropoff ? restoreFleetbasePlace(dropoff) : null), [dropoff]);
 
-    // Choose initial start: pickup -> faux -> (later customOrigin can override)
+    // Choose initial start: pickup -> faux
     const initialStart = useMemo(() => restoredPickup || createFauxPlace(), [restoredPickup]);
-    const [start, setStart] = useState(initialStart);
+
+    // REFACTORED: Handle object customOrigin immediately without async
+    const resolvedStart = useMemo(() => {
+        // If customOrigin is an object with id, use it directly
+        if (isObject(customOrigin) && customOrigin.id) {
+            return customOrigin;
+        }
+        // Otherwise use initial start (will be fetched async if it's a string ID)
+        return initialStart;
+    }, [customOrigin, initialStart]);
+
+    const [start, setStart] = useState(resolvedStart);
+
+    // Update start when resolvedStart changes (handles object customOrigin immediately)
+    useEffect(() => {
+        setStart(resolvedStart);
+    }, [resolvedStart]);
 
     // Coordinates (safe)
     const origin = useMemo(() => toCoords(start), [start]);
@@ -105,6 +120,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     // Follow moving marker when present
     const shouldFollowMoving = useMemo(() => ready && ((driverAssigned && !isOriginFoodTruck) || isOriginFoodTruck), [ready, driverAssigned, isOriginFoodTruck]);
     const providerIsGoogle = Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE;
+    const grayColor = useMemo(() => theme['$gray-200']?.val || '#E5E7EB', [theme]);
+    const blueColor = useMemo(() => theme['$blue-500']?.val || '#3B82F6', [theme]);
 
     /* ---------- Bearing polling ---------- */
     const startBearingPoll = useCallback(() => {
@@ -139,17 +156,14 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     }, []);
 
     /* ---------- Fit route (only when not following) ---------- */
-    const fitToRoute = useCallback(
-        ({ coordinates }) => {
-            if (!coordinates || coordinates.length < 2) return;
+    const fitToRoute = useCallback(({ coordinates }) => {
+        if (!coordinates || coordinates.length < 2) return;
 
-            mapRef.current?.fitToCoordinates?.(coordinates, {
-                edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                animated: true,
-            });
-        },
-        [shouldFollowMoving]
-    );
+        mapRef.current?.fitToCoordinates?.(coordinates, {
+            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+            animated: true,
+        });
+    }, []);
 
     /* ---------- Follow moving marker ---------- */
     const focusMoving = useCallback(
@@ -184,13 +198,23 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         [initialDeltas]
     );
 
-    /* ---------- customOrigin resolution ---------- */
-    const updateOriginFromCustomOrigin = useCallback(async () => {
-        if (dontFindOrigin || findingOrigin) return;
+    const handleMovement = useCallback(
+        ({ coordinates, heading }) => {
+            if (shouldFollowMoving) focusMoving(coordinates, { heading });
+        },
+        [shouldFollowMoving, focusMoving]
+    );
 
-        // No custom origin: we’re done (we already seeded start)
-        if (!customOrigin) {
-            setFindingOrigin(false);
+    /* ---------- REFACTORED: Async fetch for string IDs only ---------- */
+    const fetchOriginFromStringId = useCallback(async () => {
+        // Only fetch if customOrigin is a string ID (not an object)
+        if (!customOrigin || typeof customOrigin !== 'string') {
+            setReady(true);
+            return;
+        }
+
+        // Already fetched
+        if (start?.id === customOrigin || start?.store_location_id === customOrigin) {
             setReady(true);
             return;
         }
@@ -198,11 +222,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         setFindingOrigin(true);
 
         try {
-            if (typeof customOrigin !== 'string') {
-                if (customOrigin.id && customOrigin.id !== start?.id) {
-                    setStart(customOrigin);
-                }
-            } else if (customOrigin.startsWith('food_truck')) {
+            if (customOrigin.startsWith('food_truck')) {
                 const cachedFoodTruck = getFoodTruckById(customOrigin);
                 if (cachedFoodTruck) {
                     setStart(cachedFoodTruck);
@@ -211,10 +231,11 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         public_id: customOrigin,
                         with_deleted: true,
                     });
-                    setStart(isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck);
+                    const resolvedFoodTruck = isArray(foodTruck) && foodTruck.length ? foodTruck[0] : foodTruck;
+                    setStart(resolvedFoodTruck);
                 }
             } else if (customOrigin.startsWith('store_location')) {
-                if (store && customOrigin !== start?.store_location_id) {
+                if (store) {
                     const storeLocation = await store.getLocation(customOrigin);
                     setStart(
                         restoreFleetbasePlace({
@@ -227,29 +248,37 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         } catch (error) {
             console.error('Error fetching custom origin:', error);
         } finally {
-            setDontFindOrigin(true);
             setFindingOrigin(false);
             setReady(true);
         }
-    }, [customOrigin, dontFindOrigin, start?.id, start?.store_location_id, storefront, store]);
+    }, [customOrigin, start?.id, start?.store_location_id, storefront, store]);
 
     /* ---------- Effects ---------- */
-    // Resolve origin once storefront/store are available (don’t block rendering forever)
+    // Fetch origin if it's a string ID (only when storefront/store are ready)
     useEffect(() => {
         if (!storefront || !store) {
-            setFindingOrigin(false);
             setReady(true);
             return;
         }
-        updateOriginFromCustomOrigin();
-    }, [storefront, store, updateOriginFromCustomOrigin]);
+
+        fetchOriginFromStringId();
+    }, [storefront, store, customOrigin, fetchOriginFromStringId]);
 
     // If origin becomes available later, center once
+    // useEffect(() => {
+    //     if (origin && mapRef.current) {
+    //         mapRef.current.animateToRegion({ ...origin, latitudeDelta: initialDeltas, longitudeDelta: initialDeltas }, 250);
+    //     }
+    // }, [origin, initialDeltas]);
+
+    // Cleanup on unmount
     useEffect(() => {
-        if (origin && mapRef.current) {
-            mapRef.current.animateToRegion({ ...origin, latitudeDelta: initialDeltas, longitudeDelta: initialDeltas }, 250);
-        }
-    }, [origin, initialDeltas]);
+        return () => {
+            stopBearingPoll();
+            isPollingBearing.current = false;
+            lastFollowTsRef.current = 0;
+        };
+    }, [stopBearingPoll]);
 
     /* ---------- Render ---------- */
     return (
@@ -267,121 +296,95 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 onRegionChangeComplete={stopBearingPoll}
                 {...mapViewProps}
             >
-                {/* DRIVER MARKER — follow when visible */}
-                {ready && driverAssigned && !isOriginFoodTruck && (
-                    <DriverMarker
-                        driver={driverAssigned}
-                        onMovement={({ coordinates, heading }) => {
-                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
-                        }}
-                    />
-                )}
+                {/* ONLY RENDER WHEN READY */}
+                {ready && (
+                    <>
+                        {/* DRIVER MARKER */}
+                        {driverAssigned && !isOriginFoodTruck && <DriverMarker driver={driverAssigned} onMovement={handleMovement} />}
 
-                {/* VEHICLE MARKER (Food Truck origin) — follow when visible */}
-                {ready && isOriginFoodTruck && start?.getAttribute?.('vehicle') && (
-                    <VehicleMarker
-                        key={start?.id}
-                        vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}
-                        mapBearing={bearing}
-                        providerIsGoogle={providerIsGoogle}
-                        onMovement={({ coordinates, heading }) => {
-                            if (shouldFollowMoving) focusMoving(coordinates, { heading });
-                        }}
-                    >
-                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                Truck {start.getAttribute('vehicle.plate_number')}
-                            </Text>
-                        </YStack>
-                    </VehicleMarker>
-                )}
-
-                {/* ORIGIN PIN (Store) */}
-                {ready && !isOriginFoodTruck && origin && (
-                    <Marker coordinate={makeCoordinatesFloat(origin)} centerOffset={markerOffset}>
-                        <YStack
-                            mb={8}
-                            px='$3'
-                            py='$2'
-                            bg='$gray-900'
-                            borderRadius='$4'
-                            space='$1'
-                            shadowColor='$shadowColor'
-                            shadowOffset={markerOffset}
-                            shadowOpacity={0.25}
-                            shadowRadius={3}
-                            width={180}
-                        >
-                            <XStack space='$2'>
-                                <YStack justifyContent='center'>
-                                    <FontAwesomeIcon icon={faStore} color={theme['$gray-200'].val} size={20} />
-                                </YStack>
-                                <YStack flex={1} space='$1'>
-                                    <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                        {start?.getAttribute?.('name', `${store?.getAttribute('name') ?? 'Store'} Location`)}
-                                    </Text>
-                                    <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
-                                        {formattedAddressFromPlace(start)}
+                        {/* VEHICLE MARKER (Food Truck) */}
+                        {isOriginFoodTruck && start?.getAttribute?.('vehicle') && (
+                            <VehicleMarker
+                                key={start?.id}
+                                vehicle={new Vehicle(start.getAttribute('vehicle'), fleetbaseAdapter)}
+                                mapBearing={bearing}
+                                providerIsGoogle={providerIsGoogle}
+                                onMovement={handleMovement}
+                            >
+                                <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                    <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                        Truck {start.getAttribute('vehicle.plate_number')}
                                     </Text>
                                 </YStack>
-                            </XStack>
-                        </YStack>
-                        <LocationMarker size={markerSize} />
-                    </Marker>
-                )}
+                            </VehicleMarker>
+                        )}
 
-                {/* DESTINATION PIN */}
-                {ready && destination && restoredDropoff && (
-                    <Marker coordinate={makeCoordinatesFloat(destination)} centerOffset={markerOffset}>
-                        <YStack
-                            mb={8}
-                            px='$3'
-                            py='$2'
-                            bg='$gray-900'
-                            borderRadius='$4'
-                            space='$1'
-                            shadowColor='$shadowColor'
-                            shadowOffset={{ width: 0, height: 5 }}
-                            shadowOpacity={0.25}
-                            shadowRadius={3}
-                            width={180}
-                        >
-                            <XStack space='$2'>
-                                <YStack justifyContent='center'>
-                                    <FontAwesomeIcon icon={faPerson} color={theme['$gray-200'].val} size={20} />
+                        {/* ORIGIN PIN */}
+                        {origin && !shouldFollowMoving && (
+                            <Marker coordinate={origin} anchor={{ x: 0.5, y: 1 }}>
+                                <YStack alignItems='center' space='$1'>
+                                    <YStack bg='$background' borderRadius='$6' px='$3' py='$2' borderWidth={1} borderColor='$borderColor'>
+                                        <XStack alignItems='center' space='$2'>
+                                            <FontAwesomeIcon icon={faStore} size={14} color={grayColor} />
+                                            <YStack>
+                                                <Text fontSize={12} fontWeight='600' color='$textPrimary' numberOfLines={1}>
+                                                    {start?.getAttribute?.('name') || 'Origin'}
+                                                </Text>
+                                                {start?.getAttribute && (
+                                                    <Text fontSize={10} color='$textSecondary' numberOfLines={1}>
+                                                        {formattedAddressFromPlace(start)}
+                                                    </Text>
+                                                )}
+                                            </YStack>
+                                        </XStack>
+                                    </YStack>
+                                    <LocationMarker size={markerSize} />
                                 </YStack>
-                                <YStack flex={1} space='$1'>
-                                    <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                        {restoredDropoff.getAttribute('name') ?? 'Your Location'}
-                                    </Text>
-                                    <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
-                                        {formattedAddressFromPlace(restoredDropoff)}
-                                    </Text>
-                                </YStack>
-                            </XStack>
-                        </YStack>
-                        <LocationMarker size={markerSize} />
-                    </Marker>
-                )}
+                            </Marker>
+                        )}
 
-                {/* ROUTE (only when both ends valid; skip auto-fit if following) */}
-                {ready &&
-                    origin &&
-                    destination &&
-                    Number.isFinite(origin.latitude) &&
-                    Number.isFinite(origin.longitude) &&
-                    Number.isFinite(destination.latitude) &&
-                    Number.isFinite(destination.longitude) &&
-                    !findingOrigin && (
-                        <MapViewDirections
-                            origin={origin}
-                            destination={destination}
-                            apikey={config('GOOGLE_MAPS_API_KEY')}
-                            strokeWidth={4}
-                            strokeColor={theme['$blue-500'].val}
-                            onReady={fitToRoute}
-                        />
-                    )}
+                        {/* DESTINATION PIN */}
+                        {destination && (
+                            <Marker coordinate={destination} anchor={{ x: 0.5, y: 1 }}>
+                                <YStack alignItems='center' space='$1'>
+                                    <YStack bg='$background' borderRadius='$6' px='$3' py='$2' borderWidth={1} borderColor='$borderColor'>
+                                        <XStack alignItems='center' space='$2'>
+                                            <FontAwesomeIcon icon={faPerson} size={14} color={grayColor} />
+                                            <YStack>
+                                                <Text fontSize={12} fontWeight='600' color='$textPrimary' numberOfLines={1}>
+                                                    {restoredDropoff?.getAttribute?.('name') || 'Destination'}
+                                                </Text>
+                                                {restoredDropoff && (
+                                                    <Text fontSize={10} color='$textSecondary' numberOfLines={1}>
+                                                        {formattedAddressFromPlace(restoredDropoff)}
+                                                    </Text>
+                                                )}
+                                            </YStack>
+                                        </XStack>
+                                    </YStack>
+                                    <LocationMarker size={markerSize} />
+                                </YStack>
+                            </Marker>
+                        )}
+
+                        {/* ROUTE */}
+                        {origin &&
+                            destination &&
+                            Number.isFinite(origin.latitude) &&
+                            Number.isFinite(origin.longitude) &&
+                            Number.isFinite(destination.latitude) &&
+                            Number.isFinite(destination.longitude) && (
+                                <MapViewDirections
+                                    origin={origin}
+                                    destination={destination}
+                                    apikey={config('GOOGLE_MAPS_API_KEY')}
+                                    strokeWidth={4}
+                                    strokeColor={blueColor}
+                                    onReady={fitToRoute}
+                                />
+                            )}
+                    </>
+                )}
             </MapView>
 
             {/* Overlay slot */}
