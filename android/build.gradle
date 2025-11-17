@@ -22,7 +22,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:3.5.4")
+        classpath("com.android.tools.build:gradle:8.6.0")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
         classpath('com.google.gms:google-services:4.3.15')

@@ -79,6 +79,17 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
     
     namespace "com.storefront.app"
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
     defaultConfig {
         applicationId project.env.get("APP_IDENTIFIER") ?: "com.storefront.app"
         minSdkVersion rootProject.ext.minSdkVersion
