@@ -28,7 +28,8 @@
         "adb:logcat:grep": "adb logcat | grep 'ReactNativeJS'",
         "adb:devices": "adb devices",
         "generate:app-icon": "npx app-icon generate -i ./assets/app-icon.png",
-        "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#FFFFFF --logo-width=100 --flavor=main"
+        "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#FFFFFF --logo-width=100 --flavor=main",
+        "postinstall": "patch-package"
     },
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",
@@ -134,6 +135,8 @@
         "eslint": "^8.19.0",
         "html-webpack-plugin": "^5.6.3",
         "jest": "^29.6.3",
+        "patch-package": "^8.0.0",
+        "postinstall-postinstall": "^2.1.0",
         "prettier": "^3.3.3",
         "react-test-renderer": "19.1.0",
         "style-loader": "^4.0.0",
@@ -146,10 +149,5 @@
     },
     "engines": {
         "node": ">=20"
-    },
-    "resolutions": {
-        "react-native-i18n@^2.0.15": "patch:react-native-i18n@npm%3A2.0.15#./.yarn/patches/react-native-i18n-npm-2.0.15-7f3cf7cee6.patch",
-        "react-native-notifications@^5.1.0": "patch:react-native-notifications@npm%3A5.1.0#./.yarn/patches/react-native-notifications-npm-5.1.0-3e3b2ea3f8.patch",
-        "@backpackapp-io/react-native-toast@^0.12.1": "patch:@backpackapp-io/react-native-toast@npm%3A0.12.1#./.yarn/patches/@backpackapp-io-react-native-toast-npm-0.12.1-7afc8ec45b.patch"
     }
 }
