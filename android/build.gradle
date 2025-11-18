@@ -16,13 +16,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-
-        maven {
-            url "https://jitpack.io" // Or the correct repository URL for Flipper
-        }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.6.0")
+        classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
         classpath('com.google.gms:google-services:4.3.15')
     }
