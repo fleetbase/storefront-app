@@ -115,9 +115,9 @@
         "@babel/preset-env": "^7.26.0",
         "@babel/preset-react": "^7.25.9",
         "@babel/runtime": "^7.25.0",
-        "@react-native-community/cli": "15.0.1",
-        "@react-native-community/cli-platform-android": "15.0.1",
-        "@react-native-community/cli-platform-ios": "15.0.1",
+        "@react-native-community/cli": "28.0.0",
+        "@react-native-community/cli-platform-android": "28.0.0",
+        "@react-native-community/cli-platform-ios": "20.0.0",
         "@react-native/babel-preset": "0.81.5",
         "@react-native/eslint-config": "0.81.5",
         "@react-native/metro-config": "0.81.5",
@@ -146,7 +146,7 @@
         "webpack-dev-server": "^5.2.0"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=20"
     },
     "resolutions": {
         "react-native-i18n@^2.0.15": "patch:react-native-i18n@npm%3A2.0.15#./.yarn/patches/react-native-i18n-npm-2.0.15-7f3cf7cee6.patch",
