@@ -35,9 +35,6 @@ end
 target 'StorefrontApp' do
   config = use_native_modules!
 
-  # React Native Maps dependencies
-  pod 'react-native-google-maps', :path => '../node_modules/react-native-maps'
-
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
