@@ -335,12 +335,10 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
-    // Track if map has been initialized to correct region
-    const mapInitializedRef = useRef(false);
-
     // Update map region when current location becomes available (fixes Android showing West Africa)
-    const updateMapRegion = useCallback(() => {
-        if (!currentLocation || !mapRef.current || mapInitializedRef.current) return;
+    // Using 'region' prop instead of 'initialRegion' so map updates reactively
+    useEffect(() => {
+        if (!currentLocation) return;
         
         const coords = getCoordinates(currentLocation);
         const [latitude, longitude] = coords;
@@ -354,26 +352,10 @@ const FoodTruckScreen = () => {
                 longitudeDelta: 0.05,
             };
             
-            console.log('[updateMapRegion] Animating to:', newRegion);
-            mapRef.current.animateToRegion(newRegion, 1000);
+            console.log('[updateMapRegion] Setting region to:', newRegion);
             setMapRegion(newRegion);
-            mapInitializedRef.current = true;
         }
-    }, [currentLocation]);
-
-    // Try to update region when location changes
-    useEffect(() => {
-        updateMapRegion();
-    }, [updateMapRegion]);
-
-    // Handle map ready event - critical for Android
-    const handleMapReady = useCallback(() => {
-        console.log('[handleMapReady] Map is ready, currentLocation:', currentLocation?.id);
-        // Give map a moment to fully initialize, then update region
-        setTimeout(() => {
-            updateMapRegion();
-        }, 300);
-    }, [updateMapRegion]);
+    }, [currentLocation?.id]);
 
     useEffect(() => stopBearingPoll, [stopBearingPoll]);
 
@@ -386,10 +368,9 @@ const FoodTruckScreen = () => {
                 ref={mapRef}
                 provider={PROVIDER_DEFAULT}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
-                initialRegion={makeCoordinatesFloat(mapRegion)}
+                region={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 showsCompass={false}
-                onMapReady={handleMapReady}
                 onRegionChange={() => startBearingPoll()}
                 onRegionChangeComplete={async (region, details) => {
                     stopBearingPoll();
