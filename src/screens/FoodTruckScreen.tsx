@@ -335,6 +335,28 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
+    // Update map region when current location becomes available (fixes Android showing West Africa)
+    useEffect(() => {
+        if (currentLocation && mapRef.current) {
+            const coords = getCoordinates(currentLocation);
+            const [latitude, longitude] = coords;
+            
+            // Only update if coordinates are valid (not 0,0 which is West Africa)
+            if (latitude !== 0 || longitude !== 0) {
+                const newRegion = {
+                    latitude,
+                    longitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                };
+                
+                // Animate to the correct region
+                mapRef.current.animateToRegion(newRegion, 1000);
+                setMapRegion(newRegion);
+            }
+        }
+    }, [currentLocation?.id]);
+
     useEffect(() => stopBearingPoll, [stopBearingPoll]);
 
     const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
