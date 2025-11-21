@@ -335,27 +335,14 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
-    // Update map region when current location becomes available (fixes Android showing West Africa)
-    // Using 'region' prop instead of 'initialRegion' so map updates reactively
+    // Fix Android map showing West Africa instead of correct location
+    // On Android, animateToRegion with 0 duration makes it instant
     useEffect(() => {
-        if (!currentLocation) return;
+        if (!isAndroid || !mapRef?.current || !currentLocation) return;
         
-        const coords = getCoordinates(currentLocation);
-        const [latitude, longitude] = coords;
-        
-        // Only update if coordinates are valid (not 0,0 which is West Africa)
-        if (latitude !== 0 && longitude !== 0) {
-            const newRegion = {
-                latitude,
-                longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            };
-            
-            console.log('[updateMapRegion] Setting region to:', newRegion);
-            setMapRegion(newRegion);
-        }
-    }, [currentLocation?.id]);
+        // Animate to region instantly (0ms duration)
+        mapRef.current.animateToRegion(makeCoordinatesFloat(mapRegion), 0);
+    }, [currentLocation]);
 
     useEffect(() => stopBearingPoll, [stopBearingPoll]);
 
@@ -368,7 +355,7 @@ const FoodTruckScreen = () => {
                 ref={mapRef}
                 provider={PROVIDER_DEFAULT}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
-                region={makeCoordinatesFloat(mapRegion)}
+                initialRegion={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 showsCompass={false}
                 onRegionChange={() => startBearingPoll()}
