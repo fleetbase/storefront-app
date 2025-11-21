@@ -80,6 +80,19 @@ const FoodTruckScreen = () => {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
     });
+    
+    // On Android, wait for valid location before showing map to prevent West Africa flash
+    const [isMapReady, setIsMapReady] = useState(!isAndroid);
+    
+    useEffect(() => {
+        if (isAndroid && currentLocation) {
+            const [lat, lng] = currentLocationCoordinates;
+            // Only show map when we have valid coordinates (not 0,0)
+            if (lat !== 0 && lng !== 0) {
+                setIsMapReady(true);
+            }
+        }
+    }, [currentLocation, isAndroid]);
 
     const mapRef = useRef(null);
     const cameraRef = useRef(null);
@@ -351,7 +364,7 @@ const FoodTruckScreen = () => {
 
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
-            <MapView
+            {isMapReady && <MapView
                 ref={mapRef}
                 provider={PROVIDER_DEFAULT}
                 style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
@@ -427,7 +440,7 @@ const FoodTruckScreen = () => {
                         lineDashPattern={[5, 5]}
                     />
                 )}
-            </MapView>
+            </MapView>}
             <YStack position='absolute' top={0} left={0} right={0} zIndex={10}>
                 <CustomHeader
                     headerRowProps={{ px: '$4' }}

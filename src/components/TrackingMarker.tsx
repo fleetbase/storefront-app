@@ -1,5 +1,5 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
-import { Animated, Easing, View } from 'react-native';
+import { Animated, Easing, View, Platform } from 'react-native';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import { SvgCssUri } from 'react-native-svg/css';
 import FastImage from 'react-native-fast-image';
@@ -98,7 +98,11 @@ const TrackingMarker = forwardRef(
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
 
         useEffect(() => {
-            if (svgLoading || !!children) {
+            // On Android, tracksViewChanges can cause rendering issues with markers
+            // Set to false immediately on Android, use delayed logic on iOS
+            if (Platform.OS === 'android') {
+                setTrackViews(false);
+            } else if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
                 const t = setTimeout(() => setTrackViews(false), 120);
