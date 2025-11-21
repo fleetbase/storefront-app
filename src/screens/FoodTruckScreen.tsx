@@ -335,27 +335,45 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
+    // Track if map has been initialized to correct region
+    const mapInitializedRef = useRef(false);
+
     // Update map region when current location becomes available (fixes Android showing West Africa)
-    useEffect(() => {
-        if (currentLocation && mapRef.current) {
-            const coords = getCoordinates(currentLocation);
-            const [latitude, longitude] = coords;
+    const updateMapRegion = useCallback(() => {
+        if (!currentLocation || !mapRef.current || mapInitializedRef.current) return;
+        
+        const coords = getCoordinates(currentLocation);
+        const [latitude, longitude] = coords;
+        
+        // Only update if coordinates are valid (not 0,0 which is West Africa)
+        if (latitude !== 0 && longitude !== 0) {
+            const newRegion = {
+                latitude,
+                longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            };
             
-            // Only update if coordinates are valid (not 0,0 which is West Africa)
-            if (latitude !== 0 || longitude !== 0) {
-                const newRegion = {
-                    latitude,
-                    longitude,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                };
-                
-                // Animate to the correct region
-                mapRef.current.animateToRegion(newRegion, 1000);
-                setMapRegion(newRegion);
-            }
+            console.log('[updateMapRegion] Animating to:', newRegion);
+            mapRef.current.animateToRegion(newRegion, 1000);
+            setMapRegion(newRegion);
+            mapInitializedRef.current = true;
         }
-    }, [currentLocation?.id]);
+    }, [currentLocation]);
+
+    // Try to update region when location changes
+    useEffect(() => {
+        updateMapRegion();
+    }, [updateMapRegion]);
+
+    // Handle map ready event - critical for Android
+    const handleMapReady = useCallback(() => {
+        console.log('[handleMapReady] Map is ready, currentLocation:', currentLocation?.id);
+        // Give map a moment to fully initialize, then update region
+        setTimeout(() => {
+            updateMapRegion();
+        }, 300);
+    }, [updateMapRegion]);
 
     useEffect(() => stopBearingPoll, [stopBearingPoll]);
 
@@ -371,6 +389,7 @@ const FoodTruckScreen = () => {
                 initialRegion={makeCoordinatesFloat(mapRegion)}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 showsCompass={false}
+                onMapReady={handleMapReady}
                 onRegionChange={() => startBearingPoll()}
                 onRegionChangeComplete={async (region, details) => {
                     stopBearingPoll();
