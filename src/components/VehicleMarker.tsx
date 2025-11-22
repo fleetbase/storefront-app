@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Marker } from 'react-native-maps';
 import TrackingMarker from './TrackingMarker';
