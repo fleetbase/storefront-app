@@ -406,6 +406,23 @@ const FoodTruckScreen = () => {
                                     latitude: vehicleInstance.getAttribute('location.coordinates.1'),
                                     longitude: vehicleInstance.getAttribute('location.coordinates.0'),
                                 });
+                                console.log('[FoodTruckScreen] About to return VehicleMarker for:', vehicleInstance.id);
+                                
+                                // Temporary test: Use simple Marker on Android
+                                if (Platform.OS === 'android') {
+                                    const lat = vehicleInstance.getAttribute('location.coordinates.1');
+                                    const lng = vehicleInstance.getAttribute('location.coordinates.0');
+                                    console.log('[FoodTruckScreen] Rendering simple Marker on Android:', { lat, lng });
+                                    return (
+                                        <Marker
+                                            key={foodTruck.id}
+                                            coordinate={{ latitude: lat, longitude: lng }}
+                                            onPress={() => handlePressFoodTruck(foodTruck)}
+                                            title={`Truck ${foodTruck.vehicle?.plate_number}`}
+                                        />
+                                    );
+                                }
+                                
                                 return (
                                     <VehicleMarker
                                         key={foodTruck.id}
