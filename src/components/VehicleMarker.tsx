@@ -8,14 +8,12 @@ import { makeCoordinatesFloat } from '../utils/location';
 import { haversine } from '../utils/math';
 
 const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement, ...props }) => {
-    console.log('[VehicleMarker] Component called for vehicle:', vehicle?.id);
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
 
     const handleEvent = useCallback(
         (data) => {
-            console.log('Incoming data:', data);
             let movementData = { data };
 
             if (data.location && data.location.coordinates) {
@@ -76,13 +74,8 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
         [onPositionChange, onHeadingChange, onMovement]
     );
 
-    console.log('[VehicleMarker] About to call useSocketClusterClient');
     const { listen } = useSocketClusterClient();
-    console.log('[VehicleMarker] useSocketClusterClient completed');
-    
-    console.log('[VehicleMarker] About to call useEventBuffer');
     const { addEvent, clearEvents } = useEventBuffer(handleEvent);
-    console.log('[VehicleMarker] useEventBuffer completed');
     
     const addEventRef = useRef(addEvent);
     const clearEventsRef = useRef(clearEvents);
@@ -116,20 +109,6 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const coord = makeCoordinatesFloat({ latitude, longitude });
     const avatarUrl = vehicle.getAttribute('avatar_url');
     const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
-
-    // Debug logging for Android marker rendering issues
-    useEffect(() => {
-        console.log('[VehicleMarker Debug]', {
-            vehicleId: vehicle.id,
-            rawLatitude: latitude,
-            rawLongitude: longitude,
-            processedCoord: coord,
-            coordValid: coord && !isNaN(coord.latitude) && !isNaN(coord.longitude),
-            avatarUrl,
-            avatarSource: avatarUrl ? 'remote' : 'local',
-            heading,
-        });
-    }, [vehicle.id, latitude, longitude, coord, avatarUrl, heading]);
 
     // Initialize last coordinates with the vehicle's initial position
     useEffect(() => {

@@ -362,8 +362,6 @@ const FoodTruckScreen = () => {
     const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
     const infoColor = isDarkMode ? theme['$blue-400'].val : theme['$blue-600'].val;
 
-    console.log('[availableFoodTrucks]', availableFoodTrucks);
-
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
             {isMapReady && (
@@ -395,57 +393,24 @@ const FoodTruckScreen = () => {
                     }}
                 >
                     {isArray(availableFoodTrucks) &&
-                        availableFoodTrucks.map((foodTruck) => {
-                            // Debug: Check Vehicle instantiation
-                            try {
-                                const vehicleInstance = new Vehicle(foodTruck.vehicle, fleetbaseAdapter);
-                                console.log('[FoodTruckScreen] Vehicle created:', {
-                                    id: vehicleInstance.id,
-                                    hasGetAttribute: typeof vehicleInstance.getAttribute === 'function',
-                                    rawLocation: foodTruck.vehicle?.location,
-                                    latitude: vehicleInstance.getAttribute('location.coordinates.1'),
-                                    longitude: vehicleInstance.getAttribute('location.coordinates.0'),
-                                });
-                                console.log('[FoodTruckScreen] About to return VehicleMarker for:', vehicleInstance.id);
-
-                                // Temporary test: Use simple Marker on Android
-                                if (Platform.OS === 'android') {
-                                    const lat = vehicleInstance.getAttribute('location.coordinates.1');
-                                    const lng = vehicleInstance.getAttribute('location.coordinates.0');
-                                    console.log('[FoodTruckScreen] Rendering simple Marker on Android:', { lat, lng });
-                                    return (
-                                        <Marker
-                                            key={foodTruck.id}
-                                            coordinate={{ latitude: lat, longitude: lng }}
-                                            onPress={() => handlePressFoodTruck(foodTruck)}
-                                            title={`Truck ${foodTruck.vehicle?.plate_number}`}
-                                        />
-                                    );
-                                }
-
-                                return (
-                                    <VehicleMarker
-                                        key={foodTruck.id}
-                                        vehicle={vehicleInstance}
-                                        onPress={() => handlePressFoodTruck(foodTruck)}
-                                        mapBearing={bearing}
-                                        providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
-                                        onMovement={({ coordinates, heading }) => {
-                                            focusMoving(coordinates, { heading });
-                                        }}
-                                    >
-                                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                                {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
-                                            </Text>
-                                        </YStack>
-                                    </VehicleMarker>
-                                );
-                            } catch (error) {
-                                console.error('[FoodTruckScreen] Error creating Vehicle:', error);
-                                return null;
-                            }
-                        })}
+                        availableFoodTrucks.map((foodTruck) => (
+                            <VehicleMarker
+                                key={foodTruck.id}
+                                vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
+                                onPress={() => handlePressFoodTruck(foodTruck)}
+                                mapBearing={bearing}
+                                providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                                onMovement={({ coordinates, heading }) => {
+                                    focusMoving(coordinates, { heading });
+                                }}
+                            >
+                                <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                    <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                        {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
+                                    </Text>
+                                </YStack>
+                            </VehicleMarker>
+                        ))}
                     {currentLocation && (
                         <Marker
                             coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}

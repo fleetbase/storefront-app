@@ -117,19 +117,6 @@ const TrackingMarker = forwardRef(
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
-        // Debug logging for Android marker rendering
-        useEffect(() => {
-            console.log('[TrackingMarker Debug]', {
-                coordinate,
-                plainCoordinate,
-                coordValid: !isNaN(plainCoordinate.latitude) && !isNaN(plainCoordinate.longitude),
-                imageSource: isRemoteSvg ? 'svg' : 'image',
-                size,
-                trackViews,
-                platform: Platform.OS,
-            });
-        }, [coordinate, plainCoordinate, trackViews]);
-
         return (
             <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
                 <YStack
