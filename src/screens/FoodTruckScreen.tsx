@@ -395,10 +395,21 @@ const FoodTruckScreen = () => {
                     }}
                 >
                     {isArray(availableFoodTrucks) &&
-                        availableFoodTrucks.map((foodTruck) => (
-                            <VehicleMarker
-                                key={foodTruck.id}
-                                vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
+                        availableFoodTrucks.map((foodTruck) => {
+                            // Debug: Check Vehicle instantiation
+                            try {
+                                const vehicleInstance = new Vehicle(foodTruck.vehicle, fleetbaseAdapter);
+                                console.log('[FoodTruckScreen] Vehicle created:', {
+                                    id: vehicleInstance.id,
+                                    hasGetAttribute: typeof vehicleInstance.getAttribute === 'function',
+                                    rawLocation: foodTruck.vehicle?.location,
+                                    latitude: vehicleInstance.getAttribute('location.coordinates.1'),
+                                    longitude: vehicleInstance.getAttribute('location.coordinates.0'),
+                                });
+                                return (
+                                    <VehicleMarker
+                                        key={foodTruck.id}
+                                        vehicle={vehicleInstance}
                                 onPress={() => handlePressFoodTruck(foodTruck)}
                                 mapBearing={bearing}
                                 providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
@@ -412,7 +423,12 @@ const FoodTruckScreen = () => {
                                     </Text>
                                 </YStack>
                             </VehicleMarker>
-                        ))}
+                                );
+                            } catch (error) {
+                                console.error('[FoodTruckScreen] Error creating Vehicle:', error);
+                                return null;
+                            }
+                        })}
                     {currentLocation && (
                         <Marker
                             coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
