@@ -109,7 +109,7 @@ const CartItemScreen = ({ route = {} }) => {
                         left: 0,
                     }}
                 />
-                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={insets.top} left={0} right={0} padding='$4' zIndex={1}>
+                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={Platform.OS === 'android' ? insets.top : 0} left={0} right={0} padding='$4' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faTimes} />
