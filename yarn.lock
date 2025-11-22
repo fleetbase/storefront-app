@@ -2197,9 +2197,9 @@ __metadata:
     react-native-keychain: ^9.2.2
     react-native-linear-gradient: ^2.8.3
     react-native-localize: ^3.3.0
-    react-native-maps: ^1.20.0
+    react-native-maps: ^1.26.18
     react-native-maps-directions: ^1.9.0
-    react-native-mmkv-storage: ^0.11.0
+    react-native-mmkv-storage: ^12.0.0
     react-native-notifications: ^5.1.0
     react-native-otp-entry: ^1.7.3
     react-native-permissions: ^4.1.1
@@ -14326,7 +14326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-maps@npm:^1.20.0":
+"react-native-maps@npm:^1.26.18":
   version: 1.26.18
   resolution: "react-native-maps@npm:1.26.18"
   dependencies:
@@ -14342,14 +14342,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-mmkv-storage@npm:^0.11.0":
-  version: 0.11.2
-  resolution: "react-native-mmkv-storage@npm:0.11.2"
+"react-native-mmkv-storage@npm:^12.0.0":
+  version: 12.0.0
+  resolution: "react-native-mmkv-storage@npm:12.0.0"
   peerDependencies:
     react-native: "*"
   bin:
     mmkv-link: autolink/postlink/run.js
-  checksum: 543f784ec19c588f7514612bda3642997d88c640318f95bbd19d4a66d1ae09ef6114aef2ad2044717fe80097f5f7194b5f8731dbdd5a6e60c638e682c6718703
+  checksum: 4e80376f75518f97b4e03d0fed6b541be66f079bc69141156c7c8cb5318674c38decce603987b7fd1656e98060d4a9be16d4183ab2404a712502eece454c02b6
   languageName: node
   linkType: hard
 
