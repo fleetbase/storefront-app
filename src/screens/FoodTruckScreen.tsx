@@ -407,7 +407,7 @@ const FoodTruckScreen = () => {
                                     longitude: vehicleInstance.getAttribute('location.coordinates.0'),
                                 });
                                 console.log('[FoodTruckScreen] About to return VehicleMarker for:', vehicleInstance.id);
-                                
+
                                 // Temporary test: Use simple Marker on Android
                                 if (Platform.OS === 'android') {
                                     const lat = vehicleInstance.getAttribute('location.coordinates.1');
@@ -422,24 +422,24 @@ const FoodTruckScreen = () => {
                                         />
                                     );
                                 }
-                                
+
                                 return (
                                     <VehicleMarker
                                         key={foodTruck.id}
                                         vehicle={vehicleInstance}
-                                onPress={() => handlePressFoodTruck(foodTruck)}
-                                mapBearing={bearing}
-                                providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
-                                onMovement={({ coordinates, heading }) => {
-                                    focusMoving(coordinates, { heading });
-                                }}
-                            >
-                                <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                                    <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                        {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
-                                    </Text>
-                                </YStack>
-                            </VehicleMarker>
+                                        onPress={() => handlePressFoodTruck(foodTruck)}
+                                        mapBearing={bearing}
+                                        providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                                        onMovement={({ coordinates, heading }) => {
+                                            focusMoving(coordinates, { heading });
+                                        }}
+                                    >
+                                        <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                            <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                                {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
+                                            </Text>
+                                        </YStack>
+                                    </VehicleMarker>
                                 );
                             } catch (error) {
                                 console.error('[FoodTruckScreen] Error creating Vehicle:', error);
