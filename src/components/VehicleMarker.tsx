@@ -8,11 +8,10 @@ import { makeCoordinatesFloat } from '../utils/location';
 import { haversine } from '../utils/math';
 
 const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement, ...props }) => {
+    console.log('[VehicleMarker] Component called for vehicle:', vehicle?.id);
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
-    const addEventRef = useRef(addEvent);
-    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
@@ -77,8 +76,16 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
         [onPositionChange, onHeadingChange, onMovement]
     );
 
+    console.log('[VehicleMarker] About to call useSocketClusterClient');
     const { listen } = useSocketClusterClient();
+    console.log('[VehicleMarker] useSocketClusterClient completed');
+    
+    console.log('[VehicleMarker] About to call useEventBuffer');
     const { addEvent, clearEvents } = useEventBuffer(handleEvent);
+    console.log('[VehicleMarker] useEventBuffer completed');
+    
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     useFocusEffect(
         useCallback(() => {
