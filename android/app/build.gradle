@@ -149,6 +149,9 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.0-alpha02'
     implementation 'androidx.activity:activity:1.9.+'
     implementation 'androidx.core:core-ktx:1.15.0'
+    
+    // Google Play Services Maps for react-native-maps
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
