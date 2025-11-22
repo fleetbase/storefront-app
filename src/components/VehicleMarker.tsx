@@ -110,6 +110,20 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const avatarUrl = vehicle.getAttribute('avatar_url');
     const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
 
+    // Debug logging for Android marker rendering issues
+    useEffect(() => {
+        console.log('[VehicleMarker Debug]', {
+            vehicleId: vehicle.id,
+            rawLatitude: latitude,
+            rawLongitude: longitude,
+            processedCoord: coord,
+            coordValid: coord && !isNaN(coord.latitude) && !isNaN(coord.longitude),
+            avatarUrl,
+            avatarSource: avatarUrl ? 'remote' : 'local',
+            heading,
+        });
+    }, [vehicle.id, latitude, longitude, coord, avatarUrl, heading]);
+
     // Initialize last coordinates with the vehicle's initial position
     useEffect(() => {
         if (latitude && longitude && !lastCoordinatesRef.current) {
