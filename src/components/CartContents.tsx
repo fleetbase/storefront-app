@@ -41,7 +41,7 @@ const CartContents = ({}) => {
     const handleEdit = async (cartItem) => {
         const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
         if (product) {
-            navigation.navigate('CartItem', { cartItem, product: product.serialize(), isModal: true });
+            navigation.navigate('CartItem', { cartItem, product: product.serialize() });
         }
     };
 

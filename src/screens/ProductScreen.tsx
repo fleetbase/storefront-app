@@ -40,7 +40,6 @@ const ProductScreen = ({ route = {} }) => {
     const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
     const [ready, setReady] = useState(false);
     const storeLocationId = params.storeLocationId ?? null;
-    const isModal = Platform.OS === 'ios' && (params.isModal ?? true);
     const hasOptions = product.variants().length > 0 && product.addons().length > 0;
     const hasYoutubeVideos = youtubeUrls.length > 0;
 
@@ -78,7 +77,7 @@ const ProductScreen = ({ route = {} }) => {
     };
 
     return (
-        <ScreenWrapper isModal={isModal} useSafeArea={false}>
+        <ScreenWrapper autoDetectModal useSafeArea={false}>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
                 <ContainerDimensions>
                     {(width, height) => (

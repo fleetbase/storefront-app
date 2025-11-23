@@ -240,7 +240,7 @@ const FoodTruckScreen = () => {
             mapRef.current.animateToRegion(newRegion, 1000);
         }
 
-        navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruckId: foodTruck.id, isModal: true });
+        navigation.navigate('Catalog', { catalogs: foodTruck.catalogs, foodTruckId: foodTruck.id });
     };
 
     const handlePressCurrentLocation = (currentLocation) => {

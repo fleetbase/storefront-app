@@ -25,7 +25,7 @@ const ProductCardHorizontalLTR = ({ product, onPress, onAddToCart, style = {}, f
             return;
         }
 
-        navigation.navigate('Product', { product: product.serialize(), quantity, isModal: true });
+        navigation.navigate('Product', { product: product.serialize(), quantity });
     };
 
     const handleAddToCart = async () => {
@@ -34,7 +34,7 @@ const ProductCardHorizontalLTR = ({ product, onPress, onAddToCart, style = {}, f
         }
 
         if (productHasOptions(product)) {
-            return navigation.navigate('Product', { product: product.serialize(), quantity, isModal: true });
+            return navigation.navigate('Product', { product: product.serialize(), quantity });
         }
 
         try {

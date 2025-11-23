@@ -87,7 +87,7 @@ function detectIsModal(route: any, autoDetect: boolean, explicitIsModal?: boolea
         const params = route?.params ?? {};
         const routeName = route?.name;
 
-        // Check params
+        // Check params - explicit false overrides default
         if (params.isModal !== undefined) {
             return params.isModal === true;
         }
@@ -96,6 +96,10 @@ function detectIsModal(route: any, autoDetect: boolean, explicitIsModal?: boolea
         if (typeof routeName === 'string' && routeName.endsWith('Modal')) {
             return true;
         }
+
+        // Default to true on iOS (matches React Navigation modal presentation behavior)
+        // Android doesn't use modal presentation by default
+        return Platform.OS === 'ios';
     }
 
     return false;
