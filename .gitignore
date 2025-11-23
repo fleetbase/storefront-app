@@ -50,6 +50,7 @@ buck-out/
 \.buckd/
 *.keystore
 !debug.keystore
+.kotlin/
 
 # testing
 /coverage

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Marker } from 'react-native-maps';
 import TrackingMarker from './TrackingMarker';
@@ -11,12 +11,9 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
-    const addEventRef = useRef(addEvent);
-    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
-            console.log('Incoming data:', data);
             let movementData = { data };
 
             if (data.location && data.location.coordinates) {
@@ -79,6 +76,9 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
 
     const { listen } = useSocketClusterClient();
     const { addEvent, clearEvents } = useEventBuffer(handleEvent);
+    
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     useFocusEffect(
         useCallback(() => {

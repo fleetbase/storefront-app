@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-gesture-handler/android/build.gradle b/node_modules/react-native-gesture-handler/android/build.gradle
+index 1234567..abcdefg 100644
+--- a/node_modules/react-native-gesture-handler/android/build.gradle
++++ b/node_modules/react-native-gesture-handler/android/build.gradle
+@@ -80,6 +80,7 @@ def resolveReactNativeDirectory() {
+ }
+ 
+ android {
++    compileSdk rootProject.ext.compileSdkVersion
+     ndkVersion safeExtGet("ndkVersion", "21.4.7075529")
+     buildToolsVersion safeExtGet("buildToolsVersion", "30.0.2")
+     compileSdkVersion safeExtGet("compileSdkVersion", 30)

@@ -1,5 +1,5 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
-import { Animated, Easing, View } from 'react-native';
+import { Animated, Easing, View, Platform } from 'react-native';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import { SvgCssUri } from 'react-native-svg/css';
 import FastImage from 'react-native-fast-image';
