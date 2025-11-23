@@ -160,7 +160,7 @@ const CartItemScreen = ({ route = {} }) => {
                     />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
+            <XStack position='absolute' px='$4' py='$3' bottom={insets.bottom} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
                 <XStack width='35%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} disabled={isLoading('addToCart') || isLoading('removeCartItem')} />
                 </XStack>
