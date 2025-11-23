@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Animated, SafeAreaView, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Animated, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import ScreenWrapper from '../components/ScreenWrapper';
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -24,17 +23,13 @@ if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 const CartScreen = ({ route }) => {
-    const routeName = route.name;
     const theme = useTheme();
     const navigation = useNavigation();
-    const tabBarHeight = useBottomTabBarHeight();
-    const insets = useSafeAreaInsets();
     const { t } = useLanguage();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
-    const isModalScreen = Platform.OS === 'ios' && typeof routeName === 'string' && routeName.endsWith('Modal');
 
     const handleCheckout = () => {
         const params = {};
@@ -270,7 +265,7 @@ const CartScreen = ({ route }) => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper autoDetectModal>
             <XStack justifyContent='space-between' alignItems='center' padding='$5'>
                 <XStack alignItems='center'>
                     <Text fontSize='$7' fontWeight='bold'>
@@ -301,8 +296,8 @@ const CartScreen = ({ route }) => {
                 <YStack
                     position='absolute'
                     bg='$background'
-                    bottom={isModalScreen ? 0 : tabBarHeight}
-                    paddingBottom={isModalScreen ? insets.bottom : tabBarHeight}
+                    bottom={0}
+                    paddingBottom={0}
                     borderTopWidth={1}
                     borderColor='$borderColorWithShadow'
                     width='100%'
@@ -329,10 +324,10 @@ const CartScreen = ({ route }) => {
                             </Button>
                         </YStack>
                     </XStack>
-                    <Spacer height={isModalScreen ? 25 : 0} />
+                    <Spacer height={0} />
                 </YStack>
             )}
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 
