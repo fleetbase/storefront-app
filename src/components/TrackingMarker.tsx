@@ -98,11 +98,7 @@ const TrackingMarker = forwardRef(
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
 
         useEffect(() => {
-            // On Android, tracksViewChanges can cause rendering issues with markers
-            // Set to false immediately on Android, use delayed logic on iOS
-            if (Platform.OS === 'android') {
-                setTrackViews(false);
-            } else if (svgLoading || !!children) {
+            if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
                 const t = setTimeout(() => setTrackViews(false), 120);
