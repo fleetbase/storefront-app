@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -26,6 +28,8 @@ import FastImage from 'react-native-fast-image';
 const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
+    const tabBarHeight = useBottomTabBarHeight();
     const params = route.params ?? {};
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
