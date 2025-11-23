@@ -96,10 +96,6 @@ function detectIsModal(route: any, autoDetect: boolean, explicitIsModal?: boolea
         if (typeof routeName === 'string' && routeName.endsWith('Modal')) {
             return true;
         }
-
-        // Default to true on iOS (matches React Navigation modal presentation behavior)
-        // Android doesn't use modal presentation by default
-        return Platform.OS === 'ios';
     }
 
     return false;
@@ -201,7 +197,7 @@ function calculateBottomSpacing(
  * // Scrollable screen
  * <ScreenWrapper scrollable>
  *   <YStack>
- *     {/* Long content */}
+ *     // Long content here
  *   </YStack>
  * </ScreenWrapper>
  * 
