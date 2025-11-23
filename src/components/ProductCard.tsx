@@ -71,7 +71,7 @@ const ProductCard = ({
             return;
         }
 
-        navigation.navigate('Product', { product: product.serialize(), quantity, ...additionalNavigationParams });
+        navigation.navigate('Product', { product: product.serialize(), quantity, isModal: true, ...additionalNavigationParams });
     };
 
     const handleAddToCart = async () => {
@@ -80,7 +80,7 @@ const ProductCard = ({
         }
 
         if (productHasOptions(product)) {
-            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId, ...additionalNavigationParams });
+            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId, isModal: true, ...additionalNavigationParams });
         }
 
         try {
