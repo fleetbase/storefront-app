@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView, Dimensions, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenWrapper from '../components/ScreenWrapper';
 import { YStack, Text, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTruck } from '@fortawesome/free-solid-svg-icons';
@@ -21,7 +21,6 @@ const CatalogScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
     const navigation = useNavigation();
-    const insets = useSafeAreaInsets();
     const { t } = useLanguage();
     const catalogs = params.catalogs || [];
     const foodTruck = new FoodTruck(params.foodTruck);
@@ -46,8 +45,8 @@ const CatalogScreen = ({ route }) => {
     );
 
     return (
-        <YStack flex={1} bg='$background'>
-            <XStack pt={Platform.OS === 'android' ? insets.top : '$4'} pb='$4' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
+        <ScreenWrapper isModal useSafeArea={false}>
+            <XStack pt='$4' pb='$4' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
                 <XStack flex={1} gap='$2' alignItems='center'>
                     <FontAwesomeIcon icon={faTruck} color={theme['$blue-500'].val} size={24} />
                     <Text color='$textPrimary' fontSize='$7' fontWeight='bold' numberOfLines={1}>
@@ -85,7 +84,7 @@ const CatalogScreen = ({ route }) => {
                 </YStack>
                 <Spacer height={200} />
             </ScrollView>
-        </YStack>
+        </ScreenWrapper>
     );
 };
 

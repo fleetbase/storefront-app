@@ -4,8 +4,7 @@ import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, R
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
+import ScreenWrapper from '../components/ScreenWrapper';
 import { Product } from '@fleetbase/storefront';
 import { restoreSdkInstance } from '../utils';
 import { toast } from '../utils/toast';
@@ -27,8 +26,6 @@ import FastImage from 'react-native-fast-image';
 const ProductScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const tabBarHeight = useBottomTabBarHeight();
-    const insets = useSafeAreaInsets();
     const params = route.params ?? {};
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
@@ -43,7 +40,6 @@ const ProductScreen = ({ route = {} }) => {
     const [quantity, setQuantity] = useState(route.params.quantity ?? 1);
     const [ready, setReady] = useState(false);
     const storeLocationId = params.storeLocationId ?? null;
-    const isModal = Platform.OS !== 'ios' ? false : (params.isModal ?? true);
     const hasOptions = product.variants().length > 0 && product.addons().length > 0;
     const hasYoutubeVideos = youtubeUrls.length > 0;
 
@@ -81,7 +77,7 @@ const ProductScreen = ({ route = {} }) => {
     };
 
     return (
-        <YStack flex={1} bg='$background'>
+        <ScreenWrapper isModal useSafeArea={false}>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
                 <ContainerDimensions>
                     {(width, height) => (
@@ -94,7 +90,7 @@ const ProductScreen = ({ route = {} }) => {
                         />
                     )}
                 </ContainerDimensions>
-                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={Platform.OS === 'android' ? insets.top : 0} left={0} right={0} py='$2' px='$2' zIndex={1}>
+                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} py='$2' px='$2' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faTimes} />
@@ -147,7 +143,7 @@ const ProductScreen = ({ route = {} }) => {
                     <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={isModal ? insets.bottom : tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
+            <XStack position='absolute' px='$4' py='$3' bottom={0} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
                 <XStack width='38%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} />
                 </XStack>
@@ -189,7 +185,7 @@ const ProductScreen = ({ route = {} }) => {
                     </Button>
                 </XStack>
             </XStack>
-        </YStack>
+        </ScreenWrapper>
     );
 };
 
