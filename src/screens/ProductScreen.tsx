@@ -150,7 +150,7 @@ const ProductScreen = ({ route = {} }) => {
                     <ProductOptionsForm product={product} onAddonsChanged={setSelectedAddons} onVariationsChanged={setSelectedVariants} />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={Platform.OS === 'android' ? insets.bottom : (isModal ? insets.bottom : tabBarHeight)} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
+            <XStack position='absolute' px='$4' py='$3' bottom={isModal ? insets.bottom : tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$3'>
                 <XStack width='38%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} />
                 </XStack>
