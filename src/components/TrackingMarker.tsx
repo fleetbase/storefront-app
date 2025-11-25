@@ -69,6 +69,9 @@ const TrackingMarker = forwardRef(
         };
 
         const move = (lat, lng, duration = moveDuration) => {
+            if (!hasMovedOnce) {
+                setHasMovedOnce(true);
+            }
             animatedRegion
                 .timing({
                     latitude: lat,
@@ -97,7 +100,9 @@ const TrackingMarker = forwardRef(
         const [imageLoaded, setImageLoaded] = useState(false);
         const [trackViews, setTrackViews] = useState(Platform.OS === 'android' ? true : true);
         const [renderKey, setRenderKey] = useState(0);
+        const [hasMovedOnce, setHasMovedOnce] = useState(false);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
+        const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
             // On Android, keep tracksViewChanges true until image loads
@@ -134,10 +139,12 @@ const TrackingMarker = forwardRef(
         };
 
         const onImageLoaded = () => {
+            console.log('[TrackingMarker] Image loaded', { platform: Platform.OS, isRemoteSvg });
             setSvgLoading(false);
             setImageLoaded(true);
             if (Platform.OS === 'android') {
                 // Force re-render on Android
+                console.log('[TrackingMarker] Forcing re-render with new key');
                 setRenderKey((prev) => prev + 1);
             }
         };
@@ -146,10 +153,28 @@ const TrackingMarker = forwardRef(
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
+        console.log('[TrackingMarker] Rendering marker', {
+            platform: Platform.OS,
+            coordinate: plainCoordinate,
+            imageSource: isRemoteSvg ? 'SVG' : (imageSource.uri ? 'Remote' : 'Local'),
+            renderKey,
+            trackViews,
+            imageLoaded,
+            svgLoading
+        });
+
+        // On Android, use regular Marker until image loads to fix first render issue
+        // After image loads, switch to AnimatedMarker for smooth movement
+        const useAnimated = !isAndroid || imageLoaded;
+        const MarkerComponent = useAnimated ? AnimatedMarker : Marker;
+        const markerCoordinate = useAnimated ? makeCoordinatesFloat(plainCoordinate) : makeCoordinatesFloat(coordinate);
+        
+        console.log('[TrackingMarker] Using', useAnimated ? 'AnimatedMarker' : 'Regular Marker', { imageLoaded, isAndroid });
+
         return (
-            <AnimatedMarker
-                key={Platform.OS === 'android' ? `marker-${renderKey}` : undefined}
-                coordinate={makeCoordinatesFloat(plainCoordinate)}
+            <MarkerComponent
+                key={isAndroid ? `marker-${renderKey}-${imageLoaded ? 'loaded' : 'loading'}` : undefined}
+                coordinate={markerCoordinate}
                 onPress={onPress}
                 anchor={ANCHOR}
                 flat={true}
