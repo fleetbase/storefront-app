@@ -120,8 +120,10 @@ const TrackingMarker = forwardRef(
             setSvgLoading(false);
         };
 
-        // Use native marker rotation for both platforms - works with Google Maps and Apple Maps
+        // Native rotation for marker
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
+        // Child rotation for map bearing compensation (iOS only - breaks Android bitmap conversion)
+        const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
             <AnimatedMarker
@@ -169,6 +171,9 @@ const TrackingMarker = forwardRef(
                             height: size.height,
                             alignItems: 'center',
                             justifyContent: 'center',
+                            // iOS: Apply transform for map bearing compensation
+                            // Android: No transform (breaks bitmap conversion)
+                            ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
                         }}
                     >
                         <FastImage 
