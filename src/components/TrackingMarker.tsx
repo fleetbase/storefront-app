@@ -96,6 +96,7 @@ const TrackingMarker = forwardRef(
         const [svgLoading, setSvgLoading] = useState(true);
         const [trackViews, setTrackViews] = useState(true);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
+        const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
             if (svgLoading || !!children) {
@@ -118,9 +119,10 @@ const TrackingMarker = forwardRef(
             setSvgLoading(false);
         };
 
-        const providerSupportsRotation = providerIsGoogle;
+        // On Android: Use native rotation only (no View transform)
+        // On iOS: Use both native rotation and View transform for map bearing compensation
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
-        const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
+        const childRotation = isAndroid ? 0 : (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
             <AnimatedMarker
@@ -131,14 +133,16 @@ const TrackingMarker = forwardRef(
                 rotation={nativeRotation}
                 tracksViewChanges={trackViews}
             >
-                {/* Fixed-size View wrapper - CRITICAL for Android SVG rendering */}
+                {/* Fixed-size View wrapper - required for Android SVG rendering */}
+                {/* On Android: NO transform (breaks bitmap conversion) */}
+                {/* On iOS: transform for map bearing compensation */}
                 <View
                     style={{
                         width: size.width,
                         height: size.height,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transform: [{ rotate: `${childRotation}deg` }],
+                        ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
                     }}
                     pointerEvents='none'
                 >
