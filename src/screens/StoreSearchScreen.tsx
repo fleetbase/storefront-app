@@ -178,8 +178,8 @@ const StoreSearchScreen = (route = {}) => {
                         onChangeText={setSearchQuery}
                         size='$4'
                         placeholder={t('StoreSearchScreen.searchProducts')}
-                        placeholderTextColor='$textPlaceholder'
-                        color='$black'
+                        placeholderTextColor='$textSecondary'
+                        color='$textPrimary'
                         bg='transparent'
                         flex={1}
                         borderWidth={0}

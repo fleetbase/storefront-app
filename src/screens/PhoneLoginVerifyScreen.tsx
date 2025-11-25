@@ -9,6 +9,7 @@ import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const PhoneLoginVerifyScreen = () => {
     const navigation = useNavigation();
@@ -35,7 +36,7 @@ const PhoneLoginVerifyScreen = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <AbsoluteTabBarScreenWrapper>
                 <YStack flex={1} bg='$background' space='$3' padding='$5'>
                     <YStack mb='$4'>
@@ -69,7 +70,7 @@ const PhoneLoginVerifyScreen = () => {
                     <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                 </YStack>
             </AbsoluteTabBarScreenWrapper>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

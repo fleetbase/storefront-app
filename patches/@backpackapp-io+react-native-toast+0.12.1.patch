@@ -1,0 +1,12 @@
+diff --git a/node_modules/@backpackapp-io/react-native-toast/lib/module/index.js b/node_modules/@backpackapp-io/react-native-toast/lib/module/index.js
+index d02efb0..55c6789 100644
+--- a/node_modules/@backpackapp-io/react-native-toast/lib/module/index.js
++++ b/node_modules/@backpackapp-io/react-native-toast/lib/module/index.js
+@@ -1,5 +1,5 @@
+ export { useToaster } from './core/use-toaster';
+ export { Toasts } from './components';
+ export * from './headless';
+-export { ToastPosition, ToastAnimationType } from './core/types';
++export { ToastPosition } from './core/types';
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file

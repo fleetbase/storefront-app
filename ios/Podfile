@@ -12,6 +12,7 @@ node_require('react-native-permissions/scripts/setup.rb')
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
+source 'https://github.com/CocoaPods/Specs.git'
 
 # Permissions handlers
 setup_permissions([
@@ -34,9 +35,6 @@ end
 
 target 'StorefrontApp' do
   config = use_native_modules!
-
-  # React Native Maps dependencies
-  pod 'react-native-google-maps', :path => '../node_modules/react-native-maps'
 
   use_react_native!(
     :path => config[:reactNativePath],

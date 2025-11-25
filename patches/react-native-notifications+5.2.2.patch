@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-notifications/lib/android/app/build.gradle b/node_modules/react-native-notifications/lib/android/app/build.gradle
+index 30bb01c..473d9ed 100644
+--- a/node_modules/react-native-notifications/lib/android/app/build.gradle
++++ b/node_modules/react-native-notifications/lib/android/app/build.gradle
+@@ -62,9 +62,6 @@ android {
+         targetCompatibility JavaVersion.VERSION_1_8
+     }
+ 
+-    dexOptions {
+-        javaMaxHeapSize "4g"
+-    }
+     buildTypes {
+         release {
+             minifyEnabled false

@@ -86,6 +86,10 @@ export function isEmpty(target) {
     return target === null || target === undefined;
 }
 
+export function isBlank(target) {
+    return isEmpty(target) || target === '';
+}
+
 export function isResource(target, type = null) {
     if (isObject(target) && typeof type === 'string') {
         return hasResouceProperties(target) && target.resource === type;
@@ -268,7 +272,7 @@ export function later(callback = null, ms = 300) {
     }, ms);
 }
 
-export function debounce(func, delay) {
+export function debounce(func, delay = 300) {
     let timeoutId;
     return (...args) => {
         if (timeoutId) clearTimeout(timeoutId);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Animated, SafeAreaView, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Animated, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { Spinner, Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -11,6 +12,7 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import Spacer from '../components/Spacer';
+import ScreenWrapper from '../components/ScreenWrapper';
 import { useLanguage } from '../contexts/LanguageContext';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -20,6 +22,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const AddressBookScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
     const { savedLocations, deleteLocation } = useSavedLocations();
@@ -113,18 +116,19 @@ const AddressBookScreen = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' pt={Platform.OS === 'android' ? 65 : '$2'}>
+        <ScreenWrapper>
+            <YStack flex={1} bg='$background'>
                 <Animated.FlatList
                     data={savedLocations}
                     renderItem={renderItem}
                     keyExtractor={(item, index) => item.id || index}
                     contentContainerStyle={{ paddingBottom: 16 }}
                     ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
+                    ListHeaderComponent={<Spacer height={Platform.select({ ios: insets.top + 5, android: insets.top + 25 })} />}
                     ListFooterComponent={<Spacer height={100} />}
                 />
             </YStack>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

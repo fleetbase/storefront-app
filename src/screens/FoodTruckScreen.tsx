@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet, Pressable, Platform } from 'react-native';
+import { StyleSheet, Pressable, Platform, View } from 'react-native';
 import MapView, { Polygon, Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -80,6 +80,19 @@ const FoodTruckScreen = () => {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
     });
+
+    // On Android, wait for valid location before showing map to prevent West Africa flash
+    const [isMapReady, setIsMapReady] = useState(!isAndroid);
+
+    useEffect(() => {
+        if (isAndroid && currentLocation) {
+            const [lat, lng] = currentLocationCoordinates;
+            // Only show map when we have valid coordinates (not 0,0)
+            if (lat !== 0 && lng !== 0) {
+                setIsMapReady(true);
+            }
+        }
+    }, [currentLocation, isAndroid]);
 
     const mapRef = useRef(null);
     const cameraRef = useRef(null);
@@ -335,6 +348,15 @@ const FoodTruckScreen = () => {
         load();
     }, [fleetbase]);
 
+    // Fix Android map showing West Africa instead of correct location
+    // On Android, animateToRegion with 0 duration makes it instant
+    useEffect(() => {
+        if (!isAndroid || !mapRef?.current || !currentLocation) return;
+
+        // Animate to region instantly (0ms duration)
+        mapRef.current.animateToRegion(makeCoordinatesFloat(mapRegion), 0);
+    }, [currentLocation]);
+
     useEffect(() => stopBearingPoll, [stopBearingPoll]);
 
     const currentZoneColor = currentZone ? theme[`$green-${isDarkMode ? '400' : '600'}`].val : theme[`$red-${isDarkMode ? '400' : '600'}`].val;
@@ -342,83 +364,85 @@ const FoodTruckScreen = () => {
 
     return (
         <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
-            <MapView
-                ref={mapRef}
-                provider={PROVIDER_DEFAULT}
-                style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
-                initialRegion={makeCoordinatesFloat(mapRegion)}
-                mapType={storefrontConfig('defaultMapType', 'standard')}
-                showsCompass={false}
-                onRegionChange={() => startBearingPoll()}
-                onRegionChangeComplete={async (region, details) => {
-                    stopBearingPoll();
+            {isMapReady && (
+                <MapView
+                    ref={mapRef}
+                    provider={PROVIDER_DEFAULT}
+                    style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', zIndex: 1 }}
+                    initialRegion={makeCoordinatesFloat(mapRegion)}
+                    mapType={storefrontConfig('defaultMapType', 'standard')}
+                    showsCompass={false}
+                    onRegionChange={() => startBearingPoll()}
+                    onRegionChangeComplete={async (region, details) => {
+                        stopBearingPoll();
 
-                    // Grab the real camera (has zoom / pitch / heading)
-                    try {
-                        const cam = await mapRef.current?.getCamera?.();
-                        if (cam) {
-                            cameraRef.current = cam;
-                        }
+                        // Grab the real camera (has zoom / pitch / heading)
+                        try {
+                            const cam = await mapRef.current?.getCamera?.();
+                            if (cam) {
+                                cameraRef.current = cam;
+                            }
 
-                        // If user zoomed out enough, disable following.
-                        if (hasZoomedOutToCityLevel(cam, region)) {
-                            isFollowingRef.current = false;
+                            // If user zoomed out enough, disable following.
+                            if (hasZoomedOutToCityLevel(cam, region)) {
+                                isFollowingRef.current = false;
+                            }
+                        } catch (e) {
+                            // fail silent is fine
                         }
-                    } catch (e) {
-                        // fail silent is fine
-                    }
-                }}
-            >
-                {isArray(availableFoodTrucks) &&
-                    availableFoodTrucks.map((foodTruck) => (
-                        <VehicleMarker
-                            key={foodTruck.id}
-                            vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
-                            onPress={() => handlePressFoodTruck(foodTruck)}
-                            mapBearing={bearing}
-                            providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
-                            onMovement={({ coordinates, heading }) => {
-                                focusMoving(coordinates, { heading });
-                            }}
+                    }}
+                >
+                    {isArray(availableFoodTrucks) &&
+                        availableFoodTrucks.map((foodTruck) => (
+                            <VehicleMarker
+                                key={foodTruck.id}
+                                vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
+                                onPress={() => handlePressFoodTruck(foodTruck)}
+                                mapBearing={bearing}
+                                providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                                onMovement={({ coordinates, heading }) => {
+                                    focusMoving(coordinates, { heading });
+                                }}
+                            >
+                                <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                    <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                        {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
+                                    </Text>
+                                </YStack>
+                            </VehicleMarker>
+                        ))}
+                    {currentLocation && (
+                        <Marker
+                            coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
+                            onPress={() => handlePressCurrentLocation(currentLocation)}
                         >
-                            <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                                <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                    {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
-                                </Text>
+                            <YStack alignItems='center' justifyContent='center'>
+                                <YStack bg='$blue-600' padding='$2' alignItems='center' justifyContent='center' borderRadius='$4'>
+                                    <FontAwesomeIcon icon={faHome} color={theme['$blue-100'].val} size={25} />
+                                </YStack>
+                                <YStack opacity={1} mt='$2' bg='$blue-600' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center' maxWidth={180}>
+                                    <Text fontSize={14} color='$blue-100' numberOfLines={1}>
+                                        {currentLocation
+                                            ? currentLocation.isAttributeFilled('name')
+                                                ? currentLocation.getAttribute('name')
+                                                : formattedAddressFromPlace(currentLocation)
+                                            : t('common.loading')}
+                                    </Text>
+                                </YStack>
                             </YStack>
-                        </VehicleMarker>
-                    ))}
-                {currentLocation && (
-                    <Marker
-                        coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
-                        onPress={() => handlePressCurrentLocation(currentLocation)}
-                    >
-                        <YStack alignItems='center' justifyContent='center'>
-                            <YStack bg='$blue-600' padding='$2' alignItems='center' justifyContent='center' borderRadius='$4'>
-                                <FontAwesomeIcon icon={faHome} color={theme['$blue-100'].val} size={25} />
-                            </YStack>
-                            <YStack opacity={1} mt='$2' bg='$blue-600' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center' maxWidth={180}>
-                                <Text fontSize={14} color='$blue-100' numberOfLines={1}>
-                                    {currentLocation
-                                        ? currentLocation.isAttributeFilled('name')
-                                            ? currentLocation.getAttribute('name')
-                                            : formattedAddressFromPlace(currentLocation)
-                                        : t('common.loading')}
-                                </Text>
-                            </YStack>
-                        </YStack>
-                    </Marker>
-                )}
-                {!isNone(currentZone) && (
-                    <Polygon
-                        coordinates={makeCoordinatesFloat(getPolygonCoordinates(currentZone.border))}
-                        strokeWidth={2}
-                        strokeColor={currentZone.stroke_color}
-                        fillColor={hexToRGBA(currentZone.color, 0.05)}
-                        lineDashPattern={[5, 5]}
-                    />
-                )}
-            </MapView>
+                        </Marker>
+                    )}
+                    {!isNone(currentZone) && (
+                        <Polygon
+                            coordinates={makeCoordinatesFloat(getPolygonCoordinates(currentZone.border))}
+                            strokeWidth={2}
+                            strokeColor={currentZone.stroke_color}
+                            fillColor={hexToRGBA(currentZone.color, 0.05)}
+                            lineDashPattern={[5, 5]}
+                        />
+                    )}
+                </MapView>
+            )}
             <YStack position='absolute' top={0} left={0} right={0} zIndex={10}>
                 <CustomHeader
                     headerRowProps={{ px: '$4' }}

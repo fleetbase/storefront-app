@@ -126,6 +126,8 @@
 	<string>This app allows you to upload photos from your photo library</string>
 	<key>NSUserAuthenticationUsageDescription</key>
 	<string>Sign in with Apple is used to authenticate your account.</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
