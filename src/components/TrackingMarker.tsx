@@ -94,31 +94,68 @@ const TrackingMarker = forwardRef(
         useImperativeHandle(ref, () => ({ move, rotate }));
 
         const [svgLoading, setSvgLoading] = useState(true);
-        const [trackViews, setTrackViews] = useState(true);
+        const [imageLoaded, setImageLoaded] = useState(false);
+        const [trackViews, setTrackViews] = useState(Platform.OS === 'android' ? true : true);
+        const [renderKey, setRenderKey] = useState(0);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
 
         useEffect(() => {
-            // On Android, tracksViewChanges can cause rendering issues with markers
-            // Set to false immediately on Android, use delayed logic on iOS
+            // On Android, keep tracksViewChanges true until image loads
             if (Platform.OS === 'android') {
-                setTrackViews(false);
+                if (imageLoaded) {
+                    // After image loads, wait a bit then disable tracking
+                    const timer = setTimeout(() => {
+                        setTrackViews(false);
+                    }, 300);
+                    return () => clearTimeout(timer);
+                } else {
+                    setTrackViews(true);
+                }
             } else if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
                 const t = setTimeout(() => setTrackViews(false), 120);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading, children]);
+        }, [svgLoading, children, imageLoaded]);
 
-        const onSvgLoaded = () => setSvgLoading(false);
-        const onSvgError = () => setSvgLoading(false);
+        const onSvgLoaded = () => {
+            setSvgLoading(false);
+            setImageLoaded(true);
+            if (Platform.OS === 'android') {
+                // Force re-render on Android
+                setRenderKey((prev) => prev + 1);
+            }
+        };
+
+        const onSvgError = () => {
+            setSvgLoading(false);
+            setImageLoaded(true);
+        };
+
+        const onImageLoaded = () => {
+            setSvgLoading(false);
+            setImageLoaded(true);
+            if (Platform.OS === 'android') {
+                // Force re-render on Android
+                setRenderKey((prev) => prev + 1);
+            }
+        };
 
         const providerSupportsRotation = providerIsGoogle;
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
+            <AnimatedMarker
+                key={Platform.OS === 'android' ? `marker-${renderKey}` : undefined}
+                coordinate={makeCoordinatesFloat(plainCoordinate)}
+                onPress={onPress}
+                anchor={ANCHOR}
+                flat={true}
+                rotation={nativeRotation}
+                tracksViewChanges={trackViews}
+            >
                 <YStack
                     style={{
                         width: size.width,
@@ -146,7 +183,7 @@ const TrackingMarker = forwardRef(
                             )}
                         </>
                     ) : (
-                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={() => setSvgLoading(false)} />
+                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={onImageLoaded} />
                     )}
                 </YStack>
 

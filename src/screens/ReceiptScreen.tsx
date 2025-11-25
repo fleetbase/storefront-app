@@ -9,12 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import QRCode from 'react-native-qrcode-svg';
 import useStorage from '../hooks/use-storage';
+import { isBlank } from '../utils';
 
 const ReceiptScreen = ({ route }) => {
     const params = route.params || {};
     const theme = useTheme();
     const { t } = useLanguage();
     const { adapter: storefrontAdapter } = useStorefront();
+    const { customer } = useAuth();
 
     const [order] = useState(() => new Order(params.order, fleetbaseAdapter));
     const [response, setResponse] = useState(null);
@@ -81,8 +83,13 @@ const ReceiptScreen = ({ route }) => {
 
                 setError(null);
 
+                const ebarimt_receiver = customer?.getAttribute('meta.ebarimt_registration_no', '') ?? '';
+                const ebarimt_receiver_type = isBlank(ebarimt_receiver) ? 'CITIZEN' : 'COMPANY';
+
                 const data = await storefrontAdapter.post('orders/receipt', {
                     order: order.id,
+                    ebarimt_receiver,
+                    ebarimt_receiver_type,
                 });
 
                 setResponse(data);

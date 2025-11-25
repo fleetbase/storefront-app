@@ -33,7 +33,7 @@ const EditAccountPropertyScreen = ({ route }) => {
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
     const { t } = useLanguage();
-    const { customer, setCustomer } = useAuth();
+    const { customer, setCustomer, updateCustomerMeta } = useAuth();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [value, setValue] = useState(customer.getAttribute(property.key));
     const mutated = value !== customer.getAttribute(property.key);
@@ -43,13 +43,25 @@ const EditAccountPropertyScreen = ({ route }) => {
             return;
         }
 
-        try {
-            const updatedCustomer = await runWithLoading(customer.update({ [property.key]: value }));
-            setCustomer(updatedCustomer);
-            toast.success(t('EditAccountPropertyScreen.changesSaved', { propertyName: property.name }));
-            navigation.goBack();
-        } catch (error) {
-            toast.error(error.message);
+        // If it's a meta property
+        if (typeof property.key === 'string' && property.key.startsWith('meta.')) {
+            try {
+                const metaKey = property.key.slice('meta.'.length);
+                await runWithLoading(updateCustomerMeta({ [metaKey]: value }));
+                toast.success(t('EditAccountPropertyScreen.changesSaved', { propertyName: property.name }));
+                navigation.goBack();
+            } catch (error) {
+                toast.error(error.message);
+            }
+        } else {
+            try {
+                const updatedCustomer = await runWithLoading(customer.update({ [property.key]: value }));
+                setCustomer(updatedCustomer);
+                toast.success(t('EditAccountPropertyScreen.changesSaved', { propertyName: property.name }));
+                navigation.goBack();
+            } catch (error) {
+                toast.error(error.message);
+            }
         }
     }, [customer, runWithLoading, value]);
 

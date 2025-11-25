@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Animated, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { formatCurrency } from '../utils/format';
 import { delay, loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
@@ -30,6 +31,7 @@ const CartScreen = ({ route }) => {
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
+    const { refreshCustomer } = useAuth();
     const { t } = useLanguage();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
@@ -146,6 +148,13 @@ const CartScreen = ({ route }) => {
     useEffect(() => {
         setDisplayedItems(cart ? cart.contents() : []);
     }, [cart]);
+
+    // Run once
+    useFocusEffect(
+        useCallback(() => {
+            refreshCustomer();
+        }, [])
+    );
 
     const renderRightActions = (cartItem) => (
         <XStack height='100%' width={200} minHeight={100} maxHeight={125}>

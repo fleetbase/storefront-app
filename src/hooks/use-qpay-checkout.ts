@@ -6,7 +6,7 @@ import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
-import { get, storefrontConfig, debounce } from '../utils';
+import { get, storefrontConfig, debounce, isBlank } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
 import useStorefront from '../hooks/use-storefront';
@@ -44,7 +44,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
-    const [isPersonal, setIsPersonal] = useState(!defaultCompanyRegistrationNo);
+    const [isPersonal, setIsPersonal] = useState(isBlank(defaultCompanyRegistrationNo));
     const [error, setError] = useState(false);
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const listenerRef = useRef();
@@ -138,9 +138,20 @@ export default function useQPayCheckout({ onOrderComplete }) {
         setCheckoutOptions((prev) => ({ ...prev, pickup }));
     }, []);
 
-    const setCompanyRegistrationNumber = useCallback((registrationNumber) => {
-        debounce(setCheckoutOptions((prev) => ({ ...prev, ebarimt_registration_no: registrationNumber })));
-    }, []);
+    const debouncedUpdateRegistration = useMemo(
+        () =>
+            debounce((registrationNumber) => {
+                setCheckoutOptions((prev) => ({ ...prev, ebarimt_registration_no: registrationNumber }));
+            }, 500), // 500ms delay
+        []
+    );
+
+    const setCompanyRegistrationNumber = useCallback(
+        (registrationNumber) => {
+            debouncedUpdateRegistration(registrationNumber);
+        },
+        [debouncedUpdateRegistration]
+    );
 
     const handleDeliveryLocationChange = useCallback(
         (newLocation) => {
@@ -361,7 +372,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             isPersonal,
             setIsPersonal,
             isCompany: !isPersonal,
-            companyRegistrationNumber: checkoutOptions?.ebarimt_registration_no ?? '',
+            companyRegistrationNumber: customer?.getAttribute('meta.ebarimt_registration_no', '') ?? '',
             setCompanyRegistrationNumber,
         }),
         [

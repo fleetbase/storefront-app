@@ -64,9 +64,23 @@ const QPayCheckoutScreen = ({ route }) => {
         },
     });
     const [isBottomSheetPresenting, setIsBottomSheetPresenting] = useState(false);
+    const [localRegistrationNumber, setLocalRegistrationNumber] = useState(companyRegistrationNumber || '');
     const hasCheckoutOptions = enabled('tips') || enabled('delivery_tips');
     const isModalScreen = wasAccessedFromCartModal(navigation);
     const portalHost = isModalScreen === true ? 'QPayCheckoutPortal' : 'MainPortal';
+
+    const handleRegistrationNumberChange = useCallback(
+        (text) => {
+            setLocalRegistrationNumber(text); // Immediate UI update
+            setCompanyRegistrationNumber(text); // Debounced API call
+        },
+        [setCompanyRegistrationNumber]
+    );
+
+    // Sync local state when hook value changes
+    useEffect(() => {
+        setLocalRegistrationNumber(companyRegistrationNumber || '');
+    }, [companyRegistrationNumber]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -119,11 +133,11 @@ const QPayCheckoutScreen = ({ route }) => {
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 {t('QPayCheckoutScreen.vatRegistration')}
                             </Text>
-                            <QPayTaxRegistrationSwitch onChange={setIsPersonal} />
+                            <QPayTaxRegistrationSwitch onChange={setIsPersonal} isPeronal={!isCompany} />
                             {isCompany && (
                                 <Input
-                                    value={companyRegistrationNumber}
-                                    onChangeText={(text) => setCompanyRegistrationNumber(text)}
+                                    value={localRegistrationNumber}
+                                    onChangeText={handleRegistrationNumberChange}
                                     placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')}
                                     color='$textPrimary'
                                     placeholderTextColor='$textSecondary'

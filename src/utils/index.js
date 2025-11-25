@@ -86,6 +86,10 @@ export function isEmpty(target) {
     return target === null || target === undefined;
 }
 
+export function isBlank(target) {
+    return isEmpty(target) || target === '';
+}
+
 export function isResource(target, type = null) {
     if (isObject(target) && typeof type === 'string') {
         return hasResouceProperties(target) && target.resource === type;

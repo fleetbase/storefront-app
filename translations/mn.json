@@ -279,7 +279,11 @@
         "orderNotes": "Нэмэлт мэдээлэл (Орцны код,Хаягын заавар гэх мэт)",
         "orderNotesTitle": "Захиалгын тэмдэглэл",
         "enterAdditionalNotes": "Захиалгад нэмэлт тэмдэглэл оруулах",
-        "checkoutOptions": "Төрбөрийн сонголтууд"
+        "checkoutOptions": "Төрбөрийн сонголтууд",
+        "vatRegistration": "НӨАТ Registration",
+        "personal": "Хувь хүн",
+        "company": "Байгуулга",
+        "companyRegistrationNumber": "Компанийн регистерийн дугаар"
     },
     "SavedLocationScreen": {
         "addressSaved": "Хаяг хадгалагдсан.",

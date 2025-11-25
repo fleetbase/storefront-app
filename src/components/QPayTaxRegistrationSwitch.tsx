@@ -1,7 +1,7 @@
 import TabSwitch from './TabSwitch';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const QPayTaxRegistrationSwitch = ({ onChange }) => {
+const QPayTaxRegistrationSwitch = ({ isPeronal = true, onChange }) => {
     const { t } = useLanguage();
     const receivingOptions = [
         { label: t('QPayCheckoutScreen.personal'), value: 'personal' },
@@ -15,7 +15,7 @@ const QPayTaxRegistrationSwitch = ({ onChange }) => {
         }
     };
 
-    return <TabSwitch options={receivingOptions} onTabChange={handleTabChange} />;
+    return <TabSwitch options={receivingOptions} onTabChange={handleTabChange} initialIndex={isPeronal ? 0 : 1} />;
 };
 
 export default QPayTaxRegistrationSwitch;

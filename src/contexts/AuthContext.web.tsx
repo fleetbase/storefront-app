@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useMemo, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useMemo, useEffect, useCallback, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
@@ -144,6 +144,25 @@ export const AuthProvider = ({ children }) => {
             throw err;
         }
     };
+
+    // Refresh customer from server
+    const refreshCustomer = useCallback(async () => {
+        if (!state.customer || !state.customer.id) {
+            throw new Error('No customer to refresh');
+        }
+
+        try {
+            // Fetch fresh customer data from server
+            const freshCustomer = await state.customer.reload();
+
+            // Update stored customer and state
+            setCustomer(freshCustomer);
+            return freshCustomer;
+        } catch (err) {
+            console.error('[AuthContext] Failed to refresh customer:', err);
+            throw err;
+        }
+    }, [state.customer, adapter, setCustomer]);
 
     // Create Account: Send verification code
     const requestCreationCode = useCallback(
@@ -302,6 +321,7 @@ export const AuthProvider = ({ children }) => {
             updateCustomerLocation,
             updateCustomerMeta,
             updateCustomer,
+            refreshCustomer,
             clearSessionData,
             setCustomer,
             login,
@@ -322,12 +342,45 @@ export const AuthProvider = ({ children }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
+export const useAuth = (options = {}) => {
     const context = useContext(AuthContext);
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
-    return context;
+
+    const { refreshCustomer: shouldRefresh = false } = options;
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [freshCustomer, setFreshCustomer] = useState(context.customer);
+    const hasRefreshed = useRef(false);
+
+    useEffect(() => {
+        if (shouldRefresh && context.customer && !hasRefreshed.current && !isRefreshing) {
+            hasRefreshed.current = true;
+            setIsRefreshing(true);
+
+            context
+                .refreshCustomer()
+                .then((customer) => {
+                    setFreshCustomer(customer);
+                })
+                .catch((err) => {
+                    console.error('Failed to refresh customer:', err);
+                    setFreshCustomer(context.customer); // Fallback to cached
+                })
+                .finally(() => {
+                    setIsRefreshing(false);
+                });
+        } else if (!shouldRefresh) {
+            setFreshCustomer(context.customer);
+        }
+    }, [shouldRefresh, context.customer, context.refreshCustomer, isRefreshing]);
+
+    // Return context with potentially fresh customer
+    return {
+        ...context,
+        customer: shouldRefresh ? freshCustomer : context.customer,
+        isRefreshingCustomer: isRefreshing,
+    };
 };
 
 export const useIsAuthenticated = () => {

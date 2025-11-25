@@ -239,6 +239,20 @@ const AccountScreen = () => {
             ),
             onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.name'), key: 'name', component: 'input' } }),
         },
+        storefrontConfig('paymentGateway') === 'qpay'
+            ? {
+                  title: t('QPayCheckoutScreen.companyRegistrationNumber'),
+                  rightComponent: (
+                      <Text color='$textSecondary' opacity={0.5}>
+                          {customer.getAttribute('meta.ebarimt_registration_no')}
+                      </Text>
+                  ),
+                  onPress: () =>
+                      navigation.navigate('EditAccountProperty', {
+                          property: { name: t('QPayCheckoutScreen.companyRegistrationNumber'), key: 'meta.ebarimt_registration_no', component: 'input' },
+                      }),
+              }
+            : null,
         {
             titleComponent: <FontAwesomeIcon icon={faGlobe} size={22} color={theme.textSecondary.val} />,
             rightComponent: (
@@ -267,7 +281,7 @@ const AccountScreen = () => {
             rightComponent: null,
             onPress: handleOpenTermsOfService,
         },
-    ];
+    ].filter(Boolean);
 
     // Data Protection menu items
     const dataProtectionMenu = [
@@ -281,7 +295,7 @@ const AccountScreen = () => {
             rightComponent: null,
             onPress: handleClearCache,
         },
-    ];
+    ].filter(Boolean);
 
     return (
         <ScreenWrapper>
