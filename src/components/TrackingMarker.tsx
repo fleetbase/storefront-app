@@ -125,12 +125,10 @@ const TrackingMarker = forwardRef(
         }, [svgLoading, children, imageLoaded]);
 
         const onSvgLoaded = () => {
+            console.log('[TrackingMarker] SVG loaded', { platform: Platform.OS });
             setSvgLoading(false);
             setImageLoaded(true);
-            if (Platform.OS === 'android') {
-                // Force re-render on Android
-                setRenderKey((prev) => prev + 1);
-            }
+            // DO NOT increment renderKey here - it causes infinite re-render loop!
         };
 
         const onSvgError = () => {
@@ -142,11 +140,7 @@ const TrackingMarker = forwardRef(
             console.log('[TrackingMarker] Image loaded', { platform: Platform.OS, isRemoteSvg });
             setSvgLoading(false);
             setImageLoaded(true);
-            if (Platform.OS === 'android') {
-                // Force re-render on Android
-                console.log('[TrackingMarker] Forcing re-render with new key');
-                setRenderKey((prev) => prev + 1);
-            }
+            // DO NOT increment renderKey here - it causes infinite re-render loop!
         };
 
         const providerSupportsRotation = providerIsGoogle;
@@ -173,7 +167,7 @@ const TrackingMarker = forwardRef(
 
         return (
             <MarkerComponent
-                key={isAndroid ? `marker-${renderKey}-${imageLoaded ? 'loaded' : 'loading'}` : undefined}
+                key={isAndroid ? `marker-${imageLoaded ? 'loaded' : 'loading'}` : undefined}
                 coordinate={markerCoordinate}
                 onPress={onPress}
                 anchor={ANCHOR}
