@@ -99,16 +99,14 @@ const TrackingMarker = forwardRef(
         const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
-            if (svgLoading) {
+            if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
-                // On Android, set to false quickly after SVG loads to allow children to render
-                // On iOS, can wait longer
-                const delay = Platform.OS === 'android' ? 100 : 120;
-                const t = setTimeout(() => setTrackViews(false), delay);
+                // Keep tracksViewChanges=false after loading to prevent re-renders
+                const t = setTimeout(() => setTrackViews(false), 500);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading]);
+        }, [svgLoading, children]);
 
         const onSvgLoaded = () => {
             setSvgLoading(false);
@@ -122,10 +120,8 @@ const TrackingMarker = forwardRef(
             setSvgLoading(false);
         };
 
-        // On Android: Use native rotation only (no View transform)
-        // On iOS: Use both native rotation and View transform for map bearing compensation
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
-        const childRotation = isAndroid ? 0 : (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
+        const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
             <AnimatedMarker
@@ -136,50 +132,54 @@ const TrackingMarker = forwardRef(
                 rotation={nativeRotation}
                 tracksViewChanges={trackViews}
             >
-                {/* Fixed-size View wrapper - required for Android SVG rendering */}
-                {/* On Android: NO transform (breaks bitmap conversion) */}
-                {/* On iOS: transform for map bearing compensation */}
-                <View
-                    style={{
-                        width: size.width,
-                        height: size.height,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
-                    }}
-                    pointerEvents='none'
-                >
-                    {isRemoteSvg ? (
-                        <>
-                            <SvgCssUri 
-                                uri={imageSource.uri} 
-                                width={size.width} 
-                                height={size.height} 
-                                onLoad={onSvgLoaded} 
-                                onError={onSvgError} 
-                            />
-                            {svgLoading && (
-                                <YStack
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Spinner color='$textPrimary' size={Math.min(size.width, 24)} />
-                                </YStack>
-                            )}
-                        </>
-                    ) : (
+                {/* Android: SVG must be in fixed-size View WITHOUT transform */}
+                {isRemoteSvg ? (
+                    <View
+                        style={{
+                            width: size.width,
+                            height: size.height,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <SvgCssUri 
+                            uri={imageSource.uri} 
+                            width={size.width} 
+                            height={size.height} 
+                            onLoad={onSvgLoaded} 
+                            onError={onSvgError} 
+                        />
+                        {svgLoading && (
+                            <YStack
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Spinner color='$textPrimary' size={Math.min(size.width, 24)} />
+                            </YStack>
+                        )}
+                    </View>
+                ) : (
+                    <View
+                        style={{
+                            width: size.width,
+                            height: size.height,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
+                        }}
+                    >
                         <FastImage 
                             source={imageSource} 
                             style={{ width: size.width, height: size.height }} 
                             resizeMode={FastImage.resizeMode.contain} 
                             onLoadEnd={onImageLoaded}
                         />
-                    )}
-                </View>
+                    </View>
+                )}
 
                 {children && (
                     <View
