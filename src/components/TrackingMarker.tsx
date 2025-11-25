@@ -157,13 +157,16 @@ const TrackingMarker = forwardRef(
             svgLoading
         });
 
-        // On Android, ALWAYS use regular Marker - AnimatedMarker has rendering issues
-        // On iOS, use AnimatedMarker for smooth movement
-        const useAnimated = !isAndroid;
-        const MarkerComponent = useAnimated ? AnimatedMarker : Marker;
-        const markerCoordinate = useAnimated ? makeCoordinatesFloat(plainCoordinate) : makeCoordinatesFloat(coordinate);
+        // Try using AnimatedMarker on both platforms with proper tracksViewChanges management
+        const MarkerComponent = AnimatedMarker;
+        const markerCoordinate = makeCoordinatesFloat(plainCoordinate);
         
-        console.log('[TrackingMarker] Using', useAnimated ? 'AnimatedMarker' : 'Regular Marker', { platform: Platform.OS });
+        console.log('[TrackingMarker] Rendering AnimatedMarker', { 
+            platform: Platform.OS, 
+            trackViews, 
+            imageLoaded,
+            isRemoteSvg 
+        });
 
         return (
             <MarkerComponent
@@ -185,7 +188,8 @@ const TrackingMarker = forwardRef(
                     }}
                     pointerEvents='none'
                 >
-                    {isRemoteSvg ? (
+                    {isRemoteSvg && Platform.OS !== 'android' ? (
+                        // iOS: Use SVG directly
                         <>
                             <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
                             {svgLoading && (
@@ -202,7 +206,18 @@ const TrackingMarker = forwardRef(
                             )}
                         </>
                     ) : (
-                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={onImageLoaded} />
+                        // Android or non-SVG: Use FastImage
+                        // Note: On Android, remote SVGs won't work, so VehicleMarker should provide PNG fallback
+                        <FastImage 
+                            source={imageSource} 
+                            style={{ width: size.width, height: size.height }} 
+                            resizeMode={FastImage.resizeMode.contain} 
+                            onLoadEnd={onImageLoaded}
+                            onError={(error) => {
+                                console.warn('[TrackingMarker] Image load error:', error);
+                                onImageLoaded(); // Mark as loaded even on error to stop tracking
+                            }}
+                        />
                     )}
                 </YStack>
 

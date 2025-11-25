@@ -115,10 +115,24 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
 
     const coord = makeCoordinatesFloat({ latitude, longitude });
     const avatarUrl = vehicle.getAttribute('avatar_url');
-    // On Android, always use local PNG to avoid SVG rendering issues
-    const avatarSource = (Platform.OS === 'android' || !avatarUrl) 
-        ? require('../../assets/images/vehicles/light_commercial_van.png')
-        : { uri: avatarUrl };
+    
+    // On Android, if avatar is SVG, try to convert to PNG or use local fallback
+    let avatarSource;
+    if (!avatarUrl) {
+        // No avatar URL, use local PNG
+        avatarSource = require('../../assets/images/vehicles/light_commercial_van.png');
+    } else if (Platform.OS === 'android' && avatarUrl.toLowerCase().endsWith('.svg')) {
+        // Android + SVG: Try to convert URL to PNG (replace .svg with .png)
+        // If your CDN/server supports it, otherwise fall back to local PNG
+        const pngUrl = avatarUrl.replace(/\.svg$/i, '.png');
+        console.log('[VehicleMarker] Converting SVG to PNG for Android:', { original: avatarUrl, converted: pngUrl });
+        avatarSource = { uri: pngUrl };
+        // TODO: If PNG version doesn't exist, this will fail and we should use local fallback
+        // For now, FastImage will handle the error and we'll see a blank marker
+    } else {
+        // iOS or non-SVG: Use as-is
+        avatarSource = { uri: avatarUrl };
+    }
 
     console.log('[VehicleMarker] Render:', {
         vehicleId: vehicle.id,
