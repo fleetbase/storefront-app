@@ -1,5 +1,4 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Marker } from 'react-native-maps';
 import TrackingMarker from './TrackingMarker';
@@ -115,25 +114,7 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
 
     const coord = makeCoordinatesFloat({ latitude, longitude });
     const avatarUrl = vehicle.getAttribute('avatar_url');
-    
-    // Determine image source based on platform and avatar type
-    let avatarSource;
-    if (!avatarUrl) {
-        // No avatar URL, use local PNG
-        avatarSource = require('../../assets/images/vehicles/light_commercial_van.png');
-    } else if (Platform.OS === 'android') {
-        // Android: AnimatedMarker doesn't support SVG children
-        // Use local PNG for now
-        // TODO: Implement one of these solutions:
-        //   1. Have Fleetbase backend generate PNG versions of SVG avatars
-        //   2. Use a conversion service (e.g., https://cdn.example.com/svg2png?url=...)
-        //   3. Use react-native-view-shot to render SVG to bitmap client-side
-        console.log('[VehicleMarker] Using local PNG on Android (SVG not supported in markers)', { avatarUrl });
-        avatarSource = require('../../assets/images/vehicles/light_commercial_van.png');
-    } else {
-        // iOS: Full SVG support
-        avatarSource = { uri: avatarUrl };
-    }
+    const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
 
     console.log('[VehicleMarker] Render:', {
         vehicleId: vehicle.id,

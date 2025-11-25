@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
 import { Animated, Easing, View, Platform } from 'react-native';
-import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
+import { Marker, AnimatedRegion } from 'react-native-maps';
 import { SvgCssUri } from 'react-native-svg/css';
 import FastImage from 'react-native-fast-image';
 import { Spinner, YStack } from 'tamagui';
@@ -69,9 +69,6 @@ const TrackingMarker = forwardRef(
         };
 
         const move = (lat, lng, duration = moveDuration) => {
-            if (!hasMovedOnce) {
-                setHasMovedOnce(true);
-            }
             animatedRegion
                 .timing({
                     latitude: lat,
@@ -97,88 +94,45 @@ const TrackingMarker = forwardRef(
         useImperativeHandle(ref, () => ({ move, rotate }));
 
         const [svgLoading, setSvgLoading] = useState(true);
-        const [imageLoaded, setImageLoaded] = useState(false);
-        const [trackViews, setTrackViews] = useState(Platform.OS === 'android' ? true : true);
-        const [renderKey, setRenderKey] = useState(0);
-        const [hasMovedOnce, setHasMovedOnce] = useState(false);
+        const [trackViews, setTrackViews] = useState(true);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
-        const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
-            // On Android, keep tracksViewChanges true until image loads
-            if (Platform.OS === 'android') {
-                if (imageLoaded) {
-                    // After image loads, wait a bit then disable tracking
-                    const timer = setTimeout(() => {
-                        setTrackViews(false);
-                    }, 300);
-                    return () => clearTimeout(timer);
-                } else {
-                    setTrackViews(true);
-                }
-            } else if (svgLoading || !!children) {
+            if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
                 const t = setTimeout(() => setTrackViews(false), 120);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading, children, imageLoaded]);
+        }, [svgLoading, children]);
 
         const onSvgLoaded = () => {
-            console.log('[TrackingMarker] SVG loaded', { platform: Platform.OS });
             setSvgLoading(false);
-            setImageLoaded(true);
-            // DO NOT increment renderKey here - it causes infinite re-render loop!
         };
 
         const onSvgError = () => {
             setSvgLoading(false);
-            setImageLoaded(true);
         };
 
         const onImageLoaded = () => {
-            console.log('[TrackingMarker] Image loaded', { platform: Platform.OS, isRemoteSvg });
             setSvgLoading(false);
-            setImageLoaded(true);
-            // DO NOT increment renderKey here - it causes infinite re-render loop!
         };
 
         const providerSupportsRotation = providerIsGoogle;
         const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
-        console.log('[TrackingMarker] Rendering marker', {
-            platform: Platform.OS,
-            coordinate: plainCoordinate,
-            imageSource: isRemoteSvg ? 'SVG' : (imageSource.uri ? 'Remote' : 'Local'),
-            renderKey,
-            trackViews,
-            imageLoaded,
-            svgLoading
-        });
-
-        // Try using AnimatedMarker on both platforms with proper tracksViewChanges management
-        const MarkerComponent = AnimatedMarker;
-        const markerCoordinate = makeCoordinatesFloat(plainCoordinate);
-        
-        console.log('[TrackingMarker] Rendering AnimatedMarker', { 
-            platform: Platform.OS, 
-            trackViews, 
-            imageLoaded,
-            isRemoteSvg 
-        });
-
         return (
-            <MarkerComponent
-                key={isAndroid ? `marker-${imageLoaded ? 'loaded' : 'loading'}` : undefined}
-                coordinate={markerCoordinate}
+            <AnimatedMarker
+                coordinate={makeCoordinatesFloat(plainCoordinate)}
                 onPress={onPress}
                 anchor={ANCHOR}
                 flat={true}
                 rotation={nativeRotation}
                 tracksViewChanges={trackViews}
             >
-                <YStack
+                {/* Fixed-size View wrapper - CRITICAL for Android SVG rendering */}
+                <View
                     style={{
                         width: size.width,
                         height: size.height,
@@ -188,10 +142,15 @@ const TrackingMarker = forwardRef(
                     }}
                     pointerEvents='none'
                 >
-                    {isRemoteSvg && Platform.OS !== 'android' ? (
-                        // iOS: Use SVG directly
+                    {isRemoteSvg ? (
                         <>
-                            <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
+                            <SvgCssUri 
+                                uri={imageSource.uri} 
+                                width={size.width} 
+                                height={size.height} 
+                                onLoad={onSvgLoaded} 
+                                onError={onSvgError} 
+                            />
                             {svgLoading && (
                                 <YStack
                                     style={{
@@ -206,20 +165,14 @@ const TrackingMarker = forwardRef(
                             )}
                         </>
                     ) : (
-                        // Android or non-SVG: Use FastImage
-                        // Note: On Android, remote SVGs won't work, so VehicleMarker should provide PNG fallback
                         <FastImage 
                             source={imageSource} 
                             style={{ width: size.width, height: size.height }} 
                             resizeMode={FastImage.resizeMode.contain} 
                             onLoadEnd={onImageLoaded}
-                            onError={(error) => {
-                                console.warn('[TrackingMarker] Image load error:', error);
-                                onImageLoaded(); // Mark as loaded even on error to stop tracking
-                            }}
                         />
                     )}
-                </YStack>
+                </View>
 
                 {children && (
                     <View
@@ -235,7 +188,7 @@ const TrackingMarker = forwardRef(
                         {children}
                     </View>
                 )}
-            </MarkerComponent>
+            </AnimatedMarker>
         );
     }
 );
