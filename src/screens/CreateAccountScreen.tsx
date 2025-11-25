@@ -56,7 +56,13 @@ const CreateAccountScreen = ({ route }) => {
                             </Text>
                         </XStack>
                         <YStack space='$3'>
-                            <Input value={name} onChangeText={(text) => setName(text)} placeholder={t('CreateAccountScreen.enterYourName')} />
+                            <Input
+                                value={name}
+                                onChangeText={(text) => setName(text)}
+                                placeholder={t('CreateAccountScreen.enterYourName')}
+                                color='$textPrimary'
+                                placeholderTextColor='$textSecondary'
+                            />
                             <PhoneInput value={phone} onChange={(phoneNumber) => setPhone(phoneNumber)} />
                         </YStack>
                         <Button size='$5' mt='$2' onPress={handleSendVerificationCode} bg='$primary' width='100%' opacity={isSendingCode ? 0.75 : 1} disabled={isSendingCode} rounded='true'>

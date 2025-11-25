@@ -105,6 +105,7 @@ const TextAreaSheet = ({ value = null, title = null, placeholder = null, onBotto
                         <BottomSheetTextInput
                             ref={textAreaInputRef}
                             placeholder={placeholder}
+                            placeholderTextColor={theme.textSecondary.val}
                             value={text}
                             onChangeText={setText}
                             autoCapitalize='none'

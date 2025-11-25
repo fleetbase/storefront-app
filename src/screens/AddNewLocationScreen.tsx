@@ -131,8 +131,9 @@ const AddNewLocationScreen = ({ route }) => {
                                 ref={searchInput}
                                 size='$5'
                                 placeholder={t('AddNewLocationScreen.streetName')}
+                                placeholderTextColor='$textSecondary'
                                 bg='transparent'
-                                color='$color'
+                                color='$textPrimary'
                                 flex={1}
                                 borderWidth={0}
                                 paddingHorizontal='$2'

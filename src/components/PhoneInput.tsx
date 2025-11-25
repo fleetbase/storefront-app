@@ -124,6 +124,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                     ref={phoneInputRef}
                     flex={1}
                     placeholder={t('PhoneInput.enterPhoneNumber')}
+                    placeholderTextColor='$textSecondary'
                     keyboardType='phone-pad'
                     value={phoneNumber}
                     onChangeText={setPhoneNumber}
@@ -156,6 +157,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                         <BottomSheetTextInput
                             ref={searchInputRef}
                             placeholder={t('PhoneInput.searchCountry')}
+                            placeholderTextColor={theme.textSecondary.val}
                             onChangeText={setSearchTerm}
                             autoCapitalize='none'
                             autoComplete='off'

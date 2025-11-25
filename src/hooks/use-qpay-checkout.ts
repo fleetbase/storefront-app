@@ -6,7 +6,7 @@ import { getServiceQuote } from '../utils/checkout';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
-import { get, storefrontConfig } from '../utils';
+import { get, storefrontConfig, debounce } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
 import useStorefront from '../hooks/use-storefront';
@@ -26,12 +26,16 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { listen } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
+    const defaultCompanyRegistrationNo = useMemo(() => {
+        return customer?.getAttribute('meta.ebarimt_registration_no', '') ?? '';
+    }, [customer]);
     const [checkoutOptions, setCheckoutOptions] = useState({
         leavingTip: false,
         tip: 0,
         leavingDeliveryTip: false,
         deliveryTip: 0,
         pickup: storefrontConfig('prioritizePickup') ? 1 : 0,
+        ebarimt_registration_no: defaultCompanyRegistrationNo,
     });
     const [invoice, setInvoice] = useState();
     const [checkoutId, setCheckoutId] = useState();
@@ -40,6 +44,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
+    const [isPersonal, setIsPersonal] = useState(!defaultCompanyRegistrationNo);
     const [error, setError] = useState(false);
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const listenerRef = useRef();
@@ -131,6 +136,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     const setPickup = useCallback((pickup) => {
         setCheckoutOptions((prev) => ({ ...prev, pickup }));
+    }, []);
+
+    const setCompanyRegistrationNumber = useCallback((registrationNumber) => {
+        debounce(setCheckoutOptions((prev) => ({ ...prev, ebarimt_registration_no: registrationNumber })));
     }, []);
 
     const handleDeliveryLocationChange = useCallback(
@@ -349,6 +358,11 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isPersonal,
+            setIsPersonal,
+            isCompany: !isPersonal,
+            companyRegistrationNumber: checkoutOptions?.ebarimt_registration_no ?? '',
+            setCompanyRegistrationNumber,
         }),
         [
             cart,
@@ -370,6 +384,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isPersonal,
+            setIsPersonal,
+            setCompanyRegistrationNumber,
         ]
     );
 

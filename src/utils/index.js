@@ -268,7 +268,7 @@ export function later(callback = null, ms = 300) {
     }, ms);
 }
 
-export function debounce(func, delay) {
+export function debounce(func, delay = 300) {
     let timeoutId;
     return (...args) => {
         if (timeoutId) clearTimeout(timeoutId);

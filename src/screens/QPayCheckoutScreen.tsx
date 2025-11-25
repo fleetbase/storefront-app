@@ -3,7 +3,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView, ScrollView, Platform } from 'react-native';
-import { Button, Text, YStack, XStack, useTheme } from 'tamagui';
+import { Input, Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { PortalHost } from '@gorhom/portal';
 import CustomerLocationSelect from '../components/CustomerLocationSelect';
 import CartContents from '../components/CartContents';
@@ -14,6 +14,7 @@ import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import TextAreaSheet from '../components/TextAreaSheet';
 import LoadingOverlay from '../components/LoadingOverlay';
+import QPayTaxRegistrationSwitch from '../components/QPayTaxRegistrationSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
 import useStorefrontInfo from '../hooks/use-storefront-info';
@@ -49,6 +50,10 @@ const QPayCheckoutScreen = ({ route }) => {
         originLocationId,
         store,
         isCapturingOrder,
+        isCompany,
+        setIsPersonal,
+        companyRegistrationNumber,
+        setCompanyRegistrationNumber,
     } = useQpayCheckout({
         onOrderComplete: (order) => {
             paymentSheetRef.current?.forceClose();
@@ -109,6 +114,21 @@ const QPayCheckoutScreen = ({ route }) => {
                                 portalHost={portalHost}
                                 onBottomSheetPositionChanged={setIsBottomSheetPresenting}
                             />
+                        </YStack>
+                        <YStack space='$3'>
+                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
+                                {t('QPayCheckoutScreen.vatRegistration')}
+                            </Text>
+                            <QPayTaxRegistrationSwitch onChange={setIsPersonal} />
+                            {isCompany && (
+                                <Input
+                                    value={companyRegistrationNumber}
+                                    onChangeText={(text) => setCompanyRegistrationNumber(text)}
+                                    placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')}
+                                    color='$textPrimary'
+                                    placeholderTextColor='$textSecondary'
+                                />
+                            )}
                         </YStack>
                         {hasCheckoutOptions && (
                             <YStack space='$3'>

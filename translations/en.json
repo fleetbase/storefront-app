@@ -281,7 +281,11 @@
         "orderNotes": "Order notes",
         "orderNotesTitle": "Order Notes",
         "enterAdditionalNotes": "Enter additional notes for order",
-        "checkoutOptions": "Checkout options"
+        "checkoutOptions": "Checkout options",
+        "vatRegistration": "VAT Registration",
+        "personal": "Personal",
+        "company": "Company",
+        "companyRegistrationNumber": "Company Registration No."
     },
     "SavedLocationScreen": {
         "addressSaved": "Address saved.",

@@ -30,7 +30,8 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
             onChangeText={onChange}
             size='$5'
             placeholder={placeholder}
-            color='$color'
+            placeholderTextColor='$textSecondary'
+            color='$textPrimary'
             shadowOpacity={0}
             shadowRadius={0}
             borderWidth={1}
