@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Animated, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
-import ScreenWrapper from '../components/ScreenWrapper';
+import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +17,7 @@ import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import StorefrontConfig from '../../storefront.config';
 import Spacer from '../components/Spacer';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const isAndroid = Platform.OS === 'android';
 if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,13 +25,17 @@ if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 const CartScreen = ({ route }) => {
+    const routeName = route.name;
     const theme = useTheme();
     const navigation = useNavigation();
+    const tabBarHeight = useBottomTabBarHeight();
+    const insets = useSafeAreaInsets();
     const { t } = useLanguage();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
+    const isModal = typeof routeName === 'string' && routeName.endsWith('Modal');
 
     const handleCheckout = () => {
         const params = {};
@@ -49,7 +55,7 @@ const CartScreen = ({ route }) => {
     const handleEdit = async (cartItem) => {
         const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
         if (product) {
-            navigation.navigate('CartItem', { cartItem, product: product.serialize() });
+            navigation.navigate('CartItem', { cartItem, product: product.serialize(), isModal });
         }
     };
 
@@ -265,7 +271,7 @@ const CartScreen = ({ route }) => {
     };
 
     return (
-        <ScreenWrapper autoDetectModal>
+        <ScreenWrapper useSafeArea={!isModal}>
             <XStack justifyContent='space-between' alignItems='center' padding='$5'>
                 <XStack alignItems='center'>
                     <Text fontSize='$7' fontWeight='bold'>
@@ -324,7 +330,7 @@ const CartScreen = ({ route }) => {
                             </Button>
                         </YStack>
                     </XStack>
-                    <Spacer height={0} />
+                    <Spacer height={isModal ? Platform.select({ ios: insets.bottom, android: tabBarHeight }) : Platform.select({ ios: insets.bottom + 15, android: insets.bottom + 1 })} />
                 </YStack>
             )}
         </ScreenWrapper>

@@ -94,7 +94,7 @@ export function getCartItem(cartItemId) {
 
 export function calculateCartTotal(cart = null) {
     cart = cart === null ? getCart() : cart;
-    let subtotal = cart.subtotal();
+    let subtotal = cart?.subtotal() ?? 0;
 
     if (cart.isEmpty) {
         return 0;

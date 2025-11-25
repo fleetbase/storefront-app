@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, ScrollView } from 'react-native';
+import { SafeAreaView, ScrollView, Platform } from 'react-native';
 import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { faBuildingUser, faHouse, faBuilding, faHotel, faHospital, faSchool, faChair, faAsterisk } from '@fortawesome/free-solid-svg-icons';
 import { Place } from '@fleetbase/sdk';
 import { adapter } from '../hooks/use-storefront';
@@ -20,6 +21,7 @@ import ExpandableSelect from '../components/ExpandableSelect';
 import PlaceMapView from '../components/PlaceMapView';
 import PhoneInput from '../components/PhoneInput';
 import Spacer from '../components/Spacer';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     return (
@@ -42,10 +44,12 @@ const LocationPropertyInput = ({ value, onChange, placeholder }) => {
     );
 };
 
+const isAndroid = Platform.OS === 'android';
 const EditLocationScreen = ({ route }) => {
     const params = route.params || { redirectTo: 'AddressBook' };
     const navigation = useNavigation();
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const { customer, isAuthenticated } = useAuth();
     const { storefront } = useStorefront();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
@@ -194,9 +198,9 @@ const EditLocationScreen = ({ route }) => {
     ];
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                <YStack flex={1} height='100%' bg='$background' padding='$5' space='$5'>
+                <YStack flex={1} height='100%' bg='$background' px='$5' pb='$5' pt={insets.top + (isAndroid ? 15 : 0)} space='$5'>
                     <YStack space='$2'>
                         <XStack py='$1' justifyContent='space-between'>
                             <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
@@ -367,7 +371,7 @@ const EditLocationScreen = ({ route }) => {
                     <Spacer height={90} />
                 </YStack>
             </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={90} left={0} right={0} padding='$4' zIndex={5}>
+            <XStack animate='bouncy' position='absolute' bottom={insets.bottom + (isAndroid ? 0 : 5)} left={0} right={0} padding='$5' zIndex={5}>
                 <Button
                     onPress={handleSavePlace}
                     size='$5'
@@ -391,7 +395,7 @@ const EditLocationScreen = ({ route }) => {
                     </Button.Text>
                 </Button>
             </XStack>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

@@ -45,7 +45,7 @@ const CatalogScreen = ({ route }) => {
     );
 
     return (
-        <ScreenWrapper isModal useSafeArea={false}>
+        <ScreenWrapper>
             <XStack pt='$4' pb='$4' px='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
                 <XStack flex={1} gap='$2' alignItems='center'>
                     <FontAwesomeIcon icon={faTruck} color={theme['$blue-500'].val} size={24} />

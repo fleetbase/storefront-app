@@ -104,12 +104,7 @@ function detectIsModal(route: any, autoDetect: boolean, explicitIsModal?: boolea
 /**
  * Calculate top spacing based on platform and modal state
  */
-function calculateTopSpacing(
-    isModal: boolean,
-    insets: { top: number },
-    customInset: number | undefined,
-    disablePlatformAdjustments: boolean
-): number {
+function calculateTopSpacing(isModal: boolean, insets: { top: number }, customInset: number | undefined, disablePlatformAdjustments: boolean): number {
     // Custom inset overrides everything
     if (customInset !== undefined) {
         return customInset;
@@ -165,10 +160,10 @@ function calculateBottomSpacing(
 
 /**
  * ScreenWrapper Component
- * 
+ *
  * A centralized component for managing screen spacing, safe areas, and modal-specific layouts.
  * Eliminates the need for scattered Platform checks and provides consistent behavior across iOS and Android.
- * 
+ *
  * @example
  * // Basic usage
  * <ScreenWrapper>
@@ -176,7 +171,7 @@ function calculateBottomSpacing(
  *     <Text>Content</Text>
  *   </YStack>
  * </ScreenWrapper>
- * 
+ *
  * @example
  * // Modal screen
  * <ScreenWrapper isModal>
@@ -184,7 +179,7 @@ function calculateBottomSpacing(
  *     <Text>Modal Content</Text>
  *   </YStack>
  * </ScreenWrapper>
- * 
+ *
  * @example
  * // Auto-detect modal
  * <ScreenWrapper autoDetectModal>
@@ -192,7 +187,7 @@ function calculateBottomSpacing(
  *     <Text>Content</Text>
  *   </YStack>
  * </ScreenWrapper>
- * 
+ *
  * @example
  * // Scrollable screen
  * <ScreenWrapper scrollable>
@@ -200,7 +195,7 @@ function calculateBottomSpacing(
  *     // Long content here
  *   </YStack>
  * </ScreenWrapper>
- * 
+ *
  * @example
  * // Custom insets
  * <ScreenWrapper topInset={20} bottomInset={0}>
@@ -231,6 +226,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
     contentContainerStyle,
     renderWrapper,
     disablePlatformAdjustments = false,
+    collapsable,
 }) => {
     const route = useRoute();
     const insets = useSafeAreaInsets();
@@ -250,18 +246,14 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
         backgroundColor: backgroundColor || theme.background?.val || '#FFFFFF',
         paddingTop: paddingTop !== undefined ? paddingTop : topSpacing,
         paddingBottom: paddingBottom !== undefined ? paddingBottom : bottomSpacing,
-        paddingLeft: leftInset !== undefined ? leftInset : (paddingHorizontal !== undefined ? paddingHorizontal : undefined),
-        paddingRight: rightInset !== undefined ? rightInset : (paddingHorizontal !== undefined ? paddingHorizontal : undefined),
+        paddingLeft: leftInset !== undefined ? leftInset : paddingHorizontal !== undefined ? paddingHorizontal : undefined,
+        paddingRight: rightInset !== undefined ? rightInset : paddingHorizontal !== undefined ? paddingHorizontal : undefined,
         padding: padding,
         ...style,
     };
 
     // Render content
-    const content = (
-        <View style={containerStyle}>
-            {children}
-        </View>
-    );
+    const content = <View style={containerStyle}>{children}</View>;
 
     // Apply custom wrapper if provided
     if (renderWrapper) {
@@ -271,22 +263,14 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
     // Scrollable content
     if (scrollable) {
         const scrollContent = (
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                {...scrollViewProps}
-                contentContainerStyle={contentContainerStyle}
-            >
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...scrollViewProps} contentContainerStyle={contentContainerStyle}>
                 {children}
             </ScrollView>
         );
 
         if (useSafeArea) {
             return (
-                <SafeAreaView
-                    style={{ flex: 1, backgroundColor: backgroundColor || theme.background?.val || '#FFFFFF' }}
-                    edges={edges}
-                >
+                <SafeAreaView style={{ flex: 1, backgroundColor: backgroundColor || theme.background?.val || '#FFFFFF' }} edges={edges} collapsable={collapsable}>
                     {scrollContent}
                 </SafeAreaView>
             );
@@ -298,10 +282,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
     // Regular content with SafeAreaView
     if (useSafeArea) {
         return (
-            <SafeAreaView
-                style={{ flex: 1, backgroundColor: backgroundColor || theme.background?.val || '#FFFFFF' }}
-                edges={edges}
-            >
+            <SafeAreaView style={{ flex: 1, backgroundColor: backgroundColor || theme.background?.val || '#FFFFFF' }} edges={edges} collapsable={collapsable}>
                 {content}
             </SafeAreaView>
         );

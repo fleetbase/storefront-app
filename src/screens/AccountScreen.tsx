@@ -5,6 +5,7 @@ import { Spinner, Avatar, Text, YStack, XStack, Separator, Button, useTheme } fr
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faGlobe, faPalette } from '@fortawesome/free-solid-svg-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showActionSheet, abbreviateName, storefrontConfig } from '../utils';
 import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
@@ -14,10 +15,13 @@ import useAppTheme from '../hooks/use-app-theme';
 import DeviceInfo from 'react-native-device-info';
 import storage from '../utils/storage';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
+import ScreenWrapper from '../components/ScreenWrapper';
 
+const isAndroid = Platform.OS === 'android';
 const AccountScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const { t, language, languages, setLocale } = useLanguage();
     const { userColorScheme, appTheme, changeScheme, schemes } = useAppTheme();
     const { customer, logout, isSigningOut, updateCustomer } = useAuth();
@@ -280,12 +284,12 @@ const AccountScreen = () => {
     ];
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <AbsoluteTabBarScreenWrapper>
                     <YStack flex={1} bg='$background' space='$8' pt='$3'>
                         <YStack space='$2'>
-                            <XStack px='$3' justifyContent='space-between' mt={Platform.OS === 'android' ? 50 : 0}>
+                            <XStack px='$3' justifyContent='space-between' mt={insets.top + (isAndroid ? 10 : 0)}>
                                 <YStack>
                                     <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
                                         {t('AccountScreen.account')}
@@ -299,7 +303,7 @@ const AccountScreen = () => {
                             </XStack>
                             <FlatList
                                 data={accountMenu}
-                                keyExtractor={(item) => item.title}
+                                keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}
                                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                                 scrollEnabled={false}
@@ -313,7 +317,7 @@ const AccountScreen = () => {
                             </YStack>
                             <FlatList
                                 data={dataProtectionMenu}
-                                keyExtractor={(item) => item.title}
+                                keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}
                                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                                 scrollEnabled={false}
@@ -330,7 +334,7 @@ const AccountScreen = () => {
                     </YStack>
                 </AbsoluteTabBarScreenWrapper>
             </ScrollView>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

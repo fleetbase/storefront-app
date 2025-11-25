@@ -19,6 +19,16 @@ export default function useAppTheme() {
     const isLightMode = userColorScheme === 'light';
 
     useEffect(() => {
+        console.log('🎨 useAppTheme DEBUG:', {
+            systemColorScheme,
+            userColorScheme,
+            isDarkMode,
+            storedUserColorScheme: getString(USER_COLOR_SCHEME_KEY),
+            storedAppTheme: getString(APP_THEME_KEY),
+        });
+    }, [systemColorScheme, userColorScheme, isDarkMode]);
+
+    useEffect(() => {
         if (initializedRef.current) return;
         initializedRef.current = true;
 
