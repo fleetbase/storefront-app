@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet, Pressable, Platform } from 'react-native';
+import { StyleSheet, Pressable, Platform, View } from 'react-native';
 import MapView, { Polygon, Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

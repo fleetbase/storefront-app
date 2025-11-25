@@ -179,7 +179,7 @@ const TrackingMarker = forwardRef(
                         style={{
                             position: 'absolute',
                             top: size.height,
-                            left: -50, // Fixed left offset instead of marginLeft
+                            left: -(size.width / 2),
                             minWidth: 100,
                             maxWidth: 150,
                             alignItems: 'center',

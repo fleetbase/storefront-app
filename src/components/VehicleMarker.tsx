@@ -116,13 +116,6 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
     const avatarUrl = vehicle.getAttribute('avatar_url');
     const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
 
-    console.log('[VehicleMarker] Render:', {
-        vehicleId: vehicle.id,
-        latitude: vehicle.getAttribute('location.coordinates.1'),
-        longitude: vehicle.getAttribute('location.coordinates.0'),
-        hasLocation: !!vehicle.getAttribute('location'),
-    });
-
     // Initialize last coordinates with the vehicle's initial position
     useEffect(() => {
         if (latitude && longitude && !lastCoordinatesRef.current) {
