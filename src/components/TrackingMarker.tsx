@@ -157,13 +157,13 @@ const TrackingMarker = forwardRef(
             svgLoading
         });
 
-        // On Android, use regular Marker until image loads to fix first render issue
-        // After image loads, switch to AnimatedMarker for smooth movement
-        const useAnimated = !isAndroid || imageLoaded;
+        // On Android, ALWAYS use regular Marker - AnimatedMarker has rendering issues
+        // On iOS, use AnimatedMarker for smooth movement
+        const useAnimated = !isAndroid;
         const MarkerComponent = useAnimated ? AnimatedMarker : Marker;
         const markerCoordinate = useAnimated ? makeCoordinatesFloat(plainCoordinate) : makeCoordinatesFloat(coordinate);
         
-        console.log('[TrackingMarker] Using', useAnimated ? 'AnimatedMarker' : 'Regular Marker', { imageLoaded, isAndroid });
+        console.log('[TrackingMarker] Using', useAnimated ? 'AnimatedMarker' : 'Regular Marker', { platform: Platform.OS });
 
         return (
             <MarkerComponent

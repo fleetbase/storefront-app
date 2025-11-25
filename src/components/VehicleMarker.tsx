@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useEffect } from 'react';
+import { Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Marker } from 'react-native-maps';
 import TrackingMarker from './TrackingMarker';
@@ -114,7 +115,10 @@ const VehicleMarker = ({ vehicle, onPositionChange, onHeadingChange, onMovement,
 
     const coord = makeCoordinatesFloat({ latitude, longitude });
     const avatarUrl = vehicle.getAttribute('avatar_url');
-    const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
+    // On Android, always use local PNG to avoid SVG rendering issues
+    const avatarSource = (Platform.OS === 'android' || !avatarUrl) 
+        ? require('../../assets/images/vehicles/light_commercial_van.png')
+        : { uri: avatarUrl };
 
     console.log('[VehicleMarker] Render:', {
         vehicleId: vehicle.id,

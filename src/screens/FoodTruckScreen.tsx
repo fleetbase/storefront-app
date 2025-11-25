@@ -393,39 +393,24 @@ const FoodTruckScreen = () => {
                     }}
                 >
                     {isArray(availableFoodTrucks) &&
-                        availableFoodTrucks.map((foodTruck) => {
-                            const vehicle = foodTruck.vehicle;
-                            const latitude = vehicle?.location?.coordinates?.[1] || 0;
-                            const longitude = vehicle?.location?.coordinates?.[0] || 0;
-                            
-                            console.log('[FoodTruckScreen] Rendering test marker', { latitude, longitude, vehicleId: vehicle?.id });
-                            
-                            return (
-                                <Marker
-                                    key={foodTruck.id}
-                                    coordinate={{ latitude, longitude }}
-                                    onPress={() => handlePressFoodTruck(foodTruck)}
-                                >
-                                    <YStack 
-                                        width={50} 
-                                        height={50} 
-                                        bg='red' 
-                                        borderRadius={25} 
-                                        borderWidth={3} 
-                                        borderColor='white'
-                                        alignItems='center' 
-                                        justifyContent='center'
-                                    >
-                                        <Text fontSize={24}>🚚</Text>
-                                    </YStack>
-                                    <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
-                                        <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
-                                            {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
-                                        </Text>
-                                    </YStack>
-                                </Marker>
-                            );
-                        })}
+                        availableFoodTrucks.map((foodTruck) => (
+                            <VehicleMarker
+                                key={foodTruck.id}
+                                vehicle={new Vehicle(foodTruck.vehicle, fleetbaseAdapter)}
+                                onPress={() => handlePressFoodTruck(foodTruck)}
+                                mapBearing={bearing}
+                                providerIsGoogle={Platform.OS === 'android' || PROVIDER_DEFAULT === PROVIDER_GOOGLE}
+                                onMovement={({ coordinates, heading }) => {
+                                    focusMoving(coordinates, { heading });
+                                }}
+                            >
+                                <YStack opacity={0.9} mt='$2' bg='$background' borderRadius='$6' px='$2' py='$1' alignItems='center' justifyContent='center'>
+                                    <Text fontSize={14} color='$textPrimary' numberOfLines={1}>
+                                        {t('FoodTruckScreen.truck')} {foodTruck.vehicle?.plate_number}
+                                    </Text>
+                                </YStack>
+                            </VehicleMarker>
+                        ))}
                     {currentLocation && (
                         <Marker
                             coordinate={makeCoordinatesFloat({ latitude: currentLocationCoordinates[0], longitude: currentLocationCoordinates[1] })}
