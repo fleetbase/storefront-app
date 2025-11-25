@@ -99,7 +99,7 @@ const TrackingMarker = forwardRef(
         const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
-            if (svgLoading) {
+            if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
                 // On Android: Set to false quickly after SVG loads to allow children to render separately

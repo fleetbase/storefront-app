@@ -2194,7 +2194,7 @@ __metadata:
     react-native-get-random-values: ^1.11.0
     react-native-i18n: ^2.0.15
     react-native-image-picker: ^8.2.0
-    react-native-keychain: ^9.2.2
+    react-native-keychain: ^10.0.0
     react-native-linear-gradient: ^2.8.3
     react-native-localize: ^3.3.0
     react-native-maps: ^1.26.18
@@ -14278,10 +14278,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-keychain@npm:^9.2.2":
-  version: 9.2.3
-  resolution: "react-native-keychain@npm:9.2.3"
-  checksum: 2a5bef250efdf0aef4f13cab0f24eab127bfb52ad88f9475ff0eab199d4f0ca4807bb5f22e8a3b89978e8e8573c274c6284ec6aa9ab182382edfe20af76802ff
+"react-native-keychain@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "react-native-keychain@npm:10.0.0"
+  checksum: 1055cc192df58cb110bd49df1264a401007a354ad28b93adefd740aeac0f746cdab86d7428887694a1b0949ef8d0dc85db8984e77db684d7b967180167b64d42
   languageName: node
   linkType: hard
 
