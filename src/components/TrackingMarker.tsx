@@ -99,14 +99,16 @@ const TrackingMarker = forwardRef(
         const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
-            if (svgLoading || !!children) {
+            if (svgLoading) {
                 setTrackViews(true);
             } else {
-                // Keep tracksViewChanges=false after loading to prevent re-renders
-                const t = setTimeout(() => setTrackViews(false), 500);
+                // On Android: Set to false quickly after SVG loads to allow children to render separately
+                // On iOS: Can keep tracking longer
+                const delay = isAndroid ? 300 : 500;
+                const t = setTimeout(() => setTrackViews(false), delay);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading, children]);
+        }, [svgLoading, isAndroid]);
 
         const onSvgLoaded = () => {
             setSvgLoading(false);
@@ -172,13 +174,16 @@ const TrackingMarker = forwardRef(
 
                 {children && (
                     <View
+                        collapsable={false}
                         pointerEvents='box-none'
                         style={{
                             position: 'absolute',
                             top: size.height,
+                            left: -50, // Fixed left offset instead of marginLeft
                             minWidth: 100,
                             maxWidth: 150,
-                            marginLeft: -(size.width / 2),
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     >
                         {children}
