@@ -10,23 +10,13 @@ export const schemes = ['light', 'dark'] as const;
 
 export default function useAppTheme() {
     const baseTheme = capitalize(storefrontConfig('theme')); // e.g., 'Indigo'
-    const systemColorScheme = useColorScheme(); // 'light' or 'dark';
+    const systemColorScheme = useColorScheme() ?? 'light'; // 'light' or 'dark';
     const [userColorScheme, setUserColorScheme] = useStorage<string>(USER_COLOR_SCHEME_KEY, systemColorScheme || 'light');
     const [appTheme, setAppTheme] = useStorage<string>(APP_THEME_KEY, `${userColorScheme}${baseTheme}`);
     const initializedRef = useRef(false);
 
     const isDarkMode = userColorScheme === 'dark';
     const isLightMode = userColorScheme === 'light';
-
-    useEffect(() => {
-        console.log('🎨 useAppTheme DEBUG:', {
-            systemColorScheme,
-            userColorScheme,
-            isDarkMode,
-            storedUserColorScheme: getString(USER_COLOR_SCHEME_KEY),
-            storedAppTheme: getString(APP_THEME_KEY),
-        });
-    }, [systemColorScheme, userColorScheme, isDarkMode]);
 
     useEffect(() => {
         if (initializedRef.current) return;

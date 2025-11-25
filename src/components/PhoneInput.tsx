@@ -100,10 +100,6 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
         }
     }, [selectedCountry, phoneNumber, onChange]);
 
-    useEffect(() => {
-        console.log('📱 PhoneInput - isDarkMode:', isDarkMode);
-    }, [isDarkMode]);
-
     return (
         <YStack space='$4' {...wrapperProps}>
             <XStack width='100%' paddingHorizontal={0} shadowOpacity={0} shadowRadius={0} borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$5' bg={backgroundColor}>
