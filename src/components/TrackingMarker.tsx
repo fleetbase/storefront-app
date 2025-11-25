@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
 import { Animated, Easing, View, Platform } from 'react-native';
-import { Marker, AnimatedRegion } from 'react-native-maps';
+import { Marker, AnimatedRegion, Callout } from 'react-native-maps';
 import { SvgCssUri } from 'react-native-svg/css';
 import FastImage from 'react-native-fast-image';
 import { Spinner, YStack } from 'tamagui';
@@ -24,6 +24,7 @@ const TrackingMarker = forwardRef(
             children,
             mapBearing = 0,
             providerIsGoogle = true,
+            markerTitle,
         },
         ref
     ) => {
@@ -123,12 +124,20 @@ const TrackingMarker = forwardRef(
         };
 
         // Native rotation for marker
-        const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
+        const nativeRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
         // Child rotation for map bearing compensation (iOS only - breaks Android bitmap conversion)
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
+            <AnimatedMarker
+                coordinate={makeCoordinatesFloat(plainCoordinate)}
+                title={markerTitle}
+                onPress={onPress}
+                anchor={ANCHOR}
+                flat={true}
+                rotation={nativeRotation}
+                tracksViewChanges={trackViews}
+            >
                 {/* Android: SVG must be in fixed-size View WITHOUT transform */}
                 {isRemoteSvg ? (
                     <View
