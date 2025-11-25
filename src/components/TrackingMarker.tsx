@@ -99,13 +99,16 @@ const TrackingMarker = forwardRef(
         const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
-            if (svgLoading || !!children) {
+            if (svgLoading) {
                 setTrackViews(true);
             } else {
-                const t = setTimeout(() => setTrackViews(false), 120);
+                // On Android, set to false quickly after SVG loads to allow children to render
+                // On iOS, can wait longer
+                const delay = Platform.OS === 'android' ? 100 : 120;
+                const t = setTimeout(() => setTrackViews(false), delay);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading, children]);
+        }, [svgLoading]);
 
         const onSvgLoaded = () => {
             setSvgLoading(false);
