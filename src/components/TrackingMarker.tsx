@@ -220,7 +220,7 @@ const TrackingMarker = forwardRef(
                         {children}
                     </View>
                 )}
-            </AnimatedMarker>
+            </MarkerComponent>
         );
     }
 );
