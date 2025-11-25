@@ -200,23 +200,9 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
         },
         Category: {
             screen: CatalogCategoryScreen,
-            options: ({ route, navigation }) => {
-                return {
-                    title: null,
-                    headerTransparent: true,
-                    headerShadowVisible: true,
-                    headerLeft: () => {
-                        return (
-                            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                <BackButton onPress={() => navigation.goBack()} style={{ marginRight: 10 }} />
-                                <Text style={{ color: getTheme('textPrimary'), fontSize: 15, fontWeight: 'bold' }}>{route.params.category.name}</Text>
-                            </View>
-                        );
-                    },
-                    headerRight: () => {
-                        return <CartButton text={translate('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} iconSize={23} textSize={15} />;
-                    },
-                };
+            options: {
+                presentation: 'modal',
+                headerShown: false,
             },
         },
         Product: {

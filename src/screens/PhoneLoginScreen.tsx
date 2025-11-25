@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import PhoneInput from '../components/PhoneInput';
 import AbsoluteTabBarScreenWrapper from '../components/AbsoluteTabBarScreenWrapper';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const isAndroid = Platform.OS === 'android';
 const PhoneLoginScreen = () => {
@@ -45,7 +46,7 @@ const PhoneLoginScreen = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <AbsoluteTabBarScreenWrapper>
                 <YStack flex={1} alignItems='center' bg='$background' space='$3'>
                     <YStack space='$2' width='100%' px='$5' pt='$5'>
@@ -63,7 +64,7 @@ const PhoneLoginScreen = () => {
                     <YStack flex={1} position='relative' width='100%'>
                         <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                     </YStack>
-                    <YStack space='$4' width='100%' px='$4' pb={isAndroid ? '$4' : 0}>
+                    <YStack space='$4' width='100%' px='$4' pb={0}>
                         <Button size='$5' onPress={handleUseAnotherMethod} bg='$secondary' width='100%' rounded='true'>
                             <Button.Icon>
                                 <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />
@@ -83,7 +84,7 @@ const PhoneLoginScreen = () => {
                     </YStack>
                 </YStack>
             </AbsoluteTabBarScreenWrapper>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

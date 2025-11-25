@@ -79,7 +79,17 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                     if (supported) {
                         await Linking.openURL(bank.link);
                     } else {
-                        toast.error(t('QPayPaymentSheet.unableToOpenBank'));
+                        // Try to open anyway on Android (sometimes canOpenURL is too strict)
+                        if (Platform.OS === 'android') {
+                            try {
+                                await Linking.openURL(bank.link);
+                            } catch (androidErr) {
+                                console.error('Android fallback failed:', androidErr);
+                                toast.error(t('QPayPaymentSheet.unableToOpenBank'));
+                            }
+                        } else {
+                            toast.error(t('QPayPaymentSheet.unableToOpenBank'));
+                        }
                     }
                 } catch (err) {
                     console.error('Unable to open bank link:', err);

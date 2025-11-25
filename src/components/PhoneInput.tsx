@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { FlatList, TextInput, Keyboard } from 'react-native';
+import { FlatList, TextInput, Keyboard, Platform } from 'react-native';
 import { countries, getEmojiFlag } from 'countries-list';
 import BottomSheet, { BottomSheetView, BottomSheetFlatList, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useTheme, View, Text, Button, XStack, YStack, Input } from 'tamagui';
@@ -46,6 +46,7 @@ const getDefaultCountryCode = (defaultValue = null, fallback = 'US') => {
     return defaultValue ?? fallback;
 };
 
+const isAndroid = Platform.OS === 'android';
 const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = null, size = '$5', wrapperProps = {} }) => {
     const countryCode = getDefaultCountryCode(defaultCountryCode);
     const defaultValue = getDefaultValues(value, countryCode);
@@ -59,7 +60,10 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
     const phoneInputRef = useRef(null);
     const searchInputRef = useRef(null);
     const snapPoints = useMemo(() => ['50%', '75%'], []);
-    const backgroundColor = bg ? bg : isDarkMode ? '$surface' : '$white';
+    // const backgroundColor = useMemo(() => {
+    //     return bg ? bg : isDarkMode ? '$surface' : '$white';
+    // }, [bg, isDarkMode]);
+    const backgroundColor = '$surface';
 
     const filteredCountries = useMemo(() => {
         return countryList.filter(({ name, code, phone }) => {
@@ -120,6 +124,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                     ref={phoneInputRef}
                     flex={1}
                     placeholder={t('PhoneInput.enterPhoneNumber')}
+                    placeholderTextColor='$textSecondary'
                     keyboardType='phone-pad'
                     value={phoneNumber}
                     onChangeText={setPhoneNumber}
@@ -130,6 +135,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                     borderTopRightRadius='$3'
                     borderBottomRightRadius='$3'
                     overflow='hidden'
+                    fontSize={isAndroid ? '$4' : size}
                 />
             </XStack>
 
@@ -151,6 +157,7 @@ const PhoneInput = ({ value, onChange, bg, width = '100%', defaultCountryCode = 
                         <BottomSheetTextInput
                             ref={searchInputRef}
                             placeholder={t('PhoneInput.searchCountry')}
+                            placeholderTextColor={theme.textSecondary.val}
                             onChangeText={setSearchTerm}
                             autoCapitalize='none'
                             autoComplete='off'

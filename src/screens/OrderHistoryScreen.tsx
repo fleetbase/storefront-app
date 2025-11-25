@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { SafeAreaView, FlatList, Pressable } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Platform } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { Spinner, Separator, Text, XStack, YStack, useTheme } from 'tamagui';
@@ -15,12 +16,14 @@ import { usePromiseWithLoading } from '../hooks/use-promise-with-loading';
 import useStorage from '../hooks/use-storage';
 import Badge from '../components/Badge';
 import Spacer from '../components/Spacer';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const restoreOrders = (orders: any[] = []) => orders.map((order) => new Order(order, fleetbaseAdapter));
 
 const OrderHistoryScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation<any>();
+    const insets = useSafeAreaInsets();
     const { customer } = useAuth();
     const { t } = useLanguage();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
@@ -101,11 +104,11 @@ const OrderHistoryScreen = () => {
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper collapsable={false}>
             {(isLoading() || fetchingOrders) && !refreshing && (
                 <Portal hostName='LoadingIndicatorPortal'>
-                    <XStack px='$3' py='$3' alignItems='center' justifyContent='center'>
-                        <Spinner size='sm' color='$color' />
+                    <XStack px='$3' py='$3' alignItems='center' justifyContent='center' collapsable={false}>
+                        <Spinner size='small' color='$color' />
                     </XStack>
                 </Portal>
             )}
@@ -149,11 +152,19 @@ const OrderHistoryScreen = () => {
                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        colors={[theme.primary.val]} // Android
+                        tintColor={theme.primary.val} // iOS
+                        progressViewOffset={0}
+                    />
+                }
+                ListHeaderComponent={<Spacer height={Platform.select({ ios: insets.top, android: insets.top + 15 })} />}
                 ListFooterComponent={<Spacer height={100} />}
             />
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

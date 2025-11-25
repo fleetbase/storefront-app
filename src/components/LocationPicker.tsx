@@ -51,12 +51,23 @@ const LocationPicker = ({
     const handleTriggerPoisition = useCallback(
         (callback) => {
             if (!triggerRef.current) return;
-            triggerRef.current.measureInWindow((x, y, width, height) => {
-                setTriggerPosition({ x, y: y + height });
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+            if (isAndroid) {
+                // On Android, use measure with pageY for more reliable positioning
+                triggerRef.current.measure((fx, fy, width, height, px, py) => {
+                    setTriggerPosition({ x: px, y: py + height });
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
+            } else {
+                // iOS: use measureInWindow as before
+                triggerRef.current.measureInWindow((x, y, width, height) => {
+                    setTriggerPosition({ x, y: y + height });
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
+            }
         },
         [triggerRef.current]
     );
