@@ -126,14 +126,7 @@ const TrackingMarker = forwardRef(
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker
-                coordinate={makeCoordinatesFloat(plainCoordinate)}
-                onPress={onPress}
-                anchor={ANCHOR}
-                flat={true}
-                rotation={nativeRotation}
-                tracksViewChanges={trackViews}
-            >
+            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
                 {/* Android: SVG must be in fixed-size View WITHOUT transform */}
                 {isRemoteSvg ? (
                     <View
@@ -142,15 +135,12 @@ const TrackingMarker = forwardRef(
                             height: size.height,
                             alignItems: 'center',
                             justifyContent: 'center',
+                            // iOS: Apply transform for map bearing compensation
+                            // Android: No transform (breaks bitmap conversion)
+                            ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
                         }}
                     >
-                        <SvgCssUri 
-                            uri={imageSource.uri} 
-                            width={size.width} 
-                            height={size.height} 
-                            onLoad={onSvgLoaded} 
-                            onError={onSvgError} 
-                        />
+                        <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
                         {svgLoading && (
                             <YStack
                                 style={{
@@ -176,12 +166,7 @@ const TrackingMarker = forwardRef(
                             ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
                         }}
                     >
-                        <FastImage 
-                            source={imageSource} 
-                            style={{ width: size.width, height: size.height }} 
-                            resizeMode={FastImage.resizeMode.contain} 
-                            onLoadEnd={onImageLoaded}
-                        />
+                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={onImageLoaded} />
                     </View>
                 )}
 
