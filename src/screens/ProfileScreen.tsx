@@ -8,6 +8,7 @@ import { abbreviateName, storefrontConfig } from '../utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import storage from '../utils/storage';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const PAYMENT_GATEWAYS_NO_PAYMENT_METHODS = ['qpay'];
 const ProfileScreen = () => {
@@ -73,7 +74,7 @@ const ProfileScreen = () => {
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <YStack flex={1} bg='$background' space='$3' px='$5'>
                 <XStack paddingVertical='$3' alignItems='center' justifyContent='space-between'>
                     <YStack>
@@ -104,7 +105,7 @@ const ProfileScreen = () => {
                     />
                 </YStack>
             </YStack>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

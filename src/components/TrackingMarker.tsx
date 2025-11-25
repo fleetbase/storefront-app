@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react';
 import { Animated, Easing, View, Platform } from 'react-native';
-import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
+import { Marker, AnimatedRegion, Callout } from 'react-native-maps';
 import { SvgCssUri } from 'react-native-svg/css';
 import FastImage from 'react-native-fast-image';
 import { Spinner, YStack } from 'tamagui';
@@ -24,6 +24,7 @@ const TrackingMarker = forwardRef(
             children,
             mapBearing = 0,
             providerIsGoogle = true,
+            markerTitle,
         },
         ref
     ) => {
@@ -96,65 +97,102 @@ const TrackingMarker = forwardRef(
         const [svgLoading, setSvgLoading] = useState(true);
         const [trackViews, setTrackViews] = useState(true);
         const isRemoteSvg = isObject(imageSource) && typeof imageSource.uri === 'string' && imageSource.uri.toLowerCase().endsWith('.svg');
+        const isAndroid = Platform.OS === 'android';
 
         useEffect(() => {
             if (svgLoading || !!children) {
                 setTrackViews(true);
             } else {
-                const t = setTimeout(() => setTrackViews(false), 120);
+                // On Android: Set to false quickly after SVG loads to allow children to render separately
+                // On iOS: Can keep tracking longer
+                const delay = isAndroid ? 300 : 500;
+                const t = setTimeout(() => setTrackViews(false), delay);
                 return () => clearTimeout(t);
             }
-        }, [svgLoading, children]);
+        }, [svgLoading, isAndroid]);
 
-        const onSvgLoaded = () => setSvgLoading(false);
-        const onSvgError = () => setSvgLoading(false);
+        const onSvgLoaded = () => {
+            setSvgLoading(false);
+        };
 
-        const providerSupportsRotation = providerIsGoogle;
-        const nativeRotation = (((heading + baseRotation) % 360) + 360) % 360;
+        const onSvgError = () => {
+            setSvgLoading(false);
+        };
+
+        const onImageLoaded = () => {
+            setSvgLoading(false);
+        };
+
+        // Native rotation for marker
+        const nativeRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
+        // Child rotation for map bearing compensation (iOS only - breaks Android bitmap conversion)
         const childRotation = (((heading + baseRotation - mapBearing) % 360) + 360) % 360;
 
         return (
-            <AnimatedMarker coordinate={makeCoordinatesFloat(plainCoordinate)} onPress={onPress} anchor={ANCHOR} flat={true} rotation={nativeRotation} tracksViewChanges={trackViews}>
-                <YStack
-                    style={{
-                        width: size.width,
-                        height: size.height,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transform: [{ rotate: `${childRotation}deg` }],
-                    }}
-                    pointerEvents='none'
-                >
-                    {isRemoteSvg ? (
-                        <>
-                            <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
-                            {svgLoading && (
-                                <YStack
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Spinner color='$textPrimary' size={Math.min(size.width, 24)} />
-                                </YStack>
-                            )}
-                        </>
-                    ) : (
-                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={() => setSvgLoading(false)} />
-                    )}
-                </YStack>
+            <AnimatedMarker
+                coordinate={makeCoordinatesFloat(plainCoordinate)}
+                title={markerTitle}
+                onPress={onPress}
+                anchor={ANCHOR}
+                flat={true}
+                rotation={nativeRotation}
+                tracksViewChanges={trackViews}
+            >
+                {/* Android: SVG must be in fixed-size View WITHOUT transform */}
+                {isRemoteSvg ? (
+                    <View
+                        style={{
+                            width: size.width,
+                            height: size.height,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            // iOS: Apply transform for map bearing compensation
+                            // Android: No transform (breaks bitmap conversion)
+                            ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
+                        }}
+                    >
+                        <SvgCssUri uri={imageSource.uri} width={size.width} height={size.height} onLoad={onSvgLoaded} onError={onSvgError} />
+                        {svgLoading && (
+                            <YStack
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Spinner color='$textPrimary' size={Math.min(size.width, 24)} />
+                            </YStack>
+                        )}
+                    </View>
+                ) : (
+                    <View
+                        style={{
+                            width: size.width,
+                            height: size.height,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            // iOS: Apply transform for map bearing compensation
+                            // Android: No transform (breaks bitmap conversion)
+                            ...(isAndroid ? {} : { transform: [{ rotate: `${childRotation}deg` }] }),
+                        }}
+                    >
+                        <FastImage source={imageSource} style={{ width: size.width, height: size.height }} resizeMode={FastImage.resizeMode.contain} onLoadEnd={onImageLoaded} />
+                    </View>
+                )}
 
                 {children && (
                     <View
+                        collapsable={false}
                         pointerEvents='box-none'
                         style={{
                             position: 'absolute',
                             top: size.height,
+                            left: -(size.width / 2),
                             minWidth: 100,
                             maxWidth: 150,
-                            marginLeft: -(size.width / 2),
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     >
                         {children}

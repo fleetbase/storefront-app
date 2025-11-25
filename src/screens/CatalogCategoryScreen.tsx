@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { SafeAreaView } from 'react-native';
 import { Stack, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { FlatGrid } from 'react-native-super-grid';
 import { Product, FoodTruck } from '@fleetbase/storefront';
+import { useLanguage } from '../contexts/LanguageContext';
+import ScreenWrapper from '../components/ScreenWrapper';
 import ProductCard from '../components/ProductCard';
 import ProductCardHorizontal from '../components/ProductCardHorizontal';
 import ProductCardHorizontalLTR from '../components/ProductCardHorizontalLTR';
 import Spacer from '../components/Spacer';
+import BackButton from '../components/BackButton';
+import CartButton from '../components/CartButton';
 import useDimensions from '../hooks/use-dimensions';
 
 const CatalogCategoryScreen = ({ route }) => {
@@ -18,16 +23,30 @@ const CatalogCategoryScreen = ({ route }) => {
     const theme = useTheme();
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
+    const headerHeight = useHeaderHeight();
     const { screenWidth } = useDimensions();
+    const { t } = useLanguage();
     const products = (category.products ?? []).map((p) => new Product(p));
     const foodTruck = new FoodTruck(params.foodTruck);
     const foodTruckId = params.foodTruckId ?? null;
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <YStack flex={1} bg='$background'>
                 <FlatGrid
-                    ListHeaderComponent={<Spacer height={15} />}
+                    ListHeaderComponent={
+                        <XStack pt='$4' pb='$4' px='$4' mb='$4' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
+                            <XStack flex={1} gap='$2' alignItems='center'>
+                                <BackButton onPress={() => navigation.goBack()} style={{ marginRight: 10 }} />
+                                <Text color='$textPrimary' fontSize='$7' fontWeight='bold' numberOfLines={1}>
+                                    {category.name}
+                                </Text>
+                            </XStack>
+                            <YStack>
+                                <CartButton text={t('CatalogScreen.jumpToCart')} onPress={() => navigation.navigate('CartModal')} iconSize={23} textSize={16} />
+                            </YStack>
+                        </XStack>
+                    }
                     ListFooterComponent={<Spacer height={tabBarHeight} />}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
@@ -47,7 +66,7 @@ const CatalogCategoryScreen = ({ route }) => {
                     )}
                 />
             </YStack>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

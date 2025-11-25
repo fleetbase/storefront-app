@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
+import { Platfrom, UIManager, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
@@ -10,6 +10,11 @@ import { toast } from '../utils/toast';
 import useStorage from '../hooks/use-storage';
 import useCurrentLocation from '../hooks/use-current-location';
 import BackButton from '../components/BackButton';
+import ScreenWrapper from '../components/ScreenWrapper';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const AddNewLocationScreen = ({ route }) => {
     const params = route.params || {};
@@ -76,7 +81,7 @@ const AddNewLocationScreen = ({ route }) => {
     }, [inputValue, searchPlaces]);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+        <ScreenWrapper>
             <YStack bg='$background' width='100%' height='100%' padding='$4' space='$5'>
                 <YStack
                     space='$3'
@@ -109,6 +114,7 @@ const AddNewLocationScreen = ({ route }) => {
                             borderRadius='$3'
                             borderWidth={2}
                             borderColor='$borderColor'
+                            zIndex={10}
                             style={{
                                 transform: [{ translateY: inputFocused ? -120 : 0 }],
                                 elevation: inputFocused ? 4 : 0,
@@ -125,8 +131,9 @@ const AddNewLocationScreen = ({ route }) => {
                                 ref={searchInput}
                                 size='$5'
                                 placeholder={t('AddNewLocationScreen.streetName')}
+                                placeholderTextColor='$textSecondary'
                                 bg='transparent'
-                                color='$color'
+                                color='$textPrimary'
                                 flex={1}
                                 borderWidth={0}
                                 paddingHorizontal='$2'
@@ -158,6 +165,7 @@ const AddNewLocationScreen = ({ route }) => {
                         borderRadius='$3'
                         height={150}
                         opacity={inputFocused ? 1 : 0}
+                        pointerEvents={inputFocused ? 'auto' : 'none'}
                         style={{
                             transform: [{ translateY: inputFocused ? -50 : 0 }],
                             elevation: 4,
@@ -228,7 +236,7 @@ const AddNewLocationScreen = ({ route }) => {
                     <Pressable style={StyleSheet.absoluteFill} onPress={handleDismissFocus} pointerEvents='box-only' />
                 </YStack>
             </YStack>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 };
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Platform } from 'react-native';
 import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faAsterisk, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
@@ -12,6 +12,7 @@ import { calculateProductSubtotal, getCartItem } from '../utils/cart';
 import { toast } from '../utils/toast';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
 import { useLanguage } from '../contexts/LanguageContext';
+import ScreenWrapper from '../components/ScreenWrapper';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,9 +23,9 @@ import FastImage from 'react-native-fast-image';
 const CartItemScreen = ({ route = {} }) => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const tabBarHeight = useBottomTabBarHeight();
-    const insets = useSafeAreaInsets();
     const params = route.params ?? {};
+    const insets = useSafeAreaInsets();
+    const tabBarHeight = useBottomTabBarHeight();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const { t } = useLanguage();
     const [cart, updateCart] = useCart();
@@ -35,9 +36,9 @@ const CartItemScreen = ({ route = {} }) => {
     const [subtotal, setSubtotal] = useState(0);
     const [quantity, setQuantity] = useState(cartItem.quantity ?? 1);
     const [ready, setReady] = useState(false);
-    const isModal = Platform.OS === 'ios' && (params.isModal ?? true);
     const isService = product && product.getAttribute('is_service') === true;
     const hasOptions = product.variants().length > 0 && product.addons().length > 0;
+    const isModal = params.isModal ?? false;
 
     useEffect(() => {
         if (product) {
@@ -97,7 +98,7 @@ const CartItemScreen = ({ route = {} }) => {
     };
 
     return (
-        <YStack flex={1} bg='$background'>
+        <ScreenWrapper useSafeArea={!isModal}>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
                 <FastImage
                     source={{ uri: cartItem.product_image_url }}
@@ -109,7 +110,7 @@ const CartItemScreen = ({ route = {} }) => {
                         left: 0,
                     }}
                 />
-                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={Platform.OS === 'android' ? insets.top : 0} left={0} right={0} padding='$4' zIndex={1}>
+                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} padding='$4' zIndex={1}>
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faTimes} />
@@ -164,7 +165,17 @@ const CartItemScreen = ({ route = {} }) => {
                     />
                 </YStack>
             </ScrollView>
-            <XStack position='absolute' px='$4' py='$3' bottom={isModal ? insets.bottom : tabBarHeight} left={0} right={0} alignItems='center' justifyContent='space-between' space='$2'>
+            <XStack
+                position='absolute'
+                px='$4'
+                py='$3'
+                bottom={Platform.select({ ios: isModal ? insets.bottom : 0, android: isModal ? tabBarHeight : insets.bottom })}
+                left={0}
+                right={0}
+                alignItems='center'
+                justifyContent='space-between'
+                space='$2'
+            >
                 <XStack width='35%'>
                     <QuantityButton buttonSize='$3' quantity={quantity} onChange={setQuantity} disabled={isLoading('addToCart') || isLoading('removeCartItem')} />
                 </XStack>
@@ -212,7 +223,7 @@ const CartItemScreen = ({ route = {} }) => {
                     </Button>
                 </XStack>
             </XStack>
-        </YStack>
+        </ScreenWrapper>
     );
 };
 

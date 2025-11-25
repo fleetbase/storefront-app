@@ -23,7 +23,7 @@ const CartButton = ({ iconSize = 18, textSize = 14, blur = false, style, text, o
 
     return (
         <YStack position='relative'>
-            <Pressable onPress={handlePress} style={[style, { alignItems: 'center', justifyContent: 'center', overflow: blur ? 'hidden' : 'auto' }]}>
+            <Pressable onPress={handlePress} style={[style, { alignItems: 'center', justifyContent: 'center', overflow: blur ? 'hidden' : 'visible' }]}>
                 <XStack justifyContent='center' alignItems='center' bg='transparent' zIndex={2}>
                     {text && (
                         <YStack mr='$2'>
@@ -35,7 +35,7 @@ const CartButton = ({ iconSize = 18, textSize = 14, blur = false, style, text, o
                     {children}
                     <FontAwesomeIcon icon={faShoppingCart} color={theme.color.val} iconSize={iconSize} />
                 </XStack>
-                {blur && Platform.OS !== 'android' && (
+                {blur && Platform.OS === 'ios' && (
                     <BlurView
                         style={StyleSheet.absoluteFillObject}
                         blurType={isDarkMode ? 'dark' : 'light'}
