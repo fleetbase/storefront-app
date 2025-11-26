@@ -1,6 +1,6 @@
 {
     "name": "@fleetbase/storefront-app",
-    "version": "0.0.17",
+    "version": "0.0.18",
     "private": true,
     "scripts": {
         "android": "react-native run-android",
