@@ -14,6 +14,8 @@ const authReducer = (state, action) => {
     switch (action.type) {
         case 'RESTORE_SESSION':
             return { ...state, customer: action.customer };
+        case 'UPDATE':
+            return { ...state, customer: action.customer };
         case 'LOGIN':
             return { ...state, phone: action.phone, isSendingCode: action.isSendingCode ?? false };
         case 'CREATING_ACCOUNT':

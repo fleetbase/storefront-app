@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Animated, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -148,13 +148,6 @@ const CartScreen = ({ route }) => {
     useEffect(() => {
         setDisplayedItems(cart ? cart.contents() : []);
     }, [cart]);
-
-    // Run once
-    useFocusEffect(
-        useCallback(() => {
-            refreshCustomer();
-        }, [])
-    );
 
     const renderRightActions = (cartItem) => (
         <XStack height='100%' width={200} minHeight={100} maxHeight={125}>

@@ -26,16 +26,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { listen } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
-    const defaultCompanyRegistrationNo = useMemo(() => {
-        return customer?.getAttribute('meta.ebarimt_registration_no', '') ?? '';
-    }, [customer]);
     const [checkoutOptions, setCheckoutOptions] = useState({
         leavingTip: false,
         tip: 0,
         leavingDeliveryTip: false,
         deliveryTip: 0,
         pickup: storefrontConfig('prioritizePickup') ? 1 : 0,
-        ebarimt_registration_no: defaultCompanyRegistrationNo,
     });
     const [invoice, setInvoice] = useState();
     const [checkoutId, setCheckoutId] = useState();
@@ -44,9 +40,17 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
-    const [isPersonal, setIsPersonal] = useState(isBlank(defaultCompanyRegistrationNo));
     const [error, setError] = useState(false);
+    // Order notes
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
+    // Ebarimt company registration no
+    const companyRegistrationNo = useMemo(() => {
+        if (customer && typeof customer.getAttribute === 'function') {
+            return customer.getAttribute('meta.ebarimt_registration_no', '');
+        }
+        return '';
+    }, [customer.id]);
+    const [isPersonal, setIsPersonal] = useState(isBlank(companyRegistrationNo));
     const listenerRef = useRef();
     const hasOrderCompleted = useRef(false);
     const cartContentsString = JSON.stringify(cart.contents() || []);
@@ -141,7 +145,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const debouncedUpdateRegistration = useMemo(
         () =>
             debounce((registrationNumber) => {
-                setCheckoutOptions((prev) => ({ ...prev, ebarimt_registration_no: registrationNumber }));
+                updateCustomerMeta({ ebarimt_registration_no: registrationNumber });
             }, 500), // 500ms delay
         []
     );
@@ -372,7 +376,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             isPersonal,
             setIsPersonal,
             isCompany: !isPersonal,
-            companyRegistrationNumber: customer?.getAttribute('meta.ebarimt_registration_no', '') ?? '',
+            companyRegistrationNo,
             setCompanyRegistrationNumber,
         }),
         [
@@ -397,6 +401,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             isServiceQuoteUnavailable,
             isPersonal,
             setIsPersonal,
+            companyRegistrationNo,
             setCompanyRegistrationNumber,
         ]
     );
