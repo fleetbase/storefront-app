@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             setStoredCustomer(customerInstance.serialize());
+            dispatch({ type: 'UPDATE', customer: customerInstance });
             EventRegister.emit('customer.updated', customerInstance);
         },
         [storefront, setStoredCustomer, authToken]
@@ -111,7 +112,7 @@ export const AuthProvider = ({ children }) => {
 
     // Update customer meta attributes
     const updateCustomerMeta = async (newMeta = {}) => {
-        const meta = { ...state.customer.getAttribute('meta'), ...newMeta };
+        const meta = { ...state.customer.getAttribute('meta', {}), ...newMeta };
         try {
             const customer = await state.customer.update({ meta });
             setCustomer(customer);

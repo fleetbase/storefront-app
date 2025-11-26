@@ -44,13 +44,13 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Order notes
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     // Ebarimt company registration no
-    const companyRegistrationNo = useMemo(() => {
+    const companyRegistrationNumber = useMemo(() => {
         if (customer && typeof customer.getAttribute === 'function') {
             return customer.getAttribute('meta.ebarimt_registration_no', '');
         }
         return '';
-    }, [customer.id]);
-    const [isPersonal, setIsPersonal] = useState(isBlank(companyRegistrationNo));
+    }, [customer]);
+    const [isPersonal, setIsPersonal] = useState(isBlank(companyRegistrationNumber));
     const listenerRef = useRef();
     const hasOrderCompleted = useRef(false);
     const cartContentsString = JSON.stringify(cart.contents() || []);
@@ -376,7 +376,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             isPersonal,
             setIsPersonal,
             isCompany: !isPersonal,
-            companyRegistrationNo,
+            companyRegistrationNumber,
             setCompanyRegistrationNumber,
         }),
         [
@@ -401,7 +401,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             isServiceQuoteUnavailable,
             isPersonal,
             setIsPersonal,
-            companyRegistrationNo,
+            companyRegistrationNumber,
             setCompanyRegistrationNumber,
         ]
     );
