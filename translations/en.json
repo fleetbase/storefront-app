@@ -285,7 +285,7 @@
         "vatRegistration": "VAT Registration",
         "personal": "Personal",
         "company": "Company",
-        "companyRegistrationNumber": "Company Registration No."
+        "companyRegistrationNumber": "Company Registration"
     },
     "SavedLocationScreen": {
         "addressSaved": "Address saved.",
