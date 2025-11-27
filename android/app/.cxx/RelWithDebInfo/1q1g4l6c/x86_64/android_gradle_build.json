@@ -1,0 +1,177 @@
+{
+  "buildFiles": [
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-maps/android/src/main/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-mmkv-storage/android/generated/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-webview/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/ron/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/RelWithDebInfo/1q1g4l6c/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/ron/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/RelWithDebInfo/1q1g4l6c/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "appmodules::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "appmodules",
+      "output": "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libappmodules.so",
+      "runtimeFiles": [
+        "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_safeareacontext.so",
+        "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_rnscreens.so",
+        "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_rnsvg.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so"
+      ]
+    },
+    "react_codegen_MMKVStorageSpec::@dd6425c785c2b1a36aeb": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_MMKVStorageSpec"
+    },
+    "react_codegen_RNBootSplashSpec::@05d5bd8b08339ce1ebaa": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNBootSplashSpec"
+    },
+    "react_codegen_RNCConfigSpec::@89f1b79ed4954e2f2cff": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNCConfigSpec"
+    },
+    "react_codegen_RNCGeolocationSpec::@1b959fcb56e23f7716ba": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNCGeolocationSpec"
+    },
+    "react_codegen_RNCWebViewSpec::@eb48929f9f7453740a6c": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNCWebViewSpec"
+    },
+    "react_codegen_RNDateTimePickerCGen::@59b70ddc31ba2f8ef1d2": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNDateTimePickerCGen"
+    },
+    "react_codegen_RNGoogleSignInCGen::@337b7b353bd94a4215c0": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNGoogleSignInCGen"
+    },
+    "react_codegen_RNImagePickerSpec::@f66ee9a2efecfb28bee4": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNImagePickerSpec"
+    },
+    "react_codegen_RNKeychainSpec::@f9a2cb36ebca2de4baf9": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNKeychainSpec"
+    },
+    "react_codegen_RNLocalizeSpec::@f3ba5298aff84514e205": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNLocalizeSpec"
+    },
+    "react_codegen_RNMapsSpecs::@5748abef1962d24942ec": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNMapsSpecs"
+    },
+    "react_codegen_RNPermissionsSpec::@7ad697819b753921c957": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNPermissionsSpec"
+    },
+    "react_codegen_rnblurview::@9a34ffec6e39b5c9049e": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnblurview"
+    },
+    "react_codegen_rngesturehandler_codegen::@39f233abcd2c728bc6ec": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rngesturehandler_codegen"
+    },
+    "react_codegen_rnreanimated::@8afabad14bfffa3f8b9a": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnreanimated"
+    },
+    "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnscreens",
+      "output": "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_rnscreens.so",
+      "runtimeFiles": [
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so"
+      ]
+    },
+    "react_codegen_rnstripe::@65863f00eb0279fa1385": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnstripe"
+    },
+    "react_codegen_rnsvg::@4f40eb209d0c0b4a3b65": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnsvg",
+      "output": "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_rnsvg.so",
+      "runtimeFiles": [
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so"
+      ]
+    },
+    "react_codegen_safeareacontext::@7984cd80db47aa7b952a": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_safeareacontext",
+      "output": "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86_64/libreact_codegen_safeareacontext.so",
+      "runtimeFiles": [
+        "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/ron/Library/Android/sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/ron/Library/Android/sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

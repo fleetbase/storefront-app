@@ -1,0 +1,4 @@
+/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

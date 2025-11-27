@@ -77,10 +77,10 @@ const QPayCheckoutScreen = ({ route }) => {
         [setCompanyRegistrationNumber]
     );
 
-    // Sync local state when hook value changes
-    useEffect(() => {
-        setLocalRegistrationNumber(companyRegistrationNumber || '');
-    }, [companyRegistrationNumber]);
+    // // Sync local state when hook value changes
+    // useEffect(() => {
+    //     setLocalRegistrationNumber(companyRegistrationNumber || '');
+    // }, [companyRegistrationNumber]);
 
     useEffect(() => {
         navigation.setOptions({

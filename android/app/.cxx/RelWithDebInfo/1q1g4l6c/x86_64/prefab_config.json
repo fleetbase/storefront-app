@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "prefabPath": "/Users/ron/.gradle/caches/modules-2/files-2.1/com.google.prefab/cli/2.1.0/aa32fec809c44fa531f01dcfb739b5b3304d3050/cli-2.1.0-all.jar",
+  "packages": [
+    "/Users/ron/.gradle/caches/8.13/transforms/ab63569265af4d8a5a00adc67666753d/transformed/jetified-react-android-0.81.5-release/prefab",
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-reanimated/android/build/intermediates/prefab_package/release/prefab",
+    "/Users/ron/.gradle/caches/8.13/transforms/8e90cbfc8cdadc5a0f4274ea6858c9ae/transformed/jetified-hermes-android-0.81.5-release/prefab",
+    "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab"
+  ]
+}

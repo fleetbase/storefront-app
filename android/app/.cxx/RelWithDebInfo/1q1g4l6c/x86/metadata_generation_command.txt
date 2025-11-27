@@ -1,0 +1,24 @@
+                        -H/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=24
+-DANDROID_PLATFORM=android-24
+-DANDROID_ABI=x86
+-DCMAKE_ANDROID_ARCH_ABI=x86
+-DANDROID_NDK=/Users/ron/Library/Android/sdk/ndk/27.1.12297006
+-DCMAKE_ANDROID_NDK=/Users/ron/Library/Android/sdk/ndk/27.1.12297006
+-DCMAKE_TOOLCHAIN_FILE=/Users/ron/Library/Android/sdk/ndk/27.1.12297006/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/ron/Library/Android/sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/RelWithDebInfo/1q1g4l6c/obj/x86
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+-DCMAKE_FIND_ROOT_PATH=/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/RelWithDebInfo/1q1g4l6c/prefab/x86/prefab
+-B/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/RelWithDebInfo/1q1g4l6c/x86
+-GNinja
+-DPROJECT_BUILD_DIR=/Users/ron/Development/fleetbase/client-apps/oli/android/app/build
+-DPROJECT_ROOT_DIR=/Users/ron/Development/fleetbase/client-apps/oli/android
+-DREACT_ANDROID_DIR=/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native/ReactAndroid
+-DANDROID_STL=c++_shared
+-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+                        Build command args: []
+                        Version: 2

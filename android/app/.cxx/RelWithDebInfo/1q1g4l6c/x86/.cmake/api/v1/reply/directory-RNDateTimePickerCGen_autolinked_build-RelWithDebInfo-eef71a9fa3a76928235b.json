@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNDateTimePickerCGen_autolinked_build",
+		"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni"
+	}
+}

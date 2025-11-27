@@ -1,0 +1,538 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					],
+					"jsonFile" : "directory-.-RelWithDebInfo-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "rnblurview_autolinked_build",
+					"jsonFile" : "directory-rnblurview_autolinked_build-RelWithDebInfo-20f0c4572fdadd21bffd.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						13
+					]
+				},
+				{
+					"build" : "RNDateTimePickerCGen_autolinked_build",
+					"jsonFile" : "directory-RNDateTimePickerCGen_autolinked_build-RelWithDebInfo-eef71a9fa3a76928235b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						6
+					]
+				},
+				{
+					"build" : "RNCGeolocationSpec_autolinked_build",
+					"jsonFile" : "directory-RNCGeolocationSpec_autolinked_build-RelWithDebInfo-7bb85f3d1a2737869e19.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "RNGoogleSignInCGen_autolinked_build",
+					"jsonFile" : "directory-RNGoogleSignInCGen_autolinked_build-RelWithDebInfo-87fd99b49fa70896ed0b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						7
+					]
+				},
+				{
+					"build" : "rnstripe_autolinked_build",
+					"jsonFile" : "directory-rnstripe_autolinked_build-RelWithDebInfo-991b5af8e5a2fd038df3.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						17
+					]
+				},
+				{
+					"build" : "RNBootSplashSpec_autolinked_build",
+					"jsonFile" : "directory-RNBootSplashSpec_autolinked_build-RelWithDebInfo-f434aeffa713ac576ace.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "RNCConfigSpec_autolinked_build",
+					"jsonFile" : "directory-RNCConfigSpec_autolinked_build-RelWithDebInfo-71b67080957d58263dd9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "rngesturehandler_codegen_autolinked_build",
+					"jsonFile" : "directory-rngesturehandler_codegen_autolinked_build-RelWithDebInfo-b19b7cef5e0bc01bac88.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						14
+					]
+				},
+				{
+					"build" : "RNImagePickerSpec_autolinked_build",
+					"jsonFile" : "directory-RNImagePickerSpec_autolinked_build-RelWithDebInfo-760b6472c66037e06a6b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						8
+					]
+				},
+				{
+					"build" : "RNKeychainSpec_autolinked_build",
+					"jsonFile" : "directory-RNKeychainSpec_autolinked_build-RelWithDebInfo-f799facfc7e33c065d8a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						9
+					]
+				},
+				{
+					"build" : "RNLocalizeSpec_autolinked_build",
+					"jsonFile" : "directory-RNLocalizeSpec_autolinked_build-RelWithDebInfo-5f8fcb7c829db868e3f6.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						10
+					]
+				},
+				{
+					"build" : "RNMapsSpecs_autolinked_build",
+					"jsonFile" : "directory-RNMapsSpecs_autolinked_build-RelWithDebInfo-b5fefb5b47b957f3b527.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-maps/android/src/main/jni",
+					"targetIndexes" : 
+					[
+						11
+					]
+				},
+				{
+					"build" : "MMKVStorageSpec_autolinked_build",
+					"jsonFile" : "directory-MMKVStorageSpec_autolinked_build-RelWithDebInfo-a36e1712b4d3d2a21236.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-mmkv-storage/android/generated/jni",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "RNPermissionsSpec_autolinked_build",
+					"jsonFile" : "directory-RNPermissionsSpec_autolinked_build-RelWithDebInfo-08754a7136a01a6cc214.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						12
+					]
+				},
+				{
+					"build" : "rnreanimated_autolinked_build",
+					"jsonFile" : "directory-rnreanimated_autolinked_build-RelWithDebInfo-a9a1a3c06e6531f7217e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						15
+					]
+				},
+				{
+					"build" : "safeareacontext_autolinked_build",
+					"jsonFile" : "directory-safeareacontext_autolinked_build-RelWithDebInfo-b3f9b0610302f111cde4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni",
+					"targetIndexes" : 
+					[
+						19
+					]
+				},
+				{
+					"build" : "rnscreens_autolinked_build",
+					"jsonFile" : "directory-rnscreens_autolinked_build-RelWithDebInfo-1998d5fe596d47c4e770.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni",
+					"targetIndexes" : 
+					[
+						16
+					]
+				},
+				{
+					"build" : "rnsvg_autolinked_build",
+					"jsonFile" : "directory-rnsvg_autolinked_build-RelWithDebInfo-654b8eeac93ca7cc0efc.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni",
+					"targetIndexes" : 
+					[
+						18
+					]
+				},
+				{
+					"build" : "RNCWebViewSpec_autolinked_build",
+					"jsonFile" : "directory-RNCWebViewSpec_autolinked_build-RelWithDebInfo-4e12e5c7772673ed26ba.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-webview/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						5
+					]
+				}
+			],
+			"name" : "RelWithDebInfo",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					],
+					"name" : "appmodules",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "appmodules::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appmodules-RelWithDebInfo-0e2f062aceec34bf7283.json",
+					"name" : "appmodules",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "react_codegen_MMKVStorageSpec::@dd6425c785c2b1a36aeb",
+					"jsonFile" : "target-react_codegen_MMKVStorageSpec-RelWithDebInfo-fe0efaa15e16ac1b368c.json",
+					"name" : "react_codegen_MMKVStorageSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "react_codegen_RNBootSplashSpec::@05d5bd8b08339ce1ebaa",
+					"jsonFile" : "target-react_codegen_RNBootSplashSpec-RelWithDebInfo-6b23aa88d4c6ba4b7548.json",
+					"name" : "react_codegen_RNBootSplashSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "react_codegen_RNCConfigSpec::@89f1b79ed4954e2f2cff",
+					"jsonFile" : "target-react_codegen_RNCConfigSpec-RelWithDebInfo-5dac78b622d149fbec82.json",
+					"name" : "react_codegen_RNCConfigSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "react_codegen_RNCGeolocationSpec::@1b959fcb56e23f7716ba",
+					"jsonFile" : "target-react_codegen_RNCGeolocationSpec-RelWithDebInfo-895dbc6ad4b88d46c5b3.json",
+					"name" : "react_codegen_RNCGeolocationSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 19,
+					"id" : "react_codegen_RNCWebViewSpec::@eb48929f9f7453740a6c",
+					"jsonFile" : "target-react_codegen_RNCWebViewSpec-RelWithDebInfo-54a0f23a0ed8271da4ce.json",
+					"name" : "react_codegen_RNCWebViewSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "react_codegen_RNDateTimePickerCGen::@59b70ddc31ba2f8ef1d2",
+					"jsonFile" : "target-react_codegen_RNDateTimePickerCGen-RelWithDebInfo-4da496288d333ab1c81b.json",
+					"name" : "react_codegen_RNDateTimePickerCGen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "react_codegen_RNGoogleSignInCGen::@337b7b353bd94a4215c0",
+					"jsonFile" : "target-react_codegen_RNGoogleSignInCGen-RelWithDebInfo-1b7e98e83ba9dee730a5.json",
+					"name" : "react_codegen_RNGoogleSignInCGen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 9,
+					"id" : "react_codegen_RNImagePickerSpec::@f66ee9a2efecfb28bee4",
+					"jsonFile" : "target-react_codegen_RNImagePickerSpec-RelWithDebInfo-6789a9758b8ccf100c8d.json",
+					"name" : "react_codegen_RNImagePickerSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 10,
+					"id" : "react_codegen_RNKeychainSpec::@f9a2cb36ebca2de4baf9",
+					"jsonFile" : "target-react_codegen_RNKeychainSpec-RelWithDebInfo-714c92539499404ff3f1.json",
+					"name" : "react_codegen_RNKeychainSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "react_codegen_RNLocalizeSpec::@f3ba5298aff84514e205",
+					"jsonFile" : "target-react_codegen_RNLocalizeSpec-RelWithDebInfo-2c9edeb155608e1d000d.json",
+					"name" : "react_codegen_RNLocalizeSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 12,
+					"id" : "react_codegen_RNMapsSpecs::@5748abef1962d24942ec",
+					"jsonFile" : "target-react_codegen_RNMapsSpecs-RelWithDebInfo-5dfe182e0d818c4de5d2.json",
+					"name" : "react_codegen_RNMapsSpecs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 14,
+					"id" : "react_codegen_RNPermissionsSpec::@7ad697819b753921c957",
+					"jsonFile" : "target-react_codegen_RNPermissionsSpec-RelWithDebInfo-78f3459f0da9f1b9b5cd.json",
+					"name" : "react_codegen_RNPermissionsSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "react_codegen_rnblurview::@9a34ffec6e39b5c9049e",
+					"jsonFile" : "target-react_codegen_rnblurview-RelWithDebInfo-06051ae4ced14b4f5575.json",
+					"name" : "react_codegen_rnblurview",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 8,
+					"id" : "react_codegen_rngesturehandler_codegen::@39f233abcd2c728bc6ec",
+					"jsonFile" : "target-react_codegen_rngesturehandler_codegen-RelWithDebInfo-f4ccef78fd4a3ad56db2.json",
+					"name" : "react_codegen_rngesturehandler_codegen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 15,
+					"id" : "react_codegen_rnreanimated::@8afabad14bfffa3f8b9a",
+					"jsonFile" : "target-react_codegen_rnreanimated-RelWithDebInfo-977ff9d7bc20e12ffa7a.json",
+					"name" : "react_codegen_rnreanimated",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 17,
+					"id" : "react_codegen_rnscreens::@25bcbd507e98d3a854ad",
+					"jsonFile" : "target-react_codegen_rnscreens-RelWithDebInfo-61ac5d0d22caa4c35a1f.json",
+					"name" : "react_codegen_rnscreens",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "react_codegen_rnstripe::@65863f00eb0279fa1385",
+					"jsonFile" : "target-react_codegen_rnstripe-RelWithDebInfo-f1af947bf697b35c526f.json",
+					"name" : "react_codegen_rnstripe",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 18,
+					"id" : "react_codegen_rnsvg::@4f40eb209d0c0b4a3b65",
+					"jsonFile" : "target-react_codegen_rnsvg-RelWithDebInfo-2bb7756249cf3de576d2.json",
+					"name" : "react_codegen_rnsvg",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 16,
+					"id" : "react_codegen_safeareacontext::@7984cd80db47aa7b952a",
+					"jsonFile" : "target-react_codegen_safeareacontext-RelWithDebInfo-2b7a9dddd7a296c68edd.json",
+					"name" : "react_codegen_safeareacontext",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/RelWithDebInfo/1q1g4l6c/armeabi-v7a",
+		"source" : "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

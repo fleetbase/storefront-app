@@ -1,0 +1,42 @@
+{
+  "buildFiles": [
+    "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/ron/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/ron/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "appmodules::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86",
+      "artifactName": "appmodules",
+      "output": "/Users/ron/Development/fleetbase/client-apps/oli/android/app/build/intermediates/cxx/Debug/4236yz2y/obj/x86/libappmodules.so",
+      "runtimeFiles": [
+        "/Users/ron/.gradle/caches/8.13/transforms/db34e4957ca22e415a81cff783aab4b3/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86/libfbjni.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/df2c3af09c7dc02ae9126dc31e2cb69a/transformed/jetified-react-android-0.81.5-debug/prefab/modules/jsi/libs/android.x86/libjsi.so",
+        "/Users/ron/.gradle/caches/8.13/transforms/df2c3af09c7dc02ae9126dc31e2cb69a/transformed/jetified-react-android-0.81.5-debug/prefab/modules/reactnative/libs/android.x86/libreactnative.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/ron/Library/Android/sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/ron/Library/Android/sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}
