@@ -28,47 +28,56 @@ const OrderHistoryScreen = () => {
     const { t } = useLanguage();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
 
-    // Persist serialized orders; restore to SDK instances for rendering
+    // Persist serialized orders
     const [storedOrders, setStoredOrders] = useStorage(`${customer?.id}_orders`, []);
     const [ordersDirty, setOrdersDirty] = useStorage(`${customer?.id}_orders_dirty`, false);
+
     const [refreshing, setRefreshing] = useState(false);
     const [fetchingOrders, setFetchingOrders] = useState(false);
 
-    // Extra guard to prevent overlapping fetches
+    /** Prevent overlapping fetch calls */
     const isFetchingRef = useRef(false);
 
+    /** NEW: Prevent infinite fetch caused by empty results */
+    const hasFetchedOnce = useRef(false);
+
+    /** Hydrate SDK Order instances */
     const orders = useMemo(() => restoreOrders(storedOrders), [storedOrders]);
 
-    const fetchOrders = useCallback(
-        async (params: Record<string, any> = {}) => {
-            if (!customer) return;
-            if (isFetchingRef.current) return;
+    /** Fetch orders from API */
+    const fetchOrders = useCallback(async () => {
+        if (!customer) return;
+        if (isFetchingRef.current) return;
 
-            isFetchingRef.current = true;
-            setFetchingOrders(true);
+        isFetchingRef.current = true;
+        setFetchingOrders(true);
 
-            try {
-                const result = await runWithLoading(
-                    customer.getOrderHistory({
-                        sort: '-created_at',
-                        limit: 25,
-                        ...params,
-                    })
-                );
+        try {
+            const result = await runWithLoading(
+                customer.getOrderHistory({
+                    sort: '-created_at',
+                    limit: 25,
+                })
+            );
 
-                setStoredOrders(result.map((order: Order) => order.serialize()));
-                setOrdersDirty(false);
-            } catch (err: any) {
-                console.error('Error loading customer orders:', err);
-                // toast.error?.(err.message ?? 'Failed to load orders');
-            } finally {
-                isFetchingRef.current = false;
-                setFetchingOrders(false);
-            }
-        },
-        [customer, runWithLoading, setStoredOrders]
-    );
+            // Store serialized orders
+            const serialized = result.map((order: Order) => order.serialize());
+            setStoredOrders(serialized);
 
+            // Mark as clean
+            setOrdersDirty(false);
+
+            // Mark that we fetched at least once
+            hasFetchedOnce.current = true;
+        } catch (err) {
+            console.error('Failed to fetch orders:', err);
+        } finally {
+            isFetchingRef.current = false;
+            setFetchingOrders(false);
+        }
+    }, [customer, runWithLoading, setStoredOrders, setOrdersDirty]);
+
+    /** Pull-down refresh */
     const handleRefresh = useCallback(async () => {
         if (!customer) return;
 
@@ -77,6 +86,7 @@ const OrderHistoryScreen = () => {
         setRefreshing(false);
     }, [customer, fetchOrders]);
 
+    /** View order details */
     const handleViewOrder = useCallback(
         (order: Order) => {
             navigation.navigate('Order', { order: order.serialize() });
@@ -84,30 +94,43 @@ const OrderHistoryScreen = () => {
         [navigation]
     );
 
-    // Single source of truth: load when screen is focused.
-    // No storedOrders in deps -> no loop.
+    /**
+     * Focus Effect (Fired when screen becomes visible)
+     *
+     * Runs EXACTLY in this order:
+     * - If never fetched before → fetch once (even if empty)
+     * - Else if dirty → fetch
+     * - Otherwise → do nothing
+     *
+     * Stored orders being empty will NOT re-trigger fetches.
+     */
     useFocusEffect(
         useCallback(() => {
             if (!customer) return;
 
-            // No cache yet? Fetch once.
-            if (!storedOrders || storedOrders.length === 0) {
+            const isNotFetching = !isFetchingRef.current;
+
+            // 1. First time viewing screen → fetch once
+            if (!hasFetchedOnce.current && isNotFetching) {
                 fetchOrders();
                 return;
             }
 
-            // Only fetch if something marked it dirty (e.g. new order from another session/device)
-            if (ordersDirty) {
+            // 2. If dirty (e.g., new order placed) → fetch
+            if (ordersDirty && isNotFetching) {
                 fetchOrders();
+                return;
             }
-        }, [customer, storedOrders, ordersDirty, fetchOrders])
+
+            // 3. Otherwise → no action (no infinite loops)
+        }, [customer, ordersDirty, fetchOrders])
     );
 
     return (
         <ScreenWrapper collapsable={false}>
             {(isLoading() || fetchingOrders) && !refreshing && (
                 <Portal hostName='LoadingIndicatorPortal'>
-                    <XStack px='$3' py='$3' alignItems='center' justifyContent='center' collapsable={false}>
+                    <XStack px='$3' py='$3' alignItems='center' justifyContent='center'>
                         <Spinner size='small' color='$color' />
                     </XStack>
                 </Portal>
@@ -125,9 +148,11 @@ const OrderHistoryScreen = () => {
                                         {order.getAttribute('meta.storefront')}
                                     </Text>
                                 </XStack>
+
                                 <Text color='$textPrimary' size='$5' numberOfLines={1}>
                                     {order.getAttribute('id')}
                                 </Text>
+
                                 <Text color='$textSecondary' numberOfLines={1} size='$4'>
                                     {formatDate(order.createdAt, 'MMM d, yyyy h:mm aa')}
                                 </Text>
@@ -152,15 +177,7 @@ const OrderHistoryScreen = () => {
                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={handleRefresh}
-                        colors={[theme.primary.val]} // Android
-                        tintColor={theme.primary.val} // iOS
-                        progressViewOffset={0}
-                    />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[theme.primary.val]} tintColor={theme.primary.val} progressViewOffset={0} />}
                 ListHeaderComponent={<Spacer height={Platform.select({ ios: insets.top, android: insets.top + 15 })} />}
                 ListFooterComponent={<Spacer height={100} />}
             />

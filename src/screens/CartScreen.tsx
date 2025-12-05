@@ -274,7 +274,13 @@ const CartScreen = ({ route }) => {
 
     return (
         <ScreenWrapper isModal={isModal} useSafeArea={false}>
-            <XStack justifyContent='space-between' alignItems='center' px='$5' pb='$5' pt={Platform.select({ ios: '$5', android: (isModal ? 0 : insets.top) + 5 })}>
+            <XStack
+                justifyContent='space-between'
+                alignItems='center'
+                px='$5'
+                pb='$5'
+                pt={Platform.select({ ios: (isModal ? 10 : insets.top) + 5, android: (isModal ? 0 : insets.top) + 5 })}
+            >
                 <XStack alignItems='center'>
                     <Text fontSize='$7' fontWeight='bold'>
                         {t('CartScreen.orderItems', { count: displayedItems.length })}
@@ -332,7 +338,7 @@ const CartScreen = ({ route }) => {
                             </Button>
                         </YStack>
                     </XStack>
-                    <Spacer height={Platform.select({ ios: isModal ? insets.bottom : insets.bottom + 15, android: tabBarHeight })} />
+                    <Spacer height={Platform.select({ ios: isModal ? insets.bottom : tabBarHeight, android: tabBarHeight })} />
                 </YStack>
             )}
         </ScreenWrapper>

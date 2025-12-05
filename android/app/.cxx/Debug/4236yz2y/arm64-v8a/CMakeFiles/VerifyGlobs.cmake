@@ -12,106 +12,6 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
 endif()
 
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/rnblurview-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/States.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/blur/android/build/generated/source/codegen/jni/react/renderer/components/rnblurview/rnblurviewJSI-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/RNDateTimePickerCGen-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/RNDateTimePickerCGenJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/react/renderer/components/RNDateTimePickerCGen/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/RNCGeolocationSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/RNCGeolocationSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni/react/renderer/components/RNCGeolocationSpec/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/RNGoogleSignInCGen-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/RNGoogleSignInCGenJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@react-native-google-signin/google-signin/android/build/generated/source/codegen/jni/react/renderer/components/RNGoogleSignInCGen/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
 # react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/*.cpp")
 set(OLD_GLOB
@@ -131,156 +31,6 @@ set(OLD_GLOB
   "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/react/renderer/components/rnstripe/ShadowNodes.cpp"
   "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/react/renderer/components/rnstripe/States.cpp"
   "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni/react/renderer/components/rnstripe/rnstripeJSI-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/RNBootSplashSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/RNBootSplashSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/react/renderer/components/RNBootSplashSpec/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/RNCConfigSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/RNCConfigSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-config/android/build/generated/source/codegen/jni/react/renderer/components/RNCConfigSpec/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/rngesturehandler_codegen-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/States.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/react/renderer/components/rngesturehandler_codegen/rngesturehandler_codegenJSI-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/RNImagePickerSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/RNImagePickerSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/react/renderer/components/RNImagePickerSpec/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/RNKeychainSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/RNKeychainSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/react/renderer/components/RNKeychainSpec/States.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/RNLocalizeSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/RNLocalizeSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-localize/android/build/generated/source/codegen/jni/react/renderer/components/RNLocalizeSpec/States.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -326,31 +76,6 @@ endif()
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-mmkv-storage/android/generated/jni/react/renderer/components/MMKVStorageSpec/*.cpp")
 set(OLD_GLOB
   "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-mmkv-storage/android/generated/jni/react/renderer/components/MMKVStorageSpec/MMKVStorageSpecJSI-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/RNPermissionsSpec-generated.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "/Users/ron/Development/fleetbase/client-apps/oli/android/app/.cxx/Debug/4236yz2y/arm64-v8a/CMakeFiles/cmake.verify_globs")
-endif()
-
-# react_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/*.cpp")
-set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/RNPermissionsSpecJSI-generated.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/react/renderer/components/RNPermissionsSpec/States.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -405,7 +130,6 @@ endif()
 # LIB_CODEGEN_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt:13 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/*.cpp")
 set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/safeareacontext-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -415,12 +139,6 @@ endif()
 # LIB_CODEGEN_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt:13 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/*.cpp")
 set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/States.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-safe-area-context/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/safeareacontext/safeareacontextJSI-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -471,12 +189,6 @@ endif()
 # LIB_CODEGEN_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:24 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/*.cpp")
 set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/States.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/rnscreensJSI-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -510,12 +222,6 @@ endif()
 # rnsvg_codegen_SRCS at /Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:11 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/*cpp")
 set(OLD_GLOB
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ComponentDescriptors.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/EventEmitters.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/Props.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ShadowNodes.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/States.cpp"
-  "/Users/ron/Development/fleetbase/client-apps/oli/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/rnsvgJSI-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
