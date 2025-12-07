@@ -77,10 +77,17 @@ const QPayCheckoutScreen = ({ route }) => {
         [setCompanyRegistrationNumber]
     );
 
-    // Sync local state when hook value changes
-    useEffect(() => {
-        setLocalRegistrationNumber(companyRegistrationNumber || '');
-    }, [companyRegistrationNumber]);
+    const handleTaxTypeChange = useCallback((isPersonal) => {
+        setIsPersonal(isPersonal);
+        if (isPersonal) {
+            handleRegistrationNumberChange('');
+        }
+    });
+
+    // // Sync local state when hook value changes
+    // useEffect(() => {
+    //     setLocalRegistrationNumber(companyRegistrationNumber || '');
+    // }, [companyRegistrationNumber]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -133,7 +140,7 @@ const QPayCheckoutScreen = ({ route }) => {
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 {t('QPayCheckoutScreen.vatRegistration')}
                             </Text>
-                            <QPayTaxRegistrationSwitch onChange={setIsPersonal} isPeronal={!isCompany} />
+                            <QPayTaxRegistrationSwitch onChange={handleTaxTypeChange} isPersonal={!isCompany} />
                             {isCompany && (
                                 <Input
                                     value={localRegistrationNumber}
