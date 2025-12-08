@@ -14,14 +14,14 @@ const MinimumCheckoutNotice = ({ minimumAmount, currentSubtotal }: MinimumChecko
     const [cart] = useCart();
 
     return (
-        <YStack bg='$warning' borderWidth={1} borderColor='$warningBorder' borderRadius='$4' p='$3' space='$2'>
-            <Text color='$warningText' fontSize='$4' fontWeight='600'>
+        <YStack bg='$warning' borderWidth={1} borderColor='$warningBorder' borderRadius='$4' px='$3' py='$2' space='$2'>
+            <Text color='$warningText' fontSize='$5' fontWeight='bold'>
                 {t('checkout.minimumOrderNotReached')}
             </Text>
-            <Text color='$warningText' fontSize='$3'>
-                {t('checkout.minimumOrderMessage', { 
+            <Text color='$warningText' fontSize='$4'>
+                {t('checkout.minimumOrderMessage', {
                     minimum: formatCurrency(minimumAmount, cart.getAttribute('currency')),
-                    current: formatCurrency(currentSubtotal, cart.getAttribute('currency'))
+                    current: formatCurrency(currentSubtotal, cart.getAttribute('currency')),
                 })}
             </Text>
         </YStack>
