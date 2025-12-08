@@ -28,6 +28,10 @@
         "tip": "Tip",
         "serviceFee": "Service Fee"
     },
+    "checkout": {
+        "minimumOrderNotReached": "Minimum order amount not reached",
+        "minimumOrderMessage": "Your cart total is {{current}}. A minimum of {{minimum}} is required to checkout."
+    },
     "orderStatuses": {
         "created": "Created",
         "accepted": "Accepted",

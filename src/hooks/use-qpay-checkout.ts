@@ -20,7 +20,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 export default function useQPayCheckout({ onOrderComplete }) {
     const { storefront, adapter } = useStorefront();
-    const { info } = useStorefrontInfo();
+    const { info, enabled } = useStorefrontInfo();
     const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
@@ -60,9 +60,15 @@ export default function useQPayCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === 'Total');
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && !isLoading;
-    const isNotReady = !isReady;
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
+    
+    // Minimum checkout validation
+    const isMinimumCheckoutEnabled = enabled('required_checkout_min');
+    const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
+    const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
+    
+    const isReady = serviceQuote && !isLoading && !isBelowMinimum;
+    const isNotReady = !isReady;
 
     // Calculate line items
     function computeLineItems() {
@@ -363,8 +369,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setPickup,
             isPickup: !!checkoutOptions.pickup,
             error,
-            isReady: serviceQuote && !isLoading,
-            isNotReady: !(serviceQuote && !isLoading),
+            isReady: serviceQuote && !isLoading && !isBelowMinimum,
+            isNotReady: !(serviceQuote && !isLoading && !isBelowMinimum),
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             orderNotes,
             setOrderNotes,
             storeLocationId,
@@ -373,6 +383,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             isPersonal,
             setIsPersonal,
             isCompany: !isPersonal,
@@ -399,6 +413,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             isPersonal,
             setIsPersonal,
             companyRegistrationNumber,

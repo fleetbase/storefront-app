@@ -22,7 +22,7 @@ const STRIPE_KEY = config('STRIPE_KEY');
 
 export default function useStripeCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
-    const { info } = useStorefrontInfo();
+    const { info, enabled } = useStorefrontInfo();
     const { t } = useLanguage();
     const [cart, updateCart] = useCart();
     const { customer, updateCustomerMeta } = useAuth();
@@ -55,8 +55,14 @@ export default function useStripeCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === t('lineItems.total'));
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading;
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
+    
+    // Minimum checkout validation
+    const isMinimumCheckoutEnabled = enabled('required_checkout_min');
+    const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
+    const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
+    
+    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading && !isBelowMinimum;
 
     function computeLineItems() {
         const baseItems = [
@@ -459,6 +465,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
             originLocationId: foodTruckId ?? storeLocationId,
             isNotReady: !isReady,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
         }),
         [
             cart,
@@ -496,6 +506,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
             foodTruckId,
             storeLocationId,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
         ]
     );
 
