@@ -20,7 +20,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 export default function useQPayCheckout({ onOrderComplete }) {
     const { storefront, adapter } = useStorefront();
-    const { info, enabled } = useStorefrontInfo();
+    const { info } = useStorefrontInfo();
     const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
@@ -63,7 +63,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
     
     // Minimum checkout validation
-    const isMinimumCheckoutEnabled = enabled('required_checkout_min');
+    const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
     

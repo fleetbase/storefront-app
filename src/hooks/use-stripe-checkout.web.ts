@@ -22,7 +22,7 @@ const STRIPE_KEY = config('STRIPE_KEY');
 
 export default function useStripeCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
-    const { info, enabled } = useStorefrontInfo();
+    const { info } = useStorefrontInfo();
     const { t } = useLanguage();
     const [cart, updateCart] = useCart();
     const { customer, updateCustomerMeta } = useAuth();
@@ -58,7 +58,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
     
     // Minimum checkout validation
-    const isMinimumCheckoutEnabled = enabled('required_checkout_min');
+    const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
     
