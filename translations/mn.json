@@ -21,11 +21,15 @@
     "lineItems": {
         "cartSubtotal": "Сагсан дахь үнэ",
         "subtotal": "Сагсны үнэ",
-        "total": "Сагсны үнэ",
+        "total": "Нийт дүн",
         "deliveryFee": "Хүргэлтийн төлбөр",
         "deliveryTip": "Хүргэлтийн урамшуулал",
         "tip": "Гарын мөнгө",
         "serviceFee": "Үйлчилгээний төлбөр"
+    },
+    "checkout": {
+        "minimumOrderNotReached": "Захиалгын доод дүн хүрээгүй байна",
+        "minimumOrderMessage": "Таны сагсны дүн {{current}} байна. Захиалга өгөхийн тулд хамгийн багадаа {{minimum}} байх шаардлагатай."
     },
     "orderStatuses": {
         "created": "Үүсгэсэн",

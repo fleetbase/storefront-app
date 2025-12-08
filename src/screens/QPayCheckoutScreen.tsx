@@ -16,6 +16,7 @@ import TextAreaSheet from '../components/TextAreaSheet';
 import LoadingOverlay from '../components/LoadingOverlay';
 import QPayTaxRegistrationSwitch from '../components/QPayTaxRegistrationSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
+import MinimumCheckoutNotice from '../components/MinimumCheckoutNotice';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
@@ -54,6 +55,10 @@ const QPayCheckoutScreen = ({ route }) => {
         setIsPersonal,
         companyRegistrationNumber,
         setCompanyRegistrationNumber,
+        isBelowMinimum,
+        minimumCheckoutAmount,
+        isMinimumCheckoutEnabled,
+        subtotal,
     } = useQpayCheckout({
         onOrderComplete: (order) => {
             paymentSheetRef.current?.forceClose();
@@ -164,6 +169,12 @@ const QPayCheckoutScreen = ({ route }) => {
                                 {t('lineItems.total')}
                             </Text>
                             <CheckoutTotal lineItems={lineItems} />
+                            {isBelowMinimum && (
+                                <MinimumCheckoutNotice 
+                                    minimumAmount={minimumCheckoutAmount} 
+                                    currentSubtotal={subtotal} 
+                                />
+                            )}
                         </YStack>
                         <YStack width='100%' height={200} />
                     </YStack>

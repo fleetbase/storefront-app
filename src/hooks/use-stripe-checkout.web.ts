@@ -55,8 +55,14 @@ export default function useStripeCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === t('lineItems.total'));
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading;
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
+    
+    // Minimum checkout validation
+    const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
+    const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
+    const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
+    
+    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading && !isBelowMinimum;
 
     function computeLineItems() {
         const baseItems = [
@@ -459,6 +465,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
             originLocationId: foodTruckId ?? storeLocationId,
             isNotReady: !isReady,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
         }),
         [
             cart,
@@ -496,6 +506,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
             foodTruckId,
             storeLocationId,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
         ]
     );
 
