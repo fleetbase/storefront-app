@@ -61,7 +61,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
                         </YStack>
                         <YStack flex={1} px='$3'>
                             <Text size={15} color='$textPrimary' fontWeight='bold' mb={2}>
-                                {currentLocation.getAttribute('name') ?? 'Your Location'}
+                                {currentLocation?.getAttribute('name') ?? 'Your Location'}
                             </Text>
                             <Text color='$textSecondary'>{formattedAddressFromPlace(currentLocation)}</Text>
                         </YStack>
