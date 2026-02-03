@@ -102,7 +102,7 @@ const QPayCheckoutScreen = ({ route }) => {
 
     return (
         <YStack bg='$background'>
-            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.completingOrder') : t('QPayCheckoutScreen.checkingPayment')} />
+            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
