@@ -278,6 +278,8 @@
     "QPayCheckoutScreen": {
         "completingOrder": "Захиалгыг дуусгаж байна...",
         "checkingPayment": "Төлбөрийг шалгаж байна...",
+        "finalizingOrder": "Захиалгыг боловсруулж байна...",
+        "checkingOrderStatus": "Захиалгын төлөв шалгаж байна...",
         "yourDeliveryLocation": "Хүргэлт хийх байршил",
         "yourCart": "Таны сагс",
         "orderNotes": "Нэмэлт мэдээлэл (Орцны код,Хаягын заавар гэх мэт)",

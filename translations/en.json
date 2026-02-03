@@ -280,6 +280,8 @@
     "QPayCheckoutScreen": {
         "completingOrder": "Completing order...",
         "checkingPayment": "Checking payment...",
+        "finalizingOrder": "Finalizing order...",
+        "checkingOrderStatus": "Checking order status...",
         "yourDeliveryLocation": "Your delivery location",
         "yourCart": "Your cart",
         "orderNotes": "Order notes",
