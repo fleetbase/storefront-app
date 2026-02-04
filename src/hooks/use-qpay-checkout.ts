@@ -9,6 +9,7 @@ import { getCoordinates } from '../utils/location';
 import { get, storefrontConfig, debounce, isBlank } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { Order } from '@fleetbase/sdk';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -245,7 +246,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
             }
             
             if (order) {
-                handleOrderCompletion(order);
+                // Convert order response to SDK Order instance
+                const orderInstance = order instanceof Order ? order : new Order(order);
+                handleOrderCompletion(orderInstance);
             }
         } catch (err) {
             console.error('Error checking order status:', err);
