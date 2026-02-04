@@ -26,13 +26,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
+
+      - name: Verify Yarn version
+        run: yarn --version
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -80,13 +82,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
+
+      - name: Verify Yarn version
+        run: yarn --version
 
       - name: Cache yarn dependencies
         uses: actions/cache@v4
@@ -325,13 +329,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
+
+      - name: Verify Yarn version
+        run: yarn --version
 
       - name: Install dependencies
         run: yarn install --immutable
