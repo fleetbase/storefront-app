@@ -8,6 +8,7 @@ import { isValidPhoneNumber } from '../utils';
 import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSafeTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import PhoneInput from '../components/PhoneInput';
 
 const AddPhoneScreen = () => {
@@ -15,6 +16,7 @@ const AddPhoneScreen = () => {
     const theme = useTheme();
     const { requestPhoneVerification, isSendingCode, phone: phoneState } = useAuth();
     const { t } = useLanguage();
+    const tabBarHeight = useSafeTabBarHeight();
     const [phone, setPhone] = useState(phoneState || '');
 
     const handleSendVerificationCode = async () => {
@@ -59,7 +61,7 @@ const AddPhoneScreen = () => {
                 <YStack flex={1} position='relative' width='100%'>
                     <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
                 </YStack>
-                <YStack space='$4' width='100%' px='$4' pb={0}>
+                <YStack space='$4' width='100%' px='$4' pb={tabBarHeight}>
                     <Button size='$5' onPress={handleGoBack} bg='$secondary' width='100%' rounded='true'>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faArrowLeft} color={theme.textPrimary.val} />

@@ -8,12 +8,14 @@ import { OtpInput } from 'react-native-otp-entry';
 import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSafeTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 
 const VerifyPhoneScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
     const { phone, verifyPhoneNumber, isVerifyingCode } = useAuth();
     const { t } = useLanguage();
+    const tabBarHeight = useSafeTabBarHeight();
     const [code, setCode] = useState(null);
 
     const handleVerifyCode = async (code) => {
@@ -38,7 +40,7 @@ const VerifyPhoneScreen = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-            <YStack flex={1} bg='$background' space='$3' padding='$5'>
+            <YStack flex={1} bg='$background' space='$3' pt='$5' px='$5' pb={tabBarHeight}>
                 <YStack mb='$4'>
                     <Text fontSize={20} fontWeight='bold' color='$textPrimary'>
                         {t('VerifyPhoneScreen.title', { phone })}
