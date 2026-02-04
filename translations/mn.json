@@ -276,7 +276,8 @@
         "greeting": "Сайн уу, {{customerName}}!",
         "addPhoneTitle": "Утасны дугаар нэмэх",
         "addPhoneMessage": "Захиалгын мэдээлэл болон мэдэгдэл авахын тулд утасны дугаараа нэмнэ үү.",
-        "addPhoneButton": "Утасны дугаар нэмэх"
+        "addPhoneButton": "Утасны дугаар нэмэх",
+        "addPhoneLater": "Дараа"
     },
     "AddPhoneScreen": {
         "title": "Утасны дугаар нэмэх",

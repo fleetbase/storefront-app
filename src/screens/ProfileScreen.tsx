@@ -25,12 +25,13 @@ const ProfileScreen = () => {
                     showActionSheet({
                         title: t('ProfileScreen.addPhoneTitle'),
                         message: t('ProfileScreen.addPhoneMessage'),
-                        options: [t('ProfileScreen.addPhoneButton'), t('common.cancel')],
+                        options: [t('ProfileScreen.addPhoneButton'), t('ProfileScreen.addPhoneLater')],
                         cancelButtonIndex: 1,
                         onSelect: (buttonIndex) => {
                             if (buttonIndex === 0) {
                                 navigation.navigate('AddPhone');
                             }
+                            // buttonIndex 1 is "Later" - just dismiss
                         },
                     });
                 }

@@ -278,7 +278,8 @@
         "greeting": "Hi {{customerName}}!",
         "addPhoneTitle": "Add Phone Number",
         "addPhoneMessage": "Please add your phone number to your account for order updates and notifications.",
-        "addPhoneButton": "Add Phone Number"
+        "addPhoneButton": "Add Phone Number",
+        "addPhoneLater": "Later"
     },
     "AddPhoneScreen": {
         "title": "Add Phone Number",
