@@ -27,6 +27,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { listen } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
+    const isCheckingStatus = useRef(false);
     const [checkoutOptions, setCheckoutOptions] = useState({
         leavingTip: false,
         tip: 0,
@@ -236,6 +237,15 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Check order status using new endpoint
     const checkOrderStatus = useCallback(async () => {
         if (!checkoutId || !checkoutToken || !adapter) return;
+        
+        // Prevent simultaneous requests (throttling)
+        if (isCheckingStatus.current) {
+            console.log('[checkOrderStatus] Request already in progress, skipping');
+            return;
+        }
+        
+        isCheckingStatus.current = true;
+        
         try {
             const response = await adapter.get('checkouts/status', {
                 checkout: checkoutId,
@@ -254,6 +264,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
             }
         } catch (err) {
             console.error('Error checking order status:', err);
+        } finally {
+            isCheckingStatus.current = false;
         }
     }, [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion]);
 
