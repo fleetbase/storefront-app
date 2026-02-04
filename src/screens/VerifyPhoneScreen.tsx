@@ -10,8 +10,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSafeTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 
-const VerifyPhoneScreen = () => {
+const VerifyPhoneScreen = ({ route }) => {
     const navigation = useNavigation();
+    const returnTo = route?.params?.returnTo || 'Profile';
     const theme = useTheme();
     const { phone, verifyPhoneNumber, isVerifyingCode } = useAuth();
     const { t } = useLanguage();
@@ -26,8 +27,8 @@ const VerifyPhoneScreen = () => {
         try {
             await verifyPhoneNumber(code);
             toast.success(t('VerifyPhoneScreen.success'));
-            // Navigate back to profile screen
-            navigation.navigate('Profile');
+            // Navigate to the screen specified by returnTo parameter
+            navigation.navigate(returnTo);
         } catch (error) {
             toast.error(error?.message ?? t('VerifyPhoneScreen.error'));
         }

@@ -29,7 +29,7 @@ const ProfileScreen = () => {
                         cancelButtonIndex: 1,
                         onSelect: (buttonIndex) => {
                             if (buttonIndex === 0) {
-                                navigation.navigate('AddPhone');
+                                navigation.navigate('AddPhone', { returnTo: 'Profile' });
                             }
                             // buttonIndex 1 is "Later" - just dismiss
                         },

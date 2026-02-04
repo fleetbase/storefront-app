@@ -228,7 +228,7 @@ const AccountScreen = () => {
                     {customer.getAttribute('phone')}
                 </Text>
             ),
-            onPress: () => navigation.navigate('EditAccountProperty', { property: { name: t('AccountScreen.phoneNumber'), key: 'phone', component: 'phone-input' } }),
+            onPress: () => navigation.navigate('AddPhone', { returnTo: 'Account' }),
         },
         {
             title: t('AccountScreen.name'),

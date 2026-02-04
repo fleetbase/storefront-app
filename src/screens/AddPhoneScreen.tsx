@@ -11,8 +11,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSafeTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import PhoneInput from '../components/PhoneInput';
 
-const AddPhoneScreen = () => {
+const AddPhoneScreen = ({ route }) => {
     const navigation = useNavigation();
+    const returnTo = route?.params?.returnTo || 'Profile';
     const theme = useTheme();
     const { requestPhoneVerification, isSendingCode, phone: phoneState } = useAuth();
     const { t } = useLanguage();
@@ -30,7 +31,7 @@ const AddPhoneScreen = () => {
 
         try {
             await requestPhoneVerification(phone);
-            navigation.navigate('VerifyPhone');
+            navigation.navigate('VerifyPhone', { returnTo });
         } catch (error) {
             toast.error(error.message);
         }
