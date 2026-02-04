@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Pressable, Keyboard, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView, Pressable, Keyboard, StyleSheet, Platform } from 'react-native';
 import { Spinner, Button, Text, YStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -9,7 +9,6 @@ import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import PhoneInput from '../components/PhoneInput';
-import ScreenWrapper from '../components/ScreenWrapper';
 
 const AddPhoneScreen = () => {
     const navigation = useNavigation();
@@ -40,7 +39,7 @@ const AddPhoneScreen = () => {
     };
 
     return (
-        <ScreenWrapper>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
             <YStack flex={1} alignItems='center' bg='$background' space='$3'>
                 <YStack space='$2' width='100%' px='$5' pt='$5'>
                     <Text color='$textPrimary' fontWeight='bold' fontSize='$8' mb='$3'>
@@ -71,7 +70,7 @@ const AddPhoneScreen = () => {
                     </Button>
                 </YStack>
             </YStack>
-        </ScreenWrapper>
+        </SafeAreaView>
     );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Pressable, Keyboard, StyleSheet } from 'react-native';
+import { SafeAreaView, Pressable, Keyboard, StyleSheet } from 'react-native';
 import { Spinner, Button, Text, YStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faArrowRotateRight } from '@fortawesome/free-solid-svg-icons';
@@ -8,7 +8,6 @@ import { OtpInput } from 'react-native-otp-entry';
 import { toast } from '../utils/toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import ScreenWrapper from '../components/ScreenWrapper';
 
 const VerifyPhoneScreen = () => {
     const navigation = useNavigation();
@@ -38,7 +37,7 @@ const VerifyPhoneScreen = () => {
     };
 
     return (
-        <ScreenWrapper>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
             <YStack flex={1} bg='$background' space='$3' padding='$5'>
                 <YStack mb='$4'>
                     <Text fontSize={20} fontWeight='bold' color='$textPrimary'>
@@ -73,7 +72,7 @@ const VerifyPhoneScreen = () => {
             <YStack flex={1} position='relative' width='100%'>
                 <Pressable style={StyleSheet.absoluteFill} onPress={Keyboard.dismiss} pointerEvents='box-only' />
             </YStack>
-        </ScreenWrapper>
+        </SafeAreaView>
     );
 };
 
