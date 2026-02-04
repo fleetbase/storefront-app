@@ -25,6 +25,8 @@ import CreateAccountVerifyScreen from '../screens/CreateAccountVerifyScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
 import DeleteAccountVerifyScreen from '../screens/DeleteAccountVerifyScreen';
 import AccountScreen from '../screens/AccountScreen';
+import AddPhoneScreen from '../screens/AddPhoneScreen';
+import VerifyPhoneScreen from '../screens/VerifyPhoneScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
 import OrderScreen from '../screens/OrderScreen';
@@ -323,6 +325,18 @@ export const StoreProfileTab = createNativeStackNavigator({
                     screen: StripeCustomerScreen,
                     options: {
                         presentation: 'transparentModal',
+                        headerShown: false,
+                    },
+                },
+                AddPhone: {
+                    screen: AddPhoneScreen,
+                    options: {
+                        headerShown: false,
+                    },
+                },
+                VerifyPhone: {
+                    screen: VerifyPhoneScreen,
+                    options: {
                         headerShown: false,
                     },
                 },
