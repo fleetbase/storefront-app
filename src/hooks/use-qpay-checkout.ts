@@ -193,6 +193,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
         async (order) => {
             if (hasOrderCompleted.current === true || !order) return;
 
+            // Convert order response to SDK Order instance
+            // This ensures onOrderComplete callback always receives proper SDK instance
+            const orderInstance = order instanceof Order ? order : new Order(order);
+
             // Set the flag immediately to prevent duplicate processing
             hasOrderCompleted.current = true;
             setIsCapturingOrder(true);
@@ -203,12 +207,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
                 // Push order into local history cache immediately
                 if (customer?.id) {
-                    addOrderToHistoryCache(customer.id, order);
+                    addOrderToHistoryCache(customer.id, orderInstance);
                 }
 
                 // Ensure callback fires only once using a ref
                 if (typeof onOrderComplete === 'function') {
-                    onOrderComplete(order);
+                    onOrderComplete(orderInstance);
                 }
             } catch (error) {
                 console.error('Error processing order completion:', error);
@@ -246,9 +250,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             }
             
             if (order) {
-                // Convert order response to SDK Order instance
-                const orderInstance = order instanceof Order ? order : new Order(order);
-                handleOrderCompletion(orderInstance);
+                handleOrderCompletion(order);
             }
         } catch (err) {
             console.error('Error checking order status:', err);
