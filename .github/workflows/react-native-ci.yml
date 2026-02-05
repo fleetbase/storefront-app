@@ -8,6 +8,7 @@ on:
     tags: ["v*"]
 
 env:
+  YARN_ENABLE_INLINE_BUILDS: 1
   FLEETBASE_KEY: ${{ secrets.FLEETBASE_KEY }}
   STOREFRONT_KEY: ${{ secrets.STOREFRONT_KEY }}
   GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
