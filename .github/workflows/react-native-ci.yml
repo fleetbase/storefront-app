@@ -8,6 +8,7 @@ on:
     tags: ["v*"]
 
 env:
+  YARN_ENABLE_INLINE_BUILDS: 1
   FLEETBASE_KEY: ${{ secrets.FLEETBASE_KEY }}
   STOREFRONT_KEY: ${{ secrets.STOREFRONT_KEY }}
   GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
@@ -26,13 +27,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
+
+      - name: Verify Yarn version
+        run: yarn --version
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -48,7 +51,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install
 
       - name: Create .env file
         run: |
@@ -80,13 +83,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
+
+      - name: Verify Yarn version
+        run: yarn --version
 
       - name: Cache yarn dependencies
         uses: actions/cache@v4
@@ -99,7 +104,7 @@ jobs:
             ${{ runner.os }}-deps-
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install
 
       - name: Create .env file
         run: |
@@ -242,7 +247,7 @@ jobs:
             ${{ runner.os }}-deps-
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install
 
       - name: Create .env file
         run: |
@@ -325,7 +330,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
@@ -333,8 +337,11 @@ jobs:
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
 
+      - name: Verify Yarn version
+        run: yarn --version
+
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install
 
       - name: Create .env file
         run: |
@@ -403,7 +410,7 @@ jobs:
         run: corepack prepare yarn@3.6.4 --activate
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install
 
       - name: Create .env file
         run: |

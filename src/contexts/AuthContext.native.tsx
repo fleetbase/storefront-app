@@ -299,6 +299,40 @@ export const AuthProvider = ({ children }) => {
         return instance;
     };
 
+    // Request phone verification for authenticated user
+    const requestPhoneVerification = useCallback(
+        async (phone) => {
+            dispatch({ type: 'LOGIN', phone, isSendingCode: true });
+            try {
+                await adapter.post('customers/request-phone-verification', { phone });
+                dispatch({ type: 'LOGIN', phone, isSendingCode: false });
+            } catch (error) {
+                console.error('[AuthContext] Phone verification request failed:', error);
+                dispatch({ type: 'LOGIN', phone, isSendingCode: false });
+                throw error;
+            }
+        },
+        [adapter]
+    );
+
+    // Verify phone number for authenticated user
+    const verifyPhoneNumber = useCallback(
+        async (code) => {
+            dispatch({ type: 'VERIFY', isVerifyingCode: true });
+            try {
+                const response = await adapter.post('customers/verify-phone-number', { code });
+                const customer = new Customer(response.customer || response, adapter);
+                setCustomer(customer);
+                dispatch({ type: 'VERIFY', customer, isVerifyingCode: false });
+            } catch (error) {
+                console.error('[AuthContext] Phone verification failed:', error);
+                dispatch({ type: 'VERIFY', isVerifyingCode: false });
+                throw error;
+            }
+        },
+        [adapter, setCustomer]
+    );
+
     // Logout: Clear session
     const logout = useCallback(() => {
         setCustomer(null);
@@ -335,6 +369,8 @@ export const AuthProvider = ({ children }) => {
             logout,
             requestCreationCode,
             verifyAccountCreation,
+            requestPhoneVerification,
+            verifyPhoneNumber,
             getDefaultAddress,
             createCustomerSession,
             syncDevice,
@@ -342,7 +378,7 @@ export const AuthProvider = ({ children }) => {
             deleteAccount,
             verifyAccountDeletion,
         }),
-        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer, deleteAccount, verifyAccountDeletion]
+        [state, verifyCode, logout, login, verifyAccountCreation, requestCreationCode, requestPhoneVerification, verifyPhoneNumber, setCustomer, deleteAccount, verifyAccountDeletion]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
