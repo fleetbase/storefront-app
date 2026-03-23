@@ -21,11 +21,15 @@
     "lineItems": {
         "cartSubtotal": "Сагсан дахь үнэ",
         "subtotal": "Сагсны үнэ",
-        "total": "Сагсны үнэ",
+        "total": "Нийт дүн",
         "deliveryFee": "Хүргэлтийн төлбөр",
         "deliveryTip": "Хүргэлтийн урамшуулал",
         "tip": "Гарын мөнгө",
         "serviceFee": "Үйлчилгээний төлбөр"
+    },
+    "checkout": {
+        "minimumOrderNotReached": "Захиалгын доод дүн хүрээгүй байна",
+        "minimumOrderMessage": "Таны сагсны дүн {{current}} байна. Захиалга өгөхийн тулд хамгийн багадаа {{minimum}} байх шаардлагатай."
     },
     "orderStatuses": {
         "created": "Үүсгэсэн",
@@ -269,11 +273,30 @@
         "account": "Бүртгэл",
         "paymentMethods": "Төлбөрийн хэрэгсэл",
         "addressBook": "Хаягийн бүртгэл",
-        "greeting": "Сайн уу, {{customerName}}!"
+        "greeting": "Сайн уу, {{customerName}}!",
+        "addPhoneTitle": "Утасны дугаар нэмэх",
+        "addPhoneMessage": "Захиалгын мэдээлэл болон мэдэгдэл авахын тулд утасны дугаараа нэмнэ үү.",
+        "addPhoneButton": "Утасны дугаар нэмэх",
+        "addPhoneLater": "Дараа"
+    },
+    "AddPhoneScreen": {
+        "title": "Утасны дугаар нэмэх",
+        "description": "Захиалгын шинэчлэлтийг SMS-ээр авахын тулд утасны дугаараа оруулна уу.",
+        "invalidPhone": "Зөв утасны дугаар оруулна уу.",
+        "sendCode": "Баталгаажуулах код илгээх"
+    },
+    "VerifyPhoneScreen": {
+        "title": "{{phone}} баталгаажуулах",
+        "description": "Утсанд ирсэн 6 оронтой кодыг оруулна уу.",
+        "verify": "Баталгаажуулах",
+        "success": "Утасны дугаар амжилттай баталгаажлаа!",
+        "error": "Баталгаажуулалт амжилтгүй боллоо. Дахин оролдоно уу."
     },
     "QPayCheckoutScreen": {
         "completingOrder": "Захиалгыг дуусгаж байна...",
         "checkingPayment": "Төлбөрийг шалгаж байна...",
+        "finalizingOrder": "Захиалгыг боловсруулж байна...",
+        "checkingOrderStatus": "Захиалгын төлөв шалгаж байна...",
         "yourDeliveryLocation": "Хүргэлт хийх байршил",
         "yourCart": "Таны сагс",
         "orderNotes": "Нэмэлт мэдээлэл (Орцны код,Хаягын заавар гэх мэт)",

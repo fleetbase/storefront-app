@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView, FlatList, Pressable, Platform } from 'react-native';
 import { Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { abbreviateName, storefrontConfig } from '../utils';
+import { abbreviateName, storefrontConfig, showActionSheet } from '../utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import storage from '../utils/storage';
@@ -16,6 +16,33 @@ const ProfileScreen = () => {
     const navigation = useNavigation();
     const { customer, logout } = useAuth();
     const { t, locale } = useLanguage();
+
+    // Check for phone number and prompt user to add it
+    useFocusEffect(
+        useCallback(() => {
+            const checkPhoneNumber = () => {
+                if (customer && !customer.getAttribute('phone')) {
+                    showActionSheet({
+                        title: t('ProfileScreen.addPhoneTitle'),
+                        message: t('ProfileScreen.addPhoneMessage'),
+                        options: [t('ProfileScreen.addPhoneButton'), t('ProfileScreen.addPhoneLater')],
+                        cancelButtonIndex: 1,
+                        onSelect: (buttonIndex) => {
+                            if (buttonIndex === 0) {
+                                navigation.navigate('AddPhone', { returnTo: 'Profile' });
+                            }
+                            // buttonIndex 1 is "Later" - just dismiss
+                        },
+                    });
+                }
+            };
+
+            // Add a small delay to ensure the screen is fully rendered
+            const timer = setTimeout(checkPhoneNumber, 1000);
+
+            return () => clearTimeout(timer);
+        }, [customer, navigation, t])
+    );
 
     const handleManagePaymentMethods = useCallback(() => {
         if (storefrontConfig('paymentGateway') === 'stripe') {

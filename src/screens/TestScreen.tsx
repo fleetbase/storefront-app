@@ -50,12 +50,12 @@ const TestScreen = ({ route }) => {
 
     const testFleetbaseRequest = useCallback(async () => {
         setLoading(true);
-        setOutcome('https://fleetbase.loclx.io', null, null);
+        setOutcome('https://fleetbase.ap.loclx.io', null, null);
         try {
-            const response = await axios.get('https://fleetbase.loclx.io');
-            setOutcome('https://fleetbase.loclx.io', response?.data);
+            const response = await axios.get('https://fleetbase.ap.loclx.io');
+            setOutcome('https://fleetbase.ap.loclx.io', response?.data);
         } catch (e) {
-            setOutcome('https://fleetbase.loclx.io', null, e);
+            setOutcome('https://fleetbase.ap.loclx.io', null, e);
         } finally {
             setLoading(false);
         }

@@ -26,7 +26,7 @@ const PhoneLoginVerifyScreen = () => {
         try {
             await verifyCode(code);
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error?.message ?? 'Code verification failed.');
         }
     };
 

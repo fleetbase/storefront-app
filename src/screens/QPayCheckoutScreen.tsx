@@ -16,6 +16,7 @@ import TextAreaSheet from '../components/TextAreaSheet';
 import LoadingOverlay from '../components/LoadingOverlay';
 import QPayTaxRegistrationSwitch from '../components/QPayTaxRegistrationSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
+import MinimumCheckoutNotice from '../components/MinimumCheckoutNotice';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
@@ -54,6 +55,10 @@ const QPayCheckoutScreen = ({ route }) => {
         setIsPersonal,
         companyRegistrationNumber,
         setCompanyRegistrationNumber,
+        isBelowMinimum,
+        minimumCheckoutAmount,
+        isMinimumCheckoutEnabled,
+        subtotal,
     } = useQpayCheckout({
         onOrderComplete: (order) => {
             paymentSheetRef.current?.forceClose();
@@ -77,10 +82,17 @@ const QPayCheckoutScreen = ({ route }) => {
         [setCompanyRegistrationNumber]
     );
 
-    // Sync local state when hook value changes
-    useEffect(() => {
-        setLocalRegistrationNumber(companyRegistrationNumber || '');
-    }, [companyRegistrationNumber]);
+    const handleTaxTypeChange = useCallback((isPersonal) => {
+        setIsPersonal(isPersonal);
+        if (isPersonal) {
+            handleRegistrationNumberChange('');
+        }
+    });
+
+    // // Sync local state when hook value changes
+    // useEffect(() => {
+    //     setLocalRegistrationNumber(companyRegistrationNumber || '');
+    // }, [companyRegistrationNumber]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -90,7 +102,7 @@ const QPayCheckoutScreen = ({ route }) => {
 
     return (
         <YStack bg='$background'>
-            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.completingOrder') : t('QPayCheckoutScreen.checkingPayment')} />
+            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
@@ -133,7 +145,7 @@ const QPayCheckoutScreen = ({ route }) => {
                             <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
                                 {t('QPayCheckoutScreen.vatRegistration')}
                             </Text>
-                            <QPayTaxRegistrationSwitch onChange={setIsPersonal} isPeronal={!isCompany} />
+                            <QPayTaxRegistrationSwitch onChange={handleTaxTypeChange} isPersonal={!isCompany} />
                             {isCompany && (
                                 <Input
                                     value={localRegistrationNumber}
@@ -157,6 +169,12 @@ const QPayCheckoutScreen = ({ route }) => {
                                 {t('lineItems.total')}
                             </Text>
                             <CheckoutTotal lineItems={lineItems} />
+                            {isBelowMinimum && (
+                                <MinimumCheckoutNotice 
+                                    minimumAmount={minimumCheckoutAmount} 
+                                    currentSubtotal={subtotal} 
+                                />
+                            )}
                         </YStack>
                         <YStack width='100%' height={200} />
                     </YStack>

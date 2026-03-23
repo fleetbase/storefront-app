@@ -15,6 +15,7 @@ import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
 import CheckoutButton from '../components/CheckoutButton';
 import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
 import TextAreaSheet from '../components/TextAreaSheet';
+import MinimumCheckoutNotice from '../components/MinimumCheckoutNotice';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { useStripeCheckoutContext } from '../contexts/StripeCheckoutContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -42,6 +43,10 @@ const StripeCheckoutScreen = () => {
         totalAmount,
         isNotReady,
         isLoading,
+        isBelowMinimum,
+        minimumCheckoutAmount,
+        isMinimumCheckoutEnabled,
+        subtotal,
     } = useStripeCheckoutContext();
     const completeOrder = useCallback(() => {
         handleCompleteOrder((order) => {
@@ -115,6 +120,12 @@ const StripeCheckoutScreen = () => {
                                 {t('lineItems.total')}
                             </Text>
                             <CheckoutTotal lineItems={lineItems} />
+                            {isBelowMinimum && (
+                                <MinimumCheckoutNotice 
+                                    minimumAmount={minimumCheckoutAmount} 
+                                    currentSubtotal={subtotal} 
+                                />
+                            )}
                         </YStack>
                         <YStack width='100%' height={200} />
                     </YStack>

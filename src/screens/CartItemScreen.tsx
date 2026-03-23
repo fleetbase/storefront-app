@@ -15,6 +15,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import ScreenWrapper from '../components/ScreenWrapper';
 import QuantityButton from '../components/QuantityButton';
 import ProductOptionsForm from '../components/ProductOptionsForm';
+import ContainerDimensions from '../components/ContainerDimensions';
 import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
@@ -98,19 +99,33 @@ const CartItemScreen = ({ route = {} }) => {
     };
 
     return (
-        <ScreenWrapper useSafeArea={!isModal}>
+        <ScreenWrapper isModal={isModal && Platform.OS === 'ios'} useSafeArea={false}>
             <YStack position='relative' height={200} width='100%' overflow='hidden'>
-                <FastImage
-                    source={{ uri: cartItem.product_image_url }}
-                    style={{
-                        height: '100%',
-                        width: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                    }}
-                />
-                <XStack justifyContent='flex-end' alignItems='center' position='absolute' top={0} left={0} right={0} padding='$4' zIndex={1}>
+                <ContainerDimensions>
+                    {(width, height) => (
+                        <FastImage
+                            source={{ uri: cartItem.product_image_url }}
+                            style={{
+                                height,
+                                width,
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                            }}
+                        />
+                    )}
+                </ContainerDimensions>
+                <XStack
+                    justifyContent='flex-end'
+                    alignItems='center'
+                    position='absolute'
+                    top={Platform.select({ ios: 0, android: insets.top })}
+                    left={0}
+                    right={0}
+                    py='$2'
+                    px='$3'
+                    zIndex={1}
+                >
                     <Button size={35} onPress={handleClose} bg='$secondary' circular>
                         <Button.Icon>
                             <FontAwesomeIcon icon={faTimes} />
@@ -169,7 +184,7 @@ const CartItemScreen = ({ route = {} }) => {
                 position='absolute'
                 px='$4'
                 py='$3'
-                bottom={Platform.select({ ios: isModal ? insets.bottom : 0, android: isModal ? tabBarHeight : insets.bottom })}
+                bottom={Platform.select({ ios: isModal ? insets.bottom : 0, android: tabBarHeight })}
                 left={0}
                 right={0}
                 alignItems='center'
