@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet, Pressable, Platform, View, FlatList } from 'react-native';
+import { StyleSheet, Pressable, Platform, FlatList, Image } from 'react-native';
 import MapView, { Polygon, Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapLocationDot, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import FastImage from 'react-native-fast-image';
+import { faMapLocationDot, faTruck, faCircleInfo, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Vehicle } from '@fleetbase/sdk';
 import { getCoordinates, isPointInGeoJSONPolygon, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
 import { storefrontConfig, isArray, isNone, hexToRGBA, handleNavigateNewLocation } from '../utils';
@@ -17,7 +15,6 @@ import useStorage from '../hooks/use-storage';
 import useDimensions from '../hooks/use-dimensions';
 import useAppTheme from '../hooks/use-app-theme';
 import useCurrentLocation from '../hooks/use-current-location';
-import useSafeTabBarHeight from '../hooks/use-safe-tab-bar-height';
 import VehicleMarker from '../components/VehicleMarker';
 import CustomHeader from '../components/CustomHeader';
 import LocationPicker from '../components/LocationPicker';
@@ -68,6 +65,9 @@ function getPolygonBoundingBox(polygonCoordinates) {
 
 const isAndroid = Platform.OS === 'android';
 
+// Fallback image for vehicles without an avatar_url
+const FALLBACK_VEHICLE_IMAGE = require('../../assets/images/vehicles/light_commercial_van.png');
+
 const FoodTruckScreen = () => {
     const navigation = useNavigation();
     const theme = useTheme();
@@ -77,8 +77,6 @@ const FoodTruckScreen = () => {
     const { fleetbase, adapter: fleetbaseAdapter } = useFleetbase();
     const { storefront } = useStorefront();
     const { currentLocation } = useCurrentLocation();
-    const insets = useSafeAreaInsets();
-    const tabBarHeight = useSafeTabBarHeight();
     const currentLocationCoordinates = getCoordinates(currentLocation);
     const [mapRegion, setMapRegion] = useState({
         latitude: currentLocationCoordinates[0],
@@ -111,14 +109,6 @@ const FoodTruckScreen = () => {
     const [zones, setZones] = useStorage('zones', []);
     const [foodTrucks, setFoodTrucks] = useStorage('food_trucks', []);
     const [currentZone, setCurrentZone] = useStorage('current_zone');
-
-    // The bottom spacing for the horizontal scroll strip, accounting for the
-    // tab bar and safe area so the strip sits cleanly above the navigation bar
-    // on both iOS and Android.
-    const horizontalScrollBottom = Platform.select({
-        ios: (tabBarHeight > 0 ? tabBarHeight : insets.bottom) + 12,
-        android: (tabBarHeight > 0 ? tabBarHeight : insets.bottom) + 12,
-    });
 
     const startBearingPoll = useCallback(() => {
         if (isPollingBearing.current) return;
@@ -377,55 +367,58 @@ const FoodTruckScreen = () => {
     const infoColor = isDarkMode ? theme['$blue-400'].val : theme['$blue-600'].val;
 
     /**
-     * Renders a single food truck card in the horizontal scroll strip.
+     * Renders a single food truck chip in the horizontal scroll strip.
      *
-     * Each card displays the vehicle's avatar image (or a fallback van icon)
-     * above the truck's display name (preferring `foodTruck.name`, falling
-     * back to the vehicle plate number). The entire card is wrapped in a
-     * Pressable that triggers the existing handlePressFoodTruck handler,
-     * preserving the map-pan + Catalog navigation behaviour.
+     * Each chip shows the vehicle avatar image (no background fill — the image
+     * sits directly on the panel surface) above the truck's display name. The
+     * entire chip is wrapped in a Pressable that triggers handlePressFoodTruck,
+     * preserving the existing map-pan + Catalog navigation behaviour.
+     *
+     * Avatar resolution: the serialized vehicle object exposes `avatar_url` as a
+     * top-level property (mirroring how VehicleMarker accesses it via
+     * `vehicle.getAttribute('avatar_url')`). We use React Native's built-in
+     * Image component so there is no external dependency requirement, with the
+     * bundled van PNG as a fallback for trucks without a configured avatar.
      */
-    const renderFoodTruckCard = ({ item: foodTruck }) => {
-        const avatarUrl = foodTruck.vehicle?.avatar_url;
-        const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
-        const displayName = foodTruck.name || foodTruck.vehicle?.plate_number || t('FoodTruckScreen.truck');
+    const renderFoodTruckChip = ({ item: foodTruck, index }) => {
+        const vehicle = foodTruck.vehicle || {};
+        // avatar_url sits at the top level of the serialized vehicle object
+        const avatarUrl = vehicle.avatar_url || null;
+        const displayName = foodTruck.name || vehicle.plate_number || t('FoodTruckScreen.truck');
+        const isLast = index === availableFoodTrucks.length - 1;
 
         return (
-            <Pressable onPress={() => handlePressFoodTruck(foodTruck)} style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}>
-                <YStack
-                    alignItems='center'
-                    justifyContent='center'
-                    bg='$background'
-                    borderRadius='$5'
-                    px='$3'
-                    pt='$3'
-                    pb='$2'
-                    mr='$3'
-                    borderWidth={1}
-                    borderColor='$borderColorWithShadow'
-                    width={110}
-                    shadowColor='$shadowColor'
-                    shadowOffset={{ width: 0, height: 2 }}
-                    shadowOpacity={0.12}
-                    shadowRadius={4}
-                    elevation={3}
-                >
-                    <FastImage
-                        source={avatarSource}
-                        style={styles.truckCardImage}
-                        resizeMode={FastImage.resizeMode.contain}
+            <Pressable
+                key={foodTruck.id}
+                onPress={() => handlePressFoodTruck(foodTruck)}
+                style={({ pressed }) => [styles.truckChipPressable, { opacity: pressed ? 0.65 : 1 }, isLast && styles.truckChipLast]}
+            >
+                {/* Icon — no background, sits flush on the panel surface */}
+                {avatarUrl ? (
+                    <Image
+                        source={{ uri: avatarUrl }}
+                        style={styles.truckChipImage}
+                        resizeMode='contain'
                     />
-                    <Text
-                        color='$textPrimary'
-                        fontSize={12}
-                        fontWeight='600'
-                        numberOfLines={2}
-                        textAlign='center'
-                        mt='$1'
-                    >
-                        {displayName}
-                    </Text>
-                </YStack>
+                ) : (
+                    <Image
+                        source={FALLBACK_VEHICLE_IMAGE}
+                        style={styles.truckChipImage}
+                        resizeMode='contain'
+                    />
+                )}
+                {/* Name below the icon */}
+                <Text
+                    color='$textPrimary'
+                    fontSize={11}
+                    fontWeight='500'
+                    numberOfLines={2}
+                    textAlign='center'
+                    mt='$1'
+                    style={styles.truckChipLabel}
+                >
+                    {displayName}
+                </Text>
             </Pressable>
         );
     };
@@ -512,7 +505,7 @@ const FoodTruckScreen = () => {
                 </MapView>
             )}
 
-            {/* ── Top overlay: header + zone info banner ── */}
+            {/* ── Top overlay: header + info panel ── */}
             <YStack position='absolute' top={0} left={0} right={0} zIndex={10}>
                 <CustomHeader
                     headerRowProps={{ px: '$4' }}
@@ -531,6 +524,7 @@ const FoodTruckScreen = () => {
                 />
                 <YStack px='$4'>
                     <YStack bg='$background' borderRadius='$5'>
+                        {/* Info banner row */}
                         <XStack alignItems='center' py='$4' px='$4' borderBottomWidth={1} borderColor='$borderColor'>
                             <YStack width={32}>
                                 <FontAwesomeIcon icon={faCircleInfo} color={infoColor} size={20} />
@@ -541,8 +535,10 @@ const FoodTruckScreen = () => {
                                 </Text>
                             </XStack>
                         </XStack>
+
+                        {/* Zone row */}
                         <Pressable onPress={handlePressCurrentZone}>
-                            <XStack py='$4' px='$4'>
+                            <XStack py='$4' px='$4' borderBottomWidth={isArray(availableFoodTrucks) && availableFoodTrucks.length > 0 ? 1 : 0} borderColor='$borderColor'>
                                 <YStack width={32}>
                                     <FontAwesomeIcon icon={faMapLocationDot} color={currentZoneColor} size={20} />
                                 </YStack>
@@ -558,53 +554,49 @@ const FoodTruckScreen = () => {
                                 </YStack>
                             </XStack>
                         </Pressable>
+
+                        {/* Horizontal food truck scroll — lives inside the panel, below the zone row.
+                            Replaces the old vertical list. Each chip shows the vehicle avatar image
+                            (no background fill) above the truck name. Scrolls horizontally so the
+                            panel height stays fixed regardless of fleet size. */}
+                        {isArray(availableFoodTrucks) && availableFoodTrucks.length > 0 && (
+                            <FlatList
+                                data={availableFoodTrucks}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                keyExtractor={(item) => item.id}
+                                renderItem={renderFoodTruckChip}
+                                contentContainerStyle={styles.truckScrollContent}
+                                nestedScrollEnabled={true}
+                            />
+                        )}
                     </YStack>
                 </YStack>
             </YStack>
-
-            {/* ── Bottom overlay: horizontal food truck scroll strip ──
-                Positioned above the tab bar using safe area insets so it
-                never overlaps the navigation bar on any device. The outer
-                YStack uses pointerEvents="box-none" so that touches in the
-                empty space around the cards fall through to the MapView,
-                keeping map pan/zoom fully functional.
-            */}
-            {isArray(availableFoodTrucks) && availableFoodTrucks.length > 0 && (
-                <View
-                    style={[styles.horizontalScrollContainer, { bottom: horizontalScrollBottom }]}
-                    pointerEvents='box-none'
-                >
-                    <FlatList
-                        data={availableFoodTrucks}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        keyExtractor={(item) => item.id}
-                        renderItem={renderFoodTruckCard}
-                        contentContainerStyle={styles.horizontalScrollContent}
-                        // Prevent the FlatList's internal scroll gesture from
-                        // being swallowed by the parent MapView on Android.
-                        nestedScrollEnabled={true}
-                    />
-                </View>
-            )}
         </YStack>
     );
 };
 
 const styles = StyleSheet.create({
-    horizontalScrollContainer: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        zIndex: 10,
+    truckScrollContent: {
+        paddingHorizontal: 12,
+        paddingVertical: 12,
     },
-    horizontalScrollContent: {
-        paddingHorizontal: 16,
-        paddingVertical: 4,
+    truckChipPressable: {
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        width: 72,
+        marginRight: 12,
     },
-    truckCardImage: {
-        width: 64,
-        height: 64,
+    truckChipLast: {
+        marginRight: 0,
+    },
+    truckChipImage: {
+        width: 44,
+        height: 44,
+    },
+    truckChipLabel: {
+        width: 72,
     },
 });
 
