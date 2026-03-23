@@ -392,7 +392,7 @@ const FoodTruckScreen = () => {
                     fontWeight='500'
                     numberOfLines={2}
                     textAlign='center'
-                    mt='$1'
+                    mt='$2'
                     style={styles.truckChipLabel}
                 >
                     {displayName}
