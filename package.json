@@ -1,6 +1,6 @@
 {
     "name": "@fleetbase/storefront-app",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "private": true,
     "scripts": {
         "android": "react-native run-android",
@@ -88,7 +88,7 @@
         "react-native-keychain": "^10.0.0",
         "react-native-linear-gradient": "^2.8.3",
         "react-native-localize": "^3.3.0",
-        "react-native-maps": "^1.26.18",
+        "react-native-maps": "^1.26.19",
         "react-native-maps-directions": "^1.9.0",
         "react-native-mmkv-storage": "^12.0.0",
         "react-native-notifications": "^5.1.0",
@@ -149,5 +149,6 @@
     },
     "engines": {
         "node": ">=20"
-    }
+    },
+    "packageManager": "yarn@3.6.4+sha512.e70835d4d6d62c07be76b3c1529cb640c7443f0fe434ef4b6478a5a399218cbaf1511b396b3c56eb03bc86424cff2320f6167ad2fde273aa0df6e60b7754029f"
 }

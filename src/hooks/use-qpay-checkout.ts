@@ -9,6 +9,7 @@ import { getCoordinates } from '../utils/location';
 import { get, storefrontConfig, debounce, isBlank } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { Order } from '@fleetbase/sdk';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -26,6 +27,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { listen } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
+    const isCheckingStatus = useRef(false);
     const [checkoutOptions, setCheckoutOptions] = useState({
         leavingTip: false,
         tip: 0,
@@ -60,9 +62,15 @@ export default function useQPayCheckout({ onOrderComplete }) {
         const totalItem = lineItems.find((item) => item.name === 'Total');
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
-    const isReady = serviceQuote && !isLoading;
-    const isNotReady = !isReady;
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
+    
+    // Minimum checkout validation
+    const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
+    const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
+    const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
+    
+    const isReady = serviceQuote && !isLoading && !isBelowMinimum;
+    const isNotReady = !isReady;
 
     // Calculate line items
     function computeLineItems() {
@@ -181,51 +189,41 @@ export default function useQPayCheckout({ onOrderComplete }) {
         }
     }, [storefront, customer, cart, serviceQuote, checkoutOptions]);
 
-    // Handle successful payment capture
-    const handlePayment = useCallback(
-        async (payment) => {
-            if (hasOrderCompleted.current === true || !checkoutToken || !storefront || !cart) return;
+    // Handle order completion (order already created by backend)
+    const handleOrderCompletion = useCallback(
+        async (order) => {
+            if (hasOrderCompleted.current === true || !order) return;
 
+            // Convert order response to SDK Order instance
+            // This ensures onOrderComplete callback always receives proper SDK instance
+            const orderInstance = order instanceof Order ? order : new Order(order);
+
+            // Set the flag immediately to prevent duplicate processing
+            hasOrderCompleted.current = true;
             setIsCapturingOrder(true);
-            setIsLoading(true);
-            const status = payment.payment_status;
 
-            if (status === 'PAID') {
-                try {
-                    // Set the flag immediately to prevent duplicate orders
-                    hasOrderCompleted.current = true;
+            try {
+                const emptiedCart = await cart.empty();
+                updateCart(emptiedCart);
 
-                    // Create the order
-                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
-                    const emptiedCart = await cart.empty();
-                    updateCart(emptiedCart);
-
-                    // Push order into local history cache immediately
-                    if (customer?.id) {
-                        addOrderToHistoryCache(customer.id, order);
-                        // optionally: markOrderHistoryDirty(customer.id);
-                    }
-
-                    // Ensure callback fires only once using a ref
-                    if (typeof onOrderComplete === 'function') {
-                        onOrderComplete(order);
-                    }
-                } catch (error) {
-                    console.error('Error capturing order:', error);
-                    toast.error(error.message);
-                    // Optionally, allow a retry by resetting the flag on error:
-                    // hasOrderCompleted.current = false;
-                } finally {
-                    setIsLoading(false);
+                // Push order into local history cache immediately
+                if (customer?.id) {
+                    addOrderToHistoryCache(customer.id, orderInstance);
                 }
-            } else {
-                console.error('Payment status unknown:', status);
-                setError(`Payment status unknown: ${status}`);
+
+                // Ensure callback fires only once using a ref
+                if (typeof onOrderComplete === 'function') {
+                    onOrderComplete(orderInstance);
+                }
+            } catch (error) {
+                console.error('Error processing order completion:', error);
+                toast.error(error.message);
+            } finally {
                 setIsLoading(false);
                 setIsCapturingOrder(false);
             }
         },
-        [storefront, cart, checkoutToken, orderNotes, onOrderComplete, updateCart]
+        [cart, customer, onOrderComplete, updateCart]
     );
 
     // Handle payment errors (avoid showing errors for not found payment)
@@ -236,31 +234,50 @@ export default function useQPayCheckout({ onOrderComplete }) {
         }
     }, []);
 
-    // Extracted payment check function
-    const checkPaymentStatus = useCallback(async () => {
+    // Check order status using new endpoint
+    const checkOrderStatus = useCallback(async () => {
         if (!checkoutId || !checkoutToken || !adapter) return;
+        
+        // Prevent simultaneous requests (throttling)
+        if (isCheckingStatus.current) {
+            console.log('[checkOrderStatus] Request already in progress, skipping');
+            return;
+        }
+        
+        isCheckingStatus.current = true;
+        
         try {
-            const { payment, error } = await adapter.get('checkouts/capture-qpay', {
+            const response = await adapter.get('checkouts/status', {
                 checkout: checkoutId,
-                respond: 1,
+                token: checkoutToken,
             });
-            console.log('[checkPayment #error]', error);
-            console.log('[checkPayment #payment]', payment);
+            console.log('[checkOrderStatus #response]', response);
+            
+            const { order, error } = response;
+            
             if (error) {
                 handlePaymentError(error);
             }
-            if (payment) {
-                handlePayment(payment);
+            
+            if (order) {
+                handleOrderCompletion(order);
             }
         } catch (err) {
-            console.error('Error checking payment:', err);
+            console.error('Error checking order status:', err);
+        } finally {
+            isCheckingStatus.current = false;
         }
-    }, [checkoutId, checkoutToken, adapter, handlePaymentError, handlePayment]);
+    }, [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion]);
 
     // Setup gateway on mount or when dependencies change
     useEffect(() => {
         setupGateway();
     }, [setupGateway, customer, cart, serviceQuote]);
+
+    // Check for existing order on mount (order recovery)
+    useEffect(() => {
+        checkOrderStatus();
+    }, []);
 
     // Fetch service quote when cart or delivery location changes
     useEffect(() => {
@@ -289,20 +306,20 @@ export default function useQPayCheckout({ onOrderComplete }) {
         };
     }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, storeLocationId]);
 
-    // Listen to payment updates via socket (if not already listening)
+    // Listen to order updates via socket (if not already listening)
     useEffect(() => {
         if (!checkoutId || !checkoutToken || listenerRef.current) return;
 
-        const listenForPaymentStatus = async () => {
+        const listenForOrderStatus = async () => {
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
-                const { payment, error } = event;
+                const { order, error } = event;
                 if (error) {
                     handlePaymentError(error);
                 }
-                if (payment) {
-                    handlePayment(payment);
+                if (order) {
+                    handleOrderCompletion(order);
                 }
             });
             if (listener) {
@@ -310,7 +327,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             }
         };
 
-        listenForPaymentStatus();
+        listenForOrderStatus();
 
         return () => {
             if (listenerRef.current) {
@@ -319,27 +336,27 @@ export default function useQPayCheckout({ onOrderComplete }) {
                 listenerRef.current = null;
             }
         };
-    }, [listen, checkoutId, checkoutToken, handlePayment, handlePaymentError]);
+    }, [listen, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError]);
 
-    // Run payment check when the screen gains focus
+    // Run order status check when the screen gains focus
     useFocusEffect(
         useCallback(() => {
-            checkPaymentStatus();
-        }, [checkPaymentStatus])
+            checkOrderStatus();
+        }, [checkOrderStatus])
     );
 
-    // Also run payment check when the app returns from the background.
+    // Also run order status check when the app returns from the background.
     useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextAppState) => {
             if (nextAppState === 'active') {
-                // When the app becomes active again, re-check payment status.
-                checkPaymentStatus();
+                // When the app becomes active again, re-check order status.
+                checkOrderStatus();
             }
         });
         return () => {
             subscription.remove();
         };
-    }, [checkPaymentStatus]);
+    }, [checkOrderStatus]);
 
     // Memoize the return value to provide stable references
     const checkout = useMemo(
@@ -363,8 +380,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setPickup,
             isPickup: !!checkoutOptions.pickup,
             error,
-            isReady: serviceQuote && !isLoading,
-            isNotReady: !(serviceQuote && !isLoading),
+            isReady: serviceQuote && !isLoading && !isBelowMinimum,
+            isNotReady: !(serviceQuote && !isLoading && !isBelowMinimum),
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             orderNotes,
             setOrderNotes,
             storeLocationId,
@@ -373,6 +394,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             isPersonal,
             setIsPersonal,
             isCompany: !isPersonal,
@@ -399,6 +424,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            isBelowMinimum,
+            minimumCheckoutAmount,
+            isMinimumCheckoutEnabled,
+            subtotal,
             isPersonal,
             setIsPersonal,
             companyRegistrationNumber,

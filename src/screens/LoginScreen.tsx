@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, ImageBackground, StyleSheet } from 'react-native';
 import { Spinner, Stack, Text, YStack, useTheme, Button } from 'tamagui';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { toast } from '../utils/toast';
 import { titleize } from '../utils/format';
 import { storefrontConfig } from '../utils';
@@ -26,6 +28,10 @@ const LoginScreen = () => {
 
     const handlePhoneLogin = () => {
         navigation.navigate('PhoneLogin');
+    };
+
+    const handleCreateAccount = () => {
+        navigation.navigate('CreateAccount');
     };
 
     const handleOAuthLogin = async (provider) => {
@@ -53,6 +59,14 @@ const LoginScreen = () => {
                                 <Button.Text color='$errorText'>{t('LoginScreen.clearCache')}</Button.Text>
                             </Button>
                         )}
+                        <Button size='$5' onPress={handleCreateAccount} bg='$indigo-600' width='100%' rounded='true'>
+                            <Button.Text color='$white' fontWeight='bold'>
+                                {t('PhoneLoginScreen.createNewAccount')}
+                            </Button.Text>
+                            <Button.Icon>
+                                <FontAwesomeIcon icon={faArrowRight} color='white' />
+                            </Button.Icon>
+                        </Button>
                     </YStack>
                 </SafeAreaView>
                 {loading && (
