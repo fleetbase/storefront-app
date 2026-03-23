@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Pressable, Platform, FlatList } from 'react-native';
-import FastImage from 'react-native-fast-image';
 import MapView, { Polygon, Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -21,6 +20,7 @@ import CustomHeader from '../components/CustomHeader';
 import LocationPicker from '../components/LocationPicker';
 import CartButton from '../components/CartButton';
 import LocaleButton from '../components/LocaleButton';
+import VehicleAvatar from '../components/VehicleAvatar';
 
 function findCurrentZone(coordinates, zones = []) {
     return zones.find((zone) => {
@@ -367,20 +367,13 @@ const FoodTruckScreen = () => {
     /**
      * Renders a single food truck chip in the horizontal scroll strip.
      *
-     * Each chip shows the vehicle avatar image (no background fill — the image
-     * sits directly on the panel surface) above the truck's display name. The
-     * entire chip is wrapped in a Pressable that triggers handlePressFoodTruck,
-     * preserving the existing map-pan + Catalog navigation behaviour.
-     *
-     * Avatar resolution follows the exact same pattern as VehicleMarker and
-     * TrackingMarker: instantiate a Vehicle model from the serialized data,
-     * then call vehicle.getAttribute('avatar_url'). FastImage is used for
-     * rendering, consistent with TrackingMarker's non-SVG image path.
+     * Each chip shows the vehicle avatar (no background fill — the image sits
+     * directly on the panel surface) above the truck's display name. Avatar
+     * rendering is delegated entirely to VehicleAvatar, which implements the
+     * full SVG/FastImage branching logic from TrackingMarker.
      */
     const renderFoodTruckChip = ({ item: foodTruck, index }) => {
         const vehicle = new Vehicle(foodTruck.vehicle, fleetbaseAdapter);
-        const avatarUrl = vehicle.getAttribute('avatar_url');
-        const avatarSource = avatarUrl ? { uri: avatarUrl } : require('../../assets/images/vehicles/light_commercial_van.png');
         const displayName = foodTruck.name || vehicle.getAttribute('plate_number') || t('FoodTruckScreen.truck');
         const isLast = index === availableFoodTrucks.length - 1;
 
@@ -390,12 +383,8 @@ const FoodTruckScreen = () => {
                 onPress={() => handlePressFoodTruck(foodTruck)}
                 style={({ pressed }) => [styles.truckChipPressable, { opacity: pressed ? 0.65 : 1 }, isLast && styles.truckChipLast]}
             >
-                {/* Icon — no background fill, sits flush on the panel surface */}
-                <FastImage
-                    source={avatarSource}
-                    style={styles.truckChipImage}
-                    resizeMode={FastImage.resizeMode.contain}
-                />
+                {/* VehicleAvatar handles SVG vs raster detection and FastImage rendering */}
+                <VehicleAvatar vehicle={vehicle} size={{ width: 44, height: 44 }} />
                 {/* Name below the icon */}
                 <Text
                     color='$textPrimary'
