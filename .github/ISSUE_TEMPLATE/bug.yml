@@ -1,0 +1,85 @@
+name: Bug Report
+description: Report a reproducible bug for this repository.
+title: "[Bug]: "
+labels:
+  - type:bug
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the bug clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior
+      description: What is happening now?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide exact reproduction steps.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_area
+    attributes:
+      label: Affected Area
+      description: Mention routes, components, models, APIs, commands, or workflows affected.
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: Proposed Fix
+      description: Optional implementation direction.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define what must be true for this bug to be fixed.
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: docs_impact
+    attributes:
+      label: Documentation Impact
+      description: Does this require updates to fleetbase/fleetbase.io?
+    validations:
+      required: false
+
+  - type: textarea
+    id: api_impact
+    attributes:
+      label: API Reference Impact
+      description: Does this require updates to fleetbase/postman?
+    validations:
+      required: false

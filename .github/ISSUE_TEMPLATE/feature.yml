@@ -1,0 +1,73 @@
+name: Feature Request
+description: Request a new feature or enhancement.
+title: "[Feature]: "
+labels:
+  - type:feature
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the feature clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Use Case
+      description: What problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the desired implementation or behavior.
+    validations:
+      required: false
+
+  - type: textarea
+    id: affected_area
+    attributes:
+      label: Affected Area
+      description: Mention routes, components, models, APIs, commands, or workflows affected.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define what must be true for this feature to be complete.
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes
+      description: Optional technical direction for agents or maintainers.
+    validations:
+      required: false
+
+  - type: textarea
+    id: docs_impact
+    attributes:
+      label: Documentation Impact
+      description: Does this require updates to fleetbase/fleetbase.io?
+    validations:
+      required: false
+
+  - type: textarea
+    id: api_impact
+    attributes:
+      label: API Reference Impact
+      description: Does this require updates to fleetbase/postman?
+    validations:
+      required: false
