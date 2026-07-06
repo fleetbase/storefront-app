@@ -1,6 +1,13 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    def nodeBinary = System.getenv("NODE_BINARY") ?: "node"
+    ex.autolinkLibrariesFromCommand([
+        nodeBinary,
+        "node_modules/@react-native-community/cli/build/bin.js",
+        "config"
+    ])
+}
 rootProject.name = 'StorefrontApp'
 include ':react-native-config'
 project(':react-native-config').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-config/android')
