@@ -8,24 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		6A2BA7FD87BB04723D456B32 /* libPods-StorefrontApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 09321FAC2B3F67B7493DA3B8 /* libPods-StorefrontApp.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		BCFF07CC9CBC9D50A8931014 /* libPods-StorefrontApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DE9C1CDFA14E539CF5764F9 /* libPods-StorefrontApp.a */; };
 		E4AFEC662CF6BA4C000EDE15 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E4AFEC652CF6BA4C000EDE15 /* Config.xcconfig */; };
 		E4CDF7812CE20AF900D34FBB /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E4CDF7802CE20AF900D34FBB /* BootSplash.storyboard */; };
 		FB15EE06433579CB8F2910C6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		09321FAC2B3F67B7493DA3B8 /* libPods-StorefrontApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StorefrontApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* StorefrontApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StorefrontApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = StorefrontApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = StorefrontApp/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = StorefrontApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		2F7094C482E73D506862E969 /* Pods-StorefrontApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp.debug.xcconfig"; path = "Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp.debug.xcconfig"; sourceTree = "<group>"; };
-		3EC05B21D37FB7C68C239F50 /* Pods-StorefrontApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp.release.xcconfig"; path = "Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp.release.xcconfig"; sourceTree = "<group>"; };
+		4DE9C1CDFA14E539CF5764F9 /* libPods-StorefrontApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StorefrontApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		519E4615FABDD47FA030E86F /* Pods-StorefrontApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp.release.xcconfig"; path = "Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = StorefrontApp/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = StorefrontApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		91DCDB8B6B878860ED7CD6E4 /* Pods-StorefrontApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorefrontApp.debug.xcconfig"; path = "Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp.debug.xcconfig"; sourceTree = "<group>"; };
 		E4AFEC652CF6BA4C000EDE15 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		E4C5571E2D3A1BFA00B22EA8 /* StorefrontApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = StorefrontApp.entitlements; path = StorefrontApp/StorefrontApp.entitlements; sourceTree = "<group>"; };
 		E4CDF7802CE20AF900D34FBB /* BootSplash.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = BootSplash.storyboard; path = StorefrontApp/BootSplash.storyboard; sourceTree = "<group>"; };
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A2BA7FD87BB04723D456B32 /* libPods-StorefrontApp.a in Frameworks */,
+				BCFF07CC9CBC9D50A8931014 /* libPods-StorefrontApp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,7 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				09321FAC2B3F67B7493DA3B8 /* libPods-StorefrontApp.a */,
+				4DE9C1CDFA14E539CF5764F9 /* libPods-StorefrontApp.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -100,8 +100,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				2F7094C482E73D506862E969 /* Pods-StorefrontApp.debug.xcconfig */,
-				3EC05B21D37FB7C68C239F50 /* Pods-StorefrontApp.release.xcconfig */,
+				91DCDB8B6B878860ED7CD6E4 /* Pods-StorefrontApp.debug.xcconfig */,
+				519E4615FABDD47FA030E86F /* Pods-StorefrontApp.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -113,13 +113,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "StorefrontApp" */;
 			buildPhases = (
-				613BADF2C48AA054183E968F /* [CP] Check Pods Manifest.lock */,
+				10CD88A218AB8B747998A2D9 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				63C069CF0808364E1E5AC289 /* [CP] Embed Pods Frameworks */,
-				FFE85590AF126D7C9A71A095 /* [CP] Copy Pods Resources */,
+				0E3B433A91F52FF07FCAB6AF /* [CP] Embed Pods Frameworks */,
+				D87AA88474559D7740C63425 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -193,7 +193,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		613BADF2C48AA054183E968F /* [CP] Check Pods Manifest.lock */ = {
+		0E3B433A91F52FF07FCAB6AF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		10CD88A218AB8B747998A2D9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -215,24 +232,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		63C069CF0808364E1E5AC289 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-StorefrontApp/Pods-StorefrontApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FFE85590AF126D7C9A71A095 /* [CP] Copy Pods Resources */ = {
+		D87AA88474559D7740C63425 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -265,7 +265,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2F7094C482E73D506862E969 /* Pods-StorefrontApp.debug.xcconfig */;
+			baseConfigurationReference = 91DCDB8B6B878860ED7CD6E4 /* Pods-StorefrontApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -298,7 +298,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3EC05B21D37FB7C68C239F50 /* Pods-StorefrontApp.release.xcconfig */;
+			baseConfigurationReference = 519E4615FABDD47FA030E86F /* Pods-StorefrontApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -389,6 +389,10 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -396,14 +400,17 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					" ",
 				);
+				PODFILE_DIR = "$(SRCROOT)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				USE_HERMES = true;
 			};
 			name = Debug;
@@ -462,6 +469,10 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -469,13 +480,16 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					" ",
 				);
+				PODFILE_DIR = "$(SRCROOT)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
