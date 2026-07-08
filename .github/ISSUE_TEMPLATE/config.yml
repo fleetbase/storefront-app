@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+
+contact_links:
+  - name: Fleetbase Documentation
+    url: https://fleetbase.io/docs
+    about: Read Fleetbase documentation.
+
+  - name: Fleetbase Website
+    url: https://fleetbase.io
+    about: Visit the Fleetbase website.
