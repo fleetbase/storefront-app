@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Dimensions, Pressable } from 'react-native';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
-import { Spinner, Card, Text, YStack, XStack, H2, Paragraph, Button, Image, useTheme } from 'tamagui';
+import { Pressable } from 'react-native';
+import { Spinner, Card, Text, YStack, XStack, Button } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
@@ -13,32 +12,27 @@ import ImageSlider from './ImageSlider';
 import useCart from '../hooks/use-cart';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const { width } = Dimensions.get('window');
-
 const ProductCard = ({
     product,
     onPress,
     onAddToCart,
     style = {},
-    favoriteIcon,
     wrapperStyle = {},
     cardContainerStyle = {},
     cardHeaderStyle = {},
     cardFooterStyle = {},
-    carouselStyle = {},
     buttonStyle = {},
     quantityButtonStyle = {},
     sliderHeight = 175,
     storeLocationId,
-    width = null,
+    width: requestedWidth = null,
     additionalNavigationParams = {},
 }) => {
-    const theme = useTheme();
     const navigation = useNavigation();
     const { t } = useLanguage();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
-    const [cardWidth, setCardWidth] = useState(width);
-    const [cart, updateCart] = useCart();
+    const [cardWidth, setCardWidth] = useState(requestedWidth);
+    const [, , , addProduct] = useCart();
     const [quantity, setQuantity] = useState(1);
     const productCardStyle = storefrontConfig('productCardStyle', 'bordered');
     let cardBorderWidth = 1;
@@ -71,7 +65,8 @@ const ProductCard = ({
             return;
         }
 
-        navigation.navigate('Product', { product: product.serialize(), quantity, ...additionalNavigationParams });
+        if (onPress) return onPress(product);
+        navigation.navigate('Product', { product: product.serialize(), productId: product.id, quantity, ...additionalNavigationParams });
     };
 
     const handleAddToCart = async () => {
@@ -80,34 +75,34 @@ const ProductCard = ({
         }
 
         if (productHasOptions(product)) {
-            return navigation.navigate('Product', { product: product.serialize(), quantity, storeLocationId, ...additionalNavigationParams });
+            return navigation.navigate('Product', { product: product.serialize(), productId: product.id, quantity, storeLocationId, ...additionalNavigationParams });
         }
 
         try {
-            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { store_location: storeLocationId }), 'addToCart');
-            updateCart(updatedCart);
+            if (onAddToCart) return await onAddToCart(product, quantity);
+            await runWithLoading(addProduct(product, quantity, { store_location: storeLocationId }), 'addToCart');
             setQuantity(1);
             toast.success(t('ProductCard.productAddedToCart', { productName: product.getAttribute('name') }));
         } catch (error) {
-            console.error('Error Adding to Cart', error.message);
+            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Marketplace.addToCartError'));
         }
     };
 
     const handleSetCardWidth = useCallback(
         ({
             nativeEvent: {
-                layout: { width },
+                layout: { width: measuredWidth },
             },
         }) => {
             if (cardWidth === null) {
-                setCardWidth((prevWidth) => (prevWidth !== width ? width : prevWidth));
+                setCardWidth((prevWidth) => (prevWidth !== measuredWidth ? measuredWidth : prevWidth));
             }
         },
-        [setCardWidth]
+        [cardWidth]
     );
 
     return (
-        <YStack style={[wrapperStyle, { width }]} width={width}>
+        <YStack style={[wrapperStyle, { width: requestedWidth }]} width={requestedWidth}>
             <Pressable onPress={handlePress} style={[style]} disabled={isLoading('addToCart')} onLayout={handleSetCardWidth}>
                 <Card style={[cardContainerStyle]} bordered borderWidth={cardBorderWidth} borderColor={cardBorderColor} borderRadius={12}>
                     <Card.Header style={[cardHeaderStyle]} padding={0}>
@@ -120,7 +115,7 @@ const ProductCard = ({
                                 onImagePress={handlePress}
                                 autoplay
                             />
-                            <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2'></XStack>
+                            <XStack position='absolute' top='$2' right='$2' zIndex={10} alignItems='center' justifyContent='flex-end' space='$2' />
                         </YStack>
                     </Card.Header>
                     <Card.Footer style={[cardFooterStyle]} bg={cardFooterBg} borderRadius={cardFooterBorderRadius} overflow='hidden'>

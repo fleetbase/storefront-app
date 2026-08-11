@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 // import { useStripe, initStripe } from '@stripe/stripe-react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
+import { getCartOriginIds, getCartQuoteOrigin } from '../utils/marketplace-runtime';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
@@ -119,14 +120,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
 
-    const storeLocationId = useMemo(() => {
-        if (!cart?.contents || typeof cart.contents !== 'function') return null;
-
-        const storeLocationIds = cart.contents().map((item) => item.store_location_id);
-        const uniqueStoreLocationIds = [...new Set(storeLocationIds)];
-
-        return uniqueStoreLocationIds[0] || null;
-    }, [cartContentsString]);
+    const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
+    const storeLocationId = storeLocationIds[0] || null;
+    const quoteOrigin = useMemo(() => getCartQuoteOrigin(cart), [cartContentsString]);
 
     const foodTruckId = useMemo(() => {
         if (!cart?.contents || typeof cart.contents !== 'function') return null;
@@ -396,7 +392,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
             try {
-                const quote = await getServiceQuote(currentStoreLocation, destination, cart);
+                const quote = await getServiceQuote(quoteOrigin ?? currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
@@ -411,7 +407,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id]);
+    }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id, quoteOrigin]);
 
     // useEffect(() => {
     //     if (stripeInitialized === false) {
@@ -462,7 +458,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             setOrderNotes,
             foodTruckId,
             storeLocationId,
-            originLocationId: foodTruckId ?? storeLocationId,
+            originLocationId: quoteOrigin ?? foodTruckId ?? storeLocationId,
+            storeLocationIds,
             isNotReady: !isReady,
             isServiceQuoteUnavailable,
             isBelowMinimum,
@@ -505,6 +502,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             setOrderNotes,
             foodTruckId,
             storeLocationId,
+            storeLocationIds,
+            quoteOrigin,
             isServiceQuoteUnavailable,
             isBelowMinimum,
             minimumCheckoutAmount,

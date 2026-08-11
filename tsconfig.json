@@ -1,8 +1,14 @@
 {
+    "extends": "./node_modules/@react-native/typescript-config/tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
+        "strict": false,
+        "noImplicitAny": false,
+        "moduleSuffixes": [".native", ".web", ""],
         "paths": {
             "*": ["*", "*.native", "*.web"]
         }
-    }
+    },
+    "include": ["App.tsx", "App.web.tsx", "index.native.tsx", "index.web.tsx", "src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts", "__tests__/**/*.tsx"],
+    "exclude": ["legacy", "node_modules", "ios/Pods"]
 }

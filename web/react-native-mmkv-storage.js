@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* global localStorage */
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 class MMKVStorage {
     setArray(key, array) {
@@ -102,8 +103,8 @@ class MMKVLoader {
 // Updated useMMKVStorage accepts a storage instance as second parameter.
 function useMMKVStorage(key, storage, defaultValue) {
     // Use the provided storage instance or fallback to a new instance.
-    const mmkv = storage || new MMKVStorage();
-    const initialValue = (() => {
+    const mmkv = useMemo(() => storage || new MMKVStorage(), [storage]);
+    const readValue = useCallback(() => {
         try {
             const stored = mmkv.getString(key);
             if (stored !== null) {
@@ -119,18 +120,22 @@ function useMMKVStorage(key, storage, defaultValue) {
             console.error('Error reading key', key, error);
             return defaultValue;
         }
-    })();
+    }, [defaultValue, key, mmkv]);
 
-    const [value, setValue] = useState(initialValue);
+    const [value, setValue] = useState(readValue);
 
-    function setStoredValue(newValue) {
+    useEffect(() => {
+        setValue(readValue());
+    }, [readValue]);
+
+    const setStoredValue = useCallback((newValue) => {
         try {
             setValue(newValue);
             mmkv.setString(key, JSON.stringify(newValue));
         } catch (error) {
             console.error('Error saving key', key, error);
         }
-    }
+    }, [key, mmkv]);
 
     return [value, setStoredValue];
 }

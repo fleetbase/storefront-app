@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/utils/marketplace-runtime.ts",
+        "__tests__/marketplace-runtime.test.ts"
+    ],
+    "exclude": ["legacy", "node_modules", "ios/Pods"]
+}

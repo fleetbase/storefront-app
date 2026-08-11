@@ -1,24 +1,24 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Animated, Pressable, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { Animated, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Separator, Spinner, View, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
+import { Separator, Spinner, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
-import { delay, loadPersistedResource, storefrontConfig } from '../utils';
+import { loadPersistedResource, storefrontConfig } from '../utils';
 import { calculateCartTotal } from '../utils/cart';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useAuth } from '../contexts/AuthContext';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import FastImage from 'react-native-fast-image';
 import useCart from '../hooks/use-cart';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
-import StorefrontConfig from '../../storefront.config';
 import Spacer from '../components/Spacer';
 import ScreenWrapper from '../components/ScreenWrapper';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
+import { groupCartItemsByStore, totalCartQuantity } from '../utils/marketplace-runtime';
 
 const isAndroid = Platform.OS === 'android';
 if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -31,15 +31,30 @@ const CartScreen = ({ route }) => {
     const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
     const insets = useSafeAreaInsets();
-    const { refreshCustomer } = useAuth();
     const { t } = useLanguage();
     const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
     const [cart, updateCart] = useCart();
+    const { mode } = useStorefrontRuntime();
     const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
     const rowRefs = useRef({});
     const isModal = typeof routeName === 'string' && routeName.endsWith('Modal');
+    const displayedRows = useMemo(() => {
+        if (mode !== 'marketplace') return displayedItems;
+        return Object.entries(groupCartItemsByStore(displayedItems)).flatMap(([storeId, items]) => {
+            const subtotal = items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0);
+            const store = items[0]?.store || {};
+            return [{ id: `store-group-${storeId}`, isStoreGroup: true, storeId, store, subtotal, items }, ...items];
+        });
+    }, [displayedItems, mode]);
 
     const handleCheckout = () => {
+        if (mode === 'marketplace') {
+            const invalidGroup = Object.entries(groupCartItemsByStore(cart.contents())).find(([, items]) => items.some((item) => !item.store_location_id));
+            if (invalidGroup) {
+                toast.error(t('Marketplace.cartLocationRequired'));
+                return;
+            }
+        }
         const params = {};
         if (storefrontConfig('paymentGateway') === 'stripe') {
             return navigation.navigate('StripeCheckout', params);
@@ -169,6 +184,20 @@ const CartScreen = ({ route }) => {
     );
 
     const renderItem = ({ item: cartItem }) => {
+        if (cartItem.isStoreGroup) {
+            return (
+                <XStack bg='$surface' px='$4' py='$3' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
+                    <XStack gap='$2' alignItems='center' flex={1}>
+                        {!!cartItem.store?.logo_url && <Image source={{ uri: cartItem.store.logo_url }} width={36} height={36} borderRadius='$2' />}
+                        <YStack flex={1}>
+                            <Text color='$textPrimary' fontWeight='700' numberOfLines={1}>{cartItem.store?.name || cartItem.storeId}</Text>
+                            <Text color='$textSecondary' fontSize='$3'>{t('Marketplace.groupItemCount', { count: totalCartQuantity(cartItem.items) })}</Text>
+                        </YStack>
+                    </XStack>
+                    <Text color='$textPrimary' fontWeight='700'>{formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}</Text>
+                </XStack>
+            );
+        }
         const opacity = new Animated.Value(1);
         const translateX = new Animated.Value(0);
         rowRefs.current[cartItem.id] = { opacity, translateX };
@@ -283,7 +312,7 @@ const CartScreen = ({ route }) => {
             >
                 <XStack alignItems='center'>
                     <Text fontSize='$7' fontWeight='bold'>
-                        {t('CartScreen.orderItems', { count: displayedItems.length })}
+                        {t('CartScreen.orderItems', { count: totalCartQuantity(displayedItems) })}
                     </Text>
                     {isAnyLoading() && (
                         <YStack ml='$2'>
@@ -300,7 +329,7 @@ const CartScreen = ({ route }) => {
                 </YStack>
             </XStack>
             <Animated.FlatList
-                data={displayedItems}
+                data={displayedRows}
                 renderItem={renderItem}
                 ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
                 keyExtractor={(item) => item.id}
