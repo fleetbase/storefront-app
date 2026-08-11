@@ -9,7 +9,7 @@ import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { getTheme, handleNavigateNewLocation } from '../../utils';
-import { translate as t } from '../../utils/localize';
+import { translate as t } from '../../utils/Localize';
 
 export const LocationPermission = {
     screen: LocationPermissionScreen,

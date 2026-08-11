@@ -6,7 +6,7 @@ import HeaderButton from '../../components/HeaderButton';
 import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { translate as t } from '../../utils/localize';
+import { translate as t } from '../../utils/Localize';
 
 export const Order = {
     screen: OrderScreen,

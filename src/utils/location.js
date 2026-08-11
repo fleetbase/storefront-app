@@ -8,7 +8,7 @@ import { adapter as storefrontAdapter } from '../hooks/use-storefront';
 import { adapter } from '../hooks/use-fleetbase';
 import { haversine } from './math';
 import { config, uniqueArray, isObject, isArray, isEmpty, isResource, isSerializedResource, isPojoResource } from './';
-import { getLocale } from './localize';
+import { getLocale } from './Localize';
 import storage from './storage';
 import axios from 'axios';
 

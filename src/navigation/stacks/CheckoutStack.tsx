@@ -5,7 +5,7 @@ import PaypalCheckoutScreen from '../../screens/PaypalCheckoutScreen';
 import BackButton from '../../components/BackButton';
 import { StripeCheckoutProvider } from '../../contexts/StripeCheckoutContext';
 import { getTheme } from '../../utils';
-import { translate as t } from '../../utils/localize';
+import { translate as t } from '../../utils/Localize';
 
 export const Checkout = {
     screen: CheckoutScreen,
