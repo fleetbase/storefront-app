@@ -281,7 +281,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
-          cd ios && pod install --repo-update
+          bash scripts/ci/install-cocoapods.sh
 
       - name: List available simulators
         run: xcrun simctl list devices available | grep iPhone
@@ -408,7 +408,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
@@ -442,7 +441,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
-          cd ios && pod install --repo-update
+          bash scripts/ci/install-cocoapods.sh
 
       - name: Build iOS Release Archive
         run: |
