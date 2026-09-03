@@ -41,7 +41,7 @@ import useCart from '../hooks/use-cart';
 import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
 import { getTheme } from '../utils';
-import { translate } from '../utils/Localize';
+import { translate } from '../utils/localize';
 
 const isAndroid = Platform.OS === 'android';
 
