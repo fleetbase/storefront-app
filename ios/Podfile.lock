@@ -2212,7 +2212,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.8.4)
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.29.1):
+  - RNGestureHandler (2.32.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -3146,7 +3146,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 8b6fa8379062949dd79a009cf3d6b02a9c03ca59
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: 695c661ac41594942e846f2eb4f666ce20adf036
+  RNGestureHandler: a21ad1bb32b203570440c29b7e406a342a690842
   RNGoogleSignin: a590871cef396da4b683af9eb1cf17ce1750cfde
   RNI18n: e2f7e76389fcc6e84f2c8733ea89b92502351fd8
   RNKeychain: 1b055a0ec36d058cb0a075e965d8c9d335e0c828
