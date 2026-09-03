@@ -1,5 +1,3 @@
-import Config from 'react-native-config';
-
 export function parseConfigObjectString(objectString) {
     if (!objectString || typeof objectString !== 'string' || objectString.trim() === '') {
         return {};
@@ -16,7 +14,11 @@ export function parseConfigObjectString(objectString) {
 }
 
 export function config(key, defaultValue) {
-    const value = Config[key];
+    // This helper is evaluated by Tamagui's Node/esbuild extractor as well as
+    // Webpack. Importing react-native-config here pulls an untransformed Flow
+    // codegen module into that build-time process, so read the build environment
+    // directly. Webpack still injects runtime app configuration elsewhere.
+    const value = typeof process !== 'undefined' ? process.env?.[key] : undefined;
     return value === undefined ? defaultValue : value;
 }
 

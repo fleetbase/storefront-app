@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { Spinner, Image, Text, View, YStack, XStack, Button, Paragraph, Label, RadioGroup, Checkbox, useTheme } from 'tamagui';
+import { Spinner, Text, YStack, XStack, Button, Paragraph } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faAsterisk, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useNavigation } from '@react-navigation/native';
 import ScreenWrapper from '../components/ScreenWrapper';
-import { Product } from '@fleetbase/storefront';
-import { restoreSdkInstance } from '../utils';
+import { Product, Store } from '@fleetbase/storefront';
 import { toast } from '../utils/toast';
 import { formatCurrency } from '../utils/format';
-import { calculateProductSubtotal, getCartItem } from '../utils/cart';
+import { calculateProductSubtotal } from '../utils/cart';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons } from '../utils/product';
 import { useLanguage } from '../contexts/LanguageContext';
 import QuantityButton from '../components/QuantityButton';
@@ -23,10 +22,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import useStorefront from '../hooks/use-storefront';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
-import FastImage from 'react-native-fast-image';
 
 const ProductScreen = ({ route = {} }) => {
-    const theme = useTheme();
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const tabBarHeight = useBottomTabBarHeight();
@@ -34,8 +31,9 @@ const ProductScreen = ({ route = {} }) => {
     const { adapter: storefrontAdapter } = useStorefront();
     const { runWithLoading, isLoading } = usePromiseWithLoading();
     const { t } = useLanguage();
-    const [cart, updateCart] = useCart();
-    const product = new Product(route.params.product, storefrontAdapter);
+    const [, , , addProduct] = useCart();
+    const product = useMemo(() => new Product(params.product, storefrontAdapter), [params.product, storefrontAdapter]);
+    const merchant = useMemo(() => (params.store ? new Store(params.store, storefrontAdapter) : null), [params.store, storefrontAdapter]);
     const isService = product.getAttribute('is_service') === true;
     const youtubeUrls = product.getAttribute('youtube_urls', []).filter(Boolean);
     const [selectedAddons, setSelectedAddons] = useState({});
@@ -53,11 +51,7 @@ const ProductScreen = ({ route = {} }) => {
     useEffect(() => {
         setSubtotal(calculateProductSubtotal(product, selectedVariants, selectedAddons));
         setReady(isProductReadyForCheckout(product, selectedVariants));
-    }, [selectedAddons, selectedVariants]);
-
-    useEffect(() => {
-        setReady(isProductReadyForCheckout(product, selectedVariants));
-    }, []);
+    }, [product, selectedAddons, selectedVariants]);
 
     const handleClose = () => {
         navigation.goBack();
@@ -74,12 +68,11 @@ const ProductScreen = ({ route = {} }) => {
         const variants = getSelectedVariants(selectedVariants);
 
         try {
-            const updatedCart = await runWithLoading(cart.add(product.id, quantity, { addons, variants, store_location: storeLocationId }), 'addToCart');
-            updateCart(updatedCart);
+            await runWithLoading(addProduct(product, quantity, { addons, variants, store_location: storeLocationId }, merchant), 'addToCart');
             toast.success(t('ProductScreen.productAddedToCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
-            console.warn('Error Adding to Cart', error.message);
+            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Marketplace.addToCartError'));
         }
     };
 

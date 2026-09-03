@@ -17,7 +17,8 @@
         "confirmation": "Confirmation",
         "ok": "OK",
         "done": "Done",
-        "order": "Order"
+        "order": "Order",
+        "goBack": "Go back"
     },
     "lineItems": {
         "cartSubtotal": "Cart Subtotal",
@@ -420,5 +421,44 @@
         "unableToOpenBank": "Unable to open bank app.",
         "selectBank": "Select Bank"
     },
-    "TextAreaSheet": {}
+    "TextAreaSheet": {},
+    "Marketplace": {
+        "tabs": { "discover": "Discover", "search": "Search", "map": "Map", "cart": "Cart", "profile": "Profile" },
+        "sort": { "nearest": "Nearest", "highest_rated": "Highest rated", "lowest_rated": "Lowest rated", "popular": "Popular", "trending": "Trending", "newest": "Newest", "oldest": "Oldest" },
+        "allCategories": "All categories",
+        "uncategorized": "Uncategorized",
+        "openNow": "Open now",
+        "clearFilters": "Clear filters ({{count}})",
+        "stores": "Stores",
+        "loadError": "We couldn't load these stores. Check your connection and try again.",
+        "noStores": "No stores found",
+        "noStoresDescription": "Try clearing your filters or check back when more stores join this marketplace.",
+        "noCategoryStores": "There are no stores in this category yet.",
+        "unknownStore": "Unknown store",
+        "merchantResult": "Merchant",
+        "online": "Online",
+        "offline": "Offline",
+        "rating": "Rating {{rating}}",
+        "distanceMeters": "{{distance}} m away",
+        "openStore": "Open {{storeName}}",
+        "searchPlaceholder": "Search products and stores",
+        "searchPrompt": "Search across products and merchants.",
+        "noSearchResults": "No matching products found.",
+        "searchError": "Search is unavailable right now.",
+        "useMyLocation": "Use my location",
+        "mapError": "We couldn't load marketplace locations.",
+        "noMapLocations": "No store locations are available on the map.",
+        "storeUnavailable": "This store is unavailable or is not part of this marketplace.",
+        "productUnavailable": "This product is unavailable or is not part of this marketplace.",
+        "cartReplaceTitle": "Start a new store order?",
+        "cartReplaceDescription": "Your current cart is from another store. Replace it before adding this item?",
+        "replaceCart": "Replace cart",
+        "cartUnavailable": "Your cart is not ready yet. Please try again.",
+        "missingMerchant": "We couldn't identify the store for this product.",
+        "selectStoreLocationFirst": "Choose a store location before adding this product.",
+        "incompatibleCurrency": "Products using different currencies cannot be combined in one cart.",
+        "addToCartError": "We couldn't add this product to your cart.",
+        "groupItemCount": "{{count}} items",
+        "cartLocationRequired": "Choose a valid location for every store before checkout."
+    }
 }

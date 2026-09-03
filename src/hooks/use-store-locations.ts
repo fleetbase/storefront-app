@@ -1,90 +1,65 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { isResource } from '../utils';
-import { restoreFleetbaseStoreLocation } from '../utils/location';
-import { adapter } from './use-storefront';
+import { StoreLocation } from '@fleetbase/storefront';
 import useStorage from './use-storage';
-import useStorefrontInfo from './use-storefront-info';
-
-const serializeStoreLocation = (storeLocation) => {
-    const data = storeLocation.serialize();
-    if (data.place && typeof data.place.serialize === 'function') {
-        data.place = data.place.serialize();
-    }
-
-    return data;
-};
+import useStorefront from './use-storefront';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
+import { getScopedStorageKey, serializeSdkResource } from '../utils/marketplace-runtime';
 
 const useStoreLocations = () => {
-    const { store } = useStorefrontInfo();
-    const [currentStoreLocationId, setCurrentStoreLocationId] = useStorage('_current_store_location_id');
-    const [currentStoreLocation, setCurrentStoreLocation] = useStorage('_current_store_location');
-    const [storeLocations, setStoreLocations] = useStorage('_store_locations', []);
+    const { storefront } = useStorefront();
+    const adapter = storefront?.getAdapter();
+    const { ownerInfo, currentStore: store, selectStoreLocation, getSelectedStoreLocation } = useStorefrontRuntime();
+    const storeId = store?.id || 'none';
+    const scope = ownerInfo?.id || 'unconfigured';
+    const [storedLocations, setStoredLocations] = useStorage<any[]>(getScopedStorageKey(scope, 'locations', storeId), []);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<Error | null>(null);
 
-    // Function to get the default store location
-    const getDefaultStoreLocation = useCallback(
-        (storeLocations = []) => {
-            let defaultStoreLocation = null;
+    const storeLocations = useMemo(() => (adapter ? (storedLocations || []).map((location) => new StoreLocation(location, adapter)) : []), [adapter, storedLocations]);
+    const currentStoreLocation = getSelectedStoreLocation(store?.id);
 
-            if (currentStoreLocationId) {
-                defaultStoreLocation = storeLocations.find((location) => location.id === currentStoreLocationId);
-            }
-
-            if (storeLocations.length && !defaultStoreLocation) {
-                defaultStoreLocation = storeLocations[0];
-            }
-
-            return defaultStoreLocation && typeof defaultStoreLocation.serialize === 'function' ? serializeStoreLocation(defaultStoreLocation) : defaultStoreLocation;
-        },
-        [currentStoreLocationId]
-    );
-
-    // Function to update the current store location which will be used for loading and checkout
     const updateCurrentStoreLocation = useCallback(
-        (storeLocation) => {
-            setCurrentStoreLocationId(storeLocation.id);
-            setCurrentStoreLocation(serializeStoreLocation(storeLocation));
+        (storeLocation: any) => {
+            if (store?.id && storeLocation) selectStoreLocation(store.id, storeLocation);
         },
-        [setCurrentStoreLocationId, setCurrentStoreLocation]
+        [selectStoreLocation, store?.id]
     );
 
-    // Function to load customer locations
     const loadStoreLocations = useCallback(async () => {
-        if (!store) {
-            setError(new Error('Store instance is not set'));
-            return;
-        }
+        if (!store) return [];
         setLoading(true);
         setError(null);
         try {
             const locations = await store.getLocations();
-            const serializedLocations = locations.map(serializeStoreLocation);
-            setStoreLocations(serializedLocations);
-            setCurrentStoreLocation(getDefaultStoreLocation(serializedLocations));
+            const serialized = Array.from(locations || []).map(serializeSdkResource);
+            setStoredLocations(serialized);
+            const selected = getSelectedStoreLocation(store.id);
+            const selectedStillExists = selected && locations.some((location: any) => location.id === selected.id);
+            if (!selectedStillExists && locations.length > 0) selectStoreLocation(store.id, locations[0]);
             return locations;
-        } catch (err) {
-            console.error('Error fetching store locations:', err);
-            setError(err);
+        } catch (loadError: any) {
+            setError(loadError);
+            return [];
         } finally {
             setLoading(false);
         }
-    }, [store, getDefaultStoreLocation, setStoreLocations, setCurrentStoreLocation]);
+    }, [getSelectedStoreLocation, selectStoreLocation, setStoredLocations, store]);
 
     useEffect(() => {
-        loadStoreLocations();
-    }, [store]);
+        if (store) loadStoreLocations();
+    }, [loadStoreLocations, store]);
 
     return useMemo(
         () => ({
-            currentStoreLocation: restoreFleetbaseStoreLocation(currentStoreLocation),
-            storeLocations: restoreFleetbaseStoreLocation(storeLocations),
+            currentStoreLocation,
+            storeLocations,
             store,
             updateCurrentStoreLocation,
+            reloadStoreLocations: loadStoreLocations,
             isLoadingStoreLocations: loading,
             storeLocationsError: error,
         }),
-        [currentStoreLocation, storeLocations, store, updateCurrentStoreLocation, loading, error]
+        [currentStoreLocation, error, loadStoreLocations, loading, store, storeLocations, updateCurrentStoreLocation]
     );
 };
 

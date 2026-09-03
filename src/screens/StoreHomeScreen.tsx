@@ -1,8 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { ScrollView, Animated } from 'react-native';
-import { YStack, useTheme } from 'tamagui';
+import { YStack } from 'tamagui';
 import StoreHeader from '../components/StoreHeader';
 import StoreCategoriesGrid from '../components/StoreCategoriesGrid';
 import StoreCategoriesPills from '../components/StoreCategoriesPills';
@@ -14,13 +14,15 @@ import CustomHeader from '../components/CustomHeader';
 import Spacer from '../components/Spacer';
 import { storefrontConfig, handleNavigateNewLocation } from '../utils';
 
-const StoreHomeScreen = ({ route }) => {
-    const theme = useTheme();
+const StoreHomeScreen = () => {
     const navigation = useNavigation();
     const customHeaderHeight = 270;
     const scrollY = useRef(new Animated.Value(0)).current;
-    const { info } = useStorefrontInfo();
-    const { data: categories } = useStorefrontData((storefront) => storefront.categories.findAll(), { defaultValue: [], persistKey: `${info.id}_categories` });
+    const { info, store, mode } = useStorefrontInfo();
+    const { data: categories } = useStorefrontData(
+        (storefront) => (mode === 'marketplace' && store ? storefront.categories.query({ store: store.id }) : storefront.categories.findAll()),
+        { defaultValue: [], persistKey: `${info.id}_categories`, dependencies: [mode, store?.id] }
+    );
     const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
     const tabBarHeight = useBottomTabBarHeight();
 
@@ -61,7 +63,7 @@ const StoreHomeScreen = ({ route }) => {
                     headerLeft={<LocationPicker onPressAddNewLocation={({ params }) => handleNavigateNewLocation(navigation, params)} />}
                     headerLeftStyle={{ justifyContent: 'flex-start' }}
                 />
-                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} />
+                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} showLocationPicker={mode === 'marketplace' ? true : undefined} />
             </Animated.View>
             <ScrollView
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
@@ -81,7 +83,7 @@ const StoreHomeScreen = ({ route }) => {
                                     categories={categories || []}
                                     justifyContent='start'
                                     itemContainerWidth={100}
-                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}
+                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize(), categoryId: category.id, storeId: store?.id })}
                                 />
                             </YStack>
                         )}
@@ -89,14 +91,14 @@ const StoreHomeScreen = ({ route }) => {
                             <YStack pt='$4' pb='$2'>
                                 <StoreCategoriesPills
                                     categories={categories || []}
-                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })}
+                                    onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize(), categoryId: category.id, storeId: store?.id })}
                                 />
                             </YStack>
                         )}
                     </YStack>
                     <YStack space='$4'>
                         {categories.map((category, index) => (
-                            <CategoryProductSlider key={index} category={category} onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize() })} />
+                            <CategoryProductSlider key={index} category={category} onPressCategory={(category) => navigation.navigate('StoreCategory', { category: category.serialize(), categoryId: category.id, storeId: store?.id })} />
                         ))}
                     </YStack>
                 </YStack>

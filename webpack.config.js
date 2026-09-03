@@ -82,6 +82,12 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.m?js$/,
+                resolve: {
+                    fullySpecified: false,
+                },
+            },
+            {
                 test: /\.(js|jsx|ts|tsx)$/,
                 include: [
                     path.resolve(__dirname, 'index.web.tsx'),
@@ -97,7 +103,7 @@ module.exports = {
                         options: {
                             cacheDirectory: true,
                             presets: [
-                                ['@babel/preset-react', { plugins: ['@babel/plugin-proposal-class-properties'] }],
+                                ['@babel/preset-react', { plugins: ['@babel/plugin-transform-class-properties'] }],
                                 ['module:@react-native/babel-preset', { useTransformReactJSXExperimental: true }],
                                 '@babel/preset-typescript',
                             ],
@@ -114,24 +120,27 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(js|jsx)$/,
+                test: /\.(js|jsx|ts|tsx)$/,
                 include: [
                     path.resolve(__dirname, 'node_modules/react-native-linear-gradient'),
                     path.resolve(__dirname, 'node_modules/react-native-maps'),
+                    path.resolve(__dirname, 'node_modules/react-native-maps-directions'),
                     path.resolve(__dirname, 'node_modules/react-native-super-grid'),
                     path.resolve(__dirname, 'node_modules/react-native-community-blur'),
+                    path.resolve(__dirname, 'node_modules/react-native-image-picker'),
+                    path.resolve(__dirname, 'node_modules/react-native-qrcode-svg'),
                 ],
                 use: {
                     loader: 'babel-loader',
                     options: {
                         presets: [
-                            ['@babel/preset-react', { plugins: ['@babel/plugin-proposal-class-properties'] }],
+                            ['@babel/preset-react', { plugins: ['@babel/plugin-transform-class-properties'] }],
                             ['@babel/preset-env', { loose: true }],
                             'module:@react-native/babel-preset',
                             '@babel/preset-typescript',
                         ],
                         plugins: [
-                            ['@babel/plugin-proposal-class-properties', { loose: true }],
+                            ['@babel/plugin-transform-class-properties', { loose: true }],
                             ['@babel/plugin-transform-private-methods', { loose: true }],
                             ['@babel/plugin-transform-private-property-in-object', { loose: true }],
                             'react-native-web',

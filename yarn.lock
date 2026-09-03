@@ -2552,7 +2552,7 @@ __metadata:
     react-native-fast-image: ^8.6.3
     react-native-fbsdk-next: ^13.4.0
     react-native-fs: ^2.20.0
-    react-native-gesture-handler: ^2.29.1
+    react-native-gesture-handler: ^2.32.0
     react-native-get-random-values: ^1.11.0
     react-native-i18n: ^2.0.15
     react-native-image-picker: ^8.2.0
@@ -6024,7 +6024,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-test-renderer@npm:^19.0.0":
+"@types/react-test-renderer@npm:^19.0.0, @types/react-test-renderer@npm:^19.1.0":
   version: 19.1.0
   resolution: "@types/react-test-renderer@npm:19.1.0"
   dependencies:
@@ -14643,17 +14643,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:^2.29.1":
-  version: 2.29.1
-  resolution: "react-native-gesture-handler@npm:2.29.1"
+"react-native-gesture-handler@npm:^2.32.0":
+  version: 2.32.0
+  resolution: "react-native-gesture-handler@npm:2.32.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
+    "@types/react-test-renderer": ^19.1.0
     hoist-non-react-statics: ^3.3.0
     invariant: ^2.2.4
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: dddabdb12ce31d68ef71796e8fcaa57acd4608cca14412f36ce36fee14911fb629f325f0ced86bea1336a64673a434e34cde32a63be8d33f29d9a7bed292c5b2
+  checksum: 213362acc5489ba07bd648e1131547e71b53847949221c8ab7111115a77a98ad283b54203eb45097a39ef7e1685c74e212e91c6f1697adb1f42fa296dabf16de
   languageName: node
   linkType: hard
 

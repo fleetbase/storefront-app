@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, Pressable } from 'react-native';
 import { YStack, XStack, Text, Spinner, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { useNavigation } from '@react-navigation/native';
 import { isArray } from '../utils';
 import useStorefrontData from '../hooks/use-storefront-data';
 import ProductCard from './ProductCard';
+import useStorefrontInfo from '../hooks/use-storefront-info';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 
 const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
     const theme = useTheme();
-    const navigation = useNavigation();
-    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id }), {
+    const { store, mode } = useStorefrontInfo();
+    const { getSelectedStoreLocation } = useStorefrontRuntime();
+    const storeLocation = getSelectedStoreLocation(store?.id);
+    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id, ...(mode === 'marketplace' && store ? { store: store.id } : {}) }), {
         defaultValue: [],
-        persistKey: `${category.id}_products`,
+        persistKey: `${store?.id || 'store'}_${category.id}_products`,
+        dependencies: [mode, store?.id, category.id],
     });
 
     const handleCategoryPress = () => {
@@ -45,7 +49,7 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
                 <XStack space='$4' paddingVertical='$1' paddingHorizontal='$4' minHeight={330}>
                     {products.map((product, index) => (
-                        <ProductCard key={index} product={product} sliderHeight={135} style={{ width: 190 }} />
+                        <ProductCard key={index} product={product} sliderHeight={135} style={{ width: 190 }} storeLocationId={storeLocation?.id} additionalNavigationParams={{ store: store?.serialize?.(), storeId: store?.id }} />
                     ))}
                 </XStack>
             </ScrollView>

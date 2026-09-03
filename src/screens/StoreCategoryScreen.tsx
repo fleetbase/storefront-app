@@ -1,28 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React from 'react';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { SafeAreaView } from 'react-native';
-import { Stack, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
+import { YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Portal } from '@gorhom/portal';
 import { FlatGrid } from 'react-native-super-grid';
-import LoadingIndicator from '../components/LoadingIndicator';
 import ProductCard from '../components/ProductCard';
-import ProductCardHorizontal from '../components/ProductCardHorizontal';
-import ProductCardHorizontalLTR from '../components/ProductCardHorizontalLTR';
 import Spacer from '../components/Spacer';
 import useStorefrontData from '../hooks/use-storefront-data';
-import useStorefrontInfo from '../hooks/use-storefront-info';
 import useDimensions from '../hooks/use-dimensions';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 
 const StoreCategoryScreen = ({ route }) => {
     const category = route.params.category;
     const theme = useTheme();
-    const navigation = useNavigation();
     const tabBarHeight = useBottomTabBarHeight();
     const { screenWidth } = useDimensions();
-    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id }), {
+    const { mode, currentStore, getSelectedStoreLocation } = useStorefrontRuntime();
+    const storeLocation = getSelectedStoreLocation(currentStore?.id);
+    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id, ...(mode === 'marketplace' && currentStore ? { store: currentStore.id } : {}) }), {
         defaultValue: [],
-        persistKey: `${category.id}_products`,
+        persistKey: `${currentStore?.id || 'store'}_${category.id}_products`,
+        dependencies: [mode, currentStore?.id, category.id],
     });
 
     return (
@@ -45,7 +43,7 @@ const StoreCategoryScreen = ({ route }) => {
                     spacing={0}
                     data={products}
                     renderItem={({ item: result, index }) => (
-                        <ProductCard key={index} product={result} sliderHeight={135} wrapperStyle={{ paddingLeft: 6, paddingRight: 6, paddingBottom: 10 }} />
+                        <ProductCard key={index} product={result} storeLocationId={storeLocation?.id} additionalNavigationParams={{ store: currentStore?.serialize?.() }} sliderHeight={135} wrapperStyle={{ paddingLeft: 6, paddingRight: 6, paddingBottom: 10 }} />
                     )}
                 />
             </YStack>

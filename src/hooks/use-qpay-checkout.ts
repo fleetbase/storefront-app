@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
+import { getCartOriginIds, getCartQuoteOrigin } from '../utils/marketplace-runtime';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
@@ -129,11 +130,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
 
     // Memoize store location and food truck IDs based on cart contents
-    const storeLocationId = useMemo(() => {
-        if (!cart?.contents || typeof cart.contents !== 'function') return null;
-        const storeLocationIds = cart.contents().map((item) => item.store_location_id);
-        return [...new Set(storeLocationIds)][0] || null;
-    }, [cartContentsString]);
+    const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
+    const storeLocationId = storeLocationIds[0] || null;
+    const quoteOrigin = useMemo(() => getCartQuoteOrigin(cart), [cartContentsString]);
 
     const foodTruckId = useMemo(() => {
         if (!cart?.contents || typeof cart.contents !== 'function') return null;
@@ -284,7 +283,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         if (!cart) return;
 
         let isMounted = true;
-        const origin = foodTruckId ?? storeLocationId;
+        const origin = quoteOrigin ?? foodTruckId ?? storeLocationId;
         const destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
@@ -304,7 +303,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, storeLocationId]);
+    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, quoteOrigin, storeLocationId]);
 
     // Listen to order updates via socket (if not already listening)
     useEffect(() => {
@@ -389,7 +388,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
             orderNotes,
             setOrderNotes,
             storeLocationId,
-            originLocationId: foodTruckId ?? storeLocationId,
+            originLocationId: quoteOrigin ?? foodTruckId ?? storeLocationId,
+            storeLocationIds,
             listener: listenerRef.current,
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
@@ -421,6 +421,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
             error,
             orderNotes,
             storeLocationId,
+            storeLocationIds,
+            quoteOrigin,
             hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,

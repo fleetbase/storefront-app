@@ -15,19 +15,11 @@ const hasStorefrontConfig = () => {
 const useStorefront = () => {
     const { locale } = useLanguage();
     const [storefront, setStorefront] = useState<Storefront | null>(null);
+    const [storefrontAdapter, setStorefrontAdapter] = useState(adapter);
     const [error, setError] = useState<Error | null>(null);
-
-    const storefrontAdapter = useMemo(() => {
-        if (storefront) {
-            return storefront.getAdapter();
-        }
-
-        return adapter;
-    }, [storefront]);
+    const authToken = getString('_customer_token');
 
     useEffect(() => {
-        const authToken = getString('_customer_token');
-        
         // Build headers object with locale and auth
         const headers: Record<string, string> = {
             'Accept-Language': locale || 'en',
@@ -39,13 +31,20 @@ const useStorefront = () => {
         
         const configuredAdapter = adapter.setHeaders(headers);
         instance.setAdapter(configuredAdapter);
+        // Compatibility for Storefront JS <=1.1.14. Newer SDK versions rebuild
+        // these stores in setAdapter(), but current released clients require the
+        // adapter to be propagated explicitly after locale/auth header changes.
+        for (const storeName of ['products', 'categories', 'foodTrucks', 'reviews', 'customers', 'cart', 'checkout']) {
+            if (instance[storeName]) instance[storeName].adapter = configuredAdapter;
+        }
 
         try {
+            setStorefrontAdapter(configuredAdapter);
             setStorefront(instance);
         } catch (initializationError) {
             setError(initializationError);
         }
-    }, [locale]);
+    }, [authToken, locale]);
 
     return useMemo(
         () => ({

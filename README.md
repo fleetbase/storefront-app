@@ -85,7 +85,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 
 Storefront is a headless e-commerce service which functions as an extension within [Fleetbase](https://fleetbase.io). Similarly to how [Fleetbase is a headless logistics service](https://fleetbase.io/developers). [Fleetbase Storefront](https://fleetbase.io/products/storefront) provides several API-first approaches to products, carts, categories, customers, and checkout flow giving developers more control over the shopping experience. This project is to provide an open-sourced hyperlocal shopping app which can be fully customised and adapted to personal and commercial projects. This Storefront app is built with [React Native](https://reactnative.dev/) to provide react native developers a head start building with Fleetbase and Storefront.
 
-_Notice: Network/ Multi-vendor functionality is still a work in progress._
+The same application supports two production editions. A `store_...` key launches the established single-store experience; a `network_...` key launches the marketplace navigator with discovery, merchant and product search, map browsing, scoped carts, and optional multi-store checkout.
 
 #### Use Cases
 
@@ -154,7 +154,7 @@ APP_IDENTIFIER=
 FLEETBASE_HOST=
 STOREFRONT_KEY=
 FLEETBASE_KEY=
-GOOGLE_MAPS_KEY=
+GOOGLE_MAPS_API_KEY=
 STRIPE_KEY=
 ```
 
@@ -304,11 +304,28 @@ Fleetbase Storefront intends to support marketplaces natively though a concept c
 
 #### Configuring network
 
-Coming soon...
+Add each merchant store to the network, give every visible store at least one location and published products, and configure network-level gateways, notification channels, currency, and Fleet-Ops order settings. The `multi_cart_enabled` network option controls whether one cart may span merchants.
 
 #### Launch network on app
 
 Launching a network app is much like launching a singular StorefrontApp, but instead of providing a "store key", you must provide a "network key" which can be found in the Storefront extension in the network dialog for the network you are building.
+
+```bash
+STOREFRONT_KEY=network_your_network_key
+```
+
+The app detects the owner at boot. Marketplace customers can browse paginated member stores, category and tag filters, search products and merchants, switch between map and list discovery, enter a merchant without leaving the marketplace shell, and keep a network-scoped cart. Location permission is requested only when the customer chooses a nearby/map action; list browsing remains available if permission is denied.
+
+Every marketplace cart line records its merchant and store location. The app prompts before replacing a single-store cart and groups items by merchant when multi-cart is enabled. The backend revalidates network membership, store availability, products, locations, and currency before payment.
+
+Before opening a pull request, run:
+
+```bash
+yarn lint:marketplace
+yarn typecheck:marketplace
+yarn test:ci
+yarn web:build
+```
 
 ### Cart
 
