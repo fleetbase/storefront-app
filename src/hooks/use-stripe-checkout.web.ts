@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 // import { useStripe, initStripe } from '@stripe/stripe-react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
-import { getCartOriginIds, getCartQuoteOrigin } from '../utils/marketplace-runtime';
+import { getCartOriginIds, getCartQuoteOrigin } from '../network/network-runtime';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';

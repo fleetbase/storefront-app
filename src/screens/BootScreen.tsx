@@ -12,7 +12,7 @@ import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { getStorefrontRoute } from '../utils/marketplace-runtime';
+import { getStorefrontRoute } from '../network/network-runtime';
 
 const BootScreenWrapper = ({ children, backgroundImage, backgroundColor, theme }) => {
     const bg = (isArray(backgroundColor) ? backgroundColor[0] : backgroundColor) ?? theme.background.val;
@@ -78,7 +78,7 @@ const BootScreen = () => {
                 if (cancelled) return;
                 initializeOwner(info);
 
-                // Marketplace browsing does not require precise location. Location is
+                // Network (marketplace) browsing does not require precise location. Location is
                 // requested later, in context, for map/nearest/delivery functionality.
                 if (info.is_network) {
                     enterStorefront(getStorefrontRoute(info), info);

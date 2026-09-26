@@ -18,7 +18,7 @@ import usePromiseWithLoading from '../hooks/use-promise-with-loading';
 import Spacer from '../components/Spacer';
 import ScreenWrapper from '../components/ScreenWrapper';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { groupCartItemsByStore, totalCartQuantity } from '../utils/marketplace-runtime';
+import { groupCartItemsByStore, totalCartQuantity } from '../network/network-runtime';
 
 const isAndroid = Platform.OS === 'android';
 if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -39,7 +39,7 @@ const CartScreen = ({ route }) => {
     const rowRefs = useRef({});
     const isModal = typeof routeName === 'string' && routeName.endsWith('Modal');
     const displayedRows = useMemo(() => {
-        if (mode !== 'marketplace') return displayedItems;
+        if (mode !== 'network') return displayedItems;
         return Object.entries(groupCartItemsByStore(displayedItems)).flatMap(([storeId, items]) => {
             const subtotal = items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0);
             const store = items[0]?.store || {};
@@ -48,10 +48,10 @@ const CartScreen = ({ route }) => {
     }, [displayedItems, mode]);
 
     const handleCheckout = () => {
-        if (mode === 'marketplace') {
+        if (mode === 'network') {
             const invalidGroup = Object.entries(groupCartItemsByStore(cart.contents())).find(([, items]) => items.some((item) => !item.store_location_id));
             if (invalidGroup) {
-                toast.error(t('Marketplace.cartLocationRequired'));
+                toast.error(t('Network.cartLocationRequired'));
                 return;
             }
         }
@@ -191,7 +191,7 @@ const CartScreen = ({ route }) => {
                         {!!cartItem.store?.logo_url && <Image source={{ uri: cartItem.store.logo_url }} width={36} height={36} borderRadius='$2' />}
                         <YStack flex={1}>
                             <Text color='$textPrimary' fontWeight='700' numberOfLines={1}>{cartItem.store?.name || cartItem.storeId}</Text>
-                            <Text color='$textSecondary' fontSize='$3'>{t('Marketplace.groupItemCount', { count: totalCartQuantity(cartItem.items) })}</Text>
+                            <Text color='$textSecondary' fontSize='$3'>{t('Network.groupItemCount', { count: totalCartQuantity(cartItem.items) })}</Text>
                         </YStack>
                     </XStack>
                     <Text color='$textPrimary' fontWeight='700'>{formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}</Text>

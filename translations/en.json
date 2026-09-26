@@ -422,7 +422,7 @@
         "selectBank": "Select Bank"
     },
     "TextAreaSheet": {},
-    "Marketplace": {
+    "Network": {
         "tabs": { "discover": "Discover", "search": "Search", "map": "Map", "cart": "Cart", "profile": "Profile" },
         "sort": { "nearest": "Nearest", "highest_rated": "Highest rated", "lowest_rated": "Lowest rated", "popular": "Popular", "trending": "Trending", "newest": "Newest", "oldest": "Oldest" },
         "allCategories": "All categories",
@@ -446,10 +446,10 @@
         "noSearchResults": "No matching products found.",
         "searchError": "Search is unavailable right now.",
         "useMyLocation": "Use my location",
-        "mapError": "We couldn't load marketplace locations.",
+        "mapError": "We couldn't load store locations.",
         "noMapLocations": "No store locations are available on the map.",
-        "storeUnavailable": "This store is unavailable or is not part of this marketplace.",
-        "productUnavailable": "This product is unavailable or is not part of this marketplace.",
+        "storeUnavailable": "This store isn't available here.",
+        "productUnavailable": "This product isn't available here.",
         "cartReplaceTitle": "Start a new store order?",
         "cartReplaceDescription": "Your current cart is from another store. Replace it before adding this item?",
         "replaceCart": "Replace cart",

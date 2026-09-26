@@ -72,7 +72,7 @@ const ProductScreen = ({ route = {} }) => {
             toast.success(t('ProductScreen.productAddedToCart', { productName: product.getAttribute('name') }));
             navigation.goBack();
         } catch (error) {
-            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Marketplace.addToCartError'));
+            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Network.addToCartError'));
         }
     };
 

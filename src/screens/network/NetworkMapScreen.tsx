@@ -4,13 +4,13 @@ import MapView, { Marker } from 'react-native-maps';
 import { Button, Image, Spinner, Text, YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { getDefaultCoordinates } from '../utils/location';
-import MarketplaceStoreCard from '../components/MarketplaceStoreCard';
-import { getMappableMarketplaceLocations, getMarketplaceLocationCoordinates } from '../utils/marketplace-runtime';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
+import { getDefaultCoordinates } from '../../utils/location';
+import NetworkStoreCard from '../../components/NetworkStoreCard';
+import { getMappableNetworkLocations, getNetworkLocationCoordinates } from '../../network/network-runtime';
 
-const MarketplaceMapScreen = () => {
+const NetworkMapScreen = () => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { t } = useLanguage();
@@ -33,7 +33,7 @@ const MarketplaceMapScreen = () => {
             .getStoreLocations({ with_store: true, limit: 100 })
             .then((result: any) => {
                 if (!active) return;
-                const validLocations = getMappableMarketplaceLocations(Array.from(result || []));
+                const validLocations = getMappableNetworkLocations(Array.from(result || []));
                 setLocations(validLocations);
                 if (validLocations.length) setSelectedId(validLocations[0].id);
             })
@@ -45,14 +45,14 @@ const MarketplaceMapScreen = () => {
     }, [network, retryCounter]);
 
     const selectLocation = (location: any, index: number) => {
-        const coordinates = getMarketplaceLocationCoordinates(location);
+        const coordinates = getNetworkLocationCoordinates(location);
         setSelectedId(location.id);
         listRef.current?.scrollToIndex?.({ index, animated: true, viewPosition: 0.5 });
         mapRef.current?.animateToRegion?.({ ...coordinates, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 350);
     };
     const openStore = (location: any) => {
         const storeData = location?.storeData || location?.getAttribute?.('store_data') || location?.getAttribute?.('store');
-        if (storeData && typeof storeData === 'object') navigation.navigate('MarketplaceStore', { store: storeData, storeId: storeData.id, location: location.serialize() });
+        if (storeData && typeof storeData === 'object') navigation.navigate('NetworkStore', { store: storeData, storeId: storeData.id, location: location.serialize() });
     };
 
     return (
@@ -61,7 +61,7 @@ const MarketplaceMapScreen = () => {
                 <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={{ latitude, longitude, latitudeDelta: 0.2, longitudeDelta: 0.2 }}>
                     {locations.map((location: any, index) => {
                         const store = location.getAttribute('store_data') || {};
-                        const coordinates = getMarketplaceLocationCoordinates(location);
+                        const coordinates = getNetworkLocationCoordinates(location);
                         return (
                             <Marker key={location.id} coordinate={coordinates} onPress={() => selectLocation(location, index)}>
                                 <YStack borderWidth={selectedId === location.id ? 3 : 1} borderColor='$primary' borderRadius='$3' bg='$surface' p='$1'>
@@ -72,16 +72,16 @@ const MarketplaceMapScreen = () => {
                     })}
                 </MapView>
                 <Button position='absolute' top='$3' right='$3' bg='$surface' onPress={() => navigation.navigate('LocationPermission')}>
-                    {t('Marketplace.useMyLocation')}
+                    {t('Network.useMyLocation')}
                 </Button>
             </YStack>
             <YStack height={220} borderTopWidth={1} borderColor='$borderColor' bg='$background'>
                 {loading ? (
                     <Spinner m='$6' />
                 ) : error ? (
-                    <YStack p='$5' alignItems='center' gap='$3'><Text>{t('Marketplace.mapError')}</Text><Button onPress={() => setRetryCounter((value) => value + 1)}>{t('common.retry')}</Button></YStack>
+                    <YStack p='$5' alignItems='center' gap='$3'><Text>{t('Network.mapError')}</Text><Button onPress={() => setRetryCounter((value) => value + 1)}>{t('common.retry')}</Button></YStack>
                 ) : !locations.length ? (
-                    <YStack p='$5' alignItems='center'><Text color='$textSecondary'>{t('Marketplace.noMapLocations')}</Text></YStack>
+                    <YStack p='$5' alignItems='center'><Text color='$textSecondary'>{t('Network.noMapLocations')}</Text></YStack>
                 ) : (
                     <FlatList
                         ref={listRef}
@@ -94,7 +94,7 @@ const MarketplaceMapScreen = () => {
                             const storeData = item.storeData || item.getAttribute('store_data') || item.getAttribute('store');
                             if (!storeData) return null;
                             const merchant = { getAttribute: (key: string) => storeData[key], id: storeData.id, serialize: () => storeData };
-                            return <YStack width={280}><MarketplaceStoreCard compact store={merchant} onPress={() => openStore(item)} /></YStack>;
+                            return <YStack width={280}><NetworkStoreCard compact store={merchant} onPress={() => openStore(item)} /></YStack>;
                         }}
                     />
                 )}
@@ -103,7 +103,7 @@ const MarketplaceMapScreen = () => {
     );
 };
 
-export default MarketplaceMapScreen;
+export default NetworkMapScreen;
 
 const styles = StyleSheet.create({
     locationList: { padding: 12, gap: 12 },

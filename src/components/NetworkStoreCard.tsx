@@ -3,14 +3,14 @@ import { Pressable } from 'react-native';
 import { Card, Image, Paragraph, Text, XStack, YStack } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const MarketplaceStoreCard = ({ store, onPress, compact = false }: any) => {
+const NetworkStoreCard = ({ store, onPress, compact = false }: any) => {
     const { t } = useLanguage();
-    const name = store?.getAttribute?.('name') || t('Marketplace.unknownStore');
+    const name = store?.getAttribute?.('name') || t('Network.unknownStore');
     const distance = Number(store?.getAttribute?.('distance'));
     const online = store?.getAttribute?.('online');
 
     return (
-        <Pressable accessibilityRole='button' accessibilityLabel={t('Marketplace.openStore', { storeName: name })} onPress={() => onPress?.(store)}>
+        <Pressable accessibilityRole='button' accessibilityLabel={t('Network.openStore', { storeName: name })} onPress={() => onPress?.(store)}>
             <Card bordered borderColor='$borderColor' bg='$surface' overflow='hidden' mb='$3'>
                 {!compact && <Image source={{ uri: store?.getAttribute?.('backdrop_url') }} width='100%' height={120} resizeMode='cover' />}
                 <XStack p='$3' gap='$3' alignItems='center'>
@@ -21,7 +21,7 @@ const MarketplaceStoreCard = ({ store, onPress, compact = false }: any) => {
                                 {name}
                             </Text>
                             <Text color={online === false ? '$red-600' : '$green-600'} fontSize='$3'>
-                                {online === false ? t('Marketplace.offline') : t('Marketplace.online')}
+                                {online === false ? t('Network.offline') : t('Network.online')}
                             </Text>
                         </XStack>
                         {!!store?.getAttribute?.('description') && (
@@ -31,11 +31,11 @@ const MarketplaceStoreCard = ({ store, onPress, compact = false }: any) => {
                         )}
                         <XStack gap='$3'>
                             <Text color='$textSecondary' fontSize='$3'>
-                                {t('Marketplace.rating', { rating: Number(store?.getAttribute?.('rating') || 0).toFixed(1) })}
+                                {t('Network.rating', { rating: Number(store?.getAttribute?.('rating') || 0).toFixed(1) })}
                             </Text>
                             {Number.isFinite(distance) && (
                                 <Text color='$textSecondary' fontSize='$3'>
-                                    {t('Marketplace.distanceMeters', { distance: Math.round(distance) })}
+                                    {t('Network.distanceMeters', { distance: Math.round(distance) })}
                                 </Text>
                             )}
                         </XStack>
@@ -46,4 +46,4 @@ const MarketplaceStoreCard = ({ store, onPress, compact = false }: any) => {
     );
 };
 
-export default MarketplaceStoreCard;
+export default NetworkStoreCard;

@@ -20,7 +20,7 @@ const StoreHomeScreen = () => {
     const scrollY = useRef(new Animated.Value(0)).current;
     const { info, store, mode } = useStorefrontInfo();
     const { data: categories } = useStorefrontData(
-        (storefront) => (mode === 'marketplace' && store ? storefront.categories.query({ store: store.id }) : storefront.categories.findAll()),
+        (storefront) => (mode === 'network' && store ? storefront.categories.query({ store: store.id }) : storefront.categories.findAll()),
         { defaultValue: [], persistKey: `${info.id}_categories`, dependencies: [mode, store?.id] }
     );
     const categoriesDisplay = storefrontConfig('storeCategoriesDisplay', 'grid');
@@ -63,7 +63,7 @@ const StoreHomeScreen = () => {
                     headerLeft={<LocationPicker onPressAddNewLocation={({ params }) => handleNavigateNewLocation(navigation, params)} />}
                     headerLeftStyle={{ justifyContent: 'flex-start' }}
                 />
-                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} showLocationPicker={mode === 'marketplace' ? true : undefined} />
+                <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} showLocationPicker={mode === 'network' ? true : undefined} />
             </Animated.View>
             <ScrollView
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}

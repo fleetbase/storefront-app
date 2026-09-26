@@ -68,11 +68,11 @@ jobs:
         id: cache-key
         run: echo "key=${{ runner.os }}-deps-${{ hashFiles('**/yarn.lock', '**/package.json') }}" >> $GITHUB_OUTPUT
 
-      - name: Lint marketplace runtime and UI
-        run: yarn lint:marketplace
+      - name: Lint Network edition runtime and UI
+        run: yarn lint:strict
 
-      - name: Type-check marketplace contracts
-        run: yarn typecheck:marketplace
+      - name: Type-check strict modules
+        run: yarn typecheck:strict
 
       - name: Run behavior tests
         run: yarn test:ci

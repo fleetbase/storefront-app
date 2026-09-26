@@ -11,7 +11,7 @@ import {
     getStorefrontStorageScope,
     serializeSdkResource,
     StorefrontMode,
-} from '../utils/marketplace-runtime';
+} from '../network/network-runtime';
 
 type StorefrontRuntimeValue = {
     mode: StorefrontMode;
@@ -45,9 +45,9 @@ export const StorefrontRuntimeProvider = ({ children }: { children: ReactNode })
 
     const owner = useMemo(() => {
         if (!ownerInfo || !adapter) return null;
-        return mode === 'marketplace' ? new Network(ownerInfo, adapter) : new Store(ownerInfo, adapter);
+        return mode === 'network' ? new Network(ownerInfo, adapter) : new Store(ownerInfo, adapter);
     }, [adapter, mode, ownerInfo]);
-    const network = mode === 'marketplace' ? (owner as Network | null) : null;
+    const network = mode === 'network' ? (owner as Network | null) : null;
     const currentStore = useMemo(() => {
         const data = mode === 'store' ? ownerInfo : currentStoreInfo;
         return data && adapter ? new Store(data, adapter) : null;
@@ -80,14 +80,14 @@ export const StorefrontRuntimeProvider = ({ children }: { children: ReactNode })
 
     const enterStore = useCallback(
         (store: any) => {
-            if (mode !== 'marketplace') return;
+            if (mode !== 'network') return;
             setCurrentStoreInfo(serializeSdkResource(store));
         },
         [mode, setCurrentStoreInfo]
     );
 
     const leaveStore = useCallback(() => {
-        if (mode === 'marketplace') setCurrentStoreInfo(null);
+        if (mode === 'network') setCurrentStoreInfo(null);
     }, [mode, setCurrentStoreInfo]);
 
     const selectStoreLocation = useCallback(

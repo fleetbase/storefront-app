@@ -14,7 +14,7 @@ const CategoryProductSlider = ({ category, style = {}, onPressCategory }) => {
     const { store, mode } = useStorefrontInfo();
     const { getSelectedStoreLocation } = useStorefrontRuntime();
     const storeLocation = getSelectedStoreLocation(store?.id);
-    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id, ...(mode === 'marketplace' && store ? { store: store.id } : {}) }), {
+    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id, ...(mode === 'network' && store ? { store: store.id } : {}) }), {
         defaultValue: [],
         persistKey: `${store?.id || 'store'}_${category.id}_products`,
         dependencies: [mode, store?.id, category.id],

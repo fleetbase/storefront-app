@@ -3,17 +3,17 @@ import { FlatList, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { Button, Image, Paragraph, Spinner, Text, XStack, YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import useStorefront from '../hooks/use-storefront';
-import { getCoordinates, getCurrentLocationFromStorage } from '../utils/location';
-import MarketplaceStoreCard from '../components/MarketplaceStoreCard';
-import { buildMarketplaceStoreQuery, mergeMarketplacePage } from '../utils/marketplace-runtime';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
+import useStorefront from '../../hooks/use-storefront';
+import { getCoordinates, getCurrentLocationFromStorage } from '../../utils/location';
+import NetworkStoreCard from '../../components/NetworkStoreCard';
+import { buildNetworkStoreQuery, mergeNetworkPage } from '../../network/network-runtime';
 
 const PAGE_SIZE = 20;
 const SORTS = ['nearest', 'highest_rated', 'lowest_rated', 'popular', 'trending', 'newest', 'oldest'];
 
-const MarketplaceDiscoverScreen = () => {
+const NetworkHomeScreen = () => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { t } = useLanguage();
@@ -33,7 +33,7 @@ const MarketplaceDiscoverScreen = () => {
     const buildParams = useCallback(
         (offset = 0) => {
             const currentLocation = getCurrentLocationFromStorage();
-            return buildMarketplaceStoreQuery(discovery, offset, currentLocation ? getCoordinates(currentLocation) : null);
+            return buildNetworkStoreQuery(discovery, offset, currentLocation ? getCoordinates(currentLocation) : null);
         },
         [discovery]
     );
@@ -50,7 +50,7 @@ const MarketplaceDiscoverScreen = () => {
                 if (sequence !== requestSequence.current) return;
                 const next = Array.from(result || []);
                 setStores((current) => {
-                    const updated = mergeMarketplacePage(current, next, append);
+                    const updated = mergeNetworkPage(current, next, append);
                     storeCount.current = updated.length;
                     return updated;
                 });
@@ -110,22 +110,22 @@ const MarketplaceDiscoverScreen = () => {
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sorts}>
                         {SORTS.map((sort) => (
                             <Button key={sort} size='$3' bg={discovery.sort === sort ? '$primary' : '$surface'} color={discovery.sort === sort ? '$primaryText' : '$textPrimary'} onPress={() => updateDiscovery({ sort })}>
-                                {t(`Marketplace.sort.${sort}`)}
+                                {t(`Network.sort.${sort}`)}
                             </Button>
                         ))}
                     </ScrollView>
                     {!!categories.length && (
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
                             <Button size='$3' bg={!discovery.category ? '$primary' : '$surface'} onPress={() => updateDiscovery({ category: null })}>
-                                {t('Marketplace.allCategories')}
+                                {t('Network.allCategories')}
                             </Button>
                             {categories.map((category: any) => (
                                 <Button key={category.id} size='$3' bg={discovery.category === category.id ? '$primary' : '$surface'} onPress={() => updateDiscovery({ category: category.id })}>
                                     {category.getAttribute('name')}
                                 </Button>
                             ))}
-                            <Button size='$3' bg={discovery.category === 'uncategorized' ? '$primary' : '$surface'} onPress={() => navigation.navigate('MarketplaceCategory', { category: null, categoryId: 'uncategorized' })}>
-                                {t('Marketplace.uncategorized')}
+                            <Button size='$3' bg={discovery.category === 'uncategorized' ? '$primary' : '$surface'} onPress={() => navigation.navigate('NetworkCategory', { category: null, categoryId: 'uncategorized' })}>
+                                {t('Network.uncategorized')}
                             </Button>
                         </ScrollView>
                     )}
@@ -143,16 +143,16 @@ const MarketplaceDiscoverScreen = () => {
                     )}
                     <XStack gap='$2'>
                         <Button size='$3' bg={discovery.online === true ? '$primary' : '$surface'} onPress={() => updateDiscovery({ online: discovery.online === true ? null : true })}>
-                            {t('Marketplace.openNow')}
+                            {t('Network.openNow')}
                         </Button>
                         {activeFilterCount > 0 && (
                             <Button size='$3' chromeless onPress={clearDiscovery}>
-                                {t('Marketplace.clearFilters', { count: activeFilterCount })}
+                                {t('Network.clearFilters', { count: activeFilterCount })}
                             </Button>
                         )}
                     </XStack>
                     <Text color='$textPrimary' fontSize='$7' fontWeight='700' mt='$2'>
-                        {t('Marketplace.stores')}
+                        {t('Network.stores')}
                     </Text>
                 </YStack>
             </YStack>
@@ -165,7 +165,7 @@ const MarketplaceDiscoverScreen = () => {
             <FlatList
                 data={stores}
                 keyExtractor={(item: any) => item.id}
-                renderItem={({ item }) => <MarketplaceStoreCard store={item} onPress={(store: any) => navigation.navigate('MarketplaceStore', { store: store.serialize(), storeId: store.id })} />}
+                renderItem={({ item }) => <NetworkStoreCard store={item} onPress={(store: any) => navigation.navigate('NetworkStore', { store: store.serialize(), storeId: store.id })} />}
                 ListHeaderComponent={header}
                 contentContainerStyle={styles.list}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadStores({ refresh: true })} />}
@@ -176,9 +176,9 @@ const MarketplaceDiscoverScreen = () => {
                     loading ? (
                         <YStack p='$8' alignItems='center'><Spinner size='large' /></YStack>
                     ) : error ? (
-                        <YStack p='$6' alignItems='center' gap='$3'><Text color='$textSecondary' textAlign='center'>{t('Marketplace.loadError')}</Text><Button onPress={() => loadStores()}>{t('common.retry')}</Button></YStack>
+                        <YStack p='$6' alignItems='center' gap='$3'><Text color='$textSecondary' textAlign='center'>{t('Network.loadError')}</Text><Button onPress={() => loadStores()}>{t('common.retry')}</Button></YStack>
                     ) : (
-                        <YStack p='$6' alignItems='center' gap='$2'><Text color='$textPrimary' fontSize='$6'>{t('Marketplace.noStores')}</Text><Paragraph color='$textSecondary' textAlign='center'>{t('Marketplace.noStoresDescription')}</Paragraph></YStack>
+                        <YStack p='$6' alignItems='center' gap='$2'><Text color='$textPrimary' fontSize='$6'>{t('Network.noStores')}</Text><Paragraph color='$textSecondary' textAlign='center'>{t('Network.noStoresDescription')}</Paragraph></YStack>
                     )
                 }
             />
@@ -186,7 +186,7 @@ const MarketplaceDiscoverScreen = () => {
     );
 };
 
-export default MarketplaceDiscoverScreen;
+export default NetworkHomeScreen;
 
 const styles = StyleSheet.create({
     sorts: { gap: 8, paddingVertical: 8 },
