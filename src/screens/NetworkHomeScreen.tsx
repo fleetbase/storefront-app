@@ -7,7 +7,7 @@ const NetworkHome = () => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <YStack flex={1} alignItems='center' justifyContent='center' bg='white'>
-                <Spinner size='large' color='$blue10' />
+                <Spinner size='large' color='$primary' />
                 <Text mt='$4' color='gray'>
                     Network Home
                 </Text>

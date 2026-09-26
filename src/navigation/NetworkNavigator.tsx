@@ -89,7 +89,7 @@ const MarketplaceTabIcon = ({ routeName, color }: { routeName: string; color: st
         <XStack position='relative'>
             <FontAwesomeIcon icon={icons[routeName]} size={20} color={color} />
             {routeName === 'MarketplaceCartTab' && count > 0 && (
-                <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} borderRadius={9} bg='$red10' color='white' textAlign='center' fontSize={11} lineHeight={18}>
+                <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} borderRadius={9} bg='$red-600' color='white' textAlign='center' fontSize={11} lineHeight={18}>
                     {count > 99 ? '99+' : count}
                 </Text>
             )}

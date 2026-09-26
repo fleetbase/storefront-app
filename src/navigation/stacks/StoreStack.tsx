@@ -20,7 +20,7 @@ export const StoreCategory = {
     screen: StoreCategoryScreen,
     options: ({ route, navigation }) => {
         return {
-            title: route.params.category.name,
+            title: route.params?.category?.name ?? '',
             headerTitleAlign: 'left',
             headerTitleStyle: {
                 color: getTheme('textPrimary'),

@@ -1,3 +1,4 @@
+/* global globalThis */
 export function parseConfigObjectString(objectString) {
     if (!objectString || typeof objectString !== 'string' || objectString.trim() === '') {
         return {};
@@ -14,11 +15,14 @@ export function parseConfigObjectString(objectString) {
 }
 
 export function config(key, defaultValue) {
-    // This helper is evaluated by Tamagui's Node/esbuild extractor as well as
-    // Webpack. Importing react-native-config here pulls an untransformed Flow
-    // codegen module into that build-time process, so read the build environment
-    // directly. Webpack still injects runtime app configuration elsewhere.
-    const value = typeof process !== 'undefined' ? process.env?.[key] : undefined;
+    // This helper is evaluated by Tamagui's Node/esbuild extractor as well as by
+    // the app bundles. Importing react-native-config here pulls an untransformed
+    // Flow codegen module into the build-time process, so at runtime the app
+    // configuration is read from the global populated by `src/env.ts`, and at
+    // build time from the process environment.
+    const runtimeEnv = typeof globalThis !== 'undefined' ? globalThis.__STOREFRONT_ENV__ : undefined;
+    const runtimeValue = runtimeEnv ? runtimeEnv[key] : undefined;
+    const value = runtimeValue !== undefined ? runtimeValue : typeof process !== 'undefined' ? process.env?.[key] : undefined;
     return value === undefined ? defaultValue : value;
 }
 

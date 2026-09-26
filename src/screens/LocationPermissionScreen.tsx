@@ -17,16 +17,29 @@ const LocationPermissionScreen = () => {
     const { t } = useLanguage();
     const [isDialogOpen, setDialogOpen] = useState(false);
 
+    // When the prompt was opened from inside the app (e.g. the Network map), return
+    // to that screen. Only restart the boot flow when boot itself sent us here.
+    const continueAfterPermissionGranted = useCallback(() => {
+        const state = navigation.getState();
+        const previousRoute = state?.routes?.[(state?.index ?? 0) - 1];
+        if (previousRoute && previousRoute.name !== 'Boot') {
+            navigation.goBack();
+            return;
+        }
+
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Boot' }],
+        });
+    }, [navigation]);
+
     // Function to request location permission
     const requestLocationPermission = async () => {
         if (Platform.OS === 'web') {
             // Use the browser Permissions API (and geolocation prompt) on web
             const granted = await requestWebGeolocationPermission();
             if (granted) {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Boot' }],
-                });
+                continueAfterPermissionGranted();
             } else {
                 setDialogOpen(true);
             }
@@ -37,10 +50,7 @@ const LocationPermissionScreen = () => {
         const result = await request(permission);
 
         if (result === RESULTS.GRANTED) {
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Boot' }],
-            });
+            continueAfterPermissionGranted();
         } else {
             // Open fallback dialog after denial
             setDialogOpen(true);
@@ -56,12 +66,9 @@ const LocationPermissionScreen = () => {
         const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
         const result = await check(permission);
         if (result === RESULTS.GRANTED) {
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Boot' }],
-            });
+            continueAfterPermissionGranted();
         }
-    }, [navigation]);
+    }, [continueAfterPermissionGranted]);
 
     useFocusEffect(
         useCallback(() => {

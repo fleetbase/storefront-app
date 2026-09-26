@@ -133,7 +133,7 @@ const ProductScreen = ({ route = {} }) => {
                             )}
                         </XStack>
                         <XStack px='$4' alignItems='center' justifyContent='space-between'>
-                            <Text fontSize='$6' fontWeight='bold' color='$green8'>
+                            <Text fontSize='$6' fontWeight='bold' color='$green-600'>
                                 {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                             </Text>
                         </XStack>

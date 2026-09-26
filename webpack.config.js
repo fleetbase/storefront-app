@@ -43,12 +43,48 @@ const generateConfig = () => {
         'APPLE_LOGIN_ENABLED',
         'FACEBOOK_LOGIN_ENABLED',
         'GOOGLE_LOGIN_ENABLED',
+        'APP_THEME',
+        'CUSTOM_COLORS_LIGHT',
+        'CUSTOM_COLORS_DARK',
+        'CUSTOM_TAB_BAR_BG_COLOR',
+        'LOGIN_BG_IMAGE',
+        'BOOTSCREEN_BG_IMAGE',
+        'DISABLE_GEOCODING_SCREEN',
+        'GOOGLE_CLIENT_ID',
+        'FACEBOOK_APP_ID',
+        'FACEBOOK_CLIENT_TOKEN',
+        'STRIPE_PAYMENT_UI',
+        'STRIPE_ENABLE_APPLE_PAY',
+        'STRIPE_ENABLE_GOOGLE_PAY',
+        'SOCKETCLUSTER_PATH',
+        'STORE_HEADER_SHOW_GRADIENT',
+        'STORE_HEADER_SHOW_LOCATION_PICKER',
+        'STORE_HEADER_SHOW_TITLE',
+        'STORE_HEADER_SHOW_DESCRIPTION',
+        'STORE_HEADER_SHOW_LOGO',
+        'STORE_HEADER_LOGO_HEIGHT',
+        'STORE_HEADER_LOGO_WIDTH',
+        'STORE_HEADER_FLEX_DIRECTION',
+        'STORE_HEADER_ALIGN_ITEMS',
+        'STORE_HEADER_JUSTIFY_CONTENT',
+        'STORE_HEADER_SPACING',
+        'STORE_HEADER_PADDING_TOP',
+        'STORE_HEADER_PADDING_BOTTOM',
+        'STORE_HEADER_PADDING_LEFT',
+        'STORE_HEADER_PADDING_RIGHT',
     ];
 
     const config = STANDARD_KEYS.reduce((acc, key) => {
         acc[key] = process.env[key];
         return acc;
     }, {});
+
+    // Tab icon overrides (e.g. STORE_HOME_TAB_ICON) are read by route name.
+    Object.keys(process.env)
+        .filter((key) => /^STORE_[A-Z_]+_TAB_ICON$/.test(key))
+        .forEach((key) => {
+            config[key] = process.env[key];
+        });
 
     // Add locale-based keys.
     const AVAILABLE_LOCALES = (process.env.AVAILABLE_LOCALES || 'en').split(',');
@@ -65,9 +101,9 @@ const generateConfig = () => {
     return config;
 };
 
-module.exports = {
+module.exports = (env = {}, argv = {}) => ({
     target: 'web',
-    mode: 'development',
+    mode: argv.mode || 'development',
     devtool: 'source-map',
     entry: [path.resolve(__dirname, 'index.web.tsx')],
     devServer: {
@@ -206,7 +242,7 @@ module.exports = {
             process: 'process/browser',
         }),
         new DefinePlugin({
-            __DEV__: JSON.stringify(true),
+            __DEV__: JSON.stringify(argv.mode !== 'production'),
             CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),
@@ -219,4 +255,4 @@ module.exports = {
             },
         },
     ],
-};
+});

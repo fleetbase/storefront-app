@@ -56,8 +56,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -117,8 +117,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -259,8 +259,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -353,8 +353,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -421,8 +421,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
