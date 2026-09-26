@@ -2,10 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Product, Store } from '@fleetbase/storefront';
 import { Button, Spinner, Text, YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
-import ProductScreen from '../ProductScreen';
 import useStorefront from '../../hooks/use-storefront';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { serializeSdkResource } from '../../network/network-runtime';
+import { screenSlot } from '../../extensions';
+
+// Renders the (possibly overridden) product detail once the product and store are resolved.
+const ProductDetailSlot = screenSlot('product.detail');
 
 const NetworkProductScreen = ({ route }: any) => {
     const navigation = useNavigation();
@@ -49,7 +52,7 @@ const NetworkProductScreen = ({ route }: any) => {
 
     if (!resolvedParams) return <YStack flex={1} alignItems='center' justifyContent='center'><Spinner size='large' /></YStack>;
 
-    return <ProductScreen route={resolvedRoute} />;
+    return <ProductDetailSlot route={resolvedRoute} navigation={navigation} />;
 };
 
 export default NetworkProductScreen;

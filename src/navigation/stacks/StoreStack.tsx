@@ -1,14 +1,10 @@
-import StoreHomeScreen from '../../screens/StoreHomeScreen';
-import StoreMapScreen from '../../screens/StoreMapScreen';
-import StoreSearchScreen from '../../screens/StoreSearchScreen';
-import StoreCategoryScreen from '../../screens/StoreCategoryScreen';
-import StoreInfoScreen from '../../screens/StoreInfoScreen';
 import BackButton from '../../components/BackButton';
 import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
+import { screenSlot } from '../../extensions';
 
 export const StoreHome = {
-    screen: StoreHomeScreen,
+    screen: screenSlot('store.home'),
     options: ({ route }) => {
         return {
             headerShown: false,
@@ -17,7 +13,7 @@ export const StoreHome = {
 };
 
 export const StoreCategory = {
-    screen: StoreCategoryScreen,
+    screen: screenSlot('catalog.category'),
     options: ({ route, navigation }) => {
         return {
             title: route.params?.category?.name ?? '',
@@ -38,7 +34,7 @@ export const StoreCategory = {
 };
 
 export const StoreMap = {
-    screen: StoreMapScreen,
+    screen: screenSlot('store.map'),
     options: ({ route }) => {
         return {
             headerShown: false,
@@ -47,7 +43,7 @@ export const StoreMap = {
 };
 
 export const StoreSearch = {
-    screen: StoreSearchScreen,
+    screen: screenSlot('store.search'),
     options: ({ route }) => {
         return {
             headerShown: false,
@@ -56,7 +52,7 @@ export const StoreSearch = {
 };
 
 export const StoreInfo = {
-    screen: StoreInfoScreen,
+    screen: screenSlot('store.info'),
     options: ({ route }) => {
         return {
             presentation: 'modal',

@@ -4,20 +4,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCompass, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Text, XStack } from 'tamagui';
-import NetworkHomeScreen from '../screens/network/NetworkHomeScreen';
-import NetworkSearchScreen from '../screens/network/NetworkSearchScreen';
-import NetworkMapScreen from '../screens/network/NetworkMapScreen';
-import NetworkCategoryScreen from '../screens/network/NetworkCategoryScreen';
-import NetworkStoreScreen from '../screens/network/NetworkStoreScreen';
-import NetworkProductScreen from '../screens/network/NetworkProductScreen';
-import StoreCategoryScreen from '../screens/StoreCategoryScreen';
-import StoreInfoScreen from '../screens/StoreInfoScreen';
 import BackButton from '../components/BackButton';
 import StoreLayout from '../layouts/StoreLayout';
 import { StoreCartTab, StoreProfileTab } from './StoreNavigator';
 import useCart from '../hooks/use-cart';
 import { useLanguage } from '../contexts/LanguageContext';
 import { totalCartQuantity } from '../network/network-runtime';
+import { screenSlot } from '../extensions';
 
 // Store, category and product screens are pushed from the Home, Search and Map
 // stacks. Deep-link paths are declared only on the Home stack's copies so each
@@ -25,12 +18,12 @@ import { totalCartQuantity } from '../network/network-runtime';
 // (`linking: undefined`) so no paths are auto-generated for them.
 const createSharedNetworkScreens = (withLinking: boolean) => ({
     NetworkStore: {
-        screen: NetworkStoreScreen,
+        screen: screenSlot('network.store'),
         linking: withLinking ? { path: 'stores/:storeId' } : undefined,
         options: { headerShown: false },
     },
     StoreCategory: {
-        screen: StoreCategoryScreen,
+        screen: screenSlot('catalog.category'),
         linking: withLinking ? { path: 'stores/:storeId/categories/:categoryId' } : undefined,
         options: ({ route, navigation }: any) => ({
             title: route.params?.category?.name || '',
@@ -38,20 +31,20 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
         }),
     },
     Product: {
-        screen: NetworkProductScreen,
+        screen: screenSlot('network.product'),
         linking: withLinking ? { path: 'stores/:storeId/products/:productId' } : undefined,
         options: { presentation: 'modal', headerShown: false },
     },
     // StoreInfo needs the full store object in its params, so it is not deep-linkable.
-    StoreInfo: { screen: StoreInfoScreen, linking: undefined, options: { presentation: 'modal', headerShown: false } },
+    StoreInfo: { screen: screenSlot('store.info'), linking: undefined, options: { presentation: 'modal', headerShown: false } },
 });
 
 const NetworkHomeStack = createNativeStackNavigator({
     initialRouteName: 'NetworkHome',
     screens: {
-        NetworkHome: { screen: NetworkHomeScreen, options: { headerShown: false } },
+        NetworkHome: { screen: screenSlot('network.home'), options: { headerShown: false } },
         NetworkCategory: {
-            screen: NetworkCategoryScreen,
+            screen: screenSlot('network.directory'),
             linking: { path: 'categories/:categoryId' },
             options: ({ route }: any) => ({ title: route.params?.category?.name || '' }),
         },
@@ -61,14 +54,14 @@ const NetworkHomeStack = createNativeStackNavigator({
 
 const NetworkSearchStack = createNativeStackNavigator({
     screens: {
-        NetworkSearch: { screen: NetworkSearchScreen, linking: { path: 'search' }, options: { headerShown: false } },
+        NetworkSearch: { screen: screenSlot('network.search'), linking: { path: 'search' }, options: { headerShown: false } },
         ...createSharedNetworkScreens(false),
     },
 });
 
 const NetworkMapStack = createNativeStackNavigator({
     screens: {
-        NetworkMap: { screen: NetworkMapScreen, linking: { path: 'map' }, options: { headerShown: false } },
+        NetworkMap: { screen: screenSlot('network.map'), linking: { path: 'map' }, options: { headerShown: false } },
         ...createSharedNetworkScreens(false),
     },
 });

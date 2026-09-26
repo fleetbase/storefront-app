@@ -422,6 +422,9 @@
         "selectBank": "Select Bank"
     },
     "TextAreaSheet": {},
+    "ScreenSlot": {
+        "loadError": "Something went wrong while loading this screen."
+    },
     "Network": {
         "tabs": { "discover": "Discover", "search": "Search", "map": "Map", "cart": "Cart", "profile": "Profile" },
         "sort": { "nearest": "Nearest", "highest_rated": "Highest rated", "lowest_rated": "Lowest rated", "popular": "Popular", "trending": "Trending", "newest": "Newest", "oldest": "Oldest" },

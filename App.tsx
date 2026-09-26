@@ -11,6 +11,7 @@ import { SocketClusterProvider } from './src/contexts/SocketClusterContext';
 import { CartProvider } from './src/contexts/CartContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AppScreenRegistryProvider } from './src/extensions/app-screen-registry';
 import { TestTabNavigator } from './src/navigation/TestNavigator';
 import { ThemeProvider, useThemeContext } from './src/contexts/ThemeContext';
 import { NotificationProvider } from './src/contexts/NotificationContext';
@@ -34,7 +35,9 @@ function AppContent(): React.JSX.Element {
                                         <AuthProvider>
                                             <SocketClusterProvider>
                                                 <CartProvider>
-                                                    <AppNavigator />
+                                                    <AppScreenRegistryProvider>
+                                                        <AppNavigator />
+                                                    </AppScreenRegistryProvider>
                                                     <Toasts extraInsets={{ bottom: Platform.OS === 'android' ? 25 : 80 }} defaultStyle={getDefaultToastStyle()} />
                                                     <PortalHost name='MainPortal' />
                                                     <PortalHost name='BottomSheetPanelPortal' />

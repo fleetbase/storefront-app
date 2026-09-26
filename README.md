@@ -50,6 +50,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 - [Configuration](#configuration)
     - [Application Configuration](#appconfig)
     - [Interface Configuration](#uiconfig)
+    - [Custom Screens](#custom-screens)
 - [Internationalization and Translations](#internationalization-and-translations)
     - [Internationalization](#internationalization)
     - [Translations](#translations)
@@ -253,6 +254,20 @@ Application configuration includes behaviour configuration, linking prefixes, tr
 These options can be used to customize the design and look of your StorefrontApp. From adding background images, changing colors, positioning inputs and views. You can do a lot of customizing from the config alone.
 
 For interface config please reference the file `/config/defaults.js` to view options.
+
+#### Custom Screens
+
+Replace any overridable screen, such as the store home screen, without editing the navigators. Map its stable screen id to your own compiled-in component in `storefront.extensions.ts`:
+
+```ts
+export default defineStorefrontExtensions({
+    screens: {
+        'store.home': { load: () => import('./custom/screens/BrandStoreHomeScreen') },
+    },
+});
+```
+
+If a custom screen fails to load or render, the default screen is shown instead. See [docs/extensibility.md](docs/extensibility.md) for all screen ids, variants and platform-specific screens.
 
 ### Internationalization and Translations
 

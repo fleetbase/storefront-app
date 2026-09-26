@@ -4,7 +4,10 @@ import { Button, Spinner, Text, YStack } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useStorefront from '../../hooks/use-storefront';
-import StoreHomeScreen from '../StoreHomeScreen';
+import { screenSlot } from '../../extensions';
+
+// Renders the (possibly overridden) store home inside the Network store context.
+const StoreHomeSlot = screenSlot('store.home');
 
 const NetworkStoreScreen = ({ route }: any) => {
     const { t } = useLanguage();
@@ -48,7 +51,7 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     if (loading) return <YStack flex={1} alignItems='center' justifyContent='center'><Spinner size='large' /></YStack>;
     if (error || !currentStore) return <YStack flex={1} p='$6' alignItems='center' justifyContent='center' gap='$3'><Text color='$textPrimary'>{t('Network.storeUnavailable')}</Text><Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button></YStack>;
-    return <StoreHomeScreen route={route} />;
+    return <StoreHomeSlot route={route} navigation={navigation} />;
 };
 
 export default NetworkStoreScreen;

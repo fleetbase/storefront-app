@@ -16,7 +16,7 @@
         "test": "jest",
         "test:ci": "jest --runInBand",
         "lint": "eslint .",
-        "lint:strict": "eslint src/env.ts src/network src/screens/network src/navigation/NetworkNavigator.tsx src/components/NetworkStoreCard.tsx src/contexts/StorefrontRuntimeContext.tsx src/contexts/CartContext.tsx src/screens/BootScreen.tsx src/screens/LocationPermissionScreen.tsx web/react-native-mmkv-storage.js web/react-native-device-info.web.js __tests__",
+        "lint:strict": "eslint storefront.extensions.ts src/env.ts src/extensions src/navigation/NetworkNavigator.tsx src/navigation/AppNavigator.tsx src/network src/screens/network src/navigation/NetworkNavigator.tsx src/components/NetworkStoreCard.tsx src/contexts/StorefrontRuntimeContext.tsx src/contexts/CartContext.tsx src/screens/BootScreen.tsx src/screens/LocationPermissionScreen.tsx web/react-native-mmkv-storage.js web/react-native-device-info.web.js __tests__",
         "typecheck:strict": "tsc --noEmit -p tsconfig.strict.json",
         "format": "prettier --write .",
         "tamagui:build": "./node_modules/.bin/tamagui-build",

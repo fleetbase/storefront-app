@@ -130,6 +130,8 @@ module.exports = (env = {}, argv = {}) => ({
                     path.resolve(__dirname, 'App.tsx'),
                     path.resolve(__dirname, 'App.web.tsx'),
                     path.resolve(__dirname, 'tamagui.config.ts'),
+                    path.resolve(__dirname, 'storefront.extensions.ts'),
+                    path.resolve(__dirname, 'custom'),
                     path.resolve(__dirname, 'src'),
                     path.resolve(__dirname, 'web'),
                 ],
