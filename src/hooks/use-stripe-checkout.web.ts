@@ -20,6 +20,14 @@ const APP_IDENTIFIER = config('APP_IDENTIFIER');
 const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
 const STRIPE_KEY = config('STRIPE_KEY');
 
+// @stripe/stripe-react-native is native-only; on web these resolve with an error so callers fail gracefully
+const stripeUnavailable = async (..._args: any[]): Promise<any> => ({ error: { message: 'Stripe payments are not supported on web.' } });
+const initPaymentSheet = stripeUnavailable;
+const presentPaymentSheet = stripeUnavailable;
+const confirmSetupIntent = stripeUnavailable;
+const confirmPaymentSheetPayment = stripeUnavailable;
+const confirmPayment = stripeUnavailable;
+
 export default function useStripeCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
     const { info } = useStorefrontInfo();

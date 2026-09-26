@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
-import { calculateProductSubtotal, getCartItem } from '../utils/cart';
+import { calculateProductSubtotal } from '../utils/cart';
 import { toast } from '../utils/toast';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
 import { useLanguage } from '../contexts/LanguageContext';
