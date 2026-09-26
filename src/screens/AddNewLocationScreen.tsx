@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Platfrom, UIManager, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
+import { Platform, UIManager, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
