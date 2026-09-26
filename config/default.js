@@ -1,18 +1,19 @@
 import { mergeConfigs, config, toBoolean } from '../src/utils/config';
 import { toArray } from '../src/utils';
-import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import { getBuildBranding } from '../src/branding/build-branding';
+import { resolveAssetSource } from '../src/branding/assets';
 
-const backgroundImages = {
-    storefront_photo_1: require('../assets/images/storefront-photo-1.jpg'),
-    storefront_photo_2: require('../assets/images/storefront-photo-2.jpg'),
-};
+// Presentation settings (theme, navigation, header, cards, imagery) come from the
+// resolved build branding: storefront.brand.ts over the legacy env keys over defaults.
+const { branding } = getBuildBranding();
+const storeHeader = branding.components.storeHeader;
 
 export const DefaultConfig = {
-    theme: config('APP_THEME', 'blue'),
+    theme: branding.preset,
     storeNavigator: {
-        tabs: toArray(config('STORE_NAVIGATOR_TABS', 'StoreHomeTab,StoreSearchTab,StoreMapTab,StoreCartTab,StoreProfileTab')), // Additional tabs: StoreFoodTruckTab,
-        defaultTab: toArray(config('STORE_NAVIGATOR_DEFAULT_TAB', 'StoreHomeTab')),
-        tabBarBackgroundColor: config('STORE_NAVIGATOR_TAB_BAR_BG', 'blur'),
+        tabs: branding.navigation.store.tabs,
+        defaultTab: [branding.navigation.store.defaultTab],
+        tabBarBackgroundColor: branding.navigation.store.tabBar.background,
     },
     termsUrl: config('TOS_URL'),
     privacyUrl: config('PRIVACY_URL'),
@@ -30,31 +31,32 @@ export const DefaultConfig = {
     disableGeocodingScreen: toBoolean(config('DISABLE_GEOCODING_SCREEN', false)),
     showDriversOnMap: toBoolean(config('MAP_DISPLAY_DRIVERS', false)),
     prioritizePickup: toBoolean(config('PRIORITIZE_PICKUP', false)),
-    storeCategoriesDisplay: config('STORE_CATEGORIES_DISPLAY', 'grid'), // `pills` or `grid`
-    productCardStyle: config('PRODUCT_CARD_STYLE', 'bordered'), // `bordered`, `outlined`, `visio`
+    storeCategoriesDisplay: branding.components.storeCategories.display, // `pills` or `grid`
+    productCardStyle: branding.components.productCard.variant, // `bordered`, `outlined`, `visio`
     backgroundImages: {
-        LoginScreen: backgroundImages[config('LOGIN_BG_IMAGE', 'storefront_photo_1')],
-        BootScreen: backgroundImages[config('BOOTSCREEN_BG_IMAGE')] ?? null,
+        LoginScreen: resolveAssetSource(branding.assets.loginBackground) ?? undefined,
+        BootScreen: resolveAssetSource(branding.assets.bootBackground),
     },
+    bootBackgroundColors: branding.boot.background,
     storeHeader: {
-        showGradient: toBoolean(config('STORE_HEADER_SHOW_GRADIENT', 1)),
-        showLocationPicker: toBoolean(config('STORE_HEADER_SHOW_LOCATION_PICKER', 1)),
-        showTitle: toBoolean(config('STORE_HEADER_SHOW_TITLE', 1)),
-        showDescription: toBoolean(config('STORE_HEADER_SHOW_DESCRIPTION', 1)),
-        showLogo: toBoolean(config('STORE_HEADER_SHOW_LOGO', 1)),
-        logoHeight: parseInt(config('STORE_HEADER_LOGO_HEIGHT', 45)),
-        logoWidth: parseInt(config('STORE_HEADER_LOGO_WIDTH', 45)),
+        showGradient: storeHeader.showGradient,
+        showLocationPicker: storeHeader.showLocationPicker,
+        showTitle: storeHeader.showTitle,
+        showDescription: storeHeader.showDescription,
+        showLogo: storeHeader.showLogo,
+        logoHeight: storeHeader.logoHeight,
+        logoWidth: storeHeader.logoWidth,
     },
     styles: {
         StoreHeader: {
-            direction: config('STORE_HEADER_FLEX_DIRECTION', 'column'),
-            alignItems: config('STORE_HEADER_ALIGN_ITEMS', 'center'),
-            justifyContent: config('STORE_HEADER_JUSTIFY_CONTENT', 'flex-end'),
-            space: config('STORE_HEADER_SPACING', '$1'),
-            paddingTop: config('STORE_HEADER_PADDING_TOP', 0),
-            paddingBottom: config('STORE_HEADER_PADDING_BOTTOM', 0),
-            paddingLeft: config('STORE_HEADER_PADDING_LEFT', 0),
-            paddingRight: config('STORE_HEADER_PADDING_RIGHT', 0),
+            direction: storeHeader.direction,
+            alignItems: storeHeader.alignItems,
+            justifyContent: storeHeader.justifyContent,
+            space: storeHeader.spacing,
+            paddingTop: storeHeader.paddingTop,
+            paddingBottom: storeHeader.paddingBottom,
+            paddingLeft: storeHeader.paddingLeft,
+            paddingRight: storeHeader.paddingRight,
         },
     },
 };

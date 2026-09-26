@@ -16,7 +16,7 @@
         "test": "jest",
         "test:ci": "jest --runInBand",
         "lint": "eslint .",
-        "lint:strict": "eslint storefront.extensions.ts src/env.ts src/extensions src/navigation/NetworkNavigator.tsx src/navigation/AppNavigator.tsx src/network src/screens/network src/navigation/NetworkNavigator.tsx src/components/NetworkStoreCard.tsx src/contexts/StorefrontRuntimeContext.tsx src/contexts/CartContext.tsx src/screens/BootScreen.tsx src/screens/LocationPermissionScreen.tsx web/react-native-mmkv-storage.js web/react-native-device-info.web.js __tests__",
+        "lint:strict": "eslint storefront.extensions.ts storefront.brand.ts src/env.ts src/branding src/hooks/use-app-theme.ts src/contexts/ThemeContext.tsx src/extensions src/navigation/NetworkNavigator.tsx src/navigation/AppNavigator.tsx src/network src/screens/network src/navigation/NetworkNavigator.tsx src/components/NetworkStoreCard.tsx src/contexts/StorefrontRuntimeContext.tsx src/contexts/CartContext.tsx src/screens/BootScreen.tsx src/screens/LocationPermissionScreen.tsx web/react-native-mmkv-storage.js web/react-native-device-info.web.js __tests__",
         "typecheck:strict": "tsc --noEmit -p tsconfig.strict.json",
         "format": "prettier --write .",
         "tamagui:build": "./node_modules/.bin/tamagui-build",
@@ -114,7 +114,8 @@
         "react-redux": "^9.0.4",
         "socketcluster-client": "^19.2.3",
         "tamagui": "1.125.20",
-        "yarn": "^1.22.22"
+        "yarn": "^1.22.22",
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "@babel/core": "^7.25.2",

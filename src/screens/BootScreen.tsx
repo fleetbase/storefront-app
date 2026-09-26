@@ -5,7 +5,7 @@ import { Platform, ImageBackground, StyleSheet } from 'react-native';
 import { check, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Image, Spinner, XStack, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
-import { config, toArray, isArray, storefrontConfig } from '../utils';
+import { toArray, isArray, storefrontConfig } from '../utils';
 import { getCurrentLocationFromStorage, requestWebGeolocationPermission } from '../utils/location';
 import BootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from './SetupWarningScreen';
@@ -39,7 +39,7 @@ const BootScreen = () => {
     const { initializeOwner } = useStorefrontRuntime();
     const currentLocation = getCurrentLocationFromStorage();
     const [error, setError] = useState<Error | null>(null);
-    const backgroundColor = toArray(config('BOOTSCREEN_BACKGROUND_COLOR', '$background'));
+    const backgroundColor = toArray(storefrontConfig('bootBackgroundColors', ['$background']));
     const backgroundImage = storefrontConfig('backgroundImages.BootScreen');
     const isGradientBackground = isArray(backgroundColor) && backgroundColor.length > 1;
     const hasBgImage = !!backgroundImage;

@@ -2,7 +2,8 @@
 
 // An ordered list of the theme names you expect, in the exact order
 // they appear in your final .css. This must match the key order of the
-// `themes` object in tamagui.config.ts.
+// `themes` object in tamagui.config.ts (THEME_NAMES in src/branding/build-themes.ts;
+// a test keeps the two in sync).
 const THEME_NAMES = ['lightBlue', 'lightRed', 'lightGreen', 'lightIndigo', 'lightOrange', 'darkBlue', 'darkRed', 'darkGreen', 'darkIndigo', 'darkOrange', 'lightTruevegan', 'darkTruevegan'];
 
 // This plugin does two tasks in two passes:
@@ -59,3 +60,4 @@ module.exports = function postcssTamaguiFix() {
 };
 
 module.exports.postcss = true;
+module.exports.THEME_NAMES = THEME_NAMES;

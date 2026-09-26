@@ -51,6 +51,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
     - [Application Configuration](#appconfig)
     - [Interface Configuration](#uiconfig)
     - [Custom Screens](#custom-screens)
+    - [Branding](#branding)
 - [Internationalization and Translations](#internationalization-and-translations)
     - [Internationalization](#internationalization)
     - [Translations](#translations)
@@ -268,6 +269,10 @@ export default defineStorefrontExtensions({
 ```
 
 If a custom screen fails to load or render, the default screen is shown instead. See [docs/extensibility.md](docs/extensibility.md) for all screen ids, variants and platform-specific screens.
+
+#### Branding
+
+Colors, appearance, headers, cards, imagery and navigation are set with a typed branding config in `storefront.brand.ts`. Existing `.env` theme keys such as `APP_THEME`, `CUSTOM_COLORS` and `STORE_HEADER_*` still work and are mapped into it. Invalid values fall back to defaults. See [docs/branding.md](docs/branding.md).
 
 ### Internationalization and Translations
 

@@ -10,14 +10,14 @@ import { CartProvider } from './src/contexts/CartContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AppScreenRegistryProvider } from './src/extensions/app-screen-registry';
-import { ThemeProvider, useThemeContext } from './src/contexts/ThemeContext';
+import { BrandingProvider, useBranding } from './src/branding/BrandingProvider';
 import { NotificationProvider } from './src/contexts/NotificationContext';
 import { StorefrontRuntimeProvider } from './src/contexts/StorefrontRuntimeContext';
 import { getDefaultStyle as getDefaultToastStyle } from './src/utils/toast';
 import config from './tamagui.config';
 
 function AppContent(): React.JSX.Element {
-    const { appTheme } = useThemeContext();
+    const { themeName: appTheme } = useBranding();
 
     return (
         <TamaguiProvider config={config} defaultTheme={appTheme} disableInjectCSS={true}>
@@ -53,9 +53,9 @@ function AppContent(): React.JSX.Element {
 function App(): React.JSX.Element {
     return (
         <PortalProvider>
-            <ThemeProvider>
+            <BrandingProvider>
                 <AppContent />
-            </ThemeProvider>
+            </BrandingProvider>
         </PortalProvider>
     );
 }

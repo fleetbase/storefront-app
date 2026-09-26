@@ -13,7 +13,7 @@ import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AppScreenRegistryProvider } from './src/extensions/app-screen-registry';
 import { TestTabNavigator } from './src/navigation/TestNavigator';
-import { ThemeProvider, useThemeContext } from './src/contexts/ThemeContext';
+import { BrandingProvider, useBranding } from './src/branding/BrandingProvider';
 import { NotificationProvider } from './src/contexts/NotificationContext';
 import { StorefrontRuntimeProvider } from './src/contexts/StorefrontRuntimeContext';
 import { getDefaultStyle as getDefaultToastStyle } from './src/utils/toast';
@@ -21,7 +21,7 @@ import config from './tamagui.config';
 
 const DEBUG_APP = false;
 function AppContent(): React.JSX.Element {
-    const { appTheme } = useThemeContext();
+    const { themeName: appTheme } = useBranding();
 
     return (
         <TamaguiProvider config={config} theme={appTheme}>
@@ -57,7 +57,7 @@ function AppContent(): React.JSX.Element {
 }
 
 function TestContent(): React.JSX.Element {
-    const { appTheme } = useThemeContext();
+    const { themeName: appTheme } = useBranding();
     return (
         <TamaguiProvider config={config} theme={appTheme}>
             <Theme name={appTheme}>
@@ -94,18 +94,18 @@ function App(): React.JSX.Element {
     if (DEBUG_APP) {
         return (
             <PortalProvider>
-                <ThemeProvider>
+                <BrandingProvider>
                     <TestContent />
-                </ThemeProvider>
+                </BrandingProvider>
             </PortalProvider>
         );
     }
 
     return (
         <PortalProvider>
-            <ThemeProvider>
+            <BrandingProvider>
                 <AppContent />
-            </ThemeProvider>
+            </BrandingProvider>
         </PortalProvider>
     );
 }
