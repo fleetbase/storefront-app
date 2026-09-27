@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider, Theme, useTheme } from 'tamagui';
 import { Toasts } from '@backpackapp-io/react-native-toast';

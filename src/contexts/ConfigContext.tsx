@@ -14,11 +14,9 @@ export const useConfig = () => {
 };
 
 export const useDefaultTabIsStoreHome = () => {
-    const { storefrontConfig } = useAuth();
     return storefrontConfig('storeNavigator.defaultTab', 'StoreHomeTab') === 'StoreHomeTab';
 };
 
 export const useDefaultTabIsFoodTruck = () => {
-    const { storefrontConfig } = useAuth();
     return storefrontConfig('storeNavigator.defaultTab', 'StoreHomeTab') === 'StoreFoodTruckTab';
 };

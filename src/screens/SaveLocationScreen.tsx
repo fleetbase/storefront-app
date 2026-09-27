@@ -14,13 +14,15 @@ const SaveLocationScreen = ({ route }) => {
     const place = new Place(route.params.place, adapter);
     const { customer, isAuthenticated } = useAuth();
     const { t } = useLanguage();
+    const theme = useTheme();
+    const { runWithLoading, isLoading } = usePromiseWithLoading();
     const [ready, setReady] = useState(false);
 
     const handleSavePlace = async () => {
         if (isAuthenticated) {
             try {
                 place.setOwner(customer.id);
-                await place.save();
+                await runWithLoading(place.save());
                 toast.success(t('SaveLocationScreen.addressSaved'));
             } catch (error) {
                 toast.error(error.message);
@@ -46,7 +48,7 @@ const SaveLocationScreen = ({ route }) => {
                 </XStack>
                 {ready && (
                     <XStack position='absolute' bottom={0} left={0} right={0} padding='$5'>
-                        <Button onPress={handleSavePlace} size='$5' bg='$blue-500' flex={1} opacity={mutated ? 1 : 0.75} disabled={!mutated}>
+                        <Button onPress={handleSavePlace} size='$5' bg='$blue-500' flex={1} opacity={isLoading() ? 0.75 : 1} disabled={isLoading()}>
                             <Button.Icon>{isLoading() && <Spinner color='$blur-800' />}</Button.Icon>
                             <Button.Text color='$blue-600' fontWeight='bold' fontSize='$5'>
                                 {t('common.save')}
