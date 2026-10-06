@@ -1,4 +1,4 @@
-import { productSummary } from '../../src/ui/product-display';
+import { formatDuration, productSummary } from '../../src/ui/product-display';
 
 describe('product display', () => {
     test('summarises a product with its store', () => {
@@ -30,6 +30,7 @@ describe('product display', () => {
             available: true,
             isService: false,
             isBookable: false,
+            durationMinutes: null,
             recommended: true,
             storeId: 'store_bloom',
             storeName: 'Bloom & Co.',
@@ -46,5 +47,16 @@ describe('product display', () => {
         expect(summary.storeId).toBe('store_sparkle');
         expect(summary.imageUrl).toBeNull();
         expect(productSummary({ price: 'x' }).price).toBe(0);
+    });
+
+    test('reads a service duration from meta and formats it', () => {
+        expect(productSummary({ name: 'Clean', meta: { duration: '180' } }).durationMinutes).toBe(180);
+        expect(productSummary({ name: 'Shampoo', meta: { duration_minutes: 90 } }).durationMinutes).toBe(90);
+        expect(productSummary({ name: 'Nothing', meta: { duration: -5 } }).durationMinutes).toBeNull();
+        expect(formatDuration(45)).toBe('45 min');
+        expect(formatDuration(180)).toBe('3 hr');
+        expect(formatDuration(90)).toBe('1.5 hr');
+        expect(formatDuration(100)).toBe('1.7 hr');
+        expect(formatDuration(null)).toBeNull();
     });
 });

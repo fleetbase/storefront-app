@@ -61,3 +61,16 @@ describe('product options', () => {
         expect(describeSelection(groups, selection)).toBe('Deluxe · Vase · Chocolates · Bow');
     });
 });
+
+describe('selectionFromCartItem', () => {
+    const { optionGroups, selectionFromCartItem } = require('../../src/ui/product-options');
+    const groups = optionGroups(
+        [{ id: 'size', name: 'Size', is_multiselect: false, options: [{ id: 's', name: 'Small' }, { id: 'l', name: 'Large' }] }],
+        [{ id: 'extras', name: 'Extras', addons: [{ id: 'a1', name: 'Fridge' }, { id: 'a2', name: 'Oven' }] }]
+    );
+
+    test('restores the options a cart line was added with', () => {
+        expect(selectionFromCartItem(groups, { variants: [{ id: 'l' }, { id: 's' }], addons: [{ id: 'a2' }, 'a1', { id: 'gone' }] })).toEqual({ size: ['s'], extras: ['a1', 'a2'] });
+        expect(selectionFromCartItem(groups, null)).toEqual({});
+    });
+});

@@ -581,7 +581,9 @@
         "done": "Готово",
         "outOfStock": "Немає в наявності",
         "sale": "Знижка",
-        "bookable": "Онлайн-запис"
+        "bookable": "Онлайн-запис",
+        "view": "Переглянути",
+        "book": "Забронювати"
     },
     "StoreSwitch": {
         "yourCurrentStore": "вашого поточного магазину",
@@ -660,7 +662,10 @@
             "pickup_order": "Цей код лише для доставки.",
             "no_discount": "Цей код не знижує ціну цього кошика.",
             "unknown": "Не вдалося застосувати код. Спробуйте ще раз."
-        }
+        },
+        "change": "Змінити",
+        "changeBooking": "{{name}}, заброньовано на {{time}}. Змінити час",
+        "removeBooking": "Видалити бронювання {{name}}"
     },
     "Checkout": {
         "title": "Оформлення",
@@ -705,7 +710,10 @@
         "blockedMinimum": "Мінімальне замовлення — {{amount}}.",
         "blockedPayment": "Оберіть спосіб оплати, щоб продовжити.",
         "preparing": "Готуємо ваше замовлення…",
-        "unavailable": "Недоступно"
+        "unavailable": "Недоступно",
+        "yourBooking": "Ваше бронювання",
+        "bookingNote": "Команда приїде на вашу адресу доставки. Час бронювання підтверджує магазин.",
+        "bookingNotePickup": "Час бронювання підтверджує {{store}}."
     },
     "Tracking": {
         "yourDriver": "Ваш водій",
@@ -795,6 +803,44 @@
         "total": "Разом",
         "deliveringTo": "Доставка: {{place}}",
         "pickupAt": "Самовивіз: {{place}}",
-        "notes": "Примітки: {{notes}}"
+        "notes": "Примітки: {{notes}}",
+        "bookingLabel": "Бронювання: {{name}}, {{time}}",
+        "bookingConfirmed": "Бронювання підтверджено",
+        "bookingRequested": "Бронювання надіслано",
+        "bookingConfirmedBody": "{{store}} підтвердив ваш візит.",
+        "bookingRequestedBody": "{{store}} скоро підтвердить час.",
+        "callStore": "Зателефонувати: {{store}}"
+    },
+    "Booking": {
+        "howItWorks": "Як працює бронювання",
+        "stepPick": "Оберіть послугу",
+        "stepTime": "Оберіть дату й час",
+        "stepPay": "Оплатіть під час оформлення",
+        "bookableService": "Послуга з бронюванням",
+        "providedBy": "Надає",
+        "chooseDate": "Оберіть дату",
+        "date": "Дата",
+        "today": "Сьогодні",
+        "closed": "Вихідний",
+        "noBookings": "без бронювань",
+        "chooseTime": "Оберіть час початку",
+        "visitLength": "Тривалість: {{duration}}",
+        "morning": "Ранок",
+        "afternoon": "День",
+        "evening": "Вечір",
+        "unavailable": "недоступно",
+        "timesNote": "Час початку відповідає графіку бронювань цієї послуги. {{store}} підтвердить бронювання після оформлення.",
+        "fullyPast": "На {{day}} більше немає часу",
+        "noBookingsOn": "У {{day}} бронювань немає",
+        "noBookingsBody": "{{store}} не приймає бронювання в цей день.",
+        "seeDay": "Переглянути {{day}}",
+        "serviceAddress": "Адреса послуги",
+        "comesTo": "Команда приїде до",
+        "noAddress": "Додайте адресу для візиту",
+        "chooseToContinue": "Оберіть дату й час початку, щоб продовжити",
+        "addToCart": "Додати бронювання до кошика",
+        "saveChanges": "Зберегти бронювання",
+        "added": "{{name}} заброньовано. Бронювання в кошику.",
+        "updated": "Бронювання оновлено."
     }
 }

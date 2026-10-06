@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronLeft, faCircleExclamation, faLocationDot, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faChevronLeft, faCircleExclamation, faLocationDot, faLock } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,8 +12,9 @@ import useStorefrontInfo from '../../hooks/use-storefront-info';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useCartPromotions from '../../hooks/use-cart-promotions';
 import { formatCurrency } from '../../utils/format';
-import { Button, Card, IconButton, LocationSheet, SegmentedControl, Skeleton, StoreLogo, TextField, UIText, cartGroups, elevation, radius, space } from '../../ui';
+import { Button, Card, IconButton, LocationSheet, SegmentedControl, Skeleton, StoreLogo, TextField, UIText, cartGroups, elevation, formatClock, radius, space, usesTwelveHourClock } from '../../ui';
 import TipSelector from './TipSelector';
+import { parseScheduledAt } from '../../commerce/booking';
 
 /** The fields every gateway's checkout hook provides (Stripe, QPay). */
 export type CheckoutState = {
@@ -61,7 +62,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const { isAuthenticated } = useAuth();
     const { info, enabled } = useStorefrontInfo();
     const { mode, getSelectedStoreLocation } = useStorefrontRuntime();
@@ -74,6 +75,14 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const promo = useCartPromotions({ pickup: isPickup, serviceQuoteId: quoteId });
     const groups = useMemo(() => cartGroups(cart?.contents?.() ?? []), [cart]);
     const itemCount = groups.reduce((sum, group) => sum + group.itemCount, 0);
+    const hour12 = usesTwelveHourClock(locale);
+    const bookings = groups.flatMap((group) => group.lines.filter((line) => line.scheduledAt).map((line) => ({ line, group, at: parseScheduledAt(line.scheduledAt) })));
+    const changeBooking = (line: any) => {
+        const item = (cart?.contents?.() ?? []).find((entry: any) => entry.id === line.id);
+        const params = { productId: line.productId, storeId: line.storeId, cartLineId: line.id, cartItem: item, scheduledAt: line.scheduledAt, quantity: line.quantity };
+        if (mode === 'network') navigation.navigate('NetworkHomeTab', { screen: 'Product', params });
+        else navigation.goBack();
+    };
 
     const location = checkout.deliveryLocation;
     const placeAttr = (key: string) => (typeof location?.getAttribute === 'function' ? location.getAttribute(key) : location?.[key]);
@@ -219,6 +228,34 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 </UIText>
                             </Card>
                         )}
+
+                        {bookings.map(({ line, group, at }) => (
+                            <Card key={line.id} padding={14} gap={10} accessibilityLabel={t('Checkout.yourBooking')}>
+                                <XStack gap={12} alignItems='center'>
+                                    <StoreLogo uri={group.logoUrl} name={group.name ?? info?.name ?? '?'} size={40} radius={radius.tile} />
+                                    <YStack flex={1}>
+                                        <UIText variant='bodyStrong'>{line.name}</UIText>
+                                        <UIText variant='caption' tone='secondary'>
+                                            {group.name ?? info?.name}
+                                        </UIText>
+                                    </YStack>
+                                    <Button variant='ghost' size='sm' onPress={() => changeBooking(line)}>
+                                        {t('Checkout.change')}
+                                    </Button>
+                                </XStack>
+                                {!!at && (
+                                    <XStack alignItems='center' gap={10} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} backgroundColor='$primarySoft'>
+                                        <FontAwesomeIcon icon={faCalendarDays} size={16} color={theme.primaryForeground.val} />
+                                        <UIText variant='captionStrong' tone='brand' style={{ fontSize: 14 }}>
+                                            {at.at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })} · {formatClock(at.minutes, hour12)}
+                                        </UIText>
+                                    </XStack>
+                                )}
+                                <UIText variant='caption' tone='secondary'>
+                                    {isPickup ? t('Checkout.bookingNotePickup', { store: group.name ?? info?.name ?? '' }) : t('Checkout.bookingNote')}
+                                </UIText>
+                            </Card>
+                        ))}
 
                         {(tipsEnabled || driverTipsEnabled) && (
                             <Card padding={14} gap={14}>
