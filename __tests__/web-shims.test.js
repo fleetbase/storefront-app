@@ -122,3 +122,15 @@ describe('web device info shim', () => {
         await expect(deviceInfo.getUniqueId()).resolves.toBe('existing-id');
     });
 });
+
+describe('google sign-in web shim', () => {
+    const { GoogleSignin, statusCodes } = require('../web/react-native-google-signin.web');
+
+    it('configures without doing anything and refuses to sign in', async () => {
+        expect(() => GoogleSignin.configure({ webClientId: 'x' })).not.toThrow();
+        await expect(GoogleSignin.hasPlayServices()).resolves.toBe(false);
+        await expect(GoogleSignin.signIn()).rejects.toThrow('not available on the web');
+        expect(GoogleSignin.getCurrentUser()).toBeNull();
+        expect(statusCodes.SIGN_IN_CANCELLED).toBe('SIGN_IN_CANCELLED');
+    });
+});

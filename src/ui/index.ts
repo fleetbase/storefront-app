@@ -19,6 +19,7 @@ export { CartPill } from './CartPill';
 export { Stepper, SegmentedControl } from './Controls';
 export { Sheet } from './Sheet';
 export { TextField } from './TextField';
+export { CodeInput } from './CodeInput';
 export type { TextFieldProps } from './TextField';
 export { LocationSheet } from './LocationSheet';
 export { categoryIcon } from './category-icons';
