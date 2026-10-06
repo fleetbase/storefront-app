@@ -12,6 +12,10 @@ export const Order = {
     options: { headerShown: false },
 };
 
+// Reviews can be written from a delivered order and read from there.
+export const StoreReviews = { screen: screenSlot('reviews.list'), options: { headerShown: false } };
+export const WriteReview = { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } };
+
 export const Receipt = {
     screen: screenSlot('order.receipt'),
     options: ({ navigation, route }) => {
@@ -77,6 +81,8 @@ const OrderStack = {
     Order,
     Receipt,
     OrderHistory,
+    StoreReviews,
+    WriteReview,
 };
 
 export default OrderStack;

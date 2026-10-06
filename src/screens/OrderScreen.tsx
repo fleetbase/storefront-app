@@ -3,8 +3,10 @@ import { Image, Linking, RefreshControl, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCheck, faPhone, faReceipt, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { parseScheduledAt } from '../commerce/booking';
+import { fetchEligibility, type Eligibility } from '../commerce/reviews';
+import useReviewRequest from '../hooks/use-review-request';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { Order } from '@fleetbase/sdk';
 import { format as formatDate, formatDistanceToNowStrict, add } from 'date-fns';
@@ -21,7 +23,7 @@ import { isArray, getFoodTruckById } from '../utils';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, IconButton, Sheet, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import { Button, IconButton, Sheet, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
 
 const MAP_HEIGHT = 380;
 
@@ -49,6 +51,8 @@ const OrderScreen = ({ route }: any) => {
     const [refreshing, setRefreshing] = useState(false);
     const [confirmingPickup, setConfirmingPickup] = useState(false);
     const [pickupSheet, setPickupSheet] = useState(false);
+    const [reviewState, setReviewState] = useState<Eligibility | null>(null);
+    const reviewRequest = useReviewRequest();
 
     const storeId = useMemo(() => order.getAttribute('meta.storefront_id'), [order]);
     const [store, setStore] = useStorage(`${storeId}`, info);
@@ -166,6 +170,20 @@ const OrderScreen = ({ route }: any) => {
         statusRef.current = order.getAttribute('status');
     }, [order]);
 
+    // Once the order is finished, invite a review (the server checks it's this customer's
+    // completed order and not reviewed yet).
+    const finished = progress.finished;
+    useEffect(() => {
+        if (!finished || !storeId || !customer) return;
+        let active = true;
+        fetchEligibility(reviewRequest, storeId, order.id)
+            .then((result) => active && setReviewState(result))
+            .catch(() => {});
+        return () => {
+            active = false;
+        };
+    }, [customer, finished, order.id, reviewRequest, storeId]);
+
     const close = () => {
         if (params.justPlaced || !navigation.canGoBack()) {
             navigation.navigate(mode === 'network' ? 'NetworkHomeTab' : 'StoreHomeTab');
@@ -225,6 +243,34 @@ const OrderScreen = ({ route }: any) => {
                             {eta ? ` ${t('Tracking.arrivingIn', { eta })}` : ''}
                         </UIText>
                     </YStack>
+
+                    {reviewState?.canReview && (
+                        <YStack alignItems='center' gap={6} padding={16} borderRadius={radius.card} backgroundColor='$primarySoft'>
+                            <UIText variant='subheading' textAlign='center'>
+                                {t('Reviews.howWas', { store: storeName })}
+                            </UIText>
+                            <StarInput
+                                value={0}
+                                size={32}
+                                label={t('Reviews.ratingLabel', { store: storeName })}
+                                onChange={(rating) => navigation.navigate('WriteReview', { storeId, storeName, storeLogo: store?.logo_url ?? null, orderId: order.id, orderReference: reference, rating })}
+                            />
+                            <UIText variant='caption' tone='secondary'>
+                                {t('Reviews.tapToWrite')}
+                            </UIText>
+                        </YStack>
+                    )}
+                    {reviewState?.reason === 'already_reviewed' && (
+                        <XStack alignItems='center' gap={10} padding={14} borderRadius={radius.card} backgroundColor='$surface'>
+                            <FontAwesomeIcon icon={faStar} size={16} color={theme.warningForeground.val} />
+                            <UIText flex={1} variant='bodyStrong' style={{ fontSize: 14 }}>
+                                {t('Reviews.youReviewed')}
+                            </UIText>
+                            <Button variant='ghost' size='sm' onPress={() => navigation.navigate('StoreReviews', { storeId, storeName, storeLogo: store?.logo_url ?? null })}>
+                                {t('UI.view')}
+                            </Button>
+                        </XStack>
+                    )}
 
                     {progress.phase === 'ready' && (
                         <YStack gap={10} padding={14} borderRadius={radius.card} backgroundColor='$successSoft'>

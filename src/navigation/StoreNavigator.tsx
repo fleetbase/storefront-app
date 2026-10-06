@@ -227,6 +227,8 @@ export const StoreHomeTab = createNativeStackNavigator({
                 headerShown: false,
             },
         },
+        StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+        WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
         ...LocationStack,
         ...ModalScreens,
     },
