@@ -17,7 +17,8 @@
         "confirmation": "Баталгаажуулалт",
         "ok": "ОК",
         "done": "Дууссан",
-        "goBack": "Буцах"
+        "goBack": "Буцах",
+        "order": "Захиалга"
     },
     "lineItems": {
         "cartSubtotal": "Сагсан дахь үнэ",
@@ -189,6 +190,7 @@
         "enterLocationManually": "Байршлыг гараар оруулах"
     },
     "LocationPickerScreen": {
+        "chooseDeliveryLocation": "Хүргэлтийн байршлаа сонгоно уу",
         "useMarkerPosition": " Цэнхэр маркер ашиглан байршилаа сонгох ",
         "useExactMarkerPosition": "Газрын зураг дээр өөрийн байраа сонгон хадгалах"
     },

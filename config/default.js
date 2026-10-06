@@ -20,7 +20,7 @@ export const DefaultConfig = {
     defaultMapType: config('DEFAULT_MAP_TYPE', 'standard'),
     defaultServiceArea: config('DEFAULT_SERVICE_AREA'),
     defaultLocale: config('DEFAULT_LOCALE', 'en'),
-    availableLocales: toArray(config('AVAILABLE_LOCALES', 'en,mn')),
+    availableLocales: toArray(config('AVAILABLE_LOCALES', 'en,mn,uk')),
     paymentGateway: config('PAYMENT_GATEWAY', 'stripe'),
     incrementTipBy: config('TIP_INCREMENT', 50),
     stripePaymentMethod: config('STRIPE_PAYMENT_UI', 'sheet'), // `sheet` or `field`

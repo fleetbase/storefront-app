@@ -3,11 +3,13 @@ import { getString } from '../utils/storage';
 import { get, storefrontConfig } from '../utils';
 import en from '../../translations/en.json';
 import mn from '../../translations/mn.json';
+import uk from '../../translations/uk.json';
 import I18n from 'react-native-i18n';
 
 export const translations = {
     en,
     mn,
+    uk,
 };
 
 export function getAvailableLocales() {
