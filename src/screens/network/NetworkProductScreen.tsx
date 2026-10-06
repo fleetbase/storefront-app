@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Product, Store } from '@fleetbase/storefront';
-import { Button, Spinner, Text, YStack } from 'tamagui';
+import { YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import useStorefront from '../../hooks/use-storefront';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { serializeSdkResource } from '../../network/network-runtime';
-import { screenSlot } from '../../extensions';
-
-// Renders the (possibly overridden) product detail once the product and store are resolved.
-const ProductDetailSlot = screenSlot('product.detail');
+import { Button, ErrorState, Skeleton, space } from '../../ui';
+import NetworkProductDetail from './NetworkProductDetail';
 
 const NetworkProductScreen = ({ route }: any) => {
     const navigation = useNavigation();
@@ -39,20 +37,33 @@ const NetworkProductScreen = ({ route }: any) => {
         };
     }, [adapter, initialParams, productId, resolvedParams, storeId, storefront]);
 
-    const resolvedRoute = useMemo(() => ({ ...route, params: resolvedParams }), [resolvedParams, route]);
-
     if (error || (!resolvedParams && (!productId || !storeId))) {
         return (
-            <YStack flex={1} alignItems='center' justifyContent='center' gap='$3' p='$6'>
-                <Text color='$textPrimary'>{t('Network.productUnavailable')}</Text>
-                <Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button>
+            <YStack flex={1} justifyContent='center' backgroundColor='$background'>
+                <ErrorState title={t('Network.productUnavailable')} />
+                <YStack alignItems='center'>
+                    <Button variant='outline' onPress={() => navigation.goBack()}>
+                        {t('common.goBack')}
+                    </Button>
+                </YStack>
             </YStack>
         );
     }
 
-    if (!resolvedParams) return <YStack flex={1} alignItems='center' justifyContent='center'><Spinner size='large' /></YStack>;
+    if (!resolvedParams) {
+        return (
+            <YStack flex={1} backgroundColor='$background' gap={12}>
+                <Skeleton height={280} radius={0} />
+                <YStack paddingHorizontal={space.gutter} gap={12}>
+                    <Skeleton height={24} width='70%' />
+                    <Skeleton height={18} width='30%' />
+                    <Skeleton height={14} width='90%' />
+                </YStack>
+            </YStack>
+        );
+    }
 
-    return <ProductDetailSlot route={resolvedRoute} navigation={navigation} />;
+    return <NetworkProductDetail params={resolvedParams} />;
 };
 
 export default NetworkProductScreen;

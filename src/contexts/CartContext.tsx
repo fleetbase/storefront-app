@@ -6,7 +6,9 @@ import { Cart } from '@fleetbase/storefront';
 import useStorage, { get as getStoredValue, remove as removeStoredValue } from '../hooks/use-storage';
 import useStorefront from '../hooks/use-storefront';
 import { useStorefrontRuntime } from './StorefrontRuntimeContext';
-import { getNetworkCartDecision, getScopedStorageKey } from '../network/network-runtime';
+import { getNetworkCartDecision, getScopedStorageKey, totalCartQuantity } from '../network/network-runtime';
+import { requestStoreSwitch } from '../network/store-switch';
+import { formatCurrency } from '../utils/format';
 import { useLanguage } from './LanguageContext';
 
 const { emit } = EventRegister;
@@ -51,10 +53,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 const cartId = `${deviceId}-${scope}`;
                 const cartInstance = await storefront.cart.retrieve(cartId);
                 const serializedCart = cartInstance.serialize();
-                if (cartChanged(serializedCart)) {
-                    setCart(cartInstance);
-                    setStoredCart(serializedCart);
-                }
+                // Always adopt the loaded instance: the placeholder set when the scope changes
+                // has no id, so keeping it would send adds to `carts/null`.
+                setCart(cartInstance);
+                if (cartChanged(serializedCart)) setStoredCart(serializedCart);
             } catch (err) {
                 console.error('Error loading cart from server:', err);
             } finally {
@@ -63,12 +65,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         };
 
         const loadCartFromStorage = (serializedCart: any) => {
-            if (serializedCart) {
-                const cartInstance = new Cart(serializedCart, storefront.getAdapter());
-                if (cartChanged(cartInstance.serialize())) {
-                    setCart(cartInstance);
-                }
-            }
+            if (serializedCart) setCart(new Cart(serializedCart, storefront.getAdapter()));
         };
 
         const legacyCart = mode === 'store' && scope !== 'unconfigured' ? getStoredValue('cart') : null;
@@ -112,8 +109,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
 
     const confirmReplacement = useCallback(
-        () =>
-            new Promise<boolean>((resolve) => {
+        (fromStoreId: string | null, toStoreId: string | null, items: any[]) => {
+            // The store-switch sheet, when mounted, explains what will be cleared and why.
+            const fromSheet = requestStoreSwitch({
+                kind: 'replace',
+                fromStoreId,
+                toStoreId,
+                itemCount: totalCartQuantity(items),
+                total: cart ? formatCurrency(cart.subtotal?.() ?? 0, cart.getAttribute('currency') ?? 'USD') : null,
+            });
+            if (fromSheet) return fromSheet;
+
+            return new Promise<boolean>((resolve) => {
                 // react-native-web's Alert.alert is a no-op, which would leave this
                 // promise pending forever. Use the browser's confirm dialog instead.
                 if (Platform.OS === 'web') {
@@ -121,13 +128,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     resolve(typeof browserConfirm === 'function' ? Boolean(browserConfirm.call((globalThis as any).window, `${t('Network.cartReplaceTitle')}\n\n${t('Network.cartReplaceDescription')}`)) : false);
                     return;
                 }
-
                 Alert.alert(t('Network.cartReplaceTitle'), t('Network.cartReplaceDescription'), [
                     { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
                     { text: t('Network.replaceCart'), style: 'destructive', onPress: () => resolve(true) },
                 ]);
-            }),
-        [t]
+            });
+        },
+        [cart, t]
     );
 
     const addProduct = useCallback(
@@ -145,7 +152,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 const items = cart.contents?.() || [];
                 const multiCartEnabled = ownerInfo?.options?.multi_cart_enabled === true;
                 if (getNetworkCartDecision(items, targetStoreId, multiCartEnabled) === 'replace') {
-                    const confirmed = await confirmReplacement();
+                    const fromStoreId = items.map((item: any) => item?.store_id).find(Boolean) ?? null;
+                    const confirmed = await confirmReplacement(fromStoreId, targetStoreId, items);
                     if (!confirmed) throw new Error('CART_REPLACEMENT_CANCELLED');
                     activeCart = await cart.empty();
                     updateCart(activeCart);
@@ -154,7 +162,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 if (multiCartEnabled && items.length > 0) {
                     const currencies = new Set(items.map((item: any) => item.currency || cart.getAttribute('currency')).filter(Boolean));
                     const productCurrency = product?.getAttribute?.('currency');
-                    if (productCurrency && currencies.size > 0 && !currencies.has(productCurrency)) throw new Error(t('Network.incompatibleCurrency'));
+                    if (productCurrency && currencies.size > 0 && !currencies.has(productCurrency)) {
+                        // Explain in the sheet when it is mounted; the caller still gets the error.
+                        await requestStoreSwitch({ kind: 'currency', cartCurrency: [...currencies][0] as string, itemCurrency: productCurrency, toStoreId: targetStoreId });
+                        throw new Error(t('Network.incompatibleCurrency'));
+                    }
                 }
             }
 

@@ -21,3 +21,5 @@ export { Sheet } from './Sheet';
 export { categoryIcon } from './category-icons';
 export * from './product-display';
 export { TabBar } from './TabBar';
+export * from './product-options';
+export { ProductRow, ProductTile } from './ProductItems';
