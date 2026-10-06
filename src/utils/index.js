@@ -6,7 +6,9 @@ import storage, { getString } from './storage';
 import { capitalize } from './format';
 import { adapter, instance as storefrontInstance } from '../hooks/use-storefront';
 import { themes } from '../../tamagui.config';
-import { APP_THEME_KEY } from '../hooks/use-app-theme';
+import { getActiveTheme } from '../branding/runtime-theme';
+
+const APP_THEME_KEY = 'app_theme';
 import { pluralize } from 'inflected';
 import { countries } from 'countries-list';
 import StorefrontConfig from '../../storefront.config';
@@ -143,7 +145,18 @@ export function uniqueArray(array) {
     return [...new Set(array)];
 }
 
+/**
+ * Current theme value by key (or the whole theme) for code outside React.
+ * @returns {any}
+ */
 export function getTheme(key = null) {
+    // The theme BrandingProvider is rendering; the stored name is a fallback for
+    // code that runs before the provider mounts.
+    const active = getActiveTheme();
+    if (active) {
+        return key ? active.theme[key] : active.theme;
+    }
+
     const themeName = getString(APP_THEME_KEY);
     if (themeName) {
         const targetTheme = themes[themeName];

@@ -1,4 +1,3 @@
-import CheckoutScreen from '../../screens/CheckoutScreen';
 import StripeCheckoutScreen from '../../screens/StripeCheckoutScreen';
 import QPayCheckoutScreen from '../../screens/QPayCheckoutScreen';
 import PaypalCheckoutScreen from '../../screens/PaypalCheckoutScreen';
@@ -6,9 +5,10 @@ import BackButton from '../../components/BackButton';
 import { StripeCheckoutProvider } from '../../contexts/StripeCheckoutContext';
 import { getTheme } from '../../utils';
 import { translate as t } from '../../utils/localize';
+import { screenSlot } from '../../extensions';
 
 export const Checkout = {
-    screen: CheckoutScreen,
+    screen: screenSlot('checkout'),
     options: ({ route, navigation }) => {
         return {
             title: t('CheckoutScreen.checkout'),

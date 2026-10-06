@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pressable, Animated, Easing } from 'react-native';
+import { Pressable, Animated, Easing, LayoutChangeEvent } from 'react-native';
 import { XStack, YStack, Text, useTheme } from 'tamagui';
 
 const TabSwitch = ({ options, onTabChange, initialIndex = 0, borderRadius = 13 }) => {

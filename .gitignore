@@ -96,3 +96,4 @@ vendor
 
 # Web Build Stuff
 public/tamagui.css
+dist/

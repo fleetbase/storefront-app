@@ -1,0 +1,30 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "skipLibCheck": true,
+        "types": ["jest", "node", "react-native"]
+    },
+    "include": [
+        "src/env.ts",
+        "storefront.extensions.ts",
+        "src/extensions/**/*.ts",
+        "src/extensions/**/*.tsx",
+        "__tests__/extensions/**/*.ts",
+        "__tests__/extensions/**/*.tsx",
+        "src/network/**/*.ts",
+        "src/branding/**/*.ts",
+        "__tests__/branding/**/*.ts",
+        "__tests__/network/**/*.ts"
+    ],
+    "exclude": [
+        "src/extensions/app-screen-registry.tsx",
+        "src/extensions/screens/default-screens.ts",
+        "src/extensions/screens/ScreenFallbacks.tsx",
+        "src/branding/assets.ts",
+        "src/branding/build-branding.ts",
+        "legacy",
+        "node_modules",
+        "ios/Pods"
+    ]
+}

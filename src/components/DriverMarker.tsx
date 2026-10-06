@@ -4,6 +4,7 @@ import TrackingMarker from './TrackingMarker';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useEventBuffer from '../hooks/use-event-buffer';
 import { makeCoordinatesFloat } from '../utils/location';
+import { haversine } from '../utils/math';
 
 const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, ...props }) => {
     const markerRef = useRef();

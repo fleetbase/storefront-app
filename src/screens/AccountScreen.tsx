@@ -262,15 +262,18 @@ const AccountScreen = () => {
             ),
             onPress: handleLanguageSelect,
         },
-        {
-            titleComponent: <FontAwesomeIcon icon={faPalette} size={22} color={theme.textSecondary.val} />,
-            rightComponent: (
-                <Text color='$textSecondary' opacity={0.5}>
-                    {titleize(userColorScheme)}
-                </Text>
-            ),
-            onPress: handleSelectScheme,
-        },
+        // Hidden when the brand fixes the color scheme (appearance.allowUserToggle: false).
+        schemes.length
+            ? {
+                  titleComponent: <FontAwesomeIcon icon={faPalette} size={22} color={theme.textSecondary.val} />,
+                  rightComponent: (
+                      <Text color='$textSecondary' opacity={0.5}>
+                          {titleize(userColorScheme)}
+                      </Text>
+                  ),
+                  onPress: handleSelectScheme,
+              }
+            : null,
         {
             title: t('AccountScreen.deleteAccount'),
             rightComponent: null,
