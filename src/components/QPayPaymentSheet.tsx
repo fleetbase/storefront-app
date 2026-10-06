@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { Pressable, StyleSheet, Linking } from 'react-native';
+import { Pressable, StyleSheet, Linking, Platform } from 'react-native';
 import { Image, Text, YStack, XStack, Separator, useTheme, Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
