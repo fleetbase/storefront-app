@@ -25,7 +25,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
-    const { listen } = useSocketClusterClient();
+    const { listen, authenticateWithCheckoutToken } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
     const isCheckingStatus = useRef(false);
     const [checkoutOptions, setCheckoutOptions] = useState({
@@ -38,6 +38,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [invoice, setInvoice] = useState();
     const [checkoutId, setCheckoutId] = useState();
     const [checkoutToken, setCheckoutToken] = useState();
+    // Checkout-scoped socket token (guests); kept in memory only.
+    const checkoutSocketTokenRef = useRef(null);
+    const isGuest = !customer;
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -178,7 +181,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
         setIsLoading(true);
         try {
-            const { token, checkout, invoice } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'qpay', checkoutOptions);
+            const { token, checkout, invoice, socket_token } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'qpay', checkoutOptions);
+            checkoutSocketTokenRef.current = socket_token ?? null;
             setInvoice(invoice);
             setCheckoutId(checkout);
             setCheckoutToken(token);
@@ -311,6 +315,11 @@ export default function useQPayCheckout({ onOrderComplete }) {
         if (!checkoutId || !checkoutToken || listenerRef.current) return;
 
         const listenForOrderStatus = async () => {
+            // Guests: authenticate with the checkout-scoped socket token before subscribing.
+            // Logged-in customers' own socket tokens already cover their checkouts.
+            if (isGuest && checkoutSocketTokenRef.current && typeof authenticateWithCheckoutToken === 'function') {
+                await authenticateWithCheckoutToken(checkoutSocketTokenRef.current);
+            }
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
@@ -336,7 +345,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
                 listenerRef.current = null;
             }
         };
-    }, [listen, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError]);
+    }, [listen, authenticateWithCheckoutToken, isGuest, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError]);
 
     // Run order status check when the screen gains focus
     useFocusEffect(
