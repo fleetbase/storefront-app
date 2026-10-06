@@ -7,7 +7,7 @@ import { consumeAsyncIterator, isAsyncIterable } from '../utils';
  * Provides functionalities to subscribe, listen, and manage channels.
  */
 const useSocketClusterClient = () => {
-    const { socket, isConnected, error, subscribeChannel, closeChannel, killChannel, closeAllChannels, killAllChannels } = useSocketCluster();
+    const { socket, isConnected, error, subscribeChannel, closeChannel, killChannel, closeAllChannels, killAllChannels, authenticateWithCheckoutToken } = useSocketCluster();
 
     /**
      * Listens to a channel for all incoming events/data.
@@ -70,6 +70,7 @@ const useSocketClusterClient = () => {
         listen,
         closeAllChannels,
         killAllChannels,
+        authenticateWithCheckoutToken,
     };
 };
 

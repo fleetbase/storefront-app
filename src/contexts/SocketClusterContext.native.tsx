@@ -1,6 +1,17 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import socketClusterClient from 'socketcluster-client';
+import DeviceInfo from 'react-native-device-info';
 import { config, toBoolean, consumeAsyncIterator } from '../utils';
+import { SocketAuthManager, getCustomerToken } from '../utils/socket-auth';
+import { useAuth } from './AuthContext';
+
+const getClientTag = () => {
+    try {
+        return `storefront-app/${DeviceInfo.getVersion()}`;
+    } catch (_) {
+        return 'storefront-app';
+    }
+};
 
 const SocketClusterContext = createContext(null);
 
@@ -12,6 +23,12 @@ export const SocketClusterProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState(null);
+    const { customer } = useAuth();
+    const customerRef = useRef(customer);
+    customerRef.current = customer;
+    const authRef = useRef<SocketAuthManager | null>(null);
+    const customerId = customer?.id ?? null;
+    const previousCustomerId = useRef(customerId);
 
     useEffect(() => {
         // Initialize the socket connection
@@ -22,7 +39,17 @@ export const SocketClusterProvider = ({ children }) => {
             secure: toBoolean(config('SOCKETCLUSTER_SECURE', true)),
         };
 
-        const scSocket = socketClusterClient.create(options);
+        // Socket auth: the token lives in memory only and is delivered in the
+        // handshake by this authEngine (never storage, never the URL query).
+        const auth = new SocketAuthManager({ getCustomerToken: () => getCustomerToken(customerRef.current) });
+        authRef.current = auth;
+
+        const scSocket = socketClusterClient.create({
+            ...options,
+            authEngine: auth.authEngine,
+            query: { client: getClientTag() },
+        });
+        auth.attach(scSocket);
 
         // Define handlers for socket events
         const handleConnect = () => {
@@ -59,9 +86,37 @@ export const SocketClusterProvider = ({ children }) => {
             stopDisconnect();
             stopError();
 
+            auth.destroy();
+            authRef.current = null;
             scSocket.disconnect();
             console.log('Socket connection closed.');
         };
+    }, []);
+
+    // Re-authenticate the socket when the customer logs in, out or switches account.
+    useEffect(() => {
+        if (previousCustomerId.current === customerId) return;
+        previousCustomerId.current = customerId;
+        const auth = authRef.current;
+        if (!auth) return;
+        if (customerId) {
+            auth.onLogin().catch((err) => console.warn('Socket re-authentication failed:', err));
+        } else {
+            auth.onLogout();
+        }
+    }, [customerId]);
+
+    /**
+     * Authenticate the socket with a checkout-scoped token (guest checkout).
+     * No-op when a customer is logged in: their own token covers their checkouts.
+     */
+    const authenticateWithCheckoutToken = useCallback(async (socketToken) => {
+        if (!authRef.current) return;
+        try {
+            await authRef.current.applyCheckoutToken(socketToken);
+        } catch (err) {
+            console.warn('Unable to authenticate socket with checkout token:', err);
+        }
     }, []);
 
     /**
@@ -78,6 +133,7 @@ export const SocketClusterProvider = ({ children }) => {
 
             try {
                 const channel = socket.subscribe(channelName);
+                authRef.current?.track(channelName);
                 if (channel.isSubscribed()) {
                     console.log(`Already subscribed to channel "${channelName}".`);
                     return channel;
@@ -106,6 +162,7 @@ export const SocketClusterProvider = ({ children }) => {
             }
 
             try {
+                authRef.current?.untrack(channelName);
                 await socket.closeChannel(channelName);
                 console.log(`Gracefully closed channel "${channelName}".`);
             } catch (err) {
@@ -127,6 +184,7 @@ export const SocketClusterProvider = ({ children }) => {
             }
 
             try {
+                authRef.current?.untrack(channelName);
                 await socket.killChannel(channelName);
                 console.log(`Forcefully killed channel "${channelName}".`);
             } catch (err) {
@@ -146,6 +204,7 @@ export const SocketClusterProvider = ({ children }) => {
         }
 
         try {
+            authRef.current?.untrackAll();
             await socket.closeAllChannels();
             console.log('Gracefully closed all channels.');
         } catch (err) {
@@ -163,6 +222,7 @@ export const SocketClusterProvider = ({ children }) => {
         }
 
         try {
+            authRef.current?.untrackAll();
             await socket.killAllChannels();
             console.log('Forcefully killed all channels.');
         } catch (err) {
@@ -181,6 +241,7 @@ export const SocketClusterProvider = ({ children }) => {
                 killChannel,
                 closeAllChannels,
                 killAllChannels,
+                authenticateWithCheckoutToken,
             }}
         >
             {children}
