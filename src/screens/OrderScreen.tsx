@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Linking, RefreshControl, ScrollView } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCheck, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faComment, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { parseScheduledAt } from '../commerce/booking';
 import { fetchEligibility, type Eligibility } from '../commerce/reviews';
+import { fetchChat, type OrderChat } from '../commerce/order-chat';
+import useChatRequest from '../hooks/use-chat-request';
 import useReviewRequest from '../hooks/use-review-request';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { Order } from '@fleetbase/sdk';
@@ -56,6 +58,8 @@ const OrderScreen = ({ route }: any) => {
     const [pickupSheet, setPickupSheet] = useState(false);
     const [reviewState, setReviewState] = useState<Eligibility | null>(null);
     const reviewRequest = useReviewRequest();
+    const chatRequest = useChatRequest();
+    const [chat, setChat] = useState<OrderChat | null>(null);
 
     const storeId = useMemo(() => order.getAttribute('meta.storefront_id'), [order]);
     const [store, setStore] = useStorage(`${storeId}`, info);
@@ -199,6 +203,28 @@ const OrderScreen = ({ route }: any) => {
             active = false;
         };
     }, [customer, finished, order.id, reviewRequest, storeId]);
+
+    // The driver chat: its unread count while the order is active, its history after.
+    const hasDriver = !!order.getAttribute('driver_assigned') || !!order.getAttribute('driver_assigned_uuid');
+    useEffect(() => {
+        if (!customer || !loaded || isPickup || (!hasDriver && !progress.finished)) return;
+        let active = true;
+        fetchChat(chatRequest, order.id)
+            .then((result) => active && setChat(result))
+            .catch(() => active && setChat(null));
+        return () => {
+            active = false;
+        };
+    }, [chatRequest, customer, hasDriver, isPickup, loaded, order.id, progress.finished, status]);
+
+    const openChat = () =>
+        navigation.navigate('OrderChat', {
+            orderId: order.id,
+            orderReference: order.getAttribute('tracking_number.tracking_number') ?? order.id,
+            storeName: store?.name ?? undefined,
+            driverName: order.getAttribute('driver_assigned.name') ?? undefined,
+            driverPhone: order.getAttribute('driver_assigned.phone') ?? undefined,
+        });
 
     const close = () => {
         if (params.justPlaced || !navigation.canGoBack()) {
@@ -377,7 +403,8 @@ const OrderScreen = ({ route }: any) => {
                                     </UIText>
                                 )}
                             </YStack>
-                            {!!driver?.phone && <IconButton icon={faPhone} variant='solid' size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driver.phone}`)} />}
+                            {!!driver?.phone && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driver.phone}`)} />}
+                            {!!customer && <IconButton icon={faComment} variant='solid' size={44} badge={chat?.unread ? chat.unread : undefined} accessibilityLabel={t('Chat.messageDriver', { driver: driverName })} onPress={openChat} />}
                         </XStack>
                     )}
 
@@ -405,6 +432,18 @@ const OrderScreen = ({ route }: any) => {
                             {!!store?.phone && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />}
                         </XStack>
                     ))}
+
+                    {progress.finished && !!chat && chat.messages.length > 0 && (
+                        <Pressable onPress={openChat} accessibilityRole='button' style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.card, backgroundColor: theme.surface.val }}>
+                            <FontAwesomeIcon icon={faComment} size={18} color={theme.textSecondary.val} />
+                            <UIText flex={1} variant='caption' tone='secondary'>
+                                {t('Chat.closedNote')}{' '}
+                                <UIText variant='captionStrong' tone='brand'>
+                                    {t('Chat.viewMessages')}
+                                </UIText>
+                            </UIText>
+                        </Pressable>
+                    )}
 
                     <XStack alignItems='center' gap={12}>
                         <StoreLogo uri={store?.logo_url} name={storeName || '?'} size={40} radius={radius.tile} />

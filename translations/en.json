@@ -1007,5 +1007,38 @@
             "promotionsBody": "Deals and announcements from stores on {{name}}."
         },
         "prefsNote": "Messages from your driver about an active order always come through. Receipts and account security emails aren’t affected by these settings."
+    },
+    "Chat": {
+        "backToOrder": "Back to order tracking",
+        "yourDriver": "Your driver",
+        "online": "online",
+        "closedShort": "chat closed",
+        "messageDriver": "Message {{driver}}",
+        "messages": "Messages",
+        "intro": "{{driver}} is delivering your order from {{store}}. Messages are shared with the store if there’s a problem.",
+        "reconnecting": "Reconnecting… messages you send still go out, and new ones appear when you’re back online.",
+        "noDriverTitle": "No driver yet",
+        "noDriverBody": "You can message your driver once one is assigned to this order.",
+        "loadFailed": "Couldn’t load the chat",
+        "signInBody": "Sign in to message your driver.",
+        "quickReplies": "Quick replies",
+        "quick": {
+            "comingDown": "Coming down now",
+            "leaveAtDoor": "Please leave it at the door",
+            "callOnArrival": "Call me when you arrive",
+            "whereAreYou": "Where are you now?"
+        },
+        "sendPhoto": "Send a photo",
+        "placeholder": "Message {{driver}}",
+        "send": "Send",
+        "sending": "Sending…",
+        "failed": "Not sent",
+        "retry": "Not sent · Tap to retry",
+        "read": "Read",
+        "photo": "Photo",
+        "closedTitle": "This chat closed when your order was finished",
+        "closedBody": "Need help with the order? Contact {{store}} from the order page.",
+        "closedNote": "Chat with your driver closed when the order was finished.",
+        "viewMessages": "View messages"
     }
 }
