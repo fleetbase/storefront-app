@@ -1,4 +1,4 @@
-export type StorefrontMode = 'store' | 'marketplace';
+export type StorefrontMode = 'store' | 'network';
 
 export type DiscoveryState = {
     query: string;
@@ -21,11 +21,11 @@ export const DEFAULT_DISCOVERY_STATE: DiscoveryState = {
 };
 
 export function getStorefrontMode(owner: any): StorefrontMode {
-    return owner?.is_network === true ? 'marketplace' : 'store';
+    return owner?.is_network === true ? 'network' : 'store';
 }
 
 export function getStorefrontRoute(owner: any): 'StoreNavigator' | 'NetworkNavigator' {
-    return getStorefrontMode(owner) === 'marketplace' ? 'NetworkNavigator' : 'StoreNavigator';
+    return getStorefrontMode(owner) === 'network' ? 'NetworkNavigator' : 'StoreNavigator';
 }
 
 export function getStorefrontStorageScope(storefrontKey?: string, ownerId?: string): string {
@@ -63,13 +63,13 @@ export function groupCartItemsByStore(items: any[] = []): Record<string, any[]> 
     }, {} as Record<string, any[]>);
 }
 
-export function getMarketplaceCartDecision(items: any[] = [], targetStoreId?: string, multiCartEnabled = false): 'add' | 'replace' {
+export function getNetworkCartDecision(items: any[] = [], targetStoreId?: string, multiCartEnabled = false): 'add' | 'replace' {
     if (multiCartEnabled || items.length === 0) return 'add';
     const existingStores = new Set(items.map((item) => item?.store_id).filter(Boolean));
     return targetStoreId && (existingStores.size === 0 || existingStores.has(targetStoreId)) ? 'add' : 'replace';
 }
 
-export function canCombineMarketplaceCart(items: any[] = []): boolean {
+export function canCombineNetworkCart(items: any[] = []): boolean {
     const currencies = new Set(items.map((item) => item?.currency).filter(Boolean));
     return currencies.size <= 1 && !items.some((item) => !item?.store_id || !item?.store_location_id);
 }
@@ -87,7 +87,7 @@ export function getCartQuoteOrigin(cart: any): string | string[] | null {
     return origins.length <= 1 ? origins[0] || null : origins;
 }
 
-export function buildMarketplaceStoreQuery(discovery: DiscoveryState, offset = 0, coordinates?: string | null): Record<string, any> {
+export function buildNetworkStoreQuery(discovery: DiscoveryState, offset = 0, coordinates?: string | null): Record<string, any> {
     const params: Record<string, any> = { limit: 20, offset, sort: discovery.sort };
     if (discovery.query.trim()) params.query = discovery.query.trim();
     if (discovery.category) params.category = discovery.category;
@@ -98,20 +98,20 @@ export function buildMarketplaceStoreQuery(discovery: DiscoveryState, offset = 0
     return params;
 }
 
-export function mergeMarketplacePage(current: any[], next: any[], append = false): any[] {
+export function mergeNetworkPage(current: any[], next: any[], append = false): any[] {
     if (!append) return next;
     const seen = new Set(current.map((item) => item?.id));
     return [...current, ...next.filter((item) => !seen.has(item?.id))];
 }
 
-export function getMappableMarketplaceLocations(locations: any[] = []): any[] {
+export function getMappableNetworkLocations(locations: any[] = []): any[] {
     return locations.filter((location) => {
-        const { latitude, longitude } = getMarketplaceLocationCoordinates(location);
+        const { latitude, longitude } = getNetworkLocationCoordinates(location);
         return Number.isFinite(latitude) && Number.isFinite(longitude);
     });
 }
 
-export function getMarketplaceLocationCoordinates(location: any): { latitude: number; longitude: number } {
+export function getNetworkLocationCoordinates(location: any): { latitude: number; longitude: number } {
     return {
         latitude: Number(location?.latitude ?? location?.getAttribute?.('latitude')),
         longitude: Number(location?.longitude ?? location?.getAttribute?.('longitude')),
@@ -124,6 +124,6 @@ export function getLocationFallbackState(permission: string, hasStoredOrManualLo
     return 'request';
 }
 
-export function shouldAcceptMarketplaceRequest(requestId: number, latestRequestId: number): boolean {
+export function shouldAcceptNetworkRequest(requestId: number, latestRequestId: number): boolean {
     return requestId === latestRequestId;
 }

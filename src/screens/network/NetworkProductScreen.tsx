@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Product, Store } from '@fleetbase/storefront';
 import { Button, Spinner, Text, YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
-import ProductScreen from './ProductScreen';
-import useStorefront from '../hooks/use-storefront';
-import { useLanguage } from '../contexts/LanguageContext';
-import { serializeSdkResource } from '../utils/marketplace-runtime';
+import ProductScreen from '../ProductScreen';
+import useStorefront from '../../hooks/use-storefront';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { serializeSdkResource } from '../../network/network-runtime';
 
-const MarketplaceProductScreen = ({ route }: any) => {
+const NetworkProductScreen = ({ route }: any) => {
     const navigation = useNavigation();
     const { t } = useLanguage();
     const { storefront, adapter } = useStorefront();
@@ -41,7 +41,7 @@ const MarketplaceProductScreen = ({ route }: any) => {
     if (error || (!resolvedParams && (!productId || !storeId))) {
         return (
             <YStack flex={1} alignItems='center' justifyContent='center' gap='$3' p='$6'>
-                <Text color='$textPrimary'>{t('Marketplace.productUnavailable')}</Text>
+                <Text color='$textPrimary'>{t('Network.productUnavailable')}</Text>
                 <Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button>
             </YStack>
         );
@@ -52,4 +52,4 @@ const MarketplaceProductScreen = ({ route }: any) => {
     return <ProductScreen route={resolvedRoute} />;
 };
 
-export default MarketplaceProductScreen;
+export default NetworkProductScreen;

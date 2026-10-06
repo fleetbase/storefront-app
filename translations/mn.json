@@ -420,7 +420,7 @@
         "selectBank": "Банк сонгох"
     },
     "TextAreaSheet": {},
-    "Marketplace": {
+    "Network": {
         "tabs": { "discover": "Нээж үзэх", "search": "Хайх", "map": "Газрын зураг", "cart": "Сагс", "profile": "Профайл" },
         "sort": { "nearest": "Хамгийн ойр", "highest_rated": "Өндөр үнэлгээтэй", "lowest_rated": "Бага үнэлгээтэй", "popular": "Алдартай", "trending": "Эрэлттэй", "newest": "Хамгийн шинэ", "oldest": "Хамгийн хуучин" },
         "allCategories": "Бүх ангилал",

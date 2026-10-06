@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Spinner, Text, YStack } from 'tamagui';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import useStorefront from '../hooks/use-storefront';
-import StoreHomeScreen from './StoreHomeScreen';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
+import useStorefront from '../../hooks/use-storefront';
+import StoreHomeScreen from '../StoreHomeScreen';
 
-const MarketplaceStoreScreen = ({ route }: any) => {
+const NetworkStoreScreen = ({ route }: any) => {
     const { t } = useLanguage();
     const navigation = useNavigation();
     const { storefront } = useStorefront();
@@ -47,8 +47,8 @@ const MarketplaceStoreScreen = ({ route }: any) => {
     }, [enterStore, leaveStore, storeData, storeId, storefront]);
 
     if (loading) return <YStack flex={1} alignItems='center' justifyContent='center'><Spinner size='large' /></YStack>;
-    if (error || !currentStore) return <YStack flex={1} p='$6' alignItems='center' justifyContent='center' gap='$3'><Text color='$textPrimary'>{t('Marketplace.storeUnavailable')}</Text><Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button></YStack>;
+    if (error || !currentStore) return <YStack flex={1} p='$6' alignItems='center' justifyContent='center' gap='$3'><Text color='$textPrimary'>{t('Network.storeUnavailable')}</Text><Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button></YStack>;
     return <StoreHomeScreen route={route} />;
 };
 
-export default MarketplaceStoreScreen;
+export default NetworkStoreScreen;

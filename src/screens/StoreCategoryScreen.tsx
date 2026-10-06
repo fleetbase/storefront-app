@@ -20,7 +20,7 @@ const StoreCategoryScreen = ({ route }) => {
     const storeId = route.params?.storeId ?? currentStore?.id;
     const storeLocation = getSelectedStoreLocation(storeId);
     const { data: products, loading: isLoadingProducts } = useStorefrontData(
-        (storefront) => (categoryId ? storefront.products.query({ category: categoryId, ...(mode === 'marketplace' && storeId ? { store: storeId } : {}) }) : Promise.resolve([])),
+        (storefront) => (categoryId ? storefront.products.query({ category: categoryId, ...(mode === 'network' && storeId ? { store: storeId } : {}) }) : Promise.resolve([])),
         {
             defaultValue: [],
             persistKey: `${storeId || 'store'}_${categoryId}_products`,

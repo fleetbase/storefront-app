@@ -6,7 +6,7 @@ import { Cart } from '@fleetbase/storefront';
 import useStorage, { get as getStoredValue, remove as removeStoredValue } from '../hooks/use-storage';
 import useStorefront from '../hooks/use-storefront';
 import { useStorefrontRuntime } from './StorefrontRuntimeContext';
-import { getMarketplaceCartDecision, getScopedStorageKey } from '../utils/marketplace-runtime';
+import { getNetworkCartDecision, getScopedStorageKey } from '../network/network-runtime';
 import { useLanguage } from './LanguageContext';
 
 const { emit } = EventRegister;
@@ -118,13 +118,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 // promise pending forever. Use the browser's confirm dialog instead.
                 if (Platform.OS === 'web') {
                     const browserConfirm = (globalThis as any).window?.confirm;
-                    resolve(typeof browserConfirm === 'function' ? Boolean(browserConfirm.call((globalThis as any).window, `${t('Marketplace.cartReplaceTitle')}\n\n${t('Marketplace.cartReplaceDescription')}`)) : false);
+                    resolve(typeof browserConfirm === 'function' ? Boolean(browserConfirm.call((globalThis as any).window, `${t('Network.cartReplaceTitle')}\n\n${t('Network.cartReplaceDescription')}`)) : false);
                     return;
                 }
 
-                Alert.alert(t('Marketplace.cartReplaceTitle'), t('Marketplace.cartReplaceDescription'), [
+                Alert.alert(t('Network.cartReplaceTitle'), t('Network.cartReplaceDescription'), [
                     { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
-                    { text: t('Marketplace.replaceCart'), style: 'destructive', onPress: () => resolve(true) },
+                    { text: t('Network.replaceCart'), style: 'destructive', onPress: () => resolve(true) },
                 ]);
             }),
         [t]
@@ -132,19 +132,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const addProduct = useCallback(
         async (product: any, quantity = 1, data: any = {}, merchant: any = null) => {
-            if (!cart) throw new Error(t('Marketplace.cartUnavailable'));
+            if (!cart) throw new Error(t('Network.cartUnavailable'));
             const targetStoreId = merchant?.id || currentStore?.id || product?.getAttribute?.('store.id');
             const selectedLocation = getSelectedStoreLocation(targetStoreId);
             const storeLocationId = data.store_location || selectedLocation?.id;
             let activeCart = cart;
 
-            if (mode === 'marketplace') {
-                if (!targetStoreId) throw new Error(t('Marketplace.missingMerchant'));
-                if (!storeLocationId) throw new Error(t('Marketplace.selectStoreLocationFirst'));
+            if (mode === 'network') {
+                if (!targetStoreId) throw new Error(t('Network.missingMerchant'));
+                if (!storeLocationId) throw new Error(t('Network.selectStoreLocationFirst'));
 
                 const items = cart.contents?.() || [];
                 const multiCartEnabled = ownerInfo?.options?.multi_cart_enabled === true;
-                if (getMarketplaceCartDecision(items, targetStoreId, multiCartEnabled) === 'replace') {
+                if (getNetworkCartDecision(items, targetStoreId, multiCartEnabled) === 'replace') {
                     const confirmed = await confirmReplacement();
                     if (!confirmed) throw new Error('CART_REPLACEMENT_CANCELLED');
                     activeCart = await cart.empty();
@@ -154,7 +154,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                 if (multiCartEnabled && items.length > 0) {
                     const currencies = new Set(items.map((item: any) => item.currency || cart.getAttribute('currency')).filter(Boolean));
                     const productCurrency = product?.getAttribute?.('currency');
-                    if (productCurrency && currencies.size > 0 && !currencies.has(productCurrency)) throw new Error(t('Marketplace.incompatibleCurrency'));
+                    if (productCurrency && currencies.size > 0 && !currencies.has(productCurrency)) throw new Error(t('Network.incompatibleCurrency'));
                 }
             }
 

@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { Button, Spinner, Text, YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import MarketplaceStoreCard from '../components/MarketplaceStoreCard';
-import useStorefront from '../hooks/use-storefront';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
+import NetworkStoreCard from '../../components/NetworkStoreCard';
+import useStorefront from '../../hooks/use-storefront';
 
-const MarketplaceCategoryScreen = ({ route }: any) => {
+const NetworkCategoryScreen = ({ route }: any) => {
     const navigation = useNavigation();
     const { t } = useLanguage();
     const { storefront } = useStorefront();
@@ -57,7 +57,7 @@ const MarketplaceCategoryScreen = ({ route }: any) => {
             .then((result: any) => {
                 if (!active) return;
                 const match = Array.from(result || []).find((item: any) => item.id === categoryId);
-                if (!match) throw new Error('Marketplace category not found');
+                if (!match) throw new Error('Network category not found');
                 setCategory(match);
                 setCategoryReady(true);
             })
@@ -81,16 +81,16 @@ const MarketplaceCategoryScreen = ({ route }: any) => {
                 keyExtractor={(item: any) => item.id}
                 contentContainerStyle={styles.list}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
-                renderItem={({ item }) => <MarketplaceStoreCard store={item} onPress={(store: any) => navigation.navigate('MarketplaceStore', { store: store.serialize(), storeId: store.id })} />}
+                renderItem={({ item }) => <NetworkStoreCard store={item} onPress={(store: any) => navigation.navigate('NetworkStore', { store: store.serialize(), storeId: store.id })} />}
                 ListEmptyComponent={
-                    loading ? <Spinner m='$8' /> : error || categoryError ? <YStack p='$6' gap='$3' alignItems='center'><Text>{t('Marketplace.loadError')}</Text><Button onPress={() => load()}>{t('common.retry')}</Button></YStack> : <Text p='$6' textAlign='center' color='$textSecondary'>{t('Marketplace.noCategoryStores')}</Text>
+                    loading ? <Spinner m='$8' /> : error || categoryError ? <YStack p='$6' gap='$3' alignItems='center'><Text>{t('Network.loadError')}</Text><Button onPress={() => load()}>{t('common.retry')}</Button></YStack> : <Text p='$6' textAlign='center' color='$textSecondary'>{t('Network.noCategoryStores')}</Text>
                 }
             />
         </YStack>
     );
 };
 
-export default MarketplaceCategoryScreen;
+export default NetworkCategoryScreen;
 
 const styles = StyleSheet.create({
     list: { padding: 12, paddingBottom: 100 },

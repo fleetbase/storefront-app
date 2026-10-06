@@ -3,7 +3,7 @@ import { StoreLocation } from '@fleetbase/storefront';
 import useStorage from './use-storage';
 import useStorefront from './use-storefront';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { getScopedStorageKey, serializeSdkResource } from '../utils/marketplace-runtime';
+import { getScopedStorageKey, serializeSdkResource } from '../network/network-runtime';
 
 const useStoreLocations = () => {
     const { storefront } = useStorefront();

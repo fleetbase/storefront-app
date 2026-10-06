@@ -84,7 +84,7 @@ const ProductCard = ({
             setQuantity(1);
             toast.success(t('ProductCard.productAddedToCart', { productName: product.getAttribute('name') }));
         } catch (error) {
-            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Marketplace.addToCartError'));
+            if (error.message !== 'CART_REPLACEMENT_CANCELLED') toast.error(t('Network.addToCartError'));
         }
     };
 
