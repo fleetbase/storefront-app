@@ -35,6 +35,8 @@ export const SCREEN_IDS = [
     'reviews.write',
     'offers.list',
     'offers.detail',
+    'notifications.inbox',
+    'notifications.settings',
 ] as const;
 
 export type ScreenId = (typeof SCREEN_IDS)[number];

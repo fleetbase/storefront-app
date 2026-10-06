@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronDown, faLocationDot, faMagnifyingGlass, faStore, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faChevronDown, faLocationDot, faMagnifyingGlass, faStore, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
@@ -17,6 +17,7 @@ import { DEFAULT_DISCOVERY_STATE, buildNetworkStoreQuery, mergeNetworkPage } fro
 import { rememberStores } from '../../network/store-names';
 import { fetchOffers, type Offer } from '../../commerce/offers';
 import { OfferBanner } from '../../components/offers/OfferCard';
+import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import {
     CartPill,
     categoryIcon,
@@ -24,6 +25,7 @@ import {
     EmptyState,
     MediaImage,
     SectionHeader,
+    IconButton,
     LocationSheet,
     Skeleton,
     StoreCard,
@@ -79,6 +81,7 @@ const NetworkHomeScreen = () => {
     const [rails, setRails] = useState<Rail[]>(() => railDefinitions.map((rail) => ({ ...rail, stores: [], loading: true, failed: false })));
     const [categories, setCategories] = useState<any[]>([]);
     const [offers, setOffers] = useState<Offer[]>([]);
+    const { count: unread } = useUnreadNotifications();
     const [stores, setStores] = useState<StoreSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -200,6 +203,13 @@ const NetworkHomeScreen = () => {
                         </UIText>
                         <FontAwesomeIcon icon={faChevronDown} size={11} color='#14171c' />
                     </Pressable>
+                    <IconButton
+                        icon={faBell}
+                        variant='floating'
+                        badge={unread > 0 ? (unread > 9 ? '9+' : String(unread)) : undefined}
+                        accessibilityLabel={unread > 0 ? t('Notifications.bellUnread', { count: unread }) : t('Notifications.title')}
+                        onPress={() => navigation.navigate('Notifications')}
+                    />
                 </XStack>
                 <XStack position='absolute' left={space.gutter} right={space.gutter} bottom={62} alignItems='flex-end' gap={12}>
                     <StoreLogo uri={usableImageUrl(ownerInfo?.logo_url)} name={networkName} size={56} />
