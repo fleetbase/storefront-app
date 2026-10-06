@@ -420,6 +420,9 @@
         "selectBank": "Банк сонгох"
     },
     "TextAreaSheet": {},
+    "ScreenSlot": {
+        "loadError": "Энэ дэлгэцийг ачаалах үед алдаа гарлаа."
+    },
     "Network": {
         "tabs": { "discover": "Нээж үзэх", "search": "Хайх", "map": "Газрын зураг", "cart": "Сагс", "profile": "Профайл" },
         "sort": { "nearest": "Хамгийн ойр", "highest_rated": "Өндөр үнэлгээтэй", "lowest_rated": "Бага үнэлгээтэй", "popular": "Алдартай", "trending": "Эрэлттэй", "newest": "Хамгийн шинэ", "oldest": "Хамгийн хуучин" },

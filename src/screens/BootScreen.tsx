@@ -12,7 +12,8 @@ import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { getStorefrontRoute } from '../network/network-runtime';
+import { getStorefrontMode, getStorefrontRoute } from '../network/network-runtime';
+import { preloadInitialScreens } from '../extensions/app-screen-registry';
 
 const BootScreenWrapper = ({ children, backgroundImage, backgroundColor, theme }) => {
     const bg = (isArray(backgroundColor) ? backgroundColor[0] : backgroundColor) ?? theme.background.val;
@@ -77,6 +78,10 @@ const BootScreen = () => {
                 const info = await storefront.about();
                 if (cancelled) return;
                 initializeOwner(info);
+
+                // Load the first screens before leaving boot so they render without a loading frame.
+                await preloadInitialScreens(getStorefrontMode(info));
+                if (cancelled) return;
 
                 // Network (marketplace) browsing does not require precise location. Location is
                 // requested later, in context, for map/nearest/delivery functionality.
