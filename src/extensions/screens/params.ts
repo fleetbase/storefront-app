@@ -26,7 +26,7 @@ export type ScreenParamMap = {
     'auth.login': { redirectTo?: string; [key: string]: any } | undefined;
     'auth.createAccount': { redirectTo?: string; [key: string]: any } | undefined;
     'network.home': undefined;
-    'network.directory': { categoryId?: string; category?: Serialized; tag?: string; sort?: string } | undefined;
+    'network.directory': { categoryId?: string; category?: Serialized; tag?: string; tags?: string[]; sort?: string } | undefined;
     'network.search': undefined;
     'network.map': undefined;
     'network.store': { storeId: string; store?: Serialized };

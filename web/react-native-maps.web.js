@@ -50,10 +50,30 @@ function MapEvents({ onRegionChangeComplete, onPress, onPanDrag }) {
     return null;
 }
 
+// react-native-maps methods used by screens, added to the Leaflet map instance so existing
+// callers that use the Leaflet API directly keep working.
+function withNativeMethods(map) {
+    if (!map.animateToRegion) {
+        map.animateToRegion = (region, duration = 350) => {
+            const { center, zoom } = regionToCenterAndZoom(region);
+            map.flyTo(center, zoom, { duration: duration / 1000 });
+        };
+    }
+    if (!map.fitToCoordinates) {
+        map.fitToCoordinates = (coordinates = [], options = {}) => {
+            if (!coordinates.length) return;
+            const padding = options.edgePadding ? Math.max(options.edgePadding.top || 0, options.edgePadding.left || 0) : 24;
+            map.fitBounds(coordinates.map((coordinate) => [coordinate.latitude, coordinate.longitude]), { padding: [padding, padding], animate: options.animated !== false });
+        };
+    }
+    return map;
+}
+
 const SetMapRef = ({ setMapRef }) => {
     const map = useMap();
 
     useEffect(() => {
+        withNativeMethods(map);
         if (setMapRef) {
             if (typeof setMapRef === 'function') {
                 setMapRef(map);
@@ -72,11 +92,11 @@ export const MapView = forwardRef((props, ref) => {
     const tileUrl =
         mapType === 'satellite'
             ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     return (
         <MapContainer center={center} zoom={zoom} style={style} scrollWheelZoom={scrollEnabled} zoomControl={zoomEnabled} {...rest}>
-            <TileLayer url={tileUrl} />
+            <TileLayer url={tileUrl} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
             <SetMapRef setMapRef={ref} />
             <MapEvents onRegionChangeComplete={onRegionChangeComplete} onPress={onPress} onPanDrag={onPanDrag} />
             {children}
@@ -85,11 +105,17 @@ export const MapView = forwardRef((props, ref) => {
 });
 
 export const Marker = (props) => {
-    const { coordinate, centerOffset, onPress, children, ...rest } = props;
+    const { coordinate, centerOffset, onPress, children, webIconHtml, webIconSize = 40, ...rest } = props;
     const position = [coordinate.latitude, coordinate.longitude];
 
-    // If centerOffset is provided, create a custom icon using a divIcon.
+    // Leaflet cannot render React children as the marker itself. Screens can pass the
+    // marker as an HTML string (`webIconHtml`) for a custom marker on the web.
     let icon;
+    if (webIconHtml) {
+        icon = L.divIcon({ html: webIconHtml, className: '', iconSize: [webIconSize, webIconSize], iconAnchor: [webIconSize / 2, webIconSize / 2] });
+        return <LeafletMarker position={position} icon={icon} eventHandlers={{ click: onPress }} {...rest} />;
+    }
+    // If centerOffset is provided, create a custom icon using a divIcon.
     if (centerOffset) {
         // centerOffset should be an object like { x, y }
         icon = L.divIcon({

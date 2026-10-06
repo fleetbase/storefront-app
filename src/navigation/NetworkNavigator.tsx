@@ -11,6 +11,7 @@ import useCart from '../hooks/use-cart';
 import { useLanguage } from '../contexts/LanguageContext';
 import { totalCartQuantity } from '../network/network-runtime';
 import { screenSlot } from '../extensions';
+import { TabBar, UIText } from '../ui';
 
 // Store, category and product screens are pushed from the Home, Search and Map
 // stacks. Deep-link paths are declared only on the Home stack's copies so each
@@ -46,7 +47,7 @@ const NetworkHomeStack = createNativeStackNavigator({
         NetworkCategory: {
             screen: screenSlot('network.directory'),
             linking: { path: 'categories/:categoryId' },
-            options: ({ route }: any) => ({ title: route.params?.category?.name || '' }),
+            options: { headerShown: false },
         },
         ...createSharedNetworkScreens(true),
     },
@@ -74,9 +75,9 @@ const icons: Record<string, any> = {
     NetworkProfileTab: faUser,
 };
 
-const NetworkTabLabel = ({ labelKey, color }: { labelKey: string; color: string }) => {
+const NetworkTabLabel = ({ labelKey, color, focused }: { labelKey: string; color: string; focused?: boolean }) => {
     const { t } = useLanguage();
-    return <Text color={color} fontSize='$2'>{t(labelKey)}</Text>;
+    return <UIText style={{ color, fontSize: 11, lineHeight: 14, fontWeight: focused ? '700' : '600' }}>{t(labelKey)}</UIText>;
 };
 
 const NetworkTabIcon = ({ routeName, color }: { routeName: string; color: string }) => {
@@ -87,7 +88,7 @@ const NetworkTabIcon = ({ routeName, color }: { routeName: string; color: string
         <XStack position='relative'>
             <FontAwesomeIcon icon={icons[routeName]} size={20} color={color} />
             {routeName === 'NetworkCartTab' && count > 0 && (
-                <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} borderRadius={9} bg='$red-600' color='white' textAlign='center' fontSize={11} lineHeight={18}>
+                <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} borderRadius={9} bg='$error' color='white' textAlign='center' fontSize={11} lineHeight={18}>
                     {count > 99 ? '99+' : count}
                 </Text>
             )}
@@ -98,6 +99,7 @@ const NetworkTabIcon = ({ routeName, color }: { routeName: string; color: string
 const NetworkNavigator = createBottomTabNavigator({
     layout: StoreLayout,
     initialRouteName: 'NetworkHomeTab',
+    tabBar: (props: any) => <TabBar {...props} />,
     screenOptions: ({ route }: any) => ({
         headerShown: false,
         tabBarIcon: ({ color }: any) => <NetworkTabIcon routeName={route.name} color={color} />,
@@ -105,23 +107,23 @@ const NetworkNavigator = createBottomTabNavigator({
     screens: {
         NetworkHomeTab: {
             screen: NetworkHomeStack,
-            options: { tabBarLabel: ({ color }: any) => <NetworkTabLabel labelKey='Network.tabs.discover' color={color} /> },
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.discover' color={color} focused={focused} /> },
         },
         NetworkSearchTab: {
             screen: NetworkSearchStack,
-            options: { tabBarLabel: ({ color }: any) => <NetworkTabLabel labelKey='Network.tabs.search' color={color} /> },
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.search' color={color} focused={focused} /> },
         },
         NetworkMapTab: {
             screen: NetworkMapStack,
-            options: { tabBarLabel: ({ color }: any) => <NetworkTabLabel labelKey='Network.tabs.map' color={color} /> },
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.map' color={color} focused={focused} /> },
         },
         NetworkCartTab: {
             screen: StoreCartTab,
-            options: { tabBarLabel: ({ color }: any) => <NetworkTabLabel labelKey='Network.tabs.cart' color={color} /> },
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.cart' color={color} focused={focused} /> },
         },
         NetworkProfileTab: {
             screen: StoreProfileTab,
-            options: { tabBarLabel: ({ color }: any) => <NetworkTabLabel labelKey='Network.tabs.profile' color={color} /> },
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.profile' color={color} focused={focused} /> },
         },
     },
 });

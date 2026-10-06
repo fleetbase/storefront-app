@@ -17,3 +17,7 @@ export { RatingLine, Stars } from './Rating';
 export { StoreCard } from './StoreCard';
 export { CartPill } from './CartPill';
 export { Stepper, SegmentedControl } from './Controls';
+export { Sheet } from './Sheet';
+export { categoryIcon } from './category-icons';
+export * from './product-display';
+export { TabBar } from './TabBar';

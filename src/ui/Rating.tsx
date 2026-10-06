@@ -12,7 +12,7 @@ export function RatingLine({ rating, count, size = 13 }: { rating: number | null
     if (rating === null) return null;
     return (
         <XStack alignItems='center' gap={4} accessible accessibilityLabel={t('UI.ratingLabel', { rating })}>
-            <FontAwesomeIcon icon={faStar} size={size} color={theme.warning.val} />
+            <FontAwesomeIcon icon={faStar} size={size} color={theme.warningForeground.val} />
             <UIText variant='captionStrong'>{rating.toFixed(1)}</UIText>
             {count !== undefined && count !== null && (
                 <UIText variant='caption' tone='secondary'>
@@ -30,7 +30,7 @@ export function Stars({ value, size = 13 }: { value: number; size?: number }) {
     return (
         <XStack gap={2} accessible accessibilityLabel={t('UI.ratingLabel', { rating: value })}>
             {[1, 2, 3, 4, 5].map((star) => (
-                <FontAwesomeIcon key={star} icon={faStar} size={size} color={star <= Math.round(value) ? theme.warning.val : theme.borderColorWithShadow.val} />
+                <FontAwesomeIcon key={star} icon={faStar} size={size} color={star <= Math.round(value) ? theme.warningForeground.val : theme.borderColorWithShadow.val} />
             ))}
         </XStack>
     );

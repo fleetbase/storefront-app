@@ -4,7 +4,7 @@ import { describeOpenStatus, formatDistance, openStatus, type OpenStatus, type O
  * Generic images the API returns when a store or network has no logo or backdrop.
  * They are treated as missing so screens can show a monogram or pattern instead.
  */
-export const PLACEHOLDER_IMAGES = ['image-file-icon.png', 'default-storefront-backdrop.png', 'no-avatar.png'];
+export const PLACEHOLDER_IMAGES = ['image-file-icon.png', 'default-storefront-backdrop.png', 'no-avatar.png', 'fallback-placeholder'];
 
 /** Tags operators use to mark stores that take bookings. */
 export const BOOKABLE_TAGS = ['services', 'service', 'bookable', 'booking', 'appointments'];
