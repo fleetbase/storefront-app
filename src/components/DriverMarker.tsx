@@ -10,8 +10,6 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
-    const addEventRef = useRef(addEvent);
-    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
@@ -78,6 +76,9 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
 
     const { listen } = useSocketClusterClient();
     const { addEvent, clearEvents } = useEventBuffer(handleEvent);
+
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     useFocusEffect(
         useCallback(() => {
