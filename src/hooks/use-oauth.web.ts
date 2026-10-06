@@ -154,7 +154,8 @@ const useOAuth = () => {
 
     const loginSupported = (provider) => {
         if (provider === 'apple') {
-            return appleAuth.isSupported && toBoolean(config('APPLE_LOGIN_ENABLED')) === true;
+            // Apple Sign-In (@invertase/react-native-apple-authentication) is native-only
+            return false;
         }
 
         if (provider === 'google') {

@@ -19,6 +19,7 @@ import {
 } from '../utils/location';
 import { isArray, toBoolean, later, storefrontConfig } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from '../utils/toast';
 import LocationMarker from '../components/LocationMarker';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';

@@ -16,24 +16,16 @@ import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
 import OrderStack, { OrderModal } from './stacks/OrderStack';
 import CartStack from './stacks/CartStack';
-import ProfileScreen from '../screens/ProfileScreen';
-import LoginScreen from '../screens/LoginScreen';
 import PhoneLoginScreen from '../screens/PhoneLoginScreen';
 import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
-import CreateAccountScreen from '../screens/CreateAccountScreen';
 import CreateAccountVerifyScreen from '../screens/CreateAccountVerifyScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
 import DeleteAccountVerifyScreen from '../screens/DeleteAccountVerifyScreen';
-import AccountScreen from '../screens/AccountScreen';
 import AddPhoneScreen from '../screens/AddPhoneScreen';
 import VerifyPhoneScreen from '../screens/VerifyPhoneScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
-import OrderScreen from '../screens/OrderScreen';
-import ProductScreen from '../screens/ProductScreen';
 import FoodTruckScreen from '../screens/FoodTruckScreen';
-import CatalogScreen from '../screens/CatalogScreen';
-import CatalogCategoryScreen from '../screens/CatalogCategoryScreen';
 import BackButton from '../components/BackButton';
 import CartButton from '../components/CartButton';
 import LocationPicker from '../components/LocationPicker';
@@ -42,6 +34,7 @@ import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
 import { getTheme } from '../utils';
 import { translate } from '../utils/localize';
+import { screenSlot } from '../extensions';
 
 const isAndroid = Platform.OS === 'android';
 
@@ -175,7 +168,7 @@ function getDefaultTabIcon(routeName) {
 
 export const ModalScreens = {
     ProductModal: {
-        screen: ProductScreen,
+        screen: screenSlot('product.detail'),
         options: {
             presentation: 'modal',
             headerShown: false,
@@ -194,21 +187,21 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
             },
         },
         Catalog: {
-            screen: CatalogScreen,
+            screen: screenSlot('catalog.index'),
             options: {
                 presentation: 'modal',
                 headerShown: false,
             },
         },
         Category: {
-            screen: CatalogCategoryScreen,
+            screen: screenSlot('catalog.foodTruckCategory'),
             options: {
                 presentation: 'modal',
                 headerShown: false,
             },
         },
         Product: {
-            screen: ProductScreen,
+            screen: screenSlot('product.detail'),
             options: {
                 presentation: 'modal',
                 headerShown: false,
@@ -228,7 +221,7 @@ export const StoreHomeTab = createNativeStackNavigator({
         StoreHome,
         StoreCategory,
         Product: {
-            screen: ProductScreen,
+            screen: screenSlot('product.detail'),
             options: {
                 presentation: 'modal',
                 headerShown: false,
@@ -244,7 +237,7 @@ export const StoreSearchTab = createNativeStackNavigator({
     screens: {
         StoreSearch,
         Product: {
-            screen: ProductScreen,
+            screen: screenSlot('product.detail'),
             options: {
                 presentation: 'modal',
                 headerShown: false,
@@ -279,13 +272,13 @@ export const StoreProfileTab = createNativeStackNavigator({
             if: useIsAuthenticated,
             screens: {
                 Profile: {
-                    screen: ProfileScreen,
+                    screen: screenSlot('account.profile'),
                     options: {
                         headerShown: false,
                     },
                 },
                 Account: {
-                    screen: AccountScreen,
+                    screen: screenSlot('account.details'),
                     options: ({ route, navigation }) => {
                         return {
                             title: '',
@@ -347,7 +340,7 @@ export const StoreProfileTab = createNativeStackNavigator({
             if: useIsNotAuthenticated,
             screens: {
                 Login: {
-                    screen: LoginScreen,
+                    screen: screenSlot('auth.login'),
                     options: {
                         headerShown: false,
                     },
@@ -367,7 +360,7 @@ export const StoreProfileTab = createNativeStackNavigator({
                     },
                 },
                 CreateAccount: {
-                    screen: CreateAccountScreen,
+                    screen: screenSlot('auth.createAccount'),
                     options: {
                         headerShown: false,
                     },
@@ -419,7 +412,7 @@ const StoreNavigator = createBottomTabNavigator({
                 return {
                     marginTop: isAndroid ? 5 : 15,
                     fontSize: 15,
-                    fontWeight: focued ? 600 : 300,
+                    fontWeight: focused ? 600 : 300,
                 };
             },
         };

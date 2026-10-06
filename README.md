@@ -50,6 +50,8 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 - [Configuration](#configuration)
     - [Application Configuration](#appconfig)
     - [Interface Configuration](#uiconfig)
+    - [Custom Screens](#custom-screens)
+    - [Branding](#branding)
 - [Internationalization and Translations](#internationalization-and-translations)
     - [Internationalization](#internationalization)
     - [Translations](#translations)
@@ -57,7 +59,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
     - [Stripe](#stripe)
 - [Store Locations](#store-locations)
     - [Store Hours](#store-hours)
-- [Multi-Vendor](#multi-vendor)
+- [Network edition (marketplace)](#network-edition-marketplace)
     - [Creating a network](#creating-a-network)
     - [Inviting to network](#inviting-to-network)
     - [Configuring network](#configuring-network)
@@ -85,7 +87,7 @@ Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketpla
 
 Storefront is a headless e-commerce service which functions as an extension within [Fleetbase](https://fleetbase.io). Similarly to how [Fleetbase is a headless logistics service](https://fleetbase.io/developers). [Fleetbase Storefront](https://fleetbase.io/products/storefront) provides several API-first approaches to products, carts, categories, customers, and checkout flow giving developers more control over the shopping experience. This project is to provide an open-sourced hyperlocal shopping app which can be fully customised and adapted to personal and commercial projects. This Storefront app is built with [React Native](https://reactnative.dev/) to provide react native developers a head start building with Fleetbase and Storefront.
 
-_Notice: Network/ Multi-vendor functionality is still a work in progress._
+The same application supports two production editions. A `store_...` key launches the established single-store experience; a `network_...` key launches the Network edition: a marketplace experience with discovery, merchant and product search, map browsing, scoped carts, and optional multi-store checkout.
 
 #### Use Cases
 
@@ -154,7 +156,7 @@ APP_IDENTIFIER=
 FLEETBASE_HOST=
 STOREFRONT_KEY=
 FLEETBASE_KEY=
-GOOGLE_MAPS_KEY=
+GOOGLE_MAPS_API_KEY=
 STRIPE_KEY=
 ```
 
@@ -254,6 +256,24 @@ These options can be used to customize the design and look of your StorefrontApp
 
 For interface config please reference the file `/config/defaults.js` to view options.
 
+#### Custom Screens
+
+Replace any overridable screen, such as the store home screen, without editing the navigators. Map its stable screen id to your own compiled-in component in `storefront.extensions.ts`:
+
+```ts
+export default defineStorefrontExtensions({
+    screens: {
+        'store.home': { load: () => import('./custom/screens/BrandStoreHomeScreen') },
+    },
+});
+```
+
+If a custom screen fails to load or render, the default screen is shown instead. See [docs/extensibility.md](docs/extensibility.md) for all screen ids, variants and platform-specific screens.
+
+#### Branding
+
+Colors, appearance, headers, cards, imagery and navigation are set with a typed branding config in `storefront.brand.ts`. Existing `.env` theme keys such as `APP_THEME`, `CUSTOM_COLORS` and `STORE_HEADER_*` still work and are mapped into it. Invalid values fall back to defaults. See [docs/branding.md](docs/branding.md).
+
 ### Internationalization and Translations
 
 Baked in by default StorefrontApp support internationalization and app translations. Internationalization starts from when you configure your store or network from within the Storefront extension in the [Fleetbase Console](https://console.fleetbase.io/). Read below for getting started with internationalization and translations.
@@ -286,9 +306,9 @@ It is possible for a single store to have multiple locations, but by default eac
 
 You can set the store hours from within your store location panel. Each day of the week will be listed in which you can "Add Hours".
 
-### Multi-Vendor
+### Network edition (marketplace)
 
-Fleetbase Storefront intends to support marketplaces natively though a concept called "Networks". From Storefront you can create as many "Networks" as you want, and from the Network settings you can invite other stores from Fleetbase to join your network. If they do not have an account they will be able to create an account and manage their own stores and networks as well. The networks operate on an invitation based system, the network owner will be able to invite as many stores to join and will have complete overview of the stores in their network. The network owner is not able to manage the stores or view the stores private resources such as customers, but the network owner will have overview of orders that are created through the network.
+Fleetbase Storefront powers multi-store marketplaces through Networks. From Storefront you can create as many "Networks" as you want, and from the Network settings you can invite other stores from Fleetbase to join your network. If they do not have an account they will be able to create an account and manage their own stores and networks as well. The networks operate on an invitation based system, the network owner will be able to invite as many stores to join and will have complete overview of the stores in their network. The network owner is not able to manage the stores or view the stores private resources such as customers, but the network owner will have overview of orders that are created through the network.
 
 #### Creating a network
 
@@ -304,11 +324,28 @@ Fleetbase Storefront intends to support marketplaces natively though a concept c
 
 #### Configuring network
 
-Coming soon...
+Add each merchant store to the network, give every visible store at least one location and published products, and configure network-level gateways, notification channels, currency, and Fleet-Ops order settings. The `multi_cart_enabled` network option controls whether one cart may span merchants.
 
 #### Launch network on app
 
 Launching a network app is much like launching a singular StorefrontApp, but instead of providing a "store key", you must provide a "network key" which can be found in the Storefront extension in the network dialog for the network you are building.
+
+```bash
+STOREFRONT_KEY=network_your_network_key
+```
+
+The app detects the owner at boot. Customers of a Network can browse paginated member stores, category and tag filters, search products and merchants, switch between map and list discovery, enter a merchant without leaving the Network's marketplace, and keep a network-scoped cart. Location permission is requested only when the customer chooses a nearby/map action; list browsing remains available if permission is denied.
+
+Every Network cart line records its merchant and store location. The app prompts before replacing a single-store cart and groups items by merchant when multi-cart is enabled. The backend revalidates network membership, store availability, products, locations, and currency before payment.
+
+Before opening a pull request, run:
+
+```bash
+yarn lint:strict
+yarn typecheck:strict
+yarn test:ci
+yarn web:build
+```
 
 ### Cart
 
@@ -519,5 +556,5 @@ If you would like to make contributions to the Fleetbase Javascript SDK document
 - Global state management with redux
 - Write proper react hooks for sdks
 - Add debounce on products search
-- Add network/marketplace views
+- Add Network edition (marketplace) views
 - Shopify & Woocommerce adapters

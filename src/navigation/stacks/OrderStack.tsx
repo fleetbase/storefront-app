@@ -1,15 +1,13 @@
-import OrderScreen from '../../screens/OrderScreen';
-import ReceiptScreen from '../../screens/ReceiptScreen';
-import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
 import BackButton from '../../components/BackButton';
 import HeaderButton from '../../components/HeaderButton';
 import { PortalHost } from '@gorhom/portal';
 import { getTheme } from '../../utils';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { translate as t } from '../../utils/localize';
+import { screenSlot } from '../../extensions';
 
 export const Order = {
-    screen: OrderScreen,
+    screen: screenSlot('order.detail'),
     options: ({ navigation, route }) => {
         const params = route.params ?? {};
         return {
@@ -27,7 +25,7 @@ export const Order = {
 };
 
 export const Receipt = {
-    screen: ReceiptScreen,
+    screen: screenSlot('order.receipt'),
     options: ({ navigation, route }) => {
         const params = route.params ?? {};
         return {
@@ -46,7 +44,7 @@ export const Receipt = {
 };
 
 export const OrderModal = {
-    screen: OrderScreen,
+    screen: screenSlot('order.detail'),
     options: ({ navigation, route }) => {
         const params = route.params ?? {};
         return {
@@ -68,7 +66,7 @@ export const OrderModal = {
 };
 
 export const OrderHistory = {
-    screen: OrderHistoryScreen,
+    screen: screenSlot('order.history'),
     options: ({ navigation }) => {
         return {
             title: t('OrderHistoryScreen.orderHistory'),

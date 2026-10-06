@@ -3,11 +3,13 @@ import { getString } from '../utils/storage';
 import { get, storefrontConfig } from '../utils';
 import en from '../../translations/en.json';
 import mn from '../../translations/mn.json';
+import uk from '../../translations/uk.json';
 import I18n from 'react-native-i18n';
 
 export const translations = {
     en,
     mn,
+    uk,
 };
 
 export function getAvailableLocales() {
@@ -24,6 +26,19 @@ export function getLanguage() {
     return { code: locale, ...getLangNameFromCode(locale) };
 }
 
+let translationsLoaded = false;
+
+// Translations are registered on first use rather than at import time. Reading the
+// storefront config while modules are still initializing breaks on circular imports
+// (utils -> use-storefront -> LanguageContext -> utils), which crashed web boot.
+export function ensureTranslationsLoaded() {
+    if (translationsLoaded) return;
+    I18n.fallbacks = true;
+    I18n.translations = { ...getAvailableLocales() };
+    translationsLoaded = true;
+}
+
 export function translate(key, options) {
+    ensureTranslationsLoaded();
     return I18n.t(key, options);
 }

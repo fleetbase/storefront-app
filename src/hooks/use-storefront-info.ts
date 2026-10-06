@@ -1,18 +1,16 @@
 import { useCallback, useMemo } from 'react';
-import { adapter } from './use-storefront';
-import { Store } from '@fleetbase/storefront';
 import { get } from '../utils';
-import useStorage from './use-storage';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 
 const useStorefrontInfo = () => {
-    const [info, setInfo] = useStorage('info', {});
-    const store = useMemo(() => new Store(info, adapter), [info]);
+    const { mode, ownerInfo, network, currentStore, currentStoreInfo, initializeOwner } = useStorefrontRuntime();
+    const info = useMemo(() => currentStoreInfo || ownerInfo || {}, [currentStoreInfo, ownerInfo]);
 
     const updateInfo = useCallback(
         (newInfo) => {
-            setInfo(newInfo);
+            initializeOwner(newInfo);
         },
-        [setInfo]
+        [initializeOwner]
     );
 
     const enabled = useCallback(
@@ -28,11 +26,14 @@ const useStorefrontInfo = () => {
     return useMemo(
         () => ({
             info,
-            store,
+            store: currentStore,
+            network,
+            mode,
+            ownerInfo,
             setInfo: updateInfo,
             enabled,
         }),
-        [info, store, updateInfo, enabled]
+        [currentStore, enabled, info, mode, network, ownerInfo, updateInfo]
     );
 };
 

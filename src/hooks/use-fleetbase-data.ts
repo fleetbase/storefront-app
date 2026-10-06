@@ -34,7 +34,7 @@ const useFleetbaseData = (sdkMethod, onDataLoaded, options = {}) => {
         };
 
         fetchData();
-    }, [storefront, ...dependencies]); // Watch dependencies
+    }, [fleetbase, ...dependencies]); // Watch dependencies
 
     return { data: persistKey ? restoreSdkInstance(data, restoreType) : data, error, loading };
 };
