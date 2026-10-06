@@ -143,7 +143,7 @@
         "reset": "Reset"
     },
     "EditLocationScreen": {
-        "addressSaved": "Addess saved.",
+        "addressSaved": "Address saved.",
         "defaultLocationUpdated": "{{locationName}} is now your default location.",
         "locationWasDeleted": "{{locationName}} was deleted.",
         "unableToSelectLocationType": "Unable to select location type.",

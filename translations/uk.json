@@ -1,0 +1,424 @@
+{
+    "common": {
+        "fleetbase": "Fleetbase",
+        "storefront": "Storefront",
+        "apiKey": "Ключ API",
+        "cancel": "Скасувати",
+        "new": "Новий",
+        "create": "Створити",
+        "save": "Зберегти",
+        "delete": "Видалити",
+        "edit": "Редагувати",
+        "update": "Оновити",
+        "service": "Послуга",
+        "retry": "Повторити",
+        "loading": "Завантаження...",
+        "confirm": "Підтвердити",
+        "confirmation": "Підтвердження",
+        "ok": "ОК",
+        "done": "Готово",
+        "order": "Замовлення"
+    },
+    "lineItems": {
+        "cartSubtotal": "Проміжний підсумок кошика",
+        "subtotal": "Підсумок",
+        "total": "Всього",
+        "deliveryFee": "Вартість доставки",
+        "deliveryTip": "Чайові кур'єру",
+        "tip": "Чайові",
+        "serviceFee": "Сервісний збір"
+    },
+    "checkout": {
+        "minimumOrderNotReached": "Мінімальну суму замовлення не досягнуто",
+        "minimumOrderMessage": "Сума вашого кошика становить {{current}}. Для оформлення замовлення необхідно мінімум {{minimum}}."
+    },
+    "orderStatuses": {
+        "created": "Створено",
+        "accepted": "Прийнято",
+        "preparing": "Готується",
+        "dispatched": "Відправлено",
+        "driver_enroute": "Водій у дорозі",
+        "pending": "Очікує",
+        "in_progress": "У процесі",
+        "completed": "Завершено"
+    },
+    "tabs": {
+        "Home": "Головна",
+        "Search": "Пошук",
+        "Map": "Карта",
+        "Cart": "Кошик",
+        "Profile": "Профіль",
+        "Trucks": "Траки"
+    },
+    "BootScreen": {
+        "missingRequiredConfigurationKeys": "Відсутні обов'язкові ключі конфігурації"
+    },
+    "AccountScreen": {
+        "changeProfilePhotoOptions": {
+            "takePhoto": "Зробити фото",
+            "photoLibrary": "Галерея",
+            "deleteProfilePhoto": "Видалити фото профілю"
+        },
+        "profilePhoto": "Фото профілю",
+        "email": "Електронна пошта",
+        "phoneNumber": "Номер телефону",
+        "name": "Ім'я",
+        "language": "Мова",
+        "theme": "Тема",
+        "deleteAccount": "Видалити обліковий запис",
+        "termsOfService": "Умови використання",
+        "privacyPolicy": "Політика конфіденційності",
+        "tracking": "Відстеження",
+        "account": "Обліковий запис",
+        "dataProtection": "Захист даних",
+        "clearCache": "Очистити кеш",
+        "signOut": "Вийти",
+        "signedOut": "Вийшли з системи.",
+        "cacheCleared": "Кеш очищено.",
+        "schemeChanged": "Використовується режим {{selectedScheme}}.",
+        "languageChanged": "Використовується мова: {{selectedLanguage}}.",
+        "photoChanged": "Фото профілю змінено.",
+        "photoRemoved": "Фото профілю видалено."
+    },
+    "AddNewLocationScreen": {
+        "addNewAddress": "Додати нову адресу",
+        "streetName": "Назва вулиці та номер будинку",
+        "weThinkYoureAroundHere": "Здається, ви десь тут",
+        "cantFindYourAddress": "Не можете знайти свою адресу?",
+        "useMapInstead": "Скористайтеся карткою замість цього"
+    },
+    "SetupWarningScreen": {
+        "configurationMissing": "Відсутні конфігурації!",
+        "unconfiguredApp": "Схоже, ваш додаток не налаштований належним чином.",
+        "envMissing": "відсутній у середовищі (env)!"
+    },
+    "CartItemScreen": {
+        "productRemovedFromCart": "{{productName}} видалено з кошика.",
+        "failedToRemoveFromCart": "Не вдалося видалити товар з кошика",
+        "productUpdatedInCart": "{{productName}} оновлено у кошику."
+    },
+    "CartScreen": {
+        "couldNotFindItemToDelete": "Не вдалося знайти товар для видалення.",
+        "itemRemovedFromCart": "{{cartItemName}} видалено з кошика.",
+        "failedToRemoveItemFromCart": "Не вдалося видалити товар з кошика.",
+        "cartIsAlreadyEmpty": "Кошик уже порожній.",
+        "cartEmptied": "Кошик очищено.",
+        "failedToEmptyCart": "Не вдалося очистити кошик.",
+        "orderItems": "Товари у замовленні ({{count}})",
+        "emptyCart": "Очистити кошик",
+        "checkout": "Оформити замовлення"
+    },
+    "CatalogScreen": {
+        "jumpToCart": "Перейти до кошика"
+    },
+    "CreateAccountScreen": {
+        "invalidPhone": "Вказано недійсний номер телефону.",
+        "createAccount": "Створити обліковий запис",
+        "sendVerificationCode": "Надіслати код підтвердження",
+        "haveAccountAlreadyLogin": "Вже є обліковий запис? Увійти",
+        "enterYourName": "Введіть ваше ім'я"
+    },
+    "CreateAccountVerifyScreen": {
+        "codeSent": "Код надіслано на номер {{phone}}",
+        "verifyCode": "Підтвердити код"
+    },
+    "DeleteAccountScreen": {
+        "deleteAccount": "Видалити обліковий запис",
+        "deleteAccountConfirmation": "Ви впевнені, що хочете остаточно видалити свій обліковий запис? Цю дію неможливо скасувати.",
+        "cancel": "Скасувати",
+        "processingRequest": "Обробка запиту...",
+        "deleteMyAccount": "Так, видалити мій обліковий запис"
+    },
+    "DeleteAccountVerifyScreen": {
+        "accountDeleted": "Обліковий запис видалено.",
+        "enterDeletionCode": "Введіть код видалення",
+        "deletionCodePrompt": "Код підтвердження надіслано на вашу електронну пошту або номер телефону. Будь ласка, введіть код нижче, щоб підтвердити видалення облікового запису.",
+        "verifyCode": "Підтвердити код"
+    },
+    "EditAccountPropertyScreen": {
+        "changesSaved": "Зміни в {{propertyName}} збережено."
+    },
+    "EditLocationCoordScreen": {
+        "savePosition": "Зберегти позицію",
+        "reset": "Скинути"
+    },
+    "EditLocationScreen": {
+        "addressSaved": "Адресу збережено.",
+        "defaultLocationUpdated": "{{locationName}} тепер є вашою адресою за замовчуванням.",
+        "locationWasDeleted": "{{locationName}} було видалено.",
+        "unableToSelectLocationType": "Неможливо вибрати тип адреси.",
+        "apartment": "Квартира",
+        "house": "Будинок",
+        "office": "Офіс",
+        "hotel": "Готель",
+        "hospital": "Лікарня",
+        "school": "Школа",
+        "other": "Інше",
+        "address": "Адреса",
+        "locationType": "Тип адреси",
+        "addressDetails": "Деталі адреси",
+        "additionalAddressDetails": "Додати додаткові деталі адреси.",
+        "addressLabel": "Мітка або назва адреси",
+        "streetAddress": "Вулиця та номер будинку / а/с",
+        "aptSuiteUnit": "Квартира, офіс, під'їзд, поверх тощо",
+        "optional": "Необов'язково",
+        "neighborhood": "Район",
+        "city": "Місто або населений пункт",
+        "postalCode": "Поштовий індекс",
+        "phoneNumber": "Номер телефону",
+        "phoneNumberPlaceholder": "Номер телефону для зв'язку з кур'єром",
+        "additionalInstructions": "Додаткові вказівки для кур'єра",
+        "whereExactly": "Де саме вас зустріти?",
+        "makeDefaultAddress": "Зробити адресою за замовчуванням",
+        "deleteAddress": "Видалити адресу",
+        "saveAddress": "Зберегти адресу"
+    },
+    "FoodTruckScreen": {
+        "tapTrucksPrompt": "Натисніть на траки на карті, щоб переглянути товари.",
+        "yourZoneIs": "Ваша зона:",
+        "outOfZone": "Поза зоною, доставка недоступна 🙁",
+        "truck": "Трак"
+    },
+    "LocationPermissionScreen": {
+        "enableLocationServices": "Увімкнути геолокацію",
+        "enableLocationPrompt": "Нам потрібне ваше місцезнаходження для кращої роботи додатка.",
+        "shareAndContinue": "Поділитися геолокацією та продовжити",
+        "locationPermissionRequired": "Потрібен доступ до геолокації",
+        "locationPermissionPrompt": "Щоб увімкнути функції на основі геолокації, дозвольте доступ до вашого місцезнаходження. Якщо бажаєте, ви можете ввести адресу вручну.",
+        "goToSettings": "Перейти до налаштувань",
+        "enterLocationManually": "Ввести адресу вручну"
+    },
+    "LocationPickerScreen": {
+        "chooseDeliveryLocation": "Оберіть адресу доставки",
+        "useMarkerPosition": "Використати позицію маркера",
+        "useExactMarkerPosition": "Використати точну позицію маркера"
+    },
+    "LoginScreen": {
+        "cacheCleared": "Кеш очищено!",
+        "loggedInWithProvider": "Виконано вхід через {{provider}}",
+        "loginAttemptFailed": "Спроба входу через {{provider}} не вдалася.",
+        "clearCache": "Очистити кеш"
+    },
+    "OrderHistoryScreen": {
+        "orderHistory": "Історія замовлень"
+    },
+    "AddressBookScreen": {
+        "addressBook": "Адресна книга"
+    },
+    "OrderScreen": {
+        "orderArrivingIn": "Замовлення прибуде через {eta}",
+        "orderReadyForPickup": "Ваше замовлення готове до видачі",
+        "orderReadyForPickupPrompt": "Після отримання замовлення підтвердьте це, натиснувши кнопку підтвердження нижче.",
+        "orderPickedUp": "Замовлення отримано",
+        "orderPickedUpConfirmMessage": "Ви вже забрали та отримали своє замовлення?",
+        "yes": "Так",
+        "confirmPickup": "Підтвердити отримання",
+        "pickupLocation": "Місце самовивозу",
+        "deliveryLocation": "Місце доставки",
+        "orderNotes": "Примітки до замовлення"
+    },
+    "ReceiptScreen": {
+        "title": "Фіскальний чек",
+        "scan_qr_code": "Сканувати QR-код",
+        "qr_not_available": "QR-код недоступний",
+        "amount_details": "Деталі суми",
+        "total_amount": "Загальна сума",
+        "vat_amount": "Сума ПДВ",
+        "city_tax_amount": "Міський податок",
+        "receipt_information": "Інформація про чек",
+        "date": "Дата",
+        "lottery_number": "Номер лотереї",
+        "status": "Статус",
+        "receiver_type": "Тип отримувача",
+        "receiver_id": "ID отримувача",
+        "merchant_information": "Інформація про продавця",
+        "merchant_id": "ID продавця",
+        "register_no": "Реєстраційний номер",
+        "tin": "ІПН",
+        "branch_code": "Код філії",
+        "staff_code": "Код працівника",
+        "provider_information": "Інформація про провайдера",
+        "ebarimt_by": "Фіскальний чек від",
+        "payment_id": "ID платежу",
+        "paid_by": "Оплачено через",
+        "loading_receipt": "Завантаження чека...",
+        "error_title": "Помилка",
+        "retry": "Повторити",
+        "no_receipt_title": "Чек відсутній",
+        "no_receipt_message": "Дані чека недоступні для цього замовлення.",
+        "error_alert_title": "Помилка",
+        "error_alert_message": "Не вдалося завантажити чек. Будь ласка, спробуйте ще раз.",
+        "not_available": "Н/Д"
+    },
+    "CheckoutScreen": {
+        "checkout": "Оформлення замовлення"
+    },
+    "PaymentMethodScreen": {},
+    "PaypalCheckoutScreen": {},
+    "PhoneLoginScreen": {
+        "invalidPhone": "Вказано недійсний номер телефону.",
+        "loginViaSms": "Вхід через SMS",
+        "sendVerificationCode": "Надіслати код підтвердження",
+        "loginUsingAnotherMethod": "Увійти іншим способом",
+        "createNewAccount": "Створити новий обліковий запис"
+    },
+    "PhoneLoginVerifyScreen": {
+        "codeSentTo": "Код надіслано на номер {{phone}}",
+        "verifyCode": "Підтвердити код"
+    },
+    "ProductScreen": {
+        "productAddedToCart": "{{productName}} додано до кошика.",
+        "addToCart": "Додати до кошика"
+    },
+    "ProfileScreen": {
+        "orderHistory": "Історія замовлень",
+        "account": "Обліковий запис",
+        "paymentMethods": "Способи оплати",
+        "addressBook": "Адресна книга",
+        "greeting": "Привіт, {{customerName}}!",
+        "addPhoneTitle": "Додати номер телефону",
+        "addPhoneMessage": "Будь ласка, додайте номер телефону до свого облікового запису для отримання оновлень про замовлення та сповіщень.",
+        "addPhoneButton": "Додати номер телефону",
+        "addPhoneLater": "Пізніше"
+    },
+    "AddPhoneScreen": {
+        "title": "Додати номер телефону",
+        "description": "Введіть свій номер телефону, щоб отримувати оновлення про замовлення через SMS.",
+        "invalidPhone": "Будь ласка, введіть дійсний номер телефону.",
+        "sendCode": "Надіслати код підтвердження"
+    },
+    "VerifyPhoneScreen": {
+        "title": "Підтвердити {{phone}}",
+        "description": "Введіть 6-значний код, надісланий на ваш телефон.",
+        "verify": "Підтвердити",
+        "success": "Номер телефону успішно підтверджено!",
+        "error": "Не вдалося підтвердити. Будь ласка, спробуйте ще раз."
+    },
+    "QPayCheckoutScreen": {
+        "completingOrder": "Завершення замовлення...",
+        "checkingPayment": "Перевірка платежу...",
+        "finalizingOrder": "Фіналізація замовлення...",
+        "checkingOrderStatus": "Перевірка статусу замовлення...",
+        "yourDeliveryLocation": "Ваша адреса доставки",
+        "yourCart": "Ваш кошик",
+        "orderNotes": "Примітки до замовлення",
+        "orderNotesTitle": "Примітки до замовлення",
+        "enterAdditionalNotes": "Введіть додаткові примітки до замовлення",
+        "checkoutOptions": "Параметри оформлення",
+        "vatRegistration": "Реєстрація ПДВ",
+        "personal": "Особистий",
+        "company": "Компанія",
+        "companyRegistrationNumber": "Реєстраційний номер компанії"
+    },
+    "SavedLocationScreen": {
+        "addressSaved": "Адресу збережено.",
+        "address": "Адреса"
+    },
+    "StoreCategoryScreen": {},
+    "StoreHomeScreen": {},
+    "StoreInfoScreen": {
+        "reviewsAndRating": "Відгуки та рейтинг"
+    },
+    "StoreMapScreen": {},
+    "StoreOnboardScreen": {},
+    "StoreSearchScreen": {
+        "searchProducts": "Пошук товарів",
+        "result": "результат",
+        "foundResults": "Знайдено {{count}} {{result}} за запитом \"{{searchQuery}}\"",
+        "noResults": "За запитом \"{{searchQuery}}\" нічого не знайдено",
+        "searchPrompt": "Шукайте товари, категорії та багато іншого!"
+    },
+    "StripeCheckoutScreen": {
+        "yourDeliveryLocation": "Ваша адреса доставки",
+        "yourCart": "Ваш кошик",
+        "yourPaymentMethod": "Ваш спосіб оплати",
+        "orderNotes": "Примітки до замовлення",
+        "orderNotesTitle": "Примітки до замовлення",
+        "enterAdditionalNotes": "Введіть додаткові примітки до замовлення",
+        "checkoutOptions": "Параметри оформлення"
+    },
+    "StripeCustomerScreen": {
+        "manageYourPaymentMethod": "Керування способом оплати",
+        "loadingAccountInfo": "Завантаження інформації про обліковий запис..."
+    },
+    "TestScreen": {},
+    "AlertPromptBox": {
+        "proceedPrompt": "Ви впевнені, що хочете продовжити?"
+    },
+    "Buttons": {
+        "continueWithPhone": "Продовжити за номером телефону",
+        "continueWithApple": "Продовжити з Apple",
+        "continueWithFacebook": "Продовжити з Facebook",
+        "continueWithInstagram": "Продовжити з Instagram",
+        "continueWithGoogle": "Продовжити з Google"
+    },
+    "CartContents": {
+        "updateItem": "Оновити позицію",
+        "removeFromCart": "Видалити з кошика",
+        "removedFromCart": "{{cartItemName}} видалено з кошика.",
+        "failedToRemove": "Не вдалося видалити товар з кошика."
+    },
+    "CheckoutButton": {
+        "checkout": "Оформити на суму {{total}}",
+        "loginOrCreateAccount": "Увійти або створити обліковий запис"
+    },
+    "CheckoutPickupSwitch": {
+        "delivery": "Доставка",
+        "pickup": "Самовивіз"
+    },
+    "CheckoutTotal": {},
+    "CustomerLocationSelect": {
+        "selectAddress": "Оберіть адресу",
+        "newAddress": "Нова адреса"
+    },
+    "LocationPicker": {
+        "addNewLocation": "Додати нову адресу"
+    },
+    "OrderTotal": {},
+    "PhoneInput": {
+        "enterPhoneNumber": "Введіть номер телефону",
+        "searchCountry": "Пошук країни"
+    },
+    "ProductCard": {
+        "productAddedToCart": "{{productName}} додано до кошика.",
+        "addToCart": "Додати до кошика"
+    },
+    "ProductOptionsForm": {
+        "chooseOneItem": "Оберіть один варіант",
+        "selectOneItem": "Виберіть один варіант",
+        "chooseUpToFour": "Оберіть до 4 варіантів"
+    },
+    "StoreLocationSchedule": {
+        "Monday": "Понеділок",
+        "Tuesday": "Вівторок",
+        "Wednesday": "Середа",
+        "Thursday": "Четвер",
+        "Friday": "П'ятниця",
+        "Saturday": "Субота",
+        "Sunday": "Неділя",
+        "open24": "Відчинено 24 години",
+        "today": "Сьогодні",
+        "closed": "Зачинено"
+    },
+    "StripeCardFieldSheet": {
+        "loadingPaymentDetails": "Завантаження платежних даних...",
+        "addNewPaymentMethod": "Додати новий спосіб оплати",
+        "cardEndingIn": "Карта, що закінчується на {{label}}",
+        "change": "Змінити",
+        "addOrUpdatePaymentMethod": "Додати / Оновити спосіб оплати",
+        "saving": "Збереження...",
+        "savePaymentMethod": "Зберегти спосіб оплати"
+    },
+    "StripePaymentSheet": {
+        "loginToCheckout": "Увійдіть, щоб продовжити оформлення",
+        "loadingPaymentDetails": "Завантаження платежних даних...",
+        "addNewPaymentMethod": "Додати новий спосіб оплати",
+        "cardEndingIn": "Карта, що закінчується на {{label}}",
+        "change": "Змінити"
+    },
+    "QPayPaymentSheet": {
+        "unableToOpenBank": "Неможливо відкрити банківський додаток.",
+        "selectBank": "Оберіть банк"
+    },
+    "TextAreaSheet": {}
+}
