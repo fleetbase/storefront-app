@@ -1,0 +1,45 @@
+name: Release Tag
+
+# Tags a release when a release branch is merged to main, and pushes the tag.
+# Delegates to the reusable workflow in fleetbase/fleetbase. Requires org secret
+# _GITHUB_AUTH_TOKEN (inherited); no-ops with a warning until it is set.
+#
+# Branch convention is `release/v0.0.0`; the legacy `dev-v0.0.0` is still accepted so
+# branches opened before the rename still release.
+#
+# It pushes the tag and nothing else — whatever this repository already runs on
+# `push: tags: v*` does the publishing.
+#
+# The version is never retyped: it comes from the branch name, and the tag is refused
+# unless package.json and RELEASE.md already agree with it.
+#
+# RELEASE.md is required, and its first line must name the version being released. That
+# check is the only thing that can tell notes written for this release from the previous
+# release's notes nobody replaced.
+#
+# workflow_dispatch is the recovery path, for when a release fails validation and the fix
+# lands on main after the merge.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag, e.g. 1.2.3. Recovery only — a normal release reads it from the branch."
+        required: true
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    if: github.event_name == 'workflow_dispatch' ||
+        (github.event.pull_request.merged == true &&
+         (startsWith(github.event.pull_request.head.ref, 'release/v') ||
+          startsWith(github.event.pull_request.head.ref, 'dev-v')))
+    uses: fleetbase/fleetbase/.github/workflows/release-tag.yml@main
+    with:
+      version-files: package.json
+      version: ${{ github.event.inputs.version || '' }}
+    secrets: inherit
