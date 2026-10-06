@@ -95,7 +95,7 @@ export const MapView = forwardRef((props, ref) => {
             : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     return (
-        <MapContainer center={center} zoom={zoom} style={style} scrollWheelZoom={scrollEnabled} zoomControl={zoomEnabled} {...rest}>
+        <MapContainer center={center} zoom={zoom} style={style} scrollWheelZoom={scrollEnabled} touchZoom={zoomEnabled !== false} zoomControl={false} {...rest}>
             <TileLayer url={tileUrl} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
             <SetMapRef setMapRef={ref} />
             <MapEvents onRegionChangeComplete={onRegionChangeComplete} onPress={onPress} onPanDrag={onPanDrag} />
@@ -124,12 +124,25 @@ export const Marker = (props) => {
             iconAnchor: [centerOffset.x, centerOffset.y],
         });
     }
+    // Passing `icon={undefined}` would replace Leaflet's default icon with nothing, so
+    // markers without their own icon get a plain dot.
     return (
-        <LeafletMarker position={position} icon={icon} eventHandlers={{ click: onPress }} {...rest}>
+        <LeafletMarker position={position} icon={icon ?? defaultIcon()} eventHandlers={{ click: onPress }} {...rest}>
             {children}
         </LeafletMarker>
     );
 };
+
+let dotIcon;
+function defaultIcon() {
+    dotIcon ??= L.divIcon({
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#1d4ed8;border:3px solid #ffffff;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>',
+        className: '',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+    });
+    return dotIcon;
+}
 
 export const Polyline = ({ coordinates, ...props }) => {
     const { Polyline: LeafletPolyline } = require('react-leaflet');

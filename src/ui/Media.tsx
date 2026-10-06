@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, type ImageStyle, type StyleProp } from 'react-native';
 import { YStack } from 'tamagui';
 import { initials, tintFor } from './format';
+import { usableImageUrl } from './store-display';
 import { UIText } from './Text';
 import { radius as radii } from './tokens';
 
@@ -13,7 +14,8 @@ export type StoreLogoProps = { uri: string | null | undefined; name: string; siz
  */
 export function StoreLogo({ uri, name, size = 40, radius = radii.tile, border = false }: StoreLogoProps) {
     const [failed, setFailed] = useState(false);
-    const showImage = !!uri && !failed;
+    const src = usableImageUrl(uri);
+    const showImage = !!src && !failed;
 
     return (
         <YStack
@@ -30,7 +32,7 @@ export function StoreLogo({ uri, name, size = 40, radius = radii.tile, border = 
             importantForAccessibility='no-hide-descendants'
         >
             {showImage ? (
-                <Image source={{ uri: uri! }} style={{ width: '100%', height: '100%' }} resizeMode='cover' onError={() => setFailed(true)} />
+                <Image source={{ uri: src! }} style={{ width: '100%', height: '100%' }} resizeMode='cover' onError={() => setFailed(true)} />
             ) : (
                 <UIText variant='bodyStrong' style={{ color: '#1b2230', fontSize: Math.max(10, Math.round(size * 0.32)), lineHeight: Math.round(size * 0.4) }}>
                     {initials(name)}

@@ -594,5 +594,193 @@
         "storeClosed": "Ordering is paused until the store opens.",
         "chooseRequired": "Choose a {{groups}} to add this to your cart.",
         "and": " and "
+    },
+    "Cart": {
+        "title": "Cart",
+        "storesAndItems": "{{stores}} stores · {{items}}",
+        "clear": "Clear cart",
+        "clearTitle": "Clear your cart?",
+        "clearBody": "This removes {{items}} from your cart.",
+        "keepItems": "Keep items",
+        "emptyTitle": "Your cart is empty",
+        "emptyBody": "Add something you like and it will show up here.",
+        "emptyBodyNetwork": "Find something you like from stores on {{network}} and it will show up here.",
+        "browseStores": "Browse stores",
+        "startShopping": "Start shopping",
+        "itemsFrom": "Items from {{store}}",
+        "storeOpen": "Taking orders",
+        "addMore": "Add more",
+        "editLine": "Edit {{name}}",
+        "storeSubtotal": "Store subtotal",
+        "subtotal": "Subtotal",
+        "minimumRemaining": "Add {{amount}} more to reach this store’s {{minimum}} minimum",
+        "lineNeedsLocation": "This store can’t fulfil these items yet. Remove them and add them again from the store.",
+        "promotions": "Promotions",
+        "saving": "{{amount}} off",
+        "freeDelivery": "free delivery",
+        "removeCode": "Remove promo code {{code}}",
+        "codeNotApplying": "doesn’t apply to this cart yet",
+        "hintSpendMore": "spend {{amount}} more to unlock",
+        "promoPlaceholder": "Add a promo code",
+        "promoLabel": "Promo code",
+        "apply": "Apply",
+        "feesAtCheckout": "Delivery fee and tips are added at checkout.",
+        "goToCheckout": "Go to checkout",
+        "blockedClosed": "{{store}} isn’t taking orders right now. Remove its items or check out later.",
+        "blockedLocation": "{{store}} can’t fulfil some items. Remove them to check out.",
+        "blockedMinimum": "Add {{amount}} more from {{store}} to reach its minimum order.",
+        "updateFailed": "Couldn’t update your cart. Try again.",
+        "promoErrors": {
+            "invalid_code": "That code doesn’t exist. Check the spelling and try again.",
+            "not_active": "That code isn’t active right now.",
+            "not_applicable": "That code doesn’t apply to the items in your cart.",
+            "currency_mismatch": "That code is for a different currency.",
+            "first_order_only": "That code is only for your first order.",
+            "usage_limit_reached": "That code has been fully redeemed.",
+            "customer_usage_limit_reached": "You’ve already used that code.",
+            "budget_exhausted": "That promotion has ended.",
+            "not_combinable": "That code can’t be combined with your other promotions.",
+            "no_eligible_items": "None of the items in your cart qualify for that code.",
+            "min_subtotal": "Your cart doesn’t reach that code’s minimum spend yet.",
+            "min_items": "Add more items to use that code.",
+            "pickup_order": "That code is for delivery orders.",
+            "no_discount": "That code doesn’t lower this cart’s price.",
+            "unknown": "Couldn’t apply that code. Try again."
+        }
+    },
+    "Checkout": {
+        "title": "Checkout",
+        "backToCart": "Back to cart",
+        "fulfilment": "Delivery or pickup",
+        "delivery": "Delivery",
+        "pickup": "Pickup",
+        "deliveryAddress": "Delivery address",
+        "noAddress": "Add a delivery address",
+        "change": "Change",
+        "addAddress": "Add",
+        "deliveryFee": "Delivery fee",
+        "feeCoversStores": "One fee covers all {{count}} stores",
+        "free": "Free",
+        "deliveryUnavailableTitle": "Delivery isn’t available to this address.",
+        "deliveryUnavailableBody": "Choose another address to continue.",
+        "deliveryUnavailableBodyPickup": "Choose another address or switch to pickup.",
+        "changeAddress": "Change address",
+        "switchToPickup": "Switch to pickup",
+        "pickupFrom": "Pick up your order",
+        "pickupNotice": "We’ll notify you when your order is ready to collect.",
+        "tipDriver": "Tip your driver",
+        "tipDriverNote": "100% goes to them",
+        "tipStore": "Tip the store",
+        "tipNone": "None",
+        "tipOther": "Other",
+        "tipLess": "Lower tip",
+        "tipMore": "Raise tip",
+        "payment": "Payment",
+        "qpayNote": "Pay by QR code or your bank app after placing the order",
+        "signInBody": "Sign in to choose a payment method and place your order. Your cart is saved.",
+        "signIn": "Sign in or create an account",
+        "signInToPlace": "Sign in to continue",
+        "summary": "Summary",
+        "subtotalItems": "Subtotal · {{items}}",
+        "total": "Total",
+        "notesLabel": "Notes for the store or driver",
+        "notesPlaceholder": "E.g. gate code 4821, call on arrival",
+        "placeOrder": "Place order",
+        "blockedAddress": "Add a delivery address to continue.",
+        "blockedDelivery": "Choose an address we can deliver to.",
+        "blockedMinimum": "The minimum order is {{amount}}.",
+        "blockedPayment": "Choose a payment method to continue.",
+        "preparing": "Getting your order ready…",
+        "unavailable": "Unavailable"
+    },
+    "Tracking": {
+        "yourDriver": "Your driver",
+        "phase": {
+            "placed": {
+                "title": "Order placed",
+                "body": "Waiting for {{store}} to confirm your order."
+            },
+            "accepted": {
+                "title": "Order confirmed",
+                "body": "{{store}} has your order and will start on it shortly."
+            },
+            "preparing": {
+                "title": "Preparing your order",
+                "body": "{{store}} is getting your order ready."
+            },
+            "driverToStore": {
+                "title": "Driver on the way to the store",
+                "body": "{{driver}} is heading to {{store}} to collect your order."
+            },
+            "pickedUp": {
+                "title": "Order picked up",
+                "body": "{{driver}} has your order and is about to set off."
+            },
+            "onTheWay": {
+                "title": "On the way to you",
+                "body": "{{driver}} is heading to {{place}}."
+            },
+            "delivered": {
+                "title": "Delivered",
+                "body": "Your order from {{store}} has arrived. Enjoy!"
+            },
+            "ready": {
+                "title": "Ready for pickup",
+                "body": "Your order is waiting at {{store}}."
+            },
+            "collected": {
+                "title": "Picked up",
+                "body": "You collected your order from {{store}}. Enjoy!"
+            },
+            "canceled": {
+                "title": "Order canceled",
+                "body": "This order was canceled. If you were charged, the payment will be refunded."
+            }
+        },
+        "arrivingIn": "Arriving in about {{eta}}.",
+        "mapLabel": "Live map of your order",
+        "pickupCode": "Pickup code",
+        "readyBody": "Show this code at the counter, then confirm once you have your order.",
+        "confirmPickup": "I’ve picked it up",
+        "confirmPickupTitle": "Did you collect your order?",
+        "confirmPickupBody": "Confirm once you have your order from {{store}}.",
+        "confirmPickupYes": "Yes, I have it",
+        "notYet": "Not yet",
+        "progress": "Order progress",
+        "step": {
+            "delivery": {
+                "placed": "Order placed",
+                "preparing": "Store preparing your order",
+                "pickedUp": "Driver picked up",
+                "onTheWay": "On the way",
+                "delivered": "Delivered"
+            },
+            "pickup": {
+                "placed": "Order placed",
+                "preparing": "Store preparing your order",
+                "ready": "Ready for pickup",
+                "collected": "Picked up"
+            }
+        },
+        "stepState": {
+            "done": "done",
+            "current": "in progress",
+            "todo": "not yet"
+        },
+        "now": "Now",
+        "driverCard": "{{driver}}, your driver",
+        "callDriver": "Call {{driver}}",
+        "details": "Order details",
+        "orderNumber": "Order {{number}}",
+        "viewReceipt": "Receipt",
+        "subtotal": "Subtotal",
+        "deliveryFee": "Delivery fee",
+        "tip": "Tip",
+        "driverTip": "Driver tip",
+        "discount": "Discount",
+        "total": "Total",
+        "deliveringTo": "Delivering to {{place}}",
+        "pickupAt": "Pick up at {{place}}",
+        "notes": "Notes: {{notes}}"
     }
 }

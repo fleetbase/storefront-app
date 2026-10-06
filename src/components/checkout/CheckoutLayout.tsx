@@ -1,0 +1,318 @@
+import React, { useMemo, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronLeft, faCircleExclamation, faLocationDot, faLock } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
+import useStorefrontInfo from '../../hooks/use-storefront-info';
+import useSavedLocations from '../../hooks/use-saved-locations';
+import useCartPromotions from '../../hooks/use-cart-promotions';
+import { formatCurrency } from '../../utils/format';
+import { Button, Card, IconButton, LocationSheet, SegmentedControl, Skeleton, StoreLogo, TextField, UIText, cartGroups, elevation, radius, space } from '../../ui';
+import TipSelector from './TipSelector';
+
+/** The fields every gateway's checkout hook provides (Stripe, QPay). */
+export type CheckoutState = {
+    cart: any;
+    customer: any;
+    lineItems: { name: string; value: number; loading?: boolean; tip?: any }[];
+    totalAmount: number;
+    subtotal: number;
+    serviceQuote: any;
+    deliveryLocation: any;
+    isServiceQuoteUnavailable: boolean;
+    isPickup: boolean;
+    isPickupEnabled: boolean;
+    setPickup: (pickup: number | boolean) => void;
+    setTipOptions: (options: Record<string, any>) => void;
+    handleDeliveryLocationChange: (place: any) => void;
+    orderNotes: string;
+    setOrderNotes: (notes: string) => void;
+    isBelowMinimum: boolean;
+    minimumCheckoutAmount: number;
+    isLoading: boolean;
+    isNotReady: boolean;
+};
+
+export type CheckoutLayoutProps = {
+    checkout: CheckoutState;
+    /** The gateway's payment method picker; shown once the customer is signed in. */
+    payment: React.ReactNode;
+    /** Gateway-specific fields, such as QPay's VAT receipt type. */
+    extra?: React.ReactNode;
+    /** Whether the gateway has what it needs to charge (e.g. a card is chosen). */
+    paymentReady: boolean;
+    onPlaceOrder: () => void;
+    /** Distance from the bottom for the sticky footer (tab bar or safe area). */
+    footerOffset: number;
+    children?: React.ReactNode;
+};
+
+/**
+ * Checkout, shared by every payment gateway: delivery or pickup, the address and its
+ * delivery quote, tips, payment, notes and an order summary with promotions. The place
+ * order button says what's missing when it's disabled.
+ */
+export default function CheckoutLayout({ checkout, payment, extra, paymentReady, onPlaceOrder, footerOffset, children }: CheckoutLayoutProps) {
+    const navigation = useNavigation<any>();
+    const insets = useSafeAreaInsets();
+    const theme = useTheme();
+    const { t } = useLanguage();
+    const { isAuthenticated } = useAuth();
+    const { info, enabled } = useStorefrontInfo();
+    const { mode, getSelectedStoreLocation } = useStorefrontRuntime();
+    const { savedLocations } = useSavedLocations();
+    const [addressSheet, setAddressSheet] = useState(false);
+    const { cart, isPickup } = checkout;
+    const currency = cart?.getAttribute?.('currency') ?? info?.currency ?? 'USD';
+    const money = (amount: number) => formatCurrency(amount, currency);
+    const quoteId = checkout.serviceQuote?.id ?? checkout.serviceQuote?.getAttribute?.('id') ?? null;
+    const promo = useCartPromotions({ pickup: isPickup, serviceQuoteId: quoteId });
+    const groups = useMemo(() => cartGroups(cart?.contents?.() ?? []), [cart]);
+    const itemCount = groups.reduce((sum, group) => sum + group.itemCount, 0);
+
+    const location = checkout.deliveryLocation;
+    const placeAttr = (key: string) => (typeof location?.getAttribute === 'function' ? location.getAttribute(key) : location?.[key]);
+    const quoteAmount = checkout.serviceQuote ? Number(checkout.serviceQuote.getAttribute?.('amount') ?? checkout.serviceQuote.amount ?? 0) : null;
+    const quoteState: 'none' | 'loading' | 'ready' | 'unavailable' = isPickup ? 'none' : checkout.isServiceQuoteUnavailable ? 'unavailable' : checkout.serviceQuote ? 'ready' : location ? 'loading' : 'none';
+    const discount = promo.promotions.discount;
+    const total = Math.max(0, checkout.totalAmount - discount);
+
+    const tipsEnabled = enabled('tips');
+    const driverTipsEnabled = enabled('delivery_tips') && !isPickup;
+
+    const blockedReason = !isAuthenticated
+        ? null
+        : !isPickup && !location
+          ? t('Checkout.blockedAddress')
+          : quoteState === 'unavailable'
+            ? t('Checkout.blockedDelivery')
+            : checkout.isBelowMinimum
+              ? t('Checkout.blockedMinimum', { amount: money(checkout.minimumCheckoutAmount) })
+              : !paymentReady
+                ? t('Checkout.blockedPayment')
+                : checkout.isNotReady && !checkout.isLoading
+                  ? t('Checkout.preparing')
+                  : null;
+
+    const signIn = () => navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login' });
+    const addAddress = () => {
+        setAddressSheet(false);
+        navigation.navigate('LocationPicker', { redirectTo: 'Checkout' });
+    };
+
+    const summaryRows = checkout.lineItems.filter((item) => item.name !== t('lineItems.total'));
+
+    return (
+        <YStack flex={1} backgroundColor='$surface'>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                <ScrollView contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 160 }} keyboardShouldPersistTaps='handled'>
+                    <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingBottom={12}>
+                        <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('Checkout.backToCart')} onPress={() => navigation.goBack()} />
+                        <UIText variant='heading' accessibilityRole='header'>
+                            {t('Checkout.title')}
+                        </UIText>
+                    </XStack>
+
+                    <YStack gap={12} paddingHorizontal={space.gutter}>
+                        {checkout.isPickupEnabled && (
+                            <SegmentedControl
+                                accessibilityLabel={t('Checkout.fulfilment')}
+                                value={isPickup ? 'pickup' : 'delivery'}
+                                onChange={(value) => checkout.setPickup(value === 'pickup' ? 1 : 0)}
+                                options={[
+                                    { value: 'delivery', label: t('Checkout.delivery') },
+                                    { value: 'pickup', label: t('Checkout.pickup') },
+                                ]}
+                            />
+                        )}
+
+                        {!isPickup ? (
+                            <Card padding={14} gap={12} accessibilityLabel={t('Checkout.deliveryAddress')}>
+                                <XStack gap={12} alignItems='flex-start'>
+                                    <YStack width={40} height={40} borderRadius={radius.pill} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                                        <FontAwesomeIcon icon={faLocationDot} size={18} color={theme.primaryForeground.val} />
+                                    </YStack>
+                                    <YStack flex={1} gap={2}>
+                                        <UIText variant='bodyStrong'>{location ? placeAttr('name') || placeAttr('street1') || t('Checkout.deliveryAddress') : t('Checkout.noAddress')}</UIText>
+                                        {!!location && (
+                                            <UIText variant='caption' tone='secondary'>
+                                                {[placeAttr('street1'), placeAttr('street2'), placeAttr('city'), placeAttr('postal_code')].filter(Boolean).join(', ')}
+                                            </UIText>
+                                        )}
+                                    </YStack>
+                                    <Button variant='ghost' size='sm' onPress={() => (savedLocations?.length ? setAddressSheet(true) : addAddress())}>
+                                        {location ? t('Checkout.change') : t('Checkout.addAddress')}
+                                    </Button>
+                                </XStack>
+                                {quoteState === 'loading' && (
+                                    <XStack justifyContent='space-between' alignItems='center' paddingTop={12} borderTopWidth={1} borderColor='$borderColor'>
+                                        <UIText variant='bodyStrong'>{t('Checkout.deliveryFee')}</UIText>
+                                        <Skeleton width={60} height={16} />
+                                    </XStack>
+                                )}
+                                {quoteState === 'ready' && (
+                                    <XStack justifyContent='space-between' alignItems='center' paddingTop={12} borderTopWidth={1} borderColor='$borderColor'>
+                                        <YStack>
+                                            <UIText variant='bodyStrong'>{t('Checkout.deliveryFee')}</UIText>
+                                            {groups.length > 1 && (
+                                                <UIText variant='caption' tone='secondary'>
+                                                    {t('Checkout.feeCoversStores', { count: groups.length })}
+                                                </UIText>
+                                            )}
+                                        </YStack>
+                                        <UIText variant='bodyStrong'>{promo.promotions.discountDelivery > 0 ? t('Checkout.free') : money(quoteAmount ?? 0)}</UIText>
+                                    </XStack>
+                                )}
+                                {quoteState === 'unavailable' && (
+                                    <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
+                                        <XStack gap={10}>
+                                            <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
+                                            <UIText flex={1} variant='caption'>
+                                                <UIText variant='captionStrong'>{t('Checkout.deliveryUnavailableTitle')} </UIText>
+                                                {checkout.isPickupEnabled ? t('Checkout.deliveryUnavailableBodyPickup') : t('Checkout.deliveryUnavailableBody')}
+                                            </UIText>
+                                        </XStack>
+                                        <XStack gap={8}>
+                                            <YStack flex={1}>
+                                                <Button variant='outline' size='sm' fullWidth onPress={() => (savedLocations?.length ? setAddressSheet(true) : addAddress())}>
+                                                    {t('Checkout.changeAddress')}
+                                                </Button>
+                                            </YStack>
+                                            {checkout.isPickupEnabled && (
+                                                <YStack flex={1}>
+                                                    <Button variant='inverse' size='sm' fullWidth onPress={() => checkout.setPickup(1)}>
+                                                        {t('Checkout.switchToPickup')}
+                                                    </Button>
+                                                </YStack>
+                                            )}
+                                        </XStack>
+                                    </YStack>
+                                )}
+                            </Card>
+                        ) : (
+                            <Card padding={14} gap={12} accessibilityLabel={t('Checkout.pickupFrom')}>
+                                <UIText variant='subheading'>{t('Checkout.pickupFrom')}</UIText>
+                                {groups.map((group) => {
+                                    const storeLocation = getSelectedStoreLocation(group.storeId);
+                                    const address = storeLocation?.getAttribute?.('address') ?? storeLocation?.getAttribute?.('place.address') ?? null;
+                                    return (
+                                        <XStack key={group.storeId} gap={12} alignItems='center'>
+                                            <StoreLogo uri={group.logoUrl} name={group.name ?? info?.name ?? '?'} size={36} radius={radius.tile} />
+                                            <YStack flex={1}>
+                                                <UIText variant='bodyStrong'>{group.name ?? info?.name}</UIText>
+                                                {!!address && (
+                                                    <UIText variant='caption' tone='secondary'>
+                                                        {address}
+                                                    </UIText>
+                                                )}
+                                            </YStack>
+                                        </XStack>
+                                    );
+                                })}
+                                <UIText variant='caption' tone='secondary'>
+                                    {t('Checkout.pickupNotice')}
+                                </UIText>
+                            </Card>
+                        )}
+
+                        {(tipsEnabled || driverTipsEnabled) && (
+                            <Card padding={14} gap={14}>
+                                {driverTipsEnabled && <TipSelector title={t('Checkout.tipDriver')} note={t('Checkout.tipDriverNote')} subtotal={checkout.subtotal} currency={currency} onChange={(tip) => checkout.setTipOptions({ leavingDeliveryTip: tip !== 0, deliveryTip: tip })} />}
+                                {tipsEnabled && <TipSelector title={t('Checkout.tipStore')} subtotal={checkout.subtotal} currency={currency} onChange={(tip) => checkout.setTipOptions({ leavingTip: tip !== 0, tip })} />}
+                            </Card>
+                        )}
+
+                        {isAuthenticated ? (
+                            <Card padding={14} gap={8} accessibilityLabel={t('Checkout.payment')}>
+                                <UIText variant='subheading'>{t('Checkout.payment')}</UIText>
+                                {payment}
+                            </Card>
+                        ) : (
+                            <Card padding={14} gap={10}>
+                                <XStack gap={12} alignItems='center'>
+                                    <FontAwesomeIcon icon={faLock} size={18} color={theme.textSecondary.val} />
+                                    <UIText flex={1} tone='secondary'>
+                                        {t('Checkout.signInBody')}
+                                    </UIText>
+                                </XStack>
+                                <Button variant='outline' fullWidth onPress={signIn}>
+                                    {t('Checkout.signIn')}
+                                </Button>
+                            </Card>
+                        )}
+
+                        {extra}
+
+                        <Card padding={14} gap={8} accessibilityLabel={t('Checkout.summary')}>
+                            <UIText variant='subheading' style={{ marginBottom: 4 }}>
+                                {t('Checkout.summary')}
+                            </UIText>
+                            {summaryRows.map((row) => {
+                                const isFee = row.name === t('lineItems.serviceFee');
+                                const label = row.name === t('lineItems.cartSubtotal') ? t('Checkout.subtotalItems', { items: t('UI.itemsCount', { count: itemCount }) }) : isFee ? t('Checkout.deliveryFee') : row.name;
+                                return (
+                                    <XStack key={row.name} justifyContent='space-between'>
+                                        <UIText tone='secondary'>{label}</UIText>
+                                        {row.loading ? <Skeleton width={50} height={14} /> : isFee && quoteState === 'unavailable' ? <UIText tone='warning'>{t('Checkout.unavailable')}</UIText> : <UIText>{money(row.value)}</UIText>}
+                                    </XStack>
+                                );
+                            })}
+                            {promo.promotions.applied.map((applied) => (
+                                <XStack key={`${applied.promotionId}-${applied.code}`} justifyContent='space-between'>
+                                    <UIText tone='success'>{applied.code ?? applied.name}</UIText>
+                                    <UIText tone='success'>−{money(applied.amount + applied.deliveryAmount)}</UIText>
+                                </XStack>
+                            ))}
+                            <XStack justifyContent='space-between' paddingTop={10} marginTop={2} borderTopWidth={1} borderColor='$borderColor'>
+                                <UIText variant='subheading'>{t('Checkout.total')}</UIText>
+                                <UIText variant='subheading'>{money(total)}</UIText>
+                            </XStack>
+                        </Card>
+
+                        <YStack gap={6}>
+                            <UIText variant='captionStrong'>{t('Checkout.notesLabel')}</UIText>
+                            <TextField value={checkout.orderNotes ?? ''} onChangeText={checkout.setOrderNotes} placeholder={t('Checkout.notesPlaceholder')} accessibilityLabel={t('Checkout.notesLabel')} multiline maxLength={500} />
+                        </YStack>
+                        {children}
+                    </YStack>
+                </ScrollView>
+            </KeyboardAvoidingView>
+
+            <YStack position='absolute' left={0} right={0} bottom={footerOffset} paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={12} gap={6} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' style={elevation.floating}>
+                {!isAuthenticated ? (
+                    <Button size='lg' fullWidth icon={faLock} onPress={signIn}>
+                        {t('Checkout.signInToPlace')}
+                    </Button>
+                ) : (
+                    <>
+                        {!!blockedReason && (
+                            <UIText variant='captionStrong' tone='warning' textAlign='center' accessibilityRole='alert'>
+                                {blockedReason}
+                            </UIText>
+                        )}
+                        <Button size='lg' fullWidth disabled={!!blockedReason || checkout.isNotReady} loading={checkout.isLoading} onPress={onPlaceOrder} trailing={money(total)}>
+                            {t('Checkout.placeOrder')}
+                        </Button>
+                    </>
+                )}
+            </YStack>
+
+            <LocationSheet
+                open={addressSheet}
+                onClose={() => setAddressSheet(false)}
+                savedLocations={savedLocations}
+                currentId={location?.id}
+                onSelect={(place: any) => {
+                    checkout.handleDeliveryLocationChange(place);
+                    setAddressSheet(false);
+                }}
+                onAdd={addAddress}
+            />
+        </YStack>
+    );
+}

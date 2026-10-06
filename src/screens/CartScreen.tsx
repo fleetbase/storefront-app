@@ -1,377 +1,401 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Animated, Pressable, LayoutAnimation, UIManager, Platform } from 'react-native';
-import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Separator, Spinner, Image, Text, YStack, XStack, Button, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { toast } from '../utils/toast';
-import { formatCurrency } from '../utils/format';
-import { loadPersistedResource, storefrontConfig } from '../utils';
-import { calculateCartTotal } from '../utils/cart';
-import { useLanguage } from '../contexts/LanguageContext';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import FastImage from 'react-native-fast-image';
+import { faCartShopping, faTag, faTicket } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
+import useFooterOffset from '../hooks/use-footer-offset';
 import useCart from '../hooks/use-cart';
-import usePromiseWithLoading from '../hooks/use-promise-with-loading';
-import Spacer from '../components/Spacer';
-import ScreenWrapper from '../components/ScreenWrapper';
+import useStorefront from '../hooks/use-storefront';
+import useStorefrontInfo from '../hooks/use-storefront-info';
+import useCartPromotions from '../hooks/use-cart-promotions';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
-import { groupCartItemsByStore, totalCartQuantity } from '../network/network-runtime';
+import { loadPersistedResource, storefrontConfig } from '../utils';
+import { formatCurrency } from '../utils/format';
+import { toast } from '../utils/toast';
+import { rememberStores } from '../network/store-names';
+import {
+    Button,
+    Card,
+    EmptyState,
+    MediaImage,
+    Sheet,
+    Skeleton,
+    Stepper,
+    StoreLogo,
+    TextField,
+    UIText,
+    cartGroups,
+    cartTotals,
+    checkoutBlock,
+    elevation,
+    radius,
+    space,
+    type CartGroup,
+    type CartLine,
+    type CartStoreInfo,
+} from '../ui';
 
-const isAndroid = Platform.OS === 'android';
-if (isAndroid && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
+/** What the cart needs from a store record: name, logo and minimum order. */
+function storeInfo(store: any): CartStoreInfo {
+    const get = (key: string) => (typeof store?.getAttribute === 'function' ? store.getAttribute(key) : store?.[key]);
+    const options = get('options') ?? {};
+    return {
+        name: get('name') ?? null,
+        logoUrl: get('logo_url') ?? null,
+        minimum: options.required_checkout_min === true || Number(options.required_checkout_min_amount) > 0 ? Number(options.required_checkout_min_amount) || 0 : 0,
+    };
 }
 
-const CartScreen = ({ route }) => {
-    const routeName = route.name;
-    const theme = useTheme();
-    const navigation = useNavigation();
-    const tabBarHeight = useBottomTabBarHeight();
+/**
+ * The cart: lines grouped by the store that sells them, each store's subtotal and
+ * minimum-order progress, promotions and promo codes, and a sticky checkout footer that
+ * says plainly why checkout is unavailable when it is.
+ */
+const CartScreen = ({ route }: any) => {
+    const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
     const { t } = useLanguage();
-    const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
-    const [cart, updateCart] = useCart();
-    const { mode } = useStorefrontRuntime();
-    const [displayedItems, setDisplayedItems] = useState(cart ? cart.contents() : []);
-    const rowRefs = useRef({});
-    const isModal = typeof routeName === 'string' && routeName.endsWith('Modal');
-    const displayedRows = useMemo(() => {
-        if (mode !== 'network') return displayedItems;
-        return Object.entries(groupCartItemsByStore(displayedItems)).flatMap(([storeId, items]) => {
-            const subtotal = items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0);
-            const store = items[0]?.store || {};
-            return [{ id: `store-group-${storeId}`, isStoreGroup: true, storeId, store, subtotal, items }, ...items];
-        });
-    }, [displayedItems, mode]);
+    const { storefront } = useStorefront();
+    const { info } = useStorefrontInfo();
+    const { mode, ownerInfo } = useStorefrontRuntime();
+    const [cart, updateCart, isLoading] = useCart();
+    const [stores, setStores] = useState<Record<string, CartStoreInfo>>({});
+    const [busyLine, setBusyLine] = useState<string | null>(null);
+    const [confirmClear, setConfirmClear] = useState(false);
+    const [clearing, setClearing] = useState(false);
+    const promo = useCartPromotions({ hints: true });
+    const isNetwork = mode === 'network';
+    const isModal = typeof route?.name === 'string' && route.name.endsWith('Modal');
+    const bottomOffset = useFooterOffset(isModal);
+    const currency = cart?.getAttribute?.('currency') ?? info?.currency ?? 'USD';
+    const money = useCallback((amount: number) => formatCurrency(amount, currency), [currency]);
 
-    const handleCheckout = () => {
-        if (mode === 'network') {
-            const invalidGroup = Object.entries(groupCartItemsByStore(cart.contents())).find(([, items]) => items.some((item) => !item.store_location_id));
-            if (invalidGroup) {
-                toast.error(t('Network.cartLocationRequired'));
-                return;
-            }
-        }
-        const params = {};
-        if (storefrontConfig('paymentGateway') === 'stripe') {
-            return navigation.navigate('StripeCheckout', params);
-        }
+    const items = useMemo(() => cart?.contents?.() ?? [], [cart]);
+    const groups = useMemo(() => cartGroups(items, isNetwork ? stores : { [items[0]?.store_id ?? 'store']: storeInfo(info) }), [info, isNetwork, items, stores]);
+    const totals = cartTotals(groups);
+    const block = checkoutBlock(groups, { requireLocation: isNetwork });
+    const total = Math.max(0, totals.subtotal - promo.promotions.discountSubtotal);
 
-        if (storefrontConfig('paymentGateway') === 'qpay') {
-            return navigation.navigate('QPayCheckout', params);
-        }
-
-        if (storefrontConfig('paymentGateway') === 'paypal') {
-            return navigation.navigate('PaypalCheckout', params);
-        }
-    };
-
-    const handleEdit = async (cartItem) => {
-        const product = await loadPersistedResource((storefront) => storefront.products.findRecord(cartItem.product_id), { type: 'product', persistKey: `${cartItem.product_id}_product` });
-        if (product) {
-            navigation.navigate('CartItem', { cartItem, product: product.serialize(), isModal });
-        }
-    };
-
-    const handleDelete = async (cartItem) => {
-        const rowRef = rowRefs.current[cartItem.id];
-
-        if (!rowRef) {
-            toast.error(t('CartScreen.couldNotFindItemToDelete'));
-            return;
-        }
-
-        try {
-            await new Promise((resolve) => {
-                Animated.parallel([
-                    Animated.timing(rowRef.opacity, {
-                        toValue: 0,
-                        duration: 300,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(rowRef.translateX, {
-                        toValue: -100,
-                        duration: 300,
-                        useNativeDriver: true,
-                    }),
-                ]).start(resolve);
-            });
-
-            // Remove item visually
-            setDisplayedItems((prevItems) => prevItems.filter((item) => item.id !== cartItem.id));
-            toast.success(t('CartScreen.itemRemovedFromCart', { cartItemName: cartItem.name }));
-
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
-            const updatedCart = await runWithLoading(cart.remove(cartItem.id), `removeCartItem_${cartItem.id}`);
-            updateCart(updatedCart);
-        } catch (error) {
-            toast.error(t('CartScreen.failedToRemoveItemFromCart'));
-            console.error('Error removing cart item:', error.message);
-        }
-    };
-
-    const handleEmpty = async () => {
-        const cartItems = cart.contents();
-
-        if (!cartItems.length) {
-            toast.error(t('CartScreen.cartIsAlreadyEmpty'));
-            return;
-        }
-
-        try {
-            const animations = cartItems.map((cartItem) => {
-                const rowRef = rowRefs.current[cartItem.id];
-
-                if (rowRef) {
-                    return new Promise((resolve) => {
-                        Animated.parallel([
-                            Animated.timing(rowRef.opacity, {
-                                toValue: 0,
-                                duration: 300,
-                                useNativeDriver: true,
-                            }),
-                            Animated.timing(rowRef.translateX, {
-                                toValue: -100,
-                                duration: 300,
-                                useNativeDriver: true,
-                            }),
-                        ]).start(resolve);
-                    });
-                }
-
-                return Promise.resolve();
-            });
-
-            await Promise.all(animations);
-            toast.success(t('CartScreen.cartEmptied'));
-
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
-            const emptiedCart = await runWithLoading(cart.empty(), 'emptyCart');
-            updateCart(emptiedCart);
-        } catch (error) {
-            toast.error(t('CartScreen.failedToEmptyCart'));
-            console.error('Error emptying cart:', error.message);
-        }
-    };
-
-    // Make sure cart items is latest
+    // Look up each store in the cart once for its logo and minimum order.
+    const storeIds = groups.map((group) => group.storeId).join(',');
     useEffect(() => {
-        setDisplayedItems(cart ? cart.contents() : []);
-    }, [cart]);
+        if (!isNetwork || !storefront) return;
+        const missing = groups.map((group) => group.storeId).filter((id) => id !== 'store' && !stores[id]);
+        if (missing.length === 0) return;
+        let active = true;
+        Promise.all(missing.map((id) => storefront.lookup(id).then((store: any) => [id, store] as const, () => [id, null] as const))).then((results) => {
+            if (!active) return;
+            setStores((current) => {
+                const next = { ...current };
+                for (const [id, store] of results) next[id] = store ? storeInfo(store) : { name: null };
+                return next;
+            });
+            rememberStores(results.map(([id, store]) => ({ id, name: storeInfo(store).name ?? '', logoUrl: storeInfo(store).logoUrl ?? null })));
+        });
+        return () => {
+            active = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isNetwork, storefront, storeIds]);
 
-    const renderRightActions = (cartItem) => (
-        <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
-            <Pressable style={{ flex: 1 }} onPress={() => handleEdit(cartItem)}>
-                <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
-                    <FontAwesomeIcon icon={faPencilAlt} size={20} color={theme['$warningText'].val} />
-                </YStack>
-            </Pressable>
-            <Pressable style={{ flex: 1 }} onPress={() => handleDelete(cartItem)}>
-                <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
-                    {isLoading(`removeCartItem_${cartItem.id}`) ? (
-                        <Spinner size={40} color={theme['$errorText'].val} />
-                    ) : (
-                        <FontAwesomeIcon icon={faTrash} size={20} color={theme['$errorText'].val} />
-                    )}
-                </YStack>
-            </Pressable>
-        </XStack>
-    );
-
-    const renderItem = ({ item: cartItem }) => {
-        if (cartItem.isStoreGroup) {
-            return (
-                <XStack bg='$surface' px='$4' py='$3' alignItems='center' justifyContent='space-between' borderBottomWidth={1} borderColor='$borderColor'>
-                    <XStack gap='$2' alignItems='center' flex={1}>
-                        {!!cartItem.store?.logo_url && <Image source={{ uri: cartItem.store.logo_url }} width={36} height={36} borderRadius='$2' />}
-                        <YStack flex={1}>
-                            <Text color='$textPrimary' fontWeight='700' numberOfLines={1}>{cartItem.store?.name || cartItem.storeId}</Text>
-                            <Text color='$textSecondary' fontSize='$3'>{t('Network.groupItemCount', { count: totalCartQuantity(cartItem.items) })}</Text>
-                        </YStack>
-                    </XStack>
-                    <Text color='$textPrimary' fontWeight='700'>{formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}</Text>
-                </XStack>
-            );
+    const setQuantity = async (line: CartLine, quantity: number) => {
+        if (!cart || busyLine) return;
+        setBusyLine(line.id);
+        try {
+            const item = items.find((entry: any) => entry.id === line.id) ?? {};
+            const updated = quantity <= 0 ? await cart.remove(line.id) : await cart.update(line.id, quantity, { variants: item.variants ?? [], addons: item.addons ?? [] });
+            updateCart(updated);
+            if (quantity <= 0) toast.success(t('CartScreen.itemRemovedFromCart', { cartItemName: line.name }));
+        } catch (error: any) {
+            toast.error(error?.message || t('Cart.updateFailed'));
+        } finally {
+            setBusyLine(null);
         }
-        const opacity = new Animated.Value(1);
-        const translateX = new Animated.Value(0);
-        rowRefs.current[cartItem.id] = { opacity, translateX };
-
-        return (
-            <Animated.View
-                style={[
-                    {
-                        borderBottomWidth: 1,
-                        borderColor: theme.borderColor.val,
-                        backgroundColor: theme.background.val,
-                        opacity,
-                        transform: [{ translateX }],
-                    },
-                ]}
-            >
-                <Swipeable renderRightActions={() => renderRightActions(cartItem)}>
-                    <YStack flex={1} bg='$background' padding='$4' height={125} minHeight={100} maxHeight={350}>
-                        <XStack space='$3' justifyContent='space-between'>
-                            <XStack flex={1}>
-                                <Pressable onPress={() => handleEdit(cartItem)} style={{ flex: 1 }}>
-                                    <XStack flex={1} space='$3' height='100%'>
-                                        <YStack>
-                                            <XStack width={40} height={40} borderWidth={1} borderColor='$borderColor' borderRadius='$3' alignItems='center' justifyContent='center'>
-                                                <XStack alignItems='flex-end'>
-                                                    <Text fontSize='$1' color='$textPrimary'>
-                                                        x
-                                                    </Text>
-                                                    <Text fontSize='$5' fontWeight='bold' color='$textPrimary'>
-                                                        {cartItem.quantity}
-                                                    </Text>
-                                                </XStack>
-                                            </XStack>
-                                        </YStack>
-                                        <YStack
-                                            borderWidth={1}
-                                            borderColor='$borderColor'
-                                            borderRadius='$3'
-                                            height={60}
-                                            width={60}
-                                            alignItems='center'
-                                            justifyContent='center'
-                                            position='relative'
-                                        >
-                                            <FastImage
-                                                source={{ uri: cartItem.product_image_url }}
-                                                style={{
-                                                    height: '100%',
-                                                    width: '100%',
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    borderRadius: 5,
-                                                }}
-                                            />
-                                        </YStack>
-                                        <YStack height={125} minHeight={100} maxHeight={350} overflow='hidden' flex={1} space='$1'>
-                                            <YStack>
-                                                <XStack space='$2' alignItems='center'>
-                                                    <Text fontSize='$4' fontWeight='bold' color='$textPrimary' numberOfLines={1} ellipsizeMode='tail'>
-                                                        {cartItem.name}
-                                                    </Text>
-                                                </XStack>
-                                                {cartItem.description && (
-                                                    <Text fontSize='$3' color='$textSecondary' numberOfLines={2}>
-                                                        {cartItem.description}
-                                                    </Text>
-                                                )}
-                                            </YStack>
-                                            <YStack>
-                                                {cartItem.variants.filter(Boolean).map((variant, index) => (
-                                                    <XStack key={index} space='$2'>
-                                                        <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
-                                                            {variant.name}
-                                                        </Text>
-                                                    </XStack>
-                                                ))}
-                                                {cartItem.addons.filter(Boolean).map((addon, index) => (
-                                                    <XStack key={index} space='$2'>
-                                                        <Text flex={1} fontSize='$3' color='$textSecondary' numberOfLines={1}>
-                                                            {addon.name}
-                                                        </Text>
-                                                    </XStack>
-                                                ))}
-                                            </YStack>
-                                        </YStack>
-                                    </XStack>
-                                </Pressable>
-                            </XStack>
-                            <YStack maxWidth={150} alignItems='flex-end'>
-                                <YStack>
-                                    <Text fontSize='$4' color='$textPrimary' fontWeight='bold'>
-                                        {formatCurrency(cartItem.subtotal, cart.getAttribute('currency'))}
-                                    </Text>
-                                </YStack>
-                            </YStack>
-                        </XStack>
-                    </YStack>
-                </Swipeable>
-            </Animated.View>
-        );
     };
+
+    const editLine = async (line: CartLine) => {
+        if (!line.productId) return;
+        const item = items.find((entry: any) => entry.id === line.id);
+        const product = await loadPersistedResource((sdk: any) => sdk.products.findRecord(line.productId), { type: 'product', persistKey: `${line.productId}_product` });
+        if (product) navigation.navigate('CartItem', { cartItem: item, product: product.serialize(), isModal });
+    };
+
+    const clearCart = async () => {
+        if (!cart) return;
+        setClearing(true);
+        try {
+            updateCart(await cart.empty());
+            setConfirmClear(false);
+        } catch {
+            toast.error(t('CartScreen.failedToEmptyCart'));
+        } finally {
+            setClearing(false);
+        }
+    };
+
+    const browse = () => (isNetwork ? navigation.navigate('NetworkHomeTab') : navigation.navigate('StoreHomeTab'));
+    const openStore = (storeId: string) => (isNetwork ? navigation.navigate('NetworkHomeTab', { screen: 'NetworkStore', params: { storeId } }) : navigation.navigate('StoreHomeTab'));
+
+    const checkout = () => {
+        if (block) return;
+        const gateway = storefrontConfig('paymentGateway');
+        if (gateway === 'qpay') return navigation.navigate('QPayCheckout');
+        if (gateway === 'paypal') return navigation.navigate('PaypalCheckout');
+        return navigation.navigate('StripeCheckout');
+    };
+
+    const blockText = !block
+        ? null
+        : block.reason === 'closed'
+          ? t('Cart.blockedClosed', { store: block.storeName ?? t('StoreSwitch.thisStore') })
+          : block.reason === 'location'
+            ? t('Cart.blockedLocation', { store: block.storeName ?? t('StoreSwitch.thisStore') })
+            : t('Cart.blockedMinimum', { amount: money(block.remaining ?? 0), store: block.storeName ?? t('StoreSwitch.thisStore') });
+
+    const hasItems = groups.length > 0;
+    const networkName = ownerInfo?.name ?? info?.name ?? '';
+
+    if (isLoading && !hasItems) {
+        return (
+            <YStack flex={1} backgroundColor='$surface' paddingTop={insets.top + 16} paddingHorizontal={space.gutter} gap={12}>
+                <Skeleton height={30} width='30%' />
+                <Skeleton height={180} radius={radius.card} />
+                <Skeleton height={120} radius={radius.card} />
+            </YStack>
+        );
+    }
 
     return (
-        <ScreenWrapper isModal={isModal} useSafeArea={false}>
-            <XStack
-                justifyContent='space-between'
-                alignItems='center'
-                px='$5'
-                pb='$5'
-                pt={Platform.select({ ios: (isModal ? 10 : insets.top) + 5, android: (isModal ? 0 : insets.top) + 5 })}
-            >
-                <XStack alignItems='center'>
-                    <Text fontSize='$7' fontWeight='bold'>
-                        {t('CartScreen.orderItems', { count: totalCartQuantity(displayedItems) })}
-                    </Text>
-                    {isAnyLoading() && (
-                        <YStack ml='$2'>
-                            <Spinner color='$primary' />
-                        </YStack>
-                    )}
+        <YStack flex={1} backgroundColor='$surface'>
+            <ScrollView contentContainerStyle={{ paddingTop: (isModal ? 12 : insets.top) + 8, paddingBottom: hasItems ? 230 : 40 }} keyboardShouldPersistTaps='handled'>
+                <XStack alignItems='flex-end' justifyContent='space-between' paddingHorizontal={space.gutter} paddingBottom={14} paddingTop={8}>
+                    <YStack>
+                        <UIText variant='display' accessibilityRole='header'>
+                            {t('Cart.title')}
+                        </UIText>
+                        {hasItems && (
+                            <UIText tone='secondary'>
+                                {isNetwork && totals.storeCount > 1 ? t('Cart.storesAndItems', { stores: totals.storeCount, items: t('UI.itemsCount', { count: totals.itemCount }) }) : t('UI.itemsCount', { count: totals.itemCount })}
+                            </UIText>
+                        )}
+                    </YStack>
+                    {hasItems && <Button variant='ghost' size='sm' onPress={() => setConfirmClear(true)}>{t('Cart.clear')}</Button>}
                 </XStack>
-                <YStack>
-                    <Pressable onPress={handleEmpty}>
-                        <Text color='$errorBorder' fontSize='$4'>
-                            {t('CartScreen.emptyCart')}
-                        </Text>
-                    </Pressable>
-                </YStack>
-            </XStack>
-            <Animated.FlatList
-                data={displayedRows}
-                renderItem={renderItem}
-                ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 16 }}
-            />
-            {cart.isNotEmpty && (
-                <YStack
-                    position='absolute'
-                    bg='$background'
-                    bottom={0}
-                    paddingBottom={0}
-                    borderTopWidth={1}
-                    borderColor='$borderColorWithShadow'
-                    width='100%'
-                    padding='$4'
-                    shadowColor='$shadowColor'
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={0.15}
-                    shadowRadius={3}
-                >
-                    <XStack alignItems='center' justifyContent='space-between'>
-                        <YStack flex={1} space={isAndroid ? 0 : '$1'}>
-                            <Text color='$textSecondary' fontSize='$2' fontWeight='bold' textTransform='uppercase'>
-                                {t('lineItems.subtotal')}
-                            </Text>
-                            <Text color='$textPrimary' fontSize='$8' fontWeight='bold'>
-                                {formatCurrency(calculateCartTotal(), cart.getAttribute('currency'))}
-                            </Text>
-                        </YStack>
-                        <YStack>
-                            <Button onPress={handleCheckout} bg='$success' borderColor='$successBorder' borderWidth={1} width={180} paddingVertical='$2' rounded='true'>
-                                <Button.Text fontSize='$6' fontWeight='bold' color='$successText'>
-                                    {t('CartScreen.checkout')}
-                                </Button.Text>
+
+                {!hasItems ? (
+                    <EmptyState icon={faCartShopping} title={t('Cart.emptyTitle')} description={isNetwork ? t('Cart.emptyBodyNetwork', { network: networkName }) : t('Cart.emptyBody')} actionLabel={isNetwork ? t('Cart.browseStores') : t('Cart.startShopping')} onAction={browse} />
+                ) : (
+                    <YStack gap={12} paddingHorizontal={space.gutter}>
+                        {groups.map((group) => (
+                            <StoreGroup key={group.storeId} group={group} money={money} busyLine={busyLine} showHeader={isNetwork} onQuantity={setQuantity} onEdit={editLine} onAddMore={() => openStore(group.storeId)} />
+                        ))}
+                        <PromotionsCard promo={promo} money={money} />
+                    </YStack>
+                )}
+            </ScrollView>
+
+            {hasItems && (
+                <YStack position='absolute' left={0} right={0} bottom={bottomOffset} paddingHorizontal={space.gutter} paddingTop={14} paddingBottom={14} gap={8} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' style={elevation.floating}>
+                    <XStack justifyContent='space-between'>
+                        <UIText tone='secondary'>{t('Cart.subtotal')}</UIText>
+                        <UIText tone='secondary'>{money(totals.subtotal)}</UIText>
+                    </XStack>
+                    {promo.promotions.applied
+                        .filter((applied) => applied.amount > 0)
+                        .map((applied) => (
+                            <XStack key={`${applied.promotionId}-${applied.code}`} justifyContent='space-between'>
+                                <UIText tone='success'>{applied.code ?? applied.name}</UIText>
+                                <UIText tone='success'>−{money(applied.amount)}</UIText>
+                            </XStack>
+                        ))}
+                    <UIText variant='caption' tone='secondary'>
+                        {t('Cart.feesAtCheckout')}
+                    </UIText>
+                    {blockText ? (
+                        <YStack gap={6}>
+                            <UIText variant='captionStrong' tone='warning' accessibilityRole='alert'>
+                                {blockText}
+                            </UIText>
+                            <Button size='lg' fullWidth disabled>
+                                {t('Cart.goToCheckout')}
                             </Button>
                         </YStack>
-                    </XStack>
-                    <Spacer height={Platform.select({ ios: isModal ? insets.bottom : tabBarHeight, android: tabBarHeight })} />
+                    ) : (
+                        <Button size='lg' fullWidth onPress={checkout} trailing={money(total)}>
+                            {t('Cart.goToCheckout')}
+                        </Button>
+                    )}
                 </YStack>
             )}
-        </ScreenWrapper>
+
+            <Sheet
+                open={confirmClear}
+                onClose={() => setConfirmClear(false)}
+                title={t('Cart.clearTitle')}
+                footer={
+                    <YStack gap={8}>
+                        <Button variant='destructive' size='lg' fullWidth loading={clearing} onPress={clearCart}>
+                            {t('Cart.clear')}
+                        </Button>
+                        <Button variant='ghost' size='lg' fullWidth onPress={() => setConfirmClear(false)}>
+                            {t('Cart.keepItems')}
+                        </Button>
+                    </YStack>
+                }
+            >
+                <UIText tone='secondary'>{t('Cart.clearBody', { items: t('UI.itemsCount', { count: totals.itemCount }) })}</UIText>
+            </Sheet>
+        </YStack>
     );
 };
+
+function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuantity, onEdit, onAddMore }: { group: CartGroup; money: (amount: number) => string; busyLine: string | null; showHeader: boolean; onQuantity: (line: CartLine, quantity: number) => void; onEdit: (line: CartLine) => void; onAddMore: () => void }) {
+    const { t } = useLanguage();
+    return (
+        <Card accessibilityLabel={group.name ? t('Cart.itemsFrom', { store: group.name }) : undefined}>
+            {showHeader && (
+                <XStack alignItems='center' gap={10} paddingHorizontal={14} paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor'>
+                    <StoreLogo uri={group.logoUrl} name={group.name ?? '?'} size={36} radius={radius.tile} />
+                    <YStack flex={1}>
+                        <UIText variant='bodyStrong' numberOfLines={1}>
+                            {group.name ?? t('StoreSwitch.thisStore')}
+                        </UIText>
+                        <UIText variant='captionStrong' tone={group.open ? 'success' : 'warning'}>
+                            {group.open ? t('Cart.storeOpen') : t('UI.notAcceptingOrders')}
+                        </UIText>
+                    </YStack>
+                    <Button variant='ghost' size='sm' onPress={onAddMore}>
+                        {t('Cart.addMore')}
+                    </Button>
+                </XStack>
+            )}
+            {group.lines.map((line) => (
+                <XStack key={line.id} gap={12} paddingHorizontal={14} paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor' opacity={busy === line.id ? 0.6 : 1}>
+                    <Pressable onPress={() => onEdit(line)} accessibilityRole='button' accessibilityLabel={t('Cart.editLine', { name: line.name })} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+                        <MediaImage uri={line.imageUrl} seed={line.name} width={56} height={56} radius={radius.tile} />
+                        <YStack flex={1} gap={2}>
+                            <UIText variant='bodyStrong' style={{ fontSize: 14 }} numberOfLines={2}>
+                                {line.name}
+                            </UIText>
+                            {!!line.options && (
+                                <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                    {line.options}
+                                </UIText>
+                            )}
+                            <UIText variant='bodyStrong' style={{ fontSize: 14 }}>
+                                {format(line.lineTotal)}
+                            </UIText>
+                        </YStack>
+                    </Pressable>
+                    <YStack justifyContent='center'>
+                        <Stepper size='sm' value={line.quantity} min={1} max={99} itemName={line.name} onChange={(quantity) => onQuantity(line, quantity)} onRemove={() => onQuantity(line, 0)} />
+                    </YStack>
+                </XStack>
+            ))}
+            <YStack paddingHorizontal={14} paddingVertical={12} gap={8}>
+                <XStack justifyContent='space-between'>
+                    <UIText tone='secondary'>{showHeader ? t('Cart.storeSubtotal') : t('Cart.subtotal')}</UIText>
+                    <UIText variant='bodyStrong'>{format(group.subtotal)}</UIText>
+                </XStack>
+                {group.belowMinimum && (
+                    <YStack gap={6} accessibilityRole='progressbar' accessibilityValue={{ min: 0, max: 100, now: group.progress }}>
+                        <YStack height={6} borderRadius={radius.pill} backgroundColor='$surface2' overflow='hidden'>
+                            <YStack height={6} width={`${group.progress}%`} borderRadius={radius.pill} backgroundColor='$warning' />
+                        </YStack>
+                        <UIText variant='captionStrong' tone='warning'>
+                            {t('Cart.minimumRemaining', { amount: format(group.remaining), minimum: format(group.minimum) })}
+                        </UIText>
+                    </YStack>
+                )}
+                {group.missingLocation && showHeader && (
+                    <UIText variant='captionStrong' tone='warning'>
+                        {t('Cart.lineNeedsLocation')}
+                    </UIText>
+                )}
+            </YStack>
+        </Card>
+    );
+}
+
+function PromotionsCard({ promo: state, money: format }: { promo: ReturnType<typeof useCartPromotions>; money: (amount: number) => string }) {
+    const { t } = useLanguage();
+    const theme = useTheme();
+    const [code, setCode] = useState('');
+    const submit = async () => {
+        if (!code.trim()) return;
+        if (await state.apply(code)) setCode('');
+    };
+    const appliedCodes = new Set(state.promotions.applied.map((applied) => applied.code).filter(Boolean));
+
+    return (
+        <Card padding={14} gap={12} accessibilityLabel={t('Cart.promotions')}>
+            <UIText variant='subheading'>{t('Cart.promotions')}</UIText>
+            {state.promotions.applied.map((applied) => (
+                <XStack key={`${applied.promotionId}-${applied.code}`} alignItems='center' gap={10} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} backgroundColor='$successSoft'>
+                    <FontAwesomeIcon icon={faTag} size={16} color={theme.successForeground.val} />
+                    <UIText flex={1} variant='caption'>
+                        <UIText variant='captionStrong'>{applied.code ?? applied.name}</UIText>
+                        {applied.amount > 0 ? ` · ${t('Cart.saving', { amount: format(applied.amount) })}` : applied.deliveryAmount > 0 || applied.type === 'free_delivery' ? ` · ${t('Cart.freeDelivery')}` : ''}
+                    </UIText>
+                    {!!applied.code && (
+                        <Button variant='ghost' size='sm' disabled={state.applying} onPress={() => state.remove(applied.code!)} accessibilityLabel={t('Cart.removeCode', { code: applied.code })}>
+                            {t('UI.remove')}
+                        </Button>
+                    )}
+                </XStack>
+            ))}
+            {state.codes
+                .filter((pending) => !appliedCodes.has(pending))
+                .map((pending) => (
+                    <XStack key={pending} alignItems='center' gap={10} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} borderWidth={1} borderColor='$borderColor'>
+                        <FontAwesomeIcon icon={faTicket} size={16} color={theme.textSecondary.val} />
+                        <UIText flex={1} variant='caption' tone='secondary'>
+                            <UIText variant='captionStrong'>{pending}</UIText> · {t('Cart.codeNotApplying')}
+                        </UIText>
+                        <Button variant='ghost' size='sm' disabled={state.applying} onPress={() => state.remove(pending)} accessibilityLabel={t('Cart.removeCode', { code: pending })}>
+                            {t('UI.remove')}
+                        </Button>
+                    </XStack>
+                ))}
+            {state.hints.slice(0, 2).map((hint) => (
+                <XStack key={hint.id} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} borderWidth={1} borderStyle='dashed' borderColor='$borderColorWithShadow'>
+                    <UIText flex={1} variant='caption' tone='secondary'>
+                        <UIText variant='captionStrong'>{hint.name}</UIText> · {t('Cart.hintSpendMore', { amount: format(hint.remaining) })}
+                    </UIText>
+                </XStack>
+            ))}
+            <XStack gap={8}>
+                <YStack flex={1}>
+                    <TextField
+                        value={code}
+                        onChangeText={(value) => {
+                            setCode(value);
+                            if (state.error) state.clearError();
+                        }}
+                        placeholder={t('Cart.promoPlaceholder')}
+                        autoCapitalize='characters'
+                        autoCorrect={false}
+                        returnKeyType='done'
+                        onSubmitEditing={submit}
+                        invalid={!!state.error}
+                        height={44}
+                        accessibilityLabel={t('Cart.promoLabel')}
+                    />
+                </YStack>
+                <Button variant='soft' onPress={submit} loading={state.applying} disabled={!code.trim()}>
+                    {t('Cart.apply')}
+                </Button>
+            </XStack>
+            {!!state.error && (
+                <UIText variant='captionStrong' tone='error' accessibilityRole='alert'>
+                    {t(`Cart.promoErrors.${state.error}`)}
+                </UIText>
+            )}
+        </Card>
+    );
+}
 
 export default CartScreen;
