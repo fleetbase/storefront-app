@@ -6,10 +6,15 @@ import localeEmoji from 'locale-emoji';
 import useStorage from '../hooks/use-storage';
 import I18n from 'react-native-i18n';
 
+type LanguageInfo = { code: string; emoji?: string; name?: string; native?: string; [key: string]: unknown };
+
 interface LanguageContextProps {
     locale: string;
     setLocale: (locale: string) => void;
     t: (key: string, options?: Record<string, any>) => string;
+    current?: LanguageInfo;
+    language?: LanguageInfo;
+    languages?: LanguageInfo[];
 }
 
 const LanguageContext = createContext<LanguageContextProps>({

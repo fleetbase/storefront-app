@@ -15,7 +15,10 @@
         "src/network/**/*.ts",
         "src/branding/**/*.ts",
         "__tests__/branding/**/*.ts",
-        "__tests__/network/**/*.ts"
+        "__tests__/network/**/*.ts",
+        "src/ui/**/*.ts",
+        "src/ui/**/*.tsx",
+        "__tests__/ui/**/*.ts"
     ],
     "exclude": [
         "src/extensions/app-screen-registry.tsx",
