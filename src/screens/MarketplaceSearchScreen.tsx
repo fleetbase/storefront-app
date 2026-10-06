@@ -104,7 +104,7 @@ const MarketplaceSearchScreen = () => {
                                 <YStack flex={1} gap='$1'>
                                     <Text color='$textPrimary' fontSize='$6' fontWeight='700'>{resource.getAttribute('name')}</Text>
                                     <Text color='$textSecondary'>{isStore ? t('Marketplace.merchantResult') : merchant.name || t('Marketplace.unknownStore')}</Text>
-                                    {!isStore && <Text color='$green10' fontWeight='700'>{formatCurrency(resource.getAttribute('price'), resource.getAttribute('currency'))}</Text>}
+                                    {!isStore && <Text color='$green-600' fontWeight='700'>{formatCurrency(resource.getAttribute('price'), resource.getAttribute('currency'))}</Text>}
                                 </YStack>
                             </XStack>
                         </Button>

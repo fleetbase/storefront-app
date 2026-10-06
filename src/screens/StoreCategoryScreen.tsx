@@ -11,17 +11,22 @@ import useDimensions from '../hooks/use-dimensions';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 
 const StoreCategoryScreen = ({ route }) => {
-    const category = route.params.category;
+    // Deep links only carry ids, so the category object is optional.
+    const categoryId = route.params?.category?.id ?? route.params?.categoryId;
     const theme = useTheme();
     const tabBarHeight = useBottomTabBarHeight();
     const { screenWidth } = useDimensions();
     const { mode, currentStore, getSelectedStoreLocation } = useStorefrontRuntime();
-    const storeLocation = getSelectedStoreLocation(currentStore?.id);
-    const { data: products, loading: isLoadingProducts } = useStorefrontData((storefront) => storefront.products.query({ category: category.id, ...(mode === 'marketplace' && currentStore ? { store: currentStore.id } : {}) }), {
-        defaultValue: [],
-        persistKey: `${currentStore?.id || 'store'}_${category.id}_products`,
-        dependencies: [mode, currentStore?.id, category.id],
-    });
+    const storeId = route.params?.storeId ?? currentStore?.id;
+    const storeLocation = getSelectedStoreLocation(storeId);
+    const { data: products, loading: isLoadingProducts } = useStorefrontData(
+        (storefront) => (categoryId ? storefront.products.query({ category: categoryId, ...(mode === 'marketplace' && storeId ? { store: storeId } : {}) }) : Promise.resolve([])),
+        {
+            defaultValue: [],
+            persistKey: `${storeId || 'store'}_${categoryId}_products`,
+            dependencies: [mode, storeId, categoryId],
+        }
+    );
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>

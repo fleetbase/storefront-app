@@ -65,11 +65,11 @@ const BootScreen = () => {
         };
 
         const initializeStorefront = async () => {
-            if (!hasStorefrontConfig()) {
-                return setError(new Error(t('BootScreen.missingRequiredConfigurationKeys')));
-            }
-
             try {
+                if (!hasStorefrontConfig()) {
+                    return setError(new Error(t('BootScreen.missingRequiredConfigurationKeys')));
+                }
+
                 if (!storefront) {
                     return;
                 }

@@ -144,7 +144,7 @@ const TestScreen = ({ route }) => {
                         {loading ? (
                             <Text>Loading…</Text>
                         ) : error ? (
-                            <Text color='$red10' selectable>
+                            <Text color='$red-600' selectable>
                                 {String(error)}
                             </Text>
                         ) : result ? (
@@ -152,7 +152,7 @@ const TestScreen = ({ route }) => {
                                 {JSON.stringify(result, null, 2)}
                             </Text>
                         ) : (
-                            <Text color='$gray10'>Press a button above to send a test request.</Text>
+                            <Text color='$gray-500'>Press a button above to send a test request.</Text>
                         )}
                     </ScrollView>
                 </YStack>

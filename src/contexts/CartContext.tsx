@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { getUniqueId } from 'react-native-device-info';
 import { Cart } from '@fleetbase/storefront';
@@ -114,6 +114,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const confirmReplacement = useCallback(
         () =>
             new Promise<boolean>((resolve) => {
+                // react-native-web's Alert.alert is a no-op, which would leave this
+                // promise pending forever. Use the browser's confirm dialog instead.
+                if (Platform.OS === 'web') {
+                    const browserConfirm = (globalThis as any).window?.confirm;
+                    resolve(typeof browserConfirm === 'function' ? Boolean(browserConfirm.call((globalThis as any).window, `${t('Marketplace.cartReplaceTitle')}\n\n${t('Marketplace.cartReplaceDescription')}`)) : false);
+                    return;
+                }
+
                 Alert.alert(t('Marketplace.cartReplaceTitle'), t('Marketplace.cartReplaceDescription'), [
                     { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
                     { text: t('Marketplace.replaceCart'), style: 'destructive', onPress: () => resolve(true) },

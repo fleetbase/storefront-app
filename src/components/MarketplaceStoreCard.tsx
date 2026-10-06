@@ -20,7 +20,7 @@ const MarketplaceStoreCard = ({ store, onPress, compact = false }: any) => {
                             <Text color='$textPrimary' fontSize='$6' fontWeight='700' numberOfLines={1} flex={1}>
                                 {name}
                             </Text>
-                            <Text color={online === false ? '$red10' : '$green10'} fontSize='$3'>
+                            <Text color={online === false ? '$red-600' : '$green-600'} fontSize='$3'>
                                 {online === false ? t('Marketplace.offline') : t('Marketplace.online')}
                             </Text>
                         </XStack>
