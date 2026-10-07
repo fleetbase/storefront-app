@@ -19,7 +19,7 @@ export type ScreenParamMap = {
     'cart.item': { cartItem?: Serialized; product?: Serialized; [key: string]: any };
     checkout: Serialized | undefined;
     'order.detail': { order: Serialized; [key: string]: any };
-    'order.receipt': { order: Serialized; [key: string]: any };
+    'order.receipt': { order?: Serialized; orderId?: string; [key: string]: any };
     'order.history': undefined;
     'account.profile': undefined;
     'account.details': undefined;

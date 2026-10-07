@@ -25,7 +25,7 @@ import useAppTheme from '../../hooks/use-app-theme';
 import useStorage from '../../hooks/use-storage';
 import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import useFooterOffset from '../../hooks/use-footer-offset';
-import { orderProgress } from '../../commerce/order-progress';
+import { summarizeOrder } from '../../commerce/order-summary';
 import { storefrontConfig } from '../../utils';
 import { toast } from '../../utils/toast';
 import { Badge, Button, Card, MediaImage, Sheet, UIText, initials, radius, space, tintFor } from '../../ui';
@@ -152,7 +152,7 @@ const AccountHomeScreen = () => {
     // The most recent order still in progress, from the order history cache.
     const activeOrder = useMemo(() => {
         const orders = Array.isArray(storedOrders) ? storedOrders : [];
-        return orders.find((order: any) => order?.id && !orderProgress({ status: order.status, isPickup: order.meta?.is_pickup === true }).finished) ?? null;
+        return orders.map(summarizeOrder).find((order) => order.id && order.active) ?? null;
     }, [storedOrders]);
 
     const languageName = languages.find((language: any) => language.code === locale)?.native ?? locale.toUpperCase();
@@ -233,7 +233,7 @@ const AccountHomeScreen = () => {
                     <Pressable
                         onPress={() => navigation.navigate('Order', { orderId: activeOrder.id })}
                         accessibilityRole='button'
-                        accessibilityLabel={t('Account.activeOrderLabel', { id: activeOrder.public_id ?? activeOrder.id })}
+                        accessibilityLabel={t('Account.activeOrderLabel', { id: activeOrder.reference })}
                     >
                         <Card appearance='raised' padding={16}>
                             <XStack gap={14} alignItems='center'>
@@ -245,7 +245,7 @@ const AccountHomeScreen = () => {
                                         {t('Account.activeOrder')}
                                     </UIText>
                                     <UIText variant='bodyStrong' numberOfLines={1}>
-                                        {t(`Tracking.phase.${orderProgress({ status: activeOrder.status, isPickup: activeOrder.meta?.is_pickup === true }).phase}.title`, {
+                                        {t(`Tracking.phase.${activeOrder.phase}.title`, {
                                             store: '',
                                             driver: t('Tracking.yourDriver'),
                                         })}

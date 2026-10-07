@@ -1,7 +1,3 @@
-import BackButton from '../../components/BackButton';
-import { PortalHost } from '@gorhom/portal';
-import { getTheme } from '../../utils';
-import { translate as t } from '../../utils/localize';
 import { screenSlot } from '../../extensions';
 
 export const Order = {
@@ -18,21 +14,8 @@ export const OrderChat = { screen: screenSlot('order.chat'), options: { headerSh
 
 export const Receipt = {
     screen: screenSlot('order.receipt'),
-    options: ({ navigation, route }) => {
-        const params = route.params ?? {};
-        return {
-            presentation: 'modal',
-            title: params.order.id,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} />;
-            },
-        };
-    },
+    // The receipt draws its own header with back and share.
+    options: { presentation: 'modal', headerShown: false },
 };
 
 export const OrderModal = {
@@ -43,22 +26,7 @@ export const OrderModal = {
 
 export const OrderHistory = {
     screen: screenSlot('order.history'),
-    options: ({ navigation }) => {
-        return {
-            title: t('OrderHistoryScreen.orderHistory'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} mr='$3' />;
-            },
-            headerRight: () => {
-                return <PortalHost name='LoadingIndicatorPortal' />;
-            },
-        };
-    },
+    options: { headerShown: false },
 };
 
 const OrderStack = {

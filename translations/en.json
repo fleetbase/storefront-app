@@ -1123,5 +1123,68 @@
         "deleteBody": "We'll text you a code to confirm. Deleting removes your account, order history and saved places, and can't be undone.",
         "sendDeleteCode": "Send confirmation code",
         "keepAccount": "Keep my account"
+    },
+    "Orders": {
+        "title": "Orders",
+        "inProgress": "In progress",
+        "past": "Past orders",
+        "items": {
+            "one": "1 item",
+            "other": "{{count}} items"
+        },
+        "andMore": "and {{count}} more",
+        "track": "Track order",
+        "viewPickup": "View pickup details",
+        "activeLabel": "{{store}}, {{status}}. Open to track",
+        "pastLabel": "{{store}}, {{status}}. Open order",
+        "receiptFor": "Receipt for {{store}}",
+        "emptyTitle": "No orders yet",
+        "emptyBody": "When you place an order it shows up here, so you can follow it and find its receipt.",
+        "startShopping": "Start shopping",
+        "loadFailed": "We couldn't load your orders.",
+        "retry": "Try again",
+        "status": {
+            "placed": "Placed",
+            "accepted": "Accepted",
+            "preparing": "Preparing",
+            "driverToStore": "Driver heading to store",
+            "pickedUp": "Picked up",
+            "onTheWay": "On the way",
+            "delivered": "Delivered",
+            "ready": "Ready for pickup",
+            "collected": "Collected",
+            "canceled": "Canceled"
+        }
+    },
+    "Receipt": {
+        "title": "Receipt",
+        "share": "Share receipt",
+        "orderNumber": "Order {{number}}",
+        "items": {
+            "one": "1 item",
+            "other": "{{count}} items"
+        },
+        "bookedFor": "Booked for {{when}}",
+        "payment": "Payment",
+        "subtotal": "Subtotal",
+        "deliveryFee": "Delivery fee",
+        "tip": "Tip",
+        "driverTip": "Driver tip",
+        "discount": "Discount",
+        "total": "Total",
+        "paidWith": {
+            "card": "Paid by card",
+            "qpay": "Paid with QPay",
+            "paypal": "Paid with PayPal",
+            "cash": "Cash on delivery",
+            "other": "Paid in the app"
+        },
+        "canceledNote": "This order was canceled.",
+        "delivery": "Delivered to",
+        "pickup": "Picked up from",
+        "notes": "Notes: {{notes}}",
+        "taxReceipt": "Tax receipt (e-barimt)",
+        "taxReceiptId": "Receipt ID",
+        "loadFailed": "We couldn't load this receipt."
     }
 }

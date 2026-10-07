@@ -72,7 +72,6 @@ const OrderScreen = ({ route }: any) => {
     const isPickup = !!order.getAttribute('meta.is_pickup');
     const status = order.getAttribute('status');
     const foodTruckId = order.getAttribute('meta.food_truck_id');
-    const usedQpay = order.getAttribute('payload.payment_method') === 'qpay' || order.getAttribute('meta.gateway') === 'qpay';
     const currency = order.getAttribute('meta.currency') ?? info?.currency ?? 'USD';
     const money = (amount: unknown) => formatCurrency(Number(amount) || 0, currency);
     const progress = useMemo(
@@ -299,7 +298,18 @@ const OrderScreen = ({ route }: any) => {
                     {canRenderRoute && (isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />)}
                 </YStack>
 
-                <YStack flex={1} zIndex={1} marginTop={-28} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' paddingHorizontal={space.gutter} paddingTop={8} paddingBottom={insets.bottom + 40} gap={16}>
+                <YStack
+                    flex={1}
+                    zIndex={1}
+                    marginTop={-28}
+                    borderTopLeftRadius={radius.sheet}
+                    borderTopRightRadius={radius.sheet}
+                    backgroundColor='$background'
+                    paddingHorizontal={space.gutter}
+                    paddingTop={8}
+                    paddingBottom={insets.bottom + 40}
+                    gap={16}
+                >
                     <YStack width={40} height={5} borderRadius={radius.pill} backgroundColor='$borderColorWithShadow' alignSelf='center' />
 
                     <YStack gap={4} accessibilityRole='summary' aria-live='polite'>
@@ -321,7 +331,9 @@ const OrderScreen = ({ route }: any) => {
                                 value={0}
                                 size={32}
                                 label={t('Reviews.ratingLabel', { store: storeName })}
-                                onChange={(rating) => navigation.navigate('WriteReview', { storeId, storeName, storeLogo: store?.logo_url ?? null, orderId: order.id, orderReference: reference, rating })}
+                                onChange={(rating) =>
+                                    navigation.navigate('WriteReview', { storeId, storeName, storeLogo: store?.logo_url ?? null, orderId: order.id, orderReference: reference, rating })
+                                }
                             />
                             <UIText variant='caption' tone='secondary'>
                                 {t('Reviews.tapToWrite')}
@@ -342,7 +354,13 @@ const OrderScreen = ({ route }: any) => {
 
                     {progress.phase === 'ready' && (
                         <YStack gap={10} padding={14} borderRadius={radius.card} backgroundColor='$successSoft'>
-                            {!!qrCode && <Image source={{ uri: `data:image/png;base64,${qrCode}` }} style={{ width: 120, height: 120, alignSelf: 'center', backgroundColor: '#ffffff', borderRadius: 8 }} accessibilityLabel={t('Tracking.pickupCode')} />}
+                            {!!qrCode && (
+                                <Image
+                                    source={{ uri: `data:image/png;base64,${qrCode}` }}
+                                    style={{ width: 120, height: 120, alignSelf: 'center', backgroundColor: '#ffffff', borderRadius: 8 }}
+                                    accessibilityLabel={t('Tracking.pickupCode')}
+                                />
+                            )}
                             <UIText variant='caption'>{t('Tracking.readyBody')}</UIText>
                             <Button icon={faCheck} fullWidth onPress={() => setPickupSheet(true)}>
                                 {t('Tracking.confirmPickup')}
@@ -356,9 +374,24 @@ const OrderScreen = ({ route }: any) => {
                             const done = step.state === 'done';
                             const current = step.state === 'current';
                             return (
-                                <XStack key={step.key} gap={12} minHeight={44} accessibilityRole='text' accessibilityLabel={`${t(`Tracking.step.${isPickup ? 'pickup' : 'delivery'}.${step.key}`)}, ${t(`Tracking.stepState.${step.state}`)}`}>
+                                <XStack
+                                    key={step.key}
+                                    gap={12}
+                                    minHeight={44}
+                                    accessibilityRole='text'
+                                    accessibilityLabel={`${t(`Tracking.step.${isPickup ? 'pickup' : 'delivery'}.${step.key}`)}, ${t(`Tracking.stepState.${step.state}`)}`}
+                                >
                                     <YStack width={22} alignItems='center'>
-                                        <YStack width={22} height={22} borderRadius={11} borderWidth={2} borderColor={step.state === 'todo' ? '$borderColorWithShadow' : '$primary'} backgroundColor={done ? '$primary' : '$background'} alignItems='center' justifyContent='center'>
+                                        <YStack
+                                            width={22}
+                                            height={22}
+                                            borderRadius={11}
+                                            borderWidth={2}
+                                            borderColor={step.state === 'todo' ? '$borderColorWithShadow' : '$primary'}
+                                            backgroundColor={done ? '$primary' : '$background'}
+                                            alignItems='center'
+                                            justifyContent='center'
+                                        >
                                             {done && <FontAwesomeIcon icon={faCheck} size={11} color={theme.primaryText.val} />}
                                             {current && <YStack width={8} height={8} borderRadius={4} backgroundColor='$primary' />}
                                         </YStack>
@@ -403,13 +436,38 @@ const OrderScreen = ({ route }: any) => {
                                     </UIText>
                                 )}
                             </YStack>
-                            {!!driver?.phone && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driver.phone}`)} />}
-                            {!!customer && <IconButton icon={faComment} variant='solid' size={44} badge={chat?.unread ? chat.unread : undefined} accessibilityLabel={t('Chat.messageDriver', { driver: driverName })} onPress={openChat} />}
+                            {!!driver?.phone && (
+                                <IconButton
+                                    icon={faPhone}
+                                    size={44}
+                                    accessibilityLabel={t('Tracking.callDriver', { driver: driverName })}
+                                    onPress={() => Linking.openURL(`tel:${driver.phone}`)}
+                                />
+                            )}
+                            {!!customer && (
+                                <IconButton
+                                    icon={faComment}
+                                    variant='solid'
+                                    size={44}
+                                    badge={chat?.unread ? chat.unread : undefined}
+                                    accessibilityLabel={t('Chat.messageDriver', { driver: driverName })}
+                                    onPress={openChat}
+                                />
+                            )}
                         </XStack>
                     )}
 
                     {bookings.map(({ entity, at }: any) => (
-                        <XStack key={entity.id ?? entity.name} alignItems='center' gap={12} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor' accessibilityLabel={t('Tracking.bookingLabel', { name: entity.name, time: at.at.toLocaleString(locale) })}>
+                        <XStack
+                            key={entity.id ?? entity.name}
+                            alignItems='center'
+                            gap={12}
+                            padding={12}
+                            borderRadius={radius.card}
+                            borderWidth={1}
+                            borderColor='$borderColor'
+                            accessibilityLabel={t('Tracking.bookingLabel', { name: entity.name, time: at.at.toLocaleString(locale) })}
+                        >
                             <YStack width={52} paddingVertical={6} borderRadius={radius.tile} backgroundColor='$primarySoft' alignItems='center'>
                                 <UIText variant='captionStrong' tone='brand' style={{ fontSize: 11 }}>
                                     {at.at.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase()}
@@ -429,12 +487,23 @@ const OrderScreen = ({ route }: any) => {
                                     {bookingConfirmed ? t('Tracking.bookingConfirmedBody', { store: storeName }) : t('Tracking.bookingRequestedBody', { store: storeName })}
                                 </UIText>
                             </YStack>
-                            {!!store?.phone && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />}
+                            {!!store?.phone && (
+                                <IconButton
+                                    icon={faPhone}
+                                    size={44}
+                                    accessibilityLabel={t('Tracking.callStore', { store: storeName })}
+                                    onPress={() => Linking.openURL(`tel:${store.phone}`)}
+                                />
+                            )}
                         </XStack>
                     ))}
 
                     {progress.finished && !!chat && chat.messages.length > 0 && (
-                        <Pressable onPress={openChat} accessibilityRole='button' style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.card, backgroundColor: theme.surface.val }}>
+                        <Pressable
+                            onPress={openChat}
+                            accessibilityRole='button'
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.card, backgroundColor: theme.surface.val }}
+                        >
                             <FontAwesomeIcon icon={faComment} size={18} color={theme.textSecondary.val} />
                             <UIText flex={1} variant='caption' tone='secondary'>
                                 {t('Chat.closedNote')}{' '}
@@ -460,11 +529,9 @@ const OrderScreen = ({ route }: any) => {
                     <YStack gap={10} accessibilityLabel={t('Tracking.details')}>
                         <XStack justifyContent='space-between' alignItems='baseline'>
                             <UIText variant='subheading'>{t('Tracking.orderNumber', { number: reference })}</UIText>
-                            {usedQpay && (
-                                <Button variant='ghost' size='sm' icon={faReceipt} onPress={() => navigation.navigate('Receipt', { order: order.serialize() })}>
-                                    {t('Tracking.viewReceipt')}
-                                </Button>
-                            )}
+                            <Button variant='ghost' size='sm' icon={faReceipt} onPress={() => navigation.navigate('Receipt', { order: order.serialize() })}>
+                                {t('Tracking.viewReceipt')}
+                            </Button>
                         </XStack>
                         <UIText variant='caption' tone='secondary'>
                             {formatDate(new Date(order.getAttribute('created_at') ?? Date.now()), 'PPp')}
@@ -494,7 +561,9 @@ const OrderScreen = ({ route }: any) => {
                             <UIText variant='bodyStrong'>{money(order.getAttribute('meta.total'))}</UIText>
                         </XStack>
                         <UIText variant='caption' tone='secondary'>
-                            {isPickup ? t('Tracking.pickupAt', { place: [pickup?.name, pickup?.street1].filter(Boolean).join(', ') }) : t('Tracking.deliveringTo', { place: [dropoff?.name, dropoff?.street1].filter(Boolean).join(', ') })}
+                            {isPickup
+                                ? t('Tracking.pickupAt', { place: [pickup?.name, pickup?.street1].filter(Boolean).join(', ') })
+                                : t('Tracking.deliveringTo', { place: [dropoff?.name, dropoff?.street1].filter(Boolean).join(', ') })}
                         </UIText>
                         {!!order.getAttribute('notes') && (
                             <UIText variant='caption' tone='secondary'>
