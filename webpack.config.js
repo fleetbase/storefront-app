@@ -230,6 +230,7 @@ module.exports = (env = {}, argv = {}) => ({
             'react-native-device-info': path.resolve(__dirname, 'web/react-native-device-info.web.js'),
             'react-native-fast-image': path.resolve(__dirname, 'web/react-native-fast-image.web.js'),
             '@react-native-community/blur': path.resolve(__dirname, 'web/react-native-community-blur.web.js'),
+            '@react-native-google-signin/google-signin': path.resolve(__dirname, 'web/react-native-google-signin.web.js'),
             '@fleetbase/storefront': path.resolve(__dirname, 'node_modules/@fleetbase/storefront/dist/esm/storefront.js'),
             '@fleetbase/sdk': path.resolve(__dirname, 'node_modules/@fleetbase/sdk/dist/esm/fleetbase.js'),
         },

@@ -159,7 +159,8 @@ const useOAuth = () => {
         }
 
         if (provider === 'google') {
-            return typeof config('GOOGLE_CLIENT_ID') === 'string' && toBoolean(config('GOOGLE_LOGIN_ENABLED')) === true;
+            // Google Sign-In (@react-native-google-signin/google-signin) is native-only
+            return false;
         }
 
         if (provider === 'facebook') {

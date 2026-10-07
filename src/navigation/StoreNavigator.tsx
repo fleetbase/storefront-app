@@ -16,13 +16,10 @@ import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
 import OrderStack, { OrderModal } from './stacks/OrderStack';
 import CartStack from './stacks/CartStack';
-import PhoneLoginScreen from '../screens/PhoneLoginScreen';
-import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
-import CreateAccountVerifyScreen from '../screens/CreateAccountVerifyScreen';
+import SignInScreen from '../screens/auth/SignInScreen';
+import { CreateAccountVerifyScreen, DeleteAccountVerifyScreen, PhoneVerifyScreen, SignInVerifyScreen } from '../screens/auth/VerifyCodeScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
-import DeleteAccountVerifyScreen from '../screens/DeleteAccountVerifyScreen';
-import AddPhoneScreen from '../screens/AddPhoneScreen';
-import VerifyPhoneScreen from '../screens/VerifyPhoneScreen';
+import AddPhoneScreen from '../screens/auth/AddPhoneScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
 import FoodTruckScreen from '../screens/FoodTruckScreen';
@@ -334,7 +331,7 @@ export const StoreProfileTab = createNativeStackNavigator({
                     },
                 },
                 VerifyPhone: {
-                    screen: VerifyPhoneScreen,
+                    screen: PhoneVerifyScreen,
                     options: {
                         headerShown: false,
                     },
@@ -352,14 +349,14 @@ export const StoreProfileTab = createNativeStackNavigator({
                     },
                 },
                 PhoneLogin: {
-                    screen: PhoneLoginScreen,
+                    screen: SignInScreen,
                     options: {
                         headerShown: false,
                         gestureEnabled: false,
                     },
                 },
                 PhoneLoginVerify: {
-                    screen: PhoneLoginVerifyScreen,
+                    screen: SignInVerifyScreen,
                     options: {
                         headerShown: false,
                         gestureEnabled: false,
