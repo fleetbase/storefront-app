@@ -15,6 +15,8 @@ import useSavedLocations from '../../hooks/use-saved-locations';
 import useCartSummary from '../../hooks/use-cart-summary';
 import { DEFAULT_DISCOVERY_STATE, buildNetworkStoreQuery, mergeNetworkPage } from '../../network/network-runtime';
 import { rememberStores } from '../../network/store-names';
+import { fetchOffers, type Offer } from '../../commerce/offers';
+import { OfferBanner } from '../../components/offers/OfferCard';
 import {
     CartPill,
     categoryIcon,
@@ -76,6 +78,7 @@ const NetworkHomeScreen = () => {
 
     const [rails, setRails] = useState<Rail[]>(() => railDefinitions.map((rail) => ({ ...rail, stores: [], loading: true, failed: false })));
     const [categories, setCategories] = useState<any[]>([]);
+    const [offers, setOffers] = useState<Offer[]>([]);
     const [stores, setStores] = useState<StoreSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -154,10 +157,24 @@ const NetworkHomeScreen = () => {
         };
     }, [storefront]);
 
+    // Live offers for the rail; it hides itself when there are none or they fail to load.
+    const loadOffers = useCallback(() => {
+        const adapter = storefront?.getAdapter?.();
+        if (!adapter) return;
+        fetchOffers((path, query) => adapter.get(path, query), { includeScheduled: false })
+            .then((list) => setOffers(list.filter((offer) => offer.availability === 'live').slice(0, 8)))
+            .catch(() => setOffers([]));
+    }, [storefront]);
+
+    useEffect(() => {
+        loadOffers();
+    }, [loadOffers]);
+
     const refresh = useCallback(() => {
+        loadOffers();
         loadRails();
         loadStores({ refresh: true });
-    }, [loadRails, loadStores]);
+    }, [loadOffers, loadRails, loadStores]);
 
     const openStore = useCallback((store: StoreSummary) => navigation.navigate('NetworkStore', { storeId: store.id }), [navigation]);
     const openDirectory = useCallback((params: Record<string, unknown> = {}) => navigation.navigate('NetworkCategory', params), [navigation]);
@@ -221,6 +238,17 @@ const NetworkHomeScreen = () => {
                         />
                     ))}
                 </ScrollView>
+            )}
+
+            {offers.length > 0 && (
+                <YStack gap={12}>
+                    <SectionHeader title={t('Offers.title')} onAction={() => navigation.navigate('Offers')} />
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}>
+                        {offers.map((offer, index) => (
+                            <OfferBanner key={offer.id} offer={offer} primary={index === 0} width={304} onPress={() => navigation.navigate('Offer', { offerId: offer.id })} />
+                        ))}
+                    </ScrollView>
+                </YStack>
             )}
 
             {rails.map((rail) =>
