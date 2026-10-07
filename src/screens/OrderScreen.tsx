@@ -23,7 +23,7 @@ import { isArray, getFoodTruckById } from '../utils';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, IconButton, Sheet, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import { Button, ErrorState, IconButton, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
 
 const MAP_HEIGHT = 380;
 
@@ -45,7 +45,10 @@ const OrderScreen = ({ route }: any) => {
     const { t, locale } = useLanguage();
     const hour12 = usesTwelveHourClock(locale);
 
-    const [order, setOrder] = useState<any>(() => new Order(params.order, fleetbaseAdapter));
+    // Opened from a notification or link there is only an id; the order loads below.
+    const [order, setOrder] = useState<any>(() => new Order(params.order ?? { id: params.orderId }, fleetbaseAdapter));
+    const [loaded, setLoaded] = useState<boolean>(!!params.order);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [foodTruck, setFoodTruck] = useState<any>();
     const [distanceMatrix, setDistanceMatrix] = useState<any>();
     const [refreshing, setRefreshing] = useState(false);
@@ -93,6 +96,19 @@ const OrderScreen = ({ route }: any) => {
         } finally {
             setRefreshing(false);
         }
+    }, []);
+
+    useEffect(() => {
+        if (loaded) return;
+        orderRef.current
+            .reload()
+            .then((reloaded: any) => {
+                setOrder(reloaded);
+                statusRef.current = reloaded.getAttribute('status');
+                setLoaded(true);
+            })
+            .catch(() => setLoadFailed(true));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const confirmPickup = useCallback(async () => {
@@ -222,6 +238,32 @@ const OrderScreen = ({ route }: any) => {
         Number(order.getAttribute('meta.delivery_tip')) > 0 && { label: t('Tracking.driverTip'), value: order.getAttribute('meta.delivery_tip') },
     ].filter(Boolean) as { label: string; value: unknown }[];
     const discount = Number(order.getAttribute('meta.discount')) || 0;
+
+    if (!loaded) {
+        return (
+            <YStack flex={1} backgroundColor='$background'>
+                {loadFailed ? (
+                    <YStack flex={1} justifyContent='center' gap={12}>
+                        <ErrorState title={t('Tracking.loadFailed')} />
+                        <YStack alignItems='center'>
+                            <Button variant='outline' onPress={close}>
+                                {t('common.goBack')}
+                            </Button>
+                        </YStack>
+                    </YStack>
+                ) : (
+                    <>
+                        <Skeleton height={MAP_HEIGHT} radius={0} />
+                        <YStack padding={space.gutter} gap={12}>
+                            <Skeleton height={24} width='60%' />
+                            <Skeleton height={16} width='80%' />
+                            <Skeleton height={140} radius={radius.card} />
+                        </YStack>
+                    </>
+                )}
+            </YStack>
+        );
+    }
 
     return (
         <YStack flex={1} backgroundColor='$surface'>

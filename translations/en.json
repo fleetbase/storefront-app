@@ -796,7 +796,8 @@
         "bookingRequested": "Booking requested",
         "bookingConfirmedBody": "{{store}} confirmed your visit.",
         "bookingRequestedBody": "{{store}} will confirm your time shortly.",
-        "callStore": "Call {{store}}"
+        "callStore": "Call {{store}}",
+        "loadFailed": "Couldn’t load this order"
     },
     "Booking": {
         "howItWorks": "How booking works",
@@ -964,6 +965,47 @@
             "combines": "Combines",
             "stackable": "Can be used with other offers",
             "notStackable": "Can’t be combined with other offers"
-        }
+        },
+        "notificationSettings": "Notification settings",
+        "emptyNotify": "Turn on offer notifications and we’ll let you know when stores run a deal."
+    },
+    "Notifications": {
+        "title": "Notifications",
+        "bellUnread": "Notifications, {{count}} unread",
+        "settings": "Notification settings",
+        "settingsTitle": "Notification settings",
+        "filterLabel": "Filter notifications",
+        "filters": {
+            "all": "All",
+            "orders": "Orders",
+            "offers": "Offers"
+        },
+        "markAllRead": "Mark all read",
+        "today": "Today",
+        "earlier": "Earlier",
+        "unread": "Unread",
+        "delete": "Delete",
+        "swipeHint": "Swipe left on a notification to delete it.",
+        "trackOrder": "Track order",
+        "openChat": "Open chat",
+        "viewOffer": "View offer",
+        "emptyTitle": "You’re all caught up",
+        "emptyBody": "Order updates, messages from your driver and offers from stores will show up here.",
+        "emptyFiltered": "Nothing here yet",
+        "loadFailed": "Couldn’t load notifications",
+        "updateFailed": "Couldn’t update your notifications. Try again.",
+        "deleteFailed": "Couldn’t delete that notification. Try again.",
+        "signInTitle": "Sign in to see notifications",
+        "signInBody": "Order updates and messages are saved to your account.",
+        "pushOffTitle": "Push notifications are off for this app.",
+        "pushOffBody": "You’ll still see everything in your inbox, but your phone won’t alert you.",
+        "openSettings": "Open phone settings",
+        "prefs": {
+            "orderUpdates": "Order and booking updates",
+            "orderUpdatesBody": "Accepted, preparing, on the way, delivered, and booking confirmations.",
+            "promotions": "Offers and news",
+            "promotionsBody": "Deals and announcements from stores on {{name}}."
+        },
+        "prefsNote": "Messages from your driver about an active order always come through. Receipts and account security emails aren’t affected by these settings."
     }
 }

@@ -120,9 +120,9 @@ const OffersScreen = ({ route }: any) => {
                     <EmptyState
                         icon={faTag}
                         title={filter === 'all' ? t('Offers.emptyTitle') : t('Offers.emptyFiltered')}
-                        description={filter === 'all' ? t('Offers.emptyBody') : undefined}
-                        actionLabel={filter === 'all' ? t('Cart.browseStores') : t('Offers.showAll')}
-                        onAction={() => (filter === 'all' ? navigation.goBack() : setFilter('all'))}
+                        description={filter === 'all' ? t('Offers.emptyNotify') : undefined}
+                        actionLabel={filter === 'all' ? t('Offers.notificationSettings') : t('Offers.showAll')}
+                        onAction={() => (filter === 'all' ? navigation.navigate('NotificationSettings') : setFilter('all'))}
                     />
                 ) : (
                     <YStack gap={18}>

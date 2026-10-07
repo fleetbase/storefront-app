@@ -40,6 +40,8 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
     StoreInfo: { screen: screenSlot('store.info'), linking: undefined, options: { presentation: 'modal', headerShown: false } },
     StoreReviews: { screen: screenSlot('reviews.list'), linking: withLinking ? { path: 'stores/:storeId/reviews' } : undefined, options: { headerShown: false } },
     WriteReview: { screen: screenSlot('reviews.write'), linking: undefined, options: { presentation: 'modal', headerShown: false } },
+    Notifications: { screen: screenSlot('notifications.inbox'), linking: withLinking ? { path: 'notifications' } : undefined, options: { headerShown: false } },
+    NotificationSettings: { screen: screenSlot('notifications.settings'), linking: undefined, options: { headerShown: false } },
     Offers: { screen: screenSlot('offers.list'), linking: withLinking ? { path: 'offers' } : undefined, options: { headerShown: false } },
     Offer: { screen: screenSlot('offers.detail'), linking: withLinking ? { path: 'offers/:offerId' } : undefined, options: { headerShown: false } },
 });
