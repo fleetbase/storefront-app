@@ -14,6 +14,8 @@ export const Order = {
 export const StoreReviews = { screen: screenSlot('reviews.list'), options: { headerShown: false } };
 export const WriteReview = { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } };
 
+export const OrderChat = { screen: screenSlot('order.chat'), options: { headerShown: false } };
+
 export const Receipt = {
     screen: screenSlot('order.receipt'),
     options: ({ navigation, route }) => {
@@ -65,6 +67,7 @@ const OrderStack = {
     OrderHistory,
     StoreReviews,
     WriteReview,
+    OrderChat,
 };
 
 export default OrderStack;

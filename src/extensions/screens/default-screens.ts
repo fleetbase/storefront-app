@@ -34,6 +34,7 @@ export const defaultScreens: ScreenRegistryDefinition = {
     'network.product': { load: () => import('../../screens/network/NetworkProductScreen') },
     'reviews.list': { load: () => import('../../screens/reviews/StoreReviewsScreen') },
     'reviews.write': { load: () => import('../../screens/reviews/WriteReviewScreen') },
+    'order.chat': { load: () => import('../../screens/chat/OrderChatScreen') },
     'notifications.inbox': { load: () => import('../../screens/notifications/NotificationsScreen') },
     'notifications.settings': { load: () => import('../../screens/notifications/NotificationSettingsScreen') },
     'offers.list': { load: () => import('../../screens/offers/OffersScreen') },
