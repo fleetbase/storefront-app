@@ -477,5 +477,41 @@
         "addToCartError": "Не вдалося додати цей товар до кошика.",
         "groupItemCount": "Товарів: {{count}}",
         "cartLocationRequired": "Перед оформленням замовлення виберіть дійсне розташування для кожного магазину."
+    },
+    "UI": {
+        "openClosesAt": "Відчинено · зачиняється о {{time}}",
+        "openAllDay": "Відчинено цілодобово",
+        "closedOpensAt": "Зачинено · відчиняється о {{time}}",
+        "closedOpensTomorrow": "Зачинено · відчиняється завтра о {{time}}",
+        "closedOpensOn": "Зачинено · відчиняється {{day}} о {{time}}",
+        "closed": "Зачинено",
+        "notAcceptingOrders": "Не приймає замовлення",
+        "seeAll": "Усі",
+        "tryAgain": "Спробувати ще раз",
+        "loadErrorTitle": "Щось пішло не так",
+        "loadErrorBody": "Не вдалося завантажити. Перевірте з'єднання та спробуйте ще раз.",
+        "offlineBanner": "Ви офлайн. Показуємо раніше збережене.",
+        "reviewsCount": {
+            "one": "1 відгук",
+            "other": "Відгуків: {{count}}"
+        },
+        "itemsCount": {
+            "one": "1 товар",
+            "other": "Товарів: {{count}}"
+        },
+        "ratingLabel": "Оцінка {{rating}} з 5",
+        "bookOnline": "Онлайн-запис",
+        "viewCart": "Переглянути кошик",
+        "close": "Закрити",
+        "back": "Назад",
+        "backTo": "Назад до {{name}}",
+        "remove": "Видалити",
+        "removeFilter": "Прибрати фільтр: {{name}}",
+        "increaseQuantity": "Збільшити кількість",
+        "decreaseQuantity": "Зменшити кількість",
+        "removeItem": "Видалити {{name}}",
+        "required": "Обов'язково",
+        "optional": "Необов'язково",
+        "done": "Готово"
     }
 }

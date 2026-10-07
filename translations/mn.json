@@ -463,5 +463,41 @@
         "addToCartError": "Бүтээгдэхүүнийг сагсанд нэмэх боломжгүй байна.",
         "groupItemCount": "{{count}} бараа",
         "cartLocationRequired": "Төлбөр хийхийн өмнө дэлгүүр бүрийн хүчинтэй байршлыг сонгоно уу."
+    },
+    "UI": {
+        "openClosesAt": "Нээлттэй · {{time}}-д хаана",
+        "openAllDay": "24 цаг нээлттэй",
+        "closedOpensAt": "Хаалттай · {{time}}-д нээнэ",
+        "closedOpensTomorrow": "Хаалттай · маргааш {{time}}-д нээнэ",
+        "closedOpensOn": "Хаалттай · {{day}} {{time}}-д нээнэ",
+        "closed": "Хаалттай",
+        "notAcceptingOrders": "Захиалга авахгүй байна",
+        "seeAll": "Бүгдийг харах",
+        "tryAgain": "Дахин оролдох",
+        "loadErrorTitle": "Алдаа гарлаа",
+        "loadErrorBody": "Ачаалж чадсангүй. Холболтоо шалгаад дахин оролдоно уу.",
+        "offlineBanner": "Та офлайн байна. Өмнө хадгалсан мэдээллийг харуулж байна.",
+        "reviewsCount": {
+            "one": "1 сэтгэгдэл",
+            "other": "{{count}} сэтгэгдэл"
+        },
+        "itemsCount": {
+            "one": "1 бараа",
+            "other": "{{count}} бараа"
+        },
+        "ratingLabel": "5-аас {{rating}} үнэлгээтэй",
+        "bookOnline": "Онлайнаар захиалах",
+        "viewCart": "Сагс харах",
+        "close": "Хаах",
+        "back": "Буцах",
+        "backTo": "{{name}} руу буцах",
+        "remove": "Хасах",
+        "removeFilter": "Шүүлтүүр хасах: {{name}}",
+        "increaseQuantity": "Тоог нэмэх",
+        "decreaseQuantity": "Тоог хасах",
+        "removeItem": "{{name}}-г хасах",
+        "required": "Заавал",
+        "optional": "Сонголтоор",
+        "done": "Болсон"
     }
 }

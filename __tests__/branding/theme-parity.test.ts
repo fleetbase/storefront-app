@@ -51,3 +51,30 @@ test('tamagui.config compiles the generated themes', () => {
     expect(Object.keys(themes)).toEqual(THEME_NAMES);
     expect(themes.lightBlue.primary).toBe('#2563eb');
 });
+
+describe('supporting colors', () => {
+    const themes = buildThemeSet({ preset: 'blue', colors: PRESET_COLORS.blue, extra: { light: {}, dark: {} } });
+    const { contrastRatio } = require('../../src/branding/color');
+
+    test('every theme gets the supporting surfaces the redesigned screens use', () => {
+        for (const theme of Object.values(themes)) {
+            for (const key of ['primaryForeground', 'surface2', 'primarySoft', 'successSoft', 'warningSoft', 'errorSoft', 'infoSoft', 'overlay']) {
+                expect([key, theme[key]]).toEqual([key, expect.stringMatching(/^#|^rgba/)]);
+            }
+        }
+    });
+
+    test('brand-colored text stays readable on the background in light and dark themes', () => {
+        for (const [name, theme] of Object.entries(themes)) {
+            expect([name, contrastRatio(theme.primaryForeground, theme.background) >= 4.5]).toEqual([name, true]);
+        }
+        // A readable primary is used as-is.
+        expect(themes.lightBlue.primaryForeground).toBe(themes.lightBlue.primary);
+    });
+
+    test('readableOn falls back to the text color when nothing else reads', () => {
+        const { readableOn } = require('../../src/branding/build-themes');
+        expect(readableOn('#777777', '#777777', '#777777')).toBe('#777777');
+        expect(readableOn('not-a-color', '#ffffff', '#000000')).toBe('not-a-color');
+    });
+});

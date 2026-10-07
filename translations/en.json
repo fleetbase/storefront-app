@@ -463,5 +463,41 @@
         "addToCartError": "We couldn't add this product to your cart.",
         "groupItemCount": "{{count}} items",
         "cartLocationRequired": "Choose a valid location for every store before checkout."
+    },
+    "UI": {
+        "openClosesAt": "Open · closes {{time}}",
+        "openAllDay": "Open 24 hours",
+        "closedOpensAt": "Closed · opens {{time}}",
+        "closedOpensTomorrow": "Closed · opens tomorrow {{time}}",
+        "closedOpensOn": "Closed · opens {{day}} {{time}}",
+        "closed": "Closed",
+        "notAcceptingOrders": "Not accepting orders",
+        "seeAll": "See all",
+        "tryAgain": "Try again",
+        "loadErrorTitle": "Something went wrong",
+        "loadErrorBody": "We couldn't load this. Check your connection and try again.",
+        "offlineBanner": "You're offline. Showing what we saved earlier.",
+        "reviewsCount": {
+            "one": "1 review",
+            "other": "{{count}} reviews"
+        },
+        "itemsCount": {
+            "one": "1 item",
+            "other": "{{count}} items"
+        },
+        "ratingLabel": "Rated {{rating}} out of 5",
+        "bookOnline": "Book online",
+        "viewCart": "View cart",
+        "close": "Close",
+        "back": "Back",
+        "backTo": "Back to {{name}}",
+        "remove": "Remove",
+        "removeFilter": "Remove filter: {{name}}",
+        "increaseQuantity": "Increase quantity",
+        "decreaseQuantity": "Decrease quantity",
+        "removeItem": "Remove {{name}}",
+        "required": "Required",
+        "optional": "Optional",
+        "done": "Done"
     }
 }

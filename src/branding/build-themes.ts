@@ -1,4 +1,4 @@
-import { mix } from './color';
+import { contrastRatio, mix } from './color';
 import { flattenPalette, globalColors } from './palette';
 import { COLOR_PRESETS, PRESET_COLORS, presetThemeName } from './presets';
 import type { ColorPreset, ColorScheme, SemanticColors } from './presets';
@@ -35,12 +35,49 @@ export function interactionColors(colors: SemanticColors): ThemeColors {
 }
 
 /**
- * Builds a complete Tamagui theme: semantic colors, extra brand keys, the shared
- * palette (so `$gray-500` style keys keep working) and derived interaction keys.
+ * Supporting surfaces the redesigned screens use: a second surface for chips and
+ * tracks, soft tints behind status and primary content, and the overlay behind
+ * sheets. Derived from the semantic colors so every preset and brand gets them;
+ * a brand's extra keys can still override them.
+ */
+export function supportingColors(colors: SemanticColors): ThemeColors {
+    const { background, surface, color, primary, success, warning, error, info } = colors;
+    return {
+        primaryForeground: readableOn(primary, background, color),
+        surface2: mix(surface, color, 0.04),
+        primarySoft: mix(background, primary, 0.1),
+        successSoft: mix(background, success, 0.12),
+        warningSoft: mix(background, warning, 0.14),
+        errorSoft: mix(background, error, 0.1),
+        infoSoft: mix(background, info, 0.1),
+        overlay: 'rgba(10,14,20,0.48)',
+    };
+}
+
+/**
+ * The brand color for text and icons on the background: the color itself when it
+ * reads clearly (WCAG AA, 4.5:1), otherwise moved toward the text color until it
+ * does. Dark presets use a deep primary for button fills, which is unreadable as
+ * text on a dark background.
+ */
+export function readableOn(foreground: string, background: string, text: string, minimum = 4.5): string {
+    for (let step = 0; step <= 10; step++) {
+        const candidate = mix(foreground, text, step / 10);
+        const ratio = contrastRatio(candidate, background);
+        if (ratio === null || ratio >= minimum) return candidate;
+    }
+    return text;
+}
+
+/**
+ * Builds a complete Tamagui theme: semantic colors, supporting surfaces, extra
+ * brand keys, the shared palette (so `$gray-500` style keys keep working) and
+ * derived interaction keys.
  */
 export function buildTheme(colors: SemanticColors, extra: ThemeColors = {}): ThemeColors {
     return {
         ...colors,
+        ...supportingColors(colors),
         ...globalColors,
         ...extra,
         ...flattenPalette(),

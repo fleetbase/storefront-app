@@ -2490,7 +2490,7 @@ __metadata:
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1
     "@fortawesome/react-native-fontawesome": ^0.3.0
-    "@gorhom/bottom-sheet": 5.1.1
+    "@gorhom/bottom-sheet": 5.2.14
     "@gorhom/portal": ^1.0.14
     "@invertase/react-native-apple-authentication": ^2.4.0
     "@react-native-community/blur": ^4.4.1
@@ -2717,9 +2717,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/bottom-sheet@npm:5.1.1":
-  version: 5.1.1
-  resolution: "@gorhom/bottom-sheet@npm:5.1.1"
+"@gorhom/bottom-sheet@npm:5.2.14":
+  version: 5.2.14
+  resolution: "@gorhom/bottom-sheet@npm:5.2.14"
   dependencies:
     "@gorhom/portal": 1.0.14
     invariant: ^2.2.4
@@ -2729,13 +2729,13 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-gesture-handler: ">=2.16.1"
-    react-native-reanimated: ">=3.16.0"
+    react-native-reanimated: "*"
   peerDependenciesMeta:
     "@types/react":
       optional: true
     "@types/react-native":
       optional: true
-  checksum: 9c5c7aeb1c41ad5e887b73330b53a305255bfde82c104e1c7d50eb692d86932bb54a8c79cd65fc52a46437f21471ce71faeb6dc64af89697580675144135f994
+  checksum: c4387fa66b06e9c5dac713af7cdc9f9f5da42743f7dd6a2117d8c956e9410573c24e552fdb20232e251de5890ee83569894312eb5d4531f933f512b673ffeb53
   languageName: node
   linkType: hard
 
