@@ -518,6 +518,16 @@
             "setLocation": "Set your location to see the stores nearest you.",
             "setAddress": "Set address",
             "listView": "List view"
+        },
+        "storeUnavailableBody": "This store isn’t available on {{network}} right now.",
+        "store": {
+            "delivery": "Delivery",
+            "pickup": "Pickup",
+            "minimum": "Min. order {{amount}}",
+            "info": "Store info",
+            "closedBody": "You can browse, but ordering is paused until the store opens.",
+            "emptyCatalog": "This store hasn’t added any products yet.",
+            "recommended": "Recommended"
         }
     },
     "UI": {
@@ -554,6 +564,35 @@
         "removeItem": "Remove {{name}}",
         "required": "Required",
         "optional": "Optional",
-        "done": "Done"
+        "done": "Done",
+        "outOfStock": "Out of stock",
+        "sale": "Sale",
+        "bookable": "Book online"
+    },
+    "StoreSwitch": {
+        "yourCurrentStore": "your current store",
+        "thisStore": "this store",
+        "title": "Start a new cart from {{store}}?",
+        "willClear": "Your cart from {{store}} ({{items}}) will be cleared.",
+        "willClearWithTotal": "Your cart from {{store}} ({{items}}, {{total}}) will be cleared.",
+        "reason": "Orders on {{network}} are fulfilled by one store at a time, so each cart holds items from a single store.",
+        "startNewCart": "Start new cart",
+        "keepCart": "Keep current cart",
+        "currencyTitle": "This item can’t join your cart",
+        "currencyBody": "Your cart is priced in {{cartCurrency}}, and {{store}} prices in {{itemCurrency}}. One cart can only use one currency. Check out your current cart first, then start a new one.",
+        "ok": "Got it"
+    },
+    "ProductDetail": {
+        "gallery": "Photos of {{name}}",
+        "from": "From {{price}}",
+        "soldBy": "Sold by",
+        "chooseOne": "Choose 1",
+        "chooseUpTo": "Choose up to {{count}}",
+        "chooseAny": "Choose any",
+        "addToCart": "Add to cart",
+        "unavailable": "This item is out of stock.",
+        "storeClosed": "Ordering is paused until the store opens.",
+        "chooseRequired": "Choose a {{groups}} to add this to your cart.",
+        "and": " and "
     }
 }

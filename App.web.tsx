@@ -9,6 +9,7 @@ import { SocketClusterProvider } from './src/contexts/SocketClusterContext';
 import { CartProvider } from './src/contexts/CartContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import StoreSwitchHost from './src/components/StoreSwitchHost';
 import { AppScreenRegistryProvider } from './src/extensions/app-screen-registry';
 import { BrandingProvider, useBranding } from './src/branding/BrandingProvider';
 import { NotificationProvider } from './src/contexts/NotificationContext';
@@ -32,6 +33,7 @@ function AppContent(): React.JSX.Element {
                                             <CartProvider>
                                                 <AppScreenRegistryProvider>
                                                     <AppNavigator />
+                                                    <StoreSwitchHost />
                                                 </AppScreenRegistryProvider>
                                                 <Toasts extraInsets={{ bottom: 80 }} defaultStyle={getDefaultToastStyle()} />
                                                 <PortalHost name='MainPortal' />
