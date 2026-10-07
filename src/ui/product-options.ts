@@ -113,3 +113,14 @@ export function describeSelection(groups: OptionGroup[], selection: OptionSelect
         .filter(Boolean)
         .join(' · ');
 }
+
+/** The selection a cart line was added with, so editing it keeps its options. */
+export function selectionFromCartItem(groups: OptionGroup[], item: any): OptionSelection {
+    const chosen = new Set([...(Array.isArray(item?.variants) ? item.variants : []), ...(Array.isArray(item?.addons) ? item.addons : [])].map((option: any) => String(option?.id ?? option)));
+    const selection: OptionSelection = {};
+    for (const group of groups) {
+        const ids = group.options.filter((option) => chosen.has(option.id)).map((option) => option.id);
+        if (ids.length > 0) selection[group.id] = group.multiple ? ids : ids.slice(0, 1);
+    }
+    return selection;
+}

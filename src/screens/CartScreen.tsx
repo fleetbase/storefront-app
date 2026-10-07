@@ -3,7 +3,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCartShopping, faTag, faTicket } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faCartShopping, faTag, faTicket, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import useFooterOffset from '../hooks/use-footer-offset';
 import useCart from '../hooks/use-cart';
@@ -16,10 +16,12 @@ import { loadPersistedResource, storefrontConfig } from '../utils';
 import { formatCurrency } from '../utils/format';
 import { toast } from '../utils/toast';
 import { rememberStores } from '../network/store-names';
+import { parseScheduledAt } from '../commerce/booking';
 import {
     Button,
     Card,
     EmptyState,
+    IconButton,
     MediaImage,
     Sheet,
     Skeleton,
@@ -31,11 +33,13 @@ import {
     cartTotals,
     checkoutBlock,
     elevation,
+    formatClock,
     radius,
     space,
     type CartGroup,
     type CartLine,
     type CartStoreInfo,
+    usesTwelveHourClock,
 } from '../ui';
 
 /** What the cart needs from a store record: name, logo and minimum order. */
@@ -123,6 +127,13 @@ const CartScreen = ({ route }: any) => {
         if (product) navigation.navigate('CartItem', { cartItem: item, product: product.serialize(), isModal });
     };
 
+    const changeBooking = (line: CartLine) => {
+        const item = items.find((entry: any) => entry.id === line.id);
+        const params = { productId: line.productId, storeId: line.storeId, cartLineId: line.id, cartItem: item, scheduledAt: line.scheduledAt, quantity: line.quantity };
+        if (isNetwork) navigation.navigate('NetworkHomeTab', { screen: 'Product', params });
+        else editLine(line);
+    };
+
     const clearCart = async () => {
         if (!cart) return;
         setClearing(true);
@@ -190,7 +201,7 @@ const CartScreen = ({ route }: any) => {
                 ) : (
                     <YStack gap={12} paddingHorizontal={space.gutter}>
                         {groups.map((group) => (
-                            <StoreGroup key={group.storeId} group={group} money={money} busyLine={busyLine} showHeader={isNetwork} onQuantity={setQuantity} onEdit={editLine} onAddMore={() => openStore(group.storeId)} />
+                            <StoreGroup key={group.storeId} group={group} money={money} busyLine={busyLine} showHeader={isNetwork} onQuantity={setQuantity} onEdit={editLine} onChangeBooking={changeBooking} onAddMore={() => openStore(group.storeId)} />
                         ))}
                         <PromotionsCard promo={promo} money={money} />
                     </YStack>
@@ -252,8 +263,14 @@ const CartScreen = ({ route }: any) => {
     );
 };
 
-function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuantity, onEdit, onAddMore }: { group: CartGroup; money: (amount: number) => string; busyLine: string | null; showHeader: boolean; onQuantity: (line: CartLine, quantity: number) => void; onEdit: (line: CartLine) => void; onAddMore: () => void }) {
-    const { t } = useLanguage();
+function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuantity, onEdit, onChangeBooking, onAddMore }: { group: CartGroup; money: (amount: number) => string; busyLine: string | null; showHeader: boolean; onQuantity: (line: CartLine, quantity: number) => void; onEdit: (line: CartLine) => void; onChangeBooking: (line: CartLine) => void; onAddMore: () => void }) {
+    const { t, locale } = useLanguage();
+    const theme = useTheme();
+    const hour12 = usesTwelveHourClock(locale);
+    const bookingText = (value: string | null) => {
+        const parsed = parseScheduledAt(value);
+        return parsed ? `${parsed.at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}, ${formatClock(parsed.minutes, hour12)}` : null;
+    };
     return (
         <Card accessibilityLabel={group.name ? t('Cart.itemsFrom', { store: group.name }) : undefined}>
             {showHeader && (
@@ -274,7 +291,7 @@ function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuanti
             )}
             {group.lines.map((line) => (
                 <XStack key={line.id} gap={12} paddingHorizontal={14} paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor' opacity={busy === line.id ? 0.6 : 1}>
-                    <Pressable onPress={() => onEdit(line)} accessibilityRole='button' accessibilityLabel={t('Cart.editLine', { name: line.name })} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+                    <Pressable onPress={() => (line.scheduledAt ? onChangeBooking(line) : onEdit(line))} accessibilityRole='button' accessibilityLabel={line.scheduledAt ? t('Cart.changeBooking', { name: line.name, time: bookingText(line.scheduledAt) }) : t('Cart.editLine', { name: line.name })} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
                         <MediaImage uri={line.imageUrl} seed={line.name} width={56} height={56} radius={radius.tile} />
                         <YStack flex={1} gap={2}>
                             <UIText variant='bodyStrong' style={{ fontSize: 14 }} numberOfLines={2}>
@@ -285,13 +302,25 @@ function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuanti
                                     {line.options}
                                 </UIText>
                             )}
+                            {!!bookingText(line.scheduledAt) && (
+                                <XStack alignSelf='flex-start' marginTop={4} alignItems='center' gap={6} paddingHorizontal={10} paddingVertical={5} borderRadius={radius.pill} backgroundColor='$primarySoft'>
+                                    <FontAwesomeIcon icon={faCalendarDays} size={12} color={theme.primaryForeground.val} />
+                                    <UIText variant='captionStrong' tone='brand' style={{ fontSize: 12 }}>
+                                        {bookingText(line.scheduledAt)} · {t('Cart.change')}
+                                    </UIText>
+                                </XStack>
+                            )}
                             <UIText variant='bodyStrong' style={{ fontSize: 14 }}>
                                 {format(line.lineTotal)}
                             </UIText>
                         </YStack>
                     </Pressable>
                     <YStack justifyContent='center'>
+                        {line.scheduledAt ? (
+                        <IconButton icon={faTrashCan} accessibilityLabel={t('Cart.removeBooking', { name: line.name })} onPress={() => onQuantity(line, 0)} />
+                    ) : (
                         <Stepper size='sm' value={line.quantity} min={1} max={99} itemName={line.name} onChange={(quantity) => onQuantity(line, quantity)} onRemove={() => onQuantity(line, 0)} />
+                    )}
                     </YStack>
                 </XStack>
             ))}

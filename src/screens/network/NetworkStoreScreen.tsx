@@ -160,6 +160,7 @@ const NetworkStoreScreen = ({ route }: any) => {
     const options = currentStore?.getAttribute?.('options') ?? {};
     const minimum = Number(options.required_checkout_min_amount) || 0;
     const closed = store?.muted ?? false;
+    const takesBookings = useMemo(() => sections.some((section) => section.products.some((product) => product.summary.isBookable)), [sections]);
     const recommended = useMemo(() => sections.flatMap((section) => section.products).filter((product) => product.summary.recommended), [sections]);
 
     const openProduct = useCallback(
@@ -263,6 +264,22 @@ const NetworkStoreScreen = ({ route }: any) => {
                                     <UIText variant='captionStrong'>{store.statusText}. </UIText>
                                     {t('Network.store.closedBody')}
                                 </UIText>
+                            </XStack>
+                        )}
+                        {takesBookings && (
+                            <XStack gap={8} padding={12} borderRadius={radius.card} backgroundColor='$primarySoft' accessibilityRole='list' accessibilityLabel={t('Booking.howItWorks')}>
+                                {[t('Booking.stepPick'), t('Booking.stepTime'), t('Booking.stepPay')].map((text, index) => (
+                                    <YStack key={text} flex={1} gap={4} accessibilityRole='text'>
+                                        <YStack width={24} height={24} borderRadius={12} backgroundColor='$primary' alignItems='center' justifyContent='center'>
+                                            <UIText variant='captionStrong' tone='onPrimary'>
+                                                {index + 1}
+                                            </UIText>
+                                        </YStack>
+                                        <UIText variant='captionStrong' style={{ fontSize: 12, lineHeight: 16 }}>
+                                            {text}
+                                        </UIText>
+                                    </YStack>
+                                ))}
                             </XStack>
                         )}
                     </YStack>

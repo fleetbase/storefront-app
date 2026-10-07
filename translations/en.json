@@ -567,7 +567,9 @@
         "done": "Done",
         "outOfStock": "Out of stock",
         "sale": "Sale",
-        "bookable": "Book online"
+        "bookable": "Book online",
+        "view": "View",
+        "book": "Book"
     },
     "StoreSwitch": {
         "yourCurrentStore": "your current store",
@@ -646,7 +648,10 @@
             "pickup_order": "That code is for delivery orders.",
             "no_discount": "That code doesn’t lower this cart’s price.",
             "unknown": "Couldn’t apply that code. Try again."
-        }
+        },
+        "change": "Change",
+        "changeBooking": "{{name}}, booked for {{time}}. Change time",
+        "removeBooking": "Remove booking {{name}}"
     },
     "Checkout": {
         "title": "Checkout",
@@ -691,7 +696,10 @@
         "blockedMinimum": "The minimum order is {{amount}}.",
         "blockedPayment": "Choose a payment method to continue.",
         "preparing": "Getting your order ready…",
-        "unavailable": "Unavailable"
+        "unavailable": "Unavailable",
+        "yourBooking": "Your booking",
+        "bookingNote": "The team comes to your delivery address. Booked times are confirmed by the store.",
+        "bookingNotePickup": "Booked times are confirmed by {{store}}."
     },
     "Tracking": {
         "yourDriver": "Your driver",
@@ -781,6 +789,44 @@
         "total": "Total",
         "deliveringTo": "Delivering to {{place}}",
         "pickupAt": "Pick up at {{place}}",
-        "notes": "Notes: {{notes}}"
+        "notes": "Notes: {{notes}}",
+        "bookingLabel": "Booking: {{name}}, {{time}}",
+        "bookingConfirmed": "Booking confirmed",
+        "bookingRequested": "Booking requested",
+        "bookingConfirmedBody": "{{store}} confirmed your visit.",
+        "bookingRequestedBody": "{{store}} will confirm your time shortly.",
+        "callStore": "Call {{store}}"
+    },
+    "Booking": {
+        "howItWorks": "How booking works",
+        "stepPick": "Pick a service",
+        "stepTime": "Choose a date and time",
+        "stepPay": "Pay at checkout",
+        "bookableService": "Bookable service",
+        "providedBy": "Provided by",
+        "chooseDate": "Choose a date",
+        "date": "Date",
+        "today": "Today",
+        "closed": "Closed",
+        "noBookings": "no bookings",
+        "chooseTime": "Choose a start time",
+        "visitLength": "{{duration}} visit",
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "unavailable": "unavailable",
+        "timesNote": "Start times follow this service’s booking hours. {{store}} confirms your booking after checkout.",
+        "fullyPast": "No more times on {{day}}",
+        "noBookingsOn": "No bookings on {{day}}",
+        "noBookingsBody": "{{store}} doesn’t take bookings that day.",
+        "seeDay": "See {{day}}",
+        "serviceAddress": "Service address",
+        "comesTo": "The team comes to",
+        "noAddress": "Add an address for the visit",
+        "chooseToContinue": "Choose a date and start time to continue",
+        "addToCart": "Add booking to cart",
+        "saveChanges": "Save booking",
+        "added": "{{name}} booked. It’s in your cart.",
+        "updated": "Booking updated."
     }
 }

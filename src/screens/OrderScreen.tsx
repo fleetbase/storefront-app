@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faPhone, faReceipt, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { parseScheduledAt } from '../commerce/booking';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { Order } from '@fleetbase/sdk';
 import { format as formatDate, formatDistanceToNowStrict, add } from 'date-fns';
@@ -20,7 +21,7 @@ import { isArray, getFoodTruckById } from '../utils';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, IconButton, Sheet, StoreLogo, UIText, initials, radius, space, usableImageUrl } from '../ui';
+import { Button, IconButton, Sheet, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
 
 const MAP_HEIGHT = 380;
 
@@ -39,7 +40,8 @@ const OrderScreen = ({ route }: any) => {
     const { info } = useStorefrontInfo();
     const { mode } = useStorefrontRuntime();
     const { listen } = useSocketClusterClient();
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
+    const hour12 = usesTwelveHourClock(locale);
 
     const [order, setOrder] = useState<any>(() => new Order(params.order, fleetbaseAdapter));
     const [foodTruck, setFoodTruck] = useState<any>();
@@ -183,6 +185,8 @@ const OrderScreen = ({ route }: any) => {
     const pickup = order.getAttribute('payload.pickup');
     const entities: any[] = order.getAttribute('payload.entities') ?? [];
     const qrCode = order.getAttribute('tracking_number.qr_code');
+    const bookings = entities.map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at) })).filter((booking) => booking.at);
+    const bookingConfirmed = progress.phase !== 'placed' && !progress.canceled;
     const reference = order.getAttribute('tracking_number.tracking_number') ?? order.id;
 
     const headline = (phase: OrderPhase) => t(`Tracking.phase.${phase}.title`, { store: storeName, driver: driverName ?? t('Tracking.yourDriver') });
@@ -288,6 +292,31 @@ const OrderScreen = ({ route }: any) => {
                             {!!driver?.phone && <IconButton icon={faPhone} variant='solid' size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driver.phone}`)} />}
                         </XStack>
                     )}
+
+                    {bookings.map(({ entity, at }: any) => (
+                        <XStack key={entity.id ?? entity.name} alignItems='center' gap={12} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor' accessibilityLabel={t('Tracking.bookingLabel', { name: entity.name, time: at.at.toLocaleString(locale) })}>
+                            <YStack width={52} paddingVertical={6} borderRadius={radius.tile} backgroundColor='$primarySoft' alignItems='center'>
+                                <UIText variant='captionStrong' tone='brand' style={{ fontSize: 11 }}>
+                                    {at.at.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase()}
+                                </UIText>
+                                <UIText variant='heading' tone='brand'>
+                                    {at.at.getDate()}
+                                </UIText>
+                            </YStack>
+                            <YStack flex={1} gap={2}>
+                                <UIText variant='label' tone='secondary'>
+                                    {bookingConfirmed ? t('Tracking.bookingConfirmed') : t('Tracking.bookingRequested')}
+                                </UIText>
+                                <UIText variant='bodyStrong'>
+                                    {entity.name} · {formatClock(at.minutes, hour12)}
+                                </UIText>
+                                <UIText variant='caption' tone='secondary'>
+                                    {bookingConfirmed ? t('Tracking.bookingConfirmedBody', { store: storeName }) : t('Tracking.bookingRequestedBody', { store: storeName })}
+                                </UIText>
+                            </YStack>
+                            {!!store?.phone && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />}
+                        </XStack>
+                    ))}
 
                     <XStack alignItems='center' gap={12}>
                         <StoreLogo uri={store?.logo_url} name={storeName || '?'} size={40} radius={radius.tile} />

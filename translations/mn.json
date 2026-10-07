@@ -567,7 +567,9 @@
         "done": "Болсон",
         "outOfStock": "Дууссан",
         "sale": "Хямдрал",
-        "bookable": "Онлайнаар захиалах"
+        "bookable": "Онлайнаар захиалах",
+        "view": "Үзэх",
+        "book": "Захиалах"
     },
     "StoreSwitch": {
         "yourCurrentStore": "одоогийн дэлгүүр",
@@ -646,7 +648,10 @@
             "pickup_order": "Энэ код хүргэлттэй захиалгад зориулагдсан.",
             "no_discount": "Энэ код таны сагсны үнийг бууруулахгүй.",
             "unknown": "Кодыг ашиглаж чадсангүй. Дахин оролдоно уу."
-        }
+        },
+        "change": "Солих",
+        "changeBooking": "{{name}}, {{time}}-д захиалсан. Цаг солих",
+        "removeBooking": "{{name}} захиалгыг хасах"
     },
     "Checkout": {
         "title": "Төлбөр",
@@ -691,7 +696,10 @@
         "blockedMinimum": "Хамгийн бага захиалга {{amount}}.",
         "blockedPayment": "Үргэлжлүүлэхийн тулд төлбөрийн хэрэгсэл сонгоно уу.",
         "preparing": "Захиалгыг бэлдэж байна…",
-        "unavailable": "Боломжгүй"
+        "unavailable": "Боломжгүй",
+        "yourBooking": "Таны захиалга",
+        "bookingNote": "Баг таны хүргэлтийн хаяг руу ирнэ. Захиалсан цагийг дэлгүүр баталгаажуулна.",
+        "bookingNotePickup": "Захиалсан цагийг {{store}} баталгаажуулна."
     },
     "Tracking": {
         "yourDriver": "Таны жолооч",
@@ -781,6 +789,44 @@
         "total": "Нийт",
         "deliveringTo": "Хүргэх хаяг: {{place}}",
         "pickupAt": "Авах газар: {{place}}",
-        "notes": "Тэмдэглэл: {{notes}}"
+        "notes": "Тэмдэглэл: {{notes}}",
+        "bookingLabel": "Захиалга: {{name}}, {{time}}",
+        "bookingConfirmed": "Захиалга баталгаажсан",
+        "bookingRequested": "Захиалга илгээгдсэн",
+        "bookingConfirmedBody": "{{store}} таны айлчлалыг баталгаажууллаа.",
+        "bookingRequestedBody": "{{store}} удахгүй цагийг баталгаажуулна.",
+        "callStore": "{{store}} руу залгах"
+    },
+    "Booking": {
+        "howItWorks": "Захиалга хэрхэн ажилладаг вэ",
+        "stepPick": "Үйлчилгээ сонгох",
+        "stepTime": "Өдөр, цаг сонгох",
+        "stepPay": "Төлбөрөө хийх",
+        "bookableService": "Цаг захиалах үйлчилгээ",
+        "providedBy": "Үйлчилгээ үзүүлэгч",
+        "chooseDate": "Өдөр сонгох",
+        "date": "Өдөр",
+        "today": "Өнөөдөр",
+        "closed": "Амралт",
+        "noBookings": "захиалга авахгүй",
+        "chooseTime": "Эхлэх цаг сонгох",
+        "visitLength": "{{duration}} үргэлжилнэ",
+        "morning": "Өглөө",
+        "afternoon": "Өдөр",
+        "evening": "Орой",
+        "unavailable": "боломжгүй",
+        "timesNote": "Эхлэх цаг нь үйлчилгээний захиалгын цагийн хуваарийг дагана. {{store}} төлбөрийн дараа баталгаажуулна.",
+        "fullyPast": "{{day}} гаригт өөр цаг алга",
+        "noBookingsOn": "{{day}} гаригт захиалга авахгүй",
+        "noBookingsBody": "{{store}} энэ өдөр захиалга авдаггүй.",
+        "seeDay": "{{day}} харах",
+        "serviceAddress": "Үйлчилгээний хаяг",
+        "comesTo": "Баг ирэх хаяг",
+        "noAddress": "Үйлчилгээний хаяг нэмэх",
+        "chooseToContinue": "Үргэлжлүүлэхийн тулд өдөр, эхлэх цаг сонгоно уу",
+        "addToCart": "Захиалгыг сагсанд нэмэх",
+        "saveChanges": "Захиалгыг хадгалах",
+        "added": "{{name}} захиалагдлаа. Таны сагсанд байна.",
+        "updated": "Захиалга шинэчлэгдлээ."
     }
 }
