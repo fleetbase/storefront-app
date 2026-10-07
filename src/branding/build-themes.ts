@@ -44,6 +44,9 @@ export function supportingColors(colors: SemanticColors): ThemeColors {
     const { background, surface, color, primary, success, warning, error, info } = colors;
     return {
         primaryForeground: readableOn(primary, background, color),
+        successForeground: readableOn(success, background, color),
+        warningForeground: readableOn(warning, background, color),
+        errorForeground: readableOn(error, background, color),
         surface2: mix(surface, color, 0.04),
         primarySoft: mix(background, primary, 0.1),
         successSoft: mix(background, success, 0.12),

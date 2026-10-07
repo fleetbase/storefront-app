@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { getLangNameFromCode } from 'language-name-map';
 import { storefrontConfig } from '../utils';
 import { ensureTranslationsLoaded } from '../utils/localize';
@@ -42,9 +42,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         I18n.locale = locale;
-    }, []);
+    }, [locale]);
 
-    const t = (key: string, options?: Record<string, any>) => I18n.t(key, options);
+    // Stable per locale, so screens can depend on `t` in effects without refetching on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const t = useCallback((key: string, options?: Record<string, any>) => I18n.t(key, options), [locale]);
 
     return <LanguageContext.Provider value={{ locale, setLocale, t, current: language, language, languages }}>{children}</LanguageContext.Provider>;
 };

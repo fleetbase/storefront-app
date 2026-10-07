@@ -15,8 +15,8 @@ export function Badge({ label, tone = 'neutral', icon, size = 'md' }: BadgeProps
     const colors = {
         neutral: [theme.surface.val, theme.textSecondary.val],
         brand: [theme.primarySoft.val, theme.primaryForeground.val],
-        success: [theme.successSoft.val, theme.success.val],
-        warning: [theme.warningSoft.val, theme.warning.val],
+        success: [theme.successSoft.val, theme.successForeground.val],
+        warning: [theme.warningSoft.val, theme.warningForeground.val],
         error: [theme.error.val, '#ffffff'],
         scrim: ['rgba(13,17,23,0.8)', '#ffffff'],
         light: ['rgba(255,255,255,0.94)', '#14171c'],

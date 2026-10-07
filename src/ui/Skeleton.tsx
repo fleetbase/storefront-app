@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { AccessibilityInfo, Animated, type DimensionValue } from 'react-native';
+import { AccessibilityInfo, Animated, StyleSheet, type DimensionValue } from 'react-native';
 import { useTheme } from 'tamagui';
 
 export type SkeletonProps = { width?: DimensionValue; height: number; radius?: number; style?: object };
@@ -37,7 +37,8 @@ export function Skeleton({ width = '100%', height, radius = 8, style }: Skeleton
         <Animated.View
             accessibilityElementsHidden
             importantForAccessibility='no-hide-descendants'
-            style={[{ width, height, borderRadius: radius, backgroundColor: theme.surface2.val, opacity }, style]}
+            // A single style object: react-native-web's Animated.View sets array styles on the DOM node directly.
+            style={{ ...StyleSheet.flatten(style), width, height, borderRadius: radius, backgroundColor: theme.surface2.val, opacity }}
         />
     );
 }

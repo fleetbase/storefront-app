@@ -58,7 +58,7 @@ describe('supporting colors', () => {
 
     test('every theme gets the supporting surfaces the redesigned screens use', () => {
         for (const theme of Object.values(themes)) {
-            for (const key of ['primaryForeground', 'surface2', 'primarySoft', 'successSoft', 'warningSoft', 'errorSoft', 'infoSoft', 'overlay']) {
+            for (const key of ['primaryForeground', 'successForeground', 'warningForeground', 'errorForeground', 'surface2', 'primarySoft', 'successSoft', 'warningSoft', 'errorSoft', 'infoSoft', 'overlay']) {
                 expect([key, theme[key]]).toEqual([key, expect.stringMatching(/^#|^rgba/)]);
             }
         }
@@ -66,7 +66,9 @@ describe('supporting colors', () => {
 
     test('brand-colored text stays readable on the background in light and dark themes', () => {
         for (const [name, theme] of Object.entries(themes)) {
-            expect([name, contrastRatio(theme.primaryForeground, theme.background) >= 4.5]).toEqual([name, true]);
+            for (const key of ['primaryForeground', 'successForeground', 'warningForeground', 'errorForeground']) {
+                expect([name, key, contrastRatio(theme[key], theme.background) >= 4.5]).toEqual([name, key, true]);
+            }
         }
         // A readable primary is used as-is.
         expect(themes.lightBlue.primaryForeground).toBe(themes.lightBlue.primary);

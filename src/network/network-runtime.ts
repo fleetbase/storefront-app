@@ -87,7 +87,7 @@ export function getCartQuoteOrigin(cart: any): string | string[] | null {
     return origins.length <= 1 ? origins[0] || null : origins;
 }
 
-export function buildNetworkStoreQuery(discovery: DiscoveryState, offset = 0, coordinates?: string | null): Record<string, any> {
+export function buildNetworkStoreQuery(discovery: DiscoveryState, offset = 0, coordinates?: string | number[] | null): Record<string, any> {
     const params: Record<string, any> = { limit: 20, offset, sort: discovery.sort };
     if (discovery.query.trim()) params.query = discovery.query.trim();
     if (discovery.category) params.category = discovery.category;

@@ -1,42 +1,106 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, RefreshControl, ScrollView, StyleSheet } from 'react-native';
-import { Button, Image, Paragraph, Spinner, Text, XStack, YStack } from 'tamagui';
+import { FlatList, Image, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronDown, faLocationDot, faMagnifyingGlass, faPlus, faStore, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useStorefront from '../../hooks/use-storefront';
-import { getCoordinates, getCurrentLocationFromStorage } from '../../utils/location';
-import NetworkStoreCard from '../../components/NetworkStoreCard';
-import { buildNetworkStoreQuery, mergeNetworkPage } from '../../network/network-runtime';
+import useCurrentLocation from '../../hooks/use-current-location';
+import useCustomerCoordinates from '../../hooks/use-customer-coordinates';
+import useSavedLocations from '../../hooks/use-saved-locations';
+import useCartSummary from '../../hooks/use-cart-summary';
+import { DEFAULT_DISCOVERY_STATE, buildNetworkStoreQuery, mergeNetworkPage } from '../../network/network-runtime';
+import { rememberStores } from '../../network/store-names';
+import {
+    CartPill,
+    categoryIcon,
+    ErrorState,
+    EmptyState,
+    MediaImage,
+    SectionHeader,
+    Sheet,
+    Skeleton,
+    StoreCard,
+    StoreLogo,
+    UIText,
+    elevation,
+    radius,
+    space,
+    storeSummary,
+    usableImageUrl,
+    usesTwelveHourClock,
+    type StoreSummary,
+} from '../../ui';
 
 const PAGE_SIZE = 20;
-const SORTS = ['nearest', 'highest_rated', 'lowest_rated', 'popular', 'trending', 'newest', 'oldest'];
+const RAIL_SIZE = 8;
+const HERO_HEIGHT = 236;
+const SERVICE_TAGS = ['services'];
 
+type Rail = { key: string; title: string; subtitle?: string; params: Record<string, unknown>; stores: StoreSummary[]; loading: boolean; failed: boolean };
+
+/** Home screen of a Network (marketplace) app: hero, search, categories, curated rails and every store. */
 const NetworkHomeScreen = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
-    const { t } = useLanguage();
+    const theme = useTheme();
+    const { t, locale } = useLanguage();
     const { storefront } = useStorefront();
-    const { network, ownerInfo, discovery, updateDiscovery, clearDiscovery } = useStorefrontRuntime();
-    const [stores, setStores] = useState<any[]>([]);
+    const { network, ownerInfo } = useStorefrontRuntime();
+    const { currentLocation, updateCurrentLocation } = useCurrentLocation();
+    const { savedLocations } = useSavedLocations();
+    const cart = useCartSummary();
+    const hour12 = usesTwelveHourClock(locale);
+
+    const { coordinates } = useCustomerCoordinates();
+    const summarize = useCallback((stores: any[]) => {
+        const summaries = Array.from(stores || []).map((store) => storeSummary(store, { t, hour12 }));
+        rememberStores(summaries);
+        return summaries;
+    }, [t, hour12]);
+
+    const networkName = ownerInfo?.name ?? '';
+    const railDefinitions = useMemo(
+        () => [
+            { key: 'nearby', title: t('Network.sections.nearby'), params: { sort: 'nearest' } },
+            { key: 'services', title: t('Network.sections.services'), subtitle: t('Network.sections.servicesSubtitle'), params: { sort: 'nearest', tagged: SERVICE_TAGS } },
+            { key: 'topRated', title: t('Network.sections.topRated'), params: { sort: 'highest_rated' } },
+            { key: 'newest', title: t('Network.sections.newest', { name: networkName }), params: { sort: 'newest' } },
+        ],
+        [networkName, t]
+    );
+
+    const [rails, setRails] = useState<Rail[]>(() => railDefinitions.map((rail) => ({ ...rail, stores: [], loading: true, failed: false })));
     const [categories, setCategories] = useState<any[]>([]);
-    const [tags, setTags] = useState<string[]>([]);
+    const [stores, setStores] = useState<StoreSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [hasMore, setHasMore] = useState(true);
+    const [locationSheet, setLocationSheet] = useState(false);
     const requestSequence = useRef(0);
     const storeCount = useRef(0);
 
-    const buildParams = useCallback(
-        (offset = 0) => {
-            const currentLocation = getCurrentLocationFromStorage();
-            return buildNetworkStoreQuery(discovery, offset, currentLocation ? getCoordinates(currentLocation) : null);
-        },
-        [discovery]
-    );
+    const loadRails = useCallback(async () => {
+        if (!network) return;
+        setRails(railDefinitions.map((rail) => ({ ...rail, stores: [], loading: true, failed: false })));
+        await Promise.all(
+            railDefinitions.map(async (rail) => {
+                try {
+                    const result = await network.getStores({ limit: RAIL_SIZE, with_locations: true, ...(coordinates ? { location: coordinates } : {}), ...rail.params });
+                    const summaries = summarize(result);
+                    setRails((current) => current.map((item) => (item.key === rail.key ? { ...item, stores: summaries, loading: false } : item)));
+                } catch {
+                    setRails((current) => current.map((item) => (item.key === rail.key ? { ...item, loading: false, failed: true } : item)));
+                }
+            })
+        );
+    }, [coordinates, network, railDefinitions, summarize]);
 
     const loadStores = useCallback(
         async ({ append = false, refresh = false } = {}) => {
@@ -46,9 +110,9 @@ const NetworkHomeScreen = () => {
             append ? setLoadingMore(true) : refresh ? setRefreshing(true) : setLoading(true);
             setError(null);
             try {
-                const result = await network.getStores(buildParams(offset));
+                const result = await network.getStores({ ...buildNetworkStoreQuery(DEFAULT_DISCOVERY_STATE, offset, coordinates), with_locations: true });
                 if (sequence !== requestSequence.current) return;
-                const next = Array.from(result || []);
+                const next = summarize(result);
                 setStores((current) => {
                     const updated = mergeNetworkPage(current, next, append);
                     storeCount.current = updated.length;
@@ -65,131 +129,241 @@ const NetworkHomeScreen = () => {
                 }
             }
         },
-        [buildParams, network]
+        [coordinates, network, summarize]
     );
 
     useEffect(() => {
+        loadRails();
         loadStores();
         return () => {
             requestSequence.current += 1;
         };
-    }, [loadStores]);
+    }, [loadRails, loadStores]);
 
     useEffect(() => {
-        if (!network || !storefront) return;
+        if (!storefront) return;
         let active = true;
-        Promise.all([storefront.categories.query({ parents_only: true }), network.getTags()])
-            .then(([categoryResult, tagResult]) => {
-                if (!active) return;
-                setCategories(Array.from(categoryResult || []));
-                setTags(Array.from(tagResult || []));
-            })
+        storefront.categories
+            .query({ parents_only: true })
+            .then((result: any) => active && setCategories(Array.from(result || [])))
             .catch(() => {
-                // Discovery remains useful even if optional filter metadata fails.
+                // The category rail is optional; the rest of home stays useful without it.
             });
         return () => {
             active = false;
         };
-    }, [network, storefront]);
+    }, [storefront]);
 
-    const activeFilterCount = Number(!!discovery.category) + discovery.tags.length + Number(discovery.online !== null);
-    const header = useMemo(
-        () => (
-            <YStack>
-                <Image source={{ uri: ownerInfo?.backdrop_url }} width='100%' height={170} resizeMode='cover' />
-                <YStack p='$4' gap='$2'>
-                    <XStack alignItems='center' gap='$3'>
-                        <Image source={{ uri: ownerInfo?.logo_url }} width={64} height={64} borderRadius='$3' />
-                        <YStack flex={1}>
-                            <Text color='$textPrimary' fontWeight='800' fontSize='$8'>
-                                {ownerInfo?.name}
-                            </Text>
-                            {!!ownerInfo?.description && <Paragraph color='$textSecondary'>{ownerInfo.description}</Paragraph>}
-                        </YStack>
-                    </XStack>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sorts}>
-                        {SORTS.map((sort) => (
-                            <Button key={sort} size='$3' bg={discovery.sort === sort ? '$primary' : '$surface'} color={discovery.sort === sort ? '$primaryText' : '$textPrimary'} onPress={() => updateDiscovery({ sort })}>
-                                {t(`Network.sort.${sort}`)}
-                            </Button>
-                        ))}
-                    </ScrollView>
-                    {!!categories.length && (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-                            <Button size='$3' bg={!discovery.category ? '$primary' : '$surface'} onPress={() => updateDiscovery({ category: null })}>
-                                {t('Network.allCategories')}
-                            </Button>
-                            {categories.map((category: any) => (
-                                <Button key={category.id} size='$3' bg={discovery.category === category.id ? '$primary' : '$surface'} onPress={() => updateDiscovery({ category: category.id })}>
-                                    {category.getAttribute('name')}
-                                </Button>
-                            ))}
-                            <Button size='$3' bg={discovery.category === 'uncategorized' ? '$primary' : '$surface'} onPress={() => navigation.navigate('NetworkCategory', { category: null, categoryId: 'uncategorized' })}>
-                                {t('Network.uncategorized')}
-                            </Button>
-                        </ScrollView>
-                    )}
-                    {!!tags.length && (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-                            {tags.map((tag) => {
-                                const selected = discovery.tags.includes(tag);
-                                return (
-                                    <Button key={tag} size='$2' bg={selected ? '$secondary' : '$background'} onPress={() => updateDiscovery({ tags: selected ? discovery.tags.filter((item) => item !== tag) : [...discovery.tags, tag] })}>
-                                        {tag}
-                                    </Button>
-                                );
-                            })}
-                        </ScrollView>
-                    )}
-                    <XStack gap='$2'>
-                        <Button size='$3' bg={discovery.online === true ? '$primary' : '$surface'} onPress={() => updateDiscovery({ online: discovery.online === true ? null : true })}>
-                            {t('Network.openNow')}
-                        </Button>
-                        {activeFilterCount > 0 && (
-                            <Button size='$3' chromeless onPress={clearDiscovery}>
-                                {t('Network.clearFilters', { count: activeFilterCount })}
-                            </Button>
+    const refresh = useCallback(() => {
+        loadRails();
+        loadStores({ refresh: true });
+    }, [loadRails, loadStores]);
+
+    const openStore = useCallback((store: StoreSummary) => navigation.navigate('NetworkStore', { storeId: store.id }), [navigation]);
+    const openDirectory = useCallback((params: Record<string, unknown> = {}) => navigation.navigate('NetworkCategory', params), [navigation]);
+
+    const locationName = currentLocation?.getAttribute?.('name');
+    const locationLine = [locationName, currentLocation?.getAttribute?.('street1')].filter(Boolean).join(' · ');
+
+    const header = (
+        <YStack gap={22} paddingBottom={6}>
+            <YStack height={HERO_HEIGHT + insets.top}>
+                <MediaImage uri={usableImageUrl(ownerInfo?.backdrop_url)} seed={networkName} height={HERO_HEIGHT + insets.top} radius={0} />
+                <LinearGradient colors={['rgba(10,14,20,0.45)', 'rgba(10,14,20,0.05)', 'rgba(10,14,20,0.72)']} locations={[0, 0.38, 1]} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+                <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} alignItems='center' justifyContent='space-between' gap={10}>
+                    <Pressable
+                        onPress={() => setLocationSheet(true)}
+                        accessibilityRole='button'
+                        accessibilityLabel={locationLine ? t('Network.changeLocation', { place: locationLine }) : t('Network.setLocation')}
+                        style={{ maxWidth: '82%', height: 40, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.94)', flexDirection: 'row', alignItems: 'center', gap: 6, ...elevation.floating }}
+                    >
+                        <FontAwesomeIcon icon={faLocationDot} size={14} color='#14171c' />
+                        <UIText variant='captionStrong' style={{ color: '#14171c', flexShrink: 1 }} numberOfLines={1}>
+                            {locationLine || t('Network.setLocation')}
+                        </UIText>
+                        <FontAwesomeIcon icon={faChevronDown} size={11} color='#14171c' />
+                    </Pressable>
+                </XStack>
+                <XStack position='absolute' left={space.gutter} right={space.gutter} bottom={62} alignItems='flex-end' gap={12}>
+                    <StoreLogo uri={usableImageUrl(ownerInfo?.logo_url)} name={networkName} size={56} />
+                    <YStack flex={1} gap={2}>
+                        <UIText variant='title' tone='onImage' accessibilityRole='header' numberOfLines={1}>
+                            {networkName}
+                        </UIText>
+                        {!!ownerInfo?.description && (
+                            <UIText variant='caption' tone='onImage' numberOfLines={2} style={{ opacity: 0.92 }}>
+                                {ownerInfo.description}
+                            </UIText>
                         )}
-                    </XStack>
-                    <Text color='$textPrimary' fontSize='$7' fontWeight='700' mt='$2'>
-                        {t('Network.stores')}
-                    </Text>
-                </YStack>
+                    </YStack>
+                </XStack>
             </YStack>
-        ),
-        [activeFilterCount, categories, clearDiscovery, discovery, navigation, ownerInfo, t, tags, updateDiscovery]
+
+            <Pressable
+                onPress={() => navigation.navigate('NetworkSearchTab')}
+                accessibilityRole='search'
+                accessibilityLabel={t('Network.searchEverything')}
+                style={{ marginTop: -72, marginHorizontal: space.gutter, height: 52, borderRadius: radius.button, backgroundColor: theme.background.val, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, ...elevation.sheet }}
+            >
+                <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
+                <UIText tone='secondary'>{t('Network.searchEverything')}</UIText>
+            </Pressable>
+
+            {categories.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }} accessibilityLabel={t('Network.categoriesLabel')}>
+                    <CategoryTile label={t('Network.allCategoriesShort')} selected onPress={() => openDirectory()} />
+                    {categories.map((category: any) => (
+                        <CategoryTile
+                            key={category.id}
+                            label={category.getAttribute('name')}
+                            iconUrl={usableImageUrl(category.getAttribute('icon_url'))}
+                            onPress={() => openDirectory({ categoryId: category.id, category: { id: category.id, name: category.getAttribute('name') } })}
+                        />
+                    ))}
+                </ScrollView>
+            )}
+
+            {rails.map((rail) =>
+                !rail.loading && (rail.failed || rail.stores.length === 0) ? null : (
+                    <YStack key={rail.key} gap={12}>
+                        <SectionHeader title={rail.title} subtitle={rail.subtitle} onAction={() => openDirectory({ sort: rail.params.sort, tags: rail.params.tagged })} />
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 14 }}>
+                            {rail.loading
+                                ? [0, 1].map((index) => <HeroCardSkeleton key={index} />)
+                                : rail.stores.map((store) => <StoreCard key={store.id ?? store.name} store={store} width={268} onPress={() => openStore(store)} />)}
+                        </ScrollView>
+                    </YStack>
+                )
+            )}
+
+            <SectionHeader title={t('Network.sections.allStores')} onAction={() => openDirectory()} />
+        </YStack>
     );
 
     return (
-        <YStack flex={1} bg='$background' pt={insets.top}>
+        <YStack flex={1} backgroundColor='$background'>
             <FlatList
                 data={stores}
-                keyExtractor={(item: any) => item.id}
-                renderItem={({ item }) => <NetworkStoreCard store={item} onPress={(store: any) => navigation.navigate('NetworkStore', { store: store.serialize(), storeId: store.id })} />}
+                keyExtractor={(item, index) => item.id ?? String(index)}
+                renderItem={({ item }) => (
+                    <YStack paddingHorizontal={space.gutter}>
+                        <StoreCard store={item} variant='compact' onPress={() => openStore(item)} />
+                    </YStack>
+                )}
                 ListHeaderComponent={header}
-                contentContainerStyle={styles.list}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadStores({ refresh: true })} />}
-                onEndReached={() => hasMore && !loadingMore && loadStores({ append: true })}
-                onEndReachedThreshold={0.4}
-                ListFooterComponent={loadingMore ? <Spinner my='$4' /> : null}
+                contentContainerStyle={{ paddingBottom: cart.count > 0 ? 100 : 32 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+                onEndReached={() => hasMore && !loadingMore && !loading && loadStores({ append: true })}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={loadingMore ? <CompactSkeleton /> : null}
+                // FlatList clones the empty element with an array style; a plain View accepts it on web.
                 ListEmptyComponent={
-                    loading ? (
-                        <YStack p='$8' alignItems='center'><Spinner size='large' /></YStack>
-                    ) : error ? (
-                        <YStack p='$6' alignItems='center' gap='$3'><Text color='$textSecondary' textAlign='center'>{t('Network.loadError')}</Text><Button onPress={() => loadStores()}>{t('common.retry')}</Button></YStack>
-                    ) : (
-                        <YStack p='$6' alignItems='center' gap='$2'><Text color='$textPrimary' fontSize='$6'>{t('Network.noStores')}</Text><Paragraph color='$textSecondary' textAlign='center'>{t('Network.noStoresDescription')}</Paragraph></YStack>
-                    )
+                    <View>
+                        {loading ? (
+                            [0, 1, 2].map((index) => <CompactSkeleton key={index} />)
+                        ) : error ? (
+                            <ErrorState onRetry={() => loadStores()} />
+                        ) : (
+                            <EmptyState icon={faStore} title={t('Network.noStores')} description={t('Network.noStoresDescription')} />
+                        )}
+                    </View>
                 }
+            />
+            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate('NetworkCartTab')} />
+            <LocationSheet
+                open={locationSheet}
+                onClose={() => setLocationSheet(false)}
+                savedLocations={savedLocations}
+                currentId={currentLocation?.id}
+                onSelect={(place: any) => {
+                    updateCurrentLocation(place);
+                    setLocationSheet(false);
+                }}
+                onAdd={() => {
+                    setLocationSheet(false);
+                    navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' });
+                }}
             />
         </YStack>
     );
 };
 
-export default NetworkHomeScreen;
+function CategoryTile({ label, iconUrl, selected = false, onPress }: { label: string; iconUrl?: string | null; selected?: boolean; onPress: () => void }) {
+    const theme = useTheme();
+    return (
+        <Pressable onPress={onPress} accessibilityRole='button' accessibilityLabel={label} style={{ width: 76, alignItems: 'center', gap: 6, paddingVertical: 4 }}>
+            <YStack width={60} height={60} borderRadius={radius.tile} alignItems='center' justifyContent='center' backgroundColor={selected ? '$primarySoft' : '$surface'}>
+                {iconUrl ? (
+                    <Image source={{ uri: iconUrl }} style={{ width: 30, height: 30 }} resizeMode='contain' />
+                ) : (
+                    <FontAwesomeIcon icon={selected ? faTableCellsLarge : categoryIcon(label)} size={22} color={selected ? theme.primaryForeground.val : theme.textPrimary.val} />
+                )}
+            </YStack>
+            <UIText variant='caption' textAlign='center' numberOfLines={2} style={{ fontWeight: selected ? '700' : '500' }}>
+                {label}
+            </UIText>
+        </Pressable>
+    );
+}
 
-const styles = StyleSheet.create({
-    sorts: { gap: 8, paddingVertical: 8 },
-    filters: { gap: 8, paddingBottom: 8 },
-    list: { paddingBottom: 100, paddingHorizontal: 12 },
-});
+function HeroCardSkeleton() {
+    return (
+        <YStack width={268} gap={10}>
+            <Skeleton height={132} radius={radius.card} />
+            <XStack gap={10}>
+                <Skeleton width={40} height={40} radius={radius.tile} />
+                <YStack flex={1} gap={8}>
+                    <Skeleton height={14} width='70%' />
+                    <Skeleton height={12} width='45%' />
+                </YStack>
+            </XStack>
+        </YStack>
+    );
+}
+
+function CompactSkeleton() {
+    return (
+        <XStack paddingHorizontal={space.gutter} paddingVertical={10} gap={12} alignItems='center'>
+            <Skeleton width={64} height={64} radius={radius.tile} />
+            <YStack flex={1} gap={8}>
+                <Skeleton height={14} width='60%' />
+                <Skeleton height={12} width='40%' />
+            </YStack>
+        </XStack>
+    );
+}
+
+function LocationSheet({ open, onClose, savedLocations, currentId, onSelect, onAdd }: { open: boolean; onClose: () => void; savedLocations: any; currentId?: string; onSelect: (place: any) => void; onAdd: () => void }) {
+    const { t } = useLanguage();
+    const theme = useTheme();
+    const places = Array.from(savedLocations || []) as any[];
+
+    return (
+        <Sheet open={open} onClose={onClose} title={t('Network.chooseLocation')}>
+            <YStack>
+                {places.map((place) => {
+                    const selected = place.id === currentId;
+                    return (
+                        <Pressable key={place.id} onPress={() => onSelect(place)} accessibilityRole='radio' accessibilityState={{ selected }} style={{ minHeight: 60, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderColor: theme.borderColor.val }}>
+                            <FontAwesomeIcon icon={faLocationDot} size={16} color={selected ? theme.primaryForeground.val : theme.textSecondary.val} />
+                            <YStack flex={1}>
+                                <UIText variant='bodyStrong'>{place.getAttribute('name') || place.getAttribute('street1')}</UIText>
+                                <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                                    {[place.getAttribute('street1'), place.getAttribute('city')].filter(Boolean).join(', ')}
+                                </UIText>
+                            </YStack>
+                        </Pressable>
+                    );
+                })}
+                <Pressable onPress={onAdd} accessibilityRole='button' style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <FontAwesomeIcon icon={faPlus} size={16} color={theme.primaryForeground.val} />
+                    <UIText variant='bodyStrong' tone='brand'>
+                        {t('Network.addAddress')}
+                    </UIText>
+                </Pressable>
+            </YStack>
+        </Sheet>
+    );
+}
+
+export default NetworkHomeScreen;

@@ -8,6 +8,9 @@ export const UIText = styled(Text, {
     name: 'UIText',
     color: '$textPrimary',
     maxFontSizeMultiplier: 1.8,
+    // On the web, pressables with the button role render as <button>, whose default
+    // `text-align: center` would otherwise be inherited by text inside cards and rows.
+    '$platform-web': { textAlign: 'start' as any },
     variants: {
         variant: {
             display: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
@@ -25,9 +28,9 @@ export const UIText = styled(Text, {
             secondary: { color: '$textSecondary' },
             placeholder: { color: '$textPlaceholder' },
             brand: { color: '$primaryForeground' },
-            success: { color: '$success' },
-            warning: { color: '$warning' },
-            error: { color: '$error' },
+            success: { color: '$successForeground' },
+            warning: { color: '$warningForeground' },
+            error: { color: '$errorForeground' },
             onPrimary: { color: '$primaryText' },
             onImage: { color: '#ffffff' },
         },

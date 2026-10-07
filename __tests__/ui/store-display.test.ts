@@ -75,3 +75,26 @@ describe('store display', () => {
         expect(storeSummary({}, { t }).id).toBeNull();
     });
 });
+
+describe('category icons', () => {
+    const { categoryIcon } = require('../../src/ui/category-icons');
+    const icons = require('@fortawesome/free-solid-svg-icons');
+
+    test.each([
+        ['Groceries', icons.faBasketShopping],
+        ['Electronics', icons.faLaptop],
+        ['Flowers & gifts', icons.faSeedling],
+        ['Home cleaning', icons.faBroom],
+        ['Health & Beauty', icons.faSpa],
+        ['Pharmacy', icons.faHeartPulse],
+        ['Хүнсний дэлгүүр', icons.faBasketShopping],
+        ['Something else', icons.faTag],
+        [null, icons.faTag],
+    ])('%p uses the matching icon', (name, icon) => {
+        expect(categoryIcon(name)).toBe(icon);
+    });
+
+    test('server fallback placeholders count as missing images', () => {
+        expect(usableImageUrl('https://flb-assets.s3.ap-southeast-1.amazonaws.com/images/fallback-placeholder-1.png')).toBeNull();
+    });
+});

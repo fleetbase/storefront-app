@@ -51,7 +51,7 @@ export function Stepper({ value, onChange, min = 1, max = 99, onRemove, itemName
             backgroundColor={size === 'sm' ? '$background' : '$surface'}
         >
             {removes
-                ? button(faTrashCan, itemName ? t('UI.removeItem', { name: itemName }) : t('UI.remove'), onRemove!, false, theme.error.val)
+                ? button(faTrashCan, itemName ? t('UI.removeItem', { name: itemName }) : t('UI.remove'), onRemove!, false, theme.errorForeground.val)
                 : button(faMinus, t('UI.decreaseQuantity'), () => onChange(Math.max(min, value - 1)), atMin)}
             <UIText variant='bodyStrong' minWidth={22} textAlign='center' aria-live='polite'>
                 {value}
@@ -65,6 +65,7 @@ export type SegmentOption<T extends string> = { value: T; label: string };
 
 /** Two to four mutually exclusive options, e.g. Delivery / Pickup. */
 export function SegmentedControl<T extends string>({ options, value, onChange, accessibilityLabel }: { options: SegmentOption<T>[]; value: T; onChange: (value: T) => void; accessibilityLabel: string }) {
+    const theme = useTheme();
     return (
         <XStack accessibilityRole='tablist' accessibilityLabel={accessibilityLabel} padding={4} gap={4} borderRadius={radius.button} backgroundColor='$surface2'>
             {options.map((option) => {
@@ -75,18 +76,16 @@ export function SegmentedControl<T extends string>({ options, value, onChange, a
                         onPress={() => onChange(option.value)}
                         accessibilityRole='tab'
                         accessibilityState={{ selected }}
-                        style={{ flex: 1, height: 40, borderRadius: radius.button - 4, alignItems: 'center', justifyContent: 'center' }}
+                        style={{
+                            flex: 1,
+                            height: 40,
+                            borderRadius: radius.button - 4,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: selected ? theme.background.val : 'transparent',
+                            ...(selected ? { shadowColor: '#101828', shadowOpacity: 0.06, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : null),
+                        }}
                     >
-                        <XStack
-                            position='absolute'
-                            top={0}
-                            left={0}
-                            right={0}
-                            bottom={0}
-                            borderRadius={radius.button - 4}
-                            backgroundColor={selected ? '$background' : 'transparent'}
-                            style={selected ? { shadowColor: '#101828', shadowOpacity: 0.06, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
-                        />
                         <UIText variant='captionStrong' tone={selected ? 'primary' : 'secondary'}>
                             {option.label}
                         </UIText>
