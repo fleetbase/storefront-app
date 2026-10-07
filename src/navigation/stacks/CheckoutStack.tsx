@@ -9,16 +9,8 @@ import { screenSlot } from '../../extensions';
 
 export const Checkout = {
     screen: screenSlot('checkout'),
-    options: ({ route, navigation }) => {
-        return {
-            title: t('CheckoutScreen.checkout'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        };
-    },
+    // The checkout layout draws its own header.
+    options: { headerShown: false },
 };
 
 export const StripeCheckout = {
@@ -29,30 +21,14 @@ export const StripeCheckout = {
             </StripeCheckoutProvider>
         );
     },
-    options: ({ route, navigation }) => {
-        return {
-            title: t('CheckoutScreen.checkout'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        };
-    },
+    // The checkout layout draws its own header.
+    options: { headerShown: false },
 };
 
 export const QPayCheckout = {
     screen: QPayCheckoutScreen,
-    options: ({ route, navigation }) => {
-        return {
-            title: t('CheckoutScreen.checkout'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        };
-    },
+    // The checkout layout draws its own header.
+    options: { headerShown: false },
 };
 
 export const PaypalCheckout = {

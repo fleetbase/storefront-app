@@ -8,20 +8,8 @@ import { screenSlot } from '../../extensions';
 
 export const Order = {
     screen: screenSlot('order.detail'),
-    options: ({ navigation, route }) => {
-        const params = route.params ?? {};
-        return {
-            title: params.order.id,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} />;
-            },
-        };
-    },
+    // The tracking screen draws its own close button over the map.
+    options: { headerShown: false },
 };
 
 export const Receipt = {

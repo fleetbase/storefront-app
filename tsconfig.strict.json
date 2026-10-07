@@ -16,6 +16,8 @@
         "src/branding/**/*.ts",
         "__tests__/branding/**/*.ts",
         "__tests__/network/**/*.ts",
+        "src/commerce/**/*.ts",
+        "__tests__/commerce/**/*.ts",
         "src/ui/**/*.ts",
         "src/ui/**/*.tsx",
         "__tests__/ui/**/*.ts"

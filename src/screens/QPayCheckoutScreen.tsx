@@ -1,188 +1,91 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SafeAreaView, ScrollView, Platform } from 'react-native';
-import { Input, Button, Text, YStack, XStack, useTheme } from 'tamagui';
 import { PortalHost } from '@gorhom/portal';
-import CustomerLocationSelect from '../components/CustomerLocationSelect';
-import CartContents from '../components/CartContents';
-import CheckoutOptions from '../components/CheckoutOptions';
-import CheckoutTotal from '../components/CheckoutTotal';
-import DeliveryRoutePreview from '../components/DeliveryRoutePreview';
-import CheckoutButton from '../components/CheckoutButton';
-import CheckoutPickupSwitch from '../components/CheckoutPickupSwitch';
-import TextAreaSheet from '../components/TextAreaSheet';
+import { XStack, YStack } from 'tamagui';
 import LoadingOverlay from '../components/LoadingOverlay';
 import QPayTaxRegistrationSwitch from '../components/QPayTaxRegistrationSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
-import MinimumCheckoutNotice from '../components/MinimumCheckoutNotice';
+import CheckoutLayout from '../components/checkout/CheckoutLayout';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
-import useStorefrontInfo from '../hooks/use-storefront-info';
+import useFooterOffset from '../hooks/use-footer-offset';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Card, TextField, UIText, radius } from '../ui';
 
-const isAndroid = Platform.OS === 'android';
-const QPayCheckoutScreen = ({ route }) => {
-    const params = route.params ?? {};
-    const theme = useTheme();
-    const navigation = useNavigation();
+const QPayCheckoutScreen = () => {
+    const navigation = useNavigation<any>();
     const isFocused = useIsFocused();
-    const tabBarHeight = useBottomTabBarHeight();
-    const insets = useSafeAreaInsets();
-    const { enabled } = useStorefrontInfo();
     const { t } = useLanguage();
     const paymentSheetRef = useRef<QPayPaymentSheetRef>(null);
-    const {
-        customer,
-        invoice,
-        totalAmount,
-        handleDeliveryLocationChange,
-        receivingOptions,
-        setPickup,
-        isPickup,
-        isPickupEnabled,
-        lineItems,
-        setTipOptions,
-        isNotReady,
-        isLoading,
-        orderNotes,
-        setOrderNotes,
-        originLocationId,
-        store,
-        isCapturingOrder,
-        isCompany,
-        setIsPersonal,
-        companyRegistrationNumber,
-        setCompanyRegistrationNumber,
-        isBelowMinimum,
-        minimumCheckoutAmount,
-        isMinimumCheckoutEnabled,
-        subtotal,
-    } = useQpayCheckout({
-        onOrderComplete: (order) => {
-            paymentSheetRef.current?.forceClose();
+    const checkout: any = useQpayCheckout({
+        onOrderComplete: (order: any) => {
+            (paymentSheetRef.current as any)?.forceClose?.();
             navigation.reset({
                 index: 1,
-                routes: [{ name: firstRouteName(navigation) }, { name: 'Order', params: { order: order.serialize() } }],
+                routes: [{ name: firstRouteName(navigation) }, { name: 'Order', params: { order: order.serialize(), justPlaced: true } }],
             });
         },
     });
+    const { customer, invoice, isCapturingOrder, isCompany, setIsPersonal, companyRegistrationNumber, setCompanyRegistrationNumber } = checkout;
     const [isBottomSheetPresenting, setIsBottomSheetPresenting] = useState(false);
-    const [localRegistrationNumber, setLocalRegistrationNumber] = useState(companyRegistrationNumber || '');
-    const hasCheckoutOptions = enabled('tips') || enabled('delivery_tips');
+    const [registrationNumber, setRegistrationNumber] = useState(companyRegistrationNumber || '');
     const isModalScreen = wasAccessedFromCartModal(navigation);
+    const footerOffset = useFooterOffset(isModalScreen);
     const portalHost = isModalScreen === true ? 'QPayCheckoutPortal' : 'MainPortal';
 
-    const handleRegistrationNumberChange = useCallback(
-        (text) => {
-            setLocalRegistrationNumber(text); // Immediate UI update
-            setCompanyRegistrationNumber(text); // Debounced API call
+    const changeRegistrationNumber = useCallback(
+        (text: string) => {
+            setRegistrationNumber(text);
+            setCompanyRegistrationNumber(text);
         },
         [setCompanyRegistrationNumber]
     );
 
-    const handleTaxTypeChange = useCallback((isPersonal) => {
-        setIsPersonal(isPersonal);
-        if (isPersonal) {
-            handleRegistrationNumberChange('');
-        }
-    });
-
-    // // Sync local state when hook value changes
-    // useEffect(() => {
-    //     setLocalRegistrationNumber(companyRegistrationNumber || '');
-    // }, [companyRegistrationNumber]);
+    const changeTaxType = useCallback(
+        (isPersonal: boolean) => {
+            setIsPersonal(isPersonal);
+            if (isPersonal) changeRegistrationNumber('');
+        },
+        [changeRegistrationNumber, setIsPersonal]
+    );
 
     useEffect(() => {
-        navigation.setOptions({
-            gestureEnabled: !isBottomSheetPresenting,
-        });
-    }, [isBottomSheetPresenting]);
+        navigation.setOptions({ gestureEnabled: !isBottomSheetPresenting });
+    }, [isBottomSheetPresenting, navigation]);
 
     return (
-        <YStack bg='$background'>
+        <YStack flex={1}>
             <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')} />
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <YStack flex={1} bg='$background' space='$2'>
-                    <YStack height={300}>
-                        <DeliveryRoutePreview customOrigin={originLocationId} />
-                    </YStack>
-                    <YStack px='$3' py='$1' space='$5'>
-                        {isPickupEnabled && (
-                            <YStack space='$3'>
-                                <CheckoutPickupSwitch onChange={(isPickup) => setPickup(isPickup)} />
-                            </YStack>
-                        )}
-                        {!isPickup && (
-                            <YStack space='$3'>
-                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    {t('QPayCheckoutScreen.yourDeliveryLocation')}
-                                </Text>
-                                <CustomerLocationSelect onChange={handleDeliveryLocationChange} />
-                            </YStack>
-                        )}
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                {t('QPayCheckoutScreen.yourCart')}
-                            </Text>
-                            <CartContents />
+            <CheckoutLayout
+                checkout={checkout}
+                paymentReady
+                onPlaceOrder={() => paymentSheetRef.current?.open()}
+                footerOffset={footerOffset}
+                payment={
+                    <XStack gap={12} alignItems='center' minHeight={52}>
+                        <YStack width={40} height={28} borderRadius={6} backgroundColor='$surface2' alignItems='center' justifyContent='center'>
+                            <UIText variant='captionStrong' style={{ fontSize: 10 }}>
+                                QPay
+                            </UIText>
                         </YStack>
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                {t('QPayCheckoutScreen.orderNotes')}
-                            </Text>
-                            <TextAreaSheet
-                                value={orderNotes}
-                                onChange={setOrderNotes}
-                                title={t('QPayCheckoutScreen.orderNotesTitle')}
-                                placeholder={t('QPayCheckoutScreen.enterAdditionalNotes')}
-                                portalHost={portalHost}
-                                onBottomSheetPositionChanged={setIsBottomSheetPresenting}
-                            />
+                        <YStack flex={1}>
+                            <UIText variant='bodyStrong'>QPay</UIText>
+                            <UIText variant='caption' tone='secondary'>
+                                {t('Checkout.qpayNote')}
+                            </UIText>
                         </YStack>
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                {t('QPayCheckoutScreen.vatRegistration')}
-                            </Text>
-                            <QPayTaxRegistrationSwitch onChange={handleTaxTypeChange} isPersonal={!isCompany} />
-                            {isCompany && (
-                                <Input
-                                    value={localRegistrationNumber}
-                                    onChangeText={handleRegistrationNumberChange}
-                                    placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')}
-                                    color='$textPrimary'
-                                    placeholderTextColor='$textSecondary'
-                                />
-                            )}
-                        </YStack>
-                        {hasCheckoutOptions && (
-                            <YStack space='$3'>
-                                <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                    Checkout options
-                                </Text>
-                                <CheckoutOptions onChange={setTipOptions} isPickup={isPickup} />
-                            </YStack>
-                        )}
-                        <YStack space='$3'>
-                            <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                {t('lineItems.total')}
-                            </Text>
-                            <CheckoutTotal lineItems={lineItems} />
-                            {isBelowMinimum && (
-                                <MinimumCheckoutNotice 
-                                    minimumAmount={minimumCheckoutAmount} 
-                                    currentSubtotal={subtotal} 
-                                />
-                            )}
-                        </YStack>
-                        <YStack width='100%' height={200} />
-                    </YStack>
-                </YStack>
-            </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={isModalScreen ? insets.bottom : tabBarHeight} left={0} right={0} padding='$4' zIndex={0}>
-                <CheckoutButton onCheckout={() => paymentSheetRef.current?.open()} total={totalAmount} disabled={isNotReady} isLoading={isLoading} />
-            </XStack>
+                    </XStack>
+                }
+                extra={
+                    customer ? (
+                        <Card padding={14} gap={10}>
+                            <UIText variant='subheading'>{t('QPayCheckoutScreen.vatRegistration')}</UIText>
+                            <QPayTaxRegistrationSwitch onChange={changeTaxType} isPersonal={!isCompany} />
+                            {isCompany && <TextField value={registrationNumber} onChangeText={changeRegistrationNumber} placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')} accessibilityLabel={t('QPayCheckoutScreen.companyRegistrationNumber')} style={{ borderRadius: radius.button }} />}
+                        </Card>
+                    ) : null
+                }
+            />
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />
             <PortalHost name='QPayCheckoutPortal' />
         </YStack>
