@@ -13,7 +13,7 @@ export { Skeleton } from './Skeleton';
 export { EmptyState, ErrorState, OfflineBanner } from './States';
 export { SectionHeader } from './SectionHeader';
 export { StoreLogo, MediaImage } from './Media';
-export { RatingLine, Stars } from './Rating';
+export { RatingLine, Stars, StarInput } from './Rating';
 export { StoreCard } from './StoreCard';
 export { CartPill } from './CartPill';
 export { Stepper, SegmentedControl } from './Controls';

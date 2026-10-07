@@ -160,6 +160,8 @@ const NetworkStoreScreen = ({ route }: any) => {
     const options = currentStore?.getAttribute?.('options') ?? {};
     const minimum = Number(options.required_checkout_min_amount) || 0;
     const closed = store?.muted ?? false;
+    // Networks (and stores) can switch reviews off in the Console.
+    const reviewsEnabled = ownerInfo?.options?.reviews_enabled !== false;
     const takesBookings = useMemo(() => sections.some((section) => section.products.some((product) => product.summary.isBookable)), [sections]);
     const recommended = useMemo(() => sections.flatMap((section) => section.products).filter((product) => product.summary.recommended), [sections]);
 
@@ -234,7 +236,16 @@ const NetworkStoreScreen = ({ route }: any) => {
                             {!!store.description && <UIText tone='secondary'>{store.description}</UIText>}
                         </YStack>
                         <XStack flexWrap='wrap' alignItems='center' gap={12}>
-                            <RatingLine rating={store.rating} size={15} />
+                            {reviewsEnabled ? (
+                                <Pressable onPress={() => navigation.navigate('StoreReviews', { storeId: store.id, storeName: store.name, storeLogo: store.logoUrl })} accessibilityRole='link' accessibilityLabel={t('Reviews.openFor', { store: store.name })} style={{ minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <RatingLine rating={store.rating} size={15} />
+                                    <UIText variant='captionStrong' tone='secondary' style={{ textDecorationLine: 'underline' }}>
+                                        {t('Reviews.title')}
+                                    </UIText>
+                                </Pressable>
+                            ) : (
+                                <RatingLine rating={store.rating} size={15} />
+                            )}
                             {!!(store.category || store.distance) && (
                                 <UIText variant='caption' tone='secondary'>
                                     {[store.category, store.distance].filter(Boolean).join(' · ')}

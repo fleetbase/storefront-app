@@ -31,6 +31,8 @@ export type ScreenParamMap = {
     'network.map': undefined;
     'network.store': { storeId: string; store?: Serialized };
     'network.product': { storeId?: string; productId: string; product?: Serialized; store?: Serialized };
+    'reviews.list': { storeId: string; storeName?: string; storeLogo?: string | null };
+    'reviews.write': { storeId: string; storeName?: string; storeLogo?: string | null; orderId?: string; orderReference?: string; rating?: number };
 };
 
 // Compile-time guarantee that every ScreenId has a params entry and vice versa.

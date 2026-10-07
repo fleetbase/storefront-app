@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pressable } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import { XStack, useTheme } from 'tamagui';
@@ -31,6 +32,29 @@ export function Stars({ value, size = 13 }: { value: number; size?: number }) {
         <XStack gap={2} accessible accessibilityLabel={t('UI.ratingLabel', { rating: value })}>
             {[1, 2, 3, 4, 5].map((star) => (
                 <FontAwesomeIcon key={star} icon={faStar} size={size} color={star <= Math.round(value) ? theme.warningForeground.val : theme.borderColorWithShadow.val} />
+            ))}
+        </XStack>
+    );
+}
+
+/** Five tappable stars, a radio group for a 1–5 rating. */
+export function StarInput({ value, onChange, size = 40, label }: { value: number; onChange: (rating: number) => void; size?: number; label: string }) {
+    const theme = useTheme();
+    const { t } = useLanguage();
+    return (
+        <XStack gap={size > 30 ? 6 : 0} accessibilityRole='radiogroup' accessibilityLabel={label}>
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Pressable
+                    key={star}
+                    onPress={() => onChange(star)}
+                    accessibilityRole='radio'
+                    accessibilityState={{ checked: value === star }}
+                    accessibilityLabel={t('UI.starsCount', { count: star })}
+                    hitSlop={4}
+                    style={{ width: Math.max(44, size + 8), height: Math.max(44, size + 8), alignItems: 'center', justifyContent: 'center' }}
+                >
+                    <FontAwesomeIcon icon={faStar} size={size} color={star <= value ? theme.warningForeground.val : theme.borderColorWithShadow.val} />
+                </Pressable>
             ))}
         </XStack>
     );

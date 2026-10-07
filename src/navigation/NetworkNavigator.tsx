@@ -38,6 +38,8 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
     },
     // StoreInfo needs the full store object in its params, so it is not deep-linkable.
     StoreInfo: { screen: screenSlot('store.info'), linking: undefined, options: { presentation: 'modal', headerShown: false } },
+    StoreReviews: { screen: screenSlot('reviews.list'), linking: withLinking ? { path: 'stores/:storeId/reviews' } : undefined, options: { headerShown: false } },
+    WriteReview: { screen: screenSlot('reviews.write'), linking: undefined, options: { presentation: 'modal', headerShown: false } },
 });
 
 const NetworkHomeStack = createNativeStackNavigator({

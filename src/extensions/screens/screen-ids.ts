@@ -31,6 +31,8 @@ export const SCREEN_IDS = [
     'network.map',
     'network.store',
     'network.product',
+    'reviews.list',
+    'reviews.write',
 ] as const;
 
 export type ScreenId = (typeof SCREEN_IDS)[number];

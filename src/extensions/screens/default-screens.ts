@@ -32,4 +32,6 @@ export const defaultScreens: ScreenRegistryDefinition = {
     'network.map': { load: () => import('../../screens/network/NetworkMapScreen') },
     'network.store': { load: () => import('../../screens/network/NetworkStoreScreen') },
     'network.product': { load: () => import('../../screens/network/NetworkProductScreen') },
+    'reviews.list': { load: () => import('../../screens/reviews/StoreReviewsScreen') },
+    'reviews.write': { load: () => import('../../screens/reviews/WriteReviewScreen') },
 };
