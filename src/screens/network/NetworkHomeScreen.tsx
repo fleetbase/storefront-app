@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Image, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Animated, Image, Platform, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +55,8 @@ type Rail = { key: string; title: string; subtitle?: string; params: Record<stri
 const NetworkHomeScreen = () => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    const heroHeight = HERO_HEIGHT + insets.top;
+    const scrollY = useRef(new Animated.Value(0)).current;
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const { storefront } = useStorefront();
@@ -194,13 +196,29 @@ const NetworkHomeScreen = () => {
 
     const header = (
         <YStack gap={HEADER_GAP} paddingBottom={6}>
-            <YStack height={HERO_HEIGHT + insets.top}>
-                <MediaImage uri={usableImageUrl(ownerInfo?.backdrop_url)} seed={networkName} height={HERO_HEIGHT + insets.top} radius={0} />
-                <LinearGradient
-                    colors={['rgba(10,14,20,0.45)', 'rgba(10,14,20,0.05)', 'rgba(10,14,20,0.72)']}
-                    locations={[0, 0.38, 1]}
-                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-                />
+            <YStack height={heroHeight}>
+                {/* Pulled past the top, the backdrop grows from its top edge to fill the space while the header content moves down. */}
+                <Animated.View
+                    pointerEvents='none'
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: heroHeight,
+                        transform: [
+                            { translateY: scrollY.interpolate({ inputRange: [-heroHeight, 0], outputRange: [-heroHeight / 2, 0], extrapolateRight: 'clamp' }) },
+                            { scale: scrollY.interpolate({ inputRange: [-heroHeight, 0], outputRange: [2, 1], extrapolateRight: 'clamp' }) },
+                        ],
+                    }}
+                >
+                    <MediaImage uri={usableImageUrl(ownerInfo?.backdrop_url)} seed={networkName} height={heroHeight} radius={0} />
+                    <LinearGradient
+                        colors={['rgba(10,14,20,0.45)', 'rgba(10,14,20,0.05)', 'rgba(10,14,20,0.72)']}
+                        locations={[0, 0.38, 1]}
+                        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                    />
+                </Animated.View>
                 <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} alignItems='center' justifyContent='space-between' gap={10}>
                     <Pressable
                         onPress={() => setLocationSheet(true)}
@@ -318,8 +336,10 @@ const NetworkHomeScreen = () => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <FlatList
+            <Animated.FlatList
                 data={stores}
+                onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: Platform.OS !== 'web' })}
+                scrollEventThrottle={16}
                 keyExtractor={(item, index) => item.id ?? String(index)}
                 renderItem={({ item }) => (
                     <YStack paddingHorizontal={space.gutter}>
@@ -328,7 +348,7 @@ const NetworkHomeScreen = () => {
                 )}
                 ListHeaderComponent={header}
                 contentContainerStyle={{ paddingBottom: cart.count > 0 ? 100 : 32 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor='#ffffff' />}
                 onEndReached={() => hasMore && !loadingMore && !loading && loadStores({ append: true })}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loadingMore ? <CompactSkeleton /> : null}

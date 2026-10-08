@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import useStorefront from './use-storefront';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { apiRequest } from '../commerce/http';
+import { adapterTarget, apiRequest } from '../commerce/http';
 import { checkCustomerSession } from '../commerce/session';
 import { toast } from '../utils/toast';
 
@@ -22,13 +22,15 @@ export default function useVerifySession() {
         if (!token || !adapter || checked.current === token) return;
         checked.current = token;
         let live = true;
-        checkCustomerSession((path, options) =>
-            apiRequest({ host: adapter.host, namespace: adapter.namespace, headers: adapter.headers }, path, { ...options, headers: { 'Customer-Token': token } })
-        ).then((result) => {
-            if (!live || result !== 'rejected') return;
-            logout();
-            toast.info(t('Auth.sessionExpired'));
-        });
+        checkCustomerSession((path, options) => apiRequest(adapterTarget(adapter), path, { ...options, headers: { 'Customer-Token': token } }))
+            .then((result) => {
+                if (!live || result !== 'rejected') return;
+                logout();
+                toast.info(t('Auth.sessionExpired'));
+            })
+            .catch(() => {
+                // A failed check leaves the session alone.
+            });
         return () => {
             live = false;
         };

@@ -11,11 +11,14 @@ export type SessionCheck = 'valid' | 'rejected' | 'unknown';
 
 export type CustomerRequest = (path: string, options?: { query?: Record<string, any> }) => Promise<any>;
 
-/** The storefront refuses an unknown Customer-Token with 401, or 400/403 "Not authorized …". */
+/**
+ * The storefront refuses a Customer-Token it doesn't know with a 400 "Not authorized to view
+ * customers places". A 401 is the storefront key being refused, not the customer, so it
+ * never signs anyone out.
+ */
 export function isSessionRejected(error: unknown): boolean {
     const status = Number((error as any)?.status ?? 0);
     const message = String((error as any)?.message ?? '');
-    if (status === 401) return true;
     return (status === 400 || status === 403) && /not authori[sz]ed/i.test(message);
 }
 

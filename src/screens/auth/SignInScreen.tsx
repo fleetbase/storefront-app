@@ -125,7 +125,7 @@ const SignInScreen = ({ route, mode: forcedMode }: any) => {
                         <UIText variant='captionStrong' style={{ fontSize: 14 }}>
                             {t('Auth.mobileNumber')}
                         </UIText>
-                        <PhoneField value={phone} onChange={setPhone} onSubmit={sendCode} invalid={!!error} autoFocus={mode !== 'create'} />
+                        <PhoneField value={phone} onChange={setPhone} onSubmit={sendCode} invalid={!!error} autoFocus={mode === 'phone'} />
                         {error ? (
                             <UIText variant='captionStrong' tone='error' accessibilityRole='alert'>
                                 {error}

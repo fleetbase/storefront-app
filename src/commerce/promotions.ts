@@ -1,3 +1,4 @@
+import { adapterTarget } from './http';
 /**
  * Cart promotions: the discounts the server applies to a cart (automatic promotions and
  * promo codes), applying and removing codes, and "spend X more" hints for automatic
@@ -80,7 +81,9 @@ export function parseCartPromotions(json: any): CartPromotions {
             amount: toInt(item?.amount),
             deliveryAmount: toInt(item?.delivery_amount),
         })),
-        rejected: (Array.isArray(json.rejected) ? json.rejected : []).filter((item: any) => item?.code && item?.reason).map((item: any) => ({ code: String(item.code), reason: String(item.reason) })),
+        rejected: (Array.isArray(json.rejected) ? json.rejected : [])
+            .filter((item: any) => item?.code && item?.reason)
+            .map((item: any) => ({ code: String(item.code), reason: String(item.reason) })),
     };
 }
 
@@ -98,7 +101,11 @@ export function promoReasonFromMessage(message: unknown): PromoReason {
     return reason && (PROMO_REASONS as readonly string[]).includes(reason) ? (reason as PromoReason) : 'unknown';
 }
 
-export async function fetchCartPromotions(adapter: Adapter, cartId: string, { pickup = false, serviceQuoteId = null }: { pickup?: boolean; serviceQuoteId?: string | null } = {}): Promise<CartPromotions> {
+export async function fetchCartPromotions(
+    adapter: Adapter,
+    cartId: string,
+    { pickup = false, serviceQuoteId = null }: { pickup?: boolean; serviceQuoteId?: string | null } = {}
+): Promise<CartPromotions> {
     const query: Record<string, any> = {};
     if (pickup) query.pickup = 1;
     if (serviceQuoteId && !pickup) query.service_quote = serviceQuoteId;
@@ -117,7 +124,7 @@ async function postKeepingErrors(adapter: Adapter, path: string, data: Record<st
     if (typeof fetch !== 'function' || !adapter.host || !adapter.namespace) return adapter.post(path, data);
     const response = await fetch(`${adapter.host}/${adapter.namespace}/${path}`, {
         method: 'POST',
-        headers: { ...(adapter.headers ?? {}), 'Content-Type': 'application/json' },
+        headers: { ...(adapterTarget(adapter).headers ?? {}), 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     });
     const json = await response.json().catch(() => null);
@@ -151,7 +158,15 @@ export type PromotionHint = { id: string; name: string; minSubtotal: number; rem
  * spending more, nearest first. A promotion owned by a store only counts that store's
  * subtotal; one owned by the network or with no owner counts the whole cart.
  */
-export function promotionHints(promotions: any[] | null | undefined, { subtotal, storeSubtotals = {}, appliedIds = [], currency = null }: { subtotal: number; storeSubtotals?: Record<string, number>; appliedIds?: (string | null)[]; currency?: string | null }): PromotionHint[] {
+export function promotionHints(
+    promotions: any[] | null | undefined,
+    {
+        subtotal,
+        storeSubtotals = {},
+        appliedIds = [],
+        currency = null,
+    }: { subtotal: number; storeSubtotals?: Record<string, number>; appliedIds?: (string | null)[]; currency?: string | null }
+): PromotionHint[] {
     const applied = new Set(appliedIds.filter(Boolean));
     return (Array.isArray(promotions) ? promotions : [])
         .filter((promotion: any) => promotion?.id && !applied.has(promotion.id))

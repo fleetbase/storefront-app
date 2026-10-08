@@ -25,7 +25,16 @@ function queryString(query: Record<string, any>): string {
     return params.length ? `?${params.join('&')}` : '';
 }
 
-export async function apiRequest(target: ApiTarget, path: string, { method = 'GET', query = {}, body, headers = {} }: { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; query?: Record<string, any>; body?: Record<string, any>; headers?: Record<string, string> } = {}): Promise<any> {
+export async function apiRequest(
+    target: ApiTarget,
+    path: string,
+    {
+        method = 'GET',
+        query = {},
+        body,
+        headers = {},
+    }: { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; query?: Record<string, any>; body?: Record<string, any>; headers?: Record<string, string> } = {}
+): Promise<any> {
     if (!target.host || !target.namespace) throw new ApiError('Storefront is not ready', 0, null);
     let response: Response;
     try {
@@ -41,4 +50,25 @@ export async function apiRequest(target: ApiTarget, path: string, { method = 'GE
     if (response.ok) return json;
     const message = json?.error ?? json?.errors?.[0] ?? response.statusText ?? 'Request failed';
     throw new ApiError(String(message), response.status, typeof json?.reason === 'string' ? json.reason : null);
+}
+
+/**
+ * Host, namespace and headers (the storefront key among them) of an SDK adapter. The
+ * browser adapter keeps its headers on `headers`; the adapter used on iOS and Android
+ * (axios) keeps them on its instance's defaults, so reading only `headers` would send
+ * requests without the storefront key there.
+ */
+export function adapterTarget(adapter: any): ApiTarget {
+    const headers: Record<string, string> = {};
+    const collect = (source: any) => {
+        if (!source || typeof source !== 'object') return;
+        for (const [key, value] of Object.entries(source)) {
+            if (typeof value === 'string') headers[key] = value;
+        }
+    };
+    const defaults = adapter?.axiosInstance?.defaults?.headers;
+    collect(defaults?.common);
+    collect(defaults);
+    collect(adapter?.headers);
+    return { host: adapter?.host, namespace: adapter?.namespace, headers };
 }
