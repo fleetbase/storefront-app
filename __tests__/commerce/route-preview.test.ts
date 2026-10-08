@@ -1,4 +1,4 @@
-import { initials, regionFor, straightDistance, toLatLng } from '../../src/commerce/route-preview';
+import { arcPoints, initials, regionFor, straightDistance, toLatLng } from '../../src/commerce/route-preview';
 
 describe('toLatLng', () => {
     it('reads [latitude, longitude] and rejects missing or impossible points', () => {
@@ -41,5 +41,21 @@ describe('initials', () => {
         expect(initials('tiong')).toBe('T');
         expect(initials('  ')).toBe('?');
         expect(initials(null)).toBe('?');
+    });
+});
+
+describe('arcPoints', () => {
+    it('bows away from the straight line and ends on both points', () => {
+        const from = { latitude: 1.3, longitude: 103.8 };
+        const to = { latitude: 1.3, longitude: 103.9 };
+        const points = arcPoints(from, to, { steps: 4 });
+        expect(points).toHaveLength(5);
+        expect(points[0]).toEqual(from);
+        expect(points[4]!.latitude).toBeCloseTo(1.3);
+        expect(points[4]!.longitude).toBeCloseTo(103.9);
+        // Travelling east, the arc bows north (to the left) by half the bend at its middle.
+        expect(points[2]!.latitude).toBeCloseTo(1.3125);
+        expect(points[2]!.longitude).toBeCloseTo(103.85);
+        expect(arcPoints(from, to)).toHaveLength(25);
     });
 });

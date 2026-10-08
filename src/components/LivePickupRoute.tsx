@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Text, YStack, XStack, useTheme } from 'tamagui';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat } from '../utils/location';
 import { config, storefrontConfig } from '../utils';
-import { formattedAddressFromPlace } from '../utils/location';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import LocationMarker from './LocationMarker';
+import { PlaceMapMarker, StoreMapMarker } from './map/RouteMarkers';
 import LoadingOverlay from './LoadingOverlay';
 import useCurrentLocation from '../hooks/use-current-location';
 import useStoreLocations from '../hooks/use-store-locations';
@@ -104,71 +101,11 @@ const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '
                 mapType={storefrontConfig('defaultMapType', 'standard')}
                 {...mapViewProps}
             >
-                {/* Customer Location Marker */}
-                {origin && (
-                    <Marker coordinate={makeCoordinatesFloat(origin)} centerOffset={markerOffset}>
-                        <YStack
-                            mb={8}
-                            px='$3'
-                            py='$2'
-                            bg='$gray-900'
-                            borderRadius='$4'
-                            space='$1'
-                            shadowColor='$shadowColor'
-                            shadowOffset={markerOffset}
-                            shadowOpacity={0.25}
-                            shadowRadius={3}
-                            width={180}
-                        >
-                            <XStack space='$2'>
-                                <YStack justifyContent='center'>
-                                    <FontAwesomeIcon icon={faPerson} color={theme['$gray-200'].val} size={20} />
-                                </YStack>
-                                <YStack flex={1} space='$1'>
-                                    <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                        Your Location
-                                    </Text>
-                                    <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
-                                        {formattedAddressFromPlace(customerLocation)}
-                                    </Text>
-                                </YStack>
-                            </XStack>
-                        </YStack>
-                        <LocationMarker size={markerSize} />
-                    </Marker>
-                )}
+                {/* The customer */}
+                {origin && <PlaceMapMarker coordinate={makeCoordinatesFloat(origin)} kind='person' />}
 
-                {/* Store Location Marker */}
-                <Marker coordinate={makeCoordinatesFloat(destination)} centerOffset={markerOffset}>
-                    <YStack
-                        mb={8}
-                        px='$3'
-                        py='$2'
-                        bg='$gray-900'
-                        borderRadius='$4'
-                        space='$1'
-                        shadowColor='$shadowColor'
-                        shadowOffset={{ width: 0, height: 5 }}
-                        shadowOpacity={0.25}
-                        shadowRadius={3}
-                        width={180}
-                    >
-                        <XStack space='$2'>
-                            <YStack justifyContent='center'>
-                                <FontAwesomeIcon icon={faStore} color={theme['$gray-200'].val} size={20} />
-                            </YStack>
-                            <YStack flex={1} space='$1'>
-                                <Text fontWeight='bold' fontSize='$2' color='$gray-100' numberOfLines={1}>
-                                    {storeLocation.getAttribute('name', `${store?.getAttribute('name')} Location`)}
-                                </Text>
-                                <Text fontSize='$2' color='$gray-200' numberOfLines={1}>
-                                    {formattedAddressFromPlace(storeLocation)}
-                                </Text>
-                            </YStack>
-                        </XStack>
-                    </YStack>
-                    <LocationMarker size={markerSize} />
-                </Marker>
+                {/* The store to pick up from */}
+                <StoreMapMarker coordinate={makeCoordinatesFloat(destination)} name={store?.getAttribute('name') ?? storeLocation.getAttribute('name')} />
 
                 {/* Route Directions */}
                 {origin && destination && (

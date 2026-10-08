@@ -1,7 +1,8 @@
 /**
  * The checkout's delivery route preview: each store in the cart joined to the delivery
- * address by a straight dashed line. Straight lines need no route lookup, so checkout
- * makes no extra map API call; the distance shown is the straight-line distance.
+ * address by a dashed arc. The arc is drawn, not looked up, so checkout makes no extra
+ * map API call, and its bow makes plain that it isn't the road route. The distance
+ * shown is the straight-line distance.
  */
 
 export type LatLng = { latitude: number; longitude: number };
@@ -42,6 +43,24 @@ export function regionFor(points: LatLng[], { minDelta = 0.01, padding = 0.6 }: 
         latitudeDelta: Math.max(minDelta, (maxLat - minLat) * (1 + padding * 2)),
         longitudeDelta: Math.max(minDelta, (maxLng - minLng) * (1 + padding)),
     };
+}
+
+/**
+ * Points along a gentle arc from `from` to `to`: a quadratic curve whose control point
+ * sits off the midpoint, to the left of the direction of travel, by `bend` times the
+ * distance between them.
+ */
+export function arcPoints(from: LatLng, to: LatLng, { bend = 0.25, steps = 24 }: { bend?: number; steps?: number } = {}): LatLng[] {
+    const dLat = to.latitude - from.latitude;
+    const dLng = to.longitude - from.longitude;
+    const control = { latitude: (from.latitude + to.latitude) / 2 + dLng * bend, longitude: (from.longitude + to.longitude) / 2 - dLat * bend };
+    return Array.from({ length: steps + 1 }, (_, index) => {
+        const t = index / steps;
+        const a = (1 - t) * (1 - t);
+        const b = 2 * (1 - t) * t;
+        const c = t * t;
+        return { latitude: a * from.latitude + b * control.latitude + c * to.latitude, longitude: a * from.longitude + b * control.longitude + c * to.longitude };
+    });
 }
 
 /** "BC" for "Bloom & Co.", "T" for "Tiong", "?" for nothing. */

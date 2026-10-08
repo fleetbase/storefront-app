@@ -6,7 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import useStorefront from '../../hooks/use-storefront';
 import { getCoordinates } from '../../utils/location';
 import { storefrontConfig } from '../../utils';
-import { initials, regionFor, straightDistance, toLatLng, type LatLng } from '../../commerce/route-preview';
+import { arcPoints, initials, regionFor, straightDistance, toLatLng, type LatLng } from '../../commerce/route-preview';
 import { UIText, elevation, formatDistance, radius } from '../../ui';
 
 export type RouteStore = { storeId: string; storeLocationId: string; name: string | null };
@@ -62,7 +62,8 @@ export function RoutePreview({ stores, destination, unavailable = false, onPress
     const theme = useTheme();
     const origins = useOrigins(stores);
     const target = useMemo(() => toLatLng(destination ? getCoordinates(destination) : null), [destination]);
-    const region = useMemo(() => (target && origins.length ? regionFor([target, ...origins.map((origin) => origin.point)]) : null), [target, origins]);
+    // Frame the arcs too, so their bow stays inside the strip.
+    const region = useMemo(() => (target && origins.length ? regionFor([target, ...origins.flatMap((origin) => arcPoints(origin.point, target))]) : null), [target, origins]);
 
     if (!target || !region) return null;
 
@@ -88,7 +89,7 @@ export function RoutePreview({ stores, destination, unavailable = false, onPress
                     liteMode={Platform.OS === 'android'}
                 >
                     {origins.map((origin) => (
-                        <Polyline key={`line-${origin.key}`} coordinates={[origin.point, target]} strokeColor={lineColor} strokeWidth={3} lineDashPattern={[2, 8]} />
+                        <Polyline key={`line-${origin.key}`} coordinates={arcPoints(origin.point, target)} strokeColor={lineColor} strokeWidth={3} lineDashPattern={[2, 8]} />
                     ))}
                     {origins.map((origin) => (
                         <Marker
