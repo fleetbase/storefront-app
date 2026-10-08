@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { YStack, XStack, Text, useTheme } from 'tamagui';
 import { Store, StoreLocation } from '@fleetbase/storefront';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -15,6 +16,7 @@ import StoreRating from '../components/StoreRating';
 import StoreRecentReviews from '../components/StoreRecentReviews';
 
 const StoreInfoScreen = ({ route }) => {
+    const insets = useSafeAreaInsets();
     const theme = useTheme();
     const navigation = useNavigation();
     const { adapter } = useStorefront();
@@ -60,110 +62,113 @@ const StoreInfoScreen = ({ route }) => {
 
     return (
         <YStack flex={1} bg='$background' width='100%' height='100%'>
-            <StoreHeader
-                storeName={store.getAttribute('name')}
-                logoUrl={store.getAttribute('logo_url')}
-                backgroundUrl={store.getAttribute('backdrop_url')}
-                description={store.getAttribute('description')}
-                defaultStoreLocation={storeLocation}
-            />
-            <YStack pt='$4'>
-                <ScrollView showsVerticalScrollIndicator={false} horizontal showsHorizontalScrollIndicator={false}>
-                    {store.isAttributeFilled('phone') && (
-                        <Pill
-                            icon={faPhone}
-                            value={store.getAttribute('phone')}
-                            onPress={() => {
-                                const phone = store.getAttribute('phone');
-                                Linking.openURL(`tel:${phone}`);
-                            }}
-                        />
+            {/* The whole page scrolls, so hours and reviews below the fold stay reachable. */}
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+                <StoreHeader
+                    storeName={store.getAttribute('name')}
+                    logoUrl={store.getAttribute('logo_url')}
+                    backgroundUrl={store.getAttribute('backdrop_url')}
+                    description={store.getAttribute('description')}
+                    defaultStoreLocation={storeLocation}
+                />
+                <YStack pt='$4'>
+                    <ScrollView showsVerticalScrollIndicator={false} horizontal showsHorizontalScrollIndicator={false}>
+                        {store.isAttributeFilled('phone') && (
+                            <Pill
+                                icon={faPhone}
+                                value={store.getAttribute('phone')}
+                                onPress={() => {
+                                    const phone = store.getAttribute('phone');
+                                    Linking.openURL(`tel:${phone}`);
+                                }}
+                            />
+                        )}
+                        {store.isAttributeFilled('email') && (
+                            <Pill
+                                icon={faAt}
+                                value={store.getAttribute('email')}
+                                onPress={() => {
+                                    const email = store.getAttribute('email');
+                                    Linking.openURL(`mailto:${email}`);
+                                }}
+                            />
+                        )}
+                        {store.isAttributeFilled('website') && (
+                            <Pill
+                                icon={faGlobe}
+                                value={store.getAttribute('website')}
+                                onPress={() => {
+                                    let url = store.getAttribute('website');
+                                    if (!/^https?:\/\//i.test(url)) {
+                                        url = 'http://' + url;
+                                    }
+                                    Linking.openURL(url);
+                                }}
+                            />
+                        )}
+                        {store.isAttributeFilled('instagram') && (
+                            <Pill
+                                icon={faInstagram}
+                                value={lowercase(store.getAttribute('instagram'))}
+                                onPress={async () => {
+                                    const username = store.getAttribute('instagram');
+                                    const appURL = `instagram://user?username=${username}`;
+                                    const webURL = `https://www.instagram.com/${username}`;
+                                    const supported = await Linking.canOpenURL(appURL);
+                                    Linking.openURL(supported ? appURL : webURL);
+                                }}
+                            />
+                        )}
+                        {store.isAttributeFilled('facebook') && (
+                            <Pill
+                                icon={faFacebook}
+                                value={lowercase(store.getAttribute('facebook'))}
+                                onPress={async () => {
+                                    const username = store.getAttribute('facebook');
+                                    const appURL = `fb://profile/${username}`;
+                                    const webURL = `https://www.facebook.com/${username}`;
+                                    const supported = await Linking.canOpenURL(appURL);
+                                    Linking.openURL(supported ? appURL : webURL);
+                                }}
+                            />
+                        )}
+                        {store.isAttributeFilled('twitter') && (
+                            <Pill
+                                icon={faXTwitter}
+                                value={lowercase(store.getAttribute('twitter'))}
+                                onPress={async () => {
+                                    const username = store.getAttribute('twitter');
+                                    const appURL = `x://user?screen_name=${username}`;
+                                    const webURL = `https://x.com/${username}`;
+                                    const supported = await Linking.canOpenURL(appURL);
+                                    Linking.openURL(supported ? appURL : webURL);
+                                }}
+                            />
+                        )}
+                    </ScrollView>
+                </YStack>
+                <YStack py='$4' px='$3' gap='$4'>
+                    {storeLocation && (
+                        <ContentPanel title='Hours'>
+                            <YStack py='$2' px='$1'>
+                                <StoreLocationSchedule storeLocation={storeLocation} />
+                            </YStack>
+                        </ContentPanel>
                     )}
-                    {store.isAttributeFilled('email') && (
-                        <Pill
-                            icon={faAt}
-                            value={store.getAttribute('email')}
-                            onPress={() => {
-                                const email = store.getAttribute('email');
-                                Linking.openURL(`mailto:${email}`);
-                            }}
-                        />
-                    )}
-                    {store.isAttributeFilled('website') && (
-                        <Pill
-                            icon={faGlobe}
-                            value={store.getAttribute('website')}
-                            onPress={() => {
-                                let url = store.getAttribute('website');
-                                if (!/^https?:\/\//i.test(url)) {
-                                    url = 'http://' + url;
-                                }
-                                Linking.openURL(url);
-                            }}
-                        />
-                    )}
-                    {store.isAttributeFilled('instagram') && (
-                        <Pill
-                            icon={faInstagram}
-                            value={lowercase(store.getAttribute('instagram'))}
-                            onPress={async () => {
-                                const username = store.getAttribute('instagram');
-                                const appURL = `instagram://user?username=${username}`;
-                                const webURL = `https://www.instagram.com/${username}`;
-                                const supported = await Linking.canOpenURL(appURL);
-                                Linking.openURL(supported ? appURL : webURL);
-                            }}
-                        />
-                    )}
-                    {store.isAttributeFilled('facebook') && (
-                        <Pill
-                            icon={faFacebook}
-                            value={lowercase(store.getAttribute('facebook'))}
-                            onPress={async () => {
-                                const username = store.getAttribute('facebook');
-                                const appURL = `fb://profile/${username}`;
-                                const webURL = `https://www.facebook.com/${username}`;
-                                const supported = await Linking.canOpenURL(appURL);
-                                Linking.openURL(supported ? appURL : webURL);
-                            }}
-                        />
-                    )}
-                    {store.isAttributeFilled('twitter') && (
-                        <Pill
-                            icon={faXTwitter}
-                            value={lowercase(store.getAttribute('twitter'))}
-                            onPress={async () => {
-                                const username = store.getAttribute('twitter');
-                                const appURL = `x://user?screen_name=${username}`;
-                                const webURL = `https://x.com/${username}`;
-                                const supported = await Linking.canOpenURL(appURL);
-                                Linking.openURL(supported ? appURL : webURL);
-                            }}
-                        />
-                    )}
-                </ScrollView>
-            </YStack>
-            <YStack py='$4' px='$3' gap='$4'>
-                {storeLocation && (
-                    <ContentPanel title='Hours'>
-                        <YStack py='$2' px='$1'>
-                            <StoreLocationSchedule storeLocation={storeLocation} />
+                    <ContentPanel
+                        title={
+                            <XStack alignItems='center' gap='$2'>
+                                <Text>{t('StoreInfoScreen.reviewsAndRating')}</Text>
+                                <StoreRating rating={store.getAttribute('rating')} size={15} />
+                            </XStack>
+                        }
+                    >
+                        <YStack padding='$4'>
+                            <StoreRecentReviews store={store} />
                         </YStack>
                     </ContentPanel>
-                )}
-                <ContentPanel
-                    title={
-                        <XStack alignItems='center' gap='$2'>
-                            <Text>{t('StoreInfoScreen.reviewsAndRating')}</Text>
-                            <StoreRating rating={store.getAttribute('rating')} size={15} />
-                        </XStack>
-                    }
-                >
-                    <YStack padding='$4'>
-                        <StoreRecentReviews store={store} />
-                    </YStack>
-                </ContentPanel>
-            </YStack>
+                </YStack>
+            </ScrollView>
         </YStack>
     );
 };
