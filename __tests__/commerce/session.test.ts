@@ -60,3 +60,20 @@ describe('adapterTarget', () => {
         expect(adapterTarget(undefined)).toEqual({ host: undefined, namespace: undefined, headers: {} });
     });
 });
+
+describe('withHeaders', () => {
+    const { withHeaders } = require('../../src/commerce/http');
+
+    it('merges headers through the adapter when it supports them', () => {
+        const configured = { headers: { 'Accept-Language': 'en' } };
+        const adapter = { setHeaders: jest.fn(() => configured) };
+        expect(withHeaders(adapter, { 'Accept-Language': 'en' })).toBe(configured);
+        expect(adapter.setHeaders).toHaveBeenCalledWith({ 'Accept-Language': 'en' });
+    });
+
+    it('leaves other adapters as they are', () => {
+        const adapter = { get: jest.fn() };
+        expect(withHeaders(adapter, { 'Accept-Language': 'en' })).toBe(adapter);
+        expect(withHeaders(null, {})).toBeNull();
+    });
+});

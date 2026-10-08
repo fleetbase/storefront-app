@@ -1827,7 +1827,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.4, @babel/runtime@npm:^7.26.0":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.4":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 934b0a0460f7d06637d93fcd1a44ac49adc33518d17253b5a0b55ff4cb90a45d8fe78bf034b448911dbec7aff2a90b918697559f78d21c99ff8dbadae9565b55
@@ -2462,13 +2462,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fleetbase/sdk@npm:^1.2.13":
-  version: 1.2.13
-  resolution: "@fleetbase/sdk@npm:1.2.13"
-  dependencies:
-    "@babel/runtime": ^7.26.0
-    axios: ^1.7.0
-  checksum: 1c6a278ba479950291faa8dbab60406be2d5b6acf7250741305481d32b404b7afc1bdf8eeaa4fa577f0ee20d727056893807ae2ce1d7e1d206419f566a82b10e
+"@fleetbase/sdk@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@fleetbase/sdk@npm:2.1.1"
+  checksum: 7c7558c5ac84a50c7c22b7dd00200f33dc9f20d531379bd3e15090fc31f0bef0cf1fefd6cf195c724d6f5e24ac5c316a305318a6632e080e0c47be914b71dacf
   languageName: node
   linkType: hard
 
@@ -2484,8 +2481,8 @@ __metadata:
     "@babel/preset-react": ^7.25.9
     "@babel/runtime": ^7.25.0
     "@backpackapp-io/react-native-toast": ^0.12.1
-    "@fleetbase/sdk": ^1.2.13
-    "@fleetbase/storefront": ^1.1.14
+    "@fleetbase/sdk": ^2.1.1
+    "@fleetbase/storefront": ^2.0.1
     "@fortawesome/fontawesome-svg-core": ^6.5.1
     "@fortawesome/free-brands-svg-icons": ^6.5.1
     "@fortawesome/free-solid-svg-icons": ^6.5.1
@@ -2516,6 +2513,7 @@ __metadata:
     "@types/react": ^19.1.1
     "@types/react-test-renderer": ^19.0.0
     add: ^2.0.6
+    axios: ^1.13.2
     babel-jest: ^29.6.3
     babel-loader: ^9.2.1
     babel-plugin-preval: ^5.1.0
@@ -2594,14 +2592,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fleetbase/storefront@npm:^1.1.14":
-  version: 1.1.14
-  resolution: "@fleetbase/storefront@npm:1.1.14"
+"@fleetbase/storefront@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@fleetbase/storefront@npm:2.0.1"
   dependencies:
-    "@fleetbase/sdk": ^1.2.13
-    countries-list: ^3.1.1
-    date-fns: ^4.1.0
-  checksum: 09ad89e62273d92a194e568369a05bf4fc8c2709cf7e03378e83dde1518f5bc84fc73316f25f54108db986fa85a553db856151a1537f7da31124c43f12739e6c
+    "@fleetbase/sdk": ^2.1.1
+    countries-list: ^3.4.1
+    date-fns: ^4.4.0
+  checksum: 31e62b758360ba6f6208db2bbd7a1aa2924078ddddaef9e19d68f30d2d3c0749fb94e10531353a411930b6bbe30aa4cba000c70d5ce8e42f44acf15291911047
   languageName: node
   linkType: hard
 
@@ -6619,6 +6617,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"agent-base@npm:6":
+  version: 6.0.2
+  resolution: "agent-base@npm:6.0.2"
+  dependencies:
+    debug: 4
+  checksum: f52b6872cc96fd5f622071b71ef200e01c7c4c454ee68bc9accca90c98cfb39f2810e3e9aa330435835eedc8c23f4f8a15267f67c6e245d2b33757575bdac49d
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:^7.1.0, agent-base@npm:^7.1.2":
   version: 7.1.4
   resolution: "agent-base@npm:7.1.4"
@@ -6967,14 +6974,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.0":
-  version: 1.13.2
-  resolution: "axios@npm:1.13.2"
+"axios@npm:^1.13.2":
+  version: 1.20.0
+  resolution: "axios@npm:1.20.0"
   dependencies:
-    follow-redirects: ^1.15.6
-    form-data: ^4.0.4
-    proxy-from-env: ^1.1.0
-  checksum: 057d0204d5930e2969f0bccb9f0752745b1524a36994667833195e7e1a82f245d660752ba8517b2dbea17e9e4ed0479f10b80c5fe45edd0b5a0df645c0060386
+    follow-redirects: ^1.16.0
+    form-data: ^4.0.6
+    https-proxy-agent: ^5.0.1
+    proxy-from-env: ^2.1.0
+  checksum: 58ff916938e317352e0c3483496a4609fd528da4823a8580969821748284bea2add069a39f2285a161020ce0886f33a982a162ebb49b5403c51a6977a1d50627
   languageName: node
   linkType: hard
 
@@ -8165,10 +8173,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"countries-list@npm:^3.0.6, countries-list@npm:^3.1.1":
+"countries-list@npm:^3.0.6":
   version: 3.2.2
   resolution: "countries-list@npm:3.2.2"
   checksum: aa1bd024dc646570c886bbe664daaebf5924f0873ca803bf8231e3cc01d5a21e612b5077ea5a797e8b2cb124d868a0a250407352641a79919232e2ea8e9a2898
+  languageName: node
+  linkType: hard
+
+"countries-list@npm:^3.4.1":
+  version: 3.4.1
+  resolution: "countries-list@npm:3.4.1"
+  checksum: 8f7b7424e787c95693133893321af265a3494fc52885c537da729e9484a90cebb67b4c6a4707ebab847cb69be8fd1d406461159790763b4d9b53e06d20eaba87
   languageName: node
   linkType: hard
 
@@ -8365,6 +8380,13 @@ __metadata:
   version: 4.1.0
   resolution: "date-fns@npm:4.1.0"
   checksum: fb681b242cccabed45494468f64282a7d375ea970e0adbcc5dcc92dcb7aba49b2081c2c9739d41bf71ce89ed68dd73bebfe06ca35129490704775d091895710b
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "date-fns@npm:4.4.0"
+  checksum: 9a25020573f1aeaddfa0a41bb32411e8e1e8c81ddb870865a005c37f741778c737833baee350a90f275ae806dcd227e41bc4f26337dda189ebca796ce760ba11
   languageName: node
   linkType: hard
 
@@ -10073,13 +10095,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.0.0":
   version: 1.15.11
   resolution: "follow-redirects@npm:1.15.11"
   peerDependenciesMeta:
     debug:
       optional: true
   checksum: 20bf55e9504f59e6cc3743ba27edb2ebf41edea1baab34799408f2c050f73f0c612728db21c691276296d2795ea8a812dc532a98e8793619fcab91abe06d017f
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.16.0":
+  version: 1.16.1
+  resolution: "follow-redirects@npm:1.16.1"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: d42ff9158fe6c66692567b712fd4bba25ef8736253c1436439642884f9c218df05fe946928d1944367b1b72f7ca5e5d277c26608159e2adf1bad9e42b12d2c30
   languageName: node
   linkType: hard
 
@@ -10092,16 +10124,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.4":
-  version: 4.0.5
-  resolution: "form-data@npm:4.0.5"
+"form-data@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "form-data@npm:4.0.6"
   dependencies:
     asynckit: ^0.4.0
     combined-stream: ^1.0.8
     es-set-tostringtag: ^2.1.0
-    hasown: ^2.0.2
-    mime-types: ^2.1.12
-  checksum: af8328413c16d0cded5fccc975a44d227c5120fd46a9e81de8acf619d43ed838414cc6d7792195b30b248f76a65246949a129a4dadd148721948f90cd6d4fb69
+    hasown: ^2.0.4
+    mime-types: ^2.1.35
+  checksum: e51b9e97678c250c872cd4ec3e5eaa8fa43bee4b1acf8274c337308aebc6aebb0553091ce0810612826601ffafed9dace12504a63c6ef16c57fffcd7dcfec457
   languageName: node
   linkType: hard
 
@@ -10574,6 +10606,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hasown@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "hasown@npm:2.0.4"
+  dependencies:
+    function-bind: ^1.1.2
+  checksum: 4bd8f916b629e06324853593ffbdd45e200022952a85ad0c967f3bd4c2e4c7e1f9a9766fbe6186f60bd394e0afc73e719730caa1da15cd9bd832b7cdf53fd26c
+  languageName: node
+  linkType: hard
+
 "he@npm:1.2.0, he@npm:^1.2.0":
   version: 1.2.0
   resolution: "he@npm:1.2.0"
@@ -10837,6 +10878,16 @@ __metadata:
     follow-redirects: ^1.0.0
     requires-port: ^1.0.0
   checksum: f5bd96bf83e0b1e4226633dbb51f8b056c3e6321917df402deacec31dd7fe433914fc7a2c1831cf7ae21e69c90b3a669b8f434723e9e8b71fd68afe30737b6a5
+  languageName: node
+  linkType: hard
+
+"https-proxy-agent@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "https-proxy-agent@npm:5.0.1"
+  dependencies:
+    agent-base: 6
+    debug: 4
+  checksum: 571fccdf38184f05943e12d37d6ce38197becdd69e58d03f43637f7fa1269cf303a7d228aa27e5b27bbd3af8f09fd938e1c91dcfefff2df7ba77c20ed8dfc765
   languageName: node
   linkType: hard
 
@@ -12996,7 +13047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:~2.1.17, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
+"mime-types@npm:^2.1.27, mime-types@npm:^2.1.35, mime-types@npm:~2.1.17, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
   version: 2.1.35
   resolution: "mime-types@npm:2.1.35"
   dependencies:
@@ -14311,10 +14362,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"proxy-from-env@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "proxy-from-env@npm:1.1.0"
-  checksum: ed7fcc2ba0a33404958e34d95d18638249a68c430e30fcb6c478497d72739ba64ce9810a24f53a7d921d0c065e5b78e3822759800698167256b04659366ca4d4
+"proxy-from-env@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "proxy-from-env@npm:2.1.0"
+  checksum: b106ad790f26d47ba4791af3fe8cba5c8d35d85020119c82c05b413eb11b3ab97d2393ecaed51bca97c2788fa256408283dfeb4d970b2ebcae6702310f064e7e
   languageName: node
   linkType: hard
 

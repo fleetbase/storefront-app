@@ -232,7 +232,7 @@ module.exports = (env = {}, argv = {}) => ({
             '@react-native-community/blur': path.resolve(__dirname, 'web/react-native-community-blur.web.js'),
             '@react-native-google-signin/google-signin': path.resolve(__dirname, 'web/react-native-google-signin.web.js'),
             '@fleetbase/storefront': path.resolve(__dirname, 'node_modules/@fleetbase/storefront/dist/esm/storefront.js'),
-            '@fleetbase/sdk': path.resolve(__dirname, 'node_modules/@fleetbase/sdk/dist/esm/fleetbase.js'),
+            '@fleetbase/sdk': path.resolve(__dirname, 'node_modules/@fleetbase/sdk/dist/index.js'),
         },
         extensions: ['.mjs', '.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts'],
     },

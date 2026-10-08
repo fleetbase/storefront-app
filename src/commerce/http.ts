@@ -72,3 +72,12 @@ export function adapterTarget(adapter: any): ApiTarget {
     collect(adapter?.headers);
     return { host: adapter?.host, namespace: adapter?.namespace, headers };
 }
+
+/**
+ * The adapter with these headers merged in. Fleetbase adapters have `setHeaders`, but the
+ * SDKs type adapters by their request methods only, so this keeps call sites typed.
+ */
+export function withHeaders<T>(adapter: T, headers: Record<string, string>): T {
+    const target = adapter as unknown as { setHeaders?: (headers: Record<string, string>) => T };
+    return typeof target?.setHeaders === 'function' ? target.setHeaders(headers) : adapter;
+}

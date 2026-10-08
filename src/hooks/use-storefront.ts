@@ -3,6 +3,7 @@ import Storefront from '@fleetbase/storefront';
 import Config from 'react-native-config';
 import { getString } from './use-storage';
 import { useLanguage } from '../contexts/LanguageContext';
+import { withHeaders } from '../commerce/http';
 
 const { STOREFRONT_KEY, FLEETBASE_HOST } = Config;
 export const instance = new Storefront(STOREFRONT_KEY, { host: FLEETBASE_HOST });
@@ -24,19 +25,14 @@ const useStorefront = () => {
         const headers: Record<string, string> = {
             'Accept-Language': locale || 'en',
         };
-        
+
         if (authToken) {
             headers['Customer-Token'] = authToken;
         }
-        
-        const configuredAdapter = adapter.setHeaders(headers);
+
+        const configuredAdapter = withHeaders(adapter, headers);
         instance.setAdapter(configuredAdapter);
-        // Compatibility for Storefront JS <=1.1.14. Newer SDK versions rebuild
-        // these stores in setAdapter(), but current released clients require the
-        // adapter to be propagated explicitly after locale/auth header changes.
-        for (const storeName of ['products', 'categories', 'foodTrucks', 'reviews', 'customers', 'cart', 'checkout']) {
-            if (instance[storeName]) instance[storeName].adapter = configuredAdapter;
-        }
+        // Storefront 2 rebuilds its stores with the new adapter in setAdapter().
 
         try {
             setStorefrontAdapter(configuredAdapter);
