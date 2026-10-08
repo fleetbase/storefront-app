@@ -1123,7 +1123,8 @@
         "deleteTitle": "Delete your account?",
         "deleteBody": "We'll text you a code to confirm. Deleting removes your account, order history and saved places, and can't be undone.",
         "sendDeleteCode": "Send confirmation code",
-        "keepAccount": "Keep my account"
+        "keepAccount": "Keep my account",
+        "paymentMethodsUnavailable": "Payment methods aren't available right now. Please try again later."
     },
     "Orders": {
         "title": "Orders",

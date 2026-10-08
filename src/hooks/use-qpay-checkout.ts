@@ -64,12 +64,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
-    
+
     // Minimum checkout validation
     const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
-    
+
     const isReady = serviceQuote && !isLoading && !isBelowMinimum;
     const isNotReady = !isReady;
 
@@ -236,28 +236,28 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Check order status using new endpoint
     const checkOrderStatus = useCallback(async () => {
         if (!checkoutId || !checkoutToken || !adapter) return;
-        
+
         // Prevent simultaneous requests (throttling)
         if (isCheckingStatus.current) {
             console.log('[checkOrderStatus] Request already in progress, skipping');
             return;
         }
-        
+
         isCheckingStatus.current = true;
-        
+
         try {
             const response = await adapter.get('checkouts/status', {
                 checkout: checkoutId,
                 token: checkoutToken,
             });
             console.log('[checkOrderStatus #response]', response);
-            
+
             const { order, error } = response;
-            
+
             if (error) {
                 handlePaymentError(error);
             }
-            
+
             if (order) {
                 handleOrderCompletion(order);
             }
@@ -280,7 +280,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     // Fetch service quote when cart or delivery location changes
     useEffect(() => {
-        if (!cart) return;
+        // No address yet: nothing to quote until one is chosen.
+        if (!cart || !deliveryLocation) return;
 
         let isMounted = true;
         const origin = quoteOrigin ?? foodTruckId ?? storeLocationId;

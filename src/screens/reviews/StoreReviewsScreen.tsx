@@ -9,8 +9,21 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useReviewRequest from '../../hooks/use-review-request';
 import { toast } from '../../utils/toast';
-import { REVIEW_SORTS, deleteReview, fetchEligibility, fetchRatingSummary, fetchReviews, relativeTime, type Eligibility, type RatingSummary, type Review, type ReviewSort } from '../../commerce/reviews';
+import {
+    REVIEW_SORTS,
+    deleteReview,
+    fetchEligibility,
+    fetchRatingSummary,
+    fetchReviews,
+    relativeTime,
+    sortReviews,
+    type Eligibility,
+    type RatingSummary,
+    type Review,
+    type ReviewSort,
+} from '../../commerce/reviews';
 import { Button, EmptyState, ErrorState, IconButton, Sheet, Skeleton, Stars, UIText, elevation, initials, radius, space, tintFor } from '../../ui';
+import useFooterOffset from '../../hooks/use-footer-offset';
 
 const PAGE = 20;
 
@@ -27,6 +40,8 @@ const StoreReviewsScreen = ({ route }: any) => {
     const { mode } = useStorefrontRuntime();
     const request = useReviewRequest();
     const { storeId, storeName = '', storeLogo = null } = route.params ?? {};
+    // Above the tab bar, which already clears the home indicator.
+    const footerOffset = useFooterOffset(false);
     const [sort, setSort] = useState<ReviewSort>('newest');
     const [reviews, setReviews] = useState<Review[]>([]);
     const [summary, setSummary] = useState<RatingSummary | null>(null);
@@ -41,19 +56,28 @@ const StoreReviewsScreen = ({ route }: any) => {
     const latest = useRef(0);
     const now = useMemo(() => new Date(), []);
 
+    const shown = useRef(0);
+    shown.current = reviews.length;
+
+    // Switching sort keeps the loaded reviews on screen (re-sorted at once by `changeSort`)
+    // while the server's first page for that order loads; only an empty list shows skeletons.
     const load = useCallback(async () => {
         const id = ++latest.current;
-        setLoading(true);
+        if (shown.current === 0) setLoading(true);
         setError(false);
         try {
-            const [page, counts, canWrite] = await Promise.all([fetchReviews(request, { storeId, sort, limit: PAGE }), fetchRatingSummary(request, storeId), fetchEligibility(request, storeId).catch(() => null)]);
+            const [page, counts, canWrite] = await Promise.all([
+                fetchReviews(request, { storeId, sort, limit: PAGE }),
+                fetchRatingSummary(request, storeId),
+                fetchEligibility(request, storeId).catch(() => null),
+            ]);
             if (id !== latest.current) return;
             setReviews(page);
             setSummary(counts);
             setEligibility(canWrite);
             setDone(page.length < PAGE);
         } catch {
-            if (id === latest.current) setError(true);
+            if (id === latest.current && shown.current === 0) setError(true);
         } finally {
             if (id === latest.current) setLoading(false);
         }
@@ -71,6 +95,12 @@ const StoreReviewsScreen = ({ route }: any) => {
             focused.current = true;
         }, [])
     );
+
+    const changeSort = (option: ReviewSort) => {
+        if (option === sort) return;
+        setReviews((current) => sortReviews(current, option));
+        setSort(option);
+    };
 
     const loadMore = async () => {
         if (loading || loadingMore || done) return;
@@ -138,7 +168,15 @@ const StoreReviewsScreen = ({ route }: any) => {
                     <Skeleton height={60} />
                 </YStack>
             ) : hasReviews && summary ? (
-                <XStack marginHorizontal={space.gutter} padding={16} gap={18} alignItems='center' borderRadius={radius.card} backgroundColor='$surface' accessibilityLabel={t('Reviews.summaryLabel', { rating: summary.average ?? 0, count: summary.total })}>
+                <XStack
+                    marginHorizontal={space.gutter}
+                    padding={16}
+                    gap={18}
+                    alignItems='center'
+                    borderRadius={radius.card}
+                    backgroundColor='$surface'
+                    accessibilityLabel={t('Reviews.summaryLabel', { rating: summary.average ?? 0, count: summary.total })}
+                >
                     <YStack alignItems='center' gap={2}>
                         <UIText variant='display' style={{ fontSize: 40, lineHeight: 44 }}>
                             {summary.average?.toFixed(1) ?? '–'}
@@ -167,7 +205,17 @@ const StoreReviewsScreen = ({ route }: any) => {
             ) : null}
 
             {!!mine && (
-                <YStack marginHorizontal={space.gutter} marginTop={14} padding={14} gap={8} borderRadius={radius.card} borderWidth={1} borderColor='$primary' backgroundColor='$primarySoft' accessibilityLabel={t('Reviews.yours')}>
+                <YStack
+                    marginHorizontal={space.gutter}
+                    marginTop={14}
+                    padding={14}
+                    gap={8}
+                    borderRadius={radius.card}
+                    borderWidth={1}
+                    borderColor='$primary'
+                    backgroundColor='$primarySoft'
+                    accessibilityLabel={t('Reviews.yours')}
+                >
                     <XStack justifyContent='space-between' alignItems='center'>
                         <UIText variant='label' tone='brand'>
                             {t('Reviews.yours')}
@@ -192,10 +240,18 @@ const StoreReviewsScreen = ({ route }: any) => {
                         return (
                             <Pressable
                                 key={option}
-                                onPress={() => setSort(option)}
+                                onPress={() => changeSort(option)}
                                 accessibilityRole='radio'
                                 accessibilityState={{ checked: selected }}
-                                style={{ height: 36, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: selected ? theme.textPrimary.val : theme.borderColor.val, backgroundColor: selected ? theme.textPrimary.val : theme.background.val, justifyContent: 'center' }}
+                                style={{
+                                    height: 36,
+                                    paddingHorizontal: 14,
+                                    borderRadius: radius.pill,
+                                    borderWidth: 1,
+                                    borderColor: selected ? theme.textPrimary.val : theme.borderColor.val,
+                                    backgroundColor: selected ? theme.textPrimary.val : theme.background.val,
+                                    justifyContent: 'center',
+                                }}
                             >
                                 <UIText variant='captionStrong' style={{ color: selected ? theme.background.val : theme.textPrimary.val }}>
                                     {t(`Reviews.sort.${option}`)}
@@ -232,9 +288,7 @@ const StoreReviewsScreen = ({ route }: any) => {
                     keyExtractor={(item) => item.id}
                     ListHeaderComponent={header}
                     ListEmptyComponent={
-                        <View>
-                            {!loading && !hasReviews && <EmptyState icon={faStar} title={t('Reviews.emptyTitle')} description={t('Reviews.emptyBody', { store: storeName })} />}
-                        </View>
+                        <View>{!loading && !hasReviews && <EmptyState icon={faStar} title={t('Reviews.emptyTitle')} description={t('Reviews.emptyBody', { store: storeName })} />}</View>
                     }
                     renderItem={({ item }) => <ReviewRow review={item} now={now} />}
                     onEndReached={loadMore}
@@ -245,7 +299,19 @@ const StoreReviewsScreen = ({ route }: any) => {
             )}
 
             {!!footer && (
-                <YStack position='absolute' left={0} right={0} bottom={0} paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' style={elevation.floating}>
+                <YStack
+                    position='absolute'
+                    left={0}
+                    right={0}
+                    bottom={0}
+                    paddingHorizontal={space.gutter}
+                    paddingTop={12}
+                    paddingBottom={footerOffset + 12}
+                    backgroundColor='$background'
+                    borderTopWidth={1}
+                    borderColor='$borderColor'
+                    style={elevation.floating}
+                >
                     {footer}
                 </YStack>
             )}
@@ -289,7 +355,12 @@ function PhotoRow({ review }: { review: Review }) {
     return (
         <XStack gap={8} flexWrap='wrap'>
             {review.photos.map((photo) => (
-                <Image key={photo.id} source={{ uri: photo.url }} accessibilityLabel={t('Reviews.photoBy', { name: review.author })} style={{ width: 72, height: 72, borderRadius: radius.tile }} />
+                <Image
+                    key={photo.id}
+                    source={{ uri: photo.url }}
+                    accessibilityLabel={t('Reviews.photoBy', { name: review.author })}
+                    style={{ width: 72, height: 72, borderRadius: radius.tile }}
+                />
             ))}
         </XStack>
     );

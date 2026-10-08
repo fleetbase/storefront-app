@@ -184,7 +184,8 @@ const CartItemScreen = ({ route = {} }) => {
                 position='absolute'
                 px='$4'
                 py='$3'
-                bottom={Platform.select({ ios: isModal ? insets.bottom : 0, android: tabBarHeight })}
+                // On iOS this route is always a page sheet reaching the bottom edge, so clear the home indicator.
+                bottom={Platform.select({ ios: insets.bottom, android: tabBarHeight })}
                 left={0}
                 right={0}
                 alignItems='center'

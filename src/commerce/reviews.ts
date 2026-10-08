@@ -52,7 +52,9 @@ export function parseReview(json: any): Review {
         content: String(json?.content ?? ''),
         author: String(json?.customer?.name ?? '').trim(),
         avatarUrl: avatar && !PLACEHOLDER_AVATARS.some((placeholder) => avatar.includes(placeholder)) ? avatar : null,
-        photos: (Array.isArray(json?.photos) ? json.photos : []).filter((photo: any) => typeof photo?.url === 'string').map((photo: any) => ({ id: String(photo.id ?? photo.url), url: photo.url })),
+        photos: (Array.isArray(json?.photos) ? json.photos : [])
+            .filter((photo: any) => typeof photo?.url === 'string')
+            .map((photo: any) => ({ id: String(photo.id ?? photo.url), url: photo.url })),
         verified: json?.verified === true,
         mine: json?.is_mine === true,
         createdAt: json?.created_at ?? null,
@@ -74,7 +76,10 @@ export function parseEligibility(json: any): Eligibility {
     return { canReview: json?.can_review === true, reason, orderId: json?.order ?? null, reviewId: json?.review ?? null };
 }
 
-export async function fetchReviews(request: Request, { storeId, sort = 'newest', limit = 20, offset = 0 }: { storeId: string; sort?: ReviewSort; limit?: number; offset?: number }): Promise<Review[]> {
+export async function fetchReviews(
+    request: Request,
+    { storeId, sort = 'newest', limit = 20, offset = 0 }: { storeId: string; sort?: ReviewSort; limit?: number; offset?: number }
+): Promise<Review[]> {
     const json = await request('reviews', { store: storeId, sort, limit, offset });
     return (Array.isArray(json) ? json : []).map(parseReview).filter((review) => review.id);
 }
@@ -89,7 +94,10 @@ export async function fetchEligibility(request: Request, subjectId: string, orde
 
 export type ReviewPhoto = { data: string; type: string };
 
-export async function createReview(request: Request, { subjectId, orderId = null, rating, content, photos = [] }: { subjectId: string; orderId?: string | null; rating: number; content: string; photos?: ReviewPhoto[] }): Promise<Review> {
+export async function createReview(
+    request: Request,
+    { subjectId, orderId = null, rating, content, photos = [] }: { subjectId: string; orderId?: string | null; rating: number; content: string; photos?: ReviewPhoto[] }
+): Promise<Review> {
     const body: Record<string, any> = { subject: subjectId, rating: clampRating(rating), content: content.trim().slice(0, MAX_REVIEW_LENGTH) };
     if (orderId) body.order = orderId;
     if (photos.length > 0) body.files = photos.slice(0, MAX_REVIEW_PHOTOS);
@@ -121,4 +129,21 @@ export function relativeTime(value: string | null, now: Date, locale = 'en'): st
         if (Math.abs(seconds) >= size) return format.format(Math.round(seconds / size), unit);
     }
     return format.format(0, 'minute');
+}
+
+const reviewTime = (review: Review) => (review.createdAt ? Date.parse(review.createdAt) || 0 : 0);
+
+/**
+ * The loaded reviews in the chosen order, so switching sort is instant while the server's
+ * first page for that order loads. Ties fall back to newest first.
+ */
+export function sortReviews(reviews: Review[], sort: ReviewSort): Review[] {
+    const newest = (a: Review, b: Review) => reviewTime(b) - reviewTime(a);
+    const compare: Record<ReviewSort, (a: Review, b: Review) => number> = {
+        newest,
+        oldest: (a, b) => reviewTime(a) - reviewTime(b),
+        highest: (a, b) => b.rating - a.rating || newest(a, b),
+        lowest: (a, b) => a.rating - b.rating || newest(a, b),
+    };
+    return [...reviews].sort(compare[sort]);
 }

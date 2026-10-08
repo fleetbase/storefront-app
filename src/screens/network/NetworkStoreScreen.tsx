@@ -296,7 +296,11 @@ const NetworkStoreScreen = ({ route }: any) => {
                             {options.pickup_enabled === true && <InfoChip icon={faBagShopping} label={t('Network.store.pickup')} />}
                             {minimum > 0 && <InfoChip label={t('Network.store.minimum', { amount: formatCurrency(minimum, currentStore.getAttribute('currency') ?? 'USD') })} />}
                             <Pressable
-                                onPress={() => navigation.navigate('StoreInfo', { store: currentStore.serialize() })}
+                                onPress={() => {
+                                    // Store Info shows the hours of one location: the one orders go to, else the first.
+                                    const location = getSelectedStoreLocation(currentStore.id) ?? locations[0];
+                                    navigation.navigate('StoreInfo', { store: currentStore.serialize(), storeLocation: location?.serialize?.() ?? location ?? null });
+                                }}
                                 accessibilityRole='button'
                                 style={{
                                     height: 30,

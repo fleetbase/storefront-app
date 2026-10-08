@@ -27,7 +27,15 @@ describe('reviews', () => {
             mine: true,
             createdAt: '2026-10-04T10:00:00Z',
         });
-        expect(parseReview({ rating: 9, customer: { photo_url: 'https://cdn.test/me.jpg' } })).toMatchObject({ id: '', rating: 5, author: '', avatarUrl: 'https://cdn.test/me.jpg', verified: false, mine: false, createdAt: null });
+        expect(parseReview({ rating: 9, customer: { photo_url: 'https://cdn.test/me.jpg' } })).toMatchObject({
+            id: '',
+            rating: 5,
+            author: '',
+            avatarUrl: 'https://cdn.test/me.jpg',
+            verified: false,
+            mine: false,
+            createdAt: null,
+        });
         expect(parseReview(null).rating).toBe(0);
     });
 
@@ -65,7 +73,13 @@ describe('reviews', () => {
         request.mockResolvedValueOnce({ can_review: false, reason: 'sign_in_required' });
         await fetchEligibility(request, 'store_1');
         request.mockResolvedValueOnce(serverReview);
-        await createReview(request, { subjectId: 'store_1', orderId: 'order_9', rating: 7, content: '  Lovely  ', photos: [1, 2, 3, 4, 5].map((n) => ({ data: `b64-${n}`, type: 'image/jpeg' })) });
+        await createReview(request, {
+            subjectId: 'store_1',
+            orderId: 'order_9',
+            rating: 7,
+            content: '  Lovely  ',
+            photos: [1, 2, 3, 4, 5].map((n) => ({ data: `b64-${n}`, type: 'image/jpeg' })),
+        });
         request.mockResolvedValueOnce(serverReview);
         await createReview(request, { subjectId: 'store_1', rating: 4, content: 'Fine' });
         request.mockResolvedValueOnce({ deleted: true });
@@ -100,5 +114,27 @@ describe('reviews', () => {
         } finally {
             (Intl as any).RelativeTimeFormat = original;
         }
+    });
+});
+
+describe('sortReviews', () => {
+    const { sortReviews } = require('../../src/commerce/reviews');
+    const review = (id: string, rating: number, createdAt: string | null) => ({ id, rating, content: '', author: '', avatarUrl: null, photos: [], verified: false, mine: false, createdAt });
+    const list = [review('a', 3, '2026-10-01T00:00:00Z'), review('b', 5, '2026-09-01T00:00:00Z'), review('c', 5, '2026-10-05T00:00:00Z'), review('d', 1, null)];
+
+    it('orders by rating with newest first on ties', () => {
+        expect(sortReviews(list, 'highest').map((r: any) => r.id)).toEqual(['c', 'b', 'a', 'd']);
+        expect(sortReviews(list, 'lowest').map((r: any) => r.id)).toEqual(['d', 'a', 'c', 'b']);
+    });
+
+    it('orders by date, undated last when newest', () => {
+        expect(sortReviews(list, 'newest').map((r: any) => r.id)).toEqual(['c', 'a', 'b', 'd']);
+        expect(sortReviews(list, 'oldest').map((r: any) => r.id)).toEqual(['d', 'b', 'a', 'c']);
+    });
+
+    it('does not change the list it is given', () => {
+        const copy = [...list];
+        sortReviews(list, 'highest');
+        expect(list).toEqual(copy);
     });
 });

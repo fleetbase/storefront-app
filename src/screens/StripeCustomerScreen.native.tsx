@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { CustomerSheet, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
 import { Portal } from '@gorhom/portal';
 import { config } from '../utils';
+import { toast } from '../utils/toast';
 import { useLanguage } from '../contexts/LanguageContext';
 import useAppTheme from '../hooks/use-app-theme';
 
@@ -44,14 +45,18 @@ const StripeCustomerScreen = () => {
                 });
 
                 if (error) {
-                    console.error('Error initializing stripe customer sheet:', error);
+                    // Usually a store without working Stripe keys: say so instead of failing silently.
+                    console.warn('Error initializing stripe customer sheet:', error);
+                    toast.error(t('Account.paymentMethodsUnavailable'));
                     return navigation.goBack();
                 }
 
                 setCustomerSheetReady(true);
                 setIsLoading(false);
             } catch (err) {
-                console.error('Error initializing stripe customer sheet:', err);
+                // Usually a store without working Stripe keys: say so instead of failing silently.
+                console.warn('Error initializing stripe customer sheet:', err);
+                toast.error(t('Account.paymentMethodsUnavailable'));
                 return navigation.goBack();
             }
         };

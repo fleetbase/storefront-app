@@ -228,7 +228,7 @@ export function restoreFleetbaseStoreLocation(data) {
 }
 
 export function formattedAddressFromPlace(place) {
-    if (isEmpty(place) && typeof place.getAttribute !== 'function') {
+    if (isEmpty(place) || typeof place.getAttribute !== 'function') {
         return '';
     }
 

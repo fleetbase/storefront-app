@@ -57,12 +57,12 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
-    
+
     // Minimum checkout validation
     const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
-    
+
     const isReady = Boolean(paymentMethod) && !isLoading && !stripeLoading && (checkoutOptions?.pickup || Boolean(serviceQuote)) && !isBelowMinimum;
 
     function computeLineItems() {
@@ -383,7 +383,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
-        if (!cart || checkoutOptions.pickup) {
+        // No address yet (e.g. just signed in from checkout): nothing to quote until one is chosen.
+        if (!cart || checkoutOptions.pickup || !deliveryLocation) {
             return;
         }
 

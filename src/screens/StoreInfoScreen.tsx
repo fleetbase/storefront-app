@@ -21,7 +21,8 @@ const StoreInfoScreen = ({ route }) => {
     const { t } = useLanguage();
     const params = route.params ?? {};
     const store = new Store(params.store, adapter);
-    const storeLocation = new StoreLocation(params.storeLocation, adapter);
+    // A store without a location (or opened without one) shows no hours instead of crashing.
+    const storeLocation = params.storeLocation ? new StoreLocation(params.storeLocation, adapter) : null;
 
     const ContentPanel = ({ title = null, children }) => {
         return (
@@ -143,11 +144,13 @@ const StoreInfoScreen = ({ route }) => {
                 </ScrollView>
             </YStack>
             <YStack py='$4' px='$3' gap='$4'>
-                <ContentPanel title='Hours'>
-                    <YStack py='$2' px='$1'>
-                        <StoreLocationSchedule storeLocation={storeLocation} />
-                    </YStack>
-                </ContentPanel>
+                {storeLocation && (
+                    <ContentPanel title='Hours'>
+                        <YStack py='$2' px='$1'>
+                            <StoreLocationSchedule storeLocation={storeLocation} />
+                        </YStack>
+                    </ContentPanel>
+                )}
                 <ContentPanel
                     title={
                         <XStack alignItems='center' gap='$2'>
