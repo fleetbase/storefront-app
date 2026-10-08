@@ -392,13 +392,15 @@ export default function useStripeCheckout({ onOrderComplete }) {
         let isMounted = true;
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
+            // A new address or cart gets a fresh try; an earlier failure shouldn't stick.
+            setIsServiceQuoteUnavailable(false);
             try {
                 const quote = await getServiceQuote(quoteOrigin ?? currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                setIsServiceQuoteUnavailable(true);
+                if (isMounted) setIsServiceQuoteUnavailable(true);
                 console.warn('Error fetching service quote:', error);
             }
         };
