@@ -208,6 +208,7 @@ const NetworkMapScreen = () => {
                     </YStack>
                 ) : (
                     <FlatList
+                        showsVerticalScrollIndicator={false}
                         ref={listRef}
                         horizontal
                         data={stores}

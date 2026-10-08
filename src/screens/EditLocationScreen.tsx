@@ -121,6 +121,8 @@ const EditLocationScreen = ({ route }) => {
             </XStack>
 
             <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24, gap: 12 }}
                 keyboardShouldPersistTaps='handled'
                 keyboardDismissMode='interactive'

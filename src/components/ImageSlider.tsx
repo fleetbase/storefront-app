@@ -53,6 +53,7 @@ const ImageSlider = ({
         <View style={containerStyle}>
             {/* ScrollView for Images */}
             <ScrollView
+                showsVerticalScrollIndicator={false}
                 ref={scrollViewRef}
                 horizontal
                 pagingEnabled

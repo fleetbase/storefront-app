@@ -29,7 +29,7 @@ import useFooterOffset from '../../hooks/use-footer-offset';
 import { ORDER_PAGE_SIZE, summarizeOrder } from '../../commerce/order-summary';
 import { storefrontConfig } from '../../utils';
 import { toast } from '../../utils/toast';
-import { Badge, Button, Card, MediaImage, Sheet, UIText, initials, radius, space, tintFor } from '../../ui';
+import { Badge, Button, Card, MediaImage, Sheet, UIText, elevation, initials, radius, space, tintFor } from '../../ui';
 
 type Row = { key: string; icon: IconDefinition; label: string; value?: string | null; badge?: number; onPress: () => void; hidden?: boolean };
 
@@ -198,7 +198,11 @@ const AccountHomeScreen = () => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: footer + insets.bottom + 32, paddingHorizontal: space.gutter, gap: 22 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: footer + insets.bottom + 32, paddingHorizontal: space.gutter, gap: 22 }}
+            >
                 <UIText variant='display' style={{ fontSize: 28, lineHeight: 34 }} accessibilityRole='header'>
                     {t('Account.title')}
                 </UIText>
@@ -260,25 +264,34 @@ const AccountHomeScreen = () => {
                         accessibilityRole='button'
                         accessibilityLabel={t('Account.activeOrderLabel', { id: activeOrder.reference })}
                     >
-                        <Card appearance='raised' padding={16}>
+                        {/* Brand-tinted so the order in progress stands out from the menu below. */}
+                        <Card appearance='flat' padding={16} backgroundColor='$primarySoft' borderWidth={1} borderColor='$primary' style={elevation.card}>
                             <XStack gap={14} alignItems='center'>
                                 <YStack width={44} height={44} borderRadius={22} backgroundColor='$primary' alignItems='center' justifyContent='center'>
-                                    <FontAwesomeIcon icon={faTruckFast} size={18} color='#fff' />
+                                    <FontAwesomeIcon icon={faTruckFast} size={18} color={theme.primaryText.val} />
                                 </YStack>
                                 <YStack flex={1} gap={2}>
-                                    <UIText variant='captionStrong' tone='brand'>
-                                        {t('Account.activeOrder')}
-                                    </UIText>
+                                    <XStack alignItems='center' gap={6}>
+                                        <YStack width={8} height={8} borderRadius={4} backgroundColor='$successForeground' accessibilityElementsHidden />
+                                        <UIText variant='captionStrong' tone='brand'>
+                                            {t('Account.activeOrder')}
+                                        </UIText>
+                                    </XStack>
                                     <UIText variant='bodyStrong' numberOfLines={1}>
                                         {t(`Tracking.phase.${activeOrder.phase}.title`, {
-                                            store: '',
+                                            store: activeOrder.storeName,
                                             driver: t('Tracking.yourDriver'),
                                         })}
                                     </UIText>
+                                    <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                                        {[activeOrder.storeName, activeOrder.reference].filter(Boolean).join(' · ')}
+                                    </UIText>
                                 </YStack>
-                                <UIText variant='captionStrong' tone='brand'>
-                                    {t('Account.track')}
-                                </UIText>
+                                <YStack paddingHorizontal={12} paddingVertical={6} borderRadius={radius.pill} backgroundColor='$primary'>
+                                    <UIText variant='captionStrong' tone='onPrimary'>
+                                        {t('Account.track')}
+                                    </UIText>
+                                </YStack>
                             </XStack>
                         </Card>
                     </Pressable>

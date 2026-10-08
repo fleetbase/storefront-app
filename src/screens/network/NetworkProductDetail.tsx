@@ -131,10 +131,11 @@ export default function NetworkProductDetail({ params }: { params: any }) {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView contentContainerStyle={{ paddingBottom: 150 }} keyboardShouldPersistTaps='handled'>
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }} keyboardShouldPersistTaps='handled'>
                 <YStack height={GALLERY_HEIGHT}>
                     {images.length > 1 ? (
                         <ScrollView
+                            showsVerticalScrollIndicator={false}
                             horizontal
                             pagingEnabled
                             showsHorizontalScrollIndicator={false}

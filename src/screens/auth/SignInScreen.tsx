@@ -88,6 +88,8 @@ const SignInScreen = ({ route, mode: forcedMode }: any) => {
         <YStack flex={1} backgroundColor='$background'>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
                 <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24, paddingHorizontal: space.gutter + 4, gap: 20 }}
                     keyboardShouldPersistTaps='handled'
                 >

@@ -11,7 +11,24 @@ import useCustomerCoordinates from '../../hooks/use-customer-coordinates';
 import useCartSummary from '../../hooks/use-cart-summary';
 import { mergeNetworkPage } from '../../network/network-runtime';
 import { rememberStores } from '../../network/store-names';
-import { Button, CartPill, Chip, EmptyState, ErrorState, IconButton, SegmentedControl, Sheet, Skeleton, StoreCard, UIText, radius, space, storeSummary, usesTwelveHourClock, type StoreSummary } from '../../ui';
+import {
+    Button,
+    CartPill,
+    Chip,
+    EmptyState,
+    ErrorState,
+    IconButton,
+    SegmentedControl,
+    Sheet,
+    Skeleton,
+    StoreCard,
+    UIText,
+    radius,
+    space,
+    storeSummary,
+    usesTwelveHourClock,
+    type StoreSummary,
+} from '../../ui';
 import { activeFilterCount, buildDirectoryQuery, DEFAULT_DIRECTORY_FILTERS, DIRECTORY_DISTANCES, DIRECTORY_SORTS, type DirectoryFilters } from '../../network/directory';
 
 const PAGE_SIZE = 20;
@@ -146,12 +163,26 @@ const NetworkDirectoryScreen = ({ route }: any) => {
                 </YStack>
                 <IconButton icon={faMagnifyingGlass} accessibilityLabel={t('Network.directory.search', { name: title })} onPress={() => navigation.navigate('NetworkSearchTab')} size={44} />
             </XStack>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 12, gap: 8 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 12, gap: 8 }}
+            >
                 <Chip icon={faArrowDownWideShort} label={t(`Network.sort.${filters.sort}`)} onPress={() => openSheet('sort')} />
-                <Chip icon={faSliders} label={filterCount > 0 ? t('Network.directory.filtersCount', { count: filterCount }) : t('Network.directory.filters')} selected={filterCount > 0} onPress={() => openSheet('filters')} />
+                <Chip
+                    icon={faSliders}
+                    label={filterCount > 0 ? t('Network.directory.filtersCount', { count: filterCount }) : t('Network.directory.filters')}
+                    selected={filterCount > 0}
+                    onPress={() => openSheet('filters')}
+                />
                 {filters.openNow && <Chip appearance='filled' label={t('Network.openNow')} onRemove={() => setFilters({ ...filters, openNow: false })} />}
                 {filters.maximumDistance !== null && (
-                    <Chip appearance='filled' label={t('Network.directory.within', { distance: filters.maximumDistance / 1000 })} onRemove={() => setFilters({ ...filters, maximumDistance: null })} />
+                    <Chip
+                        appearance='filled'
+                        label={t('Network.directory.within', { distance: filters.maximumDistance / 1000 })}
+                        onRemove={() => setFilters({ ...filters, maximumDistance: null })}
+                    />
                 )}
                 {filters.tags.map((tag) => (
                     <Chip key={tag} appearance='filled' label={tag} onRemove={() => setFilters({ ...filters, tags: filters.tags.filter((item) => item !== tag) })} />
@@ -164,6 +195,8 @@ const NetworkDirectoryScreen = ({ route }: any) => {
         <YStack flex={1} backgroundColor='$background'>
             {header}
             <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={stores}
                 keyExtractor={(item, index) => item.id ?? String(index)}
                 renderItem={({ item }) => (
@@ -227,10 +260,25 @@ const NetworkDirectoryScreen = ({ route }: any) => {
                                     onPress={() => setDraft({ ...draft, sort })}
                                     accessibilityRole='radio'
                                     accessibilityState={{ selected }}
-                                    style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: theme.borderColor.val }}
+                                    style={{
+                                        minHeight: 52,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        borderBottomWidth: 1,
+                                        borderColor: theme.borderColor.val,
+                                    }}
                                 >
                                     <UIText variant={selected ? 'bodyStrong' : 'body'}>{t(`Network.sort.${sort}`)}</UIText>
-                                    <YStack width={22} height={22} borderRadius={11} borderWidth={2} borderColor={selected ? '$primaryForeground' : '$borderColorWithShadow'} alignItems='center' justifyContent='center'>
+                                    <YStack
+                                        width={22}
+                                        height={22}
+                                        borderRadius={11}
+                                        borderWidth={2}
+                                        borderColor={selected ? '$primaryForeground' : '$borderColorWithShadow'}
+                                        alignItems='center'
+                                        justifyContent='center'
+                                    >
                                         {selected && <YStack width={10} height={10} borderRadius={5} backgroundColor='$primaryForeground' />}
                                     </YStack>
                                 </Pressable>
@@ -247,7 +295,14 @@ const NetworkDirectoryScreen = ({ route }: any) => {
                                 <XStack flexWrap='wrap' gap={8}>
                                     {tags.map((tag) => {
                                         const selected = draft.tags.includes(tag);
-                                        return <Chip key={tag} label={tag} selected={selected} onPress={() => setDraft({ ...draft, tags: selected ? draft.tags.filter((item) => item !== tag) : [...draft.tags, tag] })} />;
+                                        return (
+                                            <Chip
+                                                key={tag}
+                                                label={tag}
+                                                selected={selected}
+                                                onPress={() => setDraft({ ...draft, tags: selected ? draft.tags.filter((item) => item !== tag) : [...draft.tags, tag] })}
+                                            />
+                                        );
                                     })}
                                 </XStack>
                             </YStack>
@@ -256,7 +311,12 @@ const NetworkDirectoryScreen = ({ route }: any) => {
                             <UIText variant='bodyStrong' nativeID='open-now-label'>
                                 {t('Network.openNow')}
                             </UIText>
-                            <Switch value={draft.openNow} onValueChange={(openNow) => setDraft({ ...draft, openNow })} accessibilityLabelledBy='open-now-label' trackColor={{ true: theme.primary.val, false: theme.borderColorWithShadow.val }} />
+                            <Switch
+                                value={draft.openNow}
+                                onValueChange={(openNow) => setDraft({ ...draft, openNow })}
+                                accessibilityLabelledBy='open-now-label'
+                                trackColor={{ true: theme.primary.val, false: theme.borderColorWithShadow.val }}
+                            />
                         </XStack>
                         <YStack gap={10}>
                             <UIText variant='label' tone='secondary'>

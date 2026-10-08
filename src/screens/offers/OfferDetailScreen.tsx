@@ -163,7 +163,7 @@ const OfferDetailScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView contentContainerStyle={{ paddingBottom: 130 }}>
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
                 <MediaImage uri={offer.imageUrl} seed={offer.name} height={HERO + insets.top} radius={0} dimmed={ended}>
                     <YStack
                         position='absolute'

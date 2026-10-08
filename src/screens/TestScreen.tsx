@@ -140,7 +140,7 @@ const TestScreen = ({ route }) => {
                     <Text fontWeight='600' mb='$2'>
                         {source ? `Response from ${source}` : 'No response yet'}
                     </Text>
-                    <ScrollView style={{ flex: 1 }}>
+                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
                         {loading ? (
                             <Text>Loading…</Text>
                         ) : error ? (

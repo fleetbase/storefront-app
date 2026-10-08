@@ -182,6 +182,8 @@ const AddNewLocationScreen = ({ route }) => {
             </XStack>
 
             <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={typing ? (results ?? []) : []}
                 keyExtractor={(item) => item.place_id}
                 keyboardShouldPersistTaps='handled'

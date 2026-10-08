@@ -36,7 +36,7 @@ const StoreCategoriesPills = ({ categories = [], onPressCategory }) => {
         );
     };
 
-    return <FlatList data={categories} horizontal showsHorizontalScrollIndicator={false} keyExtractor={(item) => item.id} renderItem={renderCategory} />;
+    return <FlatList showsVerticalScrollIndicator={false} data={categories} horizontal showsHorizontalScrollIndicator={false} keyExtractor={(item) => item.id} renderItem={renderCategory} />;
 };
 
 export default StoreCategoriesPills;

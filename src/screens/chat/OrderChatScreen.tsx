@@ -11,7 +11,18 @@ import { useAuth } from '../../contexts/AuthContext';
 import useChatRequest from '../../hooks/use-chat-request';
 import useSocketClusterClient from '../../hooks/use-socket-cluster-client';
 import { ApiError } from '../../commerce/http';
-import { MAX_CHAT_PHOTOS, QUICK_REPLIES, chatDriver, fetchChat, fetchOlderMessages, markChatRead, mergeMessages, sendChatMessage, type ChatMessage, type OrderChat } from '../../commerce/order-chat';
+import {
+    MAX_CHAT_PHOTOS,
+    QUICK_REPLIES,
+    chatDriver,
+    fetchChat,
+    fetchOlderMessages,
+    markChatRead,
+    mergeMessages,
+    sendChatMessage,
+    type ChatMessage,
+    type OrderChat,
+} from '../../commerce/order-chat';
 import { shortName } from '../../commerce/order-progress';
 import { Button, EmptyState, ErrorState, IconButton, Skeleton, UIText, formatClock, initials, radius, space, usesTwelveHourClock } from '../../ui';
 
@@ -96,11 +107,26 @@ const OrderChatScreen = ({ route }: any) => {
     const send = async (content: string, photos: Photo[] = [], retryId?: string) => {
         if (!orderId || (!content.trim() && photos.length === 0)) return;
         const localId = retryId ?? `local-${Date.now()}-${counter.current++}`;
-        const local: Row = { id: localId, content: content.trim(), mine: true, senderName: null, attachments: photos.map((photo, index) => ({ id: `${localId}-${index}`, url: photo.uri, type: photo.type })), read: false, createdAt: null, state: 'sending', photos };
+        const local: Row = {
+            id: localId,
+            content: content.trim(),
+            mine: true,
+            senderName: null,
+            attachments: photos.map((photo, index) => ({ id: `${localId}-${index}`, url: photo.uri, type: photo.type })),
+            read: false,
+            createdAt: null,
+            state: 'sending',
+            photos,
+        };
         setMessages((current) => [...current.filter((message) => message.id !== localId), local]);
         try {
             const sent = await sendChatMessage(request, orderId, { content, photos: photos.map(({ data, type }) => ({ data, type })) });
-            setMessages((current) => mergeMessages(current.filter((message) => message.id !== localId), [sent]));
+            setMessages((current) =>
+                mergeMessages(
+                    current.filter((message) => message.id !== localId),
+                    [sent]
+                )
+            );
         } catch (failure) {
             if (failure instanceof ApiError && failure.reason === 'chat_closed') {
                 setClosedNow(true);
@@ -134,21 +160,52 @@ const OrderChatScreen = ({ route }: any) => {
     };
 
     const header = (
-        <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingTop={insets.top + 4} paddingBottom={10} borderBottomWidth={1} borderColor='$borderColor' backgroundColor='$background'>
+        <XStack
+            alignItems='center'
+            gap={8}
+            paddingHorizontal={8}
+            paddingTop={insets.top + 4}
+            paddingBottom={10}
+            borderBottomWidth={1}
+            borderColor='$borderColor'
+            backgroundColor='$background'
+        >
             <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('Chat.backToOrder')} onPress={() => navigation.goBack()} />
             <YStack width={40} height={40} borderRadius={20} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
-                {driver?.avatarUrl ? <Image source={{ uri: driver.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20 }} /> : <UIText variant='captionStrong' tone='brand'>{initials(driverName)}</UIText>}
-                {!!chat && <YStack position='absolute' right={-1} bottom={-1} width={12} height={12} borderRadius={6} borderWidth={2} borderColor='$background' backgroundColor={driver?.online && !closed ? '$success' : '$borderColorWithShadow'} />}
+                {driver?.avatarUrl ? (
+                    <Image source={{ uri: driver.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+                ) : (
+                    <UIText variant='captionStrong' tone='brand'>
+                        {initials(driverName)}
+                    </UIText>
+                )}
+                {!!chat && (
+                    <YStack
+                        position='absolute'
+                        right={-1}
+                        bottom={-1}
+                        width={12}
+                        height={12}
+                        borderRadius={6}
+                        borderWidth={2}
+                        borderColor='$background'
+                        backgroundColor={driver?.online && !closed ? '$success' : '$borderColorWithShadow'}
+                    />
+                )}
             </YStack>
             <YStack flex={1}>
                 <UIText variant='bodyStrong' numberOfLines={1}>
                     {driverName}
                 </UIText>
                 <UIText variant='caption' tone='secondary' numberOfLines={1} style={{ fontSize: 12 }}>
-                    {[t('Chat.yourDriver'), orderReference ? `#${orderReference}` : null, closed ? t('Chat.closedShort') : driver?.online ? t('Chat.online') : null].filter(Boolean).join(' · ')}
+                    {[t('Chat.yourDriver'), orderReference ? `#${orderReference}` : null, closed ? t('Chat.closedShort') : driver?.online ? t('Chat.online') : null]
+                        .filter(Boolean)
+                        .join(' · ')}
                 </UIText>
             </YStack>
-            {!!driverPhone && !closed && <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driverPhone}`)} />}
+            {!!driverPhone && !closed && (
+                <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driverPhone}`)} />
+            )}
         </XStack>
     );
 
@@ -186,6 +243,8 @@ const OrderChatScreen = ({ route }: any) => {
             ) : (
                 <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
                     <FlatList
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
                         ref={listRef}
                         inverted
                         data={data}
@@ -206,7 +265,16 @@ const OrderChatScreen = ({ route }: any) => {
                     />
 
                     {closed ? (
-                        <YStack gap={6} paddingHorizontal={space.gutter} paddingTop={14} paddingBottom={insets.bottom + 14} borderTopWidth={1} borderColor='$borderColor' backgroundColor='$background' accessibilityRole='summary'>
+                        <YStack
+                            gap={6}
+                            paddingHorizontal={space.gutter}
+                            paddingTop={14}
+                            paddingBottom={insets.bottom + 14}
+                            borderTopWidth={1}
+                            borderColor='$borderColor'
+                            backgroundColor='$background'
+                            accessibilityRole='summary'
+                        >
                             <UIText variant='bodyStrong' textAlign='center' style={{ fontSize: 14 }}>
                                 {t('Chat.closedTitle')}
                             </UIText>
@@ -216,9 +284,21 @@ const OrderChatScreen = ({ route }: any) => {
                         </YStack>
                     ) : (
                         <YStack paddingTop={10} paddingBottom={insets.bottom + 10} borderTopWidth={1} borderColor='$borderColor' backgroundColor='$background' gap={10}>
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps='handled' contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }} accessibilityLabel={t('Chat.quickReplies')}>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                keyboardShouldPersistTaps='handled'
+                                contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }}
+                                accessibilityLabel={t('Chat.quickReplies')}
+                            >
                                 {QUICK_REPLIES.map((key) => (
-                                    <Pressable key={key} onPress={() => send(t(`Chat.quick.${key}`))} accessibilityRole='button' style={{ height: 36, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: theme.borderColor.val, justifyContent: 'center' }}>
+                                    <Pressable
+                                        key={key}
+                                        onPress={() => send(t(`Chat.quick.${key}`))}
+                                        accessibilityRole='button'
+                                        style={{ height: 36, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: theme.borderColor.val, justifyContent: 'center' }}
+                                    >
                                         <UIText variant='captionStrong'>{t(`Chat.quick.${key}`)}</UIText>
                                     </Pressable>
                                 ))}
@@ -234,7 +314,17 @@ const OrderChatScreen = ({ route }: any) => {
                                     onSubmitEditing={submit}
                                     returnKeyType='send'
                                     maxLength={2000}
-                                    style={{ flex: 1, minHeight: 44, paddingHorizontal: 16, borderRadius: radius.pill, borderWidth: 1, borderColor: theme.borderColor.val, backgroundColor: theme.surface.val, color: theme.textPrimary.val, fontSize: 15 }}
+                                    style={{
+                                        flex: 1,
+                                        minHeight: 44,
+                                        paddingHorizontal: 16,
+                                        borderRadius: radius.pill,
+                                        borderWidth: 1,
+                                        borderColor: theme.borderColor.val,
+                                        backgroundColor: theme.surface.val,
+                                        color: theme.textPrimary.val,
+                                        fontSize: 15,
+                                    }}
                                 />
                                 <IconButton icon={faPaperPlane} variant='solid' size={44} accessibilityLabel={t('Chat.send')} disabled={!draft.trim()} onPress={submit} />
                             </XStack>
@@ -249,14 +339,32 @@ const OrderChatScreen = ({ route }: any) => {
 function Bubble({ message, time, onRetry }: { message: Row; time: string; onRetry: () => void }) {
     const theme = useTheme();
     const { t } = useLanguage();
-    const meta = message.state === 'sending' ? t('Chat.sending') : message.state === 'failed' ? t('Chat.failed') : [time, message.mine && message.read ? t('Chat.read') : null].filter(Boolean).join(' · ');
+    const meta =
+        message.state === 'sending'
+            ? t('Chat.sending')
+            : message.state === 'failed'
+              ? t('Chat.failed')
+              : [time, message.mine && message.read ? t('Chat.read') : null].filter(Boolean).join(' · ');
     return (
-        <YStack alignSelf={message.mine ? 'flex-end' : 'flex-start'} maxWidth='78%' alignItems={message.mine ? 'flex-end' : 'flex-start'} gap={3} opacity={message.state === 'sending' ? 0.7 : 1}>
+        <YStack
+            alignSelf={message.mine ? 'flex-end' : 'flex-start'}
+            maxWidth='78%'
+            alignItems={message.mine ? 'flex-end' : 'flex-start'}
+            gap={3}
+            opacity={message.state === 'sending' ? 0.7 : 1}
+        >
             {message.attachments.map((attachment) => (
                 <Image key={attachment.id} source={{ uri: attachment.url }} style={{ width: 200, height: 140, borderRadius: 16 }} resizeMode='cover' accessibilityLabel={t('Chat.photo')} />
             ))}
             {!!message.content && (
-                <YStack paddingHorizontal={14} paddingVertical={10} borderRadius={18} borderBottomRightRadius={message.mine ? 6 : 18} borderBottomLeftRadius={message.mine ? 18 : 6} backgroundColor={message.mine ? '$primary' : '$background'}>
+                <YStack
+                    paddingHorizontal={14}
+                    paddingVertical={10}
+                    borderRadius={18}
+                    borderBottomRightRadius={message.mine ? 6 : 18}
+                    borderBottomLeftRadius={message.mine ? 18 : 6}
+                    backgroundColor={message.mine ? '$primary' : '$background'}
+                >
                     <UIText style={{ color: message.mine ? theme.primaryText.val : theme.textPrimary.val, fontSize: 15, lineHeight: 21 }}>{message.content}</UIText>
                 </YStack>
             )}

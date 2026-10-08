@@ -289,6 +289,7 @@ const NetworkHomeScreen = () => {
 
             {categories.length > 0 && (
                 <ScrollView
+                    showsVerticalScrollIndicator={false}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }}
@@ -309,7 +310,7 @@ const NetworkHomeScreen = () => {
             {offers.length > 0 && (
                 <YStack gap={12}>
                     <SectionHeader title={t('Offers.title')} onAction={() => navigation.navigate('Offers')} />
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}>
+                    <ScrollView showsVerticalScrollIndicator={false} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}>
                         {offers.map((offer, index) => (
                             <OfferBanner key={offer.id} offer={offer} primary={index === 0} width={304} onPress={() => navigation.navigate('Offer', { offerId: offer.id })} />
                         ))}
@@ -321,7 +322,12 @@ const NetworkHomeScreen = () => {
                 !rail.loading && (rail.failed || rail.stores.length === 0) ? null : (
                     <YStack key={rail.key} gap={12}>
                         <SectionHeader title={rail.title} subtitle={rail.subtitle} onAction={() => openDirectory({ sort: rail.params.sort, tags: rail.params.tagged })} />
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 14 }}>
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 14 }}
+                        >
                             {rail.loading
                                 ? [0, 1].map((index) => <HeroCardSkeleton key={index} />)
                                 : rail.stores.map((store) => <StoreCard key={store.id ?? store.name} store={store} width={268} onPress={() => openStore(store)} />)}
@@ -337,6 +343,8 @@ const NetworkHomeScreen = () => {
     return (
         <YStack flex={1} backgroundColor='$background'>
             <Animated.FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={stores}
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: Platform.OS !== 'web' })}
                 scrollEventThrottle={16}

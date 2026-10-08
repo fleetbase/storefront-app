@@ -106,6 +106,8 @@ const AddressBookScreen = () => {
             </XStack>
 
             <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={places}
                 keyExtractor={(place, index) => placeKey(place) ?? String(index)}
                 renderItem={renderPlace}

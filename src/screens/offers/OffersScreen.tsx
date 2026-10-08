@@ -81,8 +81,20 @@ const OffersScreen = ({ route }: any) => {
                 </YStack>
             </XStack>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 12, gap: 8 }} accessibilityRole='radiogroup' accessibilityLabel={t('Offers.filterLabel')}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
+            >
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 12, gap: 8 }}
+                    accessibilityRole='radiogroup'
+                    accessibilityLabel={t('Offers.filterLabel')}
+                >
                     {(['all', ...OFFER_TYPES] as const).map((option) => {
                         const selected = option === filter;
                         return (
@@ -91,7 +103,15 @@ const OffersScreen = ({ route }: any) => {
                                 onPress={() => setFilter(option)}
                                 accessibilityRole='radio'
                                 accessibilityState={{ checked: selected }}
-                                style={{ height: 36, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: selected ? theme.textPrimary.val : theme.borderColor.val, backgroundColor: selected ? theme.textPrimary.val : theme.background.val, justifyContent: 'center' }}
+                                style={{
+                                    height: 36,
+                                    paddingHorizontal: 14,
+                                    borderRadius: radius.pill,
+                                    borderWidth: 1,
+                                    borderColor: selected ? theme.textPrimary.val : theme.borderColor.val,
+                                    backgroundColor: selected ? theme.textPrimary.val : theme.background.val,
+                                    justifyContent: 'center',
+                                }}
                             >
                                 <UIText variant='captionStrong' style={{ color: selected ? theme.background.val : theme.textPrimary.val }}>
                                     {t(`Offers.filters.${option}`)}

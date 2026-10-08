@@ -91,7 +91,12 @@ export function Sheet({ open, onClose, title, children, footer, dismissible = tr
                                     {dismissible && <IconButton icon={faXmark} accessibilityLabel={t('UI.close')} onPress={onClose} />}
                                 </XStack>
                             )}
-                            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: footer ? 12 : insets.bottom + 20 }} keyboardShouldPersistTaps='handled'>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: footer ? 12 : insets.bottom + 20 }}
+                                keyboardShouldPersistTaps='handled'
+                            >
                                 {children}
                             </ScrollView>
                             {footer && (

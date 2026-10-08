@@ -327,7 +327,12 @@ const OrderScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$surface'>
-            <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} />} contentContainerStyle={{ flexGrow: 1 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} />}
+                contentContainerStyle={{ flexGrow: 1 }}
+            >
                 {/* zIndex 0 gives the map its own stacking context so web map panes stay under the sheet. */}
                 <YStack height={MAP_HEIGHT} backgroundColor='$surface2' accessibilityLabel={t('Tracking.mapLabel')} position='relative' zIndex={0}>
                     {canRenderRoute && (isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />)}

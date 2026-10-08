@@ -18,7 +18,19 @@ function dayDate(key: string): Date {
  * Date rail and start-time grid for a bookable service. Days without booking hours are
  * shown but marked closed; picking one explains it and offers the next open day.
  */
-export default function BookingPicker({ hours, duration, value, onChange, providerName }: { hours: BookingHour[]; duration: number | null; value: string | null; onChange: (scheduledAt: string | null) => void; providerName: string }) {
+export default function BookingPicker({
+    hours,
+    duration,
+    value,
+    onChange,
+    providerName,
+}: {
+    hours: BookingHour[];
+    duration: number | null;
+    value: string | null;
+    onChange: (scheduledAt: string | null) => void;
+    providerName: string;
+}) {
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const hour12 = usesTwelveHourClock(locale);
@@ -26,7 +38,9 @@ export default function BookingPicker({ hours, duration, value, onChange, provid
     const days = useMemo(() => bookingDays(hours, now, 14), [hours, now]);
     const chosen = parseScheduledAt(value);
     // Start on the chosen day, else the first day that still has a time to book.
-    const [selectedDate, setSelectedDate] = useState<string>(() => chosen?.date ?? days.find((entry) => entry.open && startTimes(entry.date, hours, { now, duration }).some((time) => !time.past))?.date ?? days[0].date);
+    const [selectedDate, setSelectedDate] = useState<string>(
+        () => chosen?.date ?? days.find((entry) => entry.open && startTimes(entry.date, hours, { now, duration }).some((time) => !time.past))?.date ?? days[0].date
+    );
     const day = days.find((entry) => entry.date === selectedDate) ?? days[0];
     const times = useMemo(() => (day.open ? startTimes(day.date, hours, { now, duration }) : []), [day, duration, hours, now]);
     const available = times.filter((time) => !time.past);
@@ -51,7 +65,14 @@ export default function BookingPicker({ hours, duration, value, onChange, provid
                         {month}
                     </UIText>
                 </XStack>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }} accessibilityRole='radiogroup' accessibilityLabel={t('Booking.date')}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }}
+                    accessibilityRole='radiogroup'
+                    accessibilityLabel={t('Booking.date')}
+                >
                     {days.map((entry, index) => {
                         const selected = entry.date === selectedDate;
                         const label = `${weekday(entry.date, 'long')} ${dayDate(entry.date).getDate()}${entry.open ? '' : `, ${t('Booking.noBookings')}`}`;
@@ -62,7 +83,18 @@ export default function BookingPicker({ hours, duration, value, onChange, provid
                                 accessibilityRole='radio'
                                 accessibilityState={{ checked: selected }}
                                 accessibilityLabel={label}
-                                style={{ width: 58, height: 76, borderRadius: radius.button, borderWidth: 1, borderColor: selected ? theme.primary.val : theme.borderColor.val, backgroundColor: selected ? theme.primary.val : theme.background.val, alignItems: 'center', justifyContent: 'center', gap: 2, opacity: !entry.open && !selected ? 0.55 : 1 }}
+                                style={{
+                                    width: 58,
+                                    height: 76,
+                                    borderRadius: radius.button,
+                                    borderWidth: 1,
+                                    borderColor: selected ? theme.primary.val : theme.borderColor.val,
+                                    backgroundColor: selected ? theme.primary.val : theme.background.val,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 2,
+                                    opacity: !entry.open && !selected ? 0.55 : 1,
+                                }}
                             >
                                 <UIText variant='captionStrong' tone={selected ? 'onPrimary' : entry.open ? 'primary' : 'secondary'} style={{ fontSize: 12 }}>
                                     {index === 0 ? t('Booking.today') : weekday(entry.date, 'short')}
@@ -113,9 +145,22 @@ export default function BookingPicker({ hours, duration, value, onChange, provid
                                                     accessibilityRole='radio'
                                                     accessibilityState={{ checked: selected, disabled: time.past }}
                                                     accessibilityLabel={`${timeLabel(time)}${time.past ? `, ${t('Booking.unavailable')}` : ''}`}
-                                                    style={{ width: '31.5%', height: 44, borderRadius: radius.button, borderWidth: 1, borderColor: selected ? theme.primary.val : time.past ? 'transparent' : theme.borderColor.val, backgroundColor: selected ? theme.primary.val : time.past ? theme.surface.val : theme.background.val, alignItems: 'center', justifyContent: 'center' }}
+                                                    style={{
+                                                        width: '31.5%',
+                                                        height: 44,
+                                                        borderRadius: radius.button,
+                                                        borderWidth: 1,
+                                                        borderColor: selected ? theme.primary.val : time.past ? 'transparent' : theme.borderColor.val,
+                                                        backgroundColor: selected ? theme.primary.val : time.past ? theme.surface.val : theme.background.val,
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
                                                 >
-                                                    <UIText variant='captionStrong' tone={selected ? 'onPrimary' : time.past ? 'placeholder' : 'primary'} style={{ fontSize: 14, textDecorationLine: time.past ? 'line-through' : 'none' }}>
+                                                    <UIText
+                                                        variant='captionStrong'
+                                                        tone={selected ? 'onPrimary' : time.past ? 'placeholder' : 'primary'}
+                                                        style={{ fontSize: 14, textDecorationLine: time.past ? 'line-through' : 'none' }}
+                                                    >
                                                         {formatClock(time.minutes, hour12)}
                                                     </UIText>
                                                 </Pressable>

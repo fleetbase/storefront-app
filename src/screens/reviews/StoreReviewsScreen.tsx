@@ -284,6 +284,8 @@ const StoreReviewsScreen = ({ route }: any) => {
                 <ErrorState title={t('Reviews.loadFailed')} onRetry={() => setVersion((value) => value + 1)} />
             ) : (
                 <FlatList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     data={loading ? [] : others}
                     keyExtractor={(item) => item.id}
                     ListHeaderComponent={header}

@@ -207,7 +207,13 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     const categoryTabs = (
         <YStack backgroundColor='$background' borderBottomWidth={1} borderColor='$borderColor'>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }} accessibilityRole='tablist'>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }}
+                accessibilityRole='tablist'
+            >
                 {catalogLoading
                     ? [0, 1, 2].map((index) => <Skeleton key={index} width={80} height={14} style={{ marginVertical: 14 }} />)
                     : sections.map((section) => {
@@ -251,7 +257,14 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView ref={scrollRef} onScroll={onScroll} scrollEventThrottle={32} contentContainerStyle={{ paddingBottom: cart.count > 0 ? 110 : 40 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                ref={scrollRef}
+                onScroll={onScroll}
+                scrollEventThrottle={32}
+                contentContainerStyle={{ paddingBottom: cart.count > 0 ? 110 : 40 }}
+            >
                 <YStack marginBottom={16}>
                     <MediaImage uri={store.backdropUrl} seed={store.name} height={HERO_HEIGHT + insets.top} radius={0} dimmed={closed} />
                     <YStack marginTop={-28} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' paddingHorizontal={space.gutter} gap={12}>
@@ -388,7 +401,12 @@ const NetworkStoreScreen = ({ route }: any) => {
                                             {t('Network.store.recommended')}
                                         </UIText>
                                     </YStack>
-                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}>
+                                    <ScrollView
+                                        showsVerticalScrollIndicator={false}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}
+                                    >
                                         {recommended.map((product) => (
                                             <ProductTile key={product.summary.id} product={product.summary} storeClosed={closed} onPress={() => openProduct(product)} />
                                         ))}

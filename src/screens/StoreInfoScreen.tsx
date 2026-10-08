@@ -68,7 +68,7 @@ const StoreInfoScreen = ({ route }) => {
                 defaultStoreLocation={storeLocation}
             />
             <YStack pt='$4'>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView showsVerticalScrollIndicator={false} horizontal showsHorizontalScrollIndicator={false}>
                     {store.isAttributeFilled('phone') && (
                         <Pill
                             icon={faPhone}

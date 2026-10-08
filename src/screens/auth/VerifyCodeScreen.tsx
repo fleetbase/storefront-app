@@ -106,6 +106,8 @@ const VerifyCodeScreen = ({ route, purpose }: { route: any; purpose: VerifyPurpo
         <YStack flex={1} backgroundColor='$background'>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
                 <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24, paddingHorizontal: space.gutter + 4, gap: 22 }}
                     keyboardShouldPersistTaps='handled'
                 >

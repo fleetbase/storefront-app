@@ -59,6 +59,8 @@ const CartContents = ({}) => {
     return (
         <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' space='$2'>
             <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={cart.contents()}
                 scrollEnabled={false}
                 keyExtractor={(item) => item.id}

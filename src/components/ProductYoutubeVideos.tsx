@@ -120,6 +120,8 @@ const ProductYoutubeVideos = ({ product }) => {
 
     return (
         <FlatList
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             data={urls}
             keyExtractor={(item, index) => index}
             renderItem={renderItem}

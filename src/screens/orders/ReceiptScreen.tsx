@@ -220,6 +220,8 @@ const ReceiptScreen = ({ route }: any) => {
         <YStack flex={1} backgroundColor='$background'>
             {header}
             <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: insets.bottom + 32 }}
                 refreshControl={<RefreshControl refreshing={state === 'refreshing'} onRefresh={() => reload('refreshing')} />}
             >

@@ -36,7 +36,19 @@ function split(value: string | null | undefined): { country: Country; number: st
  * A mobile number: a country button (flag and dial code, searchable list) and the local
  * number. Reports the full number in E.164 form ("+6591234567").
  */
-export default function PhoneField({ value, onChange, onSubmit, invalid = false, autoFocus = false }: { value: string; onChange: (phone: string) => void; onSubmit?: () => void; invalid?: boolean; autoFocus?: boolean }) {
+export default function PhoneField({
+    value,
+    onChange,
+    onSubmit,
+    invalid = false,
+    autoFocus = false,
+}: {
+    value: string;
+    onChange: (phone: string) => void;
+    onSubmit?: () => void;
+    invalid?: boolean;
+    autoFocus?: boolean;
+}) {
     const theme = useTheme();
     const { t } = useLanguage();
     const initial = useMemo(() => split(value), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -56,7 +68,16 @@ export default function PhoneField({ value, onChange, onSubmit, invalid = false,
                     onPress={() => setPicking(true)}
                     accessibilityRole='button'
                     accessibilityLabel={t('Auth.countryCode', { country: country.name, code: country.dial })}
-                    style={{ height: 54, paddingHorizontal: 12, borderRadius: radius.button, borderWidth: 1, borderColor: theme.borderColor.val, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                    style={{
+                        height: 54,
+                        paddingHorizontal: 12,
+                        borderRadius: radius.button,
+                        borderWidth: 1,
+                        borderColor: theme.borderColor.val,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                    }}
                 >
                     <UIText variant='bodyStrong'>
                         {country.flag} +{country.dial}
@@ -81,7 +102,18 @@ export default function PhoneField({ value, onChange, onSubmit, invalid = false,
                     accessibilityLabel={t('Auth.mobileNumber')}
                     placeholder={t('Auth.phonePlaceholder')}
                     placeholderTextColor={theme.textPlaceholder.val}
-                    style={{ flex: 1, height: 54, paddingHorizontal: 14, borderRadius: radius.button, borderWidth: 2, borderColor: invalid ? theme.errorForeground.val : focused ? theme.primary.val : theme.borderColor.val, color: theme.textPrimary.val, fontSize: 17, fontWeight: '600', letterSpacing: 0.3 }}
+                    style={{
+                        flex: 1,
+                        height: 54,
+                        paddingHorizontal: 14,
+                        borderRadius: radius.button,
+                        borderWidth: 2,
+                        borderColor: invalid ? theme.errorForeground.val : focused ? theme.primary.val : theme.borderColor.val,
+                        color: theme.textPrimary.val,
+                        fontSize: 17,
+                        fontWeight: '600',
+                        letterSpacing: 0.3,
+                    }}
                 />
             </XStack>
 
@@ -89,6 +121,8 @@ export default function PhoneField({ value, onChange, onSubmit, invalid = false,
                 <YStack gap={10}>
                     <TextField value={search} onChangeText={setSearch} placeholder={t('Auth.searchCountry')} accessibilityLabel={t('Auth.searchCountry')} height={44} autoCorrect={false} />
                     <FlatList
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
                         data={matches}
                         keyExtractor={(item) => item.code}
                         keyboardShouldPersistTaps='handled'

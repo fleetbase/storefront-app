@@ -137,7 +137,9 @@ const NotificationsScreen = () => {
             <UIText flex={1} variant='heading' accessibilityRole='header'>
                 {t('Notifications.title')}
             </UIText>
-            {!!customer && <IconButton icon={faGear} variant='plain' size={44} accessibilityLabel={t('Notifications.settings')} onPress={() => navigation.navigate('NotificationSettings')} />}
+            {!!customer && (
+                <IconButton icon={faGear} variant='plain' size={44} accessibilityLabel={t('Notifications.settings')} onPress={() => navigation.navigate('NotificationSettings')} />
+            )}
         </XStack>
     );
 
@@ -145,7 +147,13 @@ const NotificationsScreen = () => {
         return (
             <YStack flex={1} backgroundColor='$background'>
                 {header}
-                <EmptyState icon={faBell} title={t('Notifications.signInTitle')} description={t('Notifications.signInBody')} actionLabel={t('Checkout.signIn')} onAction={() => navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login' })} />
+                <EmptyState
+                    icon={faBell}
+                    title={t('Notifications.signInTitle')}
+                    description={t('Notifications.signInBody')}
+                    actionLabel={t('Checkout.signIn')}
+                    onAction={() => navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login' })}
+                />
             </YStack>
         );
     }
@@ -169,6 +177,8 @@ const NotificationsScreen = () => {
                 <ErrorState title={t('Notifications.loadFailed')} onRetry={() => load()} />
             ) : (
                 <SectionList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     sections={sections}
                     keyExtractor={(item) => item.id}
                     stickySectionHeadersEnabled={false}
@@ -183,7 +193,19 @@ const NotificationsScreen = () => {
                                     {FILTERS.map((option) => {
                                         const selected = option === filter;
                                         return (
-                                            <Pressable key={option} onPress={() => setFilter(option)} accessibilityRole='tab' accessibilityState={{ selected }} style={{ height: 34, paddingHorizontal: 12, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: selected ? theme.textPrimary.val : theme.surface.val }}>
+                                            <Pressable
+                                                key={option}
+                                                onPress={() => setFilter(option)}
+                                                accessibilityRole='tab'
+                                                accessibilityState={{ selected }}
+                                                style={{
+                                                    height: 34,
+                                                    paddingHorizontal: 12,
+                                                    borderRadius: radius.pill,
+                                                    justifyContent: 'center',
+                                                    backgroundColor: selected ? theme.textPrimary.val : theme.surface.val,
+                                                }}
+                                            >
                                                 <UIText variant='captionStrong' style={{ color: selected ? theme.background.val : theme.textPrimary.val }}>
                                                     {t(`Notifications.filters.${option}`)}
                                                 </UIText>
@@ -211,7 +233,12 @@ const NotificationsScreen = () => {
                             rightThreshold={40}
                             overshootRight={false}
                             renderRightActions={() => (
-                                <Pressable onPress={() => remove(item)} accessibilityRole='button' accessibilityLabel={t('Notifications.delete')} style={{ width: 88, backgroundColor: theme.error.val, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                                <Pressable
+                                    onPress={() => remove(item)}
+                                    accessibilityRole='button'
+                                    accessibilityLabel={t('Notifications.delete')}
+                                    style={{ width: 88, backgroundColor: theme.error.val, alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                                >
                                     <FontAwesomeIcon icon={faTrashCan} size={18} color='#ffffff' />
                                     <UIText variant='captionStrong' style={{ color: '#ffffff' }}>
                                         {t('Notifications.delete')}
@@ -224,7 +251,11 @@ const NotificationsScreen = () => {
                     )}
                     ListEmptyComponent={
                         <View>
-                            <EmptyState icon={faBell} title={filter === 'all' ? t('Notifications.emptyTitle') : t('Notifications.emptyFiltered')} description={filter === 'all' ? t('Notifications.emptyBody') : undefined} />
+                            <EmptyState
+                                icon={faBell}
+                                title={filter === 'all' ? t('Notifications.emptyTitle') : t('Notifications.emptyFiltered')}
+                                description={filter === 'all' ? t('Notifications.emptyBody') : undefined}
+                            />
                         </View>
                     }
                     ListFooterComponent={
@@ -243,7 +274,12 @@ const NotificationsScreen = () => {
 function NotificationRow({ item, when, onPress, onDelete }: { item: InboxItem; when: string | null; onPress: () => void; onDelete: () => void }) {
     const theme = useTheme();
     const { t } = useLanguage();
-    const tone = { order: ['$primarySoft', theme.primaryForeground.val], chat: ['$successSoft', theme.successForeground.val], offer: ['$warningSoft', theme.warningForeground.val], other: ['$surface', theme.textSecondary.val] }[item.kind];
+    const tone = {
+        order: ['$primarySoft', theme.primaryForeground.val],
+        chat: ['$successSoft', theme.successForeground.val],
+        offer: ['$warningSoft', theme.warningForeground.val],
+        other: ['$surface', theme.textSecondary.val],
+    }[item.kind];
     const action = item.target ? { order: t('Notifications.trackOrder'), chat: t('Notifications.openChat'), offer: t('Notifications.viewOffer'), other: null }[item.kind] : null;
 
     return (
@@ -254,7 +290,14 @@ function NotificationRow({ item, when, onPress, onDelete }: { item: InboxItem; w
             accessibilityActions={[{ name: 'delete', label: t('Notifications.delete') }]}
             onAccessibilityAction={(event) => event.nativeEvent.actionName === 'delete' && onDelete()}
         >
-            <XStack gap={12} paddingHorizontal={space.gutter} paddingVertical={14} borderBottomWidth={1} borderColor='$borderColor' backgroundColor={item.read ? '$background' : '$primarySoft'}>
+            <XStack
+                gap={12}
+                paddingHorizontal={space.gutter}
+                paddingVertical={14}
+                borderBottomWidth={1}
+                borderColor='$borderColor'
+                backgroundColor={item.read ? '$background' : '$primarySoft'}
+            >
                 <YStack width={44} height={44} borderRadius={item.kind === 'offer' ? radius.tile : 22} backgroundColor={tone[0] as any} alignItems='center' justifyContent='center'>
                     <FontAwesomeIcon icon={ICONS[item.kind]} size={18} color={tone[1]} />
                 </YStack>
@@ -274,7 +317,9 @@ function NotificationRow({ item, when, onPress, onDelete }: { item: InboxItem; w
                             {item.body}
                         </UIText>
                     )}
-                    {!!item.imageUrl && <Image source={{ uri: item.imageUrl }} style={{ height: 110, borderRadius: radius.tile, marginTop: 6 }} resizeMode='cover' accessibilityIgnoresInvertColors />}
+                    {!!item.imageUrl && (
+                        <Image source={{ uri: item.imageUrl }} style={{ height: 110, borderRadius: radius.tile, marginTop: 6 }} resizeMode='cover' accessibilityIgnoresInvertColors />
+                    )}
                     {!!action && (
                         <UIText variant='captionStrong' tone='brand' style={{ marginTop: 4 }}>
                             {action} →

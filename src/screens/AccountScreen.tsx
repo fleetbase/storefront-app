@@ -302,7 +302,7 @@ const AccountScreen = () => {
 
     return (
         <ScreenWrapper>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <AbsoluteTabBarScreenWrapper>
                     <YStack flex={1} bg='$background' space='$8' pt='$3'>
                         <YStack space='$2'>
@@ -319,6 +319,8 @@ const AccountScreen = () => {
                                 </YStack>
                             </XStack>
                             <FlatList
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 data={accountMenu}
                                 keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}
@@ -333,6 +335,8 @@ const AccountScreen = () => {
                                 </Text>
                             </YStack>
                             <FlatList
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 data={dataProtectionMenu}
                                 keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}

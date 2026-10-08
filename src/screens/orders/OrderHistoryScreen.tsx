@@ -191,6 +191,8 @@ const OrderHistoryScreen = () => {
                 </YStack>
             ) : (
                 <SectionList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     sections={sections}
                     keyExtractor={(order) => order.id}
                     stickySectionHeadersEnabled={false}

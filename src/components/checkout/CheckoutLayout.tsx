@@ -161,6 +161,8 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                 scrolls the focused field into view; padding here as well would double it. */}
             <KeyboardAvoidingView style={{ flex: 1 }} enabled={false}>
                 <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 160 }}
                     keyboardShouldPersistTaps='handled'
                     keyboardDismissMode='interactive'

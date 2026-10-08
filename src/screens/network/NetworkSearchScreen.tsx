@@ -69,7 +69,12 @@ const NetworkSearchScreen = () => {
         let active = true;
         Promise.allSettled([network.getTags(), storefront.categories.query({ parents_only: true })]).then(([tagResult, categoryResult]) => {
             if (!active) return;
-            if (tagResult.status === 'fulfilled') setTags(Array.from(tagResult.value || []).filter((tag): tag is string => typeof tag === 'string').slice(0, 10));
+            if (tagResult.status === 'fulfilled')
+                setTags(
+                    Array.from(tagResult.value || [])
+                        .filter((tag): tag is string => typeof tag === 'string')
+                        .slice(0, 10)
+                );
             if (categoryResult.status === 'fulfilled') setCategories(Array.from(categoryResult.value || []));
         });
         return () => {
@@ -154,14 +159,26 @@ const NetworkSearchScreen = () => {
     const rows = [
         ...(visible.stores.length ? [{ key: 'stores-header', type: 'header' as const, title: t('Network.searchTabs.stores') }] : []),
         ...visible.stores.map((store) => ({ key: `store-${store.id}`, type: 'store' as const, store })),
-        ...(visible.products.length ? [{ key: 'products-header', type: 'header' as const, title: tab === 'services' ? t('Network.searchTabs.services') : t('Network.productsAndServices') }] : []),
+        ...(visible.products.length
+            ? [{ key: 'products-header', type: 'header' as const, title: tab === 'services' ? t('Network.searchTabs.services') : t('Network.productsAndServices') }]
+            : []),
         ...visible.products.map((product) => ({ key: `product-${product.summary.id}`, type: 'product' as const, product })),
     ];
 
     return (
         <YStack flex={1} backgroundColor='$background' paddingTop={insets.top}>
             <YStack paddingHorizontal={space.gutter} paddingTop={6} gap={10} backgroundColor='$background' borderBottomWidth={showingResults ? 1 : 0} borderColor='$borderColor'>
-                <XStack alignItems='center' gap={10} height={48} paddingLeft={14} paddingRight={6} borderRadius={radius.button} backgroundColor='$surface' borderWidth={2} borderColor={trimmed ? '$primaryForeground' : 'transparent'}>
+                <XStack
+                    alignItems='center'
+                    gap={10}
+                    height={48}
+                    paddingLeft={14}
+                    paddingRight={6}
+                    borderRadius={radius.button}
+                    backgroundColor='$surface'
+                    borderWidth={2}
+                    borderColor={trimmed ? '$primaryForeground' : 'transparent'}
+                >
                     <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                     <TextInput
                         value={query}
@@ -174,7 +191,14 @@ const NetworkSearchScreen = () => {
                         autoCorrect={false}
                         returnKeyType='search'
                         // The field's border shows focus, so drop the browser's own outline on web.
-                        style={{ flex: 1, fontSize: 16, fontWeight: '500', color: theme.textPrimary.val, paddingVertical: 0, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null) }}
+                        style={{
+                            flex: 1,
+                            fontSize: 16,
+                            fontWeight: '500',
+                            color: theme.textPrimary.val,
+                            paddingVertical: 0,
+                            ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null),
+                        }}
                     />
                     {!!query && <IconButton icon={faXmark} size={32} accessibilityLabel={t('Network.clearSearch')} onPress={() => setQuery('')} />}
                 </XStack>
@@ -189,7 +213,12 @@ const NetworkSearchScreen = () => {
             </YStack>
 
             {!showingResults ? (
-                <ScrollView contentContainerStyle={{ padding: space.gutter, gap: 24, paddingBottom: 40 }} keyboardShouldPersistTaps='handled'>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ padding: space.gutter, gap: 24, paddingBottom: 40 }}
+                    keyboardShouldPersistTaps='handled'
+                >
                     {recents.length > 0 && (
                         <YStack>
                             <XStack alignItems='center' justifyContent='space-between'>
@@ -206,7 +235,13 @@ const NetworkSearchScreen = () => {
                                     <Pressable onPress={() => setQuery(term)} accessibilityRole='button' style={{ flex: 1, paddingVertical: 12 }}>
                                         <UIText>{term}</UIText>
                                     </Pressable>
-                                    <IconButton icon={faXmark} variant='plain' size={36} accessibilityLabel={t('Network.removeRecent', { term })} onPress={() => setRecents(removeRecentSearch(recents, term))} />
+                                    <IconButton
+                                        icon={faXmark}
+                                        variant='plain'
+                                        size={36}
+                                        accessibilityLabel={t('Network.removeRecent', { term })}
+                                        onPress={() => setRecents(removeRecentSearch(recents, term))}
+                                    />
                                 </XStack>
                             ))}
                         </YStack>
@@ -232,9 +267,19 @@ const NetworkSearchScreen = () => {
                                 {categories.map((category: any) => (
                                     <Pressable
                                         key={category.id}
-                                        onPress={() => navigation.navigate('NetworkCategory', { categoryId: category.id, category: { id: category.id, name: category.getAttribute('name') } })}
+                                        onPress={() =>
+                                            navigation.navigate('NetworkCategory', { categoryId: category.id, category: { id: category.id, name: category.getAttribute('name') } })
+                                        }
                                         accessibilityRole='button'
-                                        style={{ width: '31%', minWidth: 100, height: 88, borderRadius: radius.card, padding: 12, justifyContent: 'space-between', backgroundColor: theme.surface.val }}
+                                        style={{
+                                            width: '31%',
+                                            minWidth: 100,
+                                            height: 88,
+                                            borderRadius: radius.card,
+                                            padding: 12,
+                                            justifyContent: 'space-between',
+                                            backgroundColor: theme.surface.val,
+                                        }}
                                     >
                                         <FontAwesomeIcon icon={categoryIcon(category.getAttribute('name'))} size={18} color={theme.primaryForeground.val} />
                                         <UIText variant='captionStrong' numberOfLines={2}>
@@ -248,6 +293,8 @@ const NetworkSearchScreen = () => {
                 </ScrollView>
             ) : (
                 <FlatList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     data={error || firstLoad || noResults ? [] : rows}
                     keyExtractor={(item) => item.key}
                     keyboardShouldPersistTaps='handled'
@@ -305,8 +352,24 @@ function ProductResultRow({ product, onPress }: { product: ProductSummary; onPre
         <Pressable
             onPress={onPress}
             accessibilityRole='button'
-            accessibilityLabel={[product.name, product.isService ? t('Network.bookableService') : null, price, product.storeName ? t('Network.fromStore', { store: product.storeName }) : null].filter(Boolean).join(', ')}
-            style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 84, paddingVertical: 8, borderBottomWidth: 1, borderColor: theme.borderColor.val, opacity: pressed ? 0.85 : 1 })}
+            accessibilityLabel={[
+                product.name,
+                product.isService ? t('Network.bookableService') : null,
+                price,
+                product.storeName ? t('Network.fromStore', { store: product.storeName }) : null,
+            ]
+                .filter(Boolean)
+                .join(', ')}
+            style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+                minHeight: 84,
+                paddingVertical: 8,
+                borderBottomWidth: 1,
+                borderColor: theme.borderColor.val,
+                opacity: pressed ? 0.85 : 1,
+            })}
         >
             <MediaImage uri={product.imageUrl} seed={product.name} width={68} height={68} radius={radius.tile} dimmed={!product.available} />
             <YStack flex={1} gap={3}>

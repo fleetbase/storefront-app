@@ -118,7 +118,12 @@ const WriteReviewScreen = ({ route }: any) => {
     return (
         <YStack flex={1} backgroundColor='$background'>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                <ScrollView contentContainerStyle={{ paddingTop: top + 4, paddingBottom: 140 }} keyboardShouldPersistTaps='handled'>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingTop: top + 4, paddingBottom: 140 }}
+                    keyboardShouldPersistTaps='handled'
+                >
                     <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingBottom={4}>
                         <IconButton icon={faXmark} variant='plain' size={44} accessibilityLabel={t('UI.close')} onPress={() => navigation.goBack()} />
                         <UIText variant='heading' accessibilityRole='header'>

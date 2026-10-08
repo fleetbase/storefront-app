@@ -189,7 +189,12 @@ const CartScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$surface'>
-            <ScrollView contentContainerStyle={{ paddingTop: (isModal ? 12 : insets.top) + 8, paddingBottom: hasItems ? 230 : 40 }} keyboardShouldPersistTaps='handled'>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingTop: (isModal ? 12 : insets.top) + 8, paddingBottom: hasItems ? 230 : 40 }}
+                keyboardShouldPersistTaps='handled'
+            >
                 <XStack alignItems='flex-end' justifyContent='space-between' paddingHorizontal={space.gutter} paddingBottom={14} paddingTop={8}>
                     <YStack>
                         <UIText variant='display' accessibilityRole='header'>

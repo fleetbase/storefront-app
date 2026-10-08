@@ -97,11 +97,21 @@ const NotificationSettingsScreen = () => {
             </XStack>
 
             {!customer ? (
-                <EmptyState icon={faBell} title={t('Notifications.signInTitle')} description={t('Notifications.signInBody')} actionLabel={t('Checkout.signIn')} onAction={() => navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login' })} />
+                <EmptyState
+                    icon={faBell}
+                    title={t('Notifications.signInTitle')}
+                    description={t('Notifications.signInBody')}
+                    actionLabel={t('Checkout.signIn')}
+                    onAction={() => navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login' })}
+                />
             ) : error ? (
                 <ErrorState title={t('Notifications.loadFailed')} onRetry={load} />
             ) : (
-                <ScrollView contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: insets.bottom + 40, gap: 14 }}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: insets.bottom + 40, gap: 14 }}
+                >
                     {pushEnabled === false && (
                         <YStack gap={10} padding={14} borderRadius={radius.card} backgroundColor='$warningSoft' accessibilityRole='alert'>
                             <XStack gap={10}>
@@ -151,7 +161,22 @@ const NotificationSettingsScreen = () => {
 function Switch({ value, onChange, label, disabled }: { value: boolean; onChange: () => void; label: string; disabled?: boolean }) {
     const theme = useTheme();
     return (
-        <Pressable onPress={onChange} disabled={disabled} accessibilityRole='switch' accessibilityLabel={label} accessibilityState={{ checked: value, disabled }} hitSlop={6} style={{ width: 52, height: 32, borderRadius: 16, backgroundColor: value ? theme.primary.val : theme.borderColorWithShadow.val, justifyContent: 'center', opacity: disabled ? 0.7 : 1 }}>
+        <Pressable
+            onPress={onChange}
+            disabled={disabled}
+            accessibilityRole='switch'
+            accessibilityLabel={label}
+            accessibilityState={{ checked: value, disabled }}
+            hitSlop={6}
+            style={{
+                width: 52,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: value ? theme.primary.val : theme.borderColorWithShadow.val,
+                justifyContent: 'center',
+                opacity: disabled ? 0.7 : 1,
+            }}
+        >
             <YStack width={26} height={26} borderRadius={13} backgroundColor='#ffffff' marginLeft={value ? 23 : 3} style={elevation.card} />
         </Pressable>
     );
