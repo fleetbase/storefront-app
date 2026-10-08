@@ -658,6 +658,9 @@
         "removeBooking": "{{name}} захиалгыг хасах"
     },
     "Checkout": {
+        "routeFrom": "{{store}}-аас ойролцоогоор {{distance}}",
+        "routeStores": "{{count}} дэлгүүр · ойролцоогоор {{distance}}",
+        "routeLabel": "Хүргэлтийн маршрут, {{route}}. Хүргэлтийн хаяг солих",
         "title": "Төлбөр",
         "backToCart": "Сагс руу буцах",
         "fulfilment": "Хүргэлт эсвэл очиж авах",

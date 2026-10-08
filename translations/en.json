@@ -658,6 +658,9 @@
         "removeBooking": "Remove booking {{name}}"
     },
     "Checkout": {
+        "routeFrom": "About {{distance}} from {{store}}",
+        "routeStores": "{{count}} stores · about {{distance}}",
+        "routeLabel": "Delivery route, {{route}}. Change delivery address",
         "title": "Checkout",
         "backToCart": "Back to cart",
         "fulfilment": "Delivery or pickup",

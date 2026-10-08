@@ -30,6 +30,7 @@ import {
     usesTwelveHourClock,
 } from '../../ui';
 import TipSelector from './TipSelector';
+import { RoutePreview, type RouteStore } from './RoutePreview';
 import { parseScheduledAt } from '../../commerce/booking';
 
 /** The fields every gateway's checkout hook provides (Stripe, QPay). */
@@ -102,6 +103,15 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     };
 
     const location = checkout.deliveryLocation;
+    // One origin per store in the cart, for the route preview.
+    const routeStores: RouteStore[] = useMemo(
+        () =>
+            groups.flatMap((group) => {
+                const storeLocationId = group.lines.find((line) => line.storeLocationId)?.storeLocationId;
+                return group.storeId && storeLocationId ? [{ storeId: group.storeId, storeLocationId, name: group.name }] : [];
+            }),
+        [groups]
+    );
     const placeAttr = (key: string) => (typeof location?.getAttribute === 'function' ? location.getAttribute(key) : location?.[key]);
     const quoteAmount = checkout.serviceQuote ? Number(checkout.serviceQuote.getAttribute?.('amount') ?? checkout.serviceQuote.amount ?? 0) : null;
     const quoteState: 'none' | 'loading' | 'ready' | 'unavailable' = isPickup
@@ -176,6 +186,11 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
 
                         {!isPickup ? (
                             <Card padding={14} gap={12} accessibilityLabel={t('Checkout.deliveryAddress')}>
+                                {!!location && (
+                                    <YStack marginTop={-14} marginHorizontal={-14}>
+                                        <RoutePreview stores={routeStores} destination={location} unavailable={quoteState === 'unavailable'} onPress={() => setAddressSheet(true)} />
+                                    </YStack>
+                                )}
                                 <XStack gap={12} alignItems='flex-start'>
                                     <YStack width={40} height={40} borderRadius={radius.pill} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
                                         <FontAwesomeIcon icon={faLocationDot} size={18} color={theme.primaryForeground.val} />

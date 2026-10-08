@@ -63,7 +63,10 @@ function withNativeMethods(map) {
         map.fitToCoordinates = (coordinates = [], options = {}) => {
             if (!coordinates.length) return;
             const padding = options.edgePadding ? Math.max(options.edgePadding.top || 0, options.edgePadding.left || 0) : 24;
-            map.fitBounds(coordinates.map((coordinate) => [coordinate.latitude, coordinate.longitude]), { padding: [padding, padding], animate: options.animated !== false });
+            map.fitBounds(
+                coordinates.map((coordinate) => [coordinate.latitude, coordinate.longitude]),
+                { padding: [padding, padding], animate: options.animated !== false }
+            );
         };
     }
     return map;
@@ -90,9 +93,7 @@ export const MapView = forwardRef((props, ref) => {
     const { initialRegion, style, onRegionChangeComplete, onPress, onPanDrag, mapType = 'standard', scrollEnabled = true, zoomEnabled = true, children, ...rest } = props;
     const { center, zoom } = initialRegion ? regionToCenterAndZoom(initialRegion) : { center: [0, 0], zoom: 1 };
     const tileUrl =
-        mapType === 'satellite'
-            ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        mapType === 'satellite' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     return (
         <MapContainer center={center} zoom={zoom} style={style} scrollWheelZoom={scrollEnabled} touchZoom={zoomEnabled !== false} zoomControl={false} {...rest}>
@@ -144,10 +145,16 @@ function defaultIcon() {
     return dotIcon;
 }
 
-export const Polyline = ({ coordinates, ...props }) => {
+export const Polyline = ({ coordinates, strokeColor, strokeWidth, lineDashPattern, ...props }) => {
     const { Polyline: LeafletPolyline } = require('react-leaflet');
     const positions = coordinates.map((coord) => [coord.latitude, coord.longitude]);
-    return <LeafletPolyline positions={positions} {...props} />;
+    // Map react-native-maps line styling onto Leaflet's path options.
+    const pathOptions = {
+        ...(strokeColor ? { color: strokeColor } : {}),
+        ...(strokeWidth ? { weight: strokeWidth } : {}),
+        ...(lineDashPattern ? { dashArray: Array.isArray(lineDashPattern) ? lineDashPattern.join(' ') : lineDashPattern } : {}),
+    };
+    return <LeafletPolyline positions={positions} pathOptions={pathOptions} {...props} />;
 };
 
 export const Polygon = (props) => {
