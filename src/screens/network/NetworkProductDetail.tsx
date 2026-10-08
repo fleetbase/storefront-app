@@ -15,6 +15,7 @@ import BookingPicker from '../../components/booking/BookingPicker';
 import { parseScheduledAt, serviceDuration } from '../../commerce/booking';
 import { toast } from '../../utils/toast';
 import { formatCurrency } from '../../utils/format';
+import useScreenTopInset from '../../hooks/use-screen-top-inset';
 import {
     Badge,
     Button,
@@ -52,6 +53,8 @@ const GALLERY_HEIGHT = 280;
 export default function NetworkProductDetail({ params }: { params: any }) {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    // Presented as a modal (iOS page sheet), which already clears the status bar.
+    const top = useScreenTopInset(true);
     const theme = useTheme();
     const { width } = useWindowDimensions();
     const { t, locale } = useLanguage();
@@ -176,7 +179,16 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                         <Pressable
                             onPress={() => navigation.navigate('NetworkStore', { storeId: store.id })}
                             accessibilityRole='link'
-                            style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: radius.card, backgroundColor: theme.surface.val }}
+                            style={{
+                                minHeight: 52,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: 10,
+                                paddingHorizontal: 12,
+                                paddingVertical: 10,
+                                borderRadius: radius.card,
+                                backgroundColor: theme.surface.val,
+                            }}
                         >
                             <StoreLogo uri={store.logoUrl} name={store.name} size={32} radius={8} />
                             <UIText flex={1} variant='caption'>
@@ -191,13 +203,28 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                 </YStack>
 
                 {groups.map((group) => (
-                    <OptionGroupView key={group.id} group={group} selection={selection} currency={currency} onToggle={(optionId) => setSelection((current) => toggleOption(groups, current, group.id, optionId))} />
+                    <OptionGroupView
+                        key={group.id}
+                        group={group}
+                        selection={selection}
+                        currency={currency}
+                        onToggle={(optionId) => setSelection((current) => toggleOption(groups, current, group.id, optionId))}
+                    />
                 ))}
 
                 {isBooking && (
                     <YStack marginTop={24} gap={22}>
                         <BookingPicker hours={bookingHours} duration={duration} value={scheduledAt} onChange={setScheduledAt} providerName={store?.name ?? ''} />
-                        <XStack marginHorizontal={space.gutter} alignItems='center' gap={12} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor' accessibilityLabel={t('Booking.serviceAddress')}>
+                        <XStack
+                            marginHorizontal={space.gutter}
+                            alignItems='center'
+                            gap={12}
+                            padding={12}
+                            borderRadius={radius.card}
+                            borderWidth={1}
+                            borderColor='$borderColor'
+                            accessibilityLabel={t('Booking.serviceAddress')}
+                        >
                             <YStack width={40} height={40} borderRadius={20} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
                                 <FontAwesomeIcon icon={faHouse} size={17} color={theme.primaryForeground.val} />
                             </YStack>
@@ -209,7 +236,11 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                                     {currentLocation ? [placeAttr('name'), placeAttr('street1')].filter(Boolean).join(' · ') : t('Booking.noAddress')}
                                 </UIText>
                             </YStack>
-                            <Button variant='ghost' size='sm' onPress={() => (savedLocations?.length ? setAddressSheet(true) : navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' }))}>
+                            <Button
+                                variant='ghost'
+                                size='sm'
+                                onPress={() => (savedLocations?.length ? setAddressSheet(true) : navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' }))}
+                            >
                                 {currentLocation ? t('Checkout.change') : t('Checkout.addAddress')}
                             </Button>
                         </XStack>
@@ -217,11 +248,23 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                 )}
             </ScrollView>
 
-            <YStack position='absolute' top={insets.top + 10} left={space.gutter}>
+            <YStack position='absolute' top={top + 10} left={space.gutter}>
                 <IconButton icon={faXmark} variant='floating' accessibilityLabel={t('UI.close')} onPress={() => navigation.goBack()} />
             </YStack>
 
-            <YStack position='absolute' left={0} right={0} bottom={0} paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 16} gap={8} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor'>
+            <YStack
+                position='absolute'
+                left={0}
+                right={0}
+                bottom={0}
+                paddingHorizontal={space.gutter}
+                paddingTop={12}
+                paddingBottom={insets.bottom + 16}
+                gap={8}
+                backgroundColor='$background'
+                borderTopWidth={1}
+                borderColor='$borderColor'
+            >
                 {!!blockedReason && (
                     <UIText variant='captionStrong' tone='warning' textAlign='center' accessibilityRole='alert'>
                         {blockedReason}
@@ -238,7 +281,14 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                 <XStack gap={12} alignItems='center'>
                     {!isBooking && !editingLineId && <Stepper value={quantity} onChange={setQuantity} min={1} max={99} itemName={summary.name} />}
                     <YStack flex={1}>
-                        <Button size='lg' fullWidth disabled={!!blockedReason} loading={adding} onPress={add} trailing={formatCurrency(isBooking ? unitPrice(base, groups, selection) : total, currency)}>
+                        <Button
+                            size='lg'
+                            fullWidth
+                            disabled={!!blockedReason}
+                            loading={adding}
+                            onPress={add}
+                            trailing={formatCurrency(isBooking ? unitPrice(base, groups, selection) : total, currency)}
+                        >
                             {editingLineId ? t('Booking.saveChanges') : isBooking ? t('Booking.addToCart') : t('ProductDetail.addToCart')}
                         </Button>
                     </YStack>
@@ -292,7 +342,16 @@ function OptionGroupView({ group, selection, currency, onToggle }: { group: Opti
                             onPress={() => enabled && onToggle(option.id)}
                             accessibilityRole={group.multiple ? 'checkbox' : 'radio'}
                             accessibilityState={{ checked: selected, disabled: !enabled }}
-                            style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, borderBottomWidth: 1, borderColor: theme.borderColor.val, opacity: enabled ? 1 : 0.45 }}
+                            style={{
+                                minHeight: 52,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: 12,
+                                paddingVertical: 8,
+                                borderBottomWidth: 1,
+                                borderColor: theme.borderColor.val,
+                                opacity: enabled ? 1 : 0.45,
+                            }}
                         >
                             <YStack
                                 width={22}

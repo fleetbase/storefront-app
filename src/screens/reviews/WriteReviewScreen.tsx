@@ -11,6 +11,7 @@ import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useReviewRequest from '../../hooks/use-review-request';
 import { MAX_REVIEW_LENGTH, MAX_REVIEW_PHOTOS, createReview, fetchEligibility, type Eligibility, type ReviewPhoto } from '../../commerce/reviews';
 import { Button, IconButton, Skeleton, StarInput, StoreLogo, TextField, UIText, elevation, radius, space } from '../../ui';
+import useScreenTopInset from '../../hooks/use-screen-top-inset';
 
 type Photo = ReviewPhoto & { uri: string };
 
@@ -24,6 +25,7 @@ const WORDS = ['', 'poor', 'notGreat', 'okay', 'good', 'excellent'] as const;
 const WriteReviewScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    const top = useScreenTopInset(true);
     const theme = useTheme();
     const { t } = useLanguage();
     const { mode } = useStorefrontRuntime();
@@ -52,7 +54,14 @@ const WriteReviewScreen = ({ route }: any) => {
     }, [attempt, orderId, request, storeId]);
 
     const addPhotos = async () => {
-        const result = await launchImageLibrary({ mediaType: 'photo', includeBase64: true, selectionLimit: MAX_REVIEW_PHOTOS - photos.length, maxWidth: 1600, maxHeight: 1600, quality: 0.8 });
+        const result = await launchImageLibrary({
+            mediaType: 'photo',
+            includeBase64: true,
+            selectionLimit: MAX_REVIEW_PHOTOS - photos.length,
+            maxWidth: 1600,
+            maxHeight: 1600,
+            quality: 0.8,
+        });
         const picked = (result.assets ?? []).filter((asset) => asset.base64 && asset.uri).map((asset) => ({ data: asset.base64!, type: asset.type ?? 'image/jpeg', uri: asset.uri! }));
         setPhotos((current) => [...current, ...picked].slice(0, MAX_REVIEW_PHOTOS));
     };
@@ -109,7 +118,7 @@ const WriteReviewScreen = ({ route }: any) => {
     return (
         <YStack flex={1} backgroundColor='$background'>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                <ScrollView contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 140 }} keyboardShouldPersistTaps='handled'>
+                <ScrollView contentContainerStyle={{ paddingTop: top + 4, paddingBottom: 140 }} keyboardShouldPersistTaps='handled'>
                     <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingBottom={4}>
                         <IconButton icon={faXmark} variant='plain' size={44} accessibilityLabel={t('UI.close')} onPress={() => navigation.goBack()} />
                         <UIText variant='heading' accessibilityRole='header'>
@@ -142,7 +151,15 @@ const WriteReviewScreen = ({ route }: any) => {
 
                         <YStack gap={8}>
                             <UIText variant='subheading'>{t('Reviews.tellOthers')}</UIText>
-                            <TextField value={content} onChangeText={(value) => setContent(value.slice(0, MAX_REVIEW_LENGTH))} placeholder={t('Reviews.placeholder')} multiline style={{ minHeight: 120, textAlignVertical: 'top' }} accessibilityLabel={t('Reviews.tellOthers')} maxLength={MAX_REVIEW_LENGTH} />
+                            <TextField
+                                value={content}
+                                onChangeText={(value) => setContent(value.slice(0, MAX_REVIEW_LENGTH))}
+                                placeholder={t('Reviews.placeholder')}
+                                multiline
+                                style={{ minHeight: 120, textAlignVertical: 'top' }}
+                                accessibilityLabel={t('Reviews.tellOthers')}
+                                maxLength={MAX_REVIEW_LENGTH}
+                            />
                             <UIText variant='caption' tone='secondary' alignSelf='flex-end'>
                                 {content.length} / {MAX_REVIEW_LENGTH}
                             </UIText>
@@ -158,14 +175,50 @@ const WriteReviewScreen = ({ route }: any) => {
                             <XStack gap={8} flexWrap='wrap'>
                                 {photos.map((photo, index) => (
                                     <YStack key={`${photo.uri}-${index}`}>
-                                        <Image source={{ uri: photo.uri }} style={{ width: 76, height: 76, borderRadius: radius.tile }} accessibilityLabel={t('Reviews.photoNumber', { number: index + 1 })} />
-                                        <Pressable onPress={() => setPhotos((current) => current.filter((_, i) => i !== index))} accessibilityRole='button' accessibilityLabel={t('Reviews.removePhoto')} hitSlop={8} style={{ position: 'absolute', top: -6, right: -6, width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: theme.background.val, backgroundColor: theme.textPrimary.val, alignItems: 'center', justifyContent: 'center' }}>
+                                        <Image
+                                            source={{ uri: photo.uri }}
+                                            style={{ width: 76, height: 76, borderRadius: radius.tile }}
+                                            accessibilityLabel={t('Reviews.photoNumber', { number: index + 1 })}
+                                        />
+                                        <Pressable
+                                            onPress={() => setPhotos((current) => current.filter((_, i) => i !== index))}
+                                            accessibilityRole='button'
+                                            accessibilityLabel={t('Reviews.removePhoto')}
+                                            hitSlop={8}
+                                            style={{
+                                                position: 'absolute',
+                                                top: -6,
+                                                right: -6,
+                                                width: 26,
+                                                height: 26,
+                                                borderRadius: 13,
+                                                borderWidth: 2,
+                                                borderColor: theme.background.val,
+                                                backgroundColor: theme.textPrimary.val,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
                                             <FontAwesomeIcon icon={faXmark} size={11} color={theme.background.val} />
                                         </Pressable>
                                     </YStack>
                                 ))}
                                 {photos.length < MAX_REVIEW_PHOTOS && (
-                                    <Pressable onPress={addPhotos} accessibilityRole='button' accessibilityLabel={t('Reviews.addPhoto')} style={{ width: 76, height: 76, borderRadius: radius.tile, borderWidth: 2, borderStyle: 'dashed', borderColor: theme.borderColorWithShadow.val, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Pressable
+                                        onPress={addPhotos}
+                                        accessibilityRole='button'
+                                        accessibilityLabel={t('Reviews.addPhoto')}
+                                        style={{
+                                            width: 76,
+                                            height: 76,
+                                            borderRadius: radius.tile,
+                                            borderWidth: 2,
+                                            borderStyle: 'dashed',
+                                            borderColor: theme.borderColorWithShadow.val,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
                                         <FontAwesomeIcon icon={faCamera} size={22} color={theme.textSecondary.val} />
                                     </Pressable>
                                 )}
@@ -179,7 +232,20 @@ const WriteReviewScreen = ({ route }: any) => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            <YStack position='absolute' left={0} right={0} bottom={0} paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} gap={8} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' style={elevation.floating}>
+            <YStack
+                position='absolute'
+                left={0}
+                right={0}
+                bottom={0}
+                paddingHorizontal={space.gutter}
+                paddingTop={12}
+                paddingBottom={insets.bottom + 12}
+                gap={8}
+                backgroundColor='$background'
+                borderTopWidth={1}
+                borderColor='$borderColor'
+                style={elevation.floating}
+            >
                 {checking ? (
                     <Skeleton height={54} radius={radius.button} />
                 ) : blocked ? (

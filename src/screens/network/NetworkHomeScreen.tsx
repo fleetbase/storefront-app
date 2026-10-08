@@ -43,6 +43,10 @@ import {
 const PAGE_SIZE = 20;
 const RAIL_SIZE = 8;
 const HERO_HEIGHT = 236;
+// The search field sits inside the hero, SEARCH_INSET above its bottom edge.
+const SEARCH_HEIGHT = 52;
+const SEARCH_INSET = 16;
+const HEADER_GAP = 22;
 const SERVICE_TAGS = ['services'];
 
 type Rail = { key: string; title: string; subtitle?: string; params: Record<string, unknown>; stores: StoreSummary[]; loading: boolean; failed: boolean };
@@ -61,11 +65,14 @@ const NetworkHomeScreen = () => {
     const hour12 = usesTwelveHourClock(locale);
 
     const { coordinates } = useCustomerCoordinates();
-    const summarize = useCallback((stores: any[]) => {
-        const summaries = Array.from(stores || []).map((store) => storeSummary(store, { t, hour12 }));
-        rememberStores(summaries);
-        return summaries;
-    }, [t, hour12]);
+    const summarize = useCallback(
+        (stores: any[]) => {
+            const summaries = Array.from(stores || []).map((store) => storeSummary(store, { t, hour12 }));
+            rememberStores(summaries);
+            return summaries;
+        },
+        [t, hour12]
+    );
 
     const networkName = ownerInfo?.name ?? '';
     const railDefinitions = useMemo(
@@ -186,16 +193,30 @@ const NetworkHomeScreen = () => {
     const locationLine = [locationName, currentLocation?.getAttribute?.('street1')].filter(Boolean).join(' · ');
 
     const header = (
-        <YStack gap={22} paddingBottom={6}>
+        <YStack gap={HEADER_GAP} paddingBottom={6}>
             <YStack height={HERO_HEIGHT + insets.top}>
                 <MediaImage uri={usableImageUrl(ownerInfo?.backdrop_url)} seed={networkName} height={HERO_HEIGHT + insets.top} radius={0} />
-                <LinearGradient colors={['rgba(10,14,20,0.45)', 'rgba(10,14,20,0.05)', 'rgba(10,14,20,0.72)']} locations={[0, 0.38, 1]} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+                <LinearGradient
+                    colors={['rgba(10,14,20,0.45)', 'rgba(10,14,20,0.05)', 'rgba(10,14,20,0.72)']}
+                    locations={[0, 0.38, 1]}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                />
                 <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} alignItems='center' justifyContent='space-between' gap={10}>
                     <Pressable
                         onPress={() => setLocationSheet(true)}
                         accessibilityRole='button'
                         accessibilityLabel={locationLine ? t('Network.changeLocation', { place: locationLine }) : t('Network.setLocation')}
-                        style={{ maxWidth: '82%', height: 40, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.94)', flexDirection: 'row', alignItems: 'center', gap: 6, ...elevation.floating }}
+                        style={{
+                            maxWidth: '82%',
+                            height: 40,
+                            paddingHorizontal: 12,
+                            borderRadius: radius.pill,
+                            backgroundColor: 'rgba(255,255,255,0.94)',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 6,
+                            ...elevation.floating,
+                        }}
                     >
                         <FontAwesomeIcon icon={faLocationDot} size={14} color='#14171c' />
                         <UIText variant='captionStrong' style={{ color: '#14171c', flexShrink: 1 }} numberOfLines={1}>
@@ -211,7 +232,7 @@ const NetworkHomeScreen = () => {
                         onPress={() => navigation.navigate('Notifications')}
                     />
                 </XStack>
-                <XStack position='absolute' left={space.gutter} right={space.gutter} bottom={62} alignItems='flex-end' gap={12}>
+                <XStack position='absolute' left={space.gutter} right={space.gutter} bottom={SEARCH_HEIGHT + SEARCH_INSET * 2} alignItems='flex-end' gap={12}>
                     <StoreLogo uri={usableImageUrl(ownerInfo?.logo_url)} name={networkName} size={56} />
                     <YStack flex={1} gap={2}>
                         <UIText variant='title' tone='onImage' accessibilityRole='header' numberOfLines={1}>
@@ -230,14 +251,31 @@ const NetworkHomeScreen = () => {
                 onPress={() => navigation.navigate('NetworkSearchTab')}
                 accessibilityRole='search'
                 accessibilityLabel={t('Network.searchEverything')}
-                style={{ marginTop: -72, marginHorizontal: space.gutter, height: 52, borderRadius: radius.button, backgroundColor: theme.background.val, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, ...elevation.sheet }}
+                style={{
+                    marginTop: -(HEADER_GAP + SEARCH_HEIGHT + SEARCH_INSET),
+                    marginBottom: 8,
+                    marginHorizontal: space.gutter,
+                    height: SEARCH_HEIGHT,
+                    borderRadius: radius.button,
+                    backgroundColor: theme.background.val,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    paddingHorizontal: 14,
+                    ...elevation.sheet,
+                }}
             >
                 <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                 <UIText tone='secondary'>{t('Network.searchEverything')}</UIText>
             </Pressable>
 
             {categories.length > 0 && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }} accessibilityLabel={t('Network.categoriesLabel')}>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }}
+                    accessibilityLabel={t('Network.categoriesLabel')}
+                >
                     <CategoryTile label={t('Network.allCategoriesShort')} selected onPress={() => openDirectory()} />
                     {categories.map((category: any) => (
                         <CategoryTile

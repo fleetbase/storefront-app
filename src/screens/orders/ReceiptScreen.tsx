@@ -15,6 +15,7 @@ import { adapter as fleetbaseAdapter } from '../../hooks/use-fleetbase';
 import { paymentKey, receiptText, summarizeOrder } from '../../commerce/order-summary';
 import { formatCurrency } from '../../utils/format';
 import { Badge, Button, Card, EmptyState, ErrorState, IconButton, Skeleton, StoreLogo, UIText, radius, space } from '../../ui';
+import useScreenTopInset from '../../hooks/use-screen-top-inset';
 
 function Row({ label, value, tone, strong = false }: { label: string; value: string; tone?: 'secondary' | 'success'; strong?: boolean }) {
     return (
@@ -134,6 +135,7 @@ function TaxReceipt({ order }: { order: any }) {
 const ReceiptScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    const top = useScreenTopInset(true);
     const { t } = useLanguage();
     const params = route?.params ?? {};
     const initial = params.order ?? (params.orderId ? { id: params.orderId } : null);
@@ -177,7 +179,7 @@ const ReceiptScreen = ({ route }: any) => {
     };
 
     const header = (
-        <XStack paddingTop={insets.top + 4} paddingHorizontal={space.gutter - 10} alignItems='center' justifyContent='space-between'>
+        <XStack paddingTop={top + 4} paddingHorizontal={space.gutter - 10} alignItems='center' justifyContent='space-between'>
             <XStack alignItems='center' gap={4}>
                 <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
                 <UIText variant='title' accessibilityRole='header'>

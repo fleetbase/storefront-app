@@ -11,7 +11,23 @@ import useCustomerCoordinates from '../../hooks/use-customer-coordinates';
 import { getMappableNetworkLocations, getNetworkLocationCoordinates } from '../../network/network-runtime';
 import { distanceMeters, initialRegion, isValidCoordinate, type LatLng } from '../../network/map';
 import { rememberStores } from '../../network/store-names';
-import { Button, EmptyState, ErrorState, IconButton, Skeleton, StoreCard, UIText, formatDistance, initials, radius, space, storeSummary, tintFor, usesTwelveHourClock, type StoreSummary } from '../../ui';
+import {
+    Button,
+    EmptyState,
+    ErrorState,
+    IconButton,
+    Skeleton,
+    StoreCard,
+    UIText,
+    formatDistance,
+    initials,
+    radius,
+    space,
+    storeSummary,
+    tintFor,
+    usesTwelveHourClock,
+    type StoreSummary,
+} from '../../ui';
 
 const CARD_WIDTH = 300;
 const CARD_GAP = 12;
@@ -22,6 +38,9 @@ type MapStore = { key: string; coordinate: LatLng; summary: StoreSummary };
  * Every store location on a map, centred on the customer. Tapping a marker selects its
  * card in the carousel and swiping the carousel moves the map, so the two stay in sync.
  */
+
+/** How far in to zoom on one store (about 2 km across). */
+const STORE_DELTA = 0.02;
 const NetworkMapScreen = () => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
@@ -72,17 +91,27 @@ const NetworkMapScreen = () => {
         };
     }, [customer, hour12, network, retry, t]);
 
-    const region = useMemo(() => initialRegion(customer, stores.map((store) => store.coordinate)), [customer, stores]);
+    const region = useMemo(
+        () =>
+            initialRegion(
+                customer,
+                stores.map((store) => store.coordinate)
+            ),
+        [customer, stores]
+    );
 
     // `initialRegion` only applies when the map mounts, which can be before stores load.
-    // Once they arrive, frame the customer and the nearest stores.
+    // Once they arrive, zoom in on the first store (the selected card, nearest first), as
+    // tapping its card does. Framing the customer too can span a continent when they are
+    // far from every store.
     const framed = useRef(false);
     useEffect(() => {
-        if (framed.current || stores.length === 0 || !region) return;
+        if (framed.current || stores.length === 0) return;
         framed.current = true;
-        const timer = setTimeout(() => mapRef.current?.animateToRegion?.(region, 400), 250);
+        const first = stores[0].coordinate;
+        const timer = setTimeout(() => mapRef.current?.animateToRegion?.({ ...first, latitudeDelta: STORE_DELTA, longitudeDelta: STORE_DELTA }, 400), 250);
         return () => clearTimeout(timer);
-    }, [region, stores.length]);
+    }, [stores]);
 
     const focus = useCallback(
         (index: number, { scroll = true } = {}) => {
@@ -90,7 +119,7 @@ const NetworkMapScreen = () => {
             if (!store) return;
             setSelected(index);
             if (scroll) listRef.current?.scrollToIndex?.({ index, animated: true, viewPosition: 0.5 });
-            mapRef.current?.animateToRegion?.({ ...store.coordinate, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 350);
+            mapRef.current?.animateToRegion?.({ ...store.coordinate, latitudeDelta: STORE_DELTA, longitudeDelta: STORE_DELTA }, 350);
         },
         [stores]
     );
@@ -138,7 +167,15 @@ const NetworkMapScreen = () => {
             {/* Leaflet (web) stacks its panes up to z-index 1000; keep the controls above the map. */}
             <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} justifyContent='space-between' alignItems='flex-start' gap={8} zIndex={1100}>
                 {!customer ? (
-                    <XStack flex={1} alignItems='center' gap={10} padding={12} borderRadius={radius.card} backgroundColor='$background' style={{ shadowColor: '#101828', shadowOpacity: 0.12, shadowRadius: 12, elevation: 4 }}>
+                    <XStack
+                        flex={1}
+                        alignItems='center'
+                        gap={10}
+                        padding={12}
+                        borderRadius={radius.card}
+                        backgroundColor='$background'
+                        style={{ shadowColor: '#101828', shadowOpacity: 0.12, shadowRadius: 12, elevation: 4 }}
+                    >
                         <UIText variant='caption' flex={1}>
                             {t('Network.map.setLocation')}
                         </UIText>

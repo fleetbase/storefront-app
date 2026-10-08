@@ -18,6 +18,12 @@ import { TabBar, UIText } from '../ui';
 // URL resolves to exactly one route; the other stacks opt out explicitly
 // (`linking: undefined`) so no paths are auto-generated for them.
 const createSharedNetworkScreens = (withLinking: boolean) => ({
+    // The store directory, filtered by a category or tags (from home, search and map).
+    NetworkCategory: {
+        screen: screenSlot('network.directory'),
+        linking: withLinking ? { path: 'categories/:categoryId' } : undefined,
+        options: { headerShown: false },
+    },
     NetworkStore: {
         screen: screenSlot('network.store'),
         linking: withLinking ? { path: 'stores/:storeId' } : undefined,
@@ -50,11 +56,6 @@ const NetworkHomeStack = createNativeStackNavigator({
     initialRouteName: 'NetworkHome',
     screens: {
         NetworkHome: { screen: screenSlot('network.home'), options: { headerShown: false } },
-        NetworkCategory: {
-            screen: screenSlot('network.directory'),
-            linking: { path: 'categories/:categoryId' },
-            options: { headerShown: false },
-        },
         ...createSharedNetworkScreens(true),
     },
 });

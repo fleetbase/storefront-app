@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
@@ -21,11 +21,12 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useAppTheme from '../../hooks/use-app-theme';
 import useStorage from '../../hooks/use-storage';
 import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import useFooterOffset from '../../hooks/use-footer-offset';
-import { summarizeOrder } from '../../commerce/order-summary';
+import { ORDER_PAGE_SIZE, summarizeOrder } from '../../commerce/order-summary';
 import { storefrontConfig } from '../../utils';
 import { toast } from '../../utils/toast';
 import { Badge, Button, Card, MediaImage, Sheet, UIText, initials, radius, space, tintFor } from '../../ui';
@@ -137,7 +138,13 @@ const AccountHomeScreen = () => {
     const { userColorScheme, changeScheme, schemes } = useAppTheme();
     const { customer, logout, deleteAccount } = useAuth() as any;
     const { count: unread } = useUnreadNotifications();
-    const [storedOrders] = useStorage<any[]>(`${customer?.id}_orders`, []);
+    const { mode } = useStorefrontRuntime();
+    // Offers and the inbox live in the Home tab, where their store and order links work.
+    const openInHome = (screen: string) => navigation.navigate(mode === 'network' ? 'NetworkHomeTab' : 'StoreHomeTab', { screen, initial: false });
+    const [, setStoredOrders] = useStorage<any[]>(`${customer?.id}_orders`, []);
+    // Orders fetched when the screen is shown. The on-device cache can hold orders that no
+    // longer exist (another instance, a re-seeded database), so it never decides this card.
+    const [recentOrders, setRecentOrders] = useState<any[]>([]);
     const [sheet, setSheet] = useState<'language' | 'appearance' | 'delete' | null>(null);
     const [deleting, setDeleting] = useState(false);
 
@@ -149,11 +156,29 @@ const AccountHomeScreen = () => {
     const terms = storefrontConfig('termsUrl');
     const privacy = storefrontConfig('privacyUrl');
 
-    // The most recent order still in progress, from the order history cache.
-    const activeOrder = useMemo(() => {
-        const orders = Array.isArray(storedOrders) ? storedOrders : [];
-        return orders.map(summarizeOrder).find((order) => order.id && order.active) ?? null;
-    }, [storedOrders]);
+    useFocusEffect(
+        useCallback(() => {
+            let live = true;
+            customer
+                ?.getOrderHistory?.({ sort: '-created_at', limit: ORDER_PAGE_SIZE })
+                .then((result: any) => {
+                    if (!live) return;
+                    const serialized = (Array.isArray(result) ? result : Array.from(result ?? [])).map((order: any) => (typeof order?.serialize === 'function' ? order.serialize() : order));
+                    setRecentOrders(serialized);
+                    setStoredOrders(serialized);
+                })
+                .catch(() => {
+                    // Leave the card hidden; the order history screen shows load errors.
+                });
+            return () => {
+                live = false;
+            };
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [customer?.id])
+    );
+
+    // The most recent order still in progress.
+    const activeOrder = useMemo(() => recentOrders.map(summarizeOrder).find((order) => order.id && order.active) ?? null, [recentOrders]);
 
     const languageName = languages.find((language: any) => language.code === locale)?.native ?? locale.toUpperCase();
     const schemeLabel = (scheme: string) => t(`Account.scheme.${scheme}`);
@@ -262,7 +287,7 @@ const AccountHomeScreen = () => {
                 <MenuGroup
                     rows={[
                         { key: 'orders', icon: faReceipt, label: t('Account.orders'), onPress: () => navigation.navigate('OrderHistory') },
-                        { key: 'offers', icon: faTag, label: t('Account.offers'), onPress: () => navigation.navigate('Offers') },
+                        { key: 'offers', icon: faTag, label: t('Account.offers'), onPress: () => openInHome('Offers') },
                         { key: 'places', icon: faLocationDot, label: t('Account.savedPlaces'), onPress: () => navigation.navigate('AddressBook') },
                         {
                             key: 'payment',
@@ -271,7 +296,7 @@ const AccountHomeScreen = () => {
                             hidden: gateway !== 'stripe' || GATEWAYS_WITHOUT_SAVED_METHODS.includes(gateway),
                             onPress: () => navigation.navigate('StripeCustomer'),
                         },
-                        { key: 'notifications', icon: faBell, label: t('Account.notifications'), badge: unread, onPress: () => navigation.navigate('Notifications') },
+                        { key: 'notifications', icon: faBell, label: t('Account.notifications'), badge: unread, onPress: () => openInHome('Notifications') },
                     ]}
                 />
 

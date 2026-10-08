@@ -26,6 +26,7 @@ import { orderProgress, shortName, type OrderPhase } from '../commerce/order-pro
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
 import { Button, ErrorState, IconButton, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import useScreenTopInset from '../hooks/use-screen-top-inset';
 
 const MAP_HEIGHT = 380;
 
@@ -38,6 +39,8 @@ const OrderScreen = ({ route }: any) => {
     const params = route.params || {};
     const theme = useTheme();
     const insets = useSafeAreaInsets();
+    // Opened from a push notification it is presented as a modal (OrderModal).
+    const top = useScreenTopInset(route?.name === 'OrderModal');
     const navigation = useNavigation<any>();
     const { customer } = useAuth();
     const { storefront, adapter: storefrontAdapter } = useStorefront();
@@ -574,7 +577,7 @@ const OrderScreen = ({ route }: any) => {
                 </YStack>
             </ScrollView>
 
-            <YStack position='absolute' top={insets.top + 10} left={space.gutter}>
+            <YStack position='absolute' top={top + 10} left={space.gutter}>
                 <IconButton icon={faXmark} variant='floating' size={44} accessibilityLabel={t('UI.close')} onPress={close} />
             </YStack>
 
