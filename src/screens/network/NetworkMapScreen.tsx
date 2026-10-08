@@ -3,6 +3,7 @@ import { FlatList, Platform, StyleSheet, View, useWindowDimensions } from 'react
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { handleNavigateNewLocation } from '../../utils';
 import { faList, faLocationArrow, faLocationDot, faStore } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -179,7 +180,7 @@ const NetworkMapScreen = () => {
                         <UIText variant='caption' flex={1}>
                             {t('Network.map.setLocation')}
                         </UIText>
-                        <Button size='sm' icon={faLocationDot} onPress={() => navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' })}>
+                        <Button size='sm' icon={faLocationDot} onPress={() => handleNavigateNewLocation(navigation, { makeDefault: true })}>
                             {t('Network.map.setAddress')}
                         </Button>
                     </XStack>

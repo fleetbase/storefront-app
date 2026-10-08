@@ -1,7 +1,7 @@
 import { createStaticNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Boot } from './stacks/CoreStack';
-import { LocationPermission, LocationPicker, EditLocation, EditLocationCoord } from './stacks/LocationStack';
+import { AddNewLocation, AddressBook, EditLocation, EditLocationCoord, LocationPermission, LocationPicker } from './stacks/LocationStack';
 import { OrderModal } from './stacks/OrderStack';
 import StoreNavigator from './StoreNavigator';
 import NetworkNavigator from './NetworkNavigator';
@@ -11,10 +11,13 @@ const RootStack = createNativeStackNavigator({
     linking: { enabled: 'auto' },
     screens: {
         Boot,
+        // The address flow, reachable from either edition.
         LocationPermission,
+        AddNewLocation,
         LocationPicker,
         EditLocation,
         EditLocationCoord,
+        AddressBook,
         OrderModal,
         NetworkNavigator: {
             screen: NetworkNavigator,

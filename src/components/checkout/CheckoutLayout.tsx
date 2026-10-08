@@ -140,10 +140,6 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
         const redirect = tab ? { route: tab, params: { screen: route.name, params: route.params } } : null;
         navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login', params: { redirectTo: 'checkout', redirect } });
     };
-    const addAddress = () => {
-        setAddressSheet(false);
-        navigation.navigate('LocationPicker', { redirectTo: 'Checkout' });
-    };
 
     const summaryRows = checkout.lineItems.filter((item) => item.name !== t('lineItems.total'));
 
@@ -194,7 +190,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                             </UIText>
                                         )}
                                     </YStack>
-                                    <Button variant='ghost' size='sm' onPress={() => (savedLocations?.length ? setAddressSheet(true) : addAddress())}>
+                                    <Button variant='ghost' size='sm' onPress={() => setAddressSheet(true)}>
                                         {location ? t('Checkout.change') : t('Checkout.addAddress')}
                                     </Button>
                                 </XStack>
@@ -228,7 +224,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                         </XStack>
                                         <XStack gap={8}>
                                             <YStack flex={1}>
-                                                <Button variant='outline' size='sm' fullWidth onPress={() => (savedLocations?.length ? setAddressSheet(true) : addAddress())}>
+                                                <Button variant='outline' size='sm' fullWidth onPress={() => setAddressSheet(true)}>
                                                     {t('Checkout.changeAddress')}
                                                 </Button>
                                             </YStack>
@@ -432,12 +428,12 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                 open={addressSheet}
                 onClose={() => setAddressSheet(false)}
                 savedLocations={savedLocations}
-                currentId={location?.id}
+                current={location}
                 onSelect={(place: any) => {
                     checkout.handleDeliveryLocationChange(place);
                     setAddressSheet(false);
                 }}
-                onAdd={addAddress}
+                note={t('Places.quoteNote')}
             />
         </YStack>
     );

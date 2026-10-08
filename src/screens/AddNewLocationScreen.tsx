@@ -1,243 +1,272 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Platform, UIManager, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faTimes, faCircleXmark, faLocationArrow, faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
-import { Input, View, Button, Text, YStack, useTheme, XStack, AnimatePresence, Circle } from 'tamagui';
+import React, { useEffect, useRef, useState } from 'react';
+import { FlatList, Platform, Pressable, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { geocodeAutocomplete, getPlaceDetails, createFleetbasePlaceFromDetails, formattedAddressFromPlace } from '../utils/location';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronLeft, faLocationArrow, faLocationDot, faMagnifyingGlass, faMapLocationDot, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
+import { createFleetbasePlaceFromDetails, formattedAddressFromPlace, geocode, geocodeAutocomplete, getCoordinates, getLiveLocation, getPlaceDetails } from '../utils/location';
 import { toast } from '../utils/toast';
-import useStorage from '../hooks/use-storage';
-import useCurrentLocation from '../hooks/use-current-location';
-import BackButton from '../components/BackButton';
-import ScreenWrapper from '../components/ScreenWrapper';
+import { EmptyState, IconButton, Skeleton, UIText, radius, space } from '../ui';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
+const SEARCH_DELAY_MS = 350;
+const NEARBY_COUNT = 3;
+
+type Prediction = { place_id: string; description: string };
+
+/** "Blk 201 Tampines St 21, Singapore 520201" → the first part bold, the rest beneath. */
+function splitDescription(description: string): { title: string; line: string } {
+    const [title, ...rest] = description.split(',');
+    return { title: title.trim(), line: rest.join(',').trim() };
 }
 
+/**
+ * Add an address by searching for it. Before typing it offers where the customer is
+ * now and the addresses around them; while typing, matching addresses (the last
+ * results stay up while new ones load). Anything not found can be pinned on the map.
+ */
 const AddNewLocationScreen = ({ route }) => {
     const params = route.params || {};
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
+    const insets = useSafeAreaInsets();
     const theme = useTheme();
     const { t } = useLanguage();
-    const { liveLocation: currentLocation, getCurrentLocationCoordinates } = useCurrentLocation();
-    const [inputFocused, setInputFocused] = useState(false);
-    const [inputValue, setInputValue] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const searchInput = useRef(null);
+    const makeDefault = params.makeDefault;
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<Prediction[] | null>(null);
+    const [searching, setSearching] = useState(false);
+    const [here, setHere] = useState<any>(null);
+    const [nearby, setNearby] = useState<any[] | null>(null);
+    const [locating, setLocating] = useState(true);
+    const [opening, setOpening] = useState<string | null>(null);
+    const latest = useRef(0);
 
-    const handleFocus = () => setInputFocused(true);
-    const handleBlur = () => setInputFocused(false);
-    const handleClearInput = () => setInputValue('');
-    const handleDismissFocus = () => {
-        setInputFocused(false);
-        Keyboard.dismiss();
-        searchInput.current.blur();
-    };
+    // Where the customer is, and the addresses around it, for the empty search.
+    useEffect(() => {
+        let active = true;
+        (async () => {
+            const place = await getLiveLocation().catch(() => null);
+            if (!active) return;
+            setHere(place);
+            setLocating(false);
+            const [latitude, longitude] = place ? getCoordinates(place) : [];
+            if (!latitude || !longitude) {
+                setNearby([]);
+                return;
+            }
+            const found = await geocode(latitude, longitude, { withAllResults: true }).catch(() => null);
+            if (!active) return;
+            const seen = new Set<string>();
+            const places = (Array.isArray(found) ? found : [])
+                .map((result) => createFleetbasePlaceFromDetails(result))
+                .filter((candidate) => {
+                    const key = formattedAddressFromPlace(candidate);
+                    if (!key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            setNearby(places.slice(0, NEARBY_COUNT));
+        })();
+        return () => {
+            active = false;
+        };
+    }, []);
 
-    const handleLocationSelect = async (location) => {
-        try {
-            const details = await getPlaceDetails(location.place_id);
-            const place = createFleetbasePlaceFromDetails(details);
-            navigation.navigate('EditLocation', { place: place.serialize(), redirectTo: params.redirectTo });
-        } catch (error) {
-            console.error('Error selecting location:', error);
-            toast.error(error.message);
-        }
-    };
-
-    const handleUseCurrentLocation = async () => {
-        try {
-            navigation.navigate('EditLocation', { place: currentLocation.serialize(), redirectTo: params.redirectTo });
-        } catch (error) {
-            console.error('Error selecting current location:', error);
-            toast.error(error.message);
-        }
-    };
-
-    const handleUseMapLocation = () => {
-        navigation.navigate('LocationPicker', { redirectTo: params.redirectTo });
-    };
-
-    const searchPlaces = useCallback(async () => {
-        if (inputValue.trim() === '') {
-            setSearchResults([]);
+    useEffect(() => {
+        const text = query.trim();
+        if (!text) {
+            setResults(null);
+            setSearching(false);
             return;
         }
+        setSearching(true);
+        const request = ++latest.current;
+        const timer = setTimeout(async () => {
+            const coordinates = here ? getCoordinates(here) : null;
+            const found = await geocodeAutocomplete(text, coordinates).catch(() => []);
+            if (request !== latest.current) return;
+            setResults(found);
+            setSearching(false);
+        }, SEARCH_DELAY_MS);
+        return () => clearTimeout(timer);
+    }, [query, here]);
 
-        const coordinates = getCurrentLocationCoordinates();
-        const results = await geocodeAutocomplete(inputValue, coordinates);
-        setSearchResults(results);
-    }, [inputValue]);
+    const openPlace = (place: any) => navigation.navigate('EditLocation', { place: place.serialize(), makeDefault });
 
-    // Debounce the searchPlaces function
-    useEffect(() => {
-        const debounceTimeout = setTimeout(() => {
-            searchPlaces();
-        }, 500);
+    const openPrediction = async (prediction: Prediction) => {
+        setOpening(prediction.place_id);
+        try {
+            const details = await getPlaceDetails(prediction.place_id);
+            if (!details) throw new Error('no details');
+            openPlace(createFleetbasePlaceFromDetails(details));
+        } catch {
+            toast.error(t('Places.searchFailed'));
+        } finally {
+            setOpening(null);
+        }
+    };
 
-        return () => clearTimeout(debounceTimeout); // Clear timeout on cleanup
-    }, [inputValue, searchPlaces]);
+    const useHere = () => {
+        if (here) openPlace(here);
+        else toast.error(t('Places.locationUnavailable'));
+    };
+
+    const typing = query.trim().length > 0;
+    const hereLine = locating ? t('Places.locating') : here ? formattedAddressFromPlace(here) : t('Places.locationUnavailable');
+
+    const header = (
+        <YStack>
+            <Row icon={faLocationArrow} brand title={t('Places.useCurrentLocation')} line={hereLine} onPress={useHere} disabled={locating} />
+            {!typing && (
+                <>
+                    <UIText variant='label' tone='secondary' marginTop={16} marginBottom={4} marginHorizontal={space.gutter}>
+                        {t('Places.aroundHere')}
+                    </UIText>
+                    {nearby === null
+                        ? [0, 1, 2].map((index) => (
+                              <XStack key={index} gap={14} alignItems='center' paddingHorizontal={space.gutter} minHeight={64}>
+                                  <Skeleton width={40} height={40} radius={20} />
+                                  <YStack flex={1} gap={8}>
+                                      <Skeleton width='70%' height={14} />
+                                      <Skeleton width='45%' height={12} />
+                                  </YStack>
+                              </XStack>
+                          ))
+                        : nearby.map((place, index) => {
+                              const [title, ...rest] = formattedAddressFromPlace(place).split(',');
+                              return <Row key={index} icon={faLocationDot} title={title.trim()} line={rest.join(',').trim()} onPress={() => openPlace(place)} />;
+                          })}
+                </>
+            )}
+        </YStack>
+    );
 
     return (
-        <ScreenWrapper>
-            <YStack bg='$background' width='100%' height='100%' padding='$4' space='$5'>
-                <YStack
-                    space='$3'
-                    animation='quick'
-                    opacity={inputFocused ? 0 : 1}
-                    style={{
-                        transform: [{ scale: inputFocused ? 0.5 : 1 }],
-                        transition: 'opacity 0.3s, transform 0.3s',
-                    }}
+        <YStack flex={1} backgroundColor='$background'>
+            <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingTop={insets.top + 4} paddingBottom={8}>
+                <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
+                <UIText variant='heading' accessibilityRole='header'>
+                    {t('Places.searchTitle')}
+                </UIText>
+            </XStack>
+
+            <XStack
+                marginHorizontal={space.gutter}
+                marginBottom={8}
+                height={52}
+                alignItems='center'
+                gap={10}
+                paddingLeft={14}
+                paddingRight={6}
+                borderRadius={radius.button}
+                borderWidth={2}
+                borderColor='$primary'
+            >
+                <FontAwesomeIcon icon={faMagnifyingGlass} size={17} color={theme.textSecondary.val} />
+                <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    autoFocus
+                    accessibilityLabel={t('Places.searchLabel')}
+                    placeholder={t('Places.searchPlaceholder')}
+                    placeholderTextColor={theme.textPlaceholder.val}
+                    autoCapitalize='none'
+                    autoComplete='off'
+                    autoCorrect={false}
+                    returnKeyType='search'
+                    // The field's border is the focus ring; drop the browser's own outline.
+                    style={{ flex: 1, height: '100%', fontSize: 16, color: theme.textPrimary.val, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null) }}
+                />
+                {typing && <IconButton icon={faXmark} size={36} accessibilityLabel={t('Places.clearSearch')} onPress={() => setQuery('')} />}
+            </XStack>
+
+            <FlatList
+                data={typing ? (results ?? []) : []}
+                keyExtractor={(item) => item.place_id}
+                keyboardShouldPersistTaps='handled'
+                keyboardDismissMode='on-drag'
+                ListHeaderComponent={header}
+                renderItem={({ item }) => {
+                    const { title, line } = splitDescription(item.description);
+                    return <Row icon={faLocationDot} title={title} line={line} onPress={() => openPrediction(item)} disabled={opening !== null} busy={opening === item.place_id} />;
+                }}
+                ListEmptyComponent={
+                    typing && results !== null && !searching ? (
+                        <EmptyState icon={faMagnifyingGlass} title={t('Places.noResultsTitle', { query: query.trim() })} description={t('Places.noResultsBody')} />
+                    ) : null
+                }
+                contentContainerStyle={{ paddingBottom: 24 }}
+            />
+
+            <YStack paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} borderTopWidth={1} borderColor='$borderColor'>
+                <Pressable
+                    onPress={() => navigation.navigate('LocationPicker', { makeDefault, initialLocation: here?.serialize?.() })}
+                    accessibilityRole='button'
+                    style={{ height: 50, borderRadius: radius.button, backgroundColor: theme.surface2.val, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
                 >
-                    <BackButton onPress={() => navigation.goBack()} />
-
-                    <Text fontSize={25} fontWeight={800} color='$color'>
-                        {t('AddNewLocationScreen.addNewAddress')}
-                    </Text>
-                </YStack>
-
-                <YStack justifyContent='flex-start'>
-                    <AnimatePresence>
-                        <XStack
-                            animation='quick'
-                            justifyContent='center'
-                            alignItems='center'
-                            width='100%'
-                            position='absolute'
-                            top={inputFocused ? 0 : 'auto'}
-                            left={0}
-                            right={0}
-                            bg={inputFocused ? '$borderColor' : '$surface'}
-                            borderRadius='$3'
-                            borderWidth={2}
-                            borderColor='$borderColor'
-                            zIndex={10}
-                            style={{
-                                transform: [{ translateY: inputFocused ? -120 : 0 }],
-                                elevation: inputFocused ? 4 : 0,
-                            }}
-                        >
-                            {inputFocused && (
-                                <Button size={40} onPress={handleDismissFocus} bg='transparent' animation='quick'>
-                                    <Button.Icon>
-                                        <FontAwesomeIcon icon={faArrowLeft} color={theme.color.val} />
-                                    </Button.Icon>
-                                </Button>
-                            )}
-                            <Input
-                                ref={searchInput}
-                                size='$5'
-                                placeholder={t('AddNewLocationScreen.streetName')}
-                                placeholderTextColor='$textSecondary'
-                                bg='transparent'
-                                color='$textPrimary'
-                                flex={1}
-                                borderWidth={0}
-                                paddingHorizontal='$2'
-                                shadowOpacity={0}
-                                shadowRadius={0}
-                                value={inputValue}
-                                onFocus={handleFocus}
-                                onBlur={handleBlur}
-                                onChangeText={setInputValue}
-                                autoCapitalize='none'
-                                autoComplete='off'
-                                autoCorrect={false}
-                            />
-                            {inputFocused && (
-                                <Button size={40} onPress={handleClearInput} bg='transparent' animation='quick'>
-                                    <Button.Icon>
-                                        <FontAwesomeIcon icon={faCircleXmark} color={theme.color.val} />
-                                    </Button.Icon>
-                                </Button>
-                            )}
-                        </XStack>
-                    </AnimatePresence>
-
-                    <YStack
-                        animation='quick'
-                        bg='$borderColor'
-                        borderWidth={2}
-                        borderColor='$borderColor'
-                        borderRadius='$3'
-                        height={150}
-                        opacity={inputFocused ? 1 : 0}
-                        pointerEvents={inputFocused ? 'auto' : 'none'}
-                        style={{
-                            transform: [{ translateY: inputFocused ? -50 : 0 }],
-                            elevation: 4,
-                        }}
-                    >
-                        <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled' style={{ height: 150 }}>
-                            {currentLocation && searchResults.length === 0 && (
-                                <Pressable onPress={handleUseCurrentLocation}>
-                                    <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
-                                        <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
-                                            <Circle size={40} bg='$background'>
-                                                <FontAwesomeIcon icon={faLocationArrow} color={theme.textPrimary.val} />
-                                            </Circle>
-                                        </YStack>
-                                        <YStack flex={1} space='$1'>
-                                            <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                {formattedAddressFromPlace(currentLocation)}
-                                            </Text>
-                                            <Text color='$textSecondary' numberOfLines={1}>
-                                                {t('AddNewLocationScreen.weThinkYoureAroundHere')}
-                                            </Text>
-                                        </YStack>
-                                    </XStack>
-                                </Pressable>
-                            )}
-                            {searchResults.length > 0 &&
-                                searchResults.map((location) => (
-                                    <Pressable onPress={() => handleLocationSelect(location)} key={location.place_id}>
-                                        <XStack animation='quick' space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
-                                            <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
-                                                <Circle size={40} bg='$background'>
-                                                    <FontAwesomeIcon icon={faLocationDot} color={theme.textPrimary.val} />
-                                                </Circle>
-                                            </YStack>
-                                            <YStack flex={1} space='$1'>
-                                                <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                                    {location.description}
-                                                </Text>
-                                                <Text color='$textSecondary' numberOfLines={1}>
-                                                    {[location.city, location.state, location.country].filter(Boolean).join(', ')}
-                                                </Text>
-                                            </YStack>
-                                        </XStack>
-                                    </Pressable>
-                                ))}
-                            <Pressable onPress={handleUseMapLocation}>
-                                <XStack space='$2' borderBottomWidth={1} borderColor='$borderColorWithShadow' padding='$3'>
-                                    <YStack justifyContent='center' alignItems='center' paddingHorizontal='$1'>
-                                        <Circle size={40} bg='$background'>
-                                            <FontAwesomeIcon icon={faMapLocation} color={theme.textPrimary.val} />
-                                        </Circle>
-                                    </YStack>
-                                    <YStack flex={1} space='$1'>
-                                        <Text color='$text' fontSize={15} fontWeight='800' numberOfLines={1}>
-                                            {t('AddNewLocationScreen.cantFindYourAddress')}
-                                        </Text>
-                                        <Text color='$textSecondary' numberOfLines={1}>
-                                            {t('AddNewLocationScreen.useMapInstead')}
-                                        </Text>
-                                    </YStack>
-                                </XStack>
-                            </Pressable>
-                        </ScrollView>
-                    </YStack>
-                </YStack>
-
-                <YStack flex={1} position='relative' width='100%'>
-                    <Pressable style={StyleSheet.absoluteFill} onPress={handleDismissFocus} pointerEvents='box-only' />
-                </YStack>
+                    <FontAwesomeIcon icon={faMapLocationDot} size={17} color={theme.textPrimary.val} />
+                    <UIText variant='bodyStrong'>{t('Places.setOnMap')}</UIText>
+                </Pressable>
             </YStack>
-        </ScreenWrapper>
+        </YStack>
     );
 };
+
+/** One address in the list: a round icon, the address, and its area underneath. */
+function Row({
+    icon,
+    title,
+    line,
+    onPress,
+    brand = false,
+    disabled = false,
+    busy = false,
+}: {
+    icon: any;
+    title: string;
+    line?: string;
+    onPress: () => void;
+    brand?: boolean;
+    disabled?: boolean;
+    busy?: boolean;
+}) {
+    const theme = useTheme();
+    return (
+        <Pressable
+            onPress={onPress}
+            disabled={disabled}
+            accessibilityRole='button'
+            accessibilityLabel={line ? `${title}, ${line}` : title}
+            accessibilityState={{ disabled, busy }}
+            style={({ pressed }) => ({
+                minHeight: 64,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+                paddingHorizontal: space.gutter,
+                paddingVertical: 8,
+                borderBottomWidth: 1,
+                borderColor: theme.borderColor.val,
+                backgroundColor: pressed ? theme.backgroundPress?.val : 'transparent',
+                opacity: busy ? 0.6 : 1,
+            })}
+        >
+            <YStack width={40} height={40} borderRadius={20} backgroundColor={brand ? '$primarySoft' : '$surface'} alignItems='center' justifyContent='center'>
+                <FontAwesomeIcon icon={icon} size={16} color={brand ? theme.primaryForeground.val : theme.textSecondary.val} />
+            </YStack>
+            <YStack flex={1} gap={2}>
+                <UIText variant='bodyStrong' tone={brand ? 'brand' : 'primary'} numberOfLines={1}>
+                    {title}
+                </UIText>
+                {line ? (
+                    <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                        {line}
+                    </UIText>
+                ) : null}
+            </YStack>
+        </Pressable>
+    );
+}
 
 export default AddNewLocationScreen;

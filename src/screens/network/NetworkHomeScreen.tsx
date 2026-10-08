@@ -370,14 +370,10 @@ const NetworkHomeScreen = () => {
                 open={locationSheet}
                 onClose={() => setLocationSheet(false)}
                 savedLocations={savedLocations}
-                currentId={currentLocation?.id}
+                current={currentLocation}
                 onSelect={(place: any) => {
                     updateCurrentLocation(place);
                     setLocationSheet(false);
-                }}
-                onAdd={() => {
-                    setLocationSheet(false);
-                    navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' });
                 }}
             />
         </YStack>

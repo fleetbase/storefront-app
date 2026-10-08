@@ -236,11 +236,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                                     {currentLocation ? [placeAttr('name'), placeAttr('street1')].filter(Boolean).join(' · ') : t('Booking.noAddress')}
                                 </UIText>
                             </YStack>
-                            <Button
-                                variant='ghost'
-                                size='sm'
-                                onPress={() => (savedLocations?.length ? setAddressSheet(true) : navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' }))}
-                            >
+                            <Button variant='ghost' size='sm' onPress={() => setAddressSheet(true)}>
                                 {currentLocation ? t('Checkout.change') : t('Checkout.addAddress')}
                             </Button>
                         </XStack>
@@ -298,14 +294,10 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                 open={addressSheet}
                 onClose={() => setAddressSheet(false)}
                 savedLocations={savedLocations}
-                currentId={currentLocation?.id}
+                current={currentLocation}
                 onSelect={(place: any) => {
                     updateCurrentLocation(place);
                     setAddressSheet(false);
-                }}
-                onAdd={() => {
-                    setAddressSheet(false);
-                    navigation.navigate('LocationPicker', { redirectTo: 'NetworkNavigator' });
                 }}
             />
         </YStack>

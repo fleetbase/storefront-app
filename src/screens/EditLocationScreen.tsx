@@ -1,403 +1,275 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, ScrollView, Platform } from 'react-native';
-import { Spinner, Text, YStack, XStack, Button, Input, useTheme } from 'tamagui';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { faBuildingUser, faHouse, faBuilding, faHotel, faHospital, faSchool, faChair, faAsterisk } from '@fortawesome/free-solid-svg-icons';
-import { Place } from '@fleetbase/sdk';
-import { adapter } from '../hooks/use-storefront';
-import { useAuth } from '../contexts/AuthContext';
-import { formattedAddressFromSerializedPlace, restoreFleetbasePlace } from '../utils/location';
-import { isEmpty, toBoolean } from '../utils';
-import { toast } from '../utils/toast';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
-import usePromiseWithLoading from '../hooks/use-promise-with-loading';
-import useStorefront from '../hooks/use-storefront';
+import { useAuth } from '../contexts/AuthContext';
+import { restoreFleetbasePlace } from '../utils/location';
+import { toast } from '../utils/toast';
+import { PLACE_TYPES, placeAttributes, placeFields, placeLines, validatePlace, type PlaceFields } from '../commerce/places';
+import { finishPlaceFlow } from '../navigation/place-flow';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
-import { useAppTheme } from '../hooks/use-app-theme';
-import ExpandableSelect from '../components/ExpandableSelect';
 import PlaceMapView from '../components/PlaceMapView';
 import PhoneInput from '../components/PhoneInput';
-import Spacer from '../components/Spacer';
-import ScreenWrapper from '../components/ScreenWrapper';
+import { Button, Card, Chip, IconButton, TextField, UIText, elevation, space } from '../ui';
 
-const LocationPropertyInput = ({ value, onChange, placeholder }) => {
-    return (
-        <Input
-            value={value}
-            onChangeText={onChange}
-            size='$5'
-            placeholder={placeholder}
-            placeholderTextColor='$textSecondary'
-            color='$textPrimary'
-            shadowOpacity={0}
-            shadowRadius={0}
-            borderWidth={1}
-            borderColor='$borderColorWithShadow'
-            borderRadius='$4'
-            bg='$surface'
-            autoCapitalize='none'
-            autoComplete='off'
-            autoCorrect={false}
-        />
-    );
-};
+/** Ask before deleting; the browser has no native alert with buttons. */
+function confirmDelete(title: string, body: string, labels: { cancel: string; delete: string }): Promise<boolean> {
+    if (Platform.OS === 'web') {
+        const browserConfirm = (globalThis as any).window?.confirm;
+        return Promise.resolve(typeof browserConfirm === 'function' ? Boolean(browserConfirm.call((globalThis as any).window, `${title}\n\n${body}`)) : false);
+    }
+    return new Promise((resolve) => {
+        Alert.alert(title, body, [
+            { text: labels.cancel, style: 'cancel', onPress: () => resolve(false) },
+            { text: labels.delete, style: 'destructive', onPress: () => resolve(true) },
+        ]);
+    });
+}
 
-const isAndroid = Platform.OS === 'android';
+/**
+ * The details of an address: where the pin is (with a way to move it), what kind of
+ * place it is, its label, street and optional extras, notes for the courier, and
+ * whether it is the default. Saving or deleting returns to whatever opened the flow.
+ */
 const EditLocationScreen = ({ route }) => {
-    const params = route.params || { redirectTo: 'AddressBook' };
-    const navigation = useNavigation();
-    const theme = useTheme();
+    const params = route.params || {};
+    const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
-    const { customer, isAuthenticated } = useAuth();
-    const { storefront } = useStorefront();
-    const { runWithLoading, isLoading, isAnyLoading } = usePromiseWithLoading();
+    const { t } = useLanguage();
+    const { isAuthenticated } = useAuth();
     const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
     const { savedLocations, addLocation, deleteLocation } = useSavedLocations();
-    const { t } = useLanguage();
-    const [place, setPlace] = useState({ ...params.place });
-    const [name, setName] = useState(place.name);
-    const [street1, setStreet1] = useState(place.street1);
-    const [street2, setStreet2] = useState(place.street2);
-    const [neighborhood, setNeighborhood] = useState(place.neighborhood);
-    const [city, setCity] = useState(place.city);
-    const [postalCode, setPostalCode] = useState(place.postal_code);
-    const [phone, setPhone] = useState(place.phone);
-    const [instructions, setInstructions] = useState(place.meta?.instructions);
-    const redirectTo = params.redirectTo;
-    const redirectToScreen = params.redirectToScreen;
-    const makeDefault = toBoolean(params.makeDefault);
-    const isDefaultLocation = currentLocation?.id === place?.id;
+    // The place as it was opened; a moved pin arrives separately as `location`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const original = useMemo(() => params.place ?? {}, []);
+    const isSaved = !!original.id;
+    const isDefault = isSaved && currentLocation?.id === original.id;
+    const [fields, setFields] = useState<PlaceFields>(() => {
+        const initial = placeFields(original);
+        // A new address's name is the map's name for the spot, not the customer's label.
+        return isSaved ? initial : { ...initial, name: '' };
+    });
+    const [location, setLocation] = useState(original.location);
+    const [makeDefault, setMakeDefault] = useState<boolean>(isDefault || !!params.makeDefault || !savedLocations?.length);
+    const [showErrors, setShowErrors] = useState(false);
+    const [busy, setBusy] = useState<'saving' | 'deleting' | null>(null);
+    const errors = validatePlace(fields);
 
+    // Coming back from "Adjust pin" brings the moved pin.
     useEffect(() => {
-        setPlace({
-            ...place,
-            name,
-            street1,
-        });
-    }, [name, street1]);
+        if (params.place?.location) setLocation(params.place.location);
+    }, [params.place?.location]);
 
-    const handleRedirectToCheckoutScreen = () => {
-        navigation.reset({
-            index: 0,
-            routes: [
-                {
-                    name: 'StoreNavigator',
-                    state: {
-                        index: 0,
-                        routes: [
-                            {
-                                name: 'StoreCartTab',
-                                state: {
-                                    index: 1,
-                                    routes: [{ name: 'Cart' }, { name: 'Checkout' }],
-                                },
-                            },
-                        ],
-                    },
-                },
-            ],
-        });
-    };
+    const preview = useMemo(() => ({ ...original, location }), [original, location]);
+    const summary = placeLines(restoreFleetbasePlace({ ...preview, ...placeAttributes(fields) }));
+    const set = (key: keyof PlaceFields) => (value: string) => setFields((current) => ({ ...current, [key]: value }));
 
-    const handleRedirect = () => {
-        if (redirectTo === 'AddressBook') {
-            navigation.goBack();
-        } else if (redirectTo === 'Checkout') {
-            handleRedirectToCheckoutScreen();
-        } else {
-            const reset = {
-                index: 0,
-                routes: [
-                    {
-                        name: redirectTo,
-                    },
-                ],
-            };
-            if (redirectToScreen) {
-                reset.routes[0].params = { screen: redirectToScreen };
-            }
+    const adjustPin = () => navigation.navigate('LocationPicker', { place: { ...preview, ...placeAttributes(fields) }, adjust: true, makeDefault: params.makeDefault });
 
-            navigation.reset(reset);
+    const save = async () => {
+        if (Object.keys(errors).length) {
+            setShowErrors(true);
+            return;
         }
-    };
-
-    const getUpdatedPlace = () => {
-        return { ...place, street1, street2, neighborhood, city, phone, postal_code: postalCode, meta: { instructions } };
-    };
-
-    const handleSavePlace = async () => {
+        setBusy('saving');
         try {
-            await runWithLoading(addLocation(getUpdatedPlace(), makeDefault), 'saving');
-            toast.success(t('EditLocationScreen.addressSaved'));
-            handleRedirect();
-        } catch (error) {
-            console.warn('Error saving address details:', error);
-            toast.error(error.message);
+            const attributes = placeAttributes(fields);
+            const saved = await addLocation({ ...original, ...attributes, location, meta: { ...(original.meta ?? {}), ...attributes.meta } }, makeDefault);
+            if (isAuthenticated && !saved) throw new Error('not saved');
+            toast.success(t('Places.saved'));
+            finishPlaceFlow(navigation);
+        } catch {
+            toast.error(t('Places.saveFailed'));
+        } finally {
+            setBusy(null);
         }
     };
 
-    const handleMakeDefaultLocation = async () => {
-        const restoredInstance = restoreFleetbasePlace(place);
-        if (restoredInstance && restoredInstance.isSaved) {
-            try {
-                await runWithLoading(updateDefaultLocationPromise(restoredInstance), 'defaulting');
-                toast.success(t('EditLocationScreen.defaultLocationUpdated', { locationName: restoredInstance.getAttribute('name') }));
-                handleRedirect();
-            } catch (error) {
-                console.warn('Error making address default location:', error);
-                toast.error(error.message);
-            }
-        }
-    };
-
-    const handleDelete = async () => {
-        const isCurrentLocation = currentLocation?.id === place.id;
-        const nextPlace = savedLocations.find((loc) => loc.id !== place.id);
-        const restoredInstance = restoreFleetbasePlace(place);
-
-        if (restoredInstance && restoredInstance.isSaved) {
-            try {
-                await runWithLoading(deleteLocation(restoredInstance), 'deleting');
-                toast.success(t('EditLocationScreen.locationWasDeleted', { locationName: restoredInstance.getAttribute('name') }));
-
-                // If the deleted place was the current location and there’s another saved location, make it the default
-                if (isCurrentLocation && nextPlace) {
-                    handleMakeDefaultLocation(nextPlace);
-                }
-
-                handleRedirect();
-            } catch (error) {
-                console.error('Error deleting saved address: ', error);
-                toast.error(error.message);
-            }
-        }
-    };
-
-    const handleLocationSelect = () => {
-        navigation.navigate('EditLocationCoord', { place: getUpdatedPlace(), redirectTo });
-    };
-
-    const handleTypeSelection = ({ type }) => {
+    const remove = async () => {
+        const name = summary.title;
+        const confirmed = await confirmDelete(t('Places.deleteTitle', { name }), t('Places.deleteBody'), { cancel: t('Places.cancel'), delete: t('Places.delete') });
+        if (!confirmed) return;
+        setBusy('deleting');
         try {
-            setPlace({ ...place, type });
-        } catch (error) {
-            toast.error(t('EditLocationScreen.unableToSelectLocationType'));
+            const place = restoreFleetbasePlace(original);
+            await deleteLocation(place);
+            // Deliveries went to this address; move them to the next saved one.
+            const next = Array.from(savedLocations || []).find((candidate: any) => candidate.id !== original.id);
+            if (isDefault && next) await updateDefaultLocationPromise(next);
+            toast.success(t('Places.deleted', { name }));
+            finishPlaceFlow(navigation);
+        } catch {
+            toast.error(t('Places.deleteFailed'));
+        } finally {
+            setBusy(null);
         }
     };
 
-    const types = [
-        { id: 1, title: t('EditLocationScreen.apartment'), type: 'apartment', icon: <FontAwesomeIcon icon={faBuildingUser} color={theme.textSecondary.val} /> },
-        { id: 2, title: t('EditLocationScreen.house'), type: 'house', icon: <FontAwesomeIcon icon={faHouse} color={theme.textSecondary.val} /> },
-        { id: 3, title: t('EditLocationScreen.office'), type: 'office', icon: <FontAwesomeIcon icon={faBuilding} color={theme.textSecondary.val} /> },
-        { id: 4, title: t('EditLocationScreen.hotel'), type: 'hotel', icon: <FontAwesomeIcon icon={faHotel} color={theme.textSecondary.val} /> },
-        { id: 5, title: t('EditLocationScreen.hospital'), type: 'hospital', icon: <FontAwesomeIcon icon={faHospital} color={theme.textSecondary.val} /> },
-        { id: 6, title: t('EditLocationScreen.school'), type: 'school', icon: <FontAwesomeIcon icon={faSchool} color={theme.textSecondary.val} /> },
-        { id: 7, title: t('EditLocationScreen.other'), type: 'other', icon: <FontAwesomeIcon icon={faChair} color={theme.textSecondary.val} /> },
-    ];
+    const optional = (label: string) => `${label} · ${t('Places.optional')}`;
 
     return (
-        <ScreenWrapper>
-            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
-                <YStack flex={1} height='100%' bg='$background' px='$5' pb='$5' pt={insets.top + (isAndroid ? 15 : 0)} space='$5'>
-                    <YStack space='$2'>
-                        <XStack py='$1' justifyContent='space-between'>
-                            <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                {t('EditLocationScreen.address')}
-                            </Text>
-                        </XStack>
-                        <XStack width='100%'>
-                            <Text fontSize='$6' color='$textSecondary'>
-                                {formattedAddressFromSerializedPlace(place)}
-                            </Text>
-                        </XStack>
-                    </YStack>
-                    <YStack space='$2'>
-                        <XStack py='$1' justifyContent='space-between'>
-                            <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                {t('EditLocationScreen.locationType')}
-                            </Text>
-                        </XStack>
-                        <YStack width='100%'>
-                            <ExpandableSelect value={place.type} options={types} optionValue='type' onSelect={handleTypeSelection} />
-                        </YStack>
-                    </YStack>
-                    {place.type && (
-                        <YStack space='$4'>
-                            <YStack py='$1' space='$2' justifyContent='space-between'>
-                                <Text fontSize='$8' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                    {t('EditLocationScreen.addressDetails')}
-                                </Text>
-                                <Text fontSize='$4' color='$textSecondary' numberOfLines={1}>
-                                    {t('EditLocationScreen.additionalAddressDetails')}
-                                </Text>
-                            </YStack>
-                            <YStack space='$4'>
-                                <YStack>
-                                    <XStack mb='$2'>
-                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mr='$2'>
-                                            {t('EditLocationScreen.addressLabel')}
-                                        </Text>
-                                        <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
-                                    </XStack>
-                                    <LocationPropertyInput value={name} onChange={setName} placeholder={t('EditLocationScreen.addressLabel')} />
-                                </YStack>
-                                <YStack>
-                                    <XStack mb='$2'>
-                                        <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mr='$2'>
-                                            {t('EditLocationScreen.streetAddress')}
-                                        </Text>
-                                        <FontAwesomeIcon icon={faAsterisk} color={'red'} size={12} />
-                                    </XStack>
-                                    <LocationPropertyInput value={street1} onChange={setStreet1} placeholder={t('EditLocationScreen.streetAddress')} />
-                                </YStack>
-                                <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.aptSuiteUnit')}
-                                    </Text>
-                                    <LocationPropertyInput value={street2} onChange={setStreet2} placeholder={t('EditLocationScreen.aptSuiteUnit')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.neighborhood')}
-                                    </Text>
-                                    <LocationPropertyInput value={neighborhood} onChange={setNeighborhood} placeholder={t('EditLocationScreen.neighborhood')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.city')}
-                                    </Text>
-                                    <LocationPropertyInput value={city} onChange={setCity} placeholder={t('EditLocationScreen.city')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.postalCode')}
-                                    </Text>
-                                    <LocationPropertyInput value={postalCode} onChange={setPostalCode} placeholder={t('EditLocationScreen.postalCode')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack width='100%'>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.phoneNumber')}
-                                    </Text>
-                                    <PhoneInput value={phone} onChange={setPhone} placeholder={t('EditLocationScreen.phoneNumberPlaceholder')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack width='100%'>
-                                    <Text fontSize='$3' fontWeight='bold' color='$textSecondary' mb='$2'>
-                                        {t('EditLocationScreen.additionalInstructions')}
-                                    </Text>
-                                    <LocationPropertyInput value={instructions} onChange={setInstructions} placeholder={t('EditLocationScreen.additionalInstructions')} />
-                                    <Text fontSize='$1' color='$textSecondary' mt='$2' px='$2'>
-                                        {t('EditLocationScreen.optional')}
-                                    </Text>
-                                </YStack>
-                                <YStack>
-                                    <XStack paddingVertical='$3' justifyContent='space-between'>
-                                        <Text fontSize='$6' fontWeight='bold' color='$textPrimary' numberOfLines={1}>
-                                            {t('EditLocationScreen.whereExactly')}
-                                        </Text>
-                                    </XStack>
-                                    <PlaceMapView onPress={handleLocationSelect} place={place} height={140} zoom={2} />
-                                </YStack>
-                                <YStack width='100%' height={10} />
-                                {place.id && (
-                                    <YStack space='$2' mt='$4'>
-                                        {!isDefaultLocation && (
-                                            <Button
-                                                animate='bouncy'
-                                                onPress={handleMakeDefaultLocation}
-                                                size='$5'
-                                                bg='$blue-700'
-                                                flex={1}
-                                                opacity={isLoading('defaulting') || isDefaultLocation ? 0.85 : 1}
-                                                disabled={isAnyLoading() || isDefaultLocation ? true : false}
-                                                hoverStyle={{
-                                                    scale: 0.95,
-                                                    opacity: 0.5,
-                                                }}
-                                                pressStyle={{
-                                                    scale: 0.95,
-                                                    opacity: 0.5,
-                                                }}
-                                            >
-                                                <Button.Icon>{isLoading('defaulting') && <Spinner color='$blue-100' />}</Button.Icon>
-                                                <Button.Text color='$blue-100' fontWeight='bold' fontSize='$5'>
-                                                    {t('EditLocationScreen.makeDefaultAddress')}
-                                                </Button.Text>
-                                            </Button>
-                                        )}
-                                        <Button
-                                            animate='bouncy'
-                                            onPress={handleDelete}
-                                            size='$5'
-                                            bg='$red-700'
-                                            flex={1}
-                                            opacity={isLoading('deleting') ? 0.85 : 1}
-                                            disabled={isAnyLoading() ? true : false}
-                                            hoverStyle={{
-                                                scale: 0.95,
-                                                opacity: 0.5,
-                                            }}
-                                            pressStyle={{
-                                                scale: 0.95,
-                                                opacity: 0.5,
-                                            }}
-                                        >
-                                            <Button.Icon>{isLoading('deleting') && <Spinner color='$red-100' />}</Button.Icon>
-                                            <Button.Text color='$red-100' fontWeight='bold' fontSize='$5'>
-                                                {t('EditLocationScreen.deleteAddress')}
-                                            </Button.Text>
-                                        </Button>
-                                    </YStack>
-                                )}
-                            </YStack>
-                        </YStack>
-                    )}
-                    <Spacer height={90} />
-                </YStack>
-            </ScrollView>
-            <XStack animate='bouncy' position='absolute' bottom={insets.bottom + (isAndroid ? 0 : 5)} left={0} right={0} padding='$5' zIndex={5}>
-                <Button
-                    onPress={handleSavePlace}
-                    size='$5'
-                    bg='$success'
-                    borderColor='$successBorder'
-                    borderWidth={1}
-                    flex={1}
-                    disabled={isAnyLoading() ? true : false}
-                    hoverStyle={{
-                        scale: 0.95,
-                        opacity: 0.5,
-                    }}
-                    pressStyle={{
-                        scale: 0.95,
-                        opacity: 0.5,
-                    }}
-                >
-                    <Button.Icon>{isLoading('saving') && <Spinner color='$green-100' />}</Button.Icon>
-                    <Button.Text color='$green-100' fontWeight='bold' fontSize='$5'>
-                        {t('EditLocationScreen.saveAddress')}
-                    </Button.Text>
-                </Button>
+        <YStack flex={1} backgroundColor='$surface'>
+            <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingTop={insets.top + 4} paddingBottom={12}>
+                <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
+                <UIText variant='heading' accessibilityRole='header'>
+                    {isSaved ? t('Places.editTitle') : t('Places.detailsTitle')}
+                </UIText>
             </XStack>
-        </ScreenWrapper>
+
+            <ScrollView
+                contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24, gap: 12 }}
+                keyboardShouldPersistTaps='handled'
+                keyboardDismissMode='interactive'
+                automaticallyAdjustKeyboardInsets
+            >
+                <Card style={elevation.card}>
+                    {/* Decorative: "Adjust pin" below is the accessible way to move it. */}
+                    <YStack accessibilityElementsHidden importantForAccessibility='no-hide-descendants'>
+                        <PlaceMapView
+                            place={preview}
+                            height={128}
+                            borderRadius='$0'
+                            zoom={1}
+                            onPress={adjustPin}
+                            mapViewProps={{ scrollEnabled: false, zoomEnabled: false, rotateEnabled: false, pitchEnabled: false }}
+                        />
+                    </YStack>
+                    <XStack alignItems='center' gap={12} paddingHorizontal={14} paddingVertical={12}>
+                        <YStack flex={1} gap={2}>
+                            <UIText variant='bodyStrong' numberOfLines={1}>
+                                {fields.street1 || summary.title}
+                            </UIText>
+                            <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                                {[fields.neighborhood, fields.city, fields.postalCode].filter(Boolean).join(', ')}
+                            </UIText>
+                        </YStack>
+                        <Button variant='ghost' size='sm' onPress={adjustPin}>
+                            {t('Places.adjustPin')}
+                        </Button>
+                    </XStack>
+                </Card>
+
+                <Card padding={14} gap={10} style={elevation.card}>
+                    <UIText variant='subheading' accessibilityRole='header'>
+                        {t('Places.typeTitle')}
+                    </UIText>
+                    <XStack flexWrap='wrap' gap={8} accessibilityRole='radiogroup'>
+                        {PLACE_TYPES.map((type) => (
+                            <Chip key={type} label={t(`Places.types.${type}`)} selected={fields.type === type} onPress={() => setFields((current) => ({ ...current, type }))} />
+                        ))}
+                    </XStack>
+                </Card>
+
+                <Card padding={14} gap={14} style={elevation.card}>
+                    <Field label={t('Places.label')}>
+                        <TextField value={fields.name} onChangeText={set('name')} placeholder={t('Places.labelPlaceholder')} accessibilityLabel={t('Places.label')} />
+                    </Field>
+                    <Field label={t('Places.street')} error={showErrors && errors.street1 ? t('Places.streetRequired') : undefined}>
+                        <TextField
+                            value={fields.street1}
+                            onChangeText={set('street1')}
+                            placeholder={t('Places.streetPlaceholder')}
+                            accessibilityLabel={t('Places.street')}
+                            invalid={showErrors && !!errors.street1}
+                        />
+                    </Field>
+                    <XStack gap={10}>
+                        <Field label={t('Places.unit')} flex>
+                            <TextField value={fields.street2} onChangeText={set('street2')} placeholder={t('Places.optional')} accessibilityLabel={optional(t('Places.unit'))} />
+                        </Field>
+                        <Field label={t('Places.postalCode')} flex>
+                            <TextField value={fields.postalCode} onChangeText={set('postalCode')} placeholder={t('Places.optional')} accessibilityLabel={optional(t('Places.postalCode'))} />
+                        </Field>
+                    </XStack>
+                    <XStack gap={10}>
+                        <Field label={t('Places.neighborhood')} flex>
+                            <TextField
+                                value={fields.neighborhood}
+                                onChangeText={set('neighborhood')}
+                                placeholder={t('Places.optional')}
+                                accessibilityLabel={optional(t('Places.neighborhood'))}
+                            />
+                        </Field>
+                        <Field label={t('Places.city')} flex>
+                            <TextField value={fields.city} onChangeText={set('city')} placeholder={t('Places.optional')} accessibilityLabel={optional(t('Places.city'))} />
+                        </Field>
+                    </XStack>
+                    <Field label={optional(t('Places.phone'))}>
+                        <PhoneInput
+                            value={fields.phone}
+                            onChange={(value: string) => setFields((current) => (current.phone === value ? current : { ...current, phone: value }))}
+                            bg='$background'
+                        />
+                    </Field>
+                    <Field label={optional(t('Places.instructions'))}>
+                        <TextField
+                            value={fields.instructions}
+                            onChangeText={set('instructions')}
+                            placeholder={t('Places.instructionsPlaceholder')}
+                            accessibilityLabel={t('Places.instructions')}
+                            multiline
+                            height={88}
+                            textAlignVertical='top'
+                        />
+                    </Field>
+                </Card>
+
+                <Card style={elevation.card}>
+                    <Pressable
+                        onPress={() => setMakeDefault((value) => !value)}
+                        accessibilityRole='switch'
+                        accessibilityState={{ checked: makeDefault }}
+                        style={{ minHeight: 60, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                    >
+                        <YStack flex={1} gap={2} paddingVertical={10}>
+                            <UIText variant='bodyStrong'>{t('Places.makeDefault')}</UIText>
+                            <UIText variant='caption' tone='secondary'>
+                                {t('Places.makeDefaultBody')}
+                            </UIText>
+                        </YStack>
+                        <YStack width={52} height={32} borderRadius={16} backgroundColor={makeDefault ? '$primary' : '$borderColorWithShadow'} justifyContent='center'>
+                            <YStack width={26} height={26} borderRadius={13} backgroundColor='#ffffff' marginLeft={makeDefault ? 23 : 3} style={elevation.card} />
+                        </YStack>
+                    </Pressable>
+                </Card>
+
+                {isSaved && isAuthenticated && (
+                    <Button variant='ghost' onPress={remove} loading={busy === 'deleting'} disabled={busy !== null}>
+                        <UIText variant='bodyStrong' tone='error'>
+                            {t('Places.deleteAddress')}
+                        </UIText>
+                    </Button>
+                )}
+            </ScrollView>
+
+            <YStack paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor'>
+                <Button fullWidth size='lg' onPress={save} loading={busy === 'saving'} disabled={busy !== null}>
+                    {t('Places.save')}
+                </Button>
+            </YStack>
+        </YStack>
     );
 };
+
+/** A labelled form field with an optional error under it. */
+function Field({ label, error, flex = false, children }: { label: string; error?: string; flex?: boolean; children: React.ReactNode }) {
+    return (
+        <YStack gap={6} flex={flex ? 1 : undefined} minWidth={0}>
+            <UIText variant='captionStrong' style={{ fontSize: 14 }} numberOfLines={1}>
+                {label}
+            </UIText>
+            {children}
+            {error ? (
+                <UIText variant='captionStrong' tone='error' accessibilityRole='alert'>
+                    {error}
+                </UIText>
+            ) : null}
+        </YStack>
+    );
+}
 
 export default EditLocationScreen;

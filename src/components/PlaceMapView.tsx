@@ -34,7 +34,7 @@ const PlaceMapView = ({ place: _place, width = '100%', height = 200, markerSize 
     }, [zoom]);
 
     useEffect(() => {
-        mapRef.current.animateToRegion(
+        mapRef.current?.animateToRegion?.(
             {
                 latitude,
                 longitude,

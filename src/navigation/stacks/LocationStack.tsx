@@ -3,13 +3,10 @@ import LocationPickerScreen from '../../screens/LocationPickerScreen';
 import SavedLocationsScreen from '../../screens/SavedLocationsScreen';
 import AddNewLocationScreen from '../../screens/AddNewLocationScreen';
 import EditLocationScreen from '../../screens/EditLocationScreen';
-import EditLocationCoordScreen from '../../screens/EditLocationCoordScreen';
 import AddressBookScreen from '../../screens/AddressBookScreen';
-import BackButton from '../../components/BackButton';
-import HeaderButton from '../../components/HeaderButton';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { getTheme, handleNavigateNewLocation } from '../../utils';
-import { translate as t } from '../../utils/localize';
+
+// The address screens draw their own headers.
+const ownHeader = { headerShown: false };
 
 export const LocationPermission = {
     screen: LocationPermissionScreen,
@@ -27,63 +24,30 @@ export const SavedLocations = {
 
 export const AddressBook = {
     screen: AddressBookScreen,
-    options: ({ navigation, route }) => {
-        return {
-            title: t('AddressBookScreen.addressBook'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} mr='$3' />,
-            headerRight: () => <HeaderButton icon={faPlus} onPress={() => handleNavigateNewLocation(navigation, { redirectTo: 'AddressBook' })} />,
-        };
-    },
+    options: ownHeader,
 };
 
+/** Address search. */
 export const AddNewLocation = {
     screen: AddNewLocationScreen,
-    options: {
-        headerShown: false,
-    },
+    options: ownHeader,
 };
 
+/** Map pin: place a new address, or move the pin of one being edited. */
+export const LocationPicker = {
+    screen: LocationPickerScreen,
+    options: ownHeader,
+};
+
+/** Kept for links to the old "move the pin" screen; it is the map pin in adjust mode. */
 export const EditLocationCoord = {
-    screen: EditLocationCoordScreen,
-    options: ({ route, navigation }) => {
-        return {
-            title: `${route.params.place.name}`,
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        };
-    },
+    screen: LocationPickerScreen,
+    options: ownHeader,
 };
 
 export const EditLocation = {
     screen: EditLocationScreen,
-    options: ({ navigation, route }) => {
-        return {
-            title: route.params.place.street1,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        };
-    },
-};
-
-export const LocationPicker = {
-    screen: LocationPickerScreen,
-    options: ({ navigation }) => {
-        return {
-            title: t('LocationPickerScreen.chooseDeliveryLocation'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-            headerTransparent: true,
-        };
-    },
+    options: ownHeader,
 };
 
 const LocationStack = {

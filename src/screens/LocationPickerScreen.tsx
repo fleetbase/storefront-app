@@ -1,234 +1,181 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { Input, View, Image, Button, Text, XStack, YStack, useTheme } from 'tamagui';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMapLocation, faLocationDot } from '@fortawesome/free-solid-svg-icons';
-import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { Portal } from '@gorhom/portal';
-import { Place, Point } from '@fleetbase/sdk';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {
-    getDefaultCoordinates,
-    geocode,
-    createFleetbasePlaceFromDetails,
-    getLocationFromRouteOrStorage,
-    formattedAddressFromPlace,
-    formatAddressSecondaryIdentifier,
-    getCoordinates,
-} from '../utils/location';
-import { isArray, toBoolean, later, storefrontConfig } from '../utils';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronLeft, faLocationDot, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { Place, Point } from '@fleetbase/sdk';
+import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
-import { toast } from '../utils/toast';
-import LocationMarker from '../components/LocationMarker';
-import useStorefront from '../hooks/use-storefront';
-import useCurrentLocation from '../hooks/use-current-location';
+import { createFleetbasePlaceFromDetails, geocode, getCoordinates, getLocationFromRouteOrStorage, restoreFleetbasePlace } from '../utils/location';
+import { movedEnough, placeLines, regionAround, type Region } from '../commerce/places';
+import { PinMap, type PinMapHandle } from '../components/location/PinMap';
+import { Button, IconButton, Skeleton, UIText, elevation, radius, space } from '../ui';
 
-const LOCATION_MARKER_SIZE = { height: 70, width: 40 };
-const styles = StyleSheet.create({
-    markerFixed: {
-        position: 'absolute',
-        top: Dimensions.get('window').height / 2 - LOCATION_MARKER_SIZE.height / 2,
-        left: Dimensions.get('window').width / 2 - LOCATION_MARKER_SIZE.width / 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    bottomSheetViewContainer: {
-        flex: 1,
-    },
-});
+const STREET_DELTA = 0.004;
 
+/**
+ * Place an address by moving the map under a fixed pin. The address under the pin is
+ * looked up each time the map settles. Used to add an address (then fill in its
+ * details) and, with `adjust`, to move the pin of the address being edited.
+ */
 const LocationPickerScreen = ({ route }) => {
     const params = route.params || {};
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
+    const insets = useSafeAreaInsets();
     const theme = useTheme();
-    const { storefront } = useStorefront();
     const { t } = useLanguage();
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const initialLocation = getLocationFromRouteOrStorage('initialLocation', params);
-    const [latitude, longitude] = getCoordinates(initialLocation);
-    const [results, setResults] = useState([]);
-    const [mapRegion, setMapRegion] = useState({
-        latitude,
-        longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-    });
-    const [isPanning, setIsPanning] = useState(false);
-    const snapPoints = useMemo(() => ['35%', '50%', '65%'], []);
-    const redirectTo = params.redirectTo;
-    const redirectToScreen = params.redirectToScreen;
-    const makeDefault = toBoolean(params.makeDefault);
-
-    // Bottom sheet controls
-    const openBottomSheet = () => {
-        bottomSheetRef.current?.snapToPosition('35%');
-    };
-
-    const closeBottomSheet = () => {
-        bottomSheetRef.current?.close();
-    };
-
-    // Handle panning tracking
-    const handleTouchStart = () => setIsPanning(true);
-    const handlePanDrag = () => setIsPanning(true);
-    const handleTouchEnd = () => setIsPanning(false);
-
-    // Function to handle region change and update the center location
-    const handleRegionChangeComplete = (region) => {
-        setIsPanning(false);
-        setMapRegion(region);
-        updateNearbyResults(region);
-    };
-
-    const updateNearbyResults = useCallback(
-        async ({ latitude, longitude }) => {
-            try {
-                const results = await geocode(latitude, longitude, { withAllResults: true });
-                if (isArray(results)) {
-                    setResults(
-                        results.map((result) => {
-                            return createFleetbasePlaceFromDetails(result);
-                        })
-                    );
-
-                    later(() => {
-                        openBottomSheet();
-                    }, 300);
-                }
-            } catch (error) {
-                console.error('Error fetching nearby locations: ', error);
-                toast.error(error.message);
-            }
-        },
-        [setResults]
+    const adjusting = !!params.adjust || route.name === 'EditLocationCoord';
+    const editing = useMemo(() => (params.place ? restoreFleetbasePlace(params.place) : null), [params.place]);
+    const initialRegion = useMemo(
+        () => regionAround(getCoordinates(editing ?? getLocationFromRouteOrStorage('initialLocation', params)), undefined, STREET_DELTA),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
     );
+    const map = useRef<PinMapHandle>(null);
+    const [center, setCenter] = useState<Region>(initialRegion);
+    const [found, setFound] = useState<any>(adjusting ? editing : null);
+    const [moving, setMoving] = useState(!adjusting);
+    const lookedUp = useRef<Region | null>(adjusting ? initialRegion : null);
+    const latest = useRef(0);
 
-    const handleLocationSelect = (place) => {
-        closeBottomSheet();
-        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo, redirectToScreen, makeDefault });
+    const lookUp = async (region: Region) => {
+        setCenter(region);
+        if (lookedUp.current && !movedEnough(lookedUp.current, region)) {
+            setMoving(false);
+            return;
+        }
+        lookedUp.current = region;
+        const request = ++latest.current;
+        setMoving(true);
+        const result = await geocode(region.latitude, region.longitude).catch(() => null);
+        if (request !== latest.current) return;
+        setFound(result ? createFleetbasePlaceFromDetails(result) : null);
+        setMoving(false);
     };
 
-    const handleMarkerLocationSelect = () => {
-        closeBottomSheet();
-        const geocoded = results[0] ?? new Place();
-        const place = new Place({
-            location: new Point(mapRegion.latitude, mapRegion.longitude),
-            street1: geocoded.getAttribute('street1'),
-            city: geocoded.getAttribute('city'),
-            province: geocoded.getAttribute('province'),
-            neighborhood: geocoded.getAttribute('neighborhood'),
-            postal_code: geocoded.getAttribute('postal_code'),
-            country: geocoded.getAttribute('country'),
-        });
-        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo });
-    };
-
+    // Look up the starting point; a map doesn't always report its first settle.
     useEffect(() => {
-        updateNearbyResults(mapRegion);
-
-        return () => {
-            closeBottomSheet();
-        };
+        if (!adjusting) lookUp(initialRegion);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // The pin's exact position, with the address found under it.
+    const pinnedPlace = () => {
+        const point = new Point(center.latitude, center.longitude);
+        if (adjusting && editing) {
+            editing.setAttribute('location', point);
+            return editing;
+        }
+        const attributes = found ? { ...found.serialize(), id: undefined, name: null } : {};
+        return new Place({ ...attributes, location: point });
+    };
+
+    const confirm = () => {
+        const place = pinnedPlace().serialize();
+        if (adjusting) {
+            navigation.popTo('EditLocation', { place, makeDefault: params.makeDefault }, { merge: true });
+            return;
+        }
+        navigation.navigate('EditLocation', { place, makeDefault: params.makeDefault });
+    };
+
+    const search = () => {
+        const state = navigation.getState?.();
+        const previous = state?.routes?.[(state?.index ?? 0) - 1];
+        if (previous?.name === 'AddNewLocation') navigation.goBack();
+        else navigation.navigate('AddNewLocation', { makeDefault: params.makeDefault });
+    };
+
+    const lines = found ? placeLines(found) : null;
+    const address = lines ? { title: lines.title, line: lines.address } : { title: t('Places.unnamedSpot'), line: `${center.latitude.toFixed(5)}, ${center.longitude.toFixed(5)}` };
+
     return (
-        <YStack flex={1} alignItems='center' justifyContent='center' bg='$surface' width='100%' height='100%'>
-            <MapView
-                style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }}
-                onPress={handleTouchStart}
-                onPanDrag={handlePanDrag}
-                onRegionChangeComplete={handleRegionChangeComplete}
-                initialRegion={mapRegion}
-                mapType={storefrontConfig('defaultMapType', 'standard')}
-            />
-            <View style={styles.markerFixed}>
-                <LocationMarker lifted={isPanning} />
-            </View>
-            <Portal hostName='MainPortal'>
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={-1}
-                    snapPoints={snapPoints}
-                    keyboardBehavior='extend'
-                    keyboardBlurBehavior='none'
-                    enableDynamicSizing={false}
-                    enablePanDownToClose={true}
-                    enableOverDrag={false}
-                    style={{ flex: 1, width: '100%' }}
-                    backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
-                    handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
-                >
-                    <BottomSheetView style={{ flex: 1 }}>
-                        <YStack px='$3' py='$2'>
-                            <Button
-                                onPress={handleMarkerLocationSelect}
-                                size='$4'
-                                bg='$blue-100'
-                                justifyContent='space-between'
-                                space='$1'
-                                mb='$3'
-                                px='$4'
-                                py='$3'
-                                hoverStyle={{
-                                    scale: 0.9,
-                                    opacity: 0.5,
-                                }}
-                                pressStyle={{
-                                    scale: 0.9,
-                                    opacity: 0.5,
-                                }}
-                            >
-                                <XStack space='$2'>
-                                    <YStack pt='$1'>
-                                        <FontAwesomeIcon icon={faLocationDot} color={theme.primary.val} size={20} />
-                                    </YStack>
-                                    <YStack>
-                                        <Text color='$primary' fontWeight='bold' numberOfLines={1}>
-                                            {t('LocationPickerScreen.useMarkerPosition')}
-                                        </Text>
-                                        <Text color='$blue-500'>{t('LocationPickerScreen.useExactMarkerPosition')}</Text>
-                                    </YStack>
-                                </XStack>
-                            </Button>
-                            <BottomSheetFlatList
-                                data={results}
-                                keyExtractor={(item, index) => index}
-                                showsVerticalScrollIndicator={false}
-                                showsHorizontalScrollIndicator={false}
-                                renderItem={({ item }) => (
-                                    <Button
-                                        onPress={() => handleLocationSelect(item)}
-                                        size='$4'
-                                        bg='$secondary'
-                                        justifyContent='space-between'
-                                        space='$1'
-                                        mb='$3'
-                                        px='$4'
-                                        py='$3'
-                                        hoverStyle={{
-                                            scale: 0.9,
-                                            opacity: 0.5,
-                                        }}
-                                        pressStyle={{
-                                            scale: 0.9,
-                                            opacity: 0.5,
-                                        }}
-                                    >
-                                        <YStack>
-                                            <Text color='$textPrimary' fontWeight='bold' numberOfLines={1}>
-                                                {formattedAddressFromPlace(item)}
-                                            </Text>
-                                            <Text color='$textSecondary'>{formatAddressSecondaryIdentifier(item)}</Text>
-                                        </YStack>
-                                    </Button>
-                                )}
-                            />
-                            <YStack height={200} />
+        <YStack flex={1} backgroundColor='$surface'>
+            <YStack style={StyleSheet.absoluteFill} accessibilityLabel={t('Places.pinMapLabel')}>
+                <PinMap ref={map} initialRegion={initialRegion} onSettle={lookUp} onMoveStart={() => setMoving(true)} locateTop={insets.top + 64} />
+            </YStack>
+
+            {!moving && (
+                <YStack pointerEvents='none' style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+                    <YStack marginBottom={190} paddingHorizontal={10} paddingVertical={6} borderRadius={8} backgroundColor='$textPrimary'>
+                        <UIText variant='captionStrong' style={{ color: theme.background.val }}>
+                            {t('Places.pinBubble')}
+                        </UIText>
+                    </YStack>
+                </YStack>
+            )}
+
+            <XStack position='absolute' top={insets.top + 8} left={space.gutter} right={space.gutter} gap={10} alignItems='center'>
+                <IconButton icon={faChevronLeft} variant='floating' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
+                {!adjusting && (
+                    <Pressable
+                        onPress={search}
+                        accessibilityRole='button'
+                        style={{
+                            flex: 1,
+                            height: 44,
+                            borderRadius: radius.pill,
+                            backgroundColor: theme.background.val,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 8,
+                            paddingHorizontal: 14,
+                            ...elevation.floating,
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size={15} color={theme.textSecondary.val} />
+                        <UIText tone='secondary'>{t('Places.searchLabel')}</UIText>
+                    </Pressable>
+                )}
+            </XStack>
+
+            <YStack
+                position='absolute'
+                left={0}
+                right={0}
+                bottom={0}
+                paddingHorizontal={space.gutter}
+                paddingTop={18}
+                paddingBottom={insets.bottom + 16}
+                gap={14}
+                backgroundColor='$background'
+                borderTopLeftRadius={radius.sheet}
+                borderTopRightRadius={radius.sheet}
+                style={elevation.sheet}
+            >
+                <UIText variant='caption' tone='secondary'>
+                    {t('Places.pinHint')}
+                </UIText>
+                <XStack gap={12} alignItems='center'>
+                    <YStack width={40} height={40} borderRadius={20} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                        <FontAwesomeIcon icon={faLocationDot} size={17} color={theme.primaryForeground.val} />
+                    </YStack>
+                    {moving ? (
+                        <YStack flex={1} gap={8} accessibilityLabel={t('Places.findingAddress')}>
+                            <Skeleton width='70%' height={16} />
+                            <Skeleton width='50%' height={12} />
                         </YStack>
-                    </BottomSheetView>
-                </BottomSheet>
-            </Portal>
+                    ) : (
+                        <YStack flex={1} gap={2} accessibilityLiveRegion='polite'>
+                            <UIText variant='subheading' numberOfLines={1}>
+                                {address.title}
+                            </UIText>
+                            {address.line ? (
+                                <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                                    {address.line}
+                                </UIText>
+                            ) : null}
+                        </YStack>
+                    )}
+                    <Button variant='ghost' size='sm' onPress={() => map.current?.moveTo(initialRegion)}>
+                        {t('Places.reset')}
+                    </Button>
+                </XStack>
+                <Button fullWidth size='lg' disabled={moving} onPress={confirm}>
+                    {moving ? t('Places.findingAddress') : t('Places.useThisLocation')}
+                </Button>
+            </YStack>
         </YStack>
     );
 };
