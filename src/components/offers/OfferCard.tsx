@@ -38,6 +38,8 @@ function useBadge() {
 const BADGE_TONE: Record<Offer['type'], 'error' | 'success' | 'brand'> = { percentage: 'error', fixed_amount: 'error', free_delivery: 'success', bogo: 'brand' };
 
 /** A banner card for the home rail and the featured offer. */
+export const OFFER_BANNER_HEIGHT = 156;
+
 export function OfferBanner({ offer, onPress, primary = false, width }: { offer: Offer; onPress: () => void; primary?: boolean; width?: number }) {
     const { t } = useLanguage();
     const badge = useBadge();
@@ -49,7 +51,8 @@ export function OfferBanner({ offer, onPress, primary = false, width }: { offer:
             accessibilityLabel={[offer.name, offer.owner?.name, offer.code ? t('Offers.useCode', { code: offer.code }) : t('Offers.automatic')].filter(Boolean).join(', ')}
             style={({ pressed }) => ({ width, opacity: pressed ? 0.9 : 1 })}
         >
-            <XStack minHeight={128} borderRadius={radius.card} overflow='hidden' backgroundColor={primary ? '$primary' : '$surface2'}>
+            {/* One height for every banner, so a rail of offers lines up. */}
+            <XStack height={OFFER_BANNER_HEIGHT} borderRadius={radius.card} overflow='hidden' backgroundColor={primary ? '$primary' : '$surface2'}>
                 <YStack flex={1} padding={16} gap={6}>
                     <UIText variant='subheading' tone={fg} style={{ fontSize: 18, lineHeight: 22 }} numberOfLines={2}>
                         {offer.name}

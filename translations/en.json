@@ -700,7 +700,8 @@
         "unavailable": "Unavailable",
         "yourBooking": "Your booking",
         "bookingNote": "The team comes to your delivery address. Booked times are confirmed by the store.",
-        "bookingNotePickup": "Booked times are confirmed by {{store}}."
+        "bookingNotePickup": "Booked times are confirmed by {{store}}.",
+        "paymentNeedsAddress": "Choose an address we can deliver to, then pick how to pay."
     },
     "Tracking": {
         "yourDriver": "Your driver",

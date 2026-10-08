@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -149,8 +149,15 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
 
     return (
         <YStack flex={1} backgroundColor='$surface'>
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                <ScrollView contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 160 }} keyboardShouldPersistTaps='handled'>
+            {/* The scroll view clears the keyboard itself (automaticallyAdjustKeyboardInsets) and
+                scrolls the focused field into view; padding here as well would double it. */}
+            <KeyboardAvoidingView style={{ flex: 1 }} enabled={false}>
+                <ScrollView
+                    contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: 160 }}
+                    keyboardShouldPersistTaps='handled'
+                    keyboardDismissMode='interactive'
+                    automaticallyAdjustKeyboardInsets
+                >
                     <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingBottom={12}>
                         <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('Checkout.backToCart')} onPress={() => navigation.goBack()} />
                         <UIText variant='heading' accessibilityRole='header'>
@@ -315,7 +322,8 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                         {isAuthenticated ? (
                             <Card padding={14} gap={8} accessibilityLabel={t('Checkout.payment')}>
                                 <UIText variant='subheading'>{t('Checkout.payment')}</UIText>
-                                {payment}
+                                {/* Payment is set up for a delivery quote; without one it would wait forever. */}
+                                {quoteState === 'unavailable' ? <UIText tone='secondary'>{t('Checkout.paymentNeedsAddress')}</UIText> : payment}
                             </Card>
                         ) : (
                             <Card padding={14} gap={10}>
@@ -378,6 +386,8 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 placeholder={t('Checkout.notesPlaceholder')}
                                 accessibilityLabel={t('Checkout.notesLabel')}
                                 multiline
+                                height={96}
+                                textAlignVertical='top'
                                 maxLength={500}
                             />
                         </YStack>
