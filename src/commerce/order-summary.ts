@@ -52,6 +52,18 @@ const amount = (value: unknown): number => {
 
 const text = (value: unknown): string | null => (typeof value === 'string' && value.trim() ? value.trim() : null);
 
+/**
+ * A tip as an amount. Checkout can store a tip as a percentage of the subtotal ("10%"),
+ * which would otherwise read as 10 or not at all.
+ */
+export function tipAmount(value: unknown, subtotal: unknown): number {
+    if (typeof value === 'string' && value.trim().endsWith('%')) {
+        const percent = Number(value.trim().slice(0, -1));
+        return Number.isFinite(percent) ? Math.round((amount(subtotal) * percent) / 100) : 0;
+    }
+    return amount(value);
+}
+
 function optionNames(meta: any): string[] {
     const names: string[] = [];
     for (const variant of Array.isArray(meta?.variants) ? meta.variants : []) {
@@ -111,8 +123,8 @@ export function summarizeOrder(json: any): OrderSummary {
         itemCount: lines.reduce((sum: number, line: OrderLine) => sum + line.quantity, 0),
         subtotal: amount(meta.subtotal),
         deliveryFee: isPickup ? 0 : amount(meta.delivery_fee),
-        tip: amount(meta.tip),
-        deliveryTip: amount(meta.delivery_tip),
+        tip: tipAmount(meta.tip, meta.subtotal),
+        deliveryTip: tipAmount(meta.delivery_tip, meta.subtotal),
         discount: amount(meta.discount),
         promotions: (Array.isArray(meta.promotions) ? meta.promotions : [])
             .map((promotion: any) => ({

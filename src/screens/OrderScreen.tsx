@@ -23,6 +23,9 @@ import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { foodTruckDisplayName, formatCurrency } from '../utils/format';
 import { isArray, getFoodTruckById } from '../utils';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
+import { currentStep, fetchOrderFlow, usesCustomFlow, type OrderFlow } from '../commerce/order-flow';
+import { tipAmount } from '../commerce/order-summary';
+import { formattedAddressFromPlace, restoreFleetbasePlace } from '../utils/location';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
 import { Button, ErrorState, IconButton, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
@@ -63,6 +66,7 @@ const OrderScreen = ({ route }: any) => {
     const reviewRequest = useReviewRequest();
     const chatRequest = useChatRequest();
     const [chat, setChat] = useState<OrderChat | null>(null);
+    const [flow, setFlow] = useState<OrderFlow | null>(null);
 
     const storeId = useMemo(() => order.getAttribute('meta.storefront_id'), [order]);
     const [store, setStore] = useStorage(`${storeId}`, info);
@@ -81,6 +85,11 @@ const OrderScreen = ({ route }: any) => {
         () => orderProgress({ status, isPickup, trackingStatuses: order.getAttribute('tracking_statuses'), createdAt: order.getAttribute('created_at') }),
         [isPickup, order, status]
     );
+    // An order on a custom order config shows that config's own steps.
+    const customFlow = usesCustomFlow(flow) ? flow : null;
+    const flowStep = customFlow ? currentStep(customFlow) : null;
+    const finished = customFlow ? customFlow.completed : progress.finished;
+    const canceled = customFlow ? customFlow.canceled : progress.canceled;
 
     const canRenderRoute = useMemo(() => {
         const pickup = order.getAttribute('payload.pickup');
@@ -194,7 +203,6 @@ const OrderScreen = ({ route }: any) => {
 
     // Once the order is finished, invite a review (the server checks it's this customer's
     // completed order and not reviewed yet).
-    const finished = progress.finished;
     useEffect(() => {
         if (!finished || !storeId || !customer) return;
         let active = true;
@@ -209,7 +217,7 @@ const OrderScreen = ({ route }: any) => {
     // The driver chat: its unread count while the order is active, its history after.
     const hasDriver = !!order.getAttribute('driver_assigned') || !!order.getAttribute('driver_assigned_uuid');
     useEffect(() => {
-        if (!customer || !loaded || isPickup || (!hasDriver && !progress.finished)) return;
+        if (!customer || !loaded || isPickup || (!hasDriver && !finished)) return;
         let active = true;
         fetchChat(chatRequest, order.id)
             .then((result) => active && setChat(result))
@@ -217,7 +225,19 @@ const OrderScreen = ({ route }: any) => {
         return () => {
             active = false;
         };
-    }, [chatRequest, customer, hasDriver, isPickup, loaded, order.id, progress.finished, status]);
+    }, [chatRequest, customer, finished, hasDriver, isPickup, loaded, order.id, status]);
+
+    // The order's steps from its own order config, refreshed as its status changes.
+    useEffect(() => {
+        if (!customer || !loaded) return;
+        let active = true;
+        fetchOrderFlow(chatRequest, order.id)
+            .then((result) => active && setFlow(result))
+            .catch(() => {});
+        return () => {
+            active = false;
+        };
+    }, [chatRequest, customer, loaded, order.id, status]);
 
     const openChat = () =>
         navigation.navigate('OrderChat', {
@@ -262,10 +282,22 @@ const OrderScreen = ({ route }: any) => {
     const totals = [
         { label: t('Tracking.subtotal'), value: order.getAttribute('meta.subtotal') },
         !isPickup && { label: t('Tracking.deliveryFee'), value: order.getAttribute('meta.delivery_fee') },
-        Number(order.getAttribute('meta.tip')) > 0 && { label: t('Tracking.tip'), value: order.getAttribute('meta.tip') },
-        Number(order.getAttribute('meta.delivery_tip')) > 0 && { label: t('Tracking.driverTip'), value: order.getAttribute('meta.delivery_tip') },
+        tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')) > 0 && {
+            label: t('Tracking.tip'),
+            value: tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')),
+        },
+        tipAmount(order.getAttribute('meta.delivery_tip'), order.getAttribute('meta.subtotal')) > 0 && {
+            label: t('Tracking.driverTip'),
+            value: tipAmount(order.getAttribute('meta.delivery_tip'), order.getAttribute('meta.subtotal')),
+        },
     ].filter(Boolean) as { label: string; value: unknown }[];
     const discount = Number(order.getAttribute('meta.discount')) || 0;
+    const cashDue = Number(order.getAttribute('payload.cod_amount')) || 0;
+    const pickupName = (foodTruck ? foodTruckDisplayName(foodTruck) : null) ?? pickup?.name ?? null;
+    const fullAddress = (place: any) => (place ? formattedAddressFromPlace(restoreFleetbasePlace(place)) : '');
+    const timeline = customFlow
+        ? customFlow.steps.map((step) => ({ key: step.code, label: step.label, state: step.state, at: step.at }))
+        : progress.steps.map((step) => ({ key: step.key, label: t(`Tracking.step.${isPickup ? 'pickup' : 'delivery'}.${step.key}`), state: step.state, at: step.at }));
 
     if (!loaded) {
         return (
@@ -316,13 +348,15 @@ const OrderScreen = ({ route }: any) => {
                     <YStack width={40} height={5} borderRadius={radius.pill} backgroundColor='$borderColorWithShadow' alignSelf='center' />
 
                     <YStack gap={4} accessibilityRole='summary' aria-live='polite'>
-                        <UIText variant='heading' accessibilityRole='header' tone={progress.canceled ? 'error' : 'primary'}>
-                            {headline(progress.phase)}
+                        <UIText variant='heading' accessibilityRole='header' tone={canceled ? 'error' : 'primary'}>
+                            {flowStep ? flowStep.label : headline(progress.phase)}
                         </UIText>
-                        <UIText tone='secondary'>
-                            {subline(progress.phase)}
-                            {eta ? ` ${t('Tracking.arrivingIn', { eta })}` : ''}
-                        </UIText>
+                        {!!(flowStep ? flowStep.details || eta : true) && (
+                            <UIText tone='secondary'>
+                                {flowStep ? (flowStep.details ?? '') : subline(progress.phase)}
+                                {eta ? ` ${t('Tracking.arrivingIn', { eta })}` : ''}
+                            </UIText>
+                        )}
                     </YStack>
 
                     {reviewState?.canReview && (
@@ -355,15 +389,8 @@ const OrderScreen = ({ route }: any) => {
                         </XStack>
                     )}
 
-                    {progress.phase === 'ready' && (
+                    {isPickup && progress.phase === 'ready' && (
                         <YStack gap={10} padding={14} borderRadius={radius.card} backgroundColor='$successSoft'>
-                            {!!qrCode && (
-                                <Image
-                                    source={{ uri: `data:image/png;base64,${qrCode}` }}
-                                    style={{ width: 120, height: 120, alignSelf: 'center', backgroundColor: '#ffffff', borderRadius: 8 }}
-                                    accessibilityLabel={t('Tracking.pickupCode')}
-                                />
-                            )}
                             <UIText variant='caption'>{t('Tracking.readyBody')}</UIText>
                             <Button icon={faCheck} fullWidth onPress={() => setPickupSheet(true)}>
                                 {t('Tracking.confirmPickup')}
@@ -371,19 +398,30 @@ const OrderScreen = ({ route }: any) => {
                         </YStack>
                     )}
 
+                    {/* Drivers and stores scan this to confirm delivery or collection. */}
+                    {!!qrCode && !finished && !canceled && (
+                        <XStack alignItems='center' gap={14} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor'>
+                            <Image
+                                source={{ uri: `data:image/png;base64,${qrCode}` }}
+                                style={{ width: 96, height: 96, backgroundColor: '#ffffff', borderRadius: 8 }}
+                                accessibilityLabel={t('Tracking.pickupCode')}
+                            />
+                            <YStack flex={1} gap={4}>
+                                <UIText variant='bodyStrong'>{t('Tracking.qrTitle')}</UIText>
+                                <UIText variant='caption' tone='secondary'>
+                                    {isPickup ? t('Tracking.qrBodyPickup') : t('Tracking.qrBodyDelivery')}
+                                </UIText>
+                            </YStack>
+                        </XStack>
+                    )}
+
                     <YStack accessibilityRole='list' accessibilityLabel={t('Tracking.progress')}>
-                        {progress.steps.map((step, index) => {
-                            const last = index === progress.steps.length - 1;
+                        {timeline.map((step, index) => {
+                            const last = index === timeline.length - 1;
                             const done = step.state === 'done';
                             const current = step.state === 'current';
                             return (
-                                <XStack
-                                    key={step.key}
-                                    gap={12}
-                                    minHeight={44}
-                                    accessibilityRole='text'
-                                    accessibilityLabel={`${t(`Tracking.step.${isPickup ? 'pickup' : 'delivery'}.${step.key}`)}, ${t(`Tracking.stepState.${step.state}`)}`}
-                                >
+                                <XStack key={step.key} gap={12} minHeight={44} accessibilityRole='text' accessibilityLabel={`${step.label}, ${t(`Tracking.stepState.${step.state}`)}`}>
                                     <YStack width={22} alignItems='center'>
                                         <YStack
                                             width={22}
@@ -402,7 +440,7 @@ const OrderScreen = ({ route }: any) => {
                                     </YStack>
                                     <XStack flex={1} justifyContent='space-between' gap={8} paddingBottom={10}>
                                         <UIText variant={current ? 'bodyStrong' : 'body'} tone={step.state === 'todo' ? 'secondary' : 'primary'} style={{ fontSize: 14 }}>
-                                            {t(`Tracking.step.${isPickup ? 'pickup' : 'delivery'}.${step.key}`)}
+                                            {step.label}
                                         </UIText>
                                         {!!step.at && (
                                             <UIText variant='caption' tone='secondary'>
@@ -420,7 +458,7 @@ const OrderScreen = ({ route }: any) => {
                         })}
                     </YStack>
 
-                    {!!driverName && !isPickup && !progress.finished && !progress.canceled && (
+                    {!!driverName && !isPickup && !finished && !canceled && (
                         <XStack alignItems='center' gap={12} padding={12} borderRadius={radius.card} backgroundColor='$surface'>
                             {usableImageUrl(driver?.photo_url) ? (
                                 <Image source={{ uri: driver.photo_url }} style={{ width: 48, height: 48, borderRadius: 24 }} accessibilityIgnoresInvertColors />
@@ -501,7 +539,7 @@ const OrderScreen = ({ route }: any) => {
                         </XStack>
                     ))}
 
-                    {progress.finished && !!chat && chat.messages.length > 0 && (
+                    {finished && !!chat && chat.messages.length > 0 && (
                         <Pressable
                             onPress={openChat}
                             accessibilityRole='button'
@@ -519,14 +557,22 @@ const OrderScreen = ({ route }: any) => {
 
                     <XStack alignItems='center' gap={12}>
                         <StoreLogo uri={store?.logo_url} name={storeName || '?'} size={40} radius={radius.tile} />
-                        <YStack flex={1}>
+                        <YStack flex={1} gap={2}>
                             <UIText variant='bodyStrong'>{storeName}</UIText>
-                            {!!pickup?.street1 && (
-                                <UIText variant='caption' tone='secondary' numberOfLines={1}>
-                                    {pickup.street1}
+                            {!!pickupName && pickupName !== storeName && (
+                                <UIText variant='caption' tone='secondary'>
+                                    {pickupName}
+                                </UIText>
+                            )}
+                            {!!fullAddress(pickup) && (
+                                <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                    {fullAddress(pickup)}
                                 </UIText>
                             )}
                         </YStack>
+                        {!!store?.phone && (
+                            <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />
+                        )}
                     </XStack>
 
                     <YStack gap={10} accessibilityLabel={t('Tracking.details')}>
@@ -538,15 +584,29 @@ const OrderScreen = ({ route }: any) => {
                         </XStack>
                         <UIText variant='caption' tone='secondary'>
                             {formatDate(new Date(order.getAttribute('created_at') ?? Date.now()), 'PPp')}
+                            {reference !== order.id ? ` · ${t('Tracking.orderId', { id: order.id })}` : ''}
                         </UIText>
-                        {entities.map((entity: any, index: number) => (
-                            <XStack key={entity.id ?? index} justifyContent='space-between' gap={8}>
-                                <UIText flex={1} tone='secondary'>
-                                    {entity.meta?.quantity ?? 1} × {entity.name}
-                                </UIText>
-                                <UIText>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
-                            </XStack>
-                        ))}
+                        {entities.map((entity: any, index: number) => {
+                            const options = [...(entity.meta?.variants ?? []), ...(entity.meta?.addons ?? [])].map((option: any) => option?.name).filter(Boolean);
+                            return (
+                                <XStack key={entity.id ?? index} alignItems='center' gap={10}>
+                                    {usableImageUrl(entity.photo_url) ? (
+                                        <Image source={{ uri: entity.photo_url }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
+                                    ) : null}
+                                    <YStack flex={1} gap={2}>
+                                        <UIText tone='secondary'>
+                                            {entity.meta?.quantity ?? 1} × {entity.name}
+                                        </UIText>
+                                        {options.length > 0 && (
+                                            <UIText variant='caption' tone='secondary'>
+                                                {options.join(', ')}
+                                            </UIText>
+                                        )}
+                                    </YStack>
+                                    <UIText>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
+                                </XStack>
+                            );
+                        })}
                         {totals.map((row) => (
                             <XStack key={row.label} justifyContent='space-between'>
                                 <UIText tone='secondary'>{row.label}</UIText>
@@ -563,15 +623,23 @@ const OrderScreen = ({ route }: any) => {
                             <UIText variant='bodyStrong'>{t('Tracking.total')}</UIText>
                             <UIText variant='bodyStrong'>{money(order.getAttribute('meta.total'))}</UIText>
                         </XStack>
+                        {cashDue > 0 && (
+                            <UIText variant='captionStrong' tone='warning'>
+                                {t('Tracking.cashOnDelivery', { amount: money(cashDue) })}
+                            </UIText>
+                        )}
                         <UIText variant='caption' tone='secondary'>
                             {isPickup
-                                ? t('Tracking.pickupAt', { place: [pickup?.name, pickup?.street1].filter(Boolean).join(', ') })
-                                : t('Tracking.deliveringTo', { place: [dropoff?.name, dropoff?.street1].filter(Boolean).join(', ') })}
+                                ? t('Tracking.pickupAt', { place: [pickup?.name, fullAddress(pickup)].filter(Boolean).join(', ') })
+                                : t('Tracking.deliveringTo', { place: [dropoff?.name, fullAddress(dropoff)].filter(Boolean).join(', ') })}
                         </UIText>
                         {!!order.getAttribute('notes') && (
-                            <UIText variant='caption' tone='secondary'>
-                                {t('Tracking.notes', { notes: order.getAttribute('notes') })}
-                            </UIText>
+                            <YStack gap={4} padding={12} borderRadius={radius.button} backgroundColor='$surface'>
+                                <UIText variant='captionStrong'>{t('Tracking.notesTitle')}</UIText>
+                                <UIText variant='caption' tone='secondary'>
+                                    {order.getAttribute('notes')}
+                                </UIText>
+                            </YStack>
                         )}
                     </YStack>
                 </YStack>

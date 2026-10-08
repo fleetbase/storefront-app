@@ -714,6 +714,12 @@
         "paymentNeedsAddress": "Choose an address we can deliver to, then pick how to pay."
     },
     "Tracking": {
+        "qrTitle": "Your order code",
+        "qrBodyDelivery": "Your driver may scan this to confirm delivery.",
+        "qrBodyPickup": "Show this at the store when you collect your order.",
+        "orderId": "ID {{id}}",
+        "notesTitle": "Your notes",
+        "cashOnDelivery": "Pay {{amount}} in cash on delivery",
         "yourDriver": "Your driver",
         "phase": {
             "placed": {

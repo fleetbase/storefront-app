@@ -1,4 +1,4 @@
-import { groupOrders, itemsPreview, parseOrderLine, paymentKey, placeLine, receiptText, summarizeOrder } from '../../src/commerce/order-summary';
+import { groupOrders, itemsPreview, parseOrderLine, paymentKey, placeLine, receiptText, summarizeOrder, tipAmount } from '../../src/commerce/order-summary';
 
 const order = (overrides: any = {}) => ({
     id: 'order_1',
@@ -194,5 +194,16 @@ describe('receiptText', () => {
         expect(text).not.toContain('tip');
         expect(text).not.toContain('discount');
         expect(text.split('\n')[2]).toBe('');
+    });
+});
+
+describe('tipAmount', () => {
+    it('reads amounts and percentages of the subtotal', () => {
+        expect(tipAmount(250, 3220)).toBe(250);
+        expect(tipAmount('S$2.50', 3220)).toBe(2.5);
+        expect(tipAmount('10%', 3220)).toBe(322);
+        expect(tipAmount(' 15% ', '3220')).toBe(483);
+        expect(tipAmount('abc%', 3220)).toBe(0);
+        expect(tipAmount(null, 3220)).toBe(0);
     });
 });
