@@ -43,7 +43,12 @@ export function OfferBanner({ offer, onPress, primary = false, width }: { offer:
     const badge = useBadge();
     const fg = primary ? 'onPrimary' : 'primary';
     return (
-        <Pressable onPress={onPress} accessibilityRole='button' accessibilityLabel={[offer.name, offer.owner?.name, offer.code ? t('Offers.useCode', { code: offer.code }) : t('Offers.automatic')].filter(Boolean).join(', ')} style={({ pressed }) => ({ width, opacity: pressed ? 0.9 : 1 })}>
+        <Pressable
+            onPress={onPress}
+            accessibilityRole='button'
+            accessibilityLabel={[offer.name, offer.owner?.name, offer.code ? t('Offers.useCode', { code: offer.code }) : t('Offers.automatic')].filter(Boolean).join(', ')}
+            style={({ pressed }) => ({ width, opacity: pressed ? 0.9 : 1 })}
+        >
             <XStack minHeight={128} borderRadius={radius.card} overflow='hidden' backgroundColor={primary ? '$primary' : '$surface2'}>
                 <YStack flex={1} padding={16} gap={6}>
                     <UIText variant='subheading' tone={fg} style={{ fontSize: 18, lineHeight: 22 }} numberOfLines={2}>
@@ -52,15 +57,35 @@ export function OfferBanner({ offer, onPress, primary = false, width }: { offer:
                     <UIText variant='caption' tone={primary ? 'onPrimary' : 'secondary'} numberOfLines={2}>
                         {offer.description ?? offer.owner?.name ?? ''}
                     </UIText>
-                    <YStack marginTop='auto' alignSelf='flex-start' paddingHorizontal={10} paddingVertical={4} borderRadius={radius.pill} style={{ backgroundColor: primary ? 'rgba(255,255,255,0.18)' : undefined }} backgroundColor={primary ? undefined : '$background'}>
+                    <YStack
+                        marginTop='auto'
+                        alignSelf='flex-start'
+                        paddingHorizontal={10}
+                        paddingVertical={4}
+                        borderRadius={radius.pill}
+                        style={{ backgroundColor: primary ? 'rgba(255,255,255,0.18)' : undefined }}
+                        backgroundColor={primary ? undefined : '$background'}
+                    >
                         <UIText variant='captionStrong' tone={fg} style={{ fontSize: 12 }}>
                             {offer.code ? t('Offers.codeLabel', { code: offer.code }) : t('Offers.atCheckout')}
                         </UIText>
                     </YStack>
                 </YStack>
-                <YStack width={96}>
-                    <MediaImage uri={offer.imageUrl} seed={offer.name} width={96} height={'100%' as any} radius={0} />
-                    <YStack position='absolute' left={8} bottom={8} paddingHorizontal={8} paddingVertical={3} borderRadius={radius.pill} backgroundColor={`$${BADGE_TONE[offer.type] === 'brand' ? 'primary' : BADGE_TONE[offer.type]}` as any}>
+                {/* The text sets the banner's height; the image fills the column (a percentage height
+                    has nothing to resolve against inside a horizontal scroll view on native). */}
+                <YStack width={96} overflow='hidden'>
+                    <YStack position='absolute' top={0} bottom={0} left={0} right={0}>
+                        <MediaImage uri={offer.imageUrl} seed={offer.name} width={96} height={'100%' as any} radius={0} />
+                    </YStack>
+                    <YStack
+                        position='absolute'
+                        left={8}
+                        bottom={8}
+                        paddingHorizontal={8}
+                        paddingVertical={3}
+                        borderRadius={radius.pill}
+                        backgroundColor={`$${BADGE_TONE[offer.type] === 'brand' ? 'primary' : BADGE_TONE[offer.type]}` as any}
+                    >
                         <UIText variant='captionStrong' style={{ color: '#ffffff', fontSize: 12 }}>
                             {badge(offer)}
                         </UIText>
@@ -81,7 +106,17 @@ export function OfferRow({ offer, now, onPress }: { offer: Offer; now: Date; onP
             <XStack gap={12} alignItems='center' paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor' opacity={offer.availability === 'live' ? 1 : 0.75}>
                 <YStack>
                     <MediaImage uri={offer.imageUrl} seed={offer.name} width={64} height={64} radius={radius.tile} />
-                    <YStack position='absolute' left={-4} bottom={-6} paddingHorizontal={7} paddingVertical={3} borderRadius={radius.pill} borderWidth={2} borderColor='$background' backgroundColor={`$${BADGE_TONE[offer.type] === 'brand' ? 'primary' : BADGE_TONE[offer.type]}` as any}>
+                    <YStack
+                        position='absolute'
+                        left={-4}
+                        bottom={-6}
+                        paddingHorizontal={7}
+                        paddingVertical={3}
+                        borderRadius={radius.pill}
+                        borderWidth={2}
+                        borderColor='$background'
+                        backgroundColor={`$${BADGE_TONE[offer.type] === 'brand' ? 'primary' : BADGE_TONE[offer.type]}` as any}
+                    >
                         <UIText variant='captionStrong' style={{ color: '#ffffff', fontSize: 11, lineHeight: 13 }}>
                             {badge(offer)}
                         </UIText>

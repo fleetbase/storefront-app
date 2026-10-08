@@ -14,6 +14,7 @@ import { describeSchedule, fetchOffer, offerBadge, offerStoreId, type Offer } fr
 import { formatCurrency } from '../../utils/format';
 import { toast } from '../../utils/toast';
 import { Button, ErrorState, IconButton, MediaImage, Skeleton, StoreLogo, UIText, elevation, formatClock, radius, space, usesTwelveHourClock } from '../../ui';
+import useFooterOffset from '../../hooks/use-footer-offset';
 
 const HERO = 220;
 
@@ -28,6 +29,8 @@ const MONDAY = new Date(2026, 9, 5);
 const OfferDetailScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    // Above the tab bar, which already clears the home indicator.
+    const footerOffset = useFooterOffset(false);
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const { storefront } = useStorefront();
@@ -93,7 +96,9 @@ const OfferDetailScreen = ({ route }: any) => {
     const banner = ended
         ? t('Offers.endedOn', { date: offer.endsAt ? new Date(offer.endsAt).toLocaleDateString(locale, { day: 'numeric', month: 'long' }) : '' })
         : scheduled && nextStart
-          ? t('Offers.startsAgain', { when: `${nextStart.toDateString() === now.toDateString() ? t('Offers.today') : nextStart.toLocaleDateString(locale, { weekday: 'long' })} ${time(nextStart.getHours() * 60 + nextStart.getMinutes())}` })
+          ? t('Offers.startsAgain', {
+                when: `${nextStart.toDateString() === now.toDateString() ? t('Offers.today') : nextStart.toLocaleDateString(locale, { weekday: 'long' })} ${time(nextStart.getHours() * 60 + nextStart.getMinutes())}`,
+            })
           : null;
 
     const discount =
@@ -106,21 +111,41 @@ const OfferDetailScreen = ({ route }: any) => {
               : offer.type === 'free_delivery'
                 ? t('Offers.terms.freeDelivery')
                 : t('Offers.terms.bogo', { buy: offer.bogo?.buy ?? 1, get: offer.bogo?.get ?? 1 });
-    const scope = offer.appliesTo.products.length || offer.appliesTo.categories.length ? t('Offers.terms.selectedItems') : offer.owner?.type === 'store' ? t('Offers.terms.everythingAt', { store: offer.owner.name }) : offer.appliesTo.stores.length ? t('Offers.terms.selectedStores') : t('Offers.terms.anyStore');
+    const scope =
+        offer.appliesTo.products.length || offer.appliesTo.categories.length
+            ? t('Offers.terms.selectedItems')
+            : offer.owner?.type === 'store'
+              ? t('Offers.terms.everythingAt', { store: offer.owner.name })
+              : offer.appliesTo.stores.length
+                ? t('Offers.terms.selectedStores')
+                : t('Offers.terms.anyStore');
     const terms = [
         { label: t('Offers.terms.discount'), value: discount },
-        { label: t('Offers.terms.appliesTo'), value: scope + (offer.appliesTo.excludeProducts.length || offer.appliesTo.excludeCategories.length ? `. ${t('Offers.terms.someExcluded')}` : '') },
+        {
+            label: t('Offers.terms.appliesTo'),
+            value: scope + (offer.appliesTo.excludeProducts.length || offer.appliesTo.excludeCategories.length ? `. ${t('Offers.terms.someExcluded')}` : ''),
+        },
         offer.schedule.length > 0 && { label: t('Offers.terms.when'), value: describeSchedule(offer.schedule, dayName, time, t('Offers.terms.everyDay')).join('; ') },
-        (offer.minSubtotal || offer.minItems) && { label: t('Offers.terms.minimum'), value: [offer.minSubtotal ? t('Offers.terms.minSpend', { amount: money(offer.minSubtotal) }) : null, offer.minItems ? t('UI.itemsCount', { count: offer.minItems }) : null].filter(Boolean).join(', ') },
+        (offer.minSubtotal || offer.minItems) && {
+            label: t('Offers.terms.minimum'),
+            value: [offer.minSubtotal ? t('Offers.terms.minSpend', { amount: money(offer.minSubtotal) }) : null, offer.minItems ? t('UI.itemsCount', { count: offer.minItems }) : null]
+                .filter(Boolean)
+                .join(', '),
+        },
         offer.firstOrderOnly && { label: t('Offers.terms.who'), value: t('Offers.terms.firstOrder') },
-        offer.perCustomerLimit && { label: t('Offers.terms.limit'), value: offer.perCustomerLimit === 1 ? t('Offers.terms.oncePerCustomer') : t('Offers.terms.timesPerCustomer', { count: offer.perCustomerLimit }) },
+        offer.perCustomerLimit && {
+            label: t('Offers.terms.limit'),
+            value: offer.perCustomerLimit === 1 ? t('Offers.terms.oncePerCustomer') : t('Offers.terms.timesPerCustomer', { count: offer.perCustomerLimit }),
+        },
         offer.endsAt && { label: t('Offers.terms.validUntil'), value: new Date(offer.endsAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) },
         { label: t('Offers.terms.combines'), value: offer.stackable ? t('Offers.terms.stackable') : t('Offers.terms.notStackable') },
     ].filter(Boolean) as { label: string; value: string }[];
 
+    // A store's offer opens that store; a network-wide one, every store. In the single-store
+    // app it goes back to the store's home (navigate would not, since that route is below).
     const shop = () => {
-        if (storeId && mode === 'network') navigation.navigate('NetworkStore', { storeId });
-        else navigation.navigate(mode === 'network' ? 'NetworkHomeTab' : 'StoreHomeTab');
+        if (mode === 'network') navigation.navigate(storeId ? 'NetworkStore' : 'NetworkCategory', storeId ? { storeId } : {});
+        else navigation.popTo('StoreHome');
     };
     const apply = async () => {
         if (!offer.code) return;
@@ -140,7 +165,16 @@ const OfferDetailScreen = ({ route }: any) => {
         <YStack flex={1} backgroundColor='$background'>
             <ScrollView contentContainerStyle={{ paddingBottom: 130 }}>
                 <MediaImage uri={offer.imageUrl} seed={offer.name} height={HERO + insets.top} radius={0} dimmed={ended}>
-                    <YStack position='absolute' left={space.gutter} bottom={16} paddingHorizontal={14} paddingVertical={6} borderRadius={radius.button} backgroundColor={offer.type === 'free_delivery' ? '$success' : '$error'} style={elevation.floating}>
+                    <YStack
+                        position='absolute'
+                        left={space.gutter}
+                        bottom={16}
+                        paddingHorizontal={14}
+                        paddingVertical={6}
+                        borderRadius={radius.button}
+                        backgroundColor={offer.type === 'free_delivery' ? '$success' : '$error'}
+                        style={elevation.floating}
+                    >
                         <UIText variant='title' style={{ color: '#ffffff' }}>
                             {offerBadge(offer, money, t('Offers.freeBadge'))}
                         </UIText>
@@ -166,7 +200,16 @@ const OfferDetailScreen = ({ route }: any) => {
                             onPress={offer.owner.type === 'store' ? shop : undefined}
                             disabled={offer.owner.type !== 'store'}
                             accessibilityRole={offer.owner.type === 'store' ? 'link' : 'text'}
-                            style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: radius.card, backgroundColor: theme.surface.val }}
+                            style={{
+                                minHeight: 52,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: 10,
+                                paddingHorizontal: 12,
+                                paddingVertical: 10,
+                                borderRadius: radius.card,
+                                backgroundColor: theme.surface.val,
+                            }}
                         >
                             <StoreLogo uri={offer.owner.logoUrl} name={offer.owner.name || '?'} size={32} radius={8} />
                             <UIText flex={1} variant='caption'>
@@ -185,7 +228,17 @@ const OfferDetailScreen = ({ route }: any) => {
                             {offer.code ? (
                                 <>
                                     <XStack gap={10} alignItems='center'>
-                                        <YStack flex={1} height={48} borderRadius={radius.button} borderWidth={2} borderStyle='dashed' borderColor='$primary' backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                                        <YStack
+                                            flex={1}
+                                            height={48}
+                                            borderRadius={radius.button}
+                                            borderWidth={2}
+                                            borderStyle='dashed'
+                                            borderColor='$primary'
+                                            backgroundColor='$primarySoft'
+                                            alignItems='center'
+                                            justifyContent='center'
+                                        >
                                             <UIText variant='heading' tone='brand' style={{ letterSpacing: 1.5 }} selectable>
                                                 {offer.code}
                                             </UIText>
@@ -250,10 +303,26 @@ const OfferDetailScreen = ({ route }: any) => {
             </ScrollView>
 
             <YStack position='absolute' top={insets.top + 10} left={space.gutter}>
-                <IconButton icon={faChevronLeft} variant='floating' accessibilityLabel={t('UI.back')} onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Offers'))} />
+                <IconButton
+                    icon={faChevronLeft}
+                    variant='floating'
+                    accessibilityLabel={t('UI.back')}
+                    onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Offers'))}
+                />
             </YStack>
 
-            <YStack position='absolute' left={0} right={0} bottom={0} paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor'>
+            <YStack
+                position='absolute'
+                left={0}
+                right={0}
+                bottom={0}
+                paddingHorizontal={space.gutter}
+                paddingTop={12}
+                paddingBottom={footerOffset + 12}
+                backgroundColor='$background'
+                borderTopWidth={1}
+                borderColor='$borderColor'
+            >
                 {ended ? (
                     <Button variant='outline' size='lg' fullWidth onPress={() => navigation.navigate('Offers')}>
                         {t('Offers.seeCurrent')}
