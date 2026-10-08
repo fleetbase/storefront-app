@@ -10,6 +10,7 @@ import useCart from '../hooks/use-cart';
 import useStorefront from '../hooks/use-storefront';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useCartPromotions from '../hooks/use-cart-promotions';
+import type { PromotionHint } from '../commerce/promotions';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { loadPersistedResource, storefrontConfig } from '../utils';
@@ -90,7 +91,14 @@ const CartScreen = ({ route }: any) => {
         const missing = groups.map((group) => group.storeId).filter((id) => id !== 'store' && !stores[id]);
         if (missing.length === 0) return;
         let active = true;
-        Promise.all(missing.map((id) => storefront.lookup(id).then((store: any) => [id, store] as const, () => [id, null] as const))).then((results) => {
+        Promise.all(
+            missing.map((id) =>
+                storefront.lookup(id).then(
+                    (store: any) => [id, store] as const,
+                    () => [id, null] as const
+                )
+            )
+        ).then((results) => {
             if (!active) return;
             setStores((current) => {
                 const next = { ...current };
@@ -189,19 +197,41 @@ const CartScreen = ({ route }: any) => {
                         </UIText>
                         {hasItems && (
                             <UIText tone='secondary'>
-                                {isNetwork && totals.storeCount > 1 ? t('Cart.storesAndItems', { stores: totals.storeCount, items: t('UI.itemsCount', { count: totals.itemCount }) }) : t('UI.itemsCount', { count: totals.itemCount })}
+                                {isNetwork && totals.storeCount > 1
+                                    ? t('Cart.storesAndItems', { stores: totals.storeCount, items: t('UI.itemsCount', { count: totals.itemCount }) })
+                                    : t('UI.itemsCount', { count: totals.itemCount })}
                             </UIText>
                         )}
                     </YStack>
-                    {hasItems && <Button variant='ghost' size='sm' onPress={() => setConfirmClear(true)}>{t('Cart.clear')}</Button>}
+                    {hasItems && (
+                        <Button variant='ghost' size='sm' onPress={() => setConfirmClear(true)}>
+                            {t('Cart.clear')}
+                        </Button>
+                    )}
                 </XStack>
 
                 {!hasItems ? (
-                    <EmptyState icon={faCartShopping} title={t('Cart.emptyTitle')} description={isNetwork ? t('Cart.emptyBodyNetwork', { network: networkName }) : t('Cart.emptyBody')} actionLabel={isNetwork ? t('Cart.browseStores') : t('Cart.startShopping')} onAction={browse} />
+                    <EmptyState
+                        icon={faCartShopping}
+                        title={t('Cart.emptyTitle')}
+                        description={isNetwork ? t('Cart.emptyBodyNetwork', { network: networkName }) : t('Cart.emptyBody')}
+                        actionLabel={isNetwork ? t('Cart.browseStores') : t('Cart.startShopping')}
+                        onAction={browse}
+                    />
                 ) : (
                     <YStack gap={12} paddingHorizontal={space.gutter}>
                         {groups.map((group) => (
-                            <StoreGroup key={group.storeId} group={group} money={money} busyLine={busyLine} showHeader={isNetwork} onQuantity={setQuantity} onEdit={editLine} onChangeBooking={changeBooking} onAddMore={() => openStore(group.storeId)} />
+                            <StoreGroup
+                                key={group.storeId}
+                                group={group}
+                                money={money}
+                                busyLine={busyLine}
+                                showHeader={isNetwork}
+                                onQuantity={setQuantity}
+                                onEdit={editLine}
+                                onChangeBooking={changeBooking}
+                                onAddMore={() => openStore(group.storeId)}
+                            />
                         ))}
                         <PromotionsCard promo={promo} money={money} />
                     </YStack>
@@ -209,7 +239,20 @@ const CartScreen = ({ route }: any) => {
             </ScrollView>
 
             {hasItems && (
-                <YStack position='absolute' left={0} right={0} bottom={bottomOffset} paddingHorizontal={space.gutter} paddingTop={14} paddingBottom={14} gap={8} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' style={elevation.floating}>
+                <YStack
+                    position='absolute'
+                    left={0}
+                    right={0}
+                    bottom={bottomOffset}
+                    paddingHorizontal={space.gutter}
+                    paddingTop={14}
+                    paddingBottom={14}
+                    gap={8}
+                    backgroundColor='$background'
+                    borderTopWidth={1}
+                    borderColor='$borderColor'
+                    style={elevation.floating}
+                >
                     <XStack justifyContent='space-between'>
                         <UIText tone='secondary'>{t('Cart.subtotal')}</UIText>
                         <UIText tone='secondary'>{money(totals.subtotal)}</UIText>
@@ -263,7 +306,25 @@ const CartScreen = ({ route }: any) => {
     );
 };
 
-function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuantity, onEdit, onChangeBooking, onAddMore }: { group: CartGroup; money: (amount: number) => string; busyLine: string | null; showHeader: boolean; onQuantity: (line: CartLine, quantity: number) => void; onEdit: (line: CartLine) => void; onChangeBooking: (line: CartLine) => void; onAddMore: () => void }) {
+function StoreGroup({
+    group,
+    money: format,
+    busyLine: busy,
+    showHeader,
+    onQuantity,
+    onEdit,
+    onChangeBooking,
+    onAddMore,
+}: {
+    group: CartGroup;
+    money: (amount: number) => string;
+    busyLine: string | null;
+    showHeader: boolean;
+    onQuantity: (line: CartLine, quantity: number) => void;
+    onEdit: (line: CartLine) => void;
+    onChangeBooking: (line: CartLine) => void;
+    onAddMore: () => void;
+}) {
     const { t, locale } = useLanguage();
     const theme = useTheme();
     const hour12 = usesTwelveHourClock(locale);
@@ -291,7 +352,12 @@ function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuanti
             )}
             {group.lines.map((line) => (
                 <XStack key={line.id} gap={12} paddingHorizontal={14} paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor' opacity={busy === line.id ? 0.6 : 1}>
-                    <Pressable onPress={() => (line.scheduledAt ? onChangeBooking(line) : onEdit(line))} accessibilityRole='button' accessibilityLabel={line.scheduledAt ? t('Cart.changeBooking', { name: line.name, time: bookingText(line.scheduledAt) }) : t('Cart.editLine', { name: line.name })} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+                    <Pressable
+                        onPress={() => (line.scheduledAt ? onChangeBooking(line) : onEdit(line))}
+                        accessibilityRole='button'
+                        accessibilityLabel={line.scheduledAt ? t('Cart.changeBooking', { name: line.name, time: bookingText(line.scheduledAt) }) : t('Cart.editLine', { name: line.name })}
+                        style={{ flex: 1, flexDirection: 'row', gap: 12 }}
+                    >
                         <MediaImage uri={line.imageUrl} seed={line.name} width={56} height={56} radius={radius.tile} />
                         <YStack flex={1} gap={2}>
                             <UIText variant='bodyStrong' style={{ fontSize: 14 }} numberOfLines={2}>
@@ -303,7 +369,16 @@ function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuanti
                                 </UIText>
                             )}
                             {!!bookingText(line.scheduledAt) && (
-                                <XStack alignSelf='flex-start' marginTop={4} alignItems='center' gap={6} paddingHorizontal={10} paddingVertical={5} borderRadius={radius.pill} backgroundColor='$primarySoft'>
+                                <XStack
+                                    alignSelf='flex-start'
+                                    marginTop={4}
+                                    alignItems='center'
+                                    gap={6}
+                                    paddingHorizontal={10}
+                                    paddingVertical={5}
+                                    borderRadius={radius.pill}
+                                    backgroundColor='$primarySoft'
+                                >
                                     <FontAwesomeIcon icon={faCalendarDays} size={12} color={theme.primaryForeground.val} />
                                     <UIText variant='captionStrong' tone='brand' style={{ fontSize: 12 }}>
                                         {bookingText(line.scheduledAt)} · {t('Cart.change')}
@@ -317,10 +392,18 @@ function StoreGroup({ group, money: format, busyLine: busy, showHeader, onQuanti
                     </Pressable>
                     <YStack justifyContent='center'>
                         {line.scheduledAt ? (
-                        <IconButton icon={faTrashCan} accessibilityLabel={t('Cart.removeBooking', { name: line.name })} onPress={() => onQuantity(line, 0)} />
-                    ) : (
-                        <Stepper size='sm' value={line.quantity} min={1} max={99} itemName={line.name} onChange={(quantity) => onQuantity(line, quantity)} onRemove={() => onQuantity(line, 0)} />
-                    )}
+                            <IconButton icon={faTrashCan} accessibilityLabel={t('Cart.removeBooking', { name: line.name })} onPress={() => onQuantity(line, 0)} />
+                        ) : (
+                            <Stepper
+                                size='sm'
+                                value={line.quantity}
+                                min={1}
+                                max={99}
+                                itemName={line.name}
+                                onChange={(quantity) => onQuantity(line, quantity)}
+                                onRemove={() => onQuantity(line, 0)}
+                            />
+                        )}
                     </YStack>
                 </XStack>
             ))}
@@ -358,19 +441,50 @@ function PromotionsCard({ promo: state, money: format }: { promo: ReturnType<typ
         if (await state.apply(code)) setCode('');
     };
     const appliedCodes = new Set(state.promotions.applied.map((applied) => applied.code).filter(Boolean));
+    // Spell the reward out from the promotion itself, in the cart's currency, rather than
+    // quoting its name, which is free text and may write amounts its own way.
+    const hintText = (hint: PromotionHint) => {
+        const amount = format(hint.remaining);
+        if (hint.type === 'free_delivery') return t('Cart.hintFreeDelivery', { amount });
+        if (hint.type === 'percentage' && hint.value > 0) return t('Cart.hintPercentOff', { amount, percent: Math.round(hint.value) });
+        if (hint.type === 'fixed_amount' && hint.value > 0) return t('Cart.hintAmountOff', { amount, discount: format(hint.value).replace(/\.00$/, '') });
+        return (
+            <>
+                <UIText variant='captionStrong'>{hint.name}</UIText> · {t('Cart.hintSpendMore', { amount })}
+            </>
+        );
+    };
 
     return (
         <Card padding={14} gap={12} accessibilityLabel={t('Cart.promotions')}>
             <UIText variant='subheading'>{t('Cart.promotions')}</UIText>
             {state.promotions.applied.map((applied) => (
-                <XStack key={`${applied.promotionId}-${applied.code}`} alignItems='center' gap={10} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} backgroundColor='$successSoft'>
+                <XStack
+                    key={`${applied.promotionId}-${applied.code}`}
+                    alignItems='center'
+                    gap={10}
+                    paddingHorizontal={12}
+                    paddingVertical={10}
+                    borderRadius={radius.button}
+                    backgroundColor='$successSoft'
+                >
                     <FontAwesomeIcon icon={faTag} size={16} color={theme.successForeground.val} />
                     <UIText flex={1} variant='caption'>
                         <UIText variant='captionStrong'>{applied.code ?? applied.name}</UIText>
-                        {applied.amount > 0 ? ` · ${t('Cart.saving', { amount: format(applied.amount) })}` : applied.deliveryAmount > 0 || applied.type === 'free_delivery' ? ` · ${t('Cart.freeDelivery')}` : ''}
+                        {applied.amount > 0
+                            ? ` · ${t('Cart.saving', { amount: format(applied.amount) })}`
+                            : applied.deliveryAmount > 0 || applied.type === 'free_delivery'
+                              ? ` · ${t('Cart.freeDelivery')}`
+                              : ''}
                     </UIText>
                     {!!applied.code && (
-                        <Button variant='ghost' size='sm' disabled={state.applying} onPress={() => state.remove(applied.code!)} accessibilityLabel={t('Cart.removeCode', { code: applied.code })}>
+                        <Button
+                            variant='ghost'
+                            size='sm'
+                            disabled={state.applying}
+                            onPress={() => state.remove(applied.code!)}
+                            accessibilityLabel={t('Cart.removeCode', { code: applied.code })}
+                        >
                             {t('UI.remove')}
                         </Button>
                     )}
@@ -392,7 +506,7 @@ function PromotionsCard({ promo: state, money: format }: { promo: ReturnType<typ
             {state.hints.slice(0, 2).map((hint) => (
                 <XStack key={hint.id} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} borderWidth={1} borderStyle='dashed' borderColor='$borderColorWithShadow'>
                     <UIText flex={1} variant='caption' tone='secondary'>
-                        <UIText variant='captionStrong'>{hint.name}</UIText> · {t('Cart.hintSpendMore', { amount: format(hint.remaining) })}
+                        {hintText(hint)}
                     </UIText>
                 </XStack>
             ))}

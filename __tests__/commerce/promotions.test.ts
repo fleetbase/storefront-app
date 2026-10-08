@@ -1,4 +1,14 @@
-import { NO_PROMOTIONS, PromoCodeError, applyPromoCode, fetchCartPromotions, normalizePromoCode, parseCartPromotions, promoReasonFromMessage, promotionHints, removePromoCode } from '../../src/commerce/promotions';
+import {
+    NO_PROMOTIONS,
+    PromoCodeError,
+    applyPromoCode,
+    fetchCartPromotions,
+    normalizePromoCode,
+    parseCartPromotions,
+    promoReasonFromMessage,
+    promotionHints,
+    removePromoCode,
+} from '../../src/commerce/promotions';
 
 const fakeAdapter = (overrides: Partial<Record<'get' | 'post' | 'delete', jest.Mock>> = {}) => ({
     get: overrides.get ?? jest.fn(),
@@ -14,7 +24,10 @@ const serverResult = {
         { promotion: 'promo_1', name: 'First order', type: 'fixed_amount', code: 'FIRST5', amount: 500, delivery_amount: 0 },
         { promotion: 'promo_2', name: 'Free delivery', type: 'free_delivery', code: null, amount: 0, delivery_amount: 150 },
     ],
-    rejected: [{ code: 'OLD10', reason: 'not_active' }, { code: null, reason: 'x' }],
+    rejected: [
+        { code: 'OLD10', reason: 'not_active' },
+        { code: null, reason: 'x' },
+    ],
 };
 
 describe('cart promotions', () => {
@@ -73,7 +86,13 @@ describe('cart promotions', () => {
         const original = (globalThis as any).fetch;
         const adapter = { ...fakeAdapter(), host: 'https://api.test', namespace: 'storefront/v1', headers: { Authorization: 'Bearer key' } };
         try {
-            (globalThis as any).fetch = jest.fn().mockResolvedValue({ ok: false, statusText: 'Bad Request', json: () => Promise.resolve({ error: 'Promotion code "NOPE" cannot be applied (invalid_code).', reason: 'invalid_code' }) });
+            (globalThis as any).fetch = jest
+                .fn()
+                .mockResolvedValue({
+                    ok: false,
+                    statusText: 'Bad Request',
+                    json: () => Promise.resolve({ error: 'Promotion code "NOPE" cannot be applied (invalid_code).', reason: 'invalid_code' }),
+                });
             await expect(applyPromoCode(adapter, 'cart_1', 'nope')).rejects.toMatchObject({ reason: 'invalid_code', message: 'Promotion code "NOPE" cannot be applied (invalid_code).' });
             expect((globalThis as any).fetch).toHaveBeenCalledWith('https://api.test/storefront/v1/carts/cart_1/promo-code', {
                 method: 'POST',
@@ -81,7 +100,9 @@ describe('cart promotions', () => {
                 body: JSON.stringify({ code: 'NOPE' }),
             });
 
-            (globalThis as any).fetch = jest.fn().mockResolvedValue({ ok: false, statusText: 'Bad Request', json: () => Promise.resolve({ error: 'Promotion code "X" cannot be applied (min_items).' }) });
+            (globalThis as any).fetch = jest
+                .fn()
+                .mockResolvedValue({ ok: false, statusText: 'Bad Request', json: () => Promise.resolve({ error: 'Promotion code "X" cannot be applied (min_items).' }) });
             await expect(applyPromoCode(adapter, 'cart_1', 'x')).rejects.toMatchObject({ reason: 'min_items' });
 
             (globalThis as any).fetch = jest.fn().mockResolvedValue({ ok: false, statusText: 'Server Error', json: () => Promise.reject(new Error('not json')) });
@@ -105,7 +126,16 @@ describe('cart promotions', () => {
 
     test('hints at automatic promotions the cart has not reached, nearest first', () => {
         const promotions = [
-            { id: 'network_big', name: 'S$10 off S$150', trigger: 'automatic', min_subtotal: 15000, availability: 'live', owner: { type: 'network', id: 'network_1' } },
+            {
+                id: 'network_big',
+                name: 'S$10 off S$150',
+                type: 'fixed_amount',
+                value: 1000,
+                trigger: 'automatic',
+                min_subtotal: 15000,
+                availability: 'live',
+                owner: { type: 'network', id: 'network_1' },
+            },
             { id: 'store_card', name: 'Free greeting card', trigger: 'automatic', min_subtotal: 12000, availability: 'live', owner: { type: 'store', id: 'store_bloom' } },
             { id: 'other_store', name: 'Elsewhere', trigger: 'automatic', min_subtotal: 5000, owner: { type: 'store', id: 'store_other' } },
             { id: 'code_only', name: 'Code', trigger: 'code', code: 'X', min_subtotal: 20000 },
@@ -118,8 +148,8 @@ describe('cart promotions', () => {
         ];
         const hints = promotionHints(promotions, { subtotal: 9400, storeSubtotals: { store_bloom: 9400 }, appliedIds: ['applied', null], currency: 'SGD' });
         expect(hints).toEqual([
-            { id: 'store_card', name: 'Free greeting card', minSubtotal: 12000, remaining: 2600, ownerId: 'store_bloom' },
-            { id: 'network_big', name: 'S$10 off S$150', minSubtotal: 15000, remaining: 5600, ownerId: null },
+            { id: 'store_card', name: 'Free greeting card', type: null, value: 0, minSubtotal: 12000, remaining: 2600, ownerId: 'store_bloom' },
+            { id: 'network_big', name: 'S$10 off S$150', type: 'fixed_amount', value: 1000, minSubtotal: 15000, remaining: 5600, ownerId: null },
         ]);
         expect(promotionHints(null, { subtotal: 0 })).toEqual([]);
     });

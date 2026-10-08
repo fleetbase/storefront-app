@@ -151,7 +151,8 @@ export async function removePromoCode(adapter: Adapter, cartId: string, code: st
     return { cart: json?.cart ?? null, promotions: parseCartPromotions(json?.promotions) };
 }
 
-export type PromotionHint = { id: string; name: string; minSubtotal: number; remaining: number; ownerId: string | null };
+/** `type` and `value` let the hint describe the reward itself instead of quoting the promotion's name. */
+export type PromotionHint = { id: string; name: string; type: string | null; value: number; minSubtotal: number; remaining: number; ownerId: string | null };
 
 /**
  * Automatic promotions (no code) that are live and that the cart would unlock by
@@ -181,7 +182,9 @@ export function promotionHints(
             // Only hint at stores already in the cart.
             if (ownerId && !(ownerId in storeSubtotals)) return null;
             const remaining = minSubtotal - spent;
-            return remaining > 0 ? { id: String(promotion.id), name: String(promotion.name ?? ''), minSubtotal, remaining, ownerId } : null;
+            return remaining > 0
+                ? { id: String(promotion.id), name: String(promotion.name ?? ''), type: promotion.type ?? null, value: Number(promotion.value) || 0, minSubtotal, remaining, ownerId }
+                : null;
         })
         .filter((hint): hint is PromotionHint => hint !== null)
         .sort((a, b) => a.remaining - b.remaining);
