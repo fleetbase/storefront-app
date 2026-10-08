@@ -4,8 +4,9 @@ import type { ScreenRegistryDefinition } from './types';
  * Default implementations for every overridable screen.
  *
  * Screens are loaded lazily so navigators never import screen modules
- * directly. On web each screen becomes its own chunk; on native the modules
- * stay in the single bundle but are evaluated on first use.
+ * directly. On web each screen becomes its own chunk. On native, release builds
+ * hold every screen in the one bundle (evaluated on first use); in development
+ * metro.config.js asks Metro for the whole app up front for the same effect.
  */
 export const defaultScreens: ScreenRegistryDefinition = {
     'store.home': { load: () => import('../../screens/StoreHomeScreen') },
