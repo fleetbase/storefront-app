@@ -36,6 +36,8 @@ import { parseScheduledAt } from '../../commerce/booking';
 /** The fields every gateway's checkout hook provides (Stripe, QPay). */
 export type CheckoutState = {
     cart: any;
+    /** A paid checkout whose order still has to be created (Stripe only). */
+    pendingCapture?: { token: string } | null;
     customer: any;
     lineItems: { name: string; value: number; loading?: boolean; tip?: any }[];
     totalAmount: number;
@@ -425,6 +427,21 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                     <Button size='lg' fullWidth icon={faLock} onPress={signIn}>
                         {t('Checkout.signInToPlace')}
                     </Button>
+                ) : checkout.pendingCapture ? (
+                    // Paid, but the order wasn't created: finish it without charging again.
+                    <>
+                        <YStack gap={2} accessibilityRole='alert'>
+                            <UIText variant='captionStrong' textAlign='center'>
+                                {t('Checkout.paidPendingTitle')}
+                            </UIText>
+                            <UIText variant='caption' tone='secondary' textAlign='center'>
+                                {t('Checkout.paidPendingBody')}
+                            </UIText>
+                        </YStack>
+                        <Button size='lg' fullWidth loading={checkout.isLoading} onPress={onPlaceOrder}>
+                            {t('Checkout.finishOrder')}
+                        </Button>
+                    </>
                 ) : (
                     <>
                         {!!blockedReason && (

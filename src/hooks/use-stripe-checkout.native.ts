@@ -9,6 +9,7 @@ import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { captureWithRetry, pendingCaptureFor, type PendingCapture } from '../commerce/checkout-capture';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -285,6 +286,63 @@ export default function useStripeCheckout({ onOrderComplete }) {
         [setupIntentClientSecret, confirmSetupIntent]
     );
 
+    // A paid checkout whose order isn't created yet, kept across restarts so the customer
+    // can finish placing it without paying again.
+    const [storedPendingCapture, setPendingCapture] = useStorage<PendingCapture | null>('_pending_checkout_capture', null);
+    const pendingCapture = pendingCaptureFor(storedPendingCapture, customer?.id);
+
+    // The payment went through: create the order. Capture is retried, and if it still
+    // fails the checkout stays pending instead of being lost.
+    const completePaidOrder = useCallback(
+        async (checkoutToken, callback, notes = orderNotes) => {
+            setPendingCapture({ token: checkoutToken, notes, customerId: customer?.id ?? null, paidAt: new Date().toISOString() });
+            let order;
+            try {
+                order = await captureWithRetry(() => storefront.checkout.captureOrder(checkoutToken, { notes }));
+            } catch (error) {
+                console.warn('Order capture failed after payment:', error);
+                toast.error(t('Checkout.paidNotPlaced'));
+                return;
+            }
+            setPendingCapture(null);
+
+            try {
+                const emptiedCart = await cart.empty();
+                updateCart(emptiedCart);
+            } catch (error) {
+                console.warn('Could not empty the cart after the order:', error);
+            }
+
+            // Push order into local history cache immediately
+            if (customer?.id) {
+                addOrderToHistoryCache(customer.id, order);
+            }
+
+            if (!onOrderComplete && typeof callback === 'function') {
+                callback(order);
+            }
+
+            if (!callback && typeof onOrderComplete === 'function') {
+                onOrderComplete(order);
+            }
+        },
+        [cart, updateCart, storefront, customer, orderNotes, onOrderComplete, setPendingCapture, t]
+    );
+
+    // Finish a paid checkout whose order wasn't created; never charges again.
+    const finishPendingOrder = useCallback(
+        async (callback) => {
+            if (!pendingCapture) return;
+            setIsLoading(true);
+            try {
+                await completePaidOrder(pendingCapture.token, callback, pendingCapture.notes);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [pendingCapture, completePaidOrder]
+    );
+
     const handleCompleteOrderViaSheet = useCallback(
         async (callback) => {
             setIsLoading(true);
@@ -301,23 +359,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message);
                 } else {
-                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
-                    const emptiedCart = await cart.empty();
-                    updateCart(emptiedCart);
-
-                    // Push order into local history cache immediately
-                    if (customer?.id) {
-                        addOrderToHistoryCache(customer.id, order);
-                        // optionally: markOrderHistoryDirty(customer.id);
-                    }
-
-                    if (!onOrderComplete && typeof callback === 'function') {
-                        callback(order);
-                    }
-
-                    if (!callback && typeof onOrderComplete === 'function') {
-                        onOrderComplete(order);
-                    }
+                    await completePaidOrder(checkoutToken, callback);
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
@@ -326,7 +368,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setIsLoading(false);
             }
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, completePaidOrder]
     );
 
     const handleCompleteOrderViaField = useCallback(
@@ -348,17 +390,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message);
                 } else if (paymentIntent && paymentIntent.status === 'Succeeded') {
-                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
-                    const emptiedCart = await cart.empty();
-                    updateCart(emptiedCart);
-
-                    if (!onOrderComplete && typeof callback === 'function') {
-                        callback(order);
-                    }
-
-                    if (!callback && typeof onOrderComplete === 'function') {
-                        onOrderComplete(order);
-                    }
+                    await completePaidOrder(checkoutToken, callback);
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
@@ -367,18 +399,22 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setIsLoading(false);
             }
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, completePaidOrder]
     );
 
     const handleCompleteOrder = useCallback(
         async (callback) => {
+            // Already paid: only the order remains to be created.
+            if (pendingCapture) {
+                return finishPendingOrder(callback);
+            }
             if (storefrontConfig('stripePaymentMethod') === 'field') {
                 return handleCompleteOrderViaField(callback);
             }
 
             return handleCompleteOrderViaSheet(callback);
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, pendingCapture, finishPendingOrder]
     );
 
     // Fetch service quote whenever location or cart contents change
@@ -453,6 +489,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             handleCompleteOrderViaField,
             handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            pendingCapture,
+            finishPendingOrder,
             setStripeLoading,
             setupIntentLoading,
             error,
@@ -497,6 +535,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             handleCompleteOrderViaField,
             handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            pendingCapture,
+            finishPendingOrder,
             setStripeLoading,
             setupIntentLoading,
             error,

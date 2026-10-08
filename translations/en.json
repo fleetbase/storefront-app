@@ -658,6 +658,10 @@
         "removeBooking": "Remove booking {{name}}"
     },
     "Checkout": {
+        "paidNotPlaced": "Your payment went through, but we couldn't finish your order. Tap Finish placing order to try again; you won't be charged twice.",
+        "paidPendingTitle": "Your payment went through",
+        "paidPendingBody": "We still need to finish placing your order. You won't be charged again.",
+        "finishOrder": "Finish placing order",
         "routeFrom": "About {{distance}} from {{store}}",
         "routeStores": "{{count}} stores · about {{distance}}",
         "routeLabel": "Delivery route, {{route}}. Change delivery address",
