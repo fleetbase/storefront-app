@@ -9,6 +9,7 @@ import Spacer from '../components/Spacer';
 import { targetFromPush } from '../commerce/notifications';
 import useOpenNotification from '../hooks/use-open-notification';
 import useUnreadNotifications from '../hooks/use-unread-notifications';
+import useVerifySession from '../hooks/use-verify-session';
 
 const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }) => {
     const navigation = useNavigation<any>();
@@ -16,6 +17,8 @@ const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }
     const { addNotificationListener, removeNotificationListener } = useNotification();
     const openNotification = useOpenNotification();
     const { refresh: refreshUnread } = useUnreadNotifications();
+    // A saved session the server no longer accepts signs out once, instead of failing every request.
+    useVerifySession();
 
     useEffect(() => {
         if (!fleetbase) {

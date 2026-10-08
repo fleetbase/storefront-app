@@ -1092,7 +1092,8 @@
         "resend": "Resend code",
         "codeResent": "We sent a new code.",
         "phoneSaved": "Phone number saved",
-        "accountDeleted": "Your account has been deleted"
+        "accountDeleted": "Your account has been deleted",
+        "sessionExpired": "Your session has ended. Please sign in again."
     },
     "Account": {
         "title": "Account",
