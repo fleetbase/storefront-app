@@ -44,6 +44,8 @@ type Section = { id: string; name: string; products: Array<{ summary: ProductSum
 const NetworkStoreScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
+    // Where the fixed category bar sits: below the floating back and search buttons.
+    const stickyTop = insets.top + STICKY_CLEARANCE;
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const { storefront } = useStorefront();
@@ -65,6 +67,7 @@ const NetworkStoreScreen = ({ route }: any) => {
     const offsets = useRef<Record<string, number>>({});
     const catalogTop = useRef(0);
     const barTop = useRef(0);
+    const barHeight = useRef(0);
     const [stuck, setStuck] = useState(false);
 
     // The runtime callbacks change identity whenever the stored store or location changes,
@@ -184,9 +187,12 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     // Scroll-spy: the tab of the section under the sticky bar is the active one.
     const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-        const isStuck = event.nativeEvent.contentOffset.y >= barTop.current - 1;
+        const offset = event.nativeEvent.contentOffset.y;
+        // The bar is stuck once it reaches the fixed copy's position, under the floating buttons.
+        const isStuck = offset >= barTop.current - stickyTop;
         if (isStuck !== stuck) setStuck(isStuck);
-        const y = event.nativeEvent.contentOffset.y - catalogTop.current + 60;
+        // A section is current once its top reaches the bottom of the fixed bar.
+        const y = offset - catalogTop.current + stickyTop + barHeight.current + 1;
         let current = sections[0]?.id ?? null;
         for (const section of sections) {
             if ((offsets.current[section.id] ?? Infinity) <= y) current = section.id;
@@ -196,8 +202,33 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     const jumpTo = (id: string) => {
         setActiveTab(id);
-        scrollRef.current?.scrollTo({ y: catalogTop.current + (offsets.current[id] ?? 0) - 56, animated: true });
+        scrollRef.current?.scrollTo({ y: catalogTop.current + (offsets.current[id] ?? 0) - stickyTop - barHeight.current, animated: true });
     };
+
+    const categoryTabs = (
+        <YStack backgroundColor='$background' borderBottomWidth={1} borderColor='$borderColor'>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }} accessibilityRole='tablist'>
+                {catalogLoading
+                    ? [0, 1, 2].map((index) => <Skeleton key={index} width={80} height={14} style={{ marginVertical: 14 }} />)
+                    : sections.map((section) => {
+                          const selected = section.id === activeTab;
+                          return (
+                              <Pressable
+                                  key={section.id}
+                                  onPress={() => jumpTo(section.id)}
+                                  accessibilityRole='tab'
+                                  accessibilityState={{ selected }}
+                                  style={{ paddingVertical: 12, borderBottomWidth: 3, borderColor: selected ? theme.textPrimary.val : 'transparent' }}
+                              >
+                                  <UIText variant={selected ? 'bodyStrong' : 'body'} tone={selected ? 'primary' : 'secondary'} style={{ fontSize: 14 }}>
+                                      {section.name}
+                                  </UIText>
+                              </Pressable>
+                          );
+                      })}
+            </ScrollView>
+        </YStack>
+    );
 
     // Until the requested store is the current one, keep the skeleton: a stale store from
     // an earlier visit must never flash, and entering a store lands on the next render.
@@ -220,10 +251,8 @@ const NetworkStoreScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView ref={scrollRef} stickyHeaderIndices={[1]} onScroll={onScroll} scrollEventThrottle={32} contentContainerStyle={{ paddingBottom: cart.count > 0 ? 110 : 40 }}>
-                {/* The negative bottom margin lets the sticky bar's clearance overlap the details. It must
-                    sit here, not on the bar: a margin on the bar shifts it inside its sticky wrapper. */}
-                <YStack marginBottom={-(insets.top + STICKY_CLEARANCE) + 16}>
+            <ScrollView ref={scrollRef} onScroll={onScroll} scrollEventThrottle={32} contentContainerStyle={{ paddingBottom: cart.count > 0 ? 110 : 40 }}>
+                <YStack marginBottom={16}>
                     <MediaImage uri={store.backdropUrl} seed={store.name} height={HERO_HEIGHT + insets.top} radius={0} dimmed={closed} />
                     <YStack marginTop={-28} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' paddingHorizontal={space.gutter} gap={12}>
                         <YStack marginTop={-36}>
@@ -237,7 +266,12 @@ const NetworkStoreScreen = ({ route }: any) => {
                         </YStack>
                         <XStack flexWrap='wrap' alignItems='center' gap={12}>
                             {reviewsEnabled ? (
-                                <Pressable onPress={() => navigation.navigate('StoreReviews', { storeId: store.id, storeName: store.name, storeLogo: store.logoUrl })} accessibilityRole='link' accessibilityLabel={t('Reviews.openFor', { store: store.name })} style={{ minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <Pressable
+                                    onPress={() => navigation.navigate('StoreReviews', { storeId: store.id, storeName: store.name, storeLogo: store.logoUrl })}
+                                    accessibilityRole='link'
+                                    accessibilityLabel={t('Reviews.openFor', { store: store.name })}
+                                    style={{ minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                                >
                                     <RatingLine rating={store.rating} size={15} />
                                     <UIText variant='captionStrong' tone='secondary' style={{ textDecorationLine: 'underline' }}>
                                         {t('Reviews.title')}
@@ -261,7 +295,19 @@ const NetworkStoreScreen = ({ route }: any) => {
                             <InfoChip icon={faMotorcycle} label={t('Network.store.delivery')} />
                             {options.pickup_enabled === true && <InfoChip icon={faBagShopping} label={t('Network.store.pickup')} />}
                             {minimum > 0 && <InfoChip label={t('Network.store.minimum', { amount: formatCurrency(minimum, currentStore.getAttribute('currency') ?? 'USD') })} />}
-                            <Pressable onPress={() => navigation.navigate('StoreInfo', { store: currentStore.serialize() })} accessibilityRole='button' style={{ height: 30, paddingHorizontal: 10, borderRadius: radius.pill, backgroundColor: theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <Pressable
+                                onPress={() => navigation.navigate('StoreInfo', { store: currentStore.serialize() })}
+                                accessibilityRole='button'
+                                style={{
+                                    height: 30,
+                                    paddingHorizontal: 10,
+                                    borderRadius: radius.pill,
+                                    backgroundColor: theme.surface.val,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    gap: 4,
+                                }}
+                            >
                                 <UIText variant='captionStrong' tone='brand'>
                                     {t('Network.store.info')}
                                 </UIText>
@@ -296,32 +342,17 @@ const NetworkStoreScreen = ({ route }: any) => {
                     </YStack>
                 </YStack>
 
-                {/* Sticky catalog bar. Its spacer clears the floating buttons once stuck; until then it
-                    overlaps the store details and stays transparent. */}
+                {/* The category bar. Once it scrolls under the floating buttons, a fixed copy takes
+                    its place at the top (see below). Nothing overlaps the store details, so every
+                    control in them stays tappable. */}
                 <View
-                    pointerEvents='box-none'
                     onLayout={(event) => {
                         barTop.current = event.nativeEvent.layout.y;
+                        barHeight.current = event.nativeEvent.layout.height;
                         catalogTop.current = event.nativeEvent.layout.y + event.nativeEvent.layout.height;
                     }}
                 >
-                    <YStack height={insets.top + STICKY_CLEARANCE} backgroundColor={stuck ? '$background' : 'transparent'} pointerEvents='none' />
-                    <YStack backgroundColor='$background' borderBottomWidth={1} borderColor='$borderColor'>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }} accessibilityRole='tablist'>
-                            {catalogLoading
-                                ? [0, 1, 2].map((index) => <Skeleton key={index} width={80} height={14} style={{ marginVertical: 14 }} />)
-                                : sections.map((section) => {
-                                      const selected = section.id === activeTab;
-                                      return (
-                                          <Pressable key={section.id} onPress={() => jumpTo(section.id)} accessibilityRole='tab' accessibilityState={{ selected }} style={{ paddingVertical: 12, borderBottomWidth: 3, borderColor: selected ? theme.textPrimary.val : 'transparent' }}>
-                                              <UIText variant={selected ? 'bodyStrong' : 'body'} tone={selected ? 'primary' : 'secondary'} style={{ fontSize: 14 }}>
-                                                  {section.name}
-                                              </UIText>
-                                          </Pressable>
-                                      );
-                                  })}
-                        </ScrollView>
-                    </YStack>
+                    {categoryTabs}
                 </View>
 
                 <YStack>
@@ -375,12 +406,28 @@ const NetworkStoreScreen = ({ route }: any) => {
                 </YStack>
             </ScrollView>
 
+            {stuck && (
+                <YStack position='absolute' top={0} left={0} right={0} zIndex={5} paddingTop={stickyTop} backgroundColor='$background'>
+                    {categoryTabs}
+                </YStack>
+            )}
+
             <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} justifyContent='space-between' zIndex={10}>
                 <Pressable
                     onPress={() => navigation.goBack()}
                     accessibilityRole='button'
                     accessibilityLabel={t('UI.backTo', { name: ownerInfo?.name ?? '' })}
-                    style={{ height: 40, paddingLeft: 8, paddingRight: 14, borderRadius: radius.pill, backgroundColor: theme.background.val, flexDirection: 'row', alignItems: 'center', gap: 4, ...elevation.floating }}
+                    style={{
+                        height: 40,
+                        paddingLeft: 8,
+                        paddingRight: 14,
+                        borderRadius: radius.pill,
+                        backgroundColor: theme.background.val,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 4,
+                        ...elevation.floating,
+                    }}
                 >
                     <FontAwesomeIcon icon={faChevronLeft} size={16} color={theme.textPrimary.val} />
                     <UIText variant='captionStrong' numberOfLines={1} style={{ maxWidth: 200 }}>
@@ -397,7 +444,8 @@ const NetworkStoreScreen = ({ route }: any) => {
                 </Pressable>
             </XStack>
 
-            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate('NetworkCartTab')} bottom={insets.bottom + 16} />
+            {/* The tab bar below already clears the home indicator, so no safe-area inset here. */}
+            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate('NetworkCartTab')} bottom={28} />
         </YStack>
     );
 };
