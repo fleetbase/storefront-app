@@ -38,7 +38,7 @@ import { parseScheduledAt } from '../../commerce/booking';
 export type CheckoutState = {
     cart: any;
     /** A paid checkout whose order still has to be created (Stripe only). */
-    pendingCapture?: { token: string } | null;
+    pendingCapture?: { token: string; paidAt?: string; lastError?: string | null; lastTriedAt?: string | null } | null;
     customer: any;
     lineItems: { name: string; value: number; loading?: boolean; tip?: any }[];
     totalAmount: number;
@@ -468,16 +468,24 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                 ) : checkout.pendingCapture ? (
                     // Paid, but the order wasn't created: finish it without charging again.
                     <>
-                        <YStack gap={2} accessibilityRole='alert'>
-                            <UIText variant='captionStrong' textAlign='center'>
-                                {t('Checkout.paidPendingTitle')}
+                        <YStack gap={6} padding={12} borderRadius={radius.card} backgroundColor={checkout.pendingCapture.lastTriedAt ? '$warningSoft' : '$surface'} accessibilityRole='alert'>
+                            <UIText variant='bodyStrong'>{checkout.pendingCapture.lastTriedAt ? t('Checkout.paidFailedTitle') : t('Checkout.paidPendingTitle')}</UIText>
+                            <UIText variant='caption' tone='secondary'>
+                                {checkout.pendingCapture.lastTriedAt ? t('Checkout.paidFailedBody') : t('Checkout.paidPendingBody')}
                             </UIText>
-                            <UIText variant='caption' tone='secondary' textAlign='center'>
-                                {t('Checkout.paidPendingBody')}
-                            </UIText>
+                            {!!checkout.pendingCapture.lastError && (
+                                <UIText variant='caption' tone='secondary'>
+                                    {t('Checkout.paidFailedReason', { reason: checkout.pendingCapture.lastError })}
+                                </UIText>
+                            )}
+                            {!!checkout.pendingCapture.lastTriedAt && (
+                                <UIText variant='caption' tone='secondary'>
+                                    {t('Checkout.paidFailedLastTried', { time: new Date(checkout.pendingCapture.lastTriedAt).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' }) })}
+                                </UIText>
+                            )}
                         </YStack>
                         <Button size='lg' fullWidth loading={checkout.isLoading} onPress={onPlaceOrder}>
-                            {t('Checkout.finishOrder')}
+                            {checkout.isLoading ? t('Checkout.placingOrder') : t('Checkout.finishOrder')}
                         </Button>
                     </>
                 ) : (

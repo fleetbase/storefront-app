@@ -9,7 +9,7 @@ import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
-import { captureWithRetry, pendingCaptureFor, type PendingCapture } from '../commerce/checkout-capture';
+import { captureErrorMessage, captureWithRetry, pendingCaptureFor, type PendingCapture } from '../commerce/checkout-capture';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -303,13 +303,15 @@ export default function useStripeCheckout({ onOrderComplete }) {
     // fails the checkout stays pending instead of being lost.
     const completePaidOrder = useCallback(
         async (checkoutToken, callback, notes = orderNotes) => {
-            setPendingCapture({ token: checkoutToken, notes, customerId: customer?.id ?? null, paidAt: new Date().toISOString() });
+            const pending = { token: checkoutToken, notes, customerId: customer?.id ?? null, paidAt: new Date().toISOString() };
+            setPendingCapture(pending);
             let order;
             try {
                 order = await captureWithRetry(() => storefront.checkout.captureOrder(checkoutToken, { notes }));
             } catch (error) {
+                // Kept on screen (not a passing toast): what happened, why, and that retrying never charges again.
                 console.warn('Order capture failed after payment:', error);
-                toast.error(t('Checkout.paidNotPlaced'));
+                setPendingCapture({ ...pending, lastError: captureErrorMessage(error), lastTriedAt: new Date().toISOString() });
                 return;
             }
             setPendingCapture(null);
