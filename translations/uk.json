@@ -809,6 +809,8 @@
         },
         "now": "Зараз",
         "driverCard": "{{driver}}, ваш водій",
+        "driverAssigned": "Призначений на ваше замовлення",
+        "driverOnTheWay": "В дорозі",
         "callDriver": "Зателефонувати: {{driver}}",
         "details": "Деталі замовлення",
         "orderNumber": "Замовлення {{number}}",

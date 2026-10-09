@@ -795,6 +795,8 @@
         },
         "now": "Now",
         "driverCard": "{{driver}}, your driver",
+        "driverAssigned": "Assigned to your order",
+        "driverOnTheWay": "On the way",
         "callDriver": "Call {{driver}}",
         "details": "Order details",
         "orderNumber": "Order {{number}}",

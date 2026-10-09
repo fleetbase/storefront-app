@@ -34,6 +34,8 @@ import useScreenTopInset from '../hooks/use-screen-top-inset';
 const MAP_HEIGHT = 380;
 // How often an order under way is refreshed, in case a socket update is late or missed.
 const LIVE_REFRESH_MS = 15000;
+// How far the sheet's rounded top overlaps the map.
+const SHEET_OVERLAP = 28;
 
 /**
  * Order tracking: the live route on top, then a sheet with where the order is, the
@@ -353,22 +355,38 @@ const OrderScreen = ({ route }: any) => {
     }
 
     return (
-        <YStack flex={1} backgroundColor='$surface'>
+        <YStack flex={1} backgroundColor='$background'>
+            {/* The map stays put behind the sheet: pulling down moves only the sheet, never a gap
+                above the map. zIndex 0 keeps web map panes under the sheet. */}
+            <YStack
+                position='absolute'
+                top={0}
+                left={0}
+                right={0}
+                height={MAP_HEIGHT + SHEET_OVERLAP}
+                backgroundColor='$surface2'
+                accessibilityLabel={t('Tracking.mapLabel')}
+                zIndex={0}
+            >
+                {canRenderRoute && (isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />)}
+            </YStack>
             <ScrollView
+                style={{ flex: 1, zIndex: 1 }}
+                pointerEvents='box-none'
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} />}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} tintColor={theme.primary.val} colors={[theme.primary.val]} />
+                }
                 contentContainerStyle={{ flexGrow: 1 }}
             >
-                {/* zIndex 0 gives the map its own stacking context so web map panes stay under the sheet. */}
-                <YStack height={MAP_HEIGHT} backgroundColor='$surface2' accessibilityLabel={t('Tracking.mapLabel')} position='relative' zIndex={0}>
-                    {canRenderRoute && (isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />)}
-                </YStack>
+                {/* Over the map: touches pass through to it, so it can still be panned and zoomed. */}
+                <YStack height={MAP_HEIGHT} pointerEvents='none' />
 
                 <YStack
                     flex={1}
                     zIndex={1}
-                    marginTop={-28}
+                    marginTop={-SHEET_OVERLAP}
                     borderTopLeftRadius={radius.sheet}
                     borderTopRightRadius={radius.sheet}
                     backgroundColor='$background'
@@ -390,6 +408,49 @@ const OrderScreen = ({ route }: any) => {
                             </UIText>
                         )}
                     </YStack>
+
+                    {!!driverName && !isPickup && !finished && !canceled && (
+                        <XStack alignItems='center' gap={12} padding={12} borderRadius={radius.card} backgroundColor='$surface'>
+                            {usableImageUrl(driver?.photo_url) ? (
+                                <Image source={{ uri: driver.photo_url }} style={{ width: 48, height: 48, borderRadius: 24 }} accessibilityIgnoresInvertColors />
+                            ) : (
+                                <YStack width={48} height={48} borderRadius={24} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                                    <UIText variant='bodyStrong' tone='brand'>
+                                        {initials(driver.name)}
+                                    </UIText>
+                                </YStack>
+                            )}
+                            <YStack flex={1} gap={2}>
+                                <UIText variant='bodyStrong'>{t('Tracking.driverCard', { driver: driverName })}</UIText>
+                                <UIText variant='caption' tone='secondary'>
+                                    {progress.phase === 'onTheWay' ? t('Tracking.driverOnTheWay') : t('Tracking.driverAssigned')}
+                                </UIText>
+                                {!!(vehicleText || plate) && (
+                                    <UIText variant='caption' tone='secondary'>
+                                        {[vehicleText, plate].filter(Boolean).join(' · ')}
+                                    </UIText>
+                                )}
+                            </YStack>
+                            {!!driver?.phone && (
+                                <IconButton
+                                    icon={faPhone}
+                                    size={44}
+                                    accessibilityLabel={t('Tracking.callDriver', { driver: driverName })}
+                                    onPress={() => Linking.openURL(`tel:${driver.phone}`)}
+                                />
+                            )}
+                            {!!customer && (
+                                <IconButton
+                                    icon={faComment}
+                                    variant='solid'
+                                    size={44}
+                                    badge={chat?.unread ? chat.unread : undefined}
+                                    accessibilityLabel={t('Chat.messageDriver', { driver: driverName })}
+                                    onPress={openChat}
+                                />
+                            )}
+                        </XStack>
+                    )}
 
                     {reviewState?.canReview && (
                         <YStack alignItems='center' gap={6} padding={16} borderRadius={radius.card} backgroundColor='$primarySoft'>
@@ -489,46 +550,6 @@ const OrderScreen = ({ route }: any) => {
                             );
                         })}
                     </YStack>
-
-                    {!!driverName && !isPickup && !finished && !canceled && (
-                        <XStack alignItems='center' gap={12} padding={12} borderRadius={radius.card} backgroundColor='$surface'>
-                            {usableImageUrl(driver?.photo_url) ? (
-                                <Image source={{ uri: driver.photo_url }} style={{ width: 48, height: 48, borderRadius: 24 }} accessibilityIgnoresInvertColors />
-                            ) : (
-                                <YStack width={48} height={48} borderRadius={24} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
-                                    <UIText variant='bodyStrong' tone='brand'>
-                                        {initials(driver.name)}
-                                    </UIText>
-                                </YStack>
-                            )}
-                            <YStack flex={1} gap={2}>
-                                <UIText variant='bodyStrong'>{t('Tracking.driverCard', { driver: driverName })}</UIText>
-                                {!!(vehicleText || plate) && (
-                                    <UIText variant='caption' tone='secondary'>
-                                        {[vehicleText, plate].filter(Boolean).join(' · ')}
-                                    </UIText>
-                                )}
-                            </YStack>
-                            {!!driver?.phone && (
-                                <IconButton
-                                    icon={faPhone}
-                                    size={44}
-                                    accessibilityLabel={t('Tracking.callDriver', { driver: driverName })}
-                                    onPress={() => Linking.openURL(`tel:${driver.phone}`)}
-                                />
-                            )}
-                            {!!customer && (
-                                <IconButton
-                                    icon={faComment}
-                                    variant='solid'
-                                    size={44}
-                                    badge={chat?.unread ? chat.unread : undefined}
-                                    accessibilityLabel={t('Chat.messageDriver', { driver: driverName })}
-                                    onPress={openChat}
-                                />
-                            )}
-                        </XStack>
-                    )}
 
                     {bookings.map(({ entity, at }: any) => (
                         <XStack

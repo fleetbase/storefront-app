@@ -795,6 +795,8 @@
         },
         "now": "Одоо",
         "driverCard": "{{driver}}, таны жолооч",
+        "driverAssigned": "Таны захиалгад томилогдсон",
+        "driverOnTheWay": "Замдаа явж байна",
         "callDriver": "{{driver}} руу залгах",
         "details": "Захиалгын дэлгэрэнгүй",
         "orderNumber": "Захиалга {{number}}",
