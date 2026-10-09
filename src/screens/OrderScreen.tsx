@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Linking, Pressable, RefreshControl, ScrollView } from 'react-native';
+import { AppState, Image, Linking, Pressable, RefreshControl, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -32,6 +32,8 @@ import { Button, ErrorState, IconButton, Sheet, Skeleton, StarInput, StoreLogo, 
 import useScreenTopInset from '../hooks/use-screen-top-inset';
 
 const MAP_HEIGHT = 380;
+// How often an order under way is refreshed, in case a socket update is late or missed.
+const LIVE_REFRESH_MS = 15000;
 
 /**
  * Order tracking: the live route on top, then a sheet with where the order is, the
@@ -177,14 +179,22 @@ const OrderScreen = ({ route }: any) => {
             .catch((err: any) => console.error('Error loading order distance matrix:', err));
     }, [order, progress.phase]);
 
-    // Live status updates.
+    // Live updates: any event on the order's channel (status, activity, driver) reloads it,
+    // coalescing bursts into one request.
+    const liveReloadRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const scheduleReload = useCallback(() => {
+        if (liveReloadRef.current) return;
+        liveReloadRef.current = setTimeout(() => {
+            liveReloadRef.current = null;
+            reloadOrder();
+        }, 600);
+    }, [reloadOrder]);
+    useEffect(() => () => liveReloadRef.current && clearTimeout(liveReloadRef.current), []);
+
     useEffect(() => {
         if (listenerRef.current) return;
         let stopped = false;
-        listen(`order.${order.id}`, (event: any) => {
-            const nextStatus = event?.data?.status;
-            if (nextStatus && statusRef.current !== nextStatus) reloadOrder();
-        })
+        listen(`order.${order.id}`, () => scheduleReload())
             .then((listener: any) => {
                 if (!stopped && listener) listenerRef.current = listener;
             })
@@ -194,7 +204,24 @@ const OrderScreen = ({ route }: any) => {
             listenerRef.current?.stop?.();
             listenerRef.current = null;
         };
-    }, [listen, order.id, reloadOrder]);
+    }, [listen, order.id, scheduleReload]);
+
+    // Sockets can lag (or drop) behind the server, so while the order is under way it is
+    // also refreshed periodically and whenever the app comes back to the foreground.
+    const settled = finished || canceled;
+    useEffect(() => {
+        if (!loaded || settled) return;
+        const timer = setInterval(() => {
+            if (AppState.currentState === 'active') reloadOrder();
+        }, LIVE_REFRESH_MS);
+        const subscription = AppState.addEventListener('change', (state) => {
+            if (state === 'active') scheduleReload();
+        });
+        return () => {
+            clearInterval(timer);
+            subscription.remove();
+        };
+    }, [loaded, settled, reloadOrder, scheduleReload]);
 
     useEffect(() => {
         orderRef.current = order;
