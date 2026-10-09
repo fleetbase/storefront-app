@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useStorefrontInfo from '../../hooks/use-storefront-info';
+import useCartPickup from '../../network/use-cart-pickup';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useCartPromotions from '../../hooks/use-cart-promotions';
 import { formatCurrency } from '../../utils/format';
@@ -94,6 +95,14 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const quoteId = checkout.serviceQuote?.id ?? checkout.serviceQuote?.getAttribute?.('id') ?? null;
     const promo = useCartPromotions({ pickup: isPickup, serviceQuoteId: quoteId });
     const groups = useMemo(() => cartGroups(cart?.contents?.() ?? []), [cart]);
+    // Pickup is each store's own setting: in a network the cart's (single) store decides.
+    const cartPickup = useCartPickup(groups.map((group) => group.storeId));
+    const pickupAvailable = mode === 'network' ? cartPickup === true : checkout.isPickupEnabled;
+    // A cart that cannot be collected goes back to delivery (e.g. a second store was added).
+    useEffect(() => {
+        if (isPickup && mode === 'network' && cartPickup === false) checkout.setPickup(0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cartPickup, isPickup, mode]);
     const itemCount = groups.reduce((sum, group) => sum + group.itemCount, 0);
     const hour12 = usesTwelveHourClock(locale);
     const bookings = groups.flatMap((group) => group.lines.filter((line) => line.scheduledAt).map((line) => ({ line, group, at: parseScheduledAt(line.scheduledAt) })));
@@ -188,7 +197,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                     </XStack>
 
                     <YStack gap={12} paddingHorizontal={space.gutter}>
-                        {checkout.isPickupEnabled && (
+                        {pickupAvailable && (
                             <SegmentedControl
                                 accessibilityLabel={t('Checkout.fulfilment')}
                                 value={isPickup ? 'pickup' : 'delivery'}
@@ -250,7 +259,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                             <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
                                             <UIText flex={1} variant='caption'>
                                                 <UIText variant='captionStrong'>{t('Checkout.deliveryUnavailableTitle')} </UIText>
-                                                {checkout.isPickupEnabled ? t('Checkout.deliveryUnavailableBodyPickup') : t('Checkout.deliveryUnavailableBody')}
+                                                {pickupAvailable ? t('Checkout.deliveryUnavailableBodyPickup') : t('Checkout.deliveryUnavailableBody')}
                                             </UIText>
                                         </XStack>
                                         <XStack gap={8}>
@@ -259,7 +268,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                                     {t('Checkout.changeAddress')}
                                                 </Button>
                                             </YStack>
-                                            {checkout.isPickupEnabled && (
+                                            {pickupAvailable && (
                                                 <YStack flex={1}>
                                                     <Button variant='inverse' size='sm' fullWidth onPress={() => checkout.setPickup(1)}>
                                                         {t('Checkout.switchToPickup')}

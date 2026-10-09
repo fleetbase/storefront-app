@@ -76,7 +76,8 @@ const OrderScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
     const { customer } = useAuth();
     const { storefront, adapter: storefrontAdapter } = useStorefront();
-    const { info } = useStorefrontInfo();
+    const { info, enabled } = useStorefrontInfo();
+    const reviewsEnabled = enabled('reviews');
     const { mode } = useStorefrontRuntime();
     const { listen } = useSocketClusterClient();
     const { t, locale } = useLanguage();
@@ -272,7 +273,7 @@ const OrderScreen = ({ route }: any) => {
     // Once the order is finished, invite a review (the server checks it's this customer's
     // completed order and not reviewed yet).
     useEffect(() => {
-        if (!finished || !storeId || !customer) return;
+        if (!finished || !storeId || !customer || !reviewsEnabled) return;
         let active = true;
         fetchEligibility(reviewRequest, storeId, order.id)
             .then((result) => active && setReviewState(result))
@@ -280,7 +281,7 @@ const OrderScreen = ({ route }: any) => {
         return () => {
             active = false;
         };
-    }, [customer, finished, order.id, reviewRequest, storeId]);
+    }, [customer, finished, order.id, reviewRequest, storeId, reviewsEnabled]);
 
     // The driver chat: its unread count while the order is active, its history after.
     const hasDriver = !!order.getAttribute('driver_assigned') || !!order.getAttribute('driver_assigned_uuid');

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { effectiveOptions } from '../../hooks/use-storefront-info';
 import { Pressable, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -160,11 +161,12 @@ const NetworkStoreScreen = ({ route }: any) => {
         if (store) rememberStores([store]);
     }, [store]);
 
-    const options = currentStore?.getAttribute?.('options') ?? {};
-    const minimum = Number(options.required_checkout_min_amount) || 0;
+    // The network's settings apply to its stores (minimum order, reviews...); pickup is the store's own.
+    const options = effectiveOptions('network', ownerInfo?.options, currentStore?.getAttribute?.('options'));
+    const minimum = options.required_checkout_min === true ? Number(options.required_checkout_min_amount) || 0 : 0;
     const closed = store?.muted ?? false;
-    // Networks (and stores) can switch reviews off in the Console.
-    const reviewsEnabled = ownerInfo?.options?.reviews_enabled !== false;
+    // Reviews show only when the network has them switched on in the Console.
+    const reviewsEnabled = options.reviews_enabled === true;
     const takesBookings = useMemo(() => sections.some((section) => section.products.some((product) => product.summary.isBookable)), [sections]);
     const recommended = useMemo(() => sections.flatMap((section) => section.products).filter((product) => product.summary.recommended), [sections]);
 
