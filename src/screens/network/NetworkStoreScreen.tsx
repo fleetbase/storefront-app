@@ -4,7 +4,7 @@ import { Pressable, ScrollView, View, type LayoutChangeEvent, type NativeScrollE
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBagShopping, faChevronLeft, faChevronRight, faClock, faMagnifyingGlass, faMotorcycle } from '@fortawesome/free-solid-svg-icons';
+import { faBagShopping, faBell, faChevronDown, faChevronLeft, faChevronRight, faClock, faLocationDot, faMagnifyingGlass, faMotorcycle, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
@@ -12,10 +12,16 @@ import useStorefront from '../../hooks/use-storefront';
 import useCartSummary from '../../hooks/use-cart-summary';
 import { formatCurrency } from '../../utils/format';
 import { rememberStores } from '../../network/store-names';
+import useCurrentLocation from '../../hooks/use-current-location';
+import useSavedLocations from '../../hooks/use-saved-locations';
+import useUnreadNotifications from '../../hooks/use-unread-notifications';
+import { storefrontConfig } from '../../utils';
 import {
     Button,
     CartPill,
     ErrorState,
+    IconButton,
+    LocationSheet,
     MediaImage,
     ProductRow,
     ProductTile,
@@ -30,17 +36,25 @@ import {
     storeSummary,
     usesTwelveHourClock,
     type ProductSummary,
+    type ProductTileVariant,
 } from '../../ui';
 
 const HERO_HEIGHT = 230;
 /** Room above the sticky catalog bar for the floating back and search buttons. */
 const STICKY_CLEARANCE = 54;
-type Section = { id: string; name: string; products: Array<{ summary: ProductSummary; resource: any }> };
+type Section = { id: string; name: string; iconUrl: string | null; products: Array<{ summary: ProductSummary; resource: any }> };
+
+/** Categories beyond which the sticky bar also offers the full category list. */
+const CATALOG_LINK_AFTER = 5;
 
 /**
- * A store inside a Network: hero, store details and status, a sticky catalog bar that
- * follows the scroll, the recommended rail and each catalog section. The way back to the
- * whole marketplace stays visible at the top.
+ * The store page, shared by both editions: hero, store details and status, a sticky
+ * catalog bar that follows the scroll, the recommended rail and each catalog section.
+ *
+ * In a Network it is a store inside the marketplace, and the way back to the whole
+ * marketplace stays visible at the top. In a single store's app it is the home: the store
+ * is the app's own, the top shows the delivery address and notifications, and the store's
+ * brand settings (header, category display, product card style) apply.
  */
 const NetworkStoreScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
@@ -50,7 +64,17 @@ const NetworkStoreScreen = ({ route }: any) => {
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const { storefront } = useStorefront();
-    const { enterStore, leaveStore, currentStore, ownerInfo, getSelectedStoreLocation, selectStoreLocation } = useStorefrontRuntime();
+    const { mode, enterStore, leaveStore, currentStore, ownerInfo, getSelectedStoreLocation, selectStoreLocation } = useStorefrontRuntime();
+    // A single store's app: this page is its home, for its own store.
+    const single = mode !== 'network';
+    const { currentLocation, updateCurrentLocation } = useCurrentLocation();
+    const { savedLocations } = useSavedLocations();
+    const { count: unread } = useUnreadNotifications();
+    const [locationSheet, setLocationSheet] = useState(false);
+    const headerConfig = storefrontConfig('storeHeader', {}) || {};
+    const categoryDisplay = storefrontConfig('storeCategoriesDisplay', 'pills');
+    const cardStyle: ProductTileVariant = ['bordered', 'outlined', 'visio'].includes(storefrontConfig('productCardStyle')) ? storefrontConfig('productCardStyle') : 'outlined';
+    const jumpRequest = route.params?.categoryId ?? null;
     const cart = useCartSummary();
     const hour12 = usesTwelveHourClock(locale);
     const storeData = route.params?.store;
@@ -82,6 +106,11 @@ const NetworkStoreScreen = ({ route }: any) => {
         let active = true;
         (async () => {
             setResolveError(null);
+            // A single store's app already has its store (the app's own).
+            if (single) {
+                setResolving(false);
+                return;
+            }
             if (storeData) {
                 runtime.current.enterStore(storeData);
                 setResolving(false);
@@ -106,7 +135,7 @@ const NetworkStoreScreen = ({ route }: any) => {
             active = false;
             runtime.current.leaveStore();
         };
-    }, [storeData, storeId, storefront]);
+    }, [single, storeData, storeId, storefront]);
 
     // Locations (hours, addresses) and the catalog, once the store is known.
     useEffect(() => {
@@ -128,11 +157,16 @@ const NetworkStoreScreen = ({ route }: any) => {
             .catch(() => {});
         (async () => {
             try {
-                const categories = Array.from((await storefront.categories.query({ store: currentStore.id })) || []) as any[];
+                const categories = Array.from((await (single ? storefront.categories.findAll() : storefront.categories.query({ store: currentStore.id }))) || []) as any[];
                 const loaded = await Promise.all(
                     categories.map(async (category) => {
-                        const products = Array.from((await storefront.products.query({ category: category.id, store: currentStore.id })) || []) as any[];
-                        return { id: category.id, name: category.getAttribute('name'), products: products.map((resource) => ({ summary: productSummary(resource), resource })) };
+                        const products = Array.from((await storefront.products.query(single ? { category: category.id } : { category: category.id, store: currentStore.id })) || []) as any[];
+                        return {
+                            id: category.id,
+                            name: category.getAttribute('name'),
+                            iconUrl: category.getAttribute('icon_url') ?? null,
+                            products: products.map((resource) => ({ summary: productSummary(resource), resource })),
+                        };
                     })
                 );
                 if (!active) return;
@@ -148,7 +182,7 @@ const NetworkStoreScreen = ({ route }: any) => {
         return () => {
             active = false;
         };
-    }, [currentStore, storeId, storefront, retry]);
+    }, [currentStore, single, storeId, storefront, retry]);
 
     const store = useMemo(() => {
         if (!currentStore) return null;
@@ -161,12 +195,14 @@ const NetworkStoreScreen = ({ route }: any) => {
         if (store) rememberStores([store]);
     }, [store]);
 
-    // The network's settings apply to its stores (minimum order, reviews...); pickup is the store's own.
-    const options = effectiveOptions('network', ownerInfo?.options, currentStore?.getAttribute?.('options'));
+    // In a Network its settings apply to its stores (minimum order, reviews...) and pickup is
+    // the store's own; a single store's app uses the store's settings.
+    const options = effectiveOptions(mode, ownerInfo?.options, single ? null : currentStore?.getAttribute?.('options'));
     const minimum = options.required_checkout_min === true ? Number(options.required_checkout_min_amount) || 0 : 0;
     const closed = store?.muted ?? false;
-    // Reviews show only when the network has them switched on in the Console.
-    const reviewsEnabled = options.reviews_enabled === true;
+    // A Network shows reviews only when switched on; a single store unless switched off.
+    const reviewsEnabled = single ? options.reviews_enabled !== false : options.reviews_enabled === true;
+    const locationLine = [currentLocation?.getAttribute?.('name'), currentLocation?.getAttribute?.('street1')].filter(Boolean).join(' · ');
     const takesBookings = useMemo(() => sections.some((section) => section.products.some((product) => product.summary.isBookable)), [sections]);
     const recommended = useMemo(() => sections.flatMap((section) => section.products).filter((product) => product.summary.recommended), [sections]);
 
@@ -207,6 +243,18 @@ const NetworkStoreScreen = ({ route }: any) => {
         scrollRef.current?.scrollTo({ y: catalogTop.current + (offsets.current[id] ?? 0) - stickyTop - barHeight.current, animated: true });
     };
 
+    // Opened for a category (from the category list, search or a link): jump to its section
+    // once the catalog has laid out.
+    const handledJump = useRef<string | null>(null);
+    useEffect(() => {
+        if (!jumpRequest || catalogLoading || handledJump.current === jumpRequest) return;
+        if (!sections.some((section) => section.id === jumpRequest)) return;
+        handledJump.current = jumpRequest;
+        const timer = setTimeout(() => jumpTo(jumpRequest), 250);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [catalogLoading, jumpRequest, sections]);
+
     const categoryTabs = (
         <YStack backgroundColor='$background' borderBottomWidth={1} borderColor='$borderColor'>
             <ScrollView
@@ -234,6 +282,18 @@ const NetworkStoreScreen = ({ route }: any) => {
                               </Pressable>
                           );
                       })}
+                {single && !catalogLoading && sections.length > CATALOG_LINK_AFTER && (
+                    <Pressable
+                        onPress={() => navigation.navigate('StoreCatalog')}
+                        accessibilityRole='link'
+                        style={{ paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                    >
+                        <FontAwesomeIcon icon={faTableCellsLarge} size={13} color={theme.primaryForeground.val} />
+                        <UIText variant='captionStrong' tone='brand' style={{ fontSize: 14 }}>
+                            {t('StorePage.allCategories')}
+                        </UIText>
+                    </Pressable>
+                )}
             </ScrollView>
         </YStack>
     );
@@ -270,14 +330,18 @@ const NetworkStoreScreen = ({ route }: any) => {
                 <YStack marginBottom={16}>
                     <MediaImage uri={store.backdropUrl} seed={store.name} height={HERO_HEIGHT + insets.top} radius={0} dimmed={closed} />
                     <YStack marginTop={-28} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' paddingHorizontal={space.gutter} gap={12}>
-                        <YStack marginTop={-36}>
-                            <StoreLogo uri={store.logoUrl} name={store.name} size={72} radius={radius.card} border />
-                        </YStack>
-                        <YStack gap={4}>
-                            <UIText variant='title' accessibilityRole='header'>
-                                {store.name}
-                            </UIText>
-                            {!!store.description && <UIText tone='secondary'>{store.description}</UIText>}
+                        {(!single || headerConfig.showLogo !== false) && (
+                            <YStack marginTop={-36}>
+                                <StoreLogo uri={store.logoUrl} name={store.name} size={72} radius={radius.card} border />
+                            </YStack>
+                        )}
+                        <YStack gap={4} paddingTop={single && headerConfig.showLogo === false ? 16 : 0}>
+                            {(!single || headerConfig.showTitle !== false) && (
+                                <UIText variant='title' accessibilityRole='header'>
+                                    {store.name}
+                                </UIText>
+                            )}
+                            {!!store.description && (!single || headerConfig.showDescription !== false) && <UIText tone='secondary'>{store.description}</UIText>}
                         </YStack>
                         <XStack flexWrap='wrap' alignItems='center' gap={12}>
                             {reviewsEnabled ? (
@@ -333,6 +397,17 @@ const NetworkStoreScreen = ({ route }: any) => {
                                 <FontAwesomeIcon icon={faChevronRight} size={11} color={theme.primaryForeground.val} />
                             </Pressable>
                         </XStack>
+                        {single && (
+                            <Pressable
+                                onPress={() => navigation.navigate('StoreSearchTab')}
+                                accessibilityRole='search'
+                                accessibilityLabel={t('StorePage.searchStore', { store: store.name })}
+                                style={{ height: 48, paddingHorizontal: 14, borderRadius: radius.button, backgroundColor: theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+                            >
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
+                                <UIText tone='placeholder'>{t('StorePage.searchStore', { store: store.name })}</UIText>
+                            </Pressable>
+                        )}
                         {closed && (
                             <XStack accessibilityRole='alert' gap={10} padding={12} borderRadius={radius.card} backgroundColor='$warningSoft'>
                                 <FontAwesomeIcon icon={faClock} size={18} color={theme.warningForeground.val} />
@@ -341,6 +416,28 @@ const NetworkStoreScreen = ({ route }: any) => {
                                     {t('Network.store.closedBody')}
                                 </UIText>
                             </XStack>
+                        )}
+                        {single && categoryDisplay === 'grid' && !catalogLoading && sections.length > 1 && (
+                            <YStack gap={10} paddingTop={4}>
+                                <UIText variant='heading' accessibilityRole='header'>
+                                    {t('StorePage.shopByCategory')}
+                                </UIText>
+                                <XStack flexWrap='wrap' gap={10}>
+                                    {sections.slice(0, 8).map((section) => (
+                                        <Pressable
+                                            key={section.id}
+                                            onPress={() => jumpTo(section.id)}
+                                            accessibilityRole='button'
+                                            style={{ width: '22%', flexGrow: 1, minHeight: 84, paddingVertical: 10, paddingHorizontal: 4, borderRadius: radius.tile, backgroundColor: theme.surface.val, alignItems: 'center', gap: 6 }}
+                                        >
+                                            <MediaImage uri={section.iconUrl} seed={section.name} width={40} height={40} radius={20} />
+                                            <UIText variant='captionStrong' textAlign='center' numberOfLines={2} style={{ fontSize: 12, lineHeight: 15 }}>
+                                                {section.name}
+                                            </UIText>
+                                        </Pressable>
+                                    ))}
+                                </XStack>
+                            </YStack>
                         )}
                         {takesBookings && (
                             <XStack gap={8} padding={12} borderRadius={radius.card} backgroundColor='$primarySoft' accessibilityRole='list' accessibilityLabel={t('Booking.howItWorks')}>
@@ -410,7 +507,7 @@ const NetworkStoreScreen = ({ route }: any) => {
                                         contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}
                                     >
                                         {recommended.map((product) => (
-                                            <ProductTile key={product.summary.id} product={product.summary} storeClosed={closed} onPress={() => openProduct(product)} />
+                                            <ProductTile key={product.summary.id} product={product.summary} storeClosed={closed} variant={single ? cardStyle : 'outlined'} onPress={() => openProduct(product)} />
                                         ))}
                                     </ScrollView>
                                 </YStack>
@@ -436,40 +533,91 @@ const NetworkStoreScreen = ({ route }: any) => {
                 </YStack>
             )}
 
-            <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} justifyContent='space-between' zIndex={10}>
-                <Pressable
-                    onPress={() => navigation.goBack()}
-                    accessibilityRole='button'
-                    accessibilityLabel={t('UI.backTo', { name: ownerInfo?.name ?? '' })}
-                    style={{
-                        height: 40,
-                        paddingLeft: 8,
-                        paddingRight: 14,
-                        borderRadius: radius.pill,
-                        backgroundColor: theme.background.val,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 4,
-                        ...elevation.floating,
-                    }}
-                >
-                    <FontAwesomeIcon icon={faChevronLeft} size={16} color={theme.textPrimary.val} />
-                    <UIText variant='captionStrong' numberOfLines={1} style={{ maxWidth: 200 }}>
-                        {ownerInfo?.name}
-                    </UIText>
-                </Pressable>
-                <Pressable
-                    onPress={() => navigation.navigate('NetworkSearchTab')}
-                    accessibilityRole='button'
-                    accessibilityLabel={t('Network.directory.search', { name: store.name })}
-                    style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.background.val, alignItems: 'center', justifyContent: 'center', ...elevation.floating }}
-                >
-                    <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textPrimary.val} />
-                </Pressable>
-            </XStack>
+            {single ? (
+                // A single store's home: where orders are delivered, and notifications.
+                <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} alignItems='center' justifyContent='space-between' gap={10} zIndex={10}>
+                    {headerConfig.showLocationPicker !== false ? (
+                        <Pressable
+                            onPress={() => setLocationSheet(true)}
+                            accessibilityRole='button'
+                            accessibilityLabel={locationLine ? t('Network.changeLocation', { place: locationLine }) : t('Network.setLocation')}
+                            style={{
+                                maxWidth: '82%',
+                                height: 40,
+                                paddingHorizontal: 12,
+                                borderRadius: radius.pill,
+                                backgroundColor: theme.background.val,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: 6,
+                                ...elevation.floating,
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faLocationDot} size={14} color={theme.primaryForeground.val} />
+                            <UIText variant='captionStrong' style={{ flexShrink: 1 }} numberOfLines={1}>
+                                {locationLine || t('Network.setLocation')}
+                            </UIText>
+                            <FontAwesomeIcon icon={faChevronDown} size={11} color={theme.textPrimary.val} />
+                        </Pressable>
+                    ) : (
+                        <YStack />
+                    )}
+                    <IconButton
+                        icon={faBell}
+                        variant='floating'
+                        badge={unread > 0 ? (unread > 9 ? '9+' : String(unread)) : undefined}
+                        accessibilityLabel={unread > 0 ? t('Notifications.bellUnread', { count: unread }) : t('Notifications.title')}
+                        onPress={() => navigation.navigate('Notifications')}
+                    />
+                </XStack>
+            ) : (
+                <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} justifyContent='space-between' zIndex={10}>
+                    <Pressable
+                        onPress={() => navigation.goBack()}
+                        accessibilityRole='button'
+                        accessibilityLabel={t('UI.backTo', { name: ownerInfo?.name ?? '' })}
+                        style={{
+                            height: 40,
+                            paddingLeft: 8,
+                            paddingRight: 14,
+                            borderRadius: radius.pill,
+                            backgroundColor: theme.background.val,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 4,
+                            ...elevation.floating,
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faChevronLeft} size={16} color={theme.textPrimary.val} />
+                        <UIText variant='captionStrong' numberOfLines={1} style={{ maxWidth: 200 }}>
+                            {ownerInfo?.name}
+                        </UIText>
+                    </Pressable>
+                    <Pressable
+                        onPress={() => navigation.navigate('NetworkSearchTab')}
+                        accessibilityRole='button'
+                        accessibilityLabel={t('Network.directory.search', { name: store.name })}
+                        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.background.val, alignItems: 'center', justifyContent: 'center', ...elevation.floating }}
+                    >
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textPrimary.val} />
+                    </Pressable>
+                </XStack>
+            )}
 
             {/* The tab bar below already clears the home indicator, so no safe-area inset here. */}
-            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate('NetworkCartTab')} bottom={28} />
+            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate(single ? 'StoreCartTab' : 'NetworkCartTab')} bottom={28} />
+            {single && (
+                <LocationSheet
+                    open={locationSheet}
+                    onClose={() => setLocationSheet(false)}
+                    savedLocations={savedLocations}
+                    current={currentLocation}
+                    onSelect={(place: any) => {
+                        updateCurrentLocation(place);
+                        setLocationSheet(false);
+                    }}
+                />
+            )}
         </YStack>
     );
 };

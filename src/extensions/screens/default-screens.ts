@@ -9,14 +9,18 @@ import type { ScreenRegistryDefinition } from './types';
  * metro.config.js asks Metro for the whole app up front for the same effect.
  */
 export const defaultScreens: ScreenRegistryDefinition = {
-    'store.home': { load: () => import('../../screens/StoreHomeScreen') },
+    // A single store's home is the store page shared with the Network edition.
+    'store.home': { load: () => import('../../screens/network/NetworkStoreScreen') },
+    'store.catalog': { load: () => import('../../screens/StoreCatalogScreen') },
     'store.search': { load: () => import('../../screens/StoreSearchScreen') },
     'store.map': { load: () => import('../../screens/StoreMapScreen') },
     'store.info': { load: () => import('../../screens/StoreInfoScreen') },
-    'catalog.category': { load: () => import('../../screens/StoreCategoryScreen') },
+    // A category opens as its section on the store page.
+    'catalog.category': { load: () => import('../../screens/StoreCategoryJumpScreen') },
     'catalog.index': { load: () => import('../../screens/CatalogScreen') },
     'catalog.foodTruckCategory': { load: () => import('../../screens/CatalogCategoryScreen') },
-    'product.detail': { load: () => import('../../screens/ProductScreen') },
+    // One product screen for both editions (the Network one; it hides "Sold by" in a single store's app).
+    'product.detail': { load: () => import('../../screens/network/NetworkProductScreen') },
     cart: { load: () => import('../../screens/CartScreen') },
     'cart.item': { load: () => import('../../screens/CartItemScreen') },
     checkout: { load: () => import('../../screens/CheckoutScreen') },
@@ -24,7 +28,8 @@ export const defaultScreens: ScreenRegistryDefinition = {
     'order.receipt': { load: () => import('../../screens/orders/ReceiptScreen') },
     'order.history': { load: () => import('../../screens/orders/OrderHistoryScreen') },
     'account.profile': { load: () => import('../../screens/account/AccountHomeScreen') },
-    'account.details': { load: () => import('../../screens/AccountScreen') },
+    // Edit profile: the person's details; settings stay on the account home.
+    'account.details': { load: () => import('../../screens/account/EditProfileScreen') },
     'auth.login': { load: () => import('../../screens/auth/SignInScreen') },
     'auth.createAccount': { load: () => import('../../screens/auth/CreateAccountScreen') },
     'network.home': { load: () => import('../../screens/network/NetworkHomeScreen') },

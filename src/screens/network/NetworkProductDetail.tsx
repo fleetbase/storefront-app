@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarCheck, faCalendarDays, faCheck, faChevronRight, faHouse, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useCart from '../../hooks/use-cart';
 import useStorefront from '../../hooks/use-storefront';
 import useCurrentLocation from '../../hooks/use-current-location';
@@ -47,9 +48,9 @@ import {
 const GALLERY_HEIGHT = 280;
 
 /**
- * Product detail inside a Network: gallery, price, "Sold by" attribution, option groups
- * with required and limit hints, quantity and a sticky add button that explains why it
- * is disabled.
+ * Product detail, shared by both editions: gallery, price, "Sold by" attribution (in a
+ * Network), option groups with required and limit hints, quantity and a sticky add button
+ * that explains why it is disabled.
  */
 export default function NetworkProductDetail({ params }: { params: any }) {
     const navigation = useNavigation<any>();
@@ -60,6 +61,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
     const { width } = useWindowDimensions();
     const { t, locale } = useLanguage();
     const { adapter } = useStorefront();
+    const { mode } = useStorefrontRuntime();
     const [cart, updateCart, , addProduct] = useCart();
     const { currentLocation, updateCurrentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
@@ -177,7 +179,8 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                         )}
                     </XStack>
                     {!!summary.description && <UIText tone='secondary'>{summary.description}</UIText>}
-                    {store && (
+                    {/* "Sold by" only in a Network; a single store's app is that store. */}
+                    {store && mode === 'network' && (
                         <Pressable
                             onPress={() => navigation.navigate('NetworkStore', { storeId: store.id })}
                             accessibilityRole='link'

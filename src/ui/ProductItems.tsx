@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarCheck, faClock, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
@@ -114,40 +115,86 @@ export function ProductRow({ product, onPress, storeClosed = false, testID }: Pr
     );
 }
 
-/** A product tile for rails such as "Recommended". */
-export function ProductTile({ product, onPress, storeClosed = false, testID, width = 168 }: ProductItemProps & { width?: number }) {
+/** How a store presents its product tiles (the app's `productCardStyle` setting). */
+export type ProductTileVariant = 'bordered' | 'outlined' | 'visio';
+
+/**
+ * A product tile for rails such as "Recommended". `outlined` is the plain tile;
+ * `bordered` frames it in a card; `visio` is image-led, name and price over the photo.
+ */
+export function ProductTile({
+    product,
+    onPress,
+    storeClosed = false,
+    testID,
+    width = 168,
+    variant = 'outlined',
+}: ProductItemProps & { width?: number; variant?: ProductTileVariant }) {
     const { t } = useLanguage();
     const { price, was } = usePrice(product);
     const soldOut = !product.available;
+    const visio = variant === 'visio';
+    const bordered = variant === 'bordered';
+
+    const badges = (
+        <>
+            {product.onSale && (
+                <YStack position='absolute' left={8} top={8}>
+                    <Badge tone='error' size='sm' label={t('UI.sale')} />
+                </YStack>
+            )}
+            {!soldOut && !product.isBookable && (
+                <YStack position='absolute' right={8} top={visio ? 8 : undefined} bottom={visio ? undefined : 8}>
+                    <AddBadge disabled={storeClosed} />
+                </YStack>
+            )}
+        </>
+    );
 
     return (
         <Pressable onPress={onPress} accessibilityRole='button' accessibilityLabel={label(product, price, soldOut ? t('UI.outOfStock') : null)} testID={testID} style={({ pressed }) => ({ width, opacity: pressed ? 0.85 : 1 })}>
-            <YStack gap={8} opacity={soldOut ? 0.6 : 1}>
-                <MediaImage uri={product.imageUrl} seed={product.name} height={132}>
-                    {product.onSale && (
-                        <YStack position='absolute' left={8} top={8}>
-                            <Badge tone='error' size='sm' label={t('UI.sale')} />
-                        </YStack>
-                    )}
-                    {!soldOut && !product.isBookable && (
-                        <YStack position='absolute' right={8} bottom={8}>
-                            <AddBadge disabled={storeClosed} />
-                        </YStack>
+            <YStack
+                gap={8}
+                opacity={soldOut ? 0.6 : 1}
+                padding={bordered ? 8 : 0}
+                borderRadius={bordered ? radius.card : 0}
+                borderWidth={bordered ? 1 : 0}
+                borderColor='$borderColor'
+                backgroundColor={bordered ? '$background' : 'transparent'}
+            >
+                <MediaImage uri={product.imageUrl} seed={product.name} height={visio ? 196 : bordered ? 120 : 132}>
+                    {badges}
+                    {visio && (
+                        <LinearGradient
+                            colors={['rgba(13,17,23,0)', 'rgba(13,17,23,0.82)']}
+                            style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 36, paddingHorizontal: 10, paddingBottom: 10, borderBottomLeftRadius: radius.tile, borderBottomRightRadius: radius.tile }}
+                        >
+                            <UIText variant='captionStrong' tone='onImage' numberOfLines={2} style={{ fontSize: 14, lineHeight: 18 }}>
+                                {product.name}
+                            </UIText>
+                            <UIText variant='captionStrong' tone='onImage' style={{ fontSize: 13 }}>
+                                {price}
+                            </UIText>
+                        </LinearGradient>
                     )}
                 </MediaImage>
-                <UIText variant='captionStrong' numberOfLines={2} style={{ fontSize: 14, lineHeight: 19 }}>
-                    {product.name}
-                </UIText>
-                <XStack gap={6} alignItems='baseline'>
-                    <UIText variant='captionStrong' tone={product.onSale ? 'error' : 'primary'} style={{ fontSize: 14 }}>
-                        {price}
-                    </UIText>
-                    {was && (
-                        <UIText variant='caption' tone='secondary' style={{ textDecorationLine: 'line-through' }}>
-                            {was}
+                {!visio && (
+                    <>
+                        <UIText variant='captionStrong' numberOfLines={2} style={{ fontSize: 14, lineHeight: 19 }}>
+                            {product.name}
                         </UIText>
-                    )}
-                </XStack>
+                        <XStack gap={6} alignItems='baseline'>
+                            <UIText variant='captionStrong' tone={product.onSale ? 'error' : 'primary'} style={{ fontSize: 14 }}>
+                                {price}
+                            </UIText>
+                            {was && (
+                                <UIText variant='caption' tone='secondary' style={{ textDecorationLine: 'line-through' }}>
+                                    {was}
+                                </UIText>
+                            )}
+                        </XStack>
+                    </>
+                )}
             </YStack>
         </Pressable>
     );

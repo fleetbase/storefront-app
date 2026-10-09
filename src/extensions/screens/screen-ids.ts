@@ -11,6 +11,7 @@ export const SCREEN_IDS = [
     'store.search',
     'store.map',
     'store.info',
+    'store.catalog',
     'catalog.category',
     'catalog.index',
     'catalog.foodTruckCategory',

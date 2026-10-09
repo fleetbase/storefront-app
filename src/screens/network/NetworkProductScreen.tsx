@@ -4,15 +4,25 @@ import { YStack } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import useStorefront from '../../hooks/use-storefront';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import { serializeSdkResource } from '../../network/network-runtime';
 import { Button, ErrorState, Skeleton, space } from '../../ui';
 import NetworkProductDetail from './NetworkProductDetail';
 
+/**
+ * The product screen for both editions. A single store's app is the store itself, so its
+ * products come without a store and the app's own store is used.
+ */
 const NetworkProductScreen = ({ route }: any) => {
     const navigation = useNavigation();
     const { t } = useLanguage();
     const { storefront, adapter } = useStorefront();
-    const initialParams = useMemo(() => route.params || {}, [route.params]);
+    const { mode, ownerInfo } = useStorefrontRuntime();
+    const initialParams = useMemo(() => {
+        const params = route.params || {};
+        if (mode === 'network' || !ownerInfo) return params;
+        return { ...params, store: params.store ?? ownerInfo, storeId: params.storeId ?? ownerInfo.id };
+    }, [mode, ownerInfo, route.params]);
     const [resolvedParams, setResolvedParams] = useState<any>(initialParams.product ? initialParams : null);
     const [error, setError] = useState<Error | null>(null);
 

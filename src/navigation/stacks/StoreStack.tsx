@@ -33,6 +33,11 @@ export const StoreCategory = {
     },
 };
 
+export const StoreCatalog = {
+    screen: screenSlot('store.catalog'),
+    options: { headerShown: false },
+};
+
 export const StoreMap = {
     screen: screenSlot('store.map'),
     options: ({ route }) => {
@@ -66,6 +71,7 @@ const StoreStack = {
     StoreMap,
     StoreSearch,
     StoreCategory,
+    StoreCatalog,
     StoreInfo,
 };
 

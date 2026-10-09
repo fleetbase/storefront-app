@@ -28,7 +28,6 @@ import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import useFooterOffset from '../../hooks/use-footer-offset';
 import { ORDER_PAGE_SIZE, summarizeOrder } from '../../commerce/order-summary';
 import { storefrontConfig } from '../../utils';
-import { toast } from '../../utils/toast';
 import { Badge, Button, Card, MediaImage, Sheet, UIText, elevation, initials, radius, space, tintFor } from '../../ui';
 
 type Row = { key: string; icon: IconDefinition; label: string; value?: string | null; badge?: number; onPress: () => void; hidden?: boolean };
@@ -127,7 +126,7 @@ function ChoiceSheet({
 /**
  * The signed-in customer's account: who they are, an active order to jump back to,
  * shortcuts to orders, offers, places, payment and notifications, preferences, and
- * signing out or deleting the account.
+ * signing out. Deleting the account starts from Edit profile.
  */
 const AccountHomeScreen = () => {
     const navigation = useNavigation<any>();
@@ -136,7 +135,7 @@ const AccountHomeScreen = () => {
     const footer = useFooterOffset(false);
     const { t, locale, setLocale, languages = [] } = useLanguage();
     const { userColorScheme, changeScheme, schemes } = useAppTheme();
-    const { customer, logout, deleteAccount } = useAuth() as any;
+    const { customer, logout } = useAuth() as any;
     const { count: unread } = useUnreadNotifications();
     const { mode } = useStorefrontRuntime();
     // Offers and the inbox live in the Home tab, where their store and order links work.
@@ -145,8 +144,7 @@ const AccountHomeScreen = () => {
     // Orders fetched when the screen is shown. The on-device cache can hold orders that no
     // longer exist (another instance, a re-seeded database), so it never decides this card.
     const [recentOrders, setRecentOrders] = useState<any[]>([]);
-    const [sheet, setSheet] = useState<'language' | 'appearance' | 'delete' | null>(null);
-    const [deleting, setDeleting] = useState(false);
+    const [sheet, setSheet] = useState<'language' | 'appearance' | null>(null);
 
     const name: string = customer?.getAttribute?.('name') ?? '';
     const email: string | null = customer?.getAttribute?.('email') ?? null;
@@ -182,19 +180,6 @@ const AccountHomeScreen = () => {
 
     const languageName = languages.find((language: any) => language.code === locale)?.native ?? locale.toUpperCase();
     const schemeLabel = (scheme: string) => t(`Account.scheme.${scheme}`);
-
-    const requestDeletion = async () => {
-        setDeleting(true);
-        try {
-            await deleteAccount();
-            setSheet(null);
-            navigation.navigate('DeleteAccountVerify', { phone });
-        } catch (failure: any) {
-            toast.error(failure?.message || t('Auth.sendFailed'));
-        } finally {
-            setDeleting(false);
-        }
-    };
 
     return (
         <YStack flex={1} backgroundColor='$background'>
@@ -333,11 +318,6 @@ const AccountHomeScreen = () => {
                     <Button variant='outline' size='lg' fullWidth onPress={logout}>
                         {t('Account.signOut')}
                     </Button>
-                    <Button variant='ghost' fullWidth onPress={() => setSheet('delete')}>
-                        <UIText variant='bodyStrong' tone='error'>
-                            {t('Account.deleteAccount')}
-                        </UIText>
-                    </Button>
                 </YStack>
             </ScrollView>
 
@@ -357,23 +337,6 @@ const AccountHomeScreen = () => {
                 onSelect={changeScheme}
                 onClose={() => setSheet(null)}
             />
-            <Sheet
-                open={sheet === 'delete'}
-                onClose={() => setSheet(null)}
-                title={t('Account.deleteTitle')}
-                footer={
-                    <YStack gap={8}>
-                        <Button variant='destructive' size='lg' fullWidth loading={deleting} onPress={requestDeletion}>
-                            {t('Account.sendDeleteCode')}
-                        </Button>
-                        <Button variant='ghost' fullWidth onPress={() => setSheet(null)}>
-                            {t('Account.keepAccount')}
-                        </Button>
-                    </YStack>
-                }
-            >
-                <UIText tone='secondary'>{t('Account.deleteBody')}</UIText>
-            </Sheet>
         </YStack>
     );
 };

@@ -426,8 +426,22 @@
         "loadError": "Something went wrong while loading this screen."
     },
     "Network": {
-        "tabs": { "discover": "Discover", "search": "Search", "map": "Map", "cart": "Cart", "profile": "Profile" },
-        "sort": { "nearest": "Nearest", "highest_rated": "Highest rated", "lowest_rated": "Lowest rated", "popular": "Popular", "trending": "Trending", "newest": "Newest", "oldest": "Oldest" },
+        "tabs": {
+            "discover": "Discover",
+            "search": "Search",
+            "map": "Map",
+            "cart": "Cart",
+            "profile": "Profile"
+        },
+        "sort": {
+            "nearest": "Nearest",
+            "highest_rated": "Highest rated",
+            "lowest_rated": "Lowest rated",
+            "popular": "Popular",
+            "trending": "Trending",
+            "newest": "Newest",
+            "oldest": "Oldest"
+        },
         "allCategories": "All categories",
         "uncategorized": "Uncategorized",
         "openNow": "Open now",
@@ -570,7 +584,10 @@
         "bookable": "Book online",
         "view": "View",
         "book": "Book",
-        "starsCount": {"one": "1 star", "other": "{{count}} stars"}
+        "starsCount": {
+            "one": "1 star",
+            "other": "{{count}} stars"
+        }
     },
     "StoreSwitch": {
         "yourCurrentStore": "your current store",
@@ -1314,5 +1331,114 @@
         "editPlace": "Edit {{name}}",
         "deliverTo": "Deliver to {{name}}",
         "quoteNote": "We'll update the delivery fee for this address."
+    },
+    "StorePage": {
+        "allCategories": "All categories",
+        "searchStore": "Search {{store}}",
+        "shopByCategory": "Shop by category",
+        "categoryCount": {
+            "one": "{{store}} · 1 category",
+            "other": "{{store}} · {{count}} categories"
+        },
+        "subcategoryCount": {
+            "one": "1 subcategory",
+            "other": "{{count}} subcategories"
+        },
+        "subcategoriesOf": "{{name}} subcategories",
+        "noCategoriesTitle": "No categories yet",
+        "noCategoriesBody": "This store hasn't sorted its menu into categories. Everything is on the home page.",
+        "backToMenu": "Back to the menu"
+    },
+    "StoreSearch": {
+        "title": "Search",
+        "updating": "Updating…",
+        "clear": "Clear search",
+        "recent": "Recent",
+        "clearRecent": "Clear",
+        "removeRecent": "Remove {{term}} from recent searches",
+        "popular": "Popular at {{store}}",
+        "resultCount": {
+            "one": "1 result for “{{query}}”",
+            "other": "{{count}} results for “{{query}}”"
+        },
+        "error": "Search isn't working right now. Try again in a moment.",
+        "noResultsTitle": "Nothing matches “{{query}}”",
+        "noResultsBody": "Check the spelling, or browse the categories.",
+        "browseCategories": "Browse all categories"
+    },
+    "StoreMap": {
+        "truckLive": "Live now",
+        "truckOffline": "Offline",
+        "trucksLabel": "Map of food trucks",
+        "locationsLabel": "Map of store locations",
+        "trucksTitle": "{{store}} food trucks",
+        "locationsTitle": "{{store}} locations",
+        "show": "What to show",
+        "locations": "Locations",
+        "trucks": "Food trucks · {{count}} live",
+        "locationOff": "Location is off, so distances aren't shown. Enter your address to see the nearest location.",
+        "error": "Locations didn't load.",
+        "noTrucks": "No food trucks on the map right now",
+        "noLocations": "No locations to show yet",
+        "orderHere": "Order from here",
+        "seeMenu": "See menu",
+        "directionsTo": "Directions to {{name}}",
+        "call": "Call {{name}}"
+    },
+    "StoreInfo": {
+        "call": "Call",
+        "email": "Email",
+        "visit": "Visit",
+        "locations": "Locations",
+        "locationsError": "Locations didn't load.",
+        "noLocations": "No locations listed.",
+        "openingHours": "Opening hours",
+        "closed": "Closed",
+        "today": "{{day}} · today",
+        "days": {
+            "monday": "Monday",
+            "tuesday": "Tuesday",
+            "wednesday": "Wednesday",
+            "thursday": "Thursday",
+            "friday": "Friday",
+            "saturday": "Saturday",
+            "sunday": "Sunday"
+        },
+        "contact": "Contact",
+        "onSocial": "{{store}} on {{network}}",
+        "photos": "Photos",
+        "reviews": "Reviews",
+        "seeAllReviews": "See all"
+    },
+    "EditProfile": {
+        "title": "Edit profile",
+        "saved": "Saved",
+        "saveFailed": "Couldn't save. Try again.",
+        "photo": "Your profile photo",
+        "changePhoto": "Change photo",
+        "removePhoto": "Remove",
+        "details": "Your details",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "notSet": "Not set",
+        "edit": "Edit",
+        "phoneMissing": "Not added · stores and drivers use it to reach you",
+        "change": "Change",
+        "add": "Add",
+        "elsewhere": "Language, appearance, payment methods and sign out are on your Account page.",
+        "deleteAccount": "Delete account",
+        "deleteHint": "Removes your profile, saved places and order history. We'll send a code to confirm it's you.",
+        "emailTitle": "Your email",
+        "nameTitle": "Your name",
+        "save": "Save",
+        "fullName": "Full name",
+        "deleteTitle": "Delete your account?",
+        "sendDeleteCode": "Send confirmation code",
+        "keepAccount": "Keep my account",
+        "deleteBody": "This can't be undone. To make sure it's you, we'll send a code to {{email}}.",
+        "deletePoint1": "Your profile, photo and saved places are removed.",
+        "deletePoint2": "Past orders and receipts can't be recovered.",
+        "deletePoint3": "Orders already on their way still arrive."
     }
 }

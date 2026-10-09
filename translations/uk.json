@@ -584,7 +584,10 @@
         "bookable": "Онлайн-запис",
         "view": "Переглянути",
         "book": "Забронювати",
-        "starsCount": {"one": "1 зірка", "other": "{{count}} зірок"}
+        "starsCount": {
+            "one": "1 зірка",
+            "other": "{{count}} зірок"
+        }
     },
     "StoreSwitch": {
         "yourCurrentStore": "вашого поточного магазину",
@@ -1328,5 +1331,114 @@
         "editPlace": "Редагувати «{{name}}»",
         "deliverTo": "Доставити до «{{name}}»",
         "quoteNote": "Ми оновимо вартість доставки для цієї адреси."
+    },
+    "StorePage": {
+        "allCategories": "Усі категорії",
+        "searchStore": "Пошук у {{store}}",
+        "shopByCategory": "Покупки за категоріями",
+        "categoryCount": {
+            "one": "{{store}} · 1 категорія",
+            "other": "{{store}} · категорій: {{count}}"
+        },
+        "subcategoryCount": {
+            "one": "1 підкатегорія",
+            "other": "Підкатегорій: {{count}}"
+        },
+        "subcategoriesOf": "Підкатегорії {{name}}",
+        "noCategoriesTitle": "Категорій ще немає",
+        "noCategoriesBody": "Магазин ще не розподілив меню за категоріями. Усе є на головній сторінці.",
+        "backToMenu": "Назад до меню"
+    },
+    "StoreSearch": {
+        "title": "Пошук",
+        "updating": "Оновлення…",
+        "clear": "Очистити пошук",
+        "recent": "Нещодавні",
+        "clearRecent": "Очистити",
+        "removeRecent": "Видалити «{{term}}» з нещодавніх",
+        "popular": "Популярне в {{store}}",
+        "resultCount": {
+            "one": "1 результат для «{{query}}»",
+            "other": "Результатів для «{{query}}»: {{count}}"
+        },
+        "error": "Пошук зараз не працює. Спробуйте за мить.",
+        "noResultsTitle": "Нічого не знайдено за «{{query}}»",
+        "noResultsBody": "Перевірте написання або перегляньте категорії.",
+        "browseCategories": "Переглянути всі категорії"
+    },
+    "StoreMap": {
+        "truckLive": "Працює зараз",
+        "truckOffline": "Не працює",
+        "trucksLabel": "Карта фудтраків",
+        "locationsLabel": "Карта точок магазину",
+        "trucksTitle": "Фудтраки {{store}}",
+        "locationsTitle": "Точки {{store}}",
+        "show": "Що показати",
+        "locations": "Точки",
+        "trucks": "Фудтраки · працюють: {{count}}",
+        "locationOff": "Геолокацію вимкнено, тож відстані не показано. Вкажіть адресу, щоб побачити найближчу точку.",
+        "error": "Не вдалося завантажити точки.",
+        "noTrucks": "Зараз на карті немає фудтраків",
+        "noLocations": "Ще немає точок для показу",
+        "orderHere": "Замовити тут",
+        "seeMenu": "Меню",
+        "directionsTo": "Маршрут до {{name}}",
+        "call": "Зателефонувати {{name}}"
+    },
+    "StoreInfo": {
+        "call": "Дзвінок",
+        "email": "Email",
+        "visit": "Відкрити",
+        "locations": "Точки",
+        "locationsError": "Не вдалося завантажити точки.",
+        "noLocations": "Точок не вказано.",
+        "openingHours": "Години роботи",
+        "closed": "Зачинено",
+        "today": "{{day}} · сьогодні",
+        "days": {
+            "monday": "Понеділок",
+            "tuesday": "Вівторок",
+            "wednesday": "Середа",
+            "thursday": "Четвер",
+            "friday": "Пʼятниця",
+            "saturday": "Субота",
+            "sunday": "Неділя"
+        },
+        "contact": "Контакти",
+        "onSocial": "{{store}} у {{network}}",
+        "photos": "Фото",
+        "reviews": "Відгуки",
+        "seeAllReviews": "Усі"
+    },
+    "EditProfile": {
+        "title": "Редагувати профіль",
+        "saved": "Збережено",
+        "saveFailed": "Не вдалося зберегти. Спробуйте ще раз.",
+        "photo": "Ваше фото профілю",
+        "changePhoto": "Змінити фото",
+        "removePhoto": "Видалити",
+        "details": "Ваші дані",
+        "name": "Імʼя",
+        "email": "Email",
+        "phone": "Телефон",
+        "notSet": "Не вказано",
+        "edit": "Змінити",
+        "phoneMissing": "Не додано · магазини й водії використовують його, щоб звʼязатися з вами",
+        "change": "Змінити",
+        "add": "Додати",
+        "elsewhere": "Мова, оформлення, способи оплати та вихід — на сторінці «Обліковий запис».",
+        "deleteAccount": "Видалити обліковий запис",
+        "deleteHint": "Видаляє ваш профіль, збережені адреси та історію замовлень. Ми надішлемо код, щоб підтвердити, що це ви.",
+        "emailTitle": "Ваш email",
+        "nameTitle": "Ваше імʼя",
+        "save": "Зберегти",
+        "fullName": "Повне імʼя",
+        "deleteTitle": "Видалити обліковий запис?",
+        "sendDeleteCode": "Надіслати код підтвердження",
+        "keepAccount": "Залишити обліковий запис",
+        "deleteBody": "Це не можна скасувати. Щоб переконатися, що це ви, ми надішлемо код на {{email}}.",
+        "deletePoint1": "Ваш профіль, фото й збережені адреси буде видалено.",
+        "deletePoint2": "Минулі замовлення й чеки не відновити.",
+        "deletePoint3": "Замовлення, які вже в дорозі, буде доставлено."
     }
 }

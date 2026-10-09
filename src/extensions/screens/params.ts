@@ -7,7 +7,8 @@ type Serialized = Record<string, any>;
  * deep-linked; serialized objects are optional hints that avoid a refetch.
  */
 export type ScreenParamMap = {
-    'store.home': { storeId?: string; store?: Serialized } | undefined;
+    'store.home': { storeId?: string; store?: Serialized; categoryId?: string } | undefined;
+    'store.catalog': undefined;
     'store.search': undefined;
     'store.map': undefined;
     'store.info': { store: Serialized; storeLocation?: Serialized };

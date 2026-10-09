@@ -426,8 +426,22 @@
         "loadError": "Энэ дэлгэцийг ачаалах үед алдаа гарлаа."
     },
     "Network": {
-        "tabs": { "discover": "Нээж үзэх", "search": "Хайх", "map": "Газрын зураг", "cart": "Сагс", "profile": "Профайл" },
-        "sort": { "nearest": "Хамгийн ойр", "highest_rated": "Өндөр үнэлгээтэй", "lowest_rated": "Бага үнэлгээтэй", "popular": "Алдартай", "trending": "Эрэлттэй", "newest": "Хамгийн шинэ", "oldest": "Хамгийн хуучин" },
+        "tabs": {
+            "discover": "Нээж үзэх",
+            "search": "Хайх",
+            "map": "Газрын зураг",
+            "cart": "Сагс",
+            "profile": "Профайл"
+        },
+        "sort": {
+            "nearest": "Хамгийн ойр",
+            "highest_rated": "Өндөр үнэлгээтэй",
+            "lowest_rated": "Бага үнэлгээтэй",
+            "popular": "Алдартай",
+            "trending": "Эрэлттэй",
+            "newest": "Хамгийн шинэ",
+            "oldest": "Хамгийн хуучин"
+        },
         "allCategories": "Бүх ангилал",
         "uncategorized": "Ангилалгүй",
         "openNow": "Одоо нээлттэй",
@@ -570,7 +584,10 @@
         "bookable": "Онлайнаар захиалах",
         "view": "Үзэх",
         "book": "Захиалах",
-        "starsCount": {"one": "1 од", "other": "{{count}} од"}
+        "starsCount": {
+            "one": "1 од",
+            "other": "{{count}} од"
+        }
     },
     "StoreSwitch": {
         "yourCurrentStore": "одоогийн дэлгүүр",
@@ -1314,5 +1331,114 @@
         "editPlace": "{{name}} засах",
         "deliverTo": "{{name}} руу хүргэх",
         "quoteNote": "Энэ хаягийн хүргэлтийн төлбөрийг шинэчилнэ."
+    },
+    "StorePage": {
+        "allCategories": "Бүх ангилал",
+        "searchStore": "{{store}}-с хайх",
+        "shopByCategory": "Ангиллаар үзэх",
+        "categoryCount": {
+            "one": "{{store}} · 1 ангилал",
+            "other": "{{store}} · {{count}} ангилал"
+        },
+        "subcategoryCount": {
+            "one": "1 дэд ангилал",
+            "other": "{{count}} дэд ангилал"
+        },
+        "subcategoriesOf": "{{name}}-н дэд ангиллууд",
+        "noCategoriesTitle": "Ангилал алга",
+        "noCategoriesBody": "Энэ дэлгүүр цэсээ ангилаагүй байна. Бүгд нүүр хуудсанд байна.",
+        "backToMenu": "Цэс рүү буцах"
+    },
+    "StoreSearch": {
+        "title": "Хайх",
+        "updating": "Шинэчилж байна…",
+        "clear": "Хайлтыг арилгах",
+        "recent": "Сүүлийн хайлт",
+        "clearRecent": "Арилгах",
+        "removeRecent": "{{term}}-г сүүлийн хайлтаас хасах",
+        "popular": "{{store}}-д эрэлттэй",
+        "resultCount": {
+            "one": "“{{query}}”: 1 үр дүн",
+            "other": "“{{query}}”: {{count}} үр дүн"
+        },
+        "error": "Хайлт одоогоор ажиллахгүй байна. Дахин оролдоно уу.",
+        "noResultsTitle": "“{{query}}” олдсонгүй",
+        "noResultsBody": "Бичлэгээ шалгах эсвэл ангиллуудаас үзнэ үү.",
+        "browseCategories": "Бүх ангиллыг үзэх"
+    },
+    "StoreMap": {
+        "truckLive": "Одоо ажиллаж байна",
+        "truckOffline": "Ажиллахгүй",
+        "trucksLabel": "Хоолны машинуудын газрын зураг",
+        "locationsLabel": "Салбаруудын газрын зураг",
+        "trucksTitle": "{{store}} хоолны машинууд",
+        "locationsTitle": "{{store}} салбарууд",
+        "show": "Харуулах",
+        "locations": "Салбарууд",
+        "trucks": "Хоолны машин · {{count}} идэвхтэй",
+        "locationOff": "Байршил унтраастай тул зай харагдахгүй. Хамгийн ойрын салбарыг харахын тулд хаягаа оруулна уу.",
+        "error": "Салбаруудыг ачаалж чадсангүй.",
+        "noTrucks": "Одоогоор газрын зураг дээр хоолны машин алга",
+        "noLocations": "Харуулах салбар алга",
+        "orderHere": "Эндээс захиалах",
+        "seeMenu": "Цэс харах",
+        "directionsTo": "{{name}} руу чиглэл",
+        "call": "{{name}} руу залгах"
+    },
+    "StoreInfo": {
+        "call": "Залгах",
+        "email": "Имэйл",
+        "visit": "Зочлох",
+        "locations": "Салбарууд",
+        "locationsError": "Салбаруудыг ачаалж чадсангүй.",
+        "noLocations": "Салбар бүртгэгдээгүй.",
+        "openingHours": "Ажиллах цаг",
+        "closed": "Амарна",
+        "today": "{{day}} · өнөөдөр",
+        "days": {
+            "monday": "Даваа",
+            "tuesday": "Мягмар",
+            "wednesday": "Лхагва",
+            "thursday": "Пүрэв",
+            "friday": "Баасан",
+            "saturday": "Бямба",
+            "sunday": "Ням"
+        },
+        "contact": "Холбоо барих",
+        "onSocial": "{{store}} {{network}}-д",
+        "photos": "Зургууд",
+        "reviews": "Сэтгэгдэл",
+        "seeAllReviews": "Бүгдийг харах"
+    },
+    "EditProfile": {
+        "title": "Профайл засах",
+        "saved": "Хадгаллаа",
+        "saveFailed": "Хадгалж чадсангүй. Дахин оролдоно уу.",
+        "photo": "Таны профайл зураг",
+        "changePhoto": "Зураг солих",
+        "removePhoto": "Хасах",
+        "details": "Таны мэдээлэл",
+        "name": "Нэр",
+        "email": "Имэйл",
+        "phone": "Утас",
+        "notSet": "Тохируулаагүй",
+        "edit": "Засах",
+        "phoneMissing": "Нэмээгүй · дэлгүүр болон жолооч тантай холбогдоход хэрэглэнэ",
+        "change": "Солих",
+        "add": "Нэмэх",
+        "elsewhere": "Хэл, харагдах байдал, төлбөрийн хэрэгсэл болон гарах нь таны Бүртгэл хуудсанд байна.",
+        "deleteAccount": "Бүртгэл устгах",
+        "deleteHint": "Таны профайл, хадгалсан хаяг, захиалгын түүх устна. Таныг мөн эсэхийг баталгаажуулах код илгээнэ.",
+        "emailTitle": "Таны имэйл",
+        "nameTitle": "Таны нэр",
+        "save": "Хадгалах",
+        "fullName": "Бүтэн нэр",
+        "deleteTitle": "Бүртгэлээ устгах уу?",
+        "sendDeleteCode": "Баталгаажуулах код илгээх",
+        "keepAccount": "Бүртгэлээ үлдээх",
+        "deleteBody": "Үүнийг буцаах боломжгүй. Таныг мөн эсэхийг шалгахын тулд {{email}} руу код илгээнэ.",
+        "deletePoint1": "Таны профайл, зураг, хадгалсан хаягууд устна.",
+        "deletePoint2": "Өмнөх захиалга, баримтыг сэргээх боломжгүй.",
+        "deletePoint3": "Замдаа яваа захиалгууд хүргэгдэнэ."
     }
 }
