@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Image, Linking, Pressable, RefreshControl, ScrollView } from 'react-native';
+import { Animated, AppState, Image, Linking, Pressable, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -98,6 +98,10 @@ const OrderScreen = ({ route }: any) => {
     const [chat, setChat] = useState<OrderChat | null>(null);
     const [flow, setFlow] = useState<OrderFlow | null>(null);
     const [screenHeight, setScreenHeight] = useState(0);
+    // How far the sheet has scrolled; it reaches the top of the scroll area at `sheetTop`.
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const sheetTop = Math.max(1, MAP_HEIGHT - insets.top - SHEET_OVERLAP);
+    const statusBarFill = scrollY.interpolate({ inputRange: [sheetTop - 24, sheetTop], outputRange: [0, 1], extrapolate: 'clamp' });
     // The part of the full-screen map hidden under the sheet when it rests.
     const mapCovered = Math.max(0, screenHeight - MAP_HEIGHT + SHEET_OVERLAP);
 
@@ -398,8 +402,10 @@ const OrderScreen = ({ route }: any) => {
                     ))}
             </YStack>
             {/* Starts below the status bar so the refresh spinner shows there, over the map. */}
-            <ScrollView
+            <Animated.ScrollView
                 style={{ flex: 1, zIndex: 1, marginTop: insets.top }}
+                scrollEventThrottle={16}
+                onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
                 pointerEvents='box-none'
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
@@ -726,9 +732,15 @@ const OrderScreen = ({ route }: any) => {
                         )}
                     </YStack>
                 </YStack>
-            </ScrollView>
+            </Animated.ScrollView>
 
-            <YStack position='absolute' top={top + 10} left={space.gutter} zIndex={2}>
+            {/* Once the sheet reaches the top, the strip behind the status bar takes its colour too. */}
+            <Animated.View
+                pointerEvents='none'
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, zIndex: 2, backgroundColor: theme.background.val, opacity: statusBarFill }}
+            />
+
+            <YStack position='absolute' top={top + 10} left={space.gutter} zIndex={3}>
                 <IconButton icon={faXmark} variant='floating' size={44} accessibilityLabel={t('UI.close')} onPress={close} />
             </YStack>
 
