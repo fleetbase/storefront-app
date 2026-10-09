@@ -22,6 +22,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { foodTruckDisplayName, formatCurrency } from '../utils/format';
 import { isArray, getFoodTruckById } from '../utils';
+import * as storage from '../utils/storage';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import { currentStep, fetchOrderFlow, usesCustomFlow, type OrderFlow } from '../commerce/order-flow';
 import { tipAmount } from '../commerce/order-summary';
@@ -42,6 +43,28 @@ const SHEET_OVERLAP = 28;
  * timeline, the driver, pickup confirmation and the order details. Updates arrive over
  * the order's socket channel; pull to refresh reloads it.
  */
+const ORDER_CACHE_PREFIX = 'order-screen:';
+
+/** The full order as last loaded, so reopening it shows everything (the driver, too) at once. */
+function cachedOrder(id?: string | null): any {
+    if (!id) return null;
+    try {
+        return storage.get(`${ORDER_CACHE_PREFIX}${id}`) ?? null;
+    } catch {
+        return null;
+    }
+}
+
+function cacheOrder(order: any) {
+    const id = order?.id;
+    if (!id || typeof order.serialize !== 'function') return;
+    try {
+        storage.set(`${ORDER_CACHE_PREFIX}${id}`, order.serialize());
+    } catch {
+        // A cache miss only means the next visit starts from the summary.
+    }
+}
+
 const OrderScreen = ({ route }: any) => {
     const params = route.params || {};
     const theme = useTheme();
@@ -57,9 +80,12 @@ const OrderScreen = ({ route }: any) => {
     const { t, locale } = useLanguage();
     const hour12 = usesTwelveHourClock(locale);
 
-    // Opened from a notification or link there is only an id; the order loads below.
-    const [order, setOrder] = useState<any>(() => new Order(params.order ?? { id: params.orderId }, fleetbaseAdapter));
-    const [loaded, setLoaded] = useState<boolean>(!!params.order);
+    // The last full copy of this order (kept from the previous visit) shows at once; otherwise
+    // the summary it was opened with, or only its id from a notification or link. The full
+    // order is always fetched on open.
+    const orderId = params.order?.id ?? params.orderId;
+    const [order, setOrder] = useState<any>(() => new Order(cachedOrder(orderId) ?? params.order ?? { id: orderId }, fleetbaseAdapter));
+    const [loaded, setLoaded] = useState<boolean>(() => !!(cachedOrder(orderId) ?? params.order));
     const [loadFailed, setLoadFailed] = useState(false);
     const [foodTruck, setFoodTruck] = useState<any>();
     const [distanceMatrix, setDistanceMatrix] = useState<any>();
@@ -111,6 +137,7 @@ const OrderScreen = ({ route }: any) => {
         try {
             const reloaded = await orderRef.current.reload();
             setOrder(reloaded);
+            cacheOrder(reloaded);
             statusRef.current = reloaded.getAttribute('status');
             distanceLoadedRef.current = false;
         } catch (err) {
@@ -121,15 +148,15 @@ const OrderScreen = ({ route }: any) => {
     }, []);
 
     useEffect(() => {
-        if (loaded) return;
         orderRef.current
             .reload()
             .then((reloaded: any) => {
                 setOrder(reloaded);
+                cacheOrder(reloaded);
                 statusRef.current = reloaded.getAttribute('status');
                 setLoaded(true);
             })
-            .catch(() => setLoadFailed(true));
+            .catch(() => !loaded && setLoadFailed(true));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -396,6 +423,8 @@ const OrderScreen = ({ route }: any) => {
                     paddingBottom={insets.bottom + 40}
                     gap={16}
                 >
+                    {/* Continues the sheet below its end, so scrolling past the bottom never shows the map. */}
+                    <YStack position='absolute' top='100%' left={0} right={0} height={1000} backgroundColor='$background' pointerEvents='none' />
                     <YStack width={40} height={5} borderRadius={radius.pill} backgroundColor='$borderColorWithShadow' alignSelf='center' />
 
                     <YStack gap={4} accessibilityRole='summary' aria-live='polite'>
@@ -699,7 +728,7 @@ const OrderScreen = ({ route }: any) => {
                 </YStack>
             </ScrollView>
 
-            <YStack position='absolute' top={top + 10} left={space.gutter}>
+            <YStack position='absolute' top={top + 10} left={space.gutter} zIndex={2}>
                 <IconButton icon={faXmark} variant='floating' size={44} accessibilityLabel={t('UI.close')} onPress={close} />
             </YStack>
 
