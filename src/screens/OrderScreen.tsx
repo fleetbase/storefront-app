@@ -71,6 +71,9 @@ const OrderScreen = ({ route }: any) => {
     const chatRequest = useChatRequest();
     const [chat, setChat] = useState<OrderChat | null>(null);
     const [flow, setFlow] = useState<OrderFlow | null>(null);
+    const [screenHeight, setScreenHeight] = useState(0);
+    // The part of the full-screen map hidden under the sheet when it rests.
+    const mapCovered = Math.max(0, screenHeight - MAP_HEIGHT + SHEET_OVERLAP);
 
     const storeId = useMemo(() => order.getAttribute('meta.storefront_id'), [order]);
     const [store, setStore] = useStorage(`${storeId}`, info);
@@ -355,23 +358,21 @@ const OrderScreen = ({ route }: any) => {
     }
 
     return (
-        <YStack flex={1} backgroundColor='$background'>
-            {/* The map stays put behind the sheet: pulling down moves only the sheet, never a gap
-                above the map. zIndex 0 keeps web map panes under the sheet. */}
-            <YStack
-                position='absolute'
-                top={0}
-                left={0}
-                right={0}
-                height={MAP_HEIGHT + SHEET_OVERLAP}
-                backgroundColor='$surface2'
-                accessibilityLabel={t('Tracking.mapLabel')}
-                zIndex={0}
-            >
-                {canRenderRoute && (isPickup ? <LivePickupRoute order={order} zoom={4} /> : <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} />)}
+        <YStack flex={1} backgroundColor='$background' onLayout={(event) => setScreenHeight(event.nativeEvent.layout.height)}>
+            {/* The map fills the screen behind the sheet, so pulling the sheet down only ever
+                reveals more map. Its route and labels are kept to the part above the sheet.
+                zIndex 0 keeps web map panes under the sheet. */}
+            <YStack position='absolute' top={0} left={0} right={0} bottom={0} backgroundColor='$surface2' accessibilityLabel={t('Tracking.mapLabel')} zIndex={0}>
+                {canRenderRoute &&
+                    (isPickup ? (
+                        <LivePickupRoute order={order} zoom={4} bottomInset={mapCovered} />
+                    ) : (
+                        <LiveOrderRoute order={order} zoom={4} customOrigin={foodTruck ?? foodTruckId} bottomInset={mapCovered} />
+                    ))}
             </YStack>
+            {/* Starts below the status bar so the refresh spinner shows there, over the map. */}
             <ScrollView
-                style={{ flex: 1, zIndex: 1 }}
+                style={{ flex: 1, zIndex: 1, marginTop: insets.top }}
                 pointerEvents='box-none'
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
@@ -381,7 +382,7 @@ const OrderScreen = ({ route }: any) => {
                 contentContainerStyle={{ flexGrow: 1 }}
             >
                 {/* Over the map: touches pass through to it, so it can still be panned and zoomed. */}
-                <YStack height={MAP_HEIGHT} pointerEvents='none' />
+                <YStack height={MAP_HEIGHT - insets.top} pointerEvents='none' />
 
                 <YStack
                     flex={1}

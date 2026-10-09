@@ -51,12 +51,13 @@ const DEFAULT_REGION = {
     longitudeDelta: 0.05,
 };
 
-const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm', customOrigin }) => {
+const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm', customOrigin, bottomInset = 0 }) => {
     const theme = useTheme();
     const { storefront } = useStorefront();
     const { store } = useStoreLocations();
 
     const mapRef = useRef(null);
+    const layoutHeightRef = useRef(0);
     const bearingRaf = useRef(null);
     const isPollingBearing = useRef(false);
     const lastFollowTsRef = useRef(0);
@@ -158,7 +159,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
         if (!coordinates || coordinates.length < 2) return;
 
         mapRef.current?.fitToCoordinates?.(coordinates, {
-            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+            edgePadding: { top: 50, right: 50, bottom: 50 + bottomInset, left: 50 },
             animated: true,
         });
     }, []);
@@ -174,10 +175,15 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
             lastFollowTsRef.current = now;
 
             const heading = typeof opts.heading === 'number' ? opts.heading : undefined;
+            // Apple Maps centres on the whole view, so with content covering its bottom the
+            // centre moves south to keep the marker in the middle of the part still visible.
+            // (Google Maps already centres within the map padding.)
+            const height = layoutHeightRef.current;
+            const latitudeShift = Platform.OS === 'ios' && bottomInset > 0 && height > 0 ? (bottomInset / 2 / height) * initialDeltas : 0;
 
             mapRef.current?.animateCamera?.(
                 {
-                    center: { latitude, longitude },
+                    center: { latitude: latitude - latitudeShift, longitude },
                     heading,
                 },
                 { duration: 280 }
@@ -185,7 +191,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
             mapRef.current?.animateToRegion?.(
                 {
-                    latitude,
+                    latitude: latitude - latitudeShift,
                     longitude,
                     latitudeDelta: initialDeltas,
                     longitudeDelta: initialDeltas,
@@ -193,7 +199,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 300
             );
         },
-        [initialDeltas]
+        [initialDeltas, bottomInset]
     );
 
     const handleMovement = useCallback(
@@ -280,7 +286,16 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
     /* ---------- Render ---------- */
     return (
-        <YStack flex={1} position='relative' overflow='hidden' width={width} height={height}>
+        <YStack
+            flex={1}
+            position='relative'
+            overflow='hidden'
+            width={width}
+            height={height}
+            onLayout={(event) => {
+                layoutHeightRef.current = event.nativeEvent.layout.height;
+            }}
+        >
             <LoadingOverlay visible={findingOrigin} />
 
             <MapView
@@ -292,6 +307,8 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                 showsCompass={false}
                 onRegionChange={startBearingPoll}
                 onRegionChangeComplete={stopBearingPoll}
+                // The part of the map covered by content below it (e.g. a sheet).
+                mapPadding={{ top: 0, right: 0, bottom: bottomInset, left: 0 }}
                 {...mapViewProps}
             >
                 {/* ONLY RENDER WHEN READY */}

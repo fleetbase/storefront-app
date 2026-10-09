@@ -36,7 +36,7 @@ const getCoordinatesObject = (place) => {
     return { latitude, longitude };
 };
 
-const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm' }) => {
+const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '100%', mapViewProps, markerSize = 'sm', bottomInset = 0 }) => {
     const theme = useTheme();
     const { storefront } = useStorefront();
     const { store } = useStoreLocations();
@@ -73,7 +73,7 @@ const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '
     const fitToRoute = ({ coordinates }) => {
         if (mapRef.current) {
             mapRef.current.fitToCoordinates(coordinates, {
-                edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                edgePadding: { top: 50, right: 50, bottom: 50 + bottomInset, left: 50 },
                 animated: true,
             });
         }
@@ -99,6 +99,8 @@ const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '
                 initialRegion={mapRegion}
                 onRegionChangeComplete={handleRegionChangeComplete}
                 mapType={storefrontConfig('defaultMapType', 'standard')}
+                // The part of the map covered by content below it (e.g. a sheet).
+                mapPadding={{ top: 0, right: 0, bottom: bottomInset, left: 0 }}
                 {...mapViewProps}
             >
                 {/* The customer */}
