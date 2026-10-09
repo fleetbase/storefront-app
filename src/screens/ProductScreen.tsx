@@ -22,6 +22,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import useCart from '../hooks/use-cart';
 import useStorefront from '../hooks/use-storefront';
 import usePromiseWithLoading from '../hooks/use-promise-with-loading';
+import StoreSwitchHost from '../components/StoreSwitchHost';
 
 const ProductScreen = ({ route = {} }) => {
     const navigation = useNavigation();
@@ -205,6 +206,8 @@ const ProductScreen = ({ route = {} }) => {
                     </Button>
                 </XStack>
             </XStack>
+            {/* Shown above this modal screen: a sheet from the root cannot appear over it. */}
+            <StoreSwitchHost />
         </ScreenWrapper>
     );
 };

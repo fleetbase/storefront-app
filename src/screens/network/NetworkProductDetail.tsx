@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import StoreSwitchHost from '../../components/StoreSwitchHost';
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { Product, Store } from '@fleetbase/storefront';
 import { useNavigation } from '@react-navigation/native';
@@ -301,6 +302,8 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                     setAddressSheet(false);
                 }}
             />
+            {/* Shown above this modal screen: a sheet from the root cannot appear over it. */}
+            <StoreSwitchHost />
         </YStack>
     );
 }
