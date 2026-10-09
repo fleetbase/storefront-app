@@ -711,6 +711,8 @@
         "yourBooking": "Таны захиалга",
         "bookingNote": "Баг таны хүргэлтийн хаяг руу ирнэ. Захиалсан цагийг дэлгүүр баталгаажуулна.",
         "bookingNotePickup": "Захиалсан цагийг {{store}} баталгаажуулна.",
+        "itemsWithAppointment": "Энэ дэлгүүрийн бусад бараа тань энэ цагтай хамт ирнэ.",
+        "itemsAtAppointment": "Энэ дэлгүүрийн бусад бараагаа энэ цаг дээрээ авна уу.",
         "paymentNeedsAddress": "Хүргэх боломжтой хаяг сонгоод төлбөрийн хэлбэрээ сонгоно уу."
     },
     "Tracking": {
@@ -797,6 +799,14 @@
         "driverCard": "{{driver}}, таны жолооч",
         "driverAssigned": "Таны захиалгад томилогдсон",
         "driverOnTheWay": "Замдаа явж байна",
+        "providerCard": "{{driver}}, таны үйлчилгээ үзүүлэгч",
+        "itemsWithAppointment": "Бусад бараа тань энэ цагтай хамт ирнэ.",
+        "itemsAtAppointment": "Бусад бараагаа энэ цаг дээрээ авна уу.",
+        "addToCalendar": "{{name}}-г календарьт нэмэх",
+        "addedToCalendar": "Календарьт нэмэгдлээ",
+        "calendarUnavailable": "Календарийг нээж чадсангүй",
+        "calendarNotes": "Захиалга {{reference}}",
+        "visitFee": "Очих төлбөр",
         "callDriver": "{{driver}} руу залгах",
         "details": "Захиалгын дэлгэрэнгүй",
         "orderNumber": "Захиалга {{number}}",

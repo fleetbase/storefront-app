@@ -97,6 +97,18 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const itemCount = groups.reduce((sum, group) => sum + group.itemCount, 0);
     const hour12 = usesTwelveHourClock(locale);
     const bookings = groups.flatMap((group) => group.lines.filter((line) => line.scheduledAt).map((line) => ({ line, group, at: parseScheduledAt(line.scheduledAt) })));
+    // A store's products come with its earliest appointment: that booking says so.
+    const carriesItems = new Set(
+        groups
+            .filter((group) => group.lines.some((line) => line.scheduledAt) && group.lines.some((line) => !line.scheduledAt))
+            .map((group) => {
+                const earliest = bookings
+                    .filter((booking) => booking.group === group && booking.at)
+                    .sort((a, b) => (a.at as any).at.getTime() - (b.at as any).at.getTime())[0];
+                return earliest?.line.id;
+            })
+            .filter(Boolean)
+    );
     const changeBooking = (line: any) => {
         const item = (cart?.contents?.() ?? []).find((entry: any) => entry.id === line.id);
         const params = { productId: line.productId, storeId: line.storeId, cartLineId: line.id, cartItem: item, scheduledAt: line.scheduledAt, quantity: line.quantity };
@@ -309,6 +321,11 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 <UIText variant='caption' tone='secondary'>
                                     {isPickup ? t('Checkout.bookingNotePickup', { store: group.name ?? info?.name ?? '' }) : t('Checkout.bookingNote')}
                                 </UIText>
+                                {carriesItems.has(line.id) && (
+                                    <UIText variant='caption' tone='brand'>
+                                        {isPickup ? t('Checkout.itemsAtAppointment') : t('Checkout.itemsWithAppointment')}
+                                    </UIText>
+                                )}
                             </Card>
                         ))}
 

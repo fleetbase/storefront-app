@@ -725,6 +725,8 @@
         "yourBooking": "Ваше бронювання",
         "bookingNote": "Команда приїде на вашу адресу доставки. Час бронювання підтверджує магазин.",
         "bookingNotePickup": "Час бронювання підтверджує {{store}}.",
+        "itemsWithAppointment": "Інші товари з цього магазину привезуть разом із цим візитом.",
+        "itemsAtAppointment": "Інші товари з цього магазину заберіть під час цього візиту.",
         "paymentNeedsAddress": "Оберіть адресу, куди ми доставляємо, а потім спосіб оплати."
     },
     "Tracking": {
@@ -811,6 +813,14 @@
         "driverCard": "{{driver}}, ваш водій",
         "driverAssigned": "Призначений на ваше замовлення",
         "driverOnTheWay": "В дорозі",
+        "providerCard": "{{driver}}, ваш виконавець",
+        "itemsWithAppointment": "Інші товари привезуть разом із цим візитом.",
+        "itemsAtAppointment": "Інші товари заберіть під час цього візиту.",
+        "addToCalendar": "Додати {{name}} до календаря",
+        "addedToCalendar": "Додано до календаря",
+        "calendarUnavailable": "Не вдалося відкрити календар",
+        "calendarNotes": "Бронювання {{reference}}",
+        "visitFee": "Плата за виїзд",
         "callDriver": "Зателефонувати: {{driver}}",
         "details": "Деталі замовлення",
         "orderNumber": "Замовлення {{number}}",

@@ -2543,6 +2543,7 @@ __metadata:
     react-dom: ^19.2.3
     react-leaflet: ^4.0.0
     react-native: 0.86.0
+    react-native-add-calendar-event: 5.0.0
     react-native-bootsplash: ^5.3.0
     react-native-config: ^1.5.3
     react-native-device-info: ^14.1.1
@@ -14601,6 +14602,18 @@ __metadata:
     react: ^18.0.0
     react-dom: ^18.0.0
   checksum: 79222c2ba0c62facaa3dfee18f7a692f917a4fb744ba8d22269a77f9779fc9634962230eb51265ff2563a1a5e3287d2ec16640ee7f5de459458027e05cd756ba
+  languageName: node
+  linkType: hard
+
+"react-native-add-calendar-event@npm:5.0.0":
+  version: 5.0.0
+  resolution: "react-native-add-calendar-event@npm:5.0.0"
+  peerDependencies:
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 28c12cd5435d12be2d368e8c7dc4e42e0418a5ba6ca59ca64426248fa257b4b4e130bc760f2e71b29bef189d2c336a1dba220d68d1f270ccdac6a5ab09d35c07
   languageName: node
   linkType: hard
 

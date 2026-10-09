@@ -3,8 +3,10 @@ import { Animated, AppState, Image, Linking, Pressable, RefreshControl } from 'r
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCheck, faComment, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarPlus, faCheck, faComment, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { parseScheduledAt } from '../commerce/booking';
+import { addToCalendar } from '../commerce/calendar';
+import { toast } from '../utils/toast';
 import { fetchEligibility, type Eligibility } from '../commerce/reviews';
 import { fetchChat, type OrderChat } from '../commerce/order-chat';
 import useChatRequest from '../hooks/use-chat-request';
@@ -114,6 +116,9 @@ const OrderScreen = ({ route }: any) => {
     const statusRef = useRef(order.getAttribute('status'));
 
     const isPickup = !!order.getAttribute('meta.is_pickup');
+    // A service booking: its own flow, a provider rather than a driver, and any products come
+    // with the earliest appointment.
+    const isBooking = !!order.getAttribute('meta.is_booking');
     const status = order.getAttribute('status');
     const foodTruckId = order.getAttribute('meta.food_truck_id');
     const currency = order.getAttribute('meta.currency') ?? info?.currency ?? 'USD';
@@ -330,8 +335,31 @@ const OrderScreen = ({ route }: any) => {
     const pickup = order.getAttribute('payload.pickup');
     const entities: any[] = order.getAttribute('payload.entities') ?? [];
     const qrCode = order.getAttribute('tracking_number.qr_code');
-    const bookings = entities.map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at) })).filter((booking) => booking.at);
-    const bookingConfirmed = progress.phase !== 'placed' && !progress.canceled;
+    const bookings = entities
+        .map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at) }))
+        .filter((booking) => booking.at)
+        .sort((a: any, b: any) => a.at.at.getTime() - b.at.at.getTime());
+    const bookingConfirmed = isBooking ? !['created', 'pending'].includes(String(status)) && !canceled : progress.phase !== 'placed' && !progress.canceled;
+    // Products in a booking come with the earliest appointment.
+    const bookingHasItems = isBooking && entities.some((entity: any) => !parseScheduledAt(entity?.meta?.scheduled_at));
+    const appointmentPlace = isPickup ? pickup : dropoff;
+
+    const addBookingToCalendar = async (entity: any, at: Date) => {
+        const duration = Number(entity?.meta?.duration_minutes ?? entity?.meta?.duration);
+        try {
+            const result = await addToCalendar({
+                title: storeName ? `${entity.name} · ${storeName}` : entity.name,
+                start: at,
+                end: Number.isFinite(duration) && duration > 0 ? new Date(at.getTime() + duration * 60000) : null,
+                location: appointmentPlace ? formattedAddressFromPlace(restoreFleetbasePlace(appointmentPlace)) : null,
+                notes: t('Tracking.calendarNotes', { reference }),
+            });
+            if (result === 'saved') toast.success(t('Tracking.addedToCalendar'));
+            else if (result === 'unavailable') toast.error(t('Tracking.calendarUnavailable'));
+        } catch {
+            toast.error(t('Tracking.calendarUnavailable'));
+        }
+    };
     const reference = order.getAttribute('tracking_number.tracking_number') ?? order.id;
 
     const headline = (phase: OrderPhase) => t(`Tracking.phase.${phase}.title`, { store: storeName, driver: driverName ?? t('Tracking.yourDriver') });
@@ -344,7 +372,7 @@ const OrderScreen = ({ route }: any) => {
 
     const totals = [
         { label: t('Tracking.subtotal'), value: order.getAttribute('meta.subtotal') },
-        !isPickup && { label: t('Tracking.deliveryFee'), value: order.getAttribute('meta.delivery_fee') },
+        !isPickup && { label: t(isBooking ? 'Tracking.visitFee' : 'Tracking.deliveryFee'), value: order.getAttribute('meta.delivery_fee') },
         tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')) > 0 && {
             label: t('Tracking.tip'),
             value: tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')),
@@ -457,7 +485,7 @@ const OrderScreen = ({ route }: any) => {
                                 </YStack>
                             )}
                             <YStack flex={1} gap={2}>
-                                <UIText variant='bodyStrong'>{t('Tracking.driverCard', { driver: driverName })}</UIText>
+                                <UIText variant='bodyStrong'>{t(isBooking ? 'Tracking.providerCard' : 'Tracking.driverCard', { driver: driverName })}</UIText>
                                 <UIText variant='caption' tone='secondary'>
                                     {progress.phase === 'onTheWay' ? t('Tracking.driverOnTheWay') : t('Tracking.driverAssigned')}
                                 </UIText>
@@ -587,7 +615,7 @@ const OrderScreen = ({ route }: any) => {
                         })}
                     </YStack>
 
-                    {bookings.map(({ entity, at }: any) => (
+                    {bookings.map(({ entity, at }: any, index: number) => (
                         <XStack
                             key={entity.id ?? entity.name}
                             alignItems='center'
@@ -616,13 +644,18 @@ const OrderScreen = ({ route }: any) => {
                                 <UIText variant='caption' tone='secondary'>
                                     {bookingConfirmed ? t('Tracking.bookingConfirmedBody', { store: storeName }) : t('Tracking.bookingRequestedBody', { store: storeName })}
                                 </UIText>
+                                {bookingHasItems && index === 0 && (
+                                    <UIText variant='caption' tone='brand'>
+                                        {isPickup ? t('Tracking.itemsAtAppointment') : t('Tracking.itemsWithAppointment')}
+                                    </UIText>
+                                )}
                             </YStack>
-                            {!!store?.phone && (
+                            {!canceled && !finished && (
                                 <IconButton
-                                    icon={faPhone}
+                                    icon={faCalendarPlus}
                                     size={44}
-                                    accessibilityLabel={t('Tracking.callStore', { store: storeName })}
-                                    onPress={() => Linking.openURL(`tel:${store.phone}`)}
+                                    accessibilityLabel={t('Tracking.addToCalendar', { name: entity.name })}
+                                    onPress={() => addBookingToCalendar(entity, at.at)}
                                 />
                             )}
                         </XStack>
