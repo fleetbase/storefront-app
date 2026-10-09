@@ -85,7 +85,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const { isAuthenticated } = useAuth();
-    const { info, enabled } = useStorefrontInfo();
+    const { info, enabled, ownerInfo } = useStorefrontInfo();
     const { mode, getSelectedStoreLocation } = useStorefrontRuntime();
     const { savedLocations } = useSavedLocations();
     const [addressSheet, setAddressSheet] = useState(false);
@@ -150,6 +150,15 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const total = Math.max(0, checkout.totalAmount - discount);
 
     const tipsEnabled = enabled('tips');
+    // With several stores, the store tip goes to the network running the app, or, when the
+    // network splits it, to each store by its share of the order.
+    const multiStore = mode === 'network' && groups.length > 1;
+    const splitTips = enabled('split_tips_across_stores');
+    const ownerName = ownerInfo?.name ?? info?.name ?? '';
+    const storeNames = groups
+        .map((group) => group.name)
+        .filter(Boolean)
+        .join(', ');
     const driverTipsEnabled = enabled('delivery_tips') && !isPickup;
 
     const blockedReason = !isAuthenticated
@@ -351,7 +360,8 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 )}
                                 {tipsEnabled && (
                                     <TipSelector
-                                        title={t('Checkout.tipStore')}
+                                        title={multiStore ? (splitTips ? t('Checkout.tipStores') : t('Checkout.tipNetwork', { network: ownerName })) : t('Checkout.tipStore')}
+                                        note={multiStore ? (splitTips ? t('Checkout.tipSplitNote', { stores: storeNames }) : t('Checkout.tipNetworkNote', { network: ownerName })) : undefined}
                                         subtotal={checkout.subtotal}
                                         currency={currency}
                                         onChange={(tip) => checkout.setTipOptions({ leavingTip: tip !== 0, tip })}
