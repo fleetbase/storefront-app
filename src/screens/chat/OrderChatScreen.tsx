@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowRotateRight, faCamera, faChevronLeft, faComments, faPaperPlane, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRotateRight, faCamera, faChevronLeft, faComments, faPaperPlane, faPhone, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -49,6 +49,8 @@ const OrderChatScreen = ({ route }: any) => {
     const [messages, setMessages] = useState<Row[]>([]);
     const [error, setError] = useState<'no_driver' | 'failed' | null>(null);
     const [draft, setDraft] = useState('');
+    // Photos picked for the next message, sent with its text; each can be removed first.
+    const [pending, setPending] = useState<Photo[]>([]);
     const [loadingOlder, setLoadingOlder] = useState(false);
     const [noMoreOlder, setNoMoreOlder] = useState(false);
     const [closedNow, setClosedNow] = useState(false);
@@ -139,15 +141,22 @@ const OrderChatScreen = ({ route }: any) => {
 
     const submit = () => {
         const text = draft;
+        const photos = pending;
+        if (!text.trim() && photos.length === 0) return;
         setDraft('');
-        send(text);
+        setPending([]);
+        send(text, photos);
     };
 
     const pickPhotos = async () => {
-        const result = await launchImageLibrary({ mediaType: 'photo', includeBase64: true, selectionLimit: MAX_CHAT_PHOTOS, maxWidth: 1600, maxHeight: 1600, quality: 0.8 });
+        const room = MAX_CHAT_PHOTOS - pending.length;
+        if (room <= 0) return;
+        const result = await launchImageLibrary({ mediaType: 'photo', includeBase64: true, selectionLimit: room, maxWidth: 1600, maxHeight: 1600, quality: 0.8 });
         const photos = (result.assets ?? []).filter((asset) => asset.base64 && asset.uri).map((asset) => ({ data: asset.base64!, type: asset.type ?? 'image/jpeg', uri: asset.uri! }));
-        if (photos.length) send('', photos);
+        if (photos.length) setPending((current) => [...current, ...photos].slice(0, MAX_CHAT_PHOTOS));
     };
+
+    const removePending = (uri: string) => setPending((current) => current.filter((photo) => photo.uri !== uri));
 
     const driver = chatDriver(chat);
     const driverName = driver?.name ? shortName(driver.name) : (route.params?.driverName ?? t('Tracking.yourDriver'));
@@ -303,8 +312,53 @@ const OrderChatScreen = ({ route }: any) => {
                                     </Pressable>
                                 ))}
                             </ScrollView>
+                            {pending.length > 0 && (
+                                <ScrollView
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    keyboardShouldPersistTaps='handled'
+                                    contentContainerStyle={{ paddingHorizontal: space.gutter, paddingTop: 6, gap: 10 }}
+                                    accessibilityLabel={t('Chat.attachedPhotos')}
+                                >
+                                    {pending.map((photo, index) => (
+                                        <YStack key={photo.uri} width={72} height={72}>
+                                            <Image
+                                                source={{ uri: photo.uri }}
+                                                style={{ width: 72, height: 72, borderRadius: 12 }}
+                                                resizeMode='cover'
+                                                accessibilityLabel={t('Chat.attachedPhoto', { number: index + 1 })}
+                                            />
+                                            <Pressable
+                                                onPress={() => removePending(photo.uri)}
+                                                accessibilityRole='button'
+                                                accessibilityLabel={t('Chat.removePhoto', { number: index + 1 })}
+                                                hitSlop={10}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: -6,
+                                                    right: -6,
+                                                    width: 24,
+                                                    height: 24,
+                                                    borderRadius: 12,
+                                                    backgroundColor: theme.textPrimary.val,
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faXmark} size={12} color={theme.background.val} />
+                                            </Pressable>
+                                        </YStack>
+                                    ))}
+                                </ScrollView>
+                            )}
                             <XStack alignItems='center' gap={8} paddingHorizontal={space.gutter}>
-                                <IconButton icon={faCamera} size={44} accessibilityLabel={t('Chat.sendPhoto')} onPress={pickPhotos} />
+                                <IconButton
+                                    icon={faCamera}
+                                    size={44}
+                                    accessibilityLabel={t('Chat.sendPhoto')}
+                                    disabled={pending.length >= MAX_CHAT_PHOTOS}
+                                    onPress={pickPhotos}
+                                />
                                 <TextInput
                                     value={draft}
                                     onChangeText={setDraft}
@@ -326,7 +380,7 @@ const OrderChatScreen = ({ route }: any) => {
                                         fontSize: 15,
                                     }}
                                 />
-                                <IconButton icon={faPaperPlane} variant='solid' size={44} accessibilityLabel={t('Chat.send')} disabled={!draft.trim()} onPress={submit} />
+                                <IconButton icon={faPaperPlane} variant='solid' size={44} accessibilityLabel={t('Chat.send')} disabled={!draft.trim() && pending.length === 0} onPress={submit} />
                             </XStack>
                         </YStack>
                     )}

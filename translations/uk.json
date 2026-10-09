@@ -1062,6 +1062,9 @@
             "whereAreYou": "Де ви зараз?"
         },
         "sendPhoto": "Надіслати фото",
+        "attachedPhotos": "Фото для надсилання",
+        "attachedPhoto": "Фото {{number}} для надсилання",
+        "removePhoto": "Видалити фото {{number}}",
         "placeholder": "Написати {{driver}}",
         "send": "Надіслати",
         "sending": "Надсилання…",

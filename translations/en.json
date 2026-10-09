@@ -1047,7 +1047,10 @@
             "callOnArrival": "Call me when you arrive",
             "whereAreYou": "Where are you now?"
         },
-        "sendPhoto": "Send a photo",
+        "sendPhoto": "Add a photo",
+        "attachedPhotos": "Photos to send",
+        "attachedPhoto": "Photo {{number}} to send",
+        "removePhoto": "Remove photo {{number}}",
         "placeholder": "Message {{driver}}",
         "send": "Send",
         "sending": "Sending…",

@@ -1048,6 +1048,9 @@
             "whereAreYou": "Та одоо хаана байна?"
         },
         "sendPhoto": "Зураг илгээх",
+        "attachedPhotos": "Илгээх зургууд",
+        "attachedPhoto": "Илгээх зураг {{number}}",
+        "removePhoto": "Зураг {{number}}-г хасах",
         "placeholder": "{{driver}}-д бичих",
         "send": "Илгээх",
         "sending": "Илгээж байна…",
