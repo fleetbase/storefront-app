@@ -822,6 +822,7 @@
         "driverCard": "{{driver}}, ваш водій",
         "driverAssigned": "Призначений на ваше замовлення",
         "driverOnTheWay": "В дорозі",
+        "storeSubtotal": "Сума магазину",
         "providerCard": "{{driver}}, ваш виконавець",
         "itemsWithAppointment": "Інші товари привезуть разом із цим візитом.",
         "itemsAtAppointment": "Інші товари заберіть під час цього візиту.",

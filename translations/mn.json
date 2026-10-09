@@ -808,6 +808,7 @@
         "driverCard": "{{driver}}, таны жолооч",
         "driverAssigned": "Таны захиалгад томилогдсон",
         "driverOnTheWay": "Замдаа явж байна",
+        "storeSubtotal": "Дэлгүүрийн дүн",
         "providerCard": "{{driver}}, таны үйлчилгээ үзүүлэгч",
         "itemsWithAppointment": "Бусад бараа тань энэ цагтай хамт ирнэ.",
         "itemsAtAppointment": "Бусад бараагаа энэ цаг дээрээ авна уу.",

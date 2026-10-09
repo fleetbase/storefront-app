@@ -1,3 +1,4 @@
+import { joinStoreNames } from './order-stores';
 import { orderProgress, type OrderPhase } from './order-progress';
 
 /**
@@ -110,7 +111,8 @@ export function summarizeOrder(json: any): OrderSummary {
     return {
         id: String(json?.id ?? json?.public_id ?? ''),
         reference: text(json?.tracking_number?.tracking_number) ?? text(json?.tracking) ?? String(json?.id ?? ''),
-        storeName: text(meta.storefront) ?? text(payload.pickup?.name) ?? '',
+        // A multi-store order names its stores ("Orchard Grocers & Rochor Noodle House").
+        storeName: (Array.isArray(meta.store_names) && meta.store_names.length > 1 ? joinStoreNames(meta.store_names.map(String)) : null) ?? text(meta.storefront) ?? text(payload.pickup?.name) ?? '',
         storeId: text(meta.storefront_id),
         createdAt: text(json?.created_at),
         status,

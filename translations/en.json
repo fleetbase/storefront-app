@@ -808,6 +808,7 @@
         "driverCard": "{{driver}}, your driver",
         "driverAssigned": "Assigned to your order",
         "driverOnTheWay": "On the way",
+        "storeSubtotal": "Store subtotal",
         "providerCard": "{{driver}}, your provider",
         "itemsWithAppointment": "Your other items come with this appointment.",
         "itemsAtAppointment": "Collect your other items at this appointment.",

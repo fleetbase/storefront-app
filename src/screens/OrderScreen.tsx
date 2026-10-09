@@ -27,6 +27,7 @@ import { isArray, getFoodTruckById } from '../utils';
 import * as storage from '../utils/storage';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import { currentStep, fetchOrderFlow, usesCustomFlow, type OrderFlow } from '../commerce/order-flow';
+import { fetchOrderStores, joinStoreNames, type OrderStoreSection } from '../commerce/order-stores';
 import { tipAmount } from '../commerce/order-summary';
 import { formattedAddressFromPlace, restoreFleetbasePlace } from '../utils/location';
 import LiveOrderRoute from '../components/LiveOrderRoute';
@@ -100,6 +101,8 @@ const OrderScreen = ({ route }: any) => {
     const chatRequest = useChatRequest();
     const [chat, setChat] = useState<OrderChat | null>(null);
     const [flow, setFlow] = useState<OrderFlow | null>(null);
+    // A multi-store order: the stores it brings together, each with its own progress and items.
+    const [orderStores, setOrderStores] = useState<OrderStoreSection[]>([]);
     const [screenHeight, setScreenHeight] = useState(0);
     // How far the sheet has scrolled; it reaches the top of the scroll area at `sheetTop`.
     const scrollY = useRef(new Animated.Value(0)).current;
@@ -120,6 +123,8 @@ const OrderScreen = ({ route }: any) => {
     // A service booking: its own flow, a provider rather than a driver, and any products come
     // with the earliest appointment.
     const isBooking = !!order.getAttribute('meta.is_booking');
+    // A multi-store order: one delivery bringing together the orders each store prepares.
+    const isMultiStore = !!order.getAttribute('meta.is_master_order') && (order.getAttribute('meta.related_orders')?.length ?? 0) > 0;
     const status = order.getAttribute('status');
     const foodTruckId = order.getAttribute('meta.food_truck_id');
     const currency = order.getAttribute('meta.currency') ?? info?.currency ?? 'USD';
@@ -273,7 +278,7 @@ const OrderScreen = ({ route }: any) => {
     // Once the order is finished, invite a review (the server checks it's this customer's
     // completed order and not reviewed yet).
     useEffect(() => {
-        if (!finished || !storeId || !customer || !reviewsEnabled) return;
+        if (!finished || !storeId || !customer || !reviewsEnabled || isMultiStore) return;
         let active = true;
         fetchEligibility(reviewRequest, storeId, order.id)
             .then((result) => active && setReviewState(result))
@@ -281,7 +286,7 @@ const OrderScreen = ({ route }: any) => {
         return () => {
             active = false;
         };
-    }, [customer, finished, order.id, reviewRequest, storeId, reviewsEnabled]);
+    }, [customer, finished, order.id, reviewRequest, storeId, reviewsEnabled, isMultiStore]);
 
     // The driver chat: its unread count while the order is active, its history after.
     const hasDriver = !!order.getAttribute('driver_assigned') || !!order.getAttribute('driver_assigned_uuid');
@@ -295,6 +300,19 @@ const OrderScreen = ({ route }: any) => {
             active = false;
         };
     }, [chatRequest, customer, finished, hasDriver, isPickup, loaded, order.id, status]);
+
+    // A multi-store order's breakdown by store, refreshed whenever the order is (each store
+    // moves on at its own pace).
+    useEffect(() => {
+        if (!customer || !loaded || !isMultiStore) return;
+        let active = true;
+        fetchOrderStores(chatRequest, order.id)
+            .then((sections) => active && setOrderStores(sections))
+            .catch(() => {});
+        return () => {
+            active = false;
+        };
+    }, [chatRequest, customer, isMultiStore, loaded, order]);
 
     // The order's steps from its own order config, refreshed as its status changes.
     useEffect(() => {
@@ -325,7 +343,8 @@ const OrderScreen = ({ route }: any) => {
         }
     };
 
-    const storeName = store?.name ?? (foodTruck ? foodTruckDisplayName(foodTruck) : null) ?? order.getAttribute('payload.pickup.name') ?? '';
+    const multiStoreName = isMultiStore ? joinStoreNames(orderStores.map((section) => section.store.name ?? '')) : '';
+    const storeName = multiStoreName || (store?.name ?? (foodTruck ? foodTruckDisplayName(foodTruck) : null) ?? order.getAttribute('payload.pickup.name') ?? '');
     const driver = order.getAttribute('driver_assigned');
     const driverName = driver?.name ? shortName(driver.name) : null;
     const vehicle = order.getAttribute('vehicle_assigned') ?? driver?.vehicle;
@@ -678,25 +697,84 @@ const OrderScreen = ({ route }: any) => {
                         </Pressable>
                     )}
 
-                    <XStack alignItems='center' gap={12}>
-                        <StoreLogo uri={store?.logo_url} name={storeName || '?'} size={40} radius={radius.tile} />
-                        <YStack flex={1} gap={2}>
-                            <UIText variant='bodyStrong'>{storeName}</UIText>
-                            {!!pickupName && pickupName !== storeName && (
-                                <UIText variant='caption' tone='secondary'>
-                                    {pickupName}
-                                </UIText>
+                    {isMultiStore ? (
+                        orderStores.map((section) => {
+                            const sectionName = section.store.name ?? t('StoreSwitch.thisStore');
+                            return (
+                                <YStack key={section.order} gap={10} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor'>
+                                    <XStack alignItems='center' gap={12}>
+                                        <StoreLogo uri={section.store.logoUrl} name={sectionName} size={40} radius={radius.tile} />
+                                        <YStack flex={1} gap={2}>
+                                            <UIText variant='bodyStrong'>{sectionName}</UIText>
+                                            {!!section.label && (
+                                                <UIText variant='captionStrong' tone='brand'>
+                                                    {section.label}
+                                                </UIText>
+                                            )}
+                                            {!!section.store.address && (
+                                                <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                                    {section.store.address}
+                                                </UIText>
+                                            )}
+                                        </YStack>
+                                        {!!section.store.phone && (
+                                            <IconButton
+                                                icon={faPhone}
+                                                size={44}
+                                                accessibilityLabel={t('Tracking.callStore', { store: sectionName })}
+                                                onPress={() => Linking.openURL(`tel:${section.store.phone}`)}
+                                            />
+                                        )}
+                                    </XStack>
+                                    {section.items.map((item) => {
+                                        const options = [...item.variants, ...item.addons].map((option: any) => option?.name).filter(Boolean);
+                                        return (
+                                            <XStack key={item.id} alignItems='center' gap={10}>
+                                                {usableImageUrl(item.imageUrl) ? (
+                                                    <Image source={{ uri: item.imageUrl as string }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
+                                                ) : null}
+                                                <YStack flex={1} gap={2}>
+                                                    <UIText tone='secondary'>
+                                                        {item.quantity} × {item.name}
+                                                    </UIText>
+                                                    {options.length > 0 && (
+                                                        <UIText variant='caption' tone='secondary'>
+                                                            {options.join(', ')}
+                                                        </UIText>
+                                                    )}
+                                                </YStack>
+                                                <UIText>{money(item.subtotal)}</UIText>
+                                            </XStack>
+                                        );
+                                    })}
+                                    <XStack justifyContent='space-between' paddingTop={8} borderTopWidth={1} borderColor='$borderColor'>
+                                        <UIText tone='secondary'>{t('Tracking.storeSubtotal')}</UIText>
+                                        <UIText>{money(section.subtotal)}</UIText>
+                                    </XStack>
+                                </YStack>
+                            );
+                        })
+                    ) : (
+                        <XStack alignItems='center' gap={12}>
+                            <StoreLogo uri={store?.logo_url} name={storeName || '?'} size={40} radius={radius.tile} />
+                            <YStack flex={1} gap={2}>
+                                <UIText variant='bodyStrong'>{storeName}</UIText>
+                                {!!pickupName && pickupName !== storeName && (
+                                    <UIText variant='caption' tone='secondary'>
+                                        {pickupName}
+                                    </UIText>
+                                )}
+                                {!!fullAddress(pickup) && (
+                                    <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                        {fullAddress(pickup)}
+                                    </UIText>
+                                )}
+                            </YStack>
+                            {!!store?.phone && (
+                                <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />
                             )}
-                            {!!fullAddress(pickup) && (
-                                <UIText variant='caption' tone='secondary' numberOfLines={2}>
-                                    {fullAddress(pickup)}
-                                </UIText>
-                            )}
-                        </YStack>
-                        {!!store?.phone && (
-                            <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />
-                        )}
-                    </XStack>
+                        </XStack>
+                    )}
 
                     <YStack gap={10} accessibilityLabel={t('Tracking.details')}>
                         <XStack justifyContent='space-between' alignItems='baseline'>
@@ -709,7 +787,7 @@ const OrderScreen = ({ route }: any) => {
                             {formatDate(new Date(order.getAttribute('created_at') ?? Date.now()), 'PPp')}
                             {reference !== order.id ? ` · ${t('Tracking.orderId', { id: order.id })}` : ''}
                         </UIText>
-                        {entities.map((entity: any, index: number) => {
+                        {!isMultiStore && entities.map((entity: any, index: number) => {
                             const options = [...(entity.meta?.variants ?? []), ...(entity.meta?.addons ?? [])].map((option: any) => option?.name).filter(Boolean);
                             return (
                                 <XStack key={entity.id ?? index} alignItems='center' gap={10}>
