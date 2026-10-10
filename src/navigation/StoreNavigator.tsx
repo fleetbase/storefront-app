@@ -27,7 +27,7 @@ import StoreLayout from '../layouts/StoreLayout';
 import { translate } from '../utils/localize';
 import { screenSlot } from '../extensions';
 import { customNavigation } from '../extensions/build-navigation';
-import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel } from '../extensions/navigation';
+import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel, withCustomRoutes } from '../extensions/navigation';
 import { TabBar } from '../ui';
 import { totalCartQuantity } from '../network/network-runtime';
 
