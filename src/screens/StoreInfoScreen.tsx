@@ -11,7 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { effectiveOptions } from '../hooks/use-storefront-info';
 import useStorefront from '../hooks/use-storefront';
-import { ErrorState, IconButton, MediaImage, RatingLine, Skeleton, StoreLogo, UIText, formatClock, radius, space, storeSummary, usesTwelveHourClock } from '../ui';
+import { ErrorState, IconButton, MediaImage, OfflineNotice, RatingLine, Skeleton, StoreLogo, UIText, formatClock, radius, space, storeSummary, usesTwelveHourClock } from '../ui';
 
 const WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -277,6 +277,8 @@ const StoreInfoScreen = ({ route }: any) => {
                     </YStack>
                 )}
             </ScrollView>
+            {/* Shown as a modal, above the app layout's own notice. */}
+            <OfflineNotice top={12} />
         </YStack>
     );
 };

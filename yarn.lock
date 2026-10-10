@@ -2496,6 +2496,7 @@ __metadata:
     "@react-native-community/cli-platform-ios": 20.2.0
     "@react-native-community/datetimepicker": ^8.2.0
     "@react-native-community/geolocation": ^3.4.0
+    "@react-native-community/netinfo": 11.4.1
     "@react-native-google-signin/google-signin": latest
     "@react-native/babel-preset": 0.86.0
     "@react-native/eslint-config": 0.86.0
@@ -3680,6 +3681,15 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 4a1a334de5b8345ee5ca9af987718a4cdd0b401b6d024268330c98736eccd0bebf45fd1d4cb396558f429a4670e5b29da0b5b7ebd4e51ca12972d4b08b55d4bc
+  languageName: node
+  linkType: hard
+
+"@react-native-community/netinfo@npm:11.4.1":
+  version: 11.4.1
+  resolution: "@react-native-community/netinfo@npm:11.4.1"
+  peerDependencies:
+    react-native: ">=0.59"
+  checksum: d347ae522da6b8c045d6378754d4928bdf23cc85b74571b91fa8a03fa168bdac5e3c65eb97eac0dd0c7cbd20e782f99d41b090fb79ce7d815cbaf6fb5d1abe37
   languageName: node
   linkType: hard
 

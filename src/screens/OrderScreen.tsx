@@ -32,7 +32,7 @@ import { tipAmount } from '../commerce/order-summary';
 import { formattedAddressFromPlace, restoreFleetbasePlace } from '../utils/location';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, ErrorState, IconButton, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import { Button, ErrorState, IconButton, OfflineNotice, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
 import useScreenTopInset from '../hooks/use-screen-top-inset';
 
 const MAP_HEIGHT = 380;
@@ -855,6 +855,8 @@ const OrderScreen = ({ route }: any) => {
             <YStack position='absolute' top={top + 10} left={space.gutter} zIndex={3}>
                 <IconButton icon={faXmark} variant='floating' size={44} accessibilityLabel={t('UI.close')} onPress={close} />
             </YStack>
+            {/* Opened from a notification this is a modal above the app layout, so it has its own notice. */}
+            <OfflineNotice top={top + 62} />
 
             <Sheet
                 open={pickupSheet}

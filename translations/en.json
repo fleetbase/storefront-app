@@ -1439,6 +1439,19 @@
         "deleteBody": "This can't be undone. To make sure it's you, we'll send a code to {{email}}.",
         "deletePoint1": "Your profile, photo and saved places are removed.",
         "deletePoint2": "Past orders and receipts can't be recovered.",
-        "deletePoint3": "Orders already on their way still arrive."
+        "deletePoint3": "Orders already on their way still arrive.",
+        "addPhoneTitle": "Add your phone number",
+        "changePhoneTitle": "Change your phone number",
+        "phoneBody": "Stores and drivers use it to reach you about orders.",
+        "stepOf": "Step {{step}} of 2",
+        "sendCode": "Send code",
+        "smsNote": "We'll text a 6-digit code. Standard SMS rates may apply.",
+        "codeTitle": "Enter the code",
+        "codeBody": "We sent a 6-digit code to {{phone}}.",
+        "codeLabel": "6-digit code",
+        "verify": "Verify",
+        "resendIn": "Resend code in {{seconds}}s",
+        "resend": "Resend code",
+        "changeNumber": "Change number"
     }
 }

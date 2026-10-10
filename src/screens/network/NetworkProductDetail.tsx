@@ -24,6 +24,7 @@ import {
     IconButton,
     LocationSheet,
     MediaImage,
+    OfflineNotice,
     Stepper,
     StoreLogo,
     UIText,
@@ -307,6 +308,8 @@ export default function NetworkProductDetail({ params }: { params: any }) {
             />
             {/* Shown above this modal screen: a sheet from the root cannot appear over it. */}
             <StoreSwitchHost />
+            {/* A modal sits above the app layout, so it shows its own offline notice. */}
+            <OfflineNotice top={12} />
         </YStack>
     );
 }

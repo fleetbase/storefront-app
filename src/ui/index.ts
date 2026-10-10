@@ -10,7 +10,7 @@ export { Badge } from './Badge';
 export type { BadgeTone } from './Badge';
 export { Card } from './Card';
 export { Skeleton } from './Skeleton';
-export { EmptyState, ErrorState, OfflineBanner } from './States';
+export { EmptyState, ErrorState, OfflineBanner, OfflineNotice } from './States';
 export { SectionHeader } from './SectionHeader';
 export { StoreLogo, MediaImage } from './Media';
 export { RatingLine, Stars, StarInput } from './Rating';

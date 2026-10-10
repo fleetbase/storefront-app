@@ -4,8 +4,11 @@ import { faCircleExclamation, faWifi } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useIsOffline from '../hooks/use-is-offline';
 import { Button } from './Button';
 import { UIText } from './Text';
+import { elevation, radius } from './tokens';
 
 export type EmptyStateProps = {
     icon: IconDefinition;
@@ -77,5 +80,21 @@ export function OfflineBanner({ onRetry }: { onRetry?: () => void }) {
                 </UIText>
             )}
         </XStack>
+    );
+}
+
+/**
+ * The offline notice that floats at the top of a screen while the device is offline, so
+ * the customer knows why things aren't updating. Mounted once in the app layout and in
+ * screens shown as modals (which sit above it).
+ */
+export function OfflineNotice({ top }: { top?: number }) {
+    const offline = useIsOffline();
+    const insets = useSafeAreaInsets();
+    if (!offline) return null;
+    return (
+        <YStack position='absolute' top={top ?? insets.top + 6} left={12} right={12} zIndex={2000} pointerEvents='none' borderRadius={radius.card} overflow='hidden' style={elevation.floating}>
+            <OfflineBanner />
+        </YStack>
     );
 }

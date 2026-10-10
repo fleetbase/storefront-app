@@ -10,6 +10,7 @@ import { targetFromPush } from '../commerce/notifications';
 import useOpenNotification from '../hooks/use-open-notification';
 import useUnreadNotifications from '../hooks/use-unread-notifications';
 import useVerifySession from '../hooks/use-verify-session';
+import { OfflineNotice } from '../ui';
 
 const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }) => {
     const navigation = useNavigation<any>();
@@ -54,10 +55,22 @@ const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }
     }, [addNotificationListener, removeNotificationListener, fleetbase, navigation, openNotification, refreshUnread]);
 
     if (Platform.OS === 'web') {
-        return <SafeAreaView style={{ flex: 1, width: '100%', height: '100%' }}>{children}</SafeAreaView>;
+        return (
+            <SafeAreaView style={{ flex: 1, width: '100%', height: '100%' }}>
+                {children}
+                <OfflineNotice />
+            </SafeAreaView>
+        );
     }
 
-    return <View style={{ width: '100%', height: '100%', flex: 1 }}>{children}</View>;
+    // Every tab screen shows the offline notice from here; screens presented as native
+    // modals sit above this layout and show their own.
+    return (
+        <View style={{ width: '100%', height: '100%', flex: 1 }}>
+            {children}
+            <OfflineNotice />
+        </View>
+    );
 };
 
 export default StoreLayout;

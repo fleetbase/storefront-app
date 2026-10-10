@@ -52,6 +52,7 @@
         "@react-native-community/blur": "^4.4.1",
         "@react-native-community/datetimepicker": "^8.2.0",
         "@react-native-community/geolocation": "^3.4.0",
+        "@react-native-community/netinfo": "11.4.1",
         "@react-native-google-signin/google-signin": "latest",
         "@react-navigation/bottom-tabs": "^7.2.0",
         "@react-navigation/elements": "^2.2.5",
