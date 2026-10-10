@@ -46,6 +46,8 @@ export type CheckoutState = {
     serviceQuote: any;
     deliveryLocation: any;
     isServiceQuoteUnavailable: boolean;
+    /** Cart lines the server says can no longer be ordered, when that is why there is no quote. */
+    unavailableItems?: Array<{ id?: string; name?: string }> | null;
     isPickup: boolean;
     isPickupEnabled: boolean;
     setPickup: (pickup: number | boolean) => void;
@@ -111,9 +113,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
         groups
             .filter((group) => group.lines.some((line) => line.scheduledAt) && group.lines.some((line) => !line.scheduledAt))
             .map((group) => {
-                const earliest = bookings
-                    .filter((booking) => booking.group === group && booking.at)
-                    .sort((a, b) => (a.at as any).at.getTime() - (b.at as any).at.getTime())[0];
+                const earliest = bookings.filter((booking) => booking.group === group && booking.at).sort((a, b) => (a.at as any).at.getTime() - (b.at as any).at.getTime())[0];
                 return earliest?.line.id;
             })
             .filter(Boolean)
@@ -262,7 +262,29 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                         <UIText variant='bodyStrong'>{promo.promotions.discountDelivery > 0 ? t('Checkout.free') : money(quoteAmount ?? 0)}</UIText>
                                     </XStack>
                                 )}
-                                {quoteState === 'unavailable' && (
+                                {quoteState === 'unavailable' && checkout.unavailableItems && (
+                                    // Items gone from the store (deleted product, removed truck): not an address problem.
+                                    <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
+                                        <XStack gap={10}>
+                                            <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
+                                            <UIText flex={1} variant='caption'>
+                                                <UIText variant='captionStrong'>{t('Checkout.itemsUnavailableTitle')} </UIText>
+                                                {checkout.unavailableItems.some((item) => item.name)
+                                                    ? t('Checkout.itemsUnavailableBodyNamed', {
+                                                          items: checkout.unavailableItems
+                                                              .map((item) => item.name)
+                                                              .filter(Boolean)
+                                                              .join(', '),
+                                                      })
+                                                    : t('Checkout.itemsUnavailableBody')}
+                                            </UIText>
+                                        </XStack>
+                                        <Button variant='outline' size='sm' fullWidth onPress={() => navigation.navigate('Cart')}>
+                                            {t('Checkout.reviewCart')}
+                                        </Button>
+                                    </YStack>
+                                )}
+                                {quoteState === 'unavailable' && !checkout.unavailableItems && (
                                     <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
                                         <XStack gap={10}>
                                             <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
@@ -361,7 +383,9 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 {tipsEnabled && (
                                     <TipSelector
                                         title={multiStore ? (splitTips ? t('Checkout.tipStores') : t('Checkout.tipNetwork', { network: ownerName })) : t('Checkout.tipStore')}
-                                        note={multiStore ? (splitTips ? t('Checkout.tipSplitNote', { stores: storeNames }) : t('Checkout.tipNetworkNote', { network: ownerName })) : undefined}
+                                        note={
+                                            multiStore ? (splitTips ? t('Checkout.tipSplitNote', { stores: storeNames }) : t('Checkout.tipNetworkNote', { network: ownerName })) : undefined
+                                        }
                                         subtotal={checkout.subtotal}
                                         currency={currency}
                                         onChange={(tip) => checkout.setTipOptions({ leavingTip: tip !== 0, tip })}
@@ -480,7 +504,9 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                             )}
                             {!!checkout.pendingCapture.lastTriedAt && (
                                 <UIText variant='caption' tone='secondary'>
-                                    {t('Checkout.paidFailedLastTried', { time: new Date(checkout.pendingCapture.lastTriedAt).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' }) })}
+                                    {t('Checkout.paidFailedLastTried', {
+                                        time: new Date(checkout.pendingCapture.lastTriedAt).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' }),
+                                    })}
                                 </UIText>
                             )}
                         </YStack>

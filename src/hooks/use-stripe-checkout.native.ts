@@ -40,6 +40,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
     });
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
+    // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
+    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
@@ -119,7 +121,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable, unavailableItems]);
 
     const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
     const storeLocationId = storeLocationIds[0] || null;
@@ -432,13 +434,17 @@ export default function useStripeCheckout({ onOrderComplete }) {
             setServiceQuote(null);
             // A new address or cart gets a fresh try; an earlier failure shouldn't stick.
             setIsServiceQuoteUnavailable(false);
+            setUnavailableItems(null);
             try {
                 const quote = await getServiceQuote(quoteOrigin ?? currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                if (isMounted) setIsServiceQuoteUnavailable(true);
+                if (isMounted) {
+                    setIsServiceQuoteUnavailable(true);
+                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                }
                 console.warn('Error fetching service quote:', error);
             }
         };
@@ -505,6 +511,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
             storeLocationIds,
             isNotReady: !isReady,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
@@ -550,6 +557,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
             storeLocationIds,
             quoteOrigin,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,

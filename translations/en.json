@@ -740,7 +740,11 @@
         "bookingNotePickup": "Booked times are confirmed by {{store}}.",
         "itemsWithAppointment": "Your other items from this store come with this appointment.",
         "itemsAtAppointment": "Collect your other items from this store at this appointment.",
-        "paymentNeedsAddress": "Choose an address we can deliver to, then pick how to pay."
+        "paymentNeedsAddress": "Choose an address we can deliver to, then pick how to pay.",
+        "itemsUnavailableTitle": "Some items are no longer available.",
+        "itemsUnavailableBody": "Remove them from your cart to continue.",
+        "itemsUnavailableBodyNamed": "Remove {{items}} from your cart to continue.",
+        "reviewCart": "Review cart"
     },
     "Tracking": {
         "qrTitle": "Your order code",

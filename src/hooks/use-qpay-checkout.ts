@@ -41,6 +41,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [checkoutToken, setCheckoutToken] = useState();
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
+    // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
+    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
     const [error, setError] = useState(false);
@@ -127,7 +129,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable, unavailableItems]);
 
     // Memoize store location and food truck IDs based on cart contents
     const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
@@ -290,13 +292,17 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setServiceQuote(null);
             // A new address or cart gets a fresh try; an earlier failure shouldn't stick.
             setIsServiceQuoteUnavailable(false);
+            setUnavailableItems(null);
             try {
                 const quote = await getServiceQuote(origin, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                if (isMounted) setIsServiceQuoteUnavailable(true);
+                if (isMounted) {
+                    setIsServiceQuoteUnavailable(true);
+                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                }
                 console.warn('Error fetching service quote:', error);
             }
         };
@@ -397,6 +403,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
@@ -429,6 +436,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             hasOrderCompleted.current,
             isCapturingOrder,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,

@@ -740,7 +740,11 @@
         "bookingNotePickup": "Час бронювання підтверджує {{store}}.",
         "itemsWithAppointment": "Інші товари з цього магазину привезуть разом із цим візитом.",
         "itemsAtAppointment": "Інші товари з цього магазину заберіть під час цього візиту.",
-        "paymentNeedsAddress": "Оберіть адресу, куди ми доставляємо, а потім спосіб оплати."
+        "paymentNeedsAddress": "Оберіть адресу, куди ми доставляємо, а потім спосіб оплати.",
+        "itemsUnavailableTitle": "Деякі товари більше недоступні.",
+        "itemsUnavailableBody": "Видаліть їх із кошика, щоб продовжити.",
+        "itemsUnavailableBodyNamed": "Видаліть із кошика: {{items}}, щоб продовжити.",
+        "reviewCart": "Переглянути кошик"
     },
     "Tracking": {
         "qrTitle": "Код вашого замовлення",
