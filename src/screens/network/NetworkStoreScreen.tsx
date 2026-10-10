@@ -67,6 +67,8 @@ const NetworkStoreScreen = ({ route }: any) => {
     const { mode, enterStore, leaveStore, currentStore, ownerInfo, getSelectedStoreLocation, selectStoreLocation } = useStorefrontRuntime();
     // A single store's app: this page is its home, for its own store.
     const single = mode !== 'network';
+    // A single store's page is normally the home; it can also be pushed, e.g. from the food trucks map.
+    const pushed = single && navigation.canGoBack();
     const { currentLocation, updateCurrentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
     const { count: unread } = useUnreadNotifications();
@@ -557,7 +559,10 @@ const NetworkStoreScreen = ({ route }: any) => {
             {single ? (
                 // A single store's home: where orders are delivered, and notifications.
                 <XStack position='absolute' top={insets.top + 10} left={space.gutter} right={space.gutter} alignItems='center' justifyContent='space-between' gap={10} zIndex={10}>
-                    {headerConfig.showLocationPicker !== false ? (
+                    {pushed ? (
+                        // Opened from another screen (e.g. the food trucks map): a way back.
+                        <IconButton icon={faChevronLeft} variant='floating' accessibilityLabel={t('common.goBack')} onPress={() => navigation.goBack()} />
+                    ) : headerConfig.showLocationPicker !== false ? (
                         <Pressable
                             onPress={() => setLocationSheet(true)}
                             accessibilityRole='button'

@@ -3,7 +3,7 @@ import { FlatList, Pressable, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass, faMagnifyingGlassMinus, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@fleetbase/storefront';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -202,7 +202,7 @@ const FoodTruckSearchScreen = () => {
                 )}
             </YStack>
             {!trimmed ? (
-                <EmptyState title={t('FoodTrucks.searchIntro')} description={t('FoodTrucks.searchIntroBody')} />
+                <EmptyState icon={faMagnifyingGlass} title={t('FoodTrucks.searchIntro')} description={t('FoodTrucks.searchIntroBody')} />
             ) : firstSearch ? (
                 <YStack paddingHorizontal={space.gutter} gap={10} accessibilityLabel={t('FoodTrucks.searching')}>
                     {[0, 1, 2, 3].map((index) => (
@@ -212,7 +212,7 @@ const FoodTruckSearchScreen = () => {
             ) : failed && visible.length === 0 ? (
                 <ErrorState onRetry={() => setRetry((value) => value + 1)} />
             ) : visible.length === 0 && !loading ? (
-                <EmptyState title={t('FoodTrucks.noMatches', { query: trimmed })} description={t('FoodTrucks.noMatchesBody')} actionLabel={t('FoodTrucks.browseCategories')} onAction={() => navigation.goBack()} />
+                <EmptyState icon={faMagnifyingGlassMinus} title={t('FoodTrucks.noMatches', { query: trimmed })} description={t('FoodTrucks.noMatchesBody')} actionLabel={t('FoodTrucks.browseCategories')} onAction={() => navigation.goBack()} />
             ) : (
                 <FlatList
                     data={visible}

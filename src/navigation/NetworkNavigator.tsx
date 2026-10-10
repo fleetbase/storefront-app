@@ -16,6 +16,11 @@ import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLa
 import { TabBar, UIText } from '../ui';
 import { storefrontConfig } from '../utils';
 
+// With the food trucks home, the Home tab opens on the trucks map and the Map tab is
+// dropped. Otherwise the Trucks tab can be added on its own.
+const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
+const FOOD_TRUCKS_TAB = !FOOD_TRUCKS_HOME && storefrontConfig('networkNavigator.foodTrucks') === true;
+
 // Store, category and product screens are pushed from the Home, Search and Map
 // stacks. Deep-link paths are declared only on the Home stack's copies so each
 // URL resolves to exactly one route; the other stacks opt out explicitly
@@ -56,9 +61,16 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
 });
 
 const NetworkHomeStack = createNativeStackNavigator({
-    initialRouteName: 'NetworkHome',
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckHome' : 'NetworkHome',
     screens: {
-        NetworkHome: { screen: screenSlot('network.home'), options: { headerShown: false } },
+        ...(FOOD_TRUCKS_HOME
+            ? {
+                  FoodTruckHome: { screen: screenSlot('foodTrucks.home'), options: { headerShown: false } },
+                  FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), linking: undefined, options: { headerShown: false, animation: 'fade' } },
+                  TruckMenu: { screen: screenSlot('foodTrucks.menu'), linking: { path: 'trucks/:foodTruckId' }, options: { headerShown: false } },
+              }
+            : {}),
+        NetworkHome: { screen: screenSlot('network.home'), linking: FOOD_TRUCKS_HOME ? { path: 'discover' } : undefined, options: { headerShown: false } },
         ...withCustomRoutes(createSharedNetworkScreens(true), customNavigation.routes, 'network', { withLinking: true, tabs: customNavigation.tabs }),
     },
 });
@@ -87,8 +99,6 @@ const NetworkFoodTruckStack = createNativeStackNavigator({
     },
 });
 
-const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
-const FOOD_TRUCKS_TAB = FOOD_TRUCKS_HOME || storefrontConfig('networkNavigator.foodTrucks') === true;
 
 const icons: Record<string, any> = {
     NetworkFoodTruckTab: faTruck,
@@ -108,11 +118,12 @@ const NetworkTabIcon = ({ routeName, color, focused }: { routeName: string; colo
     const [cart] = useCart();
     const custom = customNavigation.tabs[routeName];
     if (custom) return <CustomTabIcon tab={custom} color={color} focused={focused} />;
+    const icon = routeName === 'NetworkHomeTab' && FOOD_TRUCKS_HOME ? faTruck : icons[routeName];
     const count = totalCartQuantity(cart?.contents?.().map((item: any) => item.serialize?.() || item) || []);
 
     return (
         <XStack position='relative'>
-            <FontAwesomeIcon icon={icons[routeName]} size={20} color={color} />
+            <FontAwesomeIcon icon={icon} size={20} color={color} />
             {routeName === 'NetworkCartTab' && count > 0 && (
                 <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} borderRadius={9} bg='$error' color='white' textAlign='center' fontSize={11} lineHeight={18}>
                     {count > 99 ? '99+' : count}
@@ -134,10 +145,10 @@ function foodTruckTab() {
 const label = (labelKey: string) => ({ tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey={labelKey} color={color} focused={focused} /> });
 
 const CORE_TABS: Record<string, any> = {
-    NetworkHomeTab: { screen: NetworkHomeStack, options: label('Network.tabs.discover') },
+    NetworkHomeTab: { screen: NetworkHomeStack, options: label(FOOD_TRUCKS_HOME ? 'Network.tabs.trucks' : 'Network.tabs.discover') },
     ...(FOOD_TRUCKS_TAB ? foodTruckTab() : {}),
     NetworkSearchTab: { screen: NetworkSearchStack, options: label('Network.tabs.search') },
-    NetworkMapTab: { screen: NetworkMapStack, options: label('Network.tabs.map') },
+    ...(FOOD_TRUCKS_HOME ? {} : { NetworkMapTab: { screen: NetworkMapStack, options: label('Network.tabs.map') } }),
     NetworkCartTab: { screen: StoreCartTab, options: label('Network.tabs.cart') },
     NetworkProfileTab: { screen: StoreProfileTab, options: label('Network.tabs.profile') },
 };
@@ -155,8 +166,8 @@ const CUSTOM_TAB_SCREENS: Record<string, any> = Object.fromEntries(
 );
 
 const coreOrder = Object.keys(CORE_TABS);
-const TAB_ORDER = orderTabs(FOOD_TRUCKS_HOME ? ['NetworkFoodTruckTab', ...coreOrder.filter((name) => name !== 'NetworkFoodTruckTab')] : coreOrder, CUSTOM_TABS, 'NetworkCartTab');
-const INITIAL_TAB = FOOD_TRUCKS_HOME ? 'NetworkFoodTruckTab' : (CUSTOM_TABS.find(([, tab]) => tab.initial)?.[0] ?? 'NetworkHomeTab');
+const TAB_ORDER = orderTabs(coreOrder, CUSTOM_TABS, 'NetworkCartTab');
+const INITIAL_TAB = FOOD_TRUCKS_HOME ? 'NetworkHomeTab' : (CUSTOM_TABS.find(([, tab]) => tab.initial)?.[0] ?? 'NetworkHomeTab');
 
 const NetworkNavigator = createBottomTabNavigator({
     layout: StoreLayout,

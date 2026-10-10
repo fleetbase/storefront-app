@@ -25,9 +25,11 @@ export function EmptyState({ icon, title, description, actionLabel, onAction, se
     const theme = useTheme();
     return (
         <YStack alignItems='center' paddingHorizontal={32} paddingVertical={40} gap={12}>
-            <YStack width={80} height={80} borderRadius={40} backgroundColor='$surface' alignItems='center' justifyContent='center' accessibilityElementsHidden>
-                <FontAwesomeIcon icon={icon} size={30} color={theme.textSecondary.val} />
-            </YStack>
+            {!!icon && (
+                <YStack width={80} height={80} borderRadius={40} backgroundColor='$surface' alignItems='center' justifyContent='center' accessibilityElementsHidden>
+                    <FontAwesomeIcon icon={icon} size={30} color={theme.textSecondary.val} />
+                </YStack>
+            )}
             <UIText variant='heading' textAlign='center' accessibilityRole='header'>
                 {title}
             </UIText>

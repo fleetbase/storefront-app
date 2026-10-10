@@ -4,7 +4,7 @@ import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCartShopping, faChevronDown, faChevronRight, faHouse, faLocationDot, faMagnifyingGlass, faMap, faSliders, faTableCellsLarge, faTruck } from '@fortawesome/free-solid-svg-icons';
+import { faCartShopping, faChevronDown, faChevronRight, faCrosshairs, faHouse, faLocationDot, faMagnifyingGlass, faMap, faStore, faTableCellsLarge, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,24 +15,74 @@ import useCartSummary from '../../hooks/use-cart-summary';
 import useCurrentLocation from '../../hooks/use-current-location';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useFoodTrucks, { type StorePin, type TruckPin } from '../../hooks/use-food-trucks';
-import { truckCategories } from '../../commerce/food-trucks';
+import { insideZone, truckCategories, type LatLng, type TruckCategory } from '../../commerce/food-trucks';
 import { fetchOffers, type Offer } from '../../commerce/offers';
 import { initialRegion } from '../../network/map';
 import { handleNavigateNewLocation } from '../../utils';
-import { Button, ErrorState, LocationSheet, MediaImage, Skeleton, UIText, elevation, radius, space } from '../../ui';
+import { Button, CartPill, ErrorState, LocationSheet, MediaImage, Skeleton, UIText, elevation, radius, space } from '../../ui';
 
 type Mode = 'map' | 'list';
 type Layer = 'all' | 'trucks' | 'stores';
 
+/** A truck or store the customer can order from, as the "Near you" row shows it. */
+type Place = { key: string; kind: 'truck' | 'store'; name: string; meta: string | null; active: boolean; coordinate: LatLng | null; photoUrl: string | null; truck?: TruckPin; store?: StorePin };
+type PlaceCategory = { key: string; id: string | null; name: string; iconUrl: string | null };
+
 const MODE_KEY = 'food-trucks:mode';
+/** Stores outside every zone still show when they're the closest: this many of them. */
+const NEAREST_STORES = 3;
 
 /**
- * The Trucks tab. Map first: trucks and stores on the map with the customer's zone, a
- * category slider, the nearest truck and store, and the cart. A toggle in the same
- * top-right slot switches to a list home (greeting, live-trucks card, categories, the
- * current offer); the last mode is remembered. Search opens from the header of both.
- * In a Network the stores are its member stores and the trucks theirs; a single store
- * shows its own locations and trucks.
+ * The categories of the selected truck (from its catalogs) or store (loaded once per store).
+ */
+function usePlaceCategories(place: Place | null): { categories: PlaceCategory[]; loading: boolean } {
+    const { storefront } = useStorefront();
+    const { mode } = useStorefrontRuntime();
+    const cache = useRef(new Map<string, PlaceCategory[]>());
+    const [storeCategories, setStoreCategories] = useState<{ key: string; items: PlaceCategory[] } | null>(null);
+    const storeId = place?.kind === 'store' ? (place.store?.storeId ?? null) : null;
+
+    useEffect(() => {
+        if (!storeId || !storefront) return;
+        const cached = cache.current.get(storeId);
+        if (cached) {
+            setStoreCategories({ key: storeId, items: cached });
+            return;
+        }
+        let active = true;
+        const request = mode === 'network' ? storefront.categories.query({ store: storeId }) : storefront.categories.findAll();
+        Promise.resolve(request)
+            .then((result: any) => {
+                const items = (Array.from(result || []) as any[]).map((category) => {
+                    const get = (key: string) => (typeof category?.getAttribute === 'function' ? category.getAttribute(key) : category?.[key]);
+                    return { key: String(category.id), id: category.id ?? null, name: String(get('name') ?? ''), iconUrl: get('icon_url') ?? null };
+                });
+                cache.current.set(storeId, items);
+                if (active) setStoreCategories({ key: storeId, items });
+            })
+            .catch(() => active && setStoreCategories({ key: storeId, items: [] }));
+        return () => {
+            active = false;
+        };
+    }, [mode, storeId, storefront]);
+
+    return useMemo(() => {
+        if (!place) return { categories: [], loading: false };
+        if (place.kind === 'truck' && place.truck) {
+            return { categories: truckCategories([place.truck]).map((category: TruckCategory) => ({ key: category.key, id: category.id, name: category.name, iconUrl: category.iconUrl })), loading: false };
+        }
+        if (storeCategories?.key === storeId) return { categories: storeCategories.items, loading: false };
+        return { categories: [], loading: true };
+    }, [place, storeCategories, storeId]);
+}
+
+/**
+ * The Trucks home. Map first: the trucks and stores around the customer with their zone,
+ * and below a "Near you" row of the trucks and stores that serve that zone. Picking one
+ * shows its categories; tapping a category opens its products. A toggle in the same
+ * top-right slot switches to a list layout of the same; the last mode is remembered.
+ * Search opens from the header of both. In a Network the stores are its member stores
+ * and the trucks theirs; a single store shows its own locations and trucks.
  */
 const FoodTrucksScreen = () => {
     const navigation = useNavigation<any>();
@@ -48,6 +98,7 @@ const FoodTrucksScreen = () => {
     const { trucks, stores, customer, zone, loading, error, reload } = useFoodTrucks();
     const [mode, setMode] = useStorage<Mode>(MODE_KEY, 'map');
     const [layer, setLayer] = useState<Layer>('all');
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [locationSheet, setLocationSheet] = useState(false);
     const [offer, setOffer] = useState<Offer | null>(null);
     const mapRef = useRef<any>(null);
@@ -60,31 +111,84 @@ const FoodTrucksScreen = () => {
             .catch(() => {});
     }, [storefront]);
 
-    const inZone = useMemo(() => (trucks ?? []).filter((truck) => truck.inZone), [trucks]);
-    const liveInZone = inZone.filter((truck) => truck.live);
-    const nearbyLive = (trucks ?? []).filter((truck) => truck.live && !truck.inZone);
+    const liveInZone = useMemo(() => (trucks ?? []).filter((truck) => truck.inZone && truck.live), [trucks]);
+    const nearbyLive = useMemo(() => (trucks ?? []).filter((truck) => truck.live && !truck.inZone), [trucks]);
     const outOfZone = !!customer && !!trucks && trucks.length > 0 && !zone;
-    const categories = useMemo(() => truckCategories(liveInZone.length ? liveInZone : (trucks ?? []).filter((truck) => truck.live)), [liveInZone, trucks]);
-    const nearestTruck = liveInZone[0] ?? nearbyLive[0] ?? null;
-    const nearestStore = stores[0] ?? null;
     const placeName = currentLocation?.getAttribute?.('name') || currentLocation?.getAttribute?.('street1') || null;
     const zones = useMemo(() => {
         const seen = new Map<string, TruckPin>();
         (trucks ?? []).forEach((truck) => truck.zoneId && truck.zoneBorder.length && !seen.has(truck.zoneId) && seen.set(truck.zoneId, truck));
         return [...seen.values()];
     }, [trucks]);
+    const zoneBorder = useMemo(() => zones.find((item) => item.zoneId === zone?.id)?.zoneBorder ?? [], [zone?.id, zones]);
     const region = useMemo(() => initialRegion(customer, [...(trucks ?? []).map((truck) => truck.coordinate).filter(Boolean), ...stores.map((store) => store.coordinate)] as any), [customer, stores, trucks]);
 
+    // The trucks serving the customer's zone (live first) and the stores in it, or the
+    // closest stores when none is inside.
+    const places = useMemo<Place[]>(() => {
+        const truckPlaces: Place[] = (trucks ?? [])
+            .filter((truck) => truck.inZone)
+            .map((truck) => ({
+                key: `truck:${truck.id}`,
+                kind: 'truck',
+                name: truck.name,
+                meta: truck.live ? truck.distance : t('FoodTrucks.offline'),
+                active: truck.live,
+                coordinate: truck.coordinate,
+                photoUrl: truck.photoUrl,
+                truck,
+            }));
+        const zoned = zoneBorder.length ? stores.filter((store) => insideZone(store.coordinate, zoneBorder)) : [];
+        const storePlaces: Place[] = (zoned.length ? zoned : stores.slice(0, NEAREST_STORES)).map((store) => ({
+            key: `store:${store.key}`,
+            kind: 'store',
+            name: store.name,
+            meta: [store.statusText, store.distance].filter(Boolean).join(' · ') || null,
+            active: store.open,
+            coordinate: store.coordinate,
+            photoUrl: store.store?.logo_url ?? null,
+            store,
+        }));
+        const visible = [...truckPlaces.filter((item) => item.active), ...storePlaces, ...truckPlaces.filter((item) => !item.active)];
+        return visible.filter((item) => layer === 'all' || (layer === 'trucks' ? item.kind === 'truck' : item.kind === 'store'));
+    }, [layer, stores, t, trucks, zoneBorder]);
+
+    useEffect(() => {
+        if (!places.length) return;
+        if (!selectedKey || !places.some((item) => item.key === selectedKey)) setSelectedKey(places[0].key);
+    }, [places, selectedKey]);
+
+    const selected = places.find((item) => item.key === selectedKey) ?? null;
+    const { categories, loading: categoriesLoading } = usePlaceCategories(selected);
+
     const openTruck = (truck: TruckPin, categoryId?: string | null) => navigation.navigate('TruckMenu', { foodTruckId: truck.id, truck: truck.raw, categoryId: categoryId ?? null });
-    const openStore = (store: StorePin) => {
-        if (edition === 'network') navigation.navigate('NetworkStore', { storeId: store.storeId });
-        else navigation.navigate('StoreHomeTab', { screen: 'StoreHome' });
+    const openStore = (store: StorePin, categoryId?: string | null) => {
+        if (edition === 'network') navigation.navigate('NetworkStore', { storeId: store.storeId, categoryId: categoryId ?? undefined });
+        else navigation.navigate('StoreHome', { categoryId: categoryId ?? undefined });
     };
-    const openCategory = (truckId: string, categoryId: string | null) => {
-        const truck = (trucks ?? []).find((item) => item.id === truckId);
-        if (truck) openTruck(truck, categoryId);
+    const openPlace = (place: Place, categoryId?: string | null) => {
+        if (place.truck) openTruck(place.truck, categoryId);
+        else if (place.store) openStore(place.store, categoryId);
     };
     const openCart = () => navigation.navigate(edition === 'network' ? 'NetworkCartTab' : 'StoreCartTab');
+
+    const focus = (coordinate: LatLng | null, delta = 0.02) => {
+        if (!coordinate) return;
+        mapRef.current?.animateToRegion?.({ ...coordinate, latitudeDelta: delta, longitudeDelta: delta }, 350);
+    };
+    const select = (place: Place) => {
+        // A second tap on the selected place opens it.
+        if (place.key === selectedKey) {
+            openPlace(place);
+            return;
+        }
+        setSelectedKey(place.key);
+        if (mode === 'map') focus(place.coordinate);
+    };
+    const recenter = () => {
+        if (customer) focus(customer, 0.03);
+        else setLocationSheet(true);
+    };
 
     const statusLine = !trucks
         ? null
@@ -95,23 +199,22 @@ const FoodTrucksScreen = () => {
                 ? t('FoodTrucks.inZone', { zone: zone.name ?? '' })
                 : t('FoodTrucks.noneInZone', { zone: zone.name ?? '' })
             : t('FoodTrucks.zoneUnknown');
-    const statusMeta = t('FoodTrucks.counts', { trucks: liveInZone.length || nearbyLive.length, stores: stores.length });
 
     const toggle = (
         <XStack padding={3} borderRadius={radius.pill} backgroundColor='$background' accessibilityRole='radiogroup' accessibilityLabel={t('FoodTrucks.showAs')} style={mode === 'map' ? elevation.floating : undefined}>
             {(['list', 'map'] as Mode[]).map((value) => {
-                const selected = mode === value;
+                const isSelected = mode === value;
                 return (
                     <Pressable
                         key={value}
                         onPress={() => setMode(value)}
                         accessibilityRole='radio'
-                        accessibilityState={{ selected }}
+                        accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={value === 'map' ? t('FoodTrucks.map') : t('FoodTrucks.list')}
                         hitSlop={4}
-                        style={{ width: 40, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: selected ? theme.primary.val : 'transparent' }}
+                        style={{ width: 40, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: isSelected ? theme.primary.val : 'transparent' }}
                     >
-                        <FontAwesomeIcon icon={value === 'map' ? faMap : faTableCellsLarge} size={14} color={selected ? theme.primaryText.val : theme.textSecondary.val} />
+                        <FontAwesomeIcon icon={value === 'map' ? faMap : faTableCellsLarge} size={14} color={isSelected ? theme.primaryText.val : theme.textSecondary.val} />
                     </Pressable>
                 );
             })}
@@ -123,15 +226,12 @@ const FoodTrucksScreen = () => {
             onPress={() => navigation.navigate('FoodTruckSearch')}
             accessibilityRole='search'
             accessibilityLabel={t('FoodTrucks.searchPlaceholder')}
-            style={{ height: 48, paddingLeft: 14, paddingRight: 6, borderRadius: radius.button, backgroundColor: mode === 'map' ? theme.background.val : theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10, ...(mode === 'map' ? elevation.floating : {}) }}
+            style={{ height: 48, paddingHorizontal: 14, borderRadius: radius.button, backgroundColor: mode === 'map' ? theme.background.val : theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10, ...(mode === 'map' ? elevation.floating : {}) }}
         >
             <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
-            <UIText tone='placeholder' flex={1}>
+            <UIText tone='placeholder' flex={1} numberOfLines={1}>
                 {t('FoodTrucks.searchPlaceholder')}
             </UIText>
-            <YStack width={38} height={38} alignItems='center' justifyContent='center' borderLeftWidth={1} borderColor='$borderColor'>
-                <FontAwesomeIcon icon={faSliders} size={14} color={theme.primaryForeground.val} />
-            </YStack>
         </Pressable>
     );
 
@@ -150,6 +250,118 @@ const FoodTrucksScreen = () => {
         </Pressable>
     );
 
+    const placeActions = (
+        <XStack gap={8}>
+            <YStack flex={1}>
+                <Button fullWidth onPress={() => handleNavigateNewLocation(navigation, { makeDefault: true })}>
+                    {customer ? t('FoodTrucks.changeAddress') : t('FoodTrucks.enterAddress')}
+                </Button>
+            </YStack>
+            {outOfZone && stores[0] && (
+                <YStack flex={1}>
+                    <Button variant='outline' fullWidth onPress={() => openStore(stores[0])}>
+                        {t('FoodTrucks.orderFromStore')}
+                    </Button>
+                </YStack>
+            )}
+        </XStack>
+    );
+
+    // "Near you": the trucks and stores serving the customer's zone; one is selected.
+    const placeRow = (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 4 }} accessibilityRole='radiogroup' accessibilityLabel={t('FoodTrucks.nearYou')}>
+            {places.map((place) => {
+                const isSelected = place.key === selectedKey;
+                const kindLabel = place.kind === 'truck' ? t('FoodTrucks.kindTruck') : t('FoodTrucks.kindStore');
+                return (
+                    <Pressable
+                        key={place.key}
+                        onPress={() => select(place)}
+                        accessibilityRole='radio'
+                        accessibilityState={{ selected: isSelected }}
+                        accessibilityLabel={[place.name, kindLabel, place.meta].filter(Boolean).join(', ')}
+                        accessibilityHint={isSelected ? t('FoodTrucks.openHint') : undefined}
+                        style={{
+                            width: 210,
+                            padding: 10,
+                            borderRadius: radius.card,
+                            borderWidth: 2,
+                            borderColor: isSelected ? theme.primary.val : theme.borderColor.val,
+                            backgroundColor: isSelected ? theme.primarySoft.val : theme.surface.val,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 10,
+                            opacity: place.active ? 1 : 0.65,
+                        }}
+                    >
+                        {place.photoUrl ? (
+                            <MediaImage uri={place.photoUrl} seed={place.name} width={40} height={40} radius={10} />
+                        ) : (
+                            <YStack width={40} height={40} borderRadius={10} alignItems='center' justifyContent='center' backgroundColor={place.kind === 'truck' ? (place.active ? '$primary' : '$surface2') : '$warning'}>
+                                <FontAwesomeIcon icon={place.kind === 'truck' ? faTruck : faStore} size={16} color={place.kind === 'truck' && !place.active ? theme.textSecondary.val : place.kind === 'truck' ? theme.primaryText.val : '#ffffff'} />
+                            </YStack>
+                        )}
+                        <YStack flex={1} minWidth={0}>
+                            <UIText variant='captionStrong' numberOfLines={1}>
+                                {place.name}
+                            </UIText>
+                            <UIText variant='caption' tone={place.active ? 'success' : 'secondary'} numberOfLines={1}>
+                                {[kindLabel, place.meta].filter(Boolean).join(' · ')}
+                            </UIText>
+                        </YStack>
+                        {isSelected && <FontAwesomeIcon icon={faChevronRight} size={12} color={theme.primaryForeground.val} />}
+                    </Pressable>
+                );
+            })}
+        </ScrollView>
+    );
+
+    const categoryTile = (category: PlaceCategory, size: number) => (
+        <Pressable key={category.key} onPress={() => selected && openPlace(selected, category.id)} accessibilityRole='button' style={{ width: size, alignItems: 'center', gap: 6 }}>
+            <MediaImage uri={category.iconUrl} seed={category.name} width={size} height={size - 10} radius={radius.tile} />
+            <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 12 }}>
+                {category.name}
+            </UIText>
+        </Pressable>
+    );
+
+    const allTile = (size: number) =>
+        selected ? (
+            <Pressable key='all' onPress={() => openPlace(selected)} accessibilityRole='link' accessibilityLabel={t('FoodTrucks.viewAllOf', { name: selected.name })} style={{ width: size, alignItems: 'center', gap: 6 }}>
+                <YStack width={size} height={size - 10} borderRadius={radius.tile} backgroundColor='$primary' alignItems='center' justifyContent='center'>
+                    <FontAwesomeIcon icon={faTableCellsLarge} size={20} color={theme.primaryText.val} />
+                </YStack>
+                <UIText variant='captionStrong' tone='brand' style={{ fontSize: 12 }}>
+                    {t('FoodTrucks.allShort')}
+                </UIText>
+            </Pressable>
+        ) : null;
+
+    const categoriesHeader = selected ? (
+        <XStack justifyContent='space-between' alignItems='center' gap={8}>
+            <UIText variant='subheading' numberOfLines={1} flex={1}>
+                {t('FoodTrucks.categoriesOf', { name: selected.name })}
+            </UIText>
+            <Pressable onPress={() => openPlace(selected)} accessibilityRole='link' style={{ minHeight: 32, justifyContent: 'center' }}>
+                <UIText variant='captionStrong' tone='brand'>
+                    {t('FoodTrucks.all')}
+                </UIText>
+            </Pressable>
+        </XStack>
+    ) : null;
+
+    const categorySkeletons = (count: number, size: number) =>
+        Array.from({ length: count }).map((_, index) => <Skeleton key={index} width={size} height={size} radius={radius.tile} />);
+
+    const statusRow = (
+        <XStack alignItems='center' gap={8}>
+            <YStack width={8} height={8} borderRadius={4} backgroundColor={liveInZone.length ? '$success' : '$warning'} />
+            <UIText variant='bodyStrong' numberOfLines={1} flex={1}>
+                {statusLine}
+            </UIText>
+        </XStack>
+    );
+
     const cartBar =
         cart.count > 0 ? (
             <Pressable onPress={openCart} accessibilityRole='button' style={{ height: 52, borderRadius: radius.button, backgroundColor: theme.primary.val, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16 }}>
@@ -163,105 +375,31 @@ const FoodTrucksScreen = () => {
             </Pressable>
         ) : null;
 
-    const placeActions = (
-        <XStack gap={8}>
-            <YStack flex={1}>
-                <Button fullWidth onPress={() => handleNavigateNewLocation(navigation, { makeDefault: true })}>
-                    {customer ? t('FoodTrucks.changeAddress') : t('FoodTrucks.enterAddress')}
-                </Button>
-            </YStack>
-            {outOfZone && (
-                <YStack flex={1}>
-                    <Button variant='outline' fullWidth onPress={() => navigation.navigate(edition === 'network' ? 'NetworkHomeTab' : 'StoreHomeTab')}>
-                        {t('FoodTrucks.orderFromStore')}
-                    </Button>
-                </YStack>
-            )}
-        </XStack>
-    );
-
-    const categoryTile = (category: { key: string; name: string; iconUrl: string | null; truckId: string; id: string | null }, size: number) => (
-        <Pressable key={category.key} onPress={() => openCategory(category.truckId, category.id)} accessibilityRole='button' style={{ width: size, alignItems: 'center', gap: 6 }}>
-            <MediaImage uri={category.iconUrl} seed={category.name} width={size} height={size - 10} radius={radius.tile} />
-            <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 12 }}>
-                {category.name}
-            </UIText>
-        </Pressable>
-    );
-
-    const miniCard = (kind: 'truck' | 'store', name: string, meta: string | null, onPress: () => void) => (
-        <Pressable onPress={onPress} accessibilityRole='button' style={{ flex: 1, minWidth: 0, padding: 10, borderRadius: radius.card, backgroundColor: theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <YStack width={34} height={34} borderRadius={10} alignItems='center' justifyContent='center' backgroundColor={kind === 'truck' ? '$primary' : '$warning'}>
-                <FontAwesomeIcon icon={kind === 'truck' ? faTruck : faHouse} size={15} color={kind === 'truck' ? theme.primaryText.val : '#ffffff'} />
-            </YStack>
-            <YStack flex={1} minWidth={0}>
-                <UIText variant='captionStrong' numberOfLines={1}>
-                    {name}
-                </UIText>
-                {!!meta && (
-                    <UIText variant='caption' tone='success' numberOfLines={1}>
-                        {meta}
-                    </UIText>
-                )}
-            </YStack>
-        </Pressable>
-    );
-
     const sheetBody = loading ? (
         <YStack gap={12}>
             <Skeleton height={18} width='60%' />
             <XStack gap={10}>
-                {[0, 1, 2, 3].map((index) => (
-                    <Skeleton key={index} width={74} height={74} radius={radius.tile} />
-                ))}
+                <Skeleton width={210} height={64} radius={radius.card} />
+                <Skeleton width={210} height={64} radius={radius.card} />
             </XStack>
-            <XStack gap={10}>
-                <Skeleton height={56} radius={radius.card} style={{ flex: 1 }} />
-                <Skeleton height={56} radius={radius.card} style={{ flex: 1 }} />
-            </XStack>
+            <XStack gap={10}>{categorySkeletons(4, 74)}</XStack>
         </YStack>
     ) : error && !trucks ? (
         <ErrorState title={t('FoodTrucks.errorTitle')} onRetry={reload} />
-    ) : !customer || outOfZone ? (
+    ) : !customer || outOfZone || !places.length ? (
         <YStack gap={8}>
-            <UIText variant='subheading'>{outOfZone ? t('FoodTrucks.outsideTitle') : t('FoodTrucks.whereTitle')}</UIText>
-            <UIText tone='secondary'>{outOfZone ? t('FoodTrucks.outsideBody', { zones: zones.map((item) => item.zoneName).filter(Boolean).join(', ') }) : t('FoodTrucks.whereBody')}</UIText>
+            <UIText variant='subheading'>{outOfZone || (customer && !places.length) ? t('FoodTrucks.outsideTitle') : t('FoodTrucks.whereTitle')}</UIText>
+            <UIText tone='secondary'>{outOfZone || (customer && !places.length) ? t('FoodTrucks.outsideBody', { zones: zones.map((item) => item.zoneName).filter(Boolean).join(', ') }) : t('FoodTrucks.whereBody')}</UIText>
             {placeActions}
         </YStack>
     ) : (
         <YStack gap={12}>
-            <XStack justifyContent='space-between' alignItems='center' gap={8}>
-                <XStack alignItems='center' gap={8} flex={1}>
-                    <YStack width={8} height={8} borderRadius={4} backgroundColor={liveInZone.length ? '$success' : '$warning'} />
-                    <UIText variant='bodyStrong' numberOfLines={1} flex={1}>
-                        {statusLine}
-                    </UIText>
-                </XStack>
-                <UIText variant='caption' tone='secondary'>
-                    {statusMeta}
-                </UIText>
-            </XStack>
-            {categories.length > 0 && (
-                <>
-                    <XStack justifyContent='space-between' alignItems='center'>
-                        <UIText variant='subheading'>{t('FoodTrucks.categories')}</UIText>
-                        {nearestTruck && (
-                            <Pressable onPress={() => openTruck(nearestTruck)} accessibilityRole='link' style={{ minHeight: 32, justifyContent: 'center' }}>
-                                <UIText variant='captionStrong' tone='brand'>
-                                    {t('FoodTrucks.all')}
-                                </UIText>
-                            </Pressable>
-                        )}
-                    </XStack>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-                        {categories.map((category) => categoryTile(category, 74))}
-                    </ScrollView>
-                </>
-            )}
-            <XStack gap={10}>
-                {nearestTruck && miniCard('truck', nearestTruck.name, nearestTruck.distance ?? t('FoodTrucks.live'), () => openTruck(nearestTruck))}
-                {nearestStore && layer !== 'trucks' && miniCard('store', nearestStore.name, nearestStore.statusText, () => openStore(nearestStore))}
-            </XStack>
+            {statusRow}
+            {placeRow}
+            {categoriesHeader}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                {categoriesLoading ? categorySkeletons(4, 74) : [...categories.map((category) => categoryTile(category, 74)), allTile(74)]}
+            </ScrollView>
             {cartBar}
         </YStack>
     );
@@ -288,17 +426,28 @@ const FoodTrucksScreen = () => {
                     {showTrucks &&
                         (trucks ?? [])
                             .filter((truck) => truck.coordinate)
-                            .map((truck) => (
-                                <Marker key={`truck-${truck.id}`} coordinate={truck.coordinate as any} onPress={() => openTruck(truck)} accessibilityLabel={[truck.name, truck.live ? t('FoodTrucks.live') : t('FoodTrucks.offline'), truck.distance].filter(Boolean).join(', ')}>
-                                    <MapPin kind='truck' active={truck.live} label={truck.name} meta={truck.live ? truck.distance : t('FoodTrucks.offline')} />
-                                </Marker>
-                            ))}
+                            .map((truck) => {
+                                const place = places.find((item) => item.truck?.id === truck.id);
+                                return (
+                                    <Marker
+                                        key={`truck-${truck.id}`}
+                                        coordinate={truck.coordinate as any}
+                                        onPress={() => (place ? select(place) : openTruck(truck))}
+                                        accessibilityLabel={[truck.name, truck.live ? t('FoodTrucks.live') : t('FoodTrucks.offline'), truck.distance].filter(Boolean).join(', ')}
+                                    >
+                                        <MapPin kind='truck' active={truck.live} selected={!!place && place.key === selectedKey} label={truck.name} meta={truck.live ? truck.distance : t('FoodTrucks.offline')} />
+                                    </Marker>
+                                );
+                            })}
                     {showStores &&
-                        stores.map((store) => (
-                            <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => openStore(store)} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
-                                <MapPin kind='store' active={store.open} label={store.name} meta={store.statusText} />
-                            </Marker>
-                        ))}
+                        stores.map((store) => {
+                            const place = places.find((item) => item.store?.key === store.key);
+                            return (
+                                <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => (place ? select(place) : openStore(store))} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
+                                    <MapPin kind='store' active={store.open} selected={!!place && place.key === selectedKey} label={store.name} meta={store.statusText} />
+                                </Marker>
+                            );
+                        })}
                 </MapView>
             ) : (
                 <YStack position='absolute' top={0} left={0} right={0} bottom={0} backgroundColor='$surface' />
@@ -312,16 +461,16 @@ const FoodTrucksScreen = () => {
                 {searchBar}
                 <XStack gap={8} accessibilityRole='radiogroup' accessibilityLabel={t('FoodTrucks.showOnMap')}>
                     {(['all', 'trucks', 'stores'] as Layer[]).map((value) => {
-                        const selected = layer === value;
+                        const isSelected = layer === value;
                         return (
                             <Pressable
                                 key={value}
                                 onPress={() => setLayer(value)}
                                 accessibilityRole='radio'
-                                accessibilityState={{ selected }}
-                                style={{ height: 34, paddingHorizontal: 14, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: selected ? theme.textPrimary.val : theme.background.val, ...elevation.floating }}
+                                accessibilityState={{ selected: isSelected }}
+                                style={{ height: 34, paddingHorizontal: 14, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: isSelected ? theme.textPrimary.val : theme.background.val, ...elevation.floating }}
                             >
-                                <UIText variant='captionStrong' style={{ color: selected ? theme.background.val : theme.textPrimary.val }}>
+                                <UIText variant='captionStrong' style={{ color: isSelected ? theme.background.val : theme.textPrimary.val }}>
                                     {t(`FoodTrucks.layer.${value}`)}
                                 </UIText>
                             </Pressable>
@@ -330,129 +479,136 @@ const FoodTrucksScreen = () => {
                 </XStack>
             </YStack>
 
-            <YStack position='absolute' left={0} right={0} bottom={0} zIndex={1100} paddingHorizontal={space.gutter} paddingTop={10} paddingBottom={14} gap={12} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' style={elevation.floating}>
-                <YStack alignSelf='center' width={40} height={5} borderRadius={3} backgroundColor='$borderColorWithShadow' />
-                {sheetBody}
+            <YStack position='absolute' left={0} right={0} bottom={0} zIndex={1100}>
+                {/* Back to the customer's own position and zone. */}
+                <XStack justifyContent='flex-end' paddingHorizontal={space.gutter} paddingBottom={10}>
+                    <Pressable
+                        onPress={recenter}
+                        accessibilityRole='button'
+                        accessibilityLabel={t('FoodTrucks.recenter')}
+                        hitSlop={6}
+                        style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background.val, ...elevation.floating }}
+                    >
+                        <FontAwesomeIcon icon={faCrosshairs} size={18} color={theme.primaryForeground.val} />
+                    </Pressable>
+                </XStack>
+                <YStack paddingHorizontal={space.gutter} paddingTop={10} paddingBottom={14} gap={12} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' style={elevation.floating}>
+                    <YStack alignSelf='center' width={40} height={5} borderRadius={3} backgroundColor='$borderColorWithShadow' />
+                    {sheetBody}
+                </YStack>
             </YStack>
         </YStack>
     );
 
     const greetingName = String(account?.getAttribute?.('name') ?? '').split(' ')[0];
     const listMode = (
-        <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: space.gutter, paddingBottom: 32, gap: 14 }}>
-            <XStack justifyContent='space-between' alignItems='flex-start' gap={12}>
-                <YStack flex={1} gap={2}>
-                    <UIText variant='title' accessibilityRole='header'>
-                        {greetingName ? t('FoodTrucks.greetingNamed', { name: greetingName }) : t('FoodTrucks.greeting')}
-                    </UIText>
-                    <Pressable onPress={() => setLocationSheet(true)} accessibilityRole='button' style={{ minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                        <UIText tone='secondary'>{t('FoodTrucks.deliverTo')}</UIText>
-                        <UIText variant='bodyStrong' tone='brand' numberOfLines={1} style={{ flexShrink: 1 }}>
-                            {[placeName || t('Network.setLocation'), zone?.name].filter(Boolean).join(' · ')}
+        <YStack flex={1}>
+            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: space.gutter, paddingBottom: cart.count > 0 ? 110 : 32, gap: 14 }}>
+                <XStack justifyContent='space-between' alignItems='flex-start' gap={12}>
+                    <YStack flex={1} gap={2}>
+                        <UIText variant='title' accessibilityRole='header'>
+                            {greetingName ? t('FoodTrucks.greetingNamed', { name: greetingName }) : t('FoodTrucks.greeting')}
                         </UIText>
-                        <FontAwesomeIcon icon={faChevronDown} size={11} color={theme.primaryForeground.val} />
-                    </Pressable>
-                </YStack>
-                {toggle}
-            </XStack>
-            {searchBar}
-            {loading ? (
-                <YStack gap={12}>
-                    <Skeleton height={92} radius={radius.card} />
-                    <Skeleton height={18} width='40%' />
-                    <XStack flexWrap='wrap' gap={10}>
-                        {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => (
-                            <Skeleton key={index} width='22%' height={72} radius={radius.tile} />
-                        ))}
-                    </XStack>
-                </YStack>
-            ) : error && !trucks ? (
-                <ErrorState title={t('FoodTrucks.errorTitle')} onRetry={reload} />
-            ) : (
-                <>
-                    <Pressable
-                        onPress={() => setMode('map')}
-                        accessibilityRole='button'
-                        accessibilityLabel={liveInZone.length ? t('FoodTrucks.liveCardLabel', { count: liveInZone.length }) : t('FoodTrucks.liveCardNoneLabel')}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radius.card, borderWidth: 2, borderColor: liveInZone.length ? theme.primary.val : theme.borderColor.val, backgroundColor: liveInZone.length ? theme.primarySoft.val : theme.surface.val }}
-                    >
-                        <YStack width={56} height={56} borderRadius={radius.tile} backgroundColor='$surface2' alignItems='center' justifyContent='center'>
-                            <FontAwesomeIcon icon={faTruck} size={22} color={liveInZone.length ? theme.primaryForeground.val : theme.textSecondary.val} />
-                        </YStack>
-                        <YStack flex={1} gap={3}>
-                            <XStack alignItems='center' gap={6}>
-                                <UIText variant='bodyStrong'>{t('FoodTrucks.title')}</UIText>
-                                <YStack paddingHorizontal={8} paddingVertical={2} borderRadius={radius.pill} backgroundColor={liveInZone.length ? '$successSoft' : '$surface2'}>
-                                    <UIText variant='captionStrong' tone={liveInZone.length ? 'success' : 'secondary'} style={{ fontSize: 11 }}>
-                                        {liveInZone.length ? t('FoodTrucks.live') : t('FoodTrucks.noneLive')}
-                                    </UIText>
-                                </YStack>
-                            </XStack>
-                            <UIText variant='caption' tone='secondary'>
-                                {outOfZone
-                                    ? t('FoodTrucks.outsideZones')
-                                    : liveInZone.length
-                                      ? t('FoodTrucks.liveLine', { zone: zone?.name ?? '', count: liveInZone.length, distance: liveInZone[0]?.distance ?? '' })
-                                      : t('FoodTrucks.noneLiveLine', { count: nearbyLive.length })}
+                        <Pressable onPress={() => setLocationSheet(true)} accessibilityRole='button' style={{ minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <UIText tone='secondary'>{t('FoodTrucks.deliverTo')}</UIText>
+                            <UIText variant='bodyStrong' tone='brand' numberOfLines={1} style={{ flexShrink: 1 }}>
+                                {[placeName || t('Network.setLocation'), zone?.name].filter(Boolean).join(' · ')}
                             </UIText>
-                        </YStack>
-                        <FontAwesomeIcon icon={faChevronRight} size={14} color={theme.primaryForeground.val} />
-                    </Pressable>
-
-                    {categories.length > 0 && (
-                        <>
-                            <XStack justifyContent='space-between' alignItems='center'>
-                                <UIText variant='heading'>{t('FoodTrucks.categories')}</UIText>
-                                {nearestTruck && (
-                                    <Pressable onPress={() => openTruck(nearestTruck)} accessibilityRole='link' style={{ minHeight: 32, justifyContent: 'center' }}>
-                                        <UIText variant='captionStrong' tone='brand'>
-                                            {t('FoodTrucks.all')}
-                                        </UIText>
-                                    </Pressable>
-                                )}
-                            </XStack>
-                            <XStack flexWrap='wrap' gap={10} justifyContent='space-between'>
-                                {categories.slice(0, nearestTruck ? 7 : 8).map((category) => categoryTile(category, 78))}
-                                {nearestTruck && (
-                                    <Pressable onPress={() => openTruck(nearestTruck)} accessibilityRole='link' style={{ width: 78, alignItems: 'center', gap: 6 }}>
-                                        <YStack width={78} height={68} borderRadius={radius.tile} backgroundColor='$primary' alignItems='center' justifyContent='center'>
-                                            <FontAwesomeIcon icon={faTableCellsLarge} size={20} color={theme.primaryText.val} />
-                                        </YStack>
-                                        <UIText variant='captionStrong' tone='brand' style={{ fontSize: 12 }}>
-                                            {t('FoodTrucks.allShort')}
-                                        </UIText>
-                                    </Pressable>
-                                )}
-                            </XStack>
-                        </>
-                    )}
-
-                    {offer && (
-                        <Pressable
-                            onPress={() => navigation.navigate('Offer', { offerId: offer.id, offer })}
-                            accessibilityRole='link'
-                            style={{ flexDirection: 'row', gap: 12, padding: 16, borderRadius: radius.card, backgroundColor: theme.surface.val, overflow: 'hidden' }}
-                        >
-                            <YStack flex={1} gap={6}>
-                                <YStack alignSelf='flex-start' paddingHorizontal={8} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$errorSoft'>
-                                    <UIText variant='captionStrong' tone='error' style={{ fontSize: 11 }}>
-                                        {t('FoodTrucks.offer')}
-                                    </UIText>
-                                </YStack>
-                                <UIText variant='subheading'>{offer.name}</UIText>
-                                {!!offer.description && (
-                                    <UIText variant='caption' tone='secondary' numberOfLines={2}>
-                                        {offer.description}
-                                    </UIText>
-                                )}
-                            </YStack>
-                            <MediaImage uri={offer.imageUrl} seed={offer.name} width={96} height={96} radius={radius.tile} />
+                            <FontAwesomeIcon icon={faChevronDown} size={11} color={theme.primaryForeground.val} />
                         </Pressable>
-                    )}
-                    {cartBar}
-                </>
-            )}
-        </ScrollView>
+                    </YStack>
+                    {toggle}
+                </XStack>
+                {searchBar}
+                {loading ? (
+                    <YStack gap={12}>
+                        <Skeleton height={92} radius={radius.card} />
+                        <XStack gap={10}>
+                            <Skeleton width={210} height={64} radius={radius.card} />
+                            <Skeleton width={210} height={64} radius={radius.card} />
+                        </XStack>
+                        <XStack flexWrap='wrap' gap={10}>
+                            {categorySkeletons(8, 72)}
+                        </XStack>
+                    </YStack>
+                ) : error && !trucks ? (
+                    <ErrorState title={t('FoodTrucks.errorTitle')} onRetry={reload} />
+                ) : (
+                    <>
+                        <Pressable
+                            onPress={() => setMode('map')}
+                            accessibilityRole='button'
+                            accessibilityLabel={liveInZone.length ? t('FoodTrucks.liveCardLabel', { count: liveInZone.length }) : t('FoodTrucks.liveCardNoneLabel')}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radius.card, borderWidth: 2, borderColor: liveInZone.length ? theme.primary.val : theme.borderColor.val, backgroundColor: liveInZone.length ? theme.primarySoft.val : theme.surface.val }}
+                        >
+                            <YStack width={56} height={56} borderRadius={radius.tile} backgroundColor='$surface2' alignItems='center' justifyContent='center'>
+                                <FontAwesomeIcon icon={faTruck} size={22} color={liveInZone.length ? theme.primaryForeground.val : theme.textSecondary.val} />
+                            </YStack>
+                            <YStack flex={1} gap={3}>
+                                <XStack alignItems='center' gap={6}>
+                                    <UIText variant='bodyStrong'>{t('FoodTrucks.title')}</UIText>
+                                    <YStack paddingHorizontal={8} paddingVertical={2} borderRadius={radius.pill} backgroundColor={liveInZone.length ? '$successSoft' : '$surface2'}>
+                                        <UIText variant='captionStrong' tone={liveInZone.length ? 'success' : 'secondary'} style={{ fontSize: 11 }}>
+                                            {liveInZone.length ? t('FoodTrucks.live') : t('FoodTrucks.noneLive')}
+                                        </UIText>
+                                    </YStack>
+                                </XStack>
+                                <UIText variant='caption' tone='secondary'>
+                                    {outOfZone
+                                        ? t('FoodTrucks.outsideZones')
+                                        : liveInZone.length
+                                          ? t('FoodTrucks.liveLine', { zone: zone?.name ?? '', count: liveInZone.length, distance: liveInZone[0]?.distance ?? '' })
+                                          : t('FoodTrucks.noneLiveLine', { count: nearbyLive.length })}
+                                </UIText>
+                            </YStack>
+                            <FontAwesomeIcon icon={faChevronRight} size={14} color={theme.primaryForeground.val} />
+                        </Pressable>
+
+                        {places.length > 0 ? (
+                            <>
+                                <UIText variant='heading'>{zone?.name ? t('FoodTrucks.nearYouIn', { zone: zone.name }) : t('FoodTrucks.nearYou')}</UIText>
+                                {placeRow}
+                                {categoriesHeader}
+                                <XStack flexWrap='wrap' gap={10}>
+                                    {categoriesLoading ? categorySkeletons(4, 78) : [...categories.slice(0, 7).map((category) => categoryTile(category, 78)), allTile(78)]}
+                                </XStack>
+                            </>
+                        ) : (
+                            <YStack gap={8}>
+                                <UIText variant='subheading'>{customer ? t('FoodTrucks.outsideTitle') : t('FoodTrucks.whereTitle')}</UIText>
+                                <UIText tone='secondary'>{customer ? t('FoodTrucks.outsideBody', { zones: zones.map((item) => item.zoneName).filter(Boolean).join(', ') }) : t('FoodTrucks.whereBody')}</UIText>
+                                {placeActions}
+                            </YStack>
+                        )}
+
+                        {offer && (
+                            <Pressable
+                                onPress={() => navigation.navigate('Offer', { offerId: offer.id, offer })}
+                                accessibilityRole='link'
+                                style={{ flexDirection: 'row', gap: 12, padding: 16, borderRadius: radius.card, backgroundColor: theme.surface.val, overflow: 'hidden' }}
+                            >
+                                <YStack flex={1} gap={6}>
+                                    <YStack alignSelf='flex-start' paddingHorizontal={8} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$errorSoft'>
+                                        <UIText variant='captionStrong' tone='error' style={{ fontSize: 11 }}>
+                                            {t('FoodTrucks.offer')}
+                                        </UIText>
+                                    </YStack>
+                                    <UIText variant='subheading'>{offer.name}</UIText>
+                                    {!!offer.description && (
+                                        <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                            {offer.description}
+                                        </UIText>
+                                    )}
+                                </YStack>
+                                <MediaImage uri={offer.imageUrl} seed={offer.name} width={96} height={96} radius={radius.tile} />
+                            </Pressable>
+                        )}
+                    </>
+                )}
+            </ScrollView>
+            {/* Pinned above the tab bar, like the store page's cart pill. */}
+            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={openCart} bottom={28} />
+        </YStack>
     );
 
     return (
@@ -473,14 +629,24 @@ const FoodTrucksScreen = () => {
 };
 
 /** A map marker: a truck or a store tile with its name and a short line under it. */
-function MapPin({ kind, active, label, meta }: { kind: 'truck' | 'store'; active: boolean; label: string; meta: string | null }) {
+function MapPin({ kind, active, selected, label, meta }: { kind: 'truck' | 'store'; active: boolean; selected: boolean; label: string; meta: string | null }) {
     const theme = useTheme();
     const background = kind === 'store' ? theme.warning.val : active ? theme.primary.val : theme.surface2.val;
     const foreground = kind === 'store' ? '#ffffff' : active ? theme.primaryText.val : theme.textSecondary.val;
+    const size = selected ? 48 : 40;
     return (
-        <YStack alignItems='center' gap={3} opacity={active ? 1 : 0.75}>
-            <YStack width={40} height={40} borderRadius={12} borderWidth={2} borderColor='$background' alignItems='center' justifyContent='center' style={{ backgroundColor: background, ...elevation.floating }}>
-                <FontAwesomeIcon icon={kind === 'truck' ? faTruck : faHouse} size={17} color={foreground} />
+        <YStack alignItems='center' gap={3} opacity={active || selected ? 1 : 0.75}>
+            <YStack
+                width={size}
+                height={size}
+                borderRadius={12}
+                borderWidth={selected ? 3 : 2}
+                borderColor={selected ? '$primary' : '$background'}
+                alignItems='center'
+                justifyContent='center'
+                style={{ backgroundColor: background, ...elevation.floating }}
+            >
+                <FontAwesomeIcon icon={kind === 'truck' ? faTruck : faHouse} size={selected ? 20 : 17} color={foreground} />
             </YStack>
             <XStack paddingHorizontal={7} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$background' gap={4} style={elevation.card}>
                 <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 11, maxWidth: 110 }}>

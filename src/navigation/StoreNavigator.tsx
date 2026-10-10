@@ -54,17 +54,18 @@ const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
 
 const CUSTOM_TABS = tabsFor(customNavigation.tabs, 'store');
 
-// The configured tabs plus the build's custom tabs; when the food trucks map is the
-// home screen its tab comes first.
+// The configured tabs plus the build's custom tabs. When the food trucks map is the home
+// screen it takes over the Home tab (so every "go home" lands on it), and the separate
+// Trucks and Map tabs are dropped: the trucks map already shows the store and its trucks.
 function homeTabs(): string[] {
     const tabs = orderTabs(toArray(storefrontConfig('storeNavigator.tabs')), CUSTOM_TABS, 'StoreCartTab');
     if (!FOOD_TRUCKS_HOME) return tabs;
-    return ['StoreFoodTruckTab', ...tabs.filter((tab) => tab !== 'StoreFoodTruckTab')];
+    return ['StoreHomeTab', ...tabs.filter((tab) => !['StoreHomeTab', 'StoreFoodTruckTab', 'StoreMapTab'].includes(tab))];
 }
 
 function initialTab(): string | undefined {
     const tabs = homeTabs();
-    if (FOOD_TRUCKS_HOME) return 'StoreFoodTruckTab';
+    if (FOOD_TRUCKS_HOME) return 'StoreHomeTab';
     const custom = CUSTOM_TABS.find(([, tab]) => tab.initial);
     if (custom) return custom[0];
     const configured = toArray(storefrontConfig('storeNavigator.defaultTab'))[0];
@@ -79,7 +80,7 @@ function createTabScreens(optionsCallbacks = {}) {
             options: () => {
                 const { t, locale } = useLanguage();
                 return {
-                    tabBarLabel: config(`STORE_HOME_TAB_LABEL_${uppercase(locale)}`, t('tabs.Home')),
+                    tabBarLabel: FOOD_TRUCKS_HOME ? config(`STORE_FOOD_TRUCK_TAB_LABEL_${uppercase(locale)}`, t('tabs.Trucks')) : config(`STORE_HOME_TAB_LABEL_${uppercase(locale)}`, t('tabs.Home')),
                 };
             },
         },
@@ -164,7 +165,7 @@ function getDefaultTabIcon(routeName) {
     let icon;
     switch (routeName) {
         case 'StoreHomeTab':
-            icon = faHome;
+            icon = FOOD_TRUCKS_HOME ? faTruck : faHome;
             break;
         case 'StoreSearchTab':
             icon = faMagnifyingGlass;
@@ -242,10 +243,20 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
     ),
 });
 
+// With the food trucks home, this tab opens on the trucks map and the store page is pushed from it.
+const foodTruckHomeScreens = FOOD_TRUCKS_HOME
+    ? {
+          FoodTruckHome: { screen: screenSlot('foodTrucks.home'), options: { headerShown: false } },
+          FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
+          TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+      }
+    : {};
+
 export const StoreHomeTab = createNativeStackNavigator({
-    initialRouteName: 'StoreHome',
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckHome' : 'StoreHome',
     screens: withCustomRoutes(
         {
+            ...foodTruckHomeScreens,
             StoreHome,
             StoreCategory,
             StoreCatalog,

@@ -3,7 +3,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faTruck } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faBoxOpen, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
@@ -54,7 +54,7 @@ const TruckMenuScreen = () => {
     if (!truck) {
         return (
             <YStack flex={1} backgroundColor='$background' paddingTop={insets.top} justifyContent='center'>
-                <EmptyState title={t('FoodTrucks.truckMissing')} actionLabel={t('FoodTrucks.back')} onAction={() => navigation.goBack()} />
+                <EmptyState icon={faTruck} title={t('FoodTrucks.truckMissing')} actionLabel={t('FoodTrucks.back')} onAction={() => navigation.goBack()} />
             </YStack>
         );
     }
@@ -165,7 +165,7 @@ const TruckMenuScreen = () => {
                 )}
 
                 {sections.length === 0 ? (
-                    <EmptyState title={t('FoodTrucks.menuEmpty')} description={t('FoodTrucks.menuEmptyBody')} />
+                    <EmptyState icon={faBoxOpen} title={t('FoodTrucks.menuEmpty')} description={t('FoodTrucks.menuEmptyBody')} />
                 ) : (
                     sections.map((section) => {
                         const key = section.id ?? section.name;
