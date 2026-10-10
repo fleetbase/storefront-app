@@ -7,6 +7,7 @@ import LoadingOverlay from '../components/LoadingOverlay';
 import QPayTaxRegistrationSwitch from '../components/QPayTaxRegistrationSwitch';
 import QPayPaymentSheet, { QPayPaymentSheetRef } from '../components/QPayPaymentSheet';
 import CheckoutLayout from '../components/checkout/CheckoutLayout';
+import QPayPaymentStatus from '../components/checkout/QPayPaymentStatus';
 import useQpayCheckout from '../hooks/use-qpay-checkout';
 import useFooterOffset from '../hooks/use-footer-offset';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
@@ -29,16 +30,26 @@ const QPayCheckoutScreen = () => {
             });
         },
     });
-    const { customer, invoice, isCapturingOrder, paymentStage, isCompany, setIsPersonal, companyRegistrationNumber, setCompanyRegistrationNumber } = checkout;
-    // Back from the bank app: confirming → payment received → the order screen.
-    const stageText =
-        paymentStage === 'confirming'
-            ? t('QPayCheckoutScreen.confirmingPayment')
-            : paymentStage === 'paid'
-              ? t('QPayCheckoutScreen.paymentReceived')
-              : paymentStage === 'slow'
-                ? t('QPayCheckoutScreen.paymentReceivedSlow')
-                : null;
+    const {
+        customer,
+        invoice,
+        isCapturingOrder,
+        paymentStage,
+        paymentInfo,
+        paymentError,
+        startPayment,
+        verifyPayment,
+        dismissPaymentStatus,
+        isCompany,
+        setIsPersonal,
+        companyRegistrationNumber,
+        setCompanyRegistrationNumber,
+    } = checkout;
+    // Open the bank list; leaving for a bank app from there counts as paying.
+    const openBanks = useCallback(() => {
+        startPayment();
+        paymentSheetRef.current?.open();
+    }, [startPayment]);
     const [isBottomSheetPresenting, setIsBottomSheetPresenting] = useState(false);
     const [registrationNumber, setRegistrationNumber] = useState(companyRegistrationNumber || '');
     const isModalScreen = wasAccessedFromCartModal(navigation);
@@ -61,6 +72,11 @@ const QPayCheckoutScreen = () => {
         [changeRegistrationNumber, setIsPersonal]
     );
 
+    // Once the payment is being checked or confirmed, the bank list makes way for the status.
+    useEffect(() => {
+        if (paymentStage === 'verifying' || paymentStage === 'paid' || paymentStage === 'slow') paymentSheetRef.current?.close?.();
+    }, [paymentStage]);
+
     useEffect(() => {
         navigation.setOptions({ gestureEnabled: !isBottomSheetPresenting });
     }, [isBottomSheetPresenting, navigation]);
@@ -68,17 +84,13 @@ const QPayCheckoutScreen = () => {
     return (
         <YStack flex={1}>
             <LoadingOverlay
-                visible={!!customer && (isCapturingOrder || !isFocused || !!stageText)}
-                text={
-                    isCapturingOrder
-                        ? t('QPayCheckoutScreen.finalizingOrder')
-                        : (stageText ?? (isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')))
-                }
+                visible={!!customer && paymentStage === 'idle' && (isCapturingOrder || !isFocused)}
+                text={isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')}
             />
             <CheckoutLayout
                 checkout={checkout}
                 paymentReady
-                onPlaceOrder={() => paymentSheetRef.current?.open()}
+                onPlaceOrder={openBanks}
                 footerOffset={footerOffset}
                 payment={
                     <XStack gap={12} alignItems='center' minHeight={52}>
@@ -110,6 +122,15 @@ const QPayCheckoutScreen = () => {
                 }
             />
             <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />
+            <QPayPaymentStatus
+                stage={paymentStage}
+                payment={paymentInfo}
+                currency={checkout.cart?.getAttribute?.('currency')}
+                error={paymentError}
+                onCheckAgain={verifyPayment}
+                onOpenBank={openBanks}
+                onDismiss={dismissPaymentStatus}
+            />
             <PortalHost name='QPayCheckoutPortal' />
         </YStack>
     );
