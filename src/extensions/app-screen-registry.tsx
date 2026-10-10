@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import storefrontExtensions from '../../storefront.extensions';
+import storefrontExtensions from '../generated/brand-extensions';
 import { getBuildBranding } from '../branding/build-branding';
 import { createScreenRegistry } from './screens/registry';
 import { defaultScreens } from './screens/default-screens';

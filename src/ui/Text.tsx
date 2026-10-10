@@ -1,4 +1,10 @@
 import { styled, Text } from 'tamagui';
+import { getBuildBranding } from '../branding/build-branding';
+
+// The brand's type scale (typography.scale) and heading font (typography.heading).
+const { typography } = getBuildBranding().branding;
+const size = (value: number) => Math.round(value * (typography.scale ?? 1));
+const HEADING = typography.heading ? ({ fontFamily: '$heading' } as const) : {};
 
 /**
  * Text with semantic variants. Screens pick a variant and tone instead of setting
@@ -13,15 +19,15 @@ export const UIText = styled(Text, {
     '$platform-web': { textAlign: 'start' as any },
     variants: {
         variant: {
-            display: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
-            title: { fontSize: 24, lineHeight: 30, fontWeight: '800', letterSpacing: -0.4 },
-            heading: { fontSize: 19, lineHeight: 24, fontWeight: '800', letterSpacing: -0.2 },
-            subheading: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
-            body: { fontSize: 15, lineHeight: 22, fontWeight: '500' },
-            bodyStrong: { fontSize: 15, lineHeight: 22, fontWeight: '700' },
-            caption: { fontSize: 13, lineHeight: 18, fontWeight: '500', maxFontSizeMultiplier: 1.6 },
-            captionStrong: { fontSize: 13, lineHeight: 18, fontWeight: '700', maxFontSizeMultiplier: 1.6 },
-            label: { fontSize: 12, lineHeight: 16, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', maxFontSizeMultiplier: 1.6 },
+            display: { ...HEADING, fontSize: size(30), lineHeight: size(36), fontWeight: '800', letterSpacing: -0.6 },
+            title: { ...HEADING, fontSize: size(24), lineHeight: size(30), fontWeight: '800', letterSpacing: -0.4 },
+            heading: { ...HEADING, fontSize: size(19), lineHeight: size(24), fontWeight: '800', letterSpacing: -0.2 },
+            subheading: { fontSize: size(16), lineHeight: size(22), fontWeight: '700' },
+            body: { fontSize: size(15), lineHeight: size(22), fontWeight: '500' },
+            bodyStrong: { fontSize: size(15), lineHeight: size(22), fontWeight: '700' },
+            caption: { fontSize: size(13), lineHeight: size(18), fontWeight: '500', maxFontSizeMultiplier: 1.6 },
+            captionStrong: { fontSize: size(13), lineHeight: size(18), fontWeight: '700', maxFontSizeMultiplier: 1.6 },
+            label: { fontSize: size(12), lineHeight: size(16), fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', maxFontSizeMultiplier: 1.6 },
         },
         tone: {
             primary: { color: '$textPrimary' },

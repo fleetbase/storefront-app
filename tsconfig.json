@@ -9,6 +9,6 @@
             "*": ["*", "*.native", "*.web"]
         }
     },
-    "include": ["App.tsx", "App.web.tsx", "index.native.tsx", "index.web.tsx", "src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts", "__tests__/**/*.tsx"],
+    "include": ["App.tsx", "App.web.tsx", "index.native.tsx", "index.web.tsx", "src/**/*.ts", "src/**/*.tsx", "__tests__/**/*.ts", "__tests__/**/*.tsx", "brand/**/*.ts", "brand/**/*.tsx"],
     "exclude": ["legacy", "node_modules", "ios/Pods"]
 }

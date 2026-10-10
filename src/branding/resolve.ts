@@ -5,7 +5,7 @@ import { DEFAULT_BRANDING } from './defaults';
 import { PRESET_COLORS } from './presets';
 import type { ColorPreset, ColorScheme, SemanticColorKey, SemanticColors } from './presets';
 import { BRANDING_SCHEMA_VERSION, BRANDING_SECTIONS } from './schema';
-import type { AssetReference, BrandingConfig, BrandingScreens, BrandingSection, StoreHeaderOptions } from './schema';
+import type { AssetReference, BrandingConfig, BrandingScreens, BrandingSection, FontFamily, StoreHeaderOptions } from './schema';
 
 export type BrandingSource = {
     /** Label used in issues, e.g. `defaults`, `legacy-env`, `storefront.brand.ts`, `remote`. */
@@ -32,6 +32,7 @@ export type ResolvedBranding = {
     assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null };
     boot: { background: string[] };
     navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } }; home: 'store' | 'foodTrucks'; network: { foodTrucks: boolean } };
+    typography: { body?: FontFamily; heading?: FontFamily; scale: number };
     screens: BrandingScreens;
 };
 
@@ -48,7 +49,7 @@ const isPlainObject = (value: unknown): value is Record<string, any> => !!value 
 
 // Values at these paths are replaced as a whole rather than merged (e.g. an
 // asset `{ url }` must not inherit a lower layer's `{ bundled }`).
-const ATOMIC_PATHS = [/^assets\.[^.]+$/];
+const ATOMIC_PATHS = [/^assets\.[^.]+$/, /^typography\.(body|heading)$/];
 
 function deepMerge<T>(base: T, override: unknown, path = ''): T {
     if (!isPlainObject(base) || !isPlainObject(override)) return (override === undefined ? base : override) as T;
@@ -204,6 +205,7 @@ export function resolveBranding(sources: BrandingSource[]): { branding: Resolved
         assets: merged.assets,
         boot: merged.boot,
         navigation: merged.navigation,
+        typography: merged.typography,
         screens: merged.screens,
     };
     return { branding, issues };

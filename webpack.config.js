@@ -135,6 +135,7 @@ module.exports = (env = {}, argv = {}) => ({
                     path.resolve(__dirname, 'storefront.extensions.ts'),
                     path.resolve(__dirname, 'storefront.brand.ts'),
                     path.resolve(__dirname, 'custom'),
+                    path.resolve(__dirname, 'brand'),
                     path.resolve(__dirname, 'src'),
                     path.resolve(__dirname, 'web'),
                 ],
@@ -204,6 +205,11 @@ module.exports = (env = {}, argv = {}) => ({
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
+            },
+            {
+                // Brand fonts (brand/fonts), registered with @font-face at startup.
+                test: /\.(ttf|otf|woff2?)$/,
+                type: 'asset/resource',
             },
             {
                 test: /\.(gif|jpe?g|png|svg)$/,

@@ -17,7 +17,7 @@
         "test:ci": "jest --runInBand",
         "lint": "eslint .",
         "lint:strict": "eslint src/ui storefront.extensions.ts storefront.brand.ts src/env.ts src/branding src/hooks/use-app-theme.ts src/contexts/ThemeContext.tsx src/extensions src/navigation/NetworkNavigator.tsx src/navigation/AppNavigator.tsx src/network src/screens/network src/navigation/NetworkNavigator.tsx src/contexts/StorefrontRuntimeContext.tsx src/contexts/CartContext.tsx src/screens/BootScreen.tsx src/screens/LocationPermissionScreen.tsx src/screens/AddNewLocationScreen.tsx src/screens/LocationPickerScreen.tsx src/screens/EditLocationScreen.tsx src/screens/AddressBookScreen.tsx src/navigation/stacks/LocationStack.tsx src/navigation/place-flow.ts src/components/location src/commerce src/components/checkout src/components/booking src/hooks/use-cart-promotions.ts src/hooks/use-review-request.ts src/screens/reviews src/screens/offers src/components/offers src/screens/notifications src/screens/chat src/hooks/use-chat-request.ts src/hooks/use-customer-request.ts src/hooks/use-open-notification.ts src/hooks/use-unread-notifications.ts src/hooks/use-footer-offset.ts src/screens/CartScreen.tsx src/screens/OrderScreen.tsx src/screens/StripeCheckoutScreen.tsx src/screens/QPayCheckoutScreen.tsx web/react-native-mmkv-storage.js web/react-native-device-info.web.js __tests__ src/screens/auth src/screens/account src/components/auth src/navigation/auth-redirect.ts src/screens/orders src/navigation/stacks/OrderStack.tsx",
-        "typecheck:strict": "tsc --noEmit -p tsconfig.strict.json",
+        "typecheck:strict": "node scripts/link-brand.js && tsc --noEmit -p tsconfig.strict.json",
         "format": "prettier --write .",
         "tamagui:build": "./node_modules/.bin/tamagui-build",
         "tamagui:clean": "./node_modules/.bin/tamagui-build clean",
@@ -33,7 +33,8 @@
         "adb:devices": "adb devices",
         "generate:app-icon": "npx app-icon generate -i ./assets/app-icon.png",
         "generate:launch-screen": "npx react-native generate-bootsplash ./assets/splash-screen.png --background=#FFFFFF --logo-width=100 --flavor=main",
-        "postinstall": "patch-package"
+        "postinstall": "patch-package && node scripts/link-brand.js",
+        "brand:link": "node scripts/link-brand.js"
     },
     "dependencies": {
         "@babel/plugin-proposal-async-generator-functions": "^7.20.7",

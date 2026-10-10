@@ -256,23 +256,27 @@ These options can be used to customize the design and look of your StorefrontApp
 
 For interface config please reference the file `/config/defaults.js` to view options.
 
+#### Client builds
+
+A branded build keeps everything it owns in a `brand/` folder that this repository never ships: branding, screen overrides, extra screens and tabs, copy and fonts. Upgrading is then a merge of the latest release with no conflicts. See [docs/client-builds.md](docs/client-builds.md).
+
 #### Custom Screens
 
-Replace any overridable screen, such as the store home screen, without editing the navigators. Map its stable screen id to your own compiled-in component in `storefront.extensions.ts`:
+Replace any overridable screen, such as the store home screen, or add your own screens and tabs, without editing the navigators. Map a stable screen id to your own compiled-in component in `brand/storefront.extensions.ts`:
 
 ```ts
 export default defineStorefrontExtensions({
     screens: {
-        'store.home': { load: () => import('./custom/screens/BrandStoreHomeScreen') },
+        'store.home': { load: () => import('./screens/BrandStoreHomeScreen') },
     },
 });
 ```
 
-If a custom screen fails to load or render, the default screen is shown instead. See [docs/extensibility.md](docs/extensibility.md) for all screen ids, variants and platform-specific screens.
+If a custom screen fails to load or render, the default screen is shown instead. See [docs/extensibility.md](docs/extensibility.md) for all screen ids, variants, custom routes and tabs, and platform-specific screens.
 
 #### Branding
 
-Colors, appearance, headers, cards, imagery and navigation are set with a typed branding config in `storefront.brand.ts`. Existing `.env` theme keys such as `APP_THEME`, `CUSTOM_COLORS` and `STORE_HEADER_*` still work and are mapped into it. Invalid values fall back to defaults. See [docs/branding.md](docs/branding.md).
+Colors, typography, appearance, headers, cards, imagery and navigation are set with a typed branding config in `brand/storefront.brand.ts` (or the root template `storefront.brand.ts`). Existing `.env` theme keys such as `APP_THEME`, `CUSTOM_COLORS` and `STORE_HEADER_*` still work and are mapped into it. Invalid values fall back to defaults. See [docs/branding.md](docs/branding.md).
 
 ### Internationalization and Translations
 

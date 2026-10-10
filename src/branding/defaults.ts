@@ -40,5 +40,6 @@ export const DEFAULT_BRANDING: Required<Omit<BrandingConfig, 'name'>> = {
         home: 'store',
         network: { foodTrucks: false },
     },
+    typography: { scale: 1 },
     screens: {},
 };

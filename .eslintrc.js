@@ -22,6 +22,8 @@ const OVERRIDABLE_SCREEN_MODULES = [
 ];
 
 module.exports = {
+    // Written by scripts/link-brand.js.
+    ignorePatterns: ['src/generated/'],
     root: true,
     extends: '@react-native',
     rules: {

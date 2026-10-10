@@ -8,6 +8,8 @@
     "include": [
         "src/env.ts",
         "storefront.extensions.ts",
+        "brand/**/*.ts",
+        "brand/**/*.tsx",
         "src/extensions/**/*.ts",
         "src/extensions/**/*.tsx",
         "__tests__/extensions/**/*.ts",

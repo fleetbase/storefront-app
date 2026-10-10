@@ -1,4 +1,4 @@
-import buildBrand from '../../storefront.brand';
+import buildBrand from '../generated/brand-config';
 import { config as readEnv } from '../utils/tamagui';
 import { brandingFromLegacyEnv } from './legacy-env';
 import { resolveBranding } from './resolve';

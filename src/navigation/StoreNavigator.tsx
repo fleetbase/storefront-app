@@ -26,6 +26,8 @@ import useCart from '../hooks/use-cart';
 import StoreLayout from '../layouts/StoreLayout';
 import { translate } from '../utils/localize';
 import { screenSlot } from '../extensions';
+import { customNavigation } from '../extensions/build-navigation';
+import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel } from '../extensions/navigation';
 import { TabBar } from '../ui';
 import { totalCartQuantity } from '../network/network-runtime';
 
@@ -50,9 +52,12 @@ function getTabConfig(name, key, defaultValue = null) {
 
 const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
 
-// The configured tabs; when the food trucks map is the home screen its tab comes first.
+const CUSTOM_TABS = tabsFor(customNavigation.tabs, 'store');
+
+// The configured tabs plus the build's custom tabs; when the food trucks map is the
+// home screen its tab comes first.
 function homeTabs(): string[] {
-    const tabs = toArray(storefrontConfig('storeNavigator.tabs')).filter(Boolean);
+    const tabs = orderTabs(toArray(storefrontConfig('storeNavigator.tabs')), CUSTOM_TABS, 'StoreCartTab');
     if (!FOOD_TRUCKS_HOME) return tabs;
     return ['StoreFoodTruckTab', ...tabs.filter((tab) => tab !== 'StoreFoodTruckTab')];
 }
@@ -60,6 +65,8 @@ function homeTabs(): string[] {
 function initialTab(): string | undefined {
     const tabs = homeTabs();
     if (FOOD_TRUCKS_HOME) return 'StoreFoodTruckTab';
+    const custom = CUSTOM_TABS.find(([, tab]) => tab.initial);
+    if (custom) return custom[0];
     const configured = toArray(storefrontConfig('storeNavigator.defaultTab'))[0];
     return tabs.includes(configured) ? configured : tabs[0];
 }
@@ -123,10 +130,23 @@ function createTabScreens(optionsCallbacks = {}) {
         },
     };
 
+    for (const [name, tab] of CUSTOM_TABS) {
+        screens[name] = {
+            screen: createCustomTabStack(name, tab, customNavigation.routes, 'store', {
+                Product: { screen: screenSlot('product.detail'), options: { presentation: 'modal', headerShown: false } },
+                Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+                ...LocationStack,
+                ...ModalScreens,
+            }),
+            options: () => ({ tabBarLabel: useCustomTabLabel(tab, name) }),
+        };
+    }
+
     const screenTabs = {};
     for (let i = 0; i < tabs.length; i++) {
         const tab = tabs[i];
-        if (tab) {
+        // A listed tab that isn't registered (e.g. a custom tab missing from the extensions) is skipped.
+        if (tab && screens[tab]) {
             screenTabs[tab] = screens[tab];
         }
     }
@@ -179,103 +199,124 @@ export const ModalScreens = {
 
 export const StoreFoodTruckTab = createNativeStackNavigator({
     initialRouteName: 'FoodTruckHome',
-    screens: {
-        FoodTruckHome: {
-            screen: screenSlot('foodTrucks.home'),
-            options: {
-                headerShown: false,
+    screens: withCustomRoutes(
+        {
+            FoodTruckHome: {
+                screen: screenSlot('foodTrucks.home'),
+                options: {
+                    headerShown: false,
+                },
             },
-        },
-        FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
-        TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
-        Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
-        Catalog: {
-            screen: screenSlot('catalog.index'),
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
+            TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+            Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+            Catalog: {
+                screen: screenSlot('catalog.index'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
-        },
-        Category: {
-            screen: screenSlot('catalog.foodTruckCategory'),
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            Category: {
+                screen: screenSlot('catalog.foodTruckCategory'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
-        },
-        Product: {
-            screen: screenSlot('product.detail'),
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            ...CartStack,
+            ...CheckoutStack,
+            ...LocationStack,
+            ...OrderStack,
+            ...ModalScreens,
         },
-        ...CartStack,
-        ...CheckoutStack,
-        ...LocationStack,
-        ...OrderStack,
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreHomeTab = createNativeStackNavigator({
     initialRouteName: 'StoreHome',
-    screens: {
-        StoreHome,
-        StoreCategory,
-        StoreCatalog,
-        StoreInfo,
-        Product: {
-            screen: screenSlot('product.detail'),
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+    screens: withCustomRoutes(
+        {
+            StoreHome,
+            StoreCategory,
+            StoreCatalog,
+            StoreInfo,
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+            Offers: { screen: screenSlot('offers.list'), options: { headerShown: false } },
+            Notifications: { screen: screenSlot('notifications.inbox'), options: { headerShown: false } },
+            NotificationSettings: { screen: screenSlot('notifications.settings'), options: { headerShown: false } },
+            Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+            ...LocationStack,
+            ...ModalScreens,
         },
-        StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
-        WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
-        Offers: { screen: screenSlot('offers.list'), options: { headerShown: false } },
-        Notifications: { screen: screenSlot('notifications.inbox'), options: { headerShown: false } },
-        NotificationSettings: { screen: screenSlot('notifications.settings'), options: { headerShown: false } },
-        Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
-        ...LocationStack,
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store',
+        { withLinking: true, tabs: customNavigation.tabs }
+    ),
 });
 
 export const StoreSearchTab = createNativeStackNavigator({
     initialRouteName: 'StoreSearch',
-    screens: {
-        StoreSearch,
-        Product: {
-            screen: screenSlot('product.detail'),
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+    screens: withCustomRoutes(
+        {
+            StoreSearch,
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            ...ModalScreens,
         },
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreMapTab = createNativeStackNavigator({
     initialRouteName: 'StoreMap',
-    screens: {
-        StoreMap,
-        StoreInfo,
-        StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
-        WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
-    },
+    screens: withCustomRoutes(
+        {
+            StoreMap,
+            StoreInfo,
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreCartTab = createNativeStackNavigator({
     initialRouteName: 'Cart',
-    screens: {
-        ...CartStack,
-        ...OrderStack,
-        ...CheckoutStack,
-        ...ModalScreens,
-    },
+    screens: withCustomRoutes(
+        {
+            ...CartStack,
+            ...OrderStack,
+            ...CheckoutStack,
+            ...ModalScreens,
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreProfileTab = createNativeStackNavigator({
@@ -378,22 +419,42 @@ export const StoreProfileTab = createNativeStackNavigator({
             },
         },
     },
-    screens: {
-        ...OrderStack,
-        ...LocationStack,
-        ...ModalScreens,
-    },
+    screens: withCustomRoutes(
+        {
+            ...OrderStack,
+            ...LocationStack,
+            ...ModalScreens,
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 /** A tab's icon; the cart's carries a badge with the number of items in it. */
-const StoreTabIcon = ({ routeName, color }: { routeName: string; color: string }) => {
+const StoreTabIcon = ({ routeName, color, focused }: { routeName: string; color: string; focused?: boolean }) => {
     const [cart] = useCart();
+    const custom = customNavigation.tabs[routeName];
+    if (custom) return <CustomTabIcon tab={custom} color={color} focused={focused} />;
     const count = routeName === 'StoreCartTab' ? totalCartQuantity(cart?.contents?.().map((item: any) => item.serialize?.() || item) || []) : 0;
     return (
         <XStack position='relative'>
             <FontAwesomeIcon icon={getDefaultTabIcon(routeName)} size={20} color={color} />
             {count > 0 && (
-                <Text position='absolute' top={-10} right={-12} minWidth={18} height={18} paddingHorizontal={4} borderRadius={9} backgroundColor='$error' color='white' textAlign='center' fontSize={11} lineHeight={18} fontWeight='700'>
+                <Text
+                    position='absolute'
+                    top={-10}
+                    right={-12}
+                    minWidth={18}
+                    height={18}
+                    paddingHorizontal={4}
+                    borderRadius={9}
+                    backgroundColor='$error'
+                    color='white'
+                    textAlign='center'
+                    fontSize={11}
+                    lineHeight={18}
+                    fontWeight='700'
+                >
                     {count > 99 ? '99+' : count}
                 </Text>
             )}
@@ -409,7 +470,7 @@ const StoreNavigator = createBottomTabNavigator({
     tabBar: (props: any) => <TabBar {...props} />,
     screenOptions: ({ route }: any) => ({
         headerShown: false,
-        tabBarIcon: ({ color }: any) => <StoreTabIcon routeName={route.name} color={color} />,
+        tabBarIcon: ({ color, focused }: any) => <StoreTabIcon routeName={route.name} color={color} focused={focused} />,
     }),
     screens: createTabScreens(),
 });

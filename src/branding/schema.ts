@@ -77,18 +77,21 @@ export const StoreHeaderSchema = z
 
 export const ComponentsSchema = z
     .object({
-        productCard: z.object({ variant: z.enum(['bordered', 'outlined', 'visio']) }).partial().strict(),
-        storeCategories: z.object({ display: z.enum(['grid', 'pills']) }).partial().strict(),
+        productCard: z
+            .object({ variant: z.enum(['bordered', 'outlined', 'visio']) })
+            .partial()
+            .strict(),
+        storeCategories: z
+            .object({ display: z.enum(['grid', 'pills']) })
+            .partial()
+            .strict(),
         storeHeader: StoreHeaderSchema,
     })
     .partial()
     .strict();
 
 /** A bundled asset key (see assets.ts) or an https URL. */
-export const AssetRef = z.union([
-    z.object({ bundled: z.enum(BUNDLED_ASSET_KEYS) }).strict(),
-    z.object({ url: z.string().url().max(2048).startsWith('https://') }).strict(),
-]);
+export const AssetRef = z.union([z.object({ bundled: z.enum(BUNDLED_ASSET_KEYS) }).strict(), z.object({ url: z.string().url().max(2048).startsWith('https://') }).strict()]);
 
 export const AssetsSchema = z
     .object({
@@ -106,13 +109,19 @@ export const BootSchema = z
     .partial()
     .strict();
 
+/** A core store tab, or a custom tab registered in the build's extensions (e.g. `RewardsTab`). */
+const StoreTabName = z.union([z.enum(STORE_TABS), z.string().regex(/^[A-Z][A-Za-z0-9]{0,44}Tab$/, 'Expected a store tab or a custom tab name ending in "Tab"')]);
+
 export const NavigationSchema = z
     .object({
         store: z
             .object({
-                tabs: z.array(z.enum(STORE_TABS)).min(1).max(6),
-                defaultTab: z.enum(STORE_TABS),
-                tabBar: z.object({ background: z.union([z.literal('blur'), ThemeKey]) }).partial().strict(),
+                tabs: z.array(StoreTabName).min(1).max(6),
+                defaultTab: StoreTabName,
+                tabBar: z
+                    .object({ background: z.union([z.literal('blur'), ThemeKey]) })
+                    .partial()
+                    .strict(),
             })
             .partial()
             .strict(),
@@ -131,8 +140,36 @@ export const NavigationSchema = z
 
 export const ScreensSchema = z.record(z.enum(SCREEN_IDS), z.object({ variant: z.string().regex(/^[a-zA-Z0-9_-]{1,40}$/) }).strict());
 
+const FontWeight = z.enum(['100', '200', '300', '400', '500', '600', '700', '800', '900']);
+
+/**
+ * A bundled font family: the CSS family name and, per weight, the font file's
+ * PostScript name (the file in brand/fonts is named after it, e.g. `PlusJakartaSans-Bold.ttf`).
+ */
+export const FontFamilySchema = z
+    .object({
+        family: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9 _-]{0,63}$/, 'Expected a font family name'),
+        faces: z
+            .record(FontWeight, z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/, 'Expected a PostScript font name'))
+            .refine((faces) => Object.keys(faces).length > 0, 'At least one face is required'),
+    })
+    .strict();
+
+export const TypographySchema = z
+    .object({
+        /** Body text and everything that doesn't name a font. */
+        body: FontFamilySchema,
+        /** Display, title and heading text (defaults to the body font). */
+        heading: FontFamilySchema,
+        /** Multiplies the type scale (0.85–1.3); 1 keeps the app's sizes. */
+        scale: z.number().min(0.85).max(1.3),
+    })
+    .partial()
+    .strict();
+
 export const BRANDING_SECTIONS = {
     colors: ColorsSchema,
+    typography: TypographySchema,
     appearance: AppearanceSchema,
     components: ComponentsSchema,
     assets: AssetsSchema,
@@ -158,6 +195,8 @@ export type BrandingAssets = z.infer<typeof AssetsSchema>;
 export type BrandingBoot = z.infer<typeof BootSchema>;
 export type BrandingNavigation = z.infer<typeof NavigationSchema>;
 export type BrandingScreens = z.infer<typeof ScreensSchema>;
+export type BrandingTypography = z.infer<typeof TypographySchema>;
+export type FontFamily = z.infer<typeof FontFamilySchema>;
 export type StoreHeaderOptions = z.infer<typeof StoreHeaderSchema>;
 export type AssetReference = z.infer<typeof AssetRef>;
 
@@ -171,5 +210,6 @@ export type BrandingConfig = {
     assets?: BrandingAssets;
     boot?: BrandingBoot;
     navigation?: BrandingNavigation;
+    typography?: BrandingTypography;
     screens?: BrandingScreens;
 };

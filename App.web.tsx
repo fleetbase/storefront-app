@@ -16,6 +16,11 @@ import { NotificationProvider } from './src/contexts/NotificationContext';
 import { StorefrontRuntimeProvider } from './src/contexts/StorefrontRuntimeContext';
 import { getDefaultStyle as getDefaultToastStyle } from './src/utils/toast';
 import config from './tamagui.config';
+import { getBuildBranding } from './src/branding/build-branding';
+import { registerBrandFonts } from './src/branding/fonts';
+
+// Brand fonts (brand/fonts) are registered with @font-face before the first render.
+registerBrandFonts(getBuildBranding().branding.typography);
 
 function AppContent(): React.JSX.Element {
     const { themeName: appTheme } = useBranding();
