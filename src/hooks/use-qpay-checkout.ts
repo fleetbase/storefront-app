@@ -45,6 +45,10 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
+    // After paying in a bank app: 'confirming' (back in the app, waiting for QPay's word),
+    // 'paid' (QPay confirmed, the order is being created), 'slow' (paid, order still coming).
+    const [paymentStage, setPaymentStage] = useState('idle');
+    const leftForPayment = useRef(false);
     const [error, setError] = useState(false);
     // Order notes
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
@@ -254,10 +258,14 @@ export default function useQPayCheckout({ onOrderComplete }) {
             });
             console.log('[checkOrderStatus #response]', response);
 
-            const { order, error } = response;
+            const { order, error, status } = response;
 
             if (error) {
                 handlePaymentError(error);
+            }
+
+            if (status === 'paid' && !order) {
+                setPaymentStage((stage) => (stage === 'slow' ? stage : 'paid'));
             }
 
             if (order) {
@@ -322,9 +330,13 @@ export default function useQPayCheckout({ onOrderComplete }) {
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
-                const { order, error } = event;
+                const { order, error, status } = event;
                 if (error) {
                     handlePaymentError(error);
+                }
+                // The server says so the moment QPay confirms the payment, then again with the order.
+                if (status === 'paid' && !order) {
+                    setPaymentStage((stage) => (stage === 'slow' ? stage : 'paid'));
                 }
                 if (order) {
                     handleOrderCompletion(order);
@@ -356,15 +368,44 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Also run order status check when the app returns from the background.
     useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextAppState) => {
+            // Leaving the app with an invoice open: the customer is paying in a bank app.
+            if (nextAppState === 'background' && checkoutId && !hasOrderCompleted.current) {
+                leftForPayment.current = true;
+            }
             if (nextAppState === 'active') {
-                // When the app becomes active again, re-check order status.
+                // Back from the bank app: show that the payment is being confirmed straight
+                // away, then re-check (the order usually exists by now via QPay's callback).
+                if (leftForPayment.current && !hasOrderCompleted.current) {
+                    leftForPayment.current = false;
+                    setPaymentStage((stage) => (stage === 'idle' ? 'confirming' : stage));
+                }
                 checkOrderStatus();
             }
         });
         return () => {
             subscription.remove();
         };
-    }, [checkOrderStatus]);
+    }, [checkOrderStatus, checkoutId]);
+
+    // Confirming: if QPay hasn't confirmed a payment within 20s, the customer most likely
+    // didn't pay; go back to the checkout. Paid: if the order hasn't arrived within 30s,
+    // say it's on its way (it is created server-side from QPay's callback regardless).
+    useEffect(() => {
+        if (paymentStage !== 'confirming' && paymentStage !== 'paid') return;
+        const timer = setTimeout(
+            () => {
+                if (hasOrderCompleted.current) return;
+                if (paymentStage === 'confirming') {
+                    setPaymentStage('idle');
+                    toast.info(t('QPayCheckoutScreen.paymentNotReceived'));
+                } else {
+                    setPaymentStage('slow');
+                }
+            },
+            paymentStage === 'confirming' ? 20000 : 30000
+        );
+        return () => clearTimeout(timer);
+    }, [paymentStage, t]);
 
     // Memoize the return value to provide stable references
     const checkout = useMemo(
@@ -402,6 +443,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             listener: listenerRef.current,
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
+            paymentStage,
             isServiceQuoteUnavailable,
             unavailableItems,
             isBelowMinimum,
@@ -435,6 +477,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             quoteOrigin,
             hasOrderCompleted.current,
             isCapturingOrder,
+            paymentStage,
             isServiceQuoteUnavailable,
             unavailableItems,
             isBelowMinimum,

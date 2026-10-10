@@ -309,7 +309,11 @@
         "vatRegistration": "Реєстрація ПДВ",
         "personal": "Особистий",
         "company": "Компанія",
-        "companyRegistrationNumber": "Реєстраційний номер компанії"
+        "companyRegistrationNumber": "Реєстраційний номер компанії",
+        "confirmingPayment": "Підтверджуємо оплату…",
+        "paymentReceived": "Оплату отримано. Оформлюємо замовлення…",
+        "paymentReceivedSlow": "Оплату отримано. Замовлення оформлюється й незабаром з'явиться тут.",
+        "paymentNotReceived": "Ми ще не отримали вашу оплату."
     },
     "SavedLocationScreen": {
         "addressSaved": "Адресу збережено.",

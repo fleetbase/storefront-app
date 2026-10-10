@@ -309,7 +309,11 @@
         "vatRegistration": "VAT Registration",
         "personal": "Personal",
         "company": "Company",
-        "companyRegistrationNumber": "Company Registration"
+        "companyRegistrationNumber": "Company Registration",
+        "confirmingPayment": "Confirming your payment…",
+        "paymentReceived": "Payment received. Placing your order…",
+        "paymentReceivedSlow": "Payment received. Your order is being placed and will appear here in a moment.",
+        "paymentNotReceived": "We haven't received your payment yet."
     },
     "SavedLocationScreen": {
         "addressSaved": "Address saved.",

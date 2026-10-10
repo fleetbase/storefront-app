@@ -29,7 +29,16 @@ const QPayCheckoutScreen = () => {
             });
         },
     });
-    const { customer, invoice, isCapturingOrder, isCompany, setIsPersonal, companyRegistrationNumber, setCompanyRegistrationNumber } = checkout;
+    const { customer, invoice, isCapturingOrder, paymentStage, isCompany, setIsPersonal, companyRegistrationNumber, setCompanyRegistrationNumber } = checkout;
+    // Back from the bank app: confirming → payment received → the order screen.
+    const stageText =
+        paymentStage === 'confirming'
+            ? t('QPayCheckoutScreen.confirmingPayment')
+            : paymentStage === 'paid'
+              ? t('QPayCheckoutScreen.paymentReceived')
+              : paymentStage === 'slow'
+                ? t('QPayCheckoutScreen.paymentReceivedSlow')
+                : null;
     const [isBottomSheetPresenting, setIsBottomSheetPresenting] = useState(false);
     const [registrationNumber, setRegistrationNumber] = useState(companyRegistrationNumber || '');
     const isModalScreen = wasAccessedFromCartModal(navigation);
@@ -58,7 +67,14 @@ const QPayCheckoutScreen = () => {
 
     return (
         <YStack flex={1}>
-            <LoadingOverlay visible={customer && (isCapturingOrder || !isFocused)} text={isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')} />
+            <LoadingOverlay
+                visible={!!customer && (isCapturingOrder || !isFocused || !!stageText)}
+                text={
+                    isCapturingOrder
+                        ? t('QPayCheckoutScreen.finalizingOrder')
+                        : (stageText ?? (isFocused ? t('QPayCheckoutScreen.finalizingOrder') : t('QPayCheckoutScreen.checkingOrderStatus')))
+                }
+            />
             <CheckoutLayout
                 checkout={checkout}
                 paymentReady

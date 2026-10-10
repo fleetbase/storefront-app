@@ -309,7 +309,11 @@
         "vatRegistration": "НӨАТ Registration",
         "personal": "Хувь хүн",
         "company": "Байгуулга",
-        "companyRegistrationNumber": "Компани рд"
+        "companyRegistrationNumber": "Компани рд",
+        "confirmingPayment": "Төлбөрийг баталгаажуулж байна…",
+        "paymentReceived": "Төлбөр хүлээн авлаа. Захиалгыг үүсгэж байна…",
+        "paymentReceivedSlow": "Төлбөр хүлээн авлаа. Захиалга удахгүй энд гарч ирнэ.",
+        "paymentNotReceived": "Таны төлбөр хараахан ирээгүй байна."
     },
     "SavedLocationScreen": {
         "addressSaved": "Хаяг хадгалагдсан.",
