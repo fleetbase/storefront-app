@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { effectiveOptions } from '../../hooks/use-storefront-info';
-import { Pressable, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { Animated, Pressable, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -89,6 +89,7 @@ const NetworkStoreScreen = ({ route }: any) => {
     const [retry, setRetry] = useState(0);
     const [activeTab, setActiveTab] = useState<string | null>(null);
     const scrollRef = useRef<ScrollView>(null);
+    const scrollY = useRef(new Animated.Value(0)).current;
     const offsets = useRef<Record<string, number>>({});
     const catalogTop = useRef(0);
     const barTop = useRef(0);
@@ -317,18 +318,38 @@ const NetworkStoreScreen = ({ route }: any) => {
         );
     }
 
+    const heroHeight = HERO_HEIGHT + insets.top;
+
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <ScrollView
+            <Animated.ScrollView
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
-                ref={scrollRef}
-                onScroll={onScroll}
-                scrollEventThrottle={32}
+                ref={scrollRef as any}
+                onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true, listener: onScroll })}
+                scrollEventThrottle={16}
                 contentContainerStyle={{ paddingBottom: cart.count > 0 ? 110 : 40 }}
             >
                 <YStack marginBottom={16}>
-                    <MediaImage uri={store.backdropUrl} seed={store.name} height={HERO_HEIGHT + insets.top} radius={0} dimmed={closed} />
+                    {/* Pulled past the top, the backdrop grows from its top edge to fill the space instead of leaving a blank gap. */}
+                    <YStack height={heroHeight}>
+                        <Animated.View
+                            pointerEvents='none'
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: heroHeight,
+                                transform: [
+                                    { translateY: scrollY.interpolate({ inputRange: [-heroHeight, 0], outputRange: [-heroHeight / 2, 0], extrapolateRight: 'clamp' }) },
+                                    { scale: scrollY.interpolate({ inputRange: [-heroHeight, 0], outputRange: [2, 1], extrapolateRight: 'clamp' }) },
+                                ],
+                            }}
+                        >
+                            <MediaImage uri={store.backdropUrl} seed={store.name} height={heroHeight} radius={0} dimmed={closed} />
+                        </Animated.View>
+                    </YStack>
                     <YStack marginTop={-28} borderTopLeftRadius={radius.sheet} borderTopRightRadius={radius.sheet} backgroundColor='$background' paddingHorizontal={space.gutter} gap={12}>
                         {(!single || headerConfig.showLogo !== false) && (
                             <YStack marginTop={-36}>
@@ -525,7 +546,7 @@ const NetworkStoreScreen = ({ route }: any) => {
                         </>
                     )}
                 </YStack>
-            </ScrollView>
+            </Animated.ScrollView>
 
             {stuck && (
                 <YStack position='absolute' top={0} left={0} right={0} zIndex={5} paddingTop={stickyTop} backgroundColor='$background'>
