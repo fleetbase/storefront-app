@@ -1537,6 +1537,18 @@
         "openHint": "Нээхийн тулд дахин дарна уу",
         "viewAllOf": "{{name}}-ийн бүгд",
         "categoriesOf": "{{name}}",
-        "recenter": "Миний байршил"
+        "recenter": "Миний байршил",
+        "servesZone": "{{zone}} бүсэд үйлчилнэ",
+        "searchShort": "Хайх",
+        "promotions": "Урамшуулал",
+        "showPromotions": "Урамшуулал харах",
+        "hidePromotions": "Урамшууллыг нуух",
+        "promotionsHint": {
+            "one": "1 урамшуулал харахын тулд дээш татна уу",
+            "other": "{{count}} урамшуулал харахын тулд дээш татна уу"
+        },
+        "noPromotions": "Одоогоор урамшуулал алга.",
+        "inYourArea": "Таны бүсэд",
+        "inYourAreaNamed": "Таны бүсэд · {{zone}}"
     }
 }

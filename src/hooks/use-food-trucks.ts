@@ -109,3 +109,56 @@ export default function useFoodTrucks() {
         reload: () => setRetry((value) => value + 1),
     };
 }
+
+/** A truck or store the customer can order from, as the "Near you" lists show it. */
+export type NearbyPlace = {
+    key: string;
+    kind: 'truck' | 'store';
+    name: string;
+    meta: string | null;
+    active: boolean;
+    coordinate: LatLng | null;
+    photoUrl: string | null;
+    truck?: TruckPin;
+    store?: StorePin;
+};
+
+/** Stores outside every zone still show when they're the closest: this many of them. */
+const NEAREST_STORES = 3;
+
+/** The border of the customer's zone, from the trucks that carry it. */
+export function zoneBorderOf(trucks: TruckPin[] | null, zoneId: string | null | undefined): LatLng[][] {
+    if (!zoneId) return [];
+    return (trucks ?? []).find((truck) => truck.zoneId === zoneId && truck.zoneBorder.length)?.zoneBorder ?? [];
+}
+
+/**
+ * The trucks serving the customer's zone (live first, offline last) and the stores inside
+ * it, or the closest stores when none is inside.
+ */
+export function nearbyPlaces(trucks: TruckPin[] | null, stores: StorePin[], zoneBorder: LatLng[][], offlineLabel: string): NearbyPlace[] {
+    const truckPlaces: NearbyPlace[] = (trucks ?? [])
+        .filter((truck) => truck.inZone)
+        .map((truck) => ({
+            key: `truck:${truck.id}`,
+            kind: 'truck',
+            name: truck.name,
+            meta: truck.live ? truck.distance : offlineLabel,
+            active: truck.live,
+            coordinate: truck.coordinate,
+            photoUrl: truck.photoUrl,
+            truck,
+        }));
+    const zoned = zoneBorder.length ? stores.filter((store) => insideZone(store.coordinate, zoneBorder)) : [];
+    const storePlaces: NearbyPlace[] = (zoned.length ? zoned : stores.slice(0, NEAREST_STORES)).map((store) => ({
+        key: `store:${store.key}`,
+        kind: 'store',
+        name: store.name,
+        meta: [store.statusText, store.distance].filter(Boolean).join(' · ') || null,
+        active: store.open,
+        coordinate: store.coordinate,
+        photoUrl: store.store?.logo_url ?? null,
+        store,
+    }));
+    return [...truckPlaces.filter((item) => item.active), ...storePlaces, ...truckPlaces.filter((item) => !item.active)];
+}

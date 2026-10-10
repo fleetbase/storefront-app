@@ -1537,6 +1537,18 @@
         "openHint": "Tap again to open",
         "viewAllOf": "Everything from {{name}}",
         "categoriesOf": "{{name}}",
-        "recenter": "Show my location"
+        "recenter": "Show my location",
+        "servesZone": "Serves {{zone}}",
+        "searchShort": "Search",
+        "promotions": "Promotions",
+        "showPromotions": "Show promotions",
+        "hidePromotions": "Hide promotions",
+        "promotionsHint": {
+            "one": "Pull up for 1 promotion",
+            "other": "Pull up for {{count}} promotions"
+        },
+        "noPromotions": "No promotions right now.",
+        "inYourArea": "In your area",
+        "inYourAreaNamed": "In your area · {{zone}}"
     }
 }

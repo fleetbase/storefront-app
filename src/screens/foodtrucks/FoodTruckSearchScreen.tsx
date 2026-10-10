@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, TextInput } from 'react-native';
+import { FlatList, Pressable, ScrollView, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMagnifyingGlass, faMagnifyingGlassMinus, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faMagnifyingGlass, faMagnifyingGlassMinus, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Product } from '@fleetbase/storefront';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useStorefront from '../../hooks/use-storefront';
-import useFoodTrucks, { type TruckPin } from '../../hooks/use-food-trucks';
+import useFoodTrucks, { nearbyPlaces, zoneBorderOf, type NearbyPlace, type TruckPin } from '../../hooks/use-food-trucks';
+import PlaceIcon from './PlaceIcon';
 import { truckProducts } from '../../commerce/food-trucks';
 import { serializeSdkResource } from '../../network/network-runtime';
 import { formatCurrency } from '../../utils/format';
@@ -32,7 +33,9 @@ const FoodTruckSearchScreen = () => {
     const { t } = useLanguage();
     const { storefront } = useStorefront();
     const { mode, ownerInfo } = useStorefrontRuntime();
-    const { trucks } = useFoodTrucks();
+    const { trucks, stores, zone } = useFoodTrucks();
+    // Before typing: the trucks and stores serving the customer's area.
+    const places = useMemo(() => nearbyPlaces(trucks, stores, zoneBorderOf(trucks, zone?.id), t('FoodTrucks.offline')), [stores, t, trucks, zone?.id]);
     const [query, setQuery] = useState('');
     const [from, setFrom] = useState<From>('all');
     const [storeResults, setStoreResults] = useState<Result[] | null>(null);
@@ -106,6 +109,14 @@ const FoodTruckSearchScreen = () => {
             return;
         }
         navigation.navigate('Product', { product: item.product, productId: item.summary.id, store: item.store, storeId: item.store?.id ?? item.summary.storeId });
+    };
+
+    const openPlace = (place: NearbyPlace) => {
+        if (place.truck) navigation.navigate('TruckMenu', { foodTruckId: place.truck.id, truck: place.truck.raw });
+        else if (place.store) {
+            if (mode === 'network') navigation.navigate('NetworkStore', { storeId: place.store.storeId });
+            else navigation.navigate('StoreHome');
+        }
     };
 
     const renderItem = ({ item }: { item: Result }) => {
@@ -201,7 +212,36 @@ const FoodTruckSearchScreen = () => {
                     </XStack>
                 )}
             </YStack>
-            {!trimmed ? (
+            {!trimmed && places.length > 0 ? (
+                <ScrollView keyboardShouldPersistTaps='handled' keyboardDismissMode='on-drag' showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 40 }}>
+                    <UIText variant='subheading' accessibilityRole='header' style={{ paddingTop: 6, paddingBottom: 4 }}>
+                        {zone?.name ? t('FoodTrucks.inYourAreaNamed', { zone: zone.name }) : t('FoodTrucks.inYourArea')}
+                    </UIText>
+                    {places.map((place: NearbyPlace) => {
+                        const kindLabel = place.kind === 'truck' ? t('FoodTrucks.kindTruck') : t('FoodTrucks.kindStore');
+                        return (
+                            <Pressable
+                                key={place.key}
+                                onPress={() => openPlace(place)}
+                                accessibilityRole='button'
+                                accessibilityLabel={[place.name, kindLabel, place.meta].filter(Boolean).join(', ')}
+                                style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderColor: theme.borderColor.val, opacity: pressed ? 0.85 : place.active ? 1 : 0.65 })}
+                            >
+                                <PlaceIcon kind={place.kind} active={place.active} size={44} />
+                                <YStack flex={1} minWidth={0} gap={2}>
+                                    <UIText variant='bodyStrong' numberOfLines={1}>
+                                        {place.name}
+                                    </UIText>
+                                    <UIText variant='caption' tone={place.active ? 'success' : 'secondary'} numberOfLines={1}>
+                                        {[kindLabel, place.meta].filter(Boolean).join(' · ')}
+                                    </UIText>
+                                </YStack>
+                                <FontAwesomeIcon icon={faChevronRight} size={13} color={theme.textSecondary.val} />
+                            </Pressable>
+                        );
+                    })}
+                </ScrollView>
+            ) : !trimmed ? (
                 <EmptyState icon={faMagnifyingGlass} title={t('FoodTrucks.searchIntro')} description={t('FoodTrucks.searchIntroBody')} />
             ) : firstSearch ? (
                 <YStack paddingHorizontal={space.gutter} gap={10} accessibilityLabel={t('FoodTrucks.searching')}>

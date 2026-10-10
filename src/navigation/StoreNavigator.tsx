@@ -211,6 +211,16 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
             FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
             TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
             Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+            Offers: { screen: screenSlot('offers.list'), options: { headerShown: false } },
+            // The store page and what it links to, opened from the trucks map and search.
+            StoreHome,
+            StoreCategory,
+            StoreCatalog,
+            StoreInfo,
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+            Notifications: { screen: screenSlot('notifications.inbox'), options: { headerShown: false } },
+            NotificationSettings: { screen: screenSlot('notifications.settings'), options: { headerShown: false } },
             Catalog: {
                 screen: screenSlot('catalog.index'),
                 options: {

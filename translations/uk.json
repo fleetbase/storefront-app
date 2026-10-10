@@ -1537,6 +1537,18 @@
         "openHint": "Торкніться ще раз, щоб відкрити",
         "viewAllOf": "Усе від {{name}}",
         "categoriesOf": "{{name}}",
-        "recenter": "Моє місцезнаходження"
+        "recenter": "Моє місцезнаходження",
+        "servesZone": "Обслуговує {{zone}}",
+        "searchShort": "Пошук",
+        "promotions": "Акції",
+        "showPromotions": "Показати акції",
+        "hidePromotions": "Сховати акції",
+        "promotionsHint": {
+            "one": "Потягніть угору: 1 акція",
+            "other": "Потягніть угору: акцій — {{count}}"
+        },
+        "noPromotions": "Зараз акцій немає.",
+        "inYourArea": "У вашому районі",
+        "inYourAreaNamed": "У вашому районі · {{zone}}"
     }
 }
