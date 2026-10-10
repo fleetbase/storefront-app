@@ -20,7 +20,6 @@ import DeleteAccountScreen from '../screens/DeleteAccountScreen';
 import AddPhoneScreen from '../screens/auth/AddPhoneScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
-import FoodTruckScreen from '../screens/FoodTruckScreen';
 import CartButton from '../components/CartButton';
 import LocationPicker from '../components/LocationPicker';
 import useCart from '../hooks/use-cart';
@@ -49,8 +48,24 @@ function getTabConfig(name, key, defaultValue = null) {
     return defaultValue;
 }
 
+const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
+
+// The configured tabs; when the food trucks map is the home screen its tab comes first.
+function homeTabs(): string[] {
+    const tabs = toArray(storefrontConfig('storeNavigator.tabs')).filter(Boolean);
+    if (!FOOD_TRUCKS_HOME) return tabs;
+    return ['StoreFoodTruckTab', ...tabs.filter((tab) => tab !== 'StoreFoodTruckTab')];
+}
+
+function initialTab(): string | undefined {
+    const tabs = homeTabs();
+    if (FOOD_TRUCKS_HOME) return 'StoreFoodTruckTab';
+    const configured = toArray(storefrontConfig('storeNavigator.defaultTab'))[0];
+    return tabs.includes(configured) ? configured : tabs[0];
+}
+
 function createTabScreens(optionsCallbacks = {}) {
-    const tabs = toArray(storefrontConfig('storeNavigator.tabs'));
+    const tabs = homeTabs();
     const screens = {
         StoreHomeTab: {
             screen: StoreHomeTab,
@@ -166,11 +181,14 @@ export const StoreFoodTruckTab = createNativeStackNavigator({
     initialRouteName: 'FoodTruckHome',
     screens: {
         FoodTruckHome: {
-            screen: FoodTruckScreen,
+            screen: screenSlot('foodTrucks.home'),
             options: {
                 headerShown: false,
             },
         },
+        FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
+        TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+        Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
         Catalog: {
             screen: screenSlot('catalog.index'),
             options: {
@@ -387,6 +405,7 @@ const StoreTabIcon = ({ routeName, color }: { routeName: string; color: string }
 // Which tabs show, their order and labels stay configurable (storeNavigator.tabs, *_TAB_LABEL_*).
 const StoreNavigator = createBottomTabNavigator({
     layout: StoreLayout,
+    initialRouteName: initialTab(),
     tabBar: (props: any) => <TabBar {...props} />,
     screenOptions: ({ route }: any) => ({
         headerShown: false,

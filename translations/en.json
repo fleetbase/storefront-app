@@ -431,7 +431,8 @@
             "search": "Search",
             "map": "Map",
             "cart": "Cart",
-            "profile": "Profile"
+            "profile": "Profile",
+            "trucks": "Trucks"
         },
         "sort": {
             "nearest": "Nearest",
@@ -1453,5 +1454,81 @@
         "resendIn": "Resend code in {{seconds}}s",
         "resend": "Resend code",
         "changeNumber": "Change number"
+    },
+    "FoodTrucks": {
+        "title": "Food trucks",
+        "all": "All →",
+        "allShort": "All",
+        "back": "Back",
+        "browseCategories": "Browse categories",
+        "cancel": "Cancel",
+        "cart": {
+            "one": "View cart · 1 item",
+            "other": "View cart · {{count}} items"
+        },
+        "categories": "Categories",
+        "changeAddress": "Change address",
+        "clearSearch": "Clear search",
+        "counts": "Trucks: {{trucks}} · Stores: {{stores}}",
+        "deliverTo": "Deliver to",
+        "enterAddress": "Enter your address",
+        "errorTitle": "Couldn't load the food trucks",
+        "greeting": "Hungry?",
+        "greetingNamed": "Hi {{name}}, hungry?",
+        "inZone": "Trucks are serving {{zone}}",
+        "list": "Show as list",
+        "live": "Live",
+        "liveCardLabel": {
+            "one": "1 food truck live near you. Show on the map",
+            "other": "{{count}} food trucks live near you. Show on the map"
+        },
+        "liveCardNoneLabel": "No food trucks live near you. Show on the map",
+        "liveLine": {
+            "one": "1 truck in {{zone}} · nearest {{distance}}",
+            "other": "{{count}} trucks in {{zone}} · nearest {{distance}}"
+        },
+        "map": "Show on map",
+        "mapLabel": "Map of food trucks and stores",
+        "menu": "Menu",
+        "menuEmpty": "No menu yet",
+        "menuEmptyBody": "This truck hasn't added anything to its menu.",
+        "noMatches": "Nothing matches “{{query}}” near you",
+        "noMatchesBody": "Check the spelling, or look at what the trucks near you are serving.",
+        "noneInZone": "No trucks in {{zone}} right now",
+        "noneLive": "None live",
+        "noneLiveLine": {
+            "zero": "No trucks are out right now",
+            "one": "None in your zone · 1 truck out nearby",
+            "other": "None in your zone · {{count}} trucks out nearby"
+        },
+        "notHere": "doesn't serve your address",
+        "offer": "Offer",
+        "offline": "Offline",
+        "orderFromStore": "Order from a store",
+        "outsideBody": "The trucks serve {{zones}}. Try another address, or order from a store.",
+        "outsideTitle": "No trucks serve this address",
+        "outsideZones": "Your address is outside the trucks' zones",
+        "runBy": "Run by {{store}}",
+        "sale": "Sale",
+        "searchIntro": "Search trucks and menus",
+        "searchIntroBody": "Find a dish, a drink or a truck by name.",
+        "searchPlaceholder": "Search trucks and menus",
+        "searching": "Searching",
+        "showAs": "Show trucks as",
+        "showOnMap": "Show on the map",
+        "showResultsFrom": "Show results from",
+        "truckMissing": "This truck isn't available",
+        "truckOfflineNotice": "This truck is offline. You can look at the menu, but it isn't taking orders.",
+        "truckOfflineShort": "This truck is offline",
+        "truckOutsideNotice": "This truck serves {{zone}}, not your address. You can look at the menu, but it can't deliver to you.",
+        "truckOutsideShort": "This truck doesn't serve your address",
+        "whereBody": "Enter your address to see the trucks that serve it.",
+        "whereTitle": "Where should we bring it?",
+        "zoneUnknown": "Trucks near you",
+        "layer": {
+            "all": "All",
+            "trucks": "Trucks",
+            "stores": "Stores"
+        }
     }
 }

@@ -15,6 +15,11 @@ export const DefaultConfig = {
         defaultTab: [branding.navigation.store.defaultTab],
         tabBarBackgroundColor: branding.navigation.store.tabBar.background,
     },
+    // `foodTrucks` opens the app on the food trucks map instead of the store or Network home.
+    homeScreen: branding.navigation.home ?? 'store',
+    networkNavigator: {
+        foodTrucks: branding.navigation.home === 'foodTrucks' || branding.navigation.network?.foodTrucks === true,
+    },
     termsUrl: config('TOS_URL'),
     privacyUrl: config('PRIVACY_URL'),
     defaultMapType: config('DEFAULT_MAP_TYPE', 'standard'),

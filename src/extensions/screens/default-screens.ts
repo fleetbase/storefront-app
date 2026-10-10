@@ -17,8 +17,11 @@ export const defaultScreens: ScreenRegistryDefinition = {
     'store.info': { load: () => import('../../screens/StoreInfoScreen') },
     // A category opens as its section on the store page.
     'catalog.category': { load: () => import('../../screens/StoreCategoryJumpScreen') },
-    'catalog.index': { load: () => import('../../screens/CatalogScreen') },
-    'catalog.foodTruckCategory': { load: () => import('../../screens/CatalogCategoryScreen') },
+    'catalog.index': { load: () => import('../../screens/foodtrucks/TruckMenuScreen') },
+    'catalog.foodTruckCategory': { load: () => import('../../screens/foodtrucks/TruckMenuScreen') },
+    'foodTrucks.home': { load: () => import('../../screens/foodtrucks/FoodTrucksScreen') },
+    'foodTrucks.search': { load: () => import('../../screens/foodtrucks/FoodTruckSearchScreen') },
+    'foodTrucks.menu': { load: () => import('../../screens/foodtrucks/TruckMenuScreen') },
     // One product screen for both editions (the Network one; it hides "Sold by" in a single store's app).
     'product.detail': { load: () => import('../../screens/network/NetworkProductScreen') },
     cart: { load: () => import('../../screens/CartScreen') },

@@ -37,6 +37,8 @@ export const DEFAULT_BRANDING: Required<Omit<BrandingConfig, 'name'>> = {
             defaultTab: 'StoreHomeTab',
             tabBar: { background: 'blur' },
         },
+        home: 'store',
+        network: { foodTrucks: false },
     },
     screens: {},
 };

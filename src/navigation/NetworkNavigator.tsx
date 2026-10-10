@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCompass, faMagnifyingGlass, faMap, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faMagnifyingGlass, faMap, faShoppingCart, faTruck, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Text, XStack } from 'tamagui';
 import BackButton from '../components/BackButton';
 import StoreLayout from '../layouts/StoreLayout';
@@ -12,6 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { totalCartQuantity } from '../network/network-runtime';
 import { screenSlot } from '../extensions';
 import { TabBar, UIText } from '../ui';
+import { storefrontConfig } from '../utils';
 
 // Store, category and product screens are pushed from the Home, Search and Map
 // stacks. Deep-link paths are declared only on the Home stack's copies so each
@@ -74,7 +75,21 @@ const NetworkMapStack = createNativeStackNavigator({
     },
 });
 
+// The food trucks map: member stores' trucks alongside the stores themselves.
+const NetworkFoodTruckStack = createNativeStackNavigator({
+    screens: {
+        FoodTruckHome: { screen: screenSlot('foodTrucks.home'), linking: { path: 'trucks' }, options: { headerShown: false } },
+        FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), linking: undefined, options: { headerShown: false, animation: 'fade' } },
+        TruckMenu: { screen: screenSlot('foodTrucks.menu'), linking: { path: 'trucks/:foodTruckId' }, options: { headerShown: false } },
+        ...createSharedNetworkScreens(false),
+    },
+});
+
+const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
+const FOOD_TRUCKS_TAB = FOOD_TRUCKS_HOME || storefrontConfig('networkNavigator.foodTrucks') === true;
+
 const icons: Record<string, any> = {
+    NetworkFoodTruckTab: faTruck,
     NetworkHomeTab: faCompass,
     NetworkSearchTab: faMagnifyingGlass,
     NetworkMapTab: faMap,
@@ -103,19 +118,30 @@ const NetworkTabIcon = ({ routeName, color }: { routeName: string; color: string
     );
 };
 
+function foodTruckTab() {
+    return {
+        NetworkFoodTruckTab: {
+            screen: NetworkFoodTruckStack,
+            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.trucks' color={color} focused={focused} /> },
+        },
+    };
+}
+
 const NetworkNavigator = createBottomTabNavigator({
     layout: StoreLayout,
-    initialRouteName: 'NetworkHomeTab',
+    initialRouteName: FOOD_TRUCKS_HOME ? 'NetworkFoodTruckTab' : 'NetworkHomeTab',
     tabBar: (props: any) => <TabBar {...props} />,
     screenOptions: ({ route }: any) => ({
         headerShown: false,
         tabBarIcon: ({ color }: any) => <NetworkTabIcon routeName={route.name} color={color} />,
     }),
     screens: {
+        ...(FOOD_TRUCKS_HOME ? foodTruckTab() : {}),
         NetworkHomeTab: {
             screen: NetworkHomeStack,
             options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.discover' color={color} focused={focused} /> },
         },
+        ...(FOOD_TRUCKS_TAB && !FOOD_TRUCKS_HOME ? foodTruckTab() : {}),
         NetworkSearchTab: {
             screen: NetworkSearchStack,
             options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.search' color={color} focused={focused} /> },

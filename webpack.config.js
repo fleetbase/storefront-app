@@ -25,6 +25,8 @@ const generateConfig = () => {
         'DEFAULT_COORDINATES',
         'STORE_NAVIGATOR_TABS',
         'STORE_NAVIGATOR_DEFAULT_TAB',
+        'HOME_SCREEN',
+        'NETWORK_FOOD_TRUCKS_TAB',
         'STORE_FOOD_TRUCK_TAB_ICON',
         'DEFAULT_SERVICE_AREA',
         'BOOTSCREEN_BACKGROUND_COLOR',

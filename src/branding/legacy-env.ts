@@ -105,7 +105,12 @@ export function brandingFromLegacyEnv(env: EnvReader): BrandingConfig {
     assignIfPresent(store, 'tabs', env('STORE_NAVIGATOR_TABS'), toList);
     assignIfPresent(store, 'defaultTab', env('STORE_NAVIGATOR_DEFAULT_TAB'), (value) => toList(value)[0]);
     assignIfPresent(store, 'tabBar', env('STORE_NAVIGATOR_TAB_BAR_BG'), (value) => ({ background: value.trim() }));
-    if (Object.keys(store).length) branding.navigation = { store };
+    const navigation: Record<string, any> = {};
+    if (Object.keys(store).length) navigation.store = store;
+    const home = env('HOME_SCREEN');
+    if (present(home)) navigation.home = home!.trim() === 'foodTrucks' ? 'foodTrucks' : 'store';
+    if (present(env('NETWORK_FOOD_TRUCKS_TAB'))) navigation.network = { foodTrucks: ['1', 'true', 'yes'].includes(env('NETWORK_FOOD_TRUCKS_TAB')!.trim().toLowerCase()) };
+    if (Object.keys(navigation).length) branding.navigation = navigation;
 
     return branding;
 }
@@ -139,4 +144,6 @@ export const LEGACY_BRANDING_ENV_KEYS = [
     'STORE_NAVIGATOR_TABS',
     'STORE_NAVIGATOR_DEFAULT_TAB',
     'STORE_NAVIGATOR_TAB_BAR_BG',
+    'HOME_SCREEN',
+    'NETWORK_FOOD_TRUCKS_TAB',
 ] as const;

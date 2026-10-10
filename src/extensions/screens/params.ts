@@ -15,6 +15,9 @@ export type ScreenParamMap = {
     'catalog.category': { storeId?: string; categoryId?: string; category?: Serialized };
     'catalog.index': Serialized | undefined;
     'catalog.foodTruckCategory': Serialized | undefined;
+    'foodTrucks.home': undefined;
+    'foodTrucks.search': undefined;
+    'foodTrucks.menu': { foodTruckId: string; truck?: Serialized; categoryId?: string | null };
     'product.detail': { storeId?: string; productId?: string; product?: Serialized; quantity?: number; [key: string]: any };
     cart: undefined;
     'cart.item': { cartItem?: Serialized; product?: Serialized; [key: string]: any };

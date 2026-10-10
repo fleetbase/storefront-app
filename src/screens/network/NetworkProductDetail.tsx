@@ -106,7 +106,9 @@ export default function NetworkProductDetail({ params }: { params: any }) {
         ? t('ProductDetail.unavailable')
         : store?.status.state === 'offline'
           ? t('ProductDetail.storeClosed')
-          : missing.length > 0
+          : params.unavailableReason
+            ? params.unavailableReason
+            : missing.length > 0
             ? t('ProductDetail.chooseRequired', { groups: missing.map((group) => group.name.toLowerCase()).join(t('ProductDetail.and')) })
             : isBooking && !scheduledAt
               ? t('Booking.chooseToContinue')

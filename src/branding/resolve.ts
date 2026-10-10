@@ -31,7 +31,7 @@ export type ResolvedBranding = {
     };
     assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null };
     boot: { background: string[] };
-    navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } } };
+    navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } }; home: 'store' | 'foodTrucks'; network: { foodTrucks: boolean } };
     screens: BrandingScreens;
 };
 

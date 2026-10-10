@@ -15,6 +15,7 @@ import { BUNDLED_ASSET_KEYS } from './asset-keys';
  */
 export const BRANDING_SCHEMA_VERSION = 1 as const;
 
+export const HOME_SCREENS = ['store', 'foodTrucks'] as const;
 export const STORE_TABS = ['StoreHomeTab', 'StoreSearchTab', 'StoreMapTab', 'StoreCartTab', 'StoreProfileTab', 'StoreFoodTruckTab'] as const;
 
 export const ColorValue = z.string().max(40).refine(isColor, { message: 'Expected a hex, rgb()/rgba() or named (white, black, transparent) color' });
@@ -112,6 +113,15 @@ export const NavigationSchema = z
                 tabs: z.array(z.enum(STORE_TABS)).min(1).max(6),
                 defaultTab: z.enum(STORE_TABS),
                 tabBar: z.object({ background: z.union([z.literal('blur'), ThemeKey]) }).partial().strict(),
+            })
+            .partial()
+            .strict(),
+        /** The app's first screen: the store (or Network) home, or the food trucks map. */
+        home: z.enum(HOME_SCREENS),
+        network: z
+            .object({
+                /** Show the Trucks tab in a Network (always shown when it is the home screen). */
+                foodTrucks: z.boolean(),
             })
             .partial()
             .strict(),
