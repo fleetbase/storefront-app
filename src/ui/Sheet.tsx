@@ -18,6 +18,8 @@ export type SheetProps = {
     /** Hide the close button for decision sheets that must be answered. */
     dismissible?: boolean;
     maxHeightRatio?: number;
+    /** False when the content scrolls itself (e.g. a FlatList), which can't sit inside the sheet's ScrollView. */
+    scrollable?: boolean;
 };
 
 /**
@@ -30,7 +32,7 @@ const OPEN_MS = 260;
 const CLOSE_MS = 200;
 const nativeDriver = Platform.OS !== 'web';
 
-export function Sheet({ open, onClose, title, children, footer, dismissible = true, maxHeightRatio = 0.88 }: SheetProps) {
+export function Sheet({ open, onClose, title, children, footer, dismissible = true, maxHeightRatio = 0.88, scrollable = true }: SheetProps) {
     const insets = useSafeAreaInsets();
     const { t } = useLanguage();
     // Stays mounted while the closing animation runs.
@@ -91,14 +93,20 @@ export function Sheet({ open, onClose, title, children, footer, dismissible = tr
                                     {dismissible && <IconButton icon={faXmark} accessibilityLabel={t('UI.close')} onPress={onClose} />}
                                 </XStack>
                             )}
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: footer ? 12 : insets.bottom + 20 }}
-                                keyboardShouldPersistTaps='handled'
-                            >
-                                {children}
-                            </ScrollView>
+                            {scrollable ? (
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: footer ? 12 : insets.bottom + 20 }}
+                                    keyboardShouldPersistTaps='handled'
+                                >
+                                    {children}
+                                </ScrollView>
+                            ) : (
+                                <YStack flexShrink={1} paddingHorizontal={20} paddingTop={8} paddingBottom={footer ? 12 : insets.bottom + 20}>
+                                    {children}
+                                </YStack>
+                            )}
                             {footer && (
                                 <YStack paddingHorizontal={20} paddingTop={12} paddingBottom={insets.bottom + 16} borderTopWidth={1} borderColor='$borderColor'>
                                     {footer}

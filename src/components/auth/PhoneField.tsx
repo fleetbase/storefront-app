@@ -117,7 +117,7 @@ export default function PhoneField({
                 />
             </XStack>
 
-            <Sheet open={picking} onClose={() => setPicking(false)} title={t('Auth.chooseCountry')} maxHeightRatio={0.85}>
+            <Sheet open={picking} onClose={() => setPicking(false)} title={t('Auth.chooseCountry')} maxHeightRatio={0.85} scrollable={false}>
                 <YStack gap={10}>
                     <TextField value={search} onChangeText={setSearch} placeholder={t('Auth.searchCountry')} accessibilityLabel={t('Auth.searchCountry')} height={44} autoCorrect={false} />
                     <FlatList

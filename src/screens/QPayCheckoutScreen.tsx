@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { Image } from 'react-native';
 import { PortalHost } from '@gorhom/portal';
 import { XStack, YStack } from 'tamagui';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -11,6 +12,8 @@ import useFooterOffset from '../hooks/use-footer-offset';
 import { wasAccessedFromCartModal, firstRouteName } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, TextField, UIText, radius } from '../ui';
+
+const QPAY_ICON = require('../../assets/images/payment-logos/qpay-icon.png');
 
 const QPayCheckoutScreen = () => {
     const navigation = useNavigation<any>();
@@ -63,11 +66,7 @@ const QPayCheckoutScreen = () => {
                 footerOffset={footerOffset}
                 payment={
                     <XStack gap={12} alignItems='center' minHeight={52}>
-                        <YStack width={40} height={28} borderRadius={6} backgroundColor='$surface2' alignItems='center' justifyContent='center'>
-                            <UIText variant='captionStrong' style={{ fontSize: 10 }}>
-                                QPay
-                            </UIText>
-                        </YStack>
+                        <Image source={QPAY_ICON} accessibilityIgnoresInvertColors style={{ width: 40, height: 40, borderRadius: 10 }} />
                         <YStack flex={1}>
                             <UIText variant='bodyStrong'>QPay</UIText>
                             <UIText variant='caption' tone='secondary'>
@@ -81,7 +80,15 @@ const QPayCheckoutScreen = () => {
                         <Card padding={14} gap={10}>
                             <UIText variant='subheading'>{t('QPayCheckoutScreen.vatRegistration')}</UIText>
                             <QPayTaxRegistrationSwitch onChange={changeTaxType} isPersonal={!isCompany} />
-                            {isCompany && <TextField value={registrationNumber} onChangeText={changeRegistrationNumber} placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')} accessibilityLabel={t('QPayCheckoutScreen.companyRegistrationNumber')} style={{ borderRadius: radius.button }} />}
+                            {isCompany && (
+                                <TextField
+                                    value={registrationNumber}
+                                    onChangeText={changeRegistrationNumber}
+                                    placeholder={t('QPayCheckoutScreen.companyRegistrationNumber')}
+                                    accessibilityLabel={t('QPayCheckoutScreen.companyRegistrationNumber')}
+                                    style={{ borderRadius: radius.button }}
+                                />
+                            )}
                         </Card>
                     ) : null
                 }
