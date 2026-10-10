@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import Config from 'react-native-config';
+import Config from '../env';
 import { Network, Store, StoreLocation } from '@fleetbase/storefront';
 import useStorage, { get as getStoredValue, remove as removeStoredValue } from '../hooks/use-storage';
 import useStorefront from '../hooks/use-storefront';

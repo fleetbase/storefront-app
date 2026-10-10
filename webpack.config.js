@@ -1,3 +1,4 @@
+require('./scripts/link-brand').linkBrand(__dirname);
 require('dotenv').config();
 
 const path = require('path');

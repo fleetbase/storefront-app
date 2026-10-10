@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import Storefront from '@fleetbase/storefront';
-import Config from 'react-native-config';
+import Config from '../env';
 import { getString } from './use-storage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { withHeaders } from '../commerce/http';

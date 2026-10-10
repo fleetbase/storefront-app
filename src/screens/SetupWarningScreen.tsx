@@ -1,5 +1,5 @@
 import React from 'react';
-import Config from 'react-native-config';
+import Config from '../env';
 import { SafeAreaView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faExclamationTriangle, faExclamation } from '@fortawesome/free-solid-svg-icons';

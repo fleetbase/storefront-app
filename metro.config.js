@@ -1,4 +1,8 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+// Point the app at brand/ and env.dev.json on every Metro start (Babel's config runs it too,
+// but only when a file is transformed, which a warm cache skips).
+require('./scripts/link-brand').linkBrand(__dirname);
 const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);

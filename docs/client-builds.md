@@ -83,4 +83,4 @@ Then build and check the client's screens against the release notes.
 { "STOREFRONT_KEY": "store_…", "FLEETBASE_KEY": "flb_…" }
 ```
 
-Create, edit or delete it, then restart Metro with `--reset-cache` and reload. Release builds ignore it. Native-only values (such as the Google Maps key) still come from the build.
+After creating or deleting it, restart Metro (it links the file on start); edits to an existing file apply on reload. Release builds ignore it. Native-only values (such as the Google Maps key) still come from the build.

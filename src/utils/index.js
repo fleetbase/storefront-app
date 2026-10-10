@@ -1,4 +1,4 @@
-import Config from 'react-native-config';
+import Config from '../env';
 import { Platform, ActionSheetIOS, Alert } from 'react-native';
 import { Collection } from '@fleetbase/sdk';
 import { lookup, FoodTruck } from '@fleetbase/storefront';
