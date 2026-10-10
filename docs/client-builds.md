@@ -74,3 +74,13 @@ yarn typecheck:strict
 ```
 
 Then build and check the client's screens against the release notes.
+
+## Switching storefronts in development
+
+`.env` values are compiled into native builds, so changing `STOREFRONT_KEY` normally needs a rebuild. In debug builds, values in a git-ignored `env.dev.json` at the repository root replace the `.env` values:
+
+```json
+{ "STOREFRONT_KEY": "store_…", "FLEETBASE_KEY": "flb_…" }
+```
+
+Create, edit or delete it, then restart Metro with `--reset-cache` and reload. Release builds ignore it. Native-only values (such as the Google Maps key) still come from the build.

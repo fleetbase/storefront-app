@@ -92,6 +92,7 @@ android/app/google-services.json
 #
 storefront.config.js
 src/generated/
+env.dev.json
 .tamagui
 vendor
 

@@ -89,12 +89,21 @@ function linkBrand(root = path.resolve(__dirname, '..')) {
         `${HEADER}${fontImports}${fontImports ? '\n\n' : ''}/** Font files bundled from brand/fonts, by PostScript name, with their URLs on the web. */\nexport const brandFontFiles: Record<string, string | null> = {\n${fontNames.map((name, index) => `    ${JSON.stringify(name)}: f${index} as unknown as string,`).join('\n')}${fontNames.length ? '\n' : ''}};\n`
     );
 
-    return { brandConfig, brandExtensions, locales, fonts: fontNames };
+    // Development env overrides: env.dev.json (git-ignored) at the repository root.
+    const envOverrides = exists(path.join(root, 'env.dev.json'));
+    writeIfChanged(
+        path.join(outDir, 'env-overrides.ts'),
+        envOverrides
+            ? `${HEADER}import envOverrides from '${rel('env.dev.json')}';\n\nexport default envOverrides as Record<string, string>;\n`
+            : `${HEADER}const envOverrides: Record<string, string> = {};\n\nexport default envOverrides;\n`
+    );
+
+    return { brandConfig, brandExtensions, locales, fonts: fontNames, envOverrides };
 }
 
 module.exports = { linkBrand };
 
 if (require.main === module) {
     const result = linkBrand();
-    console.log(`[link-brand] branding: ${result.brandConfig}, extensions: ${result.brandExtensions}, translations: ${result.locales.join(', ') || 'none'}, fonts: ${result.fonts.length}`);
+    console.log(`[link-brand] branding: ${result.brandConfig}, extensions: ${result.brandExtensions}, translations: ${result.locales.join(', ') || 'none'}, fonts: ${result.fonts.length}${result.envOverrides ? ', env.dev.json: yes' : ''}`);
 }
