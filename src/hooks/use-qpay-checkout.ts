@@ -272,11 +272,26 @@ export default function useQPayCheckout({ onOrderComplete }) {
                 handleOrderCompletion(order);
             }
         } catch (err) {
-            console.error('Error checking order status:', err);
+            // iOS cuts requests off while the app is in the background (e.g. in a bank app),
+            // which surfaces as a network error: expected, so it isn't logged as an error, and
+            // the status is checked again shortly once the app is back in the foreground.
+            if (err?.code === 'NETWORK_ERROR') {
+                console.warn('Order status check interrupted; retrying');
+                setTimeout(() => {
+                    if (AppState.currentState === 'active' && !hasOrderCompleted.current) checkOrderStatusRef.current?.();
+                }, 1500);
+            } else {
+                console.error('Error checking order status:', err);
+            }
         } finally {
             isCheckingStatus.current = false;
         }
     }, [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion]);
+
+    const checkOrderStatusRef = useRef(null);
+    useEffect(() => {
+        checkOrderStatusRef.current = checkOrderStatus;
+    }, [checkOrderStatus]);
 
     // Setup gateway on mount or when dependencies change
     useEffect(() => {
