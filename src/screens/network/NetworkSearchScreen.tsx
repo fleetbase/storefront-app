@@ -15,8 +15,8 @@ import { formatCurrency } from '../../utils/format';
 import { getScopedStorageKey, serializeSdkResource } from '../../network/network-runtime';
 import { rememberStores } from '../../network/store-names';
 import { addRecentSearch, removeRecentSearch } from '../../network/recent-searches';
-import {
 import NearbyPlacesSection from '../foodtrucks/NearbyPlacesSection';
+import {
     Badge,
     Chip,
     EmptyState,
