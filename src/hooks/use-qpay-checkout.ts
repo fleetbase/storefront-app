@@ -304,7 +304,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const startPayment = useCallback(() => {
         paymentStarted.current = true;
         setPaymentError(null);
-        setPaymentStage((stage) => (stage === 'not_received' || stage === 'failed' ? 'idle' : stage));
+        setPaymentStage((stage) => (stage === 'verifying' || stage === 'not_received' || stage === 'failed' ? 'idle' : stage));
     }, []);
 
     // "Check again": ask QPay once more.

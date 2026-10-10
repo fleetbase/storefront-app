@@ -327,7 +327,9 @@
             "backToCheckout": "Back to checkout",
             "failedTitle": "Payment wasn't completed",
             "failedBody": "Your payment didn't go through. You can try again.",
-            "tryAgain": "Try again"
+            "tryAgain": "Try again",
+            "verifyingHint": "If your bank app didn't open the payment, choose your bank again.",
+            "chooseBankAgain": "Choose bank again"
         }
     },
     "SavedLocationScreen": {

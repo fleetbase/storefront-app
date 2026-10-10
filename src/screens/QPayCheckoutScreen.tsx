@@ -72,9 +72,10 @@ const QPayCheckoutScreen = () => {
         [changeRegistrationNumber, setIsPersonal]
     );
 
-    // Once the payment is being checked or confirmed, the bank list makes way for the status.
+    // Once the payment is confirmed, the bank list makes way for the status. While it is only
+    // being checked the list stays usable: the bank app may not have opened the payment.
     useEffect(() => {
-        if (paymentStage === 'verifying' || paymentStage === 'paid' || paymentStage === 'slow') paymentSheetRef.current?.close?.();
+        if (paymentStage === 'paid' || paymentStage === 'slow') paymentSheetRef.current?.close?.();
     }, [paymentStage]);
 
     useEffect(() => {
@@ -121,7 +122,7 @@ const QPayCheckoutScreen = () => {
                     ) : null
                 }
             />
-            <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />
+            <QPayPaymentSheet ref={paymentSheetRef} invoice={invoice} portalHost={portalHost} onBankSelect={startPayment} onBottomSheetPositionChanged={setIsBottomSheetPresenting} />
             <QPayPaymentStatus
                 stage={paymentStage}
                 payment={paymentInfo}
