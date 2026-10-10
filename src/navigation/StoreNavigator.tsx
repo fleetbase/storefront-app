@@ -298,6 +298,8 @@ export const StoreSearchTab = createNativeStackNavigator({
     screens: withCustomRoutes(
         {
             StoreSearch,
+            // Trucks in the customer's area open from search.
+            TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
             Product: {
                 screen: screenSlot('product.detail'),
                 options: {

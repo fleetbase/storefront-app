@@ -12,6 +12,7 @@ import useStorefrontInfo from '../hooks/use-storefront-info';
 import useStorage from '../hooks/use-storage';
 import { getScopedStorageKey } from '../network/network-runtime';
 import { addRecentSearch, removeRecentSearch } from '../network/recent-searches';
+import NearbyPlacesSection from './foodtrucks/NearbyPlacesSection';
 import { Chip, EmptyState, ErrorState, IconButton, ProductRow, Skeleton, UIText, productSummary, radius, space } from '../ui';
 
 const SEARCH_DELAY_MS = 300;
@@ -101,7 +102,16 @@ const StoreSearchScreen = () => {
                 <UIText variant='title' accessibilityRole='header'>
                     {t('StoreSearch.title')}
                 </UIText>
-                <XStack height={50} alignItems='center' gap={10} paddingLeft={14} paddingRight={6} borderRadius={radius.button} borderWidth={2} borderColor={trimmed ? '$primary' : '$borderColor'}>
+                <XStack
+                    height={50}
+                    alignItems='center'
+                    gap={10}
+                    paddingLeft={14}
+                    paddingRight={6}
+                    borderRadius={radius.button}
+                    borderWidth={2}
+                    borderColor={trimmed ? '$primary' : '$borderColor'}
+                >
                     <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                     <TextInput
                         value={query}
@@ -114,7 +124,11 @@ const StoreSearchScreen = () => {
                         autoCorrect={false}
                         style={{ flex: 1, height: '100%', fontSize: 16, color: theme.textPrimary.val, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null) }}
                     />
-                    {refreshing && <UIText variant='caption' tone='secondary' accessibilityLiveRegion='polite'>{t('StoreSearch.updating')}</UIText>}
+                    {refreshing && (
+                        <UIText variant='caption' tone='secondary' accessibilityLiveRegion='polite'>
+                            {t('StoreSearch.updating')}
+                        </UIText>
+                    )}
                     {!!query && <IconButton icon={faXmark} size={36} accessibilityLabel={t('StoreSearch.clear')} onPress={() => setQuery('')} />}
                 </XStack>
             </YStack>
@@ -128,16 +142,20 @@ const StoreSearchScreen = () => {
                     keyboardShouldPersistTaps='handled'
                     contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24 }}
                     ListHeaderComponent={
-                        recents.length > 0 ? (
-                            <XStack justifyContent='space-between' alignItems='center'>
-                                <UIText variant='subheading'>{t('StoreSearch.recent')}</UIText>
-                                <Pressable onPress={() => setRecents([])} accessibilityRole='button' style={{ minHeight: 40, justifyContent: 'center' }}>
-                                    <UIText variant='captionStrong' tone='brand'>
-                                        {t('StoreSearch.clearRecent')}
-                                    </UIText>
-                                </Pressable>
-                            </XStack>
-                        ) : null
+                        <YStack gap={recents.length > 0 ? 18 : 0}>
+                            {/* Trucks and stores serving the customer's area (only when the store runs food trucks). */}
+                            <NearbyPlacesSection />
+                            {recents.length > 0 ? (
+                                <XStack justifyContent='space-between' alignItems='center'>
+                                    <UIText variant='subheading'>{t('StoreSearch.recent')}</UIText>
+                                    <Pressable onPress={() => setRecents([])} accessibilityRole='button' style={{ minHeight: 40, justifyContent: 'center' }}>
+                                        <UIText variant='captionStrong' tone='brand'>
+                                            {t('StoreSearch.clearRecent')}
+                                        </UIText>
+                                    </Pressable>
+                                </XStack>
+                            ) : null}
+                        </YStack>
                     }
                     renderItem={({ item }) => (
                         <XStack alignItems='center' gap={12} minHeight={48} borderBottomWidth={1} borderColor='$borderColor'>
@@ -145,7 +163,13 @@ const StoreSearchScreen = () => {
                                 <FontAwesomeIcon icon={faClockRotateLeft} size={14} color={theme.textSecondary.val} />
                                 <UIText>{item}</UIText>
                             </Pressable>
-                            <IconButton icon={faXmark} size={36} variant='plain' accessibilityLabel={t('StoreSearch.removeRecent', { term: item })} onPress={() => setRecents(removeRecentSearch(recents, item))} />
+                            <IconButton
+                                icon={faXmark}
+                                size={36}
+                                variant='plain'
+                                accessibilityLabel={t('StoreSearch.removeRecent', { term: item })}
+                                onPress={() => setRecents(removeRecentSearch(recents, item))}
+                            />
                         </XStack>
                     )}
                     ListFooterComponent={

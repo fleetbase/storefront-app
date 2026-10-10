@@ -78,6 +78,7 @@ const NetworkHomeStack = createNativeStackNavigator({
 const NetworkSearchStack = createNativeStackNavigator({
     screens: {
         NetworkSearch: { screen: screenSlot('network.search'), linking: { path: 'search' }, options: { headerShown: false } },
+        TruckMenu: { screen: screenSlot('foodTrucks.menu'), linking: undefined, options: { headerShown: false } },
         ...withCustomRoutes(createSharedNetworkScreens(false), customNavigation.routes, 'network'),
     },
 });

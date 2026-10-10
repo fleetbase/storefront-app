@@ -112,6 +112,8 @@ const TruckMenuScreen = () => {
     const storeName = truck.storeName ?? ownerInfo?.name ?? null;
     const storeLogo = store?.logo_url ?? null;
     const backdrop = truck.photoUrl ?? store?.backdrop_url ?? null;
+    // Trucks search lives on the trucks stack; opened from the Search tab there is none.
+    const canSearch = (navigation.getState?.()?.routeNames ?? []).includes('FoodTruckSearch');
 
     const openProduct = (product: any) =>
         navigation.navigate('Product', {
@@ -125,7 +127,13 @@ const TruckMenuScreen = () => {
 
     const categoryTabs = (
         <YStack backgroundColor='$background' borderBottomWidth={1} borderColor='$borderColor'>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }} accessibilityRole='tablist'>
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 20 }}
+                accessibilityRole='tablist'
+            >
                 {sections.map((section) => {
                     const selected = section.key === activeTab;
                     return (
@@ -209,16 +217,26 @@ const TruckMenuScreen = () => {
                         </XStack>
                         <XStack flexWrap='wrap' gap={8}>
                             {!!truck.zoneName && <InfoChip icon={faLocationDot} label={t('FoodTrucks.servesZone', { zone: truck.zoneName })} />}
-                            <Pressable
-                                onPress={() => navigation.navigate('FoodTruckSearch')}
-                                accessibilityRole='search'
-                                style={{ height: 30, paddingHorizontal: 10, borderRadius: radius.pill, backgroundColor: theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                            >
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size={12} color={theme.primaryForeground.val} />
-                                <UIText variant='captionStrong' tone='brand'>
-                                    {t('FoodTrucks.searchShort')}
-                                </UIText>
-                            </Pressable>
+                            {canSearch && (
+                                <Pressable
+                                    onPress={() => navigation.navigate('FoodTruckSearch')}
+                                    accessibilityRole='search'
+                                    style={{
+                                        height: 30,
+                                        paddingHorizontal: 10,
+                                        borderRadius: radius.pill,
+                                        backgroundColor: theme.surface.val,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                    }}
+                                >
+                                    <FontAwesomeIcon icon={faMagnifyingGlass} size={12} color={theme.primaryForeground.val} />
+                                    <UIText variant='captionStrong' tone='brand'>
+                                        {t('FoodTrucks.searchShort')}
+                                    </UIText>
+                                </Pressable>
+                            )}
                         </XStack>
                         {!ordering && (
                             <XStack accessibilityRole='alert' gap={10} padding={12} borderRadius={radius.card} backgroundColor='$warningSoft'>
@@ -259,7 +277,12 @@ const TruckMenuScreen = () => {
                                             {t('Network.store.recommended')}
                                         </UIText>
                                     </YStack>
-                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}>
+                                    <ScrollView
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
+                                        contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 12 }}
+                                    >
                                         {recommended.map((item) => (
                                             <ProductTile key={`rec-${item.summary.id}`} product={item.summary} storeClosed={!ordering} onPress={() => openProduct(item.product)} />
                                         ))}
@@ -298,7 +321,13 @@ const TruckMenuScreen = () => {
                 <IconButton icon={faChevronLeft} variant='floating' accessibilityLabel={t('FoodTrucks.back')} onPress={() => navigation.goBack()} />
             </XStack>
 
-            <CartPill count={cart.count} total={cart.total} storeName={cart.storeName} onPress={() => navigation.navigate(mode === 'network' ? 'NetworkCartTab' : 'StoreCartTab')} bottom={28} />
+            <CartPill
+                count={cart.count}
+                total={cart.total}
+                storeName={cart.storeName}
+                onPress={() => navigation.navigate(mode === 'network' ? 'NetworkCartTab' : 'StoreCartTab')}
+                bottom={28}
+            />
         </YStack>
     );
 };

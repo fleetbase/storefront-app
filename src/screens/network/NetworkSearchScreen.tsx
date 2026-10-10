@@ -16,6 +16,7 @@ import { getScopedStorageKey, serializeSdkResource } from '../../network/network
 import { rememberStores } from '../../network/store-names';
 import { addRecentSearch, removeRecentSearch } from '../../network/recent-searches';
 import {
+import NearbyPlacesSection from '../foodtrucks/NearbyPlacesSection';
     Badge,
     Chip,
     EmptyState,
@@ -219,6 +220,8 @@ const NetworkSearchScreen = () => {
                     contentContainerStyle={{ padding: space.gutter, gap: 24, paddingBottom: 40 }}
                     keyboardShouldPersistTaps='handled'
                 >
+                    {/* Trucks and stores serving the customer's area (only when the Network has food trucks). */}
+                    <NearbyPlacesSection />
                     {recents.length > 0 && (
                         <YStack>
                             <XStack alignItems='center' justifyContent='space-between'>
