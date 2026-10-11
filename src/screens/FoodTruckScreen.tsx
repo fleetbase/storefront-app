@@ -386,15 +386,7 @@ const FoodTruckScreen = () => {
                 {/* VehicleAvatar handles SVG vs raster detection and FastImage rendering */}
                 <VehicleAvatar vehicle={vehicle} size={{ width: 44, height: 44 }} />
                 {/* Name below the icon */}
-                <Text
-                    color='$textPrimary'
-                    fontSize={11}
-                    fontWeight='500'
-                    numberOfLines={2}
-                    textAlign='center'
-                    mt='$2'
-                    style={styles.truckChipLabel}
-                >
+                <Text color='$textPrimary' fontSize={11} fontWeight='500' numberOfLines={2} textAlign='center' mt='$2' style={styles.truckChipLabel}>
                     {displayName}
                 </Text>
             </Pressable>
@@ -539,6 +531,7 @@ const FoodTruckScreen = () => {
                             panel height stays fixed regardless of fleet size. */}
                         {isArray(availableFoodTrucks) && availableFoodTrucks.length > 0 && (
                             <FlatList
+                                showsVerticalScrollIndicator={false}
                                 data={availableFoodTrucks}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}

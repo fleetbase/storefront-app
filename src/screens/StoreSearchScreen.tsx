@@ -1,278 +1,233 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
-import { SafeAreaView, Keyboard, Animated, StyleSheet, Pressable } from 'react-native';
-import { Spinner, Button, Stack, Text, YStack, XStack, Input, useTheme } from 'tamagui';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMagnifyingGlass, faArrowLeft, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, Pressable, TextInput, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faClockRotateLeft, faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FlatGrid } from 'react-native-super-grid';
-import StoreTagCloud from '../components/StoreTagCloud';
-import ProductCard from '../components/ProductCard';
-import Spacer from '../components/Spacer';
-import useStorefrontInfo from '../hooks/use-storefront-info';
+import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import useStorefront from '../hooks/use-storefront';
-import useAppTheme from '../hooks/use-app-theme';
-import useDimensions from '../hooks/use-dimensions';
-import { debounce, delay } from '../utils';
-import { pluralize } from 'inflected';
+import useStorefrontInfo from '../hooks/use-storefront-info';
+import useStorage from '../hooks/use-storage';
+import { getScopedStorageKey } from '../network/network-runtime';
+import { addRecentSearch, removeRecentSearch } from '../network/recent-searches';
+import NearbyPlacesSection from './foodtrucks/NearbyPlacesSection';
+import { Chip, EmptyState, ErrorState, IconButton, ProductRow, Skeleton, UIText, productSummary, radius, space } from '../ui';
 
-const StoreSearchScreen = (route = {}) => {
-    const theme = useTheme();
+const SEARCH_DELAY_MS = 300;
+
+/**
+ * Search within a single store. Before typing: recent searches and the store's popular
+ * categories. While typing: matching products; earlier results stay up while new ones load,
+ * and a skeleton shows only for the first search.
+ */
+const StoreSearchScreen = () => {
+    const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
-    const tabBarHeight = useBottomTabBarHeight();
+    const theme = useTheme();
     const { t } = useLanguage();
-    const { info } = useStorefrontInfo();
     const { storefront } = useStorefront();
-    const { isDarkMode } = useAppTheme();
-    const { screenWidth } = useDimensions();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [results, setResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [inputFocused, setInputFocused] = useState(false);
-    const [tagCloudHeight, setTagCloudHeight] = useState('auto');
-    const searchInput = useRef(null);
-
-    // Animated values for the tag cloud
-    const tagCloudTranslateY = useRef(new Animated.Value(0)).current;
-    const tagCloudOpacity = useRef(new Animated.Value(1)).current;
-
-    // Determine if the dismiss overlay should be active
-    const showDismissOverlay = inputFocused && !isLoading;
-
-    // Debounced search function
-    const performSearch = debounce(async (query) => {
-        if (!query.trim()) {
-            setResults([]);
-            setIsLoading(false);
-            return;
-        }
-        setIsLoading(true);
-        try {
-            const results = await storefront.search(query, { store: info.id });
-            setResults(results);
-        } catch (error) {
-            console.error('Error searching:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, 300);
-
-    const setTag = (tag) => {
-        setSearchQuery(tag);
-        handleFocus();
-        if (searchInput.current && typeof searchInput.current.focus === 'function') {
-            searchInput.current.focus();
-        }
-    };
-
-    const handleFocus = () => {
-        setInputFocused(true);
-        // Animate tag cloud away
-        Animated.parallel([
-            Animated.timing(tagCloudTranslateY, {
-                toValue: -50, // Slide up
-                duration: 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(tagCloudOpacity, {
-                toValue: 0, // Fade out
-                duration: 300,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
-
-    const handleBlur = () => {
-        setInputFocused(false);
-        // Animate tag cloud back
-        Animated.parallel([
-            Animated.timing(tagCloudTranslateY, {
-                toValue: 0, // Reset position
-                duration: 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(tagCloudOpacity, {
-                toValue: 1, // Fade back in
-                duration: 300,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
-
-    const handleClearInput = () => setSearchQuery('');
-
-    const handleDismissFocus = () => {
-        setInputFocused(false);
-        Keyboard.dismiss();
-        if (searchInput.current && typeof searchInput.current.blur === 'function') {
-            searchInput.current.blur();
-        }
-    };
+    const { info } = useStorefrontInfo();
+    const { getSelectedStoreLocation } = useStorefrontRuntime();
+    const [recents, setRecents] = useStorage<string[]>(getScopedStorageKey(info?.id ?? 'unconfigured', 'recent-searches'), []);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<any[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [failed, setFailed] = useState(false);
+    const [retry, setRetry] = useState(0);
+    const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+    const latest = useRef(0);
+    const trimmed = query.trim();
 
     useEffect(() => {
-        performSearch(searchQuery);
-    }, [searchQuery]);
+        if (!storefront) return;
+        let active = true;
+        storefront.categories
+            .findAll()
+            .then((result: any) => {
+                if (!active) return;
+                const list = (Array.from(result || []) as any[]).map((category) => ({ id: category.id, name: category.getAttribute('name') })).filter((category) => category.name);
+                setCategories(list.slice(0, 8));
+            })
+            .catch(() => {});
+        return () => {
+            active = false;
+        };
+    }, [storefront]);
+
+    useEffect(() => {
+        if (!trimmed || !storefront) {
+            setLoading(false);
+            setFailed(false);
+            if (!trimmed) setResults(null);
+            return;
+        }
+        setLoading(true);
+        setFailed(false);
+        const request = ++latest.current;
+        const timer = setTimeout(async () => {
+            try {
+                const found = await storefront.search(trimmed, { store: info?.id });
+                if (request !== latest.current) return;
+                setResults(Array.from(found || []) as any[]);
+            } catch {
+                if (request === latest.current) setFailed(true);
+            } finally {
+                if (request === latest.current) setLoading(false);
+            }
+        }, SEARCH_DELAY_MS);
+        return () => clearTimeout(timer);
+    }, [info?.id, retry, storefront, trimmed]);
+
+    const remember = useCallback((term: string) => setRecents(addRecentSearch(recents, term)), [recents, setRecents]);
+
+    const openProduct = (resource: any) => {
+        remember(trimmed);
+        navigation.navigate('Product', {
+            product: resource.serialize(),
+            productId: resource.id,
+            storeLocationId: getSelectedStoreLocation(info?.id)?.id,
+        });
+    };
+
+    const openCategory = (categoryId: string) => navigation.navigate('StoreHomeTab', { screen: 'StoreHome', params: { categoryId } });
+
+    const firstSearch = loading && results === null;
+    const refreshing = loading && results !== null;
 
     return (
-        <YStack flex={1} bg='$background'>
-            <XStack
-                bg='$surface'
-                paddingTop={insets.top}
-                paddingHorizontal='$4'
-                paddingBottom='$4'
-                shadowColor='$shadowColor'
-                borderBottomWidth={1}
-                borderColor='$borderColorWithShadow'
-                shadowOffset={{ width: 0, height: 1 }}
-                shadowOpacity={0.15}
-                shadowRadius={3}
-                zIndex={9}
-            >
+        <YStack flex={1} backgroundColor='$background'>
+            <YStack paddingHorizontal={space.gutter} paddingTop={insets.top + 8} paddingBottom={10} gap={10}>
+                <UIText variant='title' accessibilityRole='header'>
+                    {t('StoreSearch.title')}
+                </UIText>
                 <XStack
+                    height={50}
                     alignItems='center'
-                    flex={1}
-                    paddingHorizontal={0}
-                    shadowOpacity={0}
-                    shadowRadius={0}
-                    borderWidth={1}
-                    borderColor='$borderColorWithShadow'
-                    borderRadius='$4'
-                    bg='white'
-                    shadowColor='$shadowColor'
-                    shadowOffset={{ width: 0, height: 1 }}
-                    shadowOpacity={0.05}
-                    shadowRadius={3}
+                    gap={10}
+                    paddingLeft={14}
+                    paddingRight={6}
+                    borderRadius={radius.button}
+                    borderWidth={2}
+                    borderColor={trimmed ? '$primary' : '$borderColor'}
                 >
-                    <YStack>
-                        {inputFocused ? (
-                            <Button
-                                onPress={handleDismissFocus}
-                                bg='transparent'
-                                width={40}
-                                animation='quick'
-                                hoverStyle={{
-                                    scale: 0.95,
-                                    opacity: 0.5,
-                                }}
-                                pressStyle={{
-                                    scale: 0.95,
-                                    opacity: 0.5,
-                                }}
-                            >
-                                <Button.Icon>
-                                    <FontAwesomeIcon icon={faArrowLeft} color={theme.textSecondary.val} size={18} />
-                                </Button.Icon>
-                            </Button>
-                        ) : (
-                            <YStack width={40} bg='transparent' animation='quick' alignItems='center' justifyContent='center'>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} color={theme.textSecondary.val} size={18} />
-                            </YStack>
-                        )}
-                    </YStack>
-                    <Input
-                        ref={searchInput}
-                        value={searchQuery}
-                        onFocus={handleFocus}
-                        onBlur={handleBlur}
-                        onChangeText={setSearchQuery}
-                        size='$4'
-                        placeholder={t('StoreSearchScreen.searchProducts')}
-                        placeholderTextColor='$textSecondary'
-                        color='$textPrimary'
-                        bg='transparent'
-                        flex={1}
-                        borderWidth={0}
-                        autoCapitalize='none'
-                        autoComplete='off'
+                    <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
+                    <TextInput
+                        value={query}
+                        onChangeText={setQuery}
+                        onSubmitEditing={() => trimmed && remember(trimmed)}
+                        placeholder={t('StorePage.searchStore', { store: info?.name ?? '' })}
+                        placeholderTextColor={theme.textPlaceholder.val}
+                        accessibilityLabel={t('StorePage.searchStore', { store: info?.name ?? '' })}
+                        returnKeyType='search'
                         autoCorrect={false}
+                        style={{ flex: 1, height: '100%', fontSize: 16, color: theme.textPrimary.val, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null) }}
                     />
-                    {inputFocused && (
-                        <Button
-                            width={40}
-                            onPress={handleClearInput}
-                            bg='transparent'
-                            animation='quick'
-                            hoverStyle={{
-                                scale: 0.95,
-                                opacity: 0.5,
-                            }}
-                            pressStyle={{
-                                scale: 0.95,
-                                opacity: 0.5,
-                            }}
-                        >
-                            <Button.Icon>
-                                <FontAwesomeIcon icon={faCircleXmark} color={theme.textSecondary.val} size={18} />
-                            </Button.Icon>
-                        </Button>
+                    {refreshing && (
+                        <UIText variant='caption' tone='secondary' accessibilityLiveRegion='polite'>
+                            {t('StoreSearch.updating')}
+                        </UIText>
                     )}
+                    {!!query && <IconButton icon={faXmark} size={36} accessibilityLabel={t('StoreSearch.clear')} onPress={() => setQuery('')} />}
                 </XStack>
-            </XStack>
-            <Animated.View
-                style={{
-                    transform: [{ translateY: tagCloudTranslateY }],
-                    opacity: tagCloudOpacity,
-                    position: 'absolute',
-                    top: 100,
-                }}
-            >
-                {!results.length && (
-                    <YStack padding='$4'>
-                        <StoreTagCloud tags={info.tags} maxTags={20} onTagPress={setTag} bg={theme['primary'].val} fontColor='#fff' />
-                    </YStack>
-                )}
-            </Animated.View>
-            {showDismissOverlay && <Pressable style={StyleSheet.absoluteFill} onPress={() => Keyboard.dismiss()} pointerEvents='box-only' />}
-            {results.length > 0 && (
-                <YStack animate='quick' flex={1}>
-                    <FlatGrid
-                        ListHeaderComponent={
-                            <YStack px='$3' py='$2'>
-                                <Text fontSize='$4' color='$textSecondary' marginTop='$2' marginBottom='$4'>
-                                    {t('StoreSearchScreen.foundResults', { count: results.length, result: pluralize(t('StoreSearchScreen.result'), results.length), searchQuery })}
-                                </Text>
-                            </YStack>
-                        }
-                        ListFooterComponent={<Spacer height={tabBarHeight} />}
-                        showsVerticalScrollIndicator={false}
-                        showsHorizontalScrollIndicator={false}
-                        maxItemsPerRow={2}
-                        itemDimension={screenWidth / 2}
-                        spacing={0}
-                        data={results}
-                        renderItem={({ item: result, index }) => (
-                            <ProductCard key={index} product={result} sliderHeight={135} wrapperStyle={{ paddingLeft: 6, paddingRight: 6, paddingBottom: 10 }} />
-                        )}
-                    />
-                </YStack>
-            )}
-            {inputFocused && (
-                <YStack alignItems='center' justifyContent='center'>
-                    {isLoading ? (
-                        <YStack alignItems='center' justifyContent='center' position='absolute' style={[StyleSheet.absoluteFill]}>
-                            <YStack mt={125}>
-                                <Spinner size='large' color={theme.textPrimary.val} />
-                            </YStack>
+            </YStack>
+
+            {!trimmed ? (
+                <FlatList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    data={recents}
+                    keyExtractor={(term) => term}
+                    keyboardShouldPersistTaps='handled'
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24 }}
+                    ListHeaderComponent={
+                        <YStack gap={recents.length > 0 ? 18 : 0}>
+                            {/* Trucks and stores serving the customer's area (only when the store runs food trucks). */}
+                            <NearbyPlacesSection />
+                            {recents.length > 0 ? (
+                                <XStack justifyContent='space-between' alignItems='center'>
+                                    <UIText variant='subheading'>{t('StoreSearch.recent')}</UIText>
+                                    <Pressable onPress={() => setRecents([])} accessibilityRole='button' style={{ minHeight: 40, justifyContent: 'center' }}>
+                                        <UIText variant='captionStrong' tone='brand'>
+                                            {t('StoreSearch.clearRecent')}
+                                        </UIText>
+                                    </Pressable>
+                                </XStack>
+                            ) : null}
                         </YStack>
-                    ) : !results.length && searchQuery.trim() ? (
-                        <YStack alignItems='center' justifyContent='center' position='absolute' style={[StyleSheet.absoluteFill]}>
-                            <YStack mt={125}>
-                                <Text fontSize='$6' color='$textSecondary' textAlign='center'>
-                                    {t('StoreSearchScreen.noResults', { searchQuery })}
-                                </Text>
-                            </YStack>
-                        </YStack>
-                    ) : (
-                        <YStack alignItems='center' justifyContent='center' position='absolute' style={[StyleSheet.absoluteFill]}>
-                            <YStack mt={125}>
-                                <Text fontSize='$6' color='$textSecondary' textAlign='center'>
-                                    {t('StoreSearchScreen.searchPrompt')}
-                                </Text>
-                            </YStack>
-                        </YStack>
+                    }
+                    renderItem={({ item }) => (
+                        <XStack alignItems='center' gap={12} minHeight={48} borderBottomWidth={1} borderColor='$borderColor'>
+                            <Pressable onPress={() => setQuery(item)} accessibilityRole='button' style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}>
+                                <FontAwesomeIcon icon={faClockRotateLeft} size={14} color={theme.textSecondary.val} />
+                                <UIText>{item}</UIText>
+                            </Pressable>
+                            <IconButton
+                                icon={faXmark}
+                                size={36}
+                                variant='plain'
+                                accessibilityLabel={t('StoreSearch.removeRecent', { term: item })}
+                                onPress={() => setRecents(removeRecentSearch(recents, item))}
+                            />
+                        </XStack>
                     )}
+                    ListFooterComponent={
+                        categories.length > 0 ? (
+                            <YStack gap={10} marginTop={22}>
+                                <UIText variant='subheading'>{t('StoreSearch.popular', { store: info?.name ?? '' })}</UIText>
+                                <XStack flexWrap='wrap' gap={8}>
+                                    {categories.map((category) => (
+                                        <Chip key={category.id} label={category.name} appearance='filled' onPress={() => openCategory(category.id)} />
+                                    ))}
+                                </XStack>
+                            </YStack>
+                        ) : null
+                    }
+                />
+            ) : firstSearch ? (
+                <YStack paddingHorizontal={space.gutter} gap={16} paddingTop={8}>
+                    {[0, 1, 2, 3, 4].map((index) => (
+                        <XStack key={index} gap={14}>
+                            <YStack flex={1} gap={8}>
+                                <Skeleton height={14} width='60%' />
+                                <Skeleton height={12} width='85%' />
+                                <Skeleton height={14} width='25%' />
+                            </YStack>
+                            <Skeleton width={96} height={96} radius={radius.tile} />
+                        </XStack>
+                    ))}
                 </YStack>
+            ) : failed ? (
+                <ErrorState description={t('StoreSearch.error')} onRetry={() => setRetry((value) => value + 1)} />
+            ) : (
+                <FlatList
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    data={results ?? []}
+                    keyExtractor={(item: any) => item.id}
+                    keyboardShouldPersistTaps='handled'
+                    keyboardDismissMode='on-drag'
+                    style={{ opacity: refreshing ? 0.6 : 1 }}
+                    contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24, flexGrow: 1 }}
+                    ListHeaderComponent={
+                        results && results.length > 0 ? (
+                            <UIText variant='caption' tone='secondary' style={{ paddingBottom: 4 }}>
+                                {t('StoreSearch.resultCount', { count: results.length, query: trimmed })}
+                            </UIText>
+                        ) : null
+                    }
+                    renderItem={({ item }) => <ProductRow product={productSummary(item)} onPress={() => openProduct(item)} />}
+                    ListEmptyComponent={
+                        <EmptyState
+                            icon={faMagnifyingGlass}
+                            title={t('StoreSearch.noResultsTitle', { query: trimmed })}
+                            description={t('StoreSearch.noResultsBody')}
+                            actionLabel={categories.length ? t('StoreSearch.browseCategories') : undefined}
+                            onAction={categories.length ? () => navigation.navigate('StoreHomeTab', { screen: 'StoreCatalog' }) : undefined}
+                        />
+                    }
+                />
             )}
         </YStack>
     );

@@ -119,6 +119,10 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
 		when the app is in use</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Add your booked appointments to your calendar.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Add your booked appointments to your calendar.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to provide create user address for order
 		when the app is in use</string>

@@ -100,7 +100,31 @@ export async function geocodeAutocomplete(input, coordinates = null) {
 
         return predictions;
     } catch (error) {
+        // Browsers can't call the Places API directly (no CORS); the Geocoding API allows it.
+        if (Platform.OS === 'web') {
+            return geocodeAddressSearch(input, language, coordinates);
+        }
         console.warn('Autocomplete error:', error);
+        return [];
+    }
+}
+
+/** Address search through the Geocoding API, shaped like autocomplete predictions. */
+async function geocodeAddressSearch(input, language, coordinates = null) {
+    try {
+        const params = { address: input, language, key: config('GOOGLE_MAPS_API_KEY') };
+        if (isArray(coordinates)) {
+            const [latitude, longitude] = coordinates;
+            params.bounds = `${latitude - 0.1},${longitude - 0.1}|${latitude + 0.1},${longitude + 0.1}`;
+        }
+        const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', { params });
+        return (response.data.results ?? []).map((result) => ({
+            description: result.formatted_address,
+            place_id: result.place_id,
+            ...parseAutocompleteAddress(result.formatted_address),
+        }));
+    } catch (error) {
+        console.warn('Address search error:', error);
         return [];
     }
 }
@@ -124,6 +148,15 @@ export async function getPlaceDetails(placeId) {
         // Return the full result object from Google
         return response.data.result;
     } catch (error) {
+        // On the web the Places API is blocked (no CORS); the Geocoding API has the same address parts.
+        if (Platform.OS === 'web') {
+            try {
+                const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', { params: { place_id: placeId, key: config('GOOGLE_MAPS_API_KEY') } });
+                return response.data.results?.[0] ?? null;
+            } catch {
+                return null;
+            }
+        }
         console.warn(`Error fetching place details for ID: ${placeId}`, error.message);
         return null;
     }
@@ -228,7 +261,7 @@ export function restoreFleetbaseStoreLocation(data) {
 }
 
 export function formattedAddressFromPlace(place) {
-    if (isEmpty(place) && typeof place.getAttribute !== 'function') {
+    if (isEmpty(place) || typeof place.getAttribute !== 'function') {
         return '';
     }
 

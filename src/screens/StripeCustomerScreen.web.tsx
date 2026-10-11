@@ -70,28 +70,10 @@ const StripeCustomerScreen = () => {
     //     initializeCustomerSheet();
     // }, [customer]);
 
+    // CustomerSheet is native-only (@stripe/stripe-react-native); nothing to present on web.
     useEffect(() => {
-        const showCustomerSheet = async () => {
-            try {
-                const { error, paymentMethod } = await CustomerSheet.present();
-                if (error) {
-                    if (error.code === CustomerSheetError.Canceled) {
-                        return navigation.goBack();
-                    }
-
-                    console.error('Error presenting stripe customer sheet:', error);
-                    return;
-                }
-
-                if (paymentMethod) {
-                    await updateCustomerMeta({ stripe_payment_method_id: paymentMethod.id });
-                }
-            } catch (err) {
-                console.error('Error presenting stripe customer sheet:', err);
-            }
-        };
         if (customerSheetReady) {
-            showCustomerSheet();
+            console.warn('Stripe CustomerSheet is not supported on web.');
         }
     }, [customerSheetReady]);
 

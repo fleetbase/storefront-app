@@ -1,12 +1,12 @@
 import React from 'react';
 import { Animated } from 'react-native';
-import { Stack, YStack, Text, XStack, useTheme } from 'tamagui';
+import { Stack, YStack, Text, useTheme } from 'tamagui';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 import StoreLocationPicker from './StoreLocationPicker';
 import { storefrontConfig } from '../utils';
 
-const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {}, defaultStoreLocation = null }) => {
+const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 250, wrapperStyle = {}, defaultStoreLocation = null, showLocationPicker = storefrontConfig('storeHeader.showLocationPicker') }) => {
     const theme = useTheme();
 
     return (
@@ -65,7 +65,7 @@ const StoreHeader = ({ storeName, description, logoUrl, backgroundUrl, height = 
                     )}
                 </YStack>
 
-                {storefrontConfig('storeHeader.showLocationPicker') && (
+                {showLocationPicker && (
                     <YStack alignItems='center' justifyContent='center'>
                         <StoreLocationPicker
                             defaultStoreLocation={defaultStoreLocation}

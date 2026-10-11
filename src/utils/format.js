@@ -254,9 +254,10 @@ export function capitalize(str) {
 }
 
 export function foodTruckDisplayName(foodTruck) {
-    return [foodTruck?.getAttribute('vehicle.year'), foodTruck?.getAttribute('vehicle.make'), foodTruck?.getAttribute('vehicle.model'), foodTruck?.getAttribute('vehicle.plate_number')]
-        .filter(Boolean)
-        .join(' ');
+    // An SDK resource or the plain JSON the food trucks endpoint returns.
+    const attr = (key) =>
+        typeof foodTruck?.getAttribute === 'function' ? foodTruck.getAttribute(key) : key.split('.').reduce((value, part) => (value == null ? undefined : value[part]), foodTruck);
+    return [attr('vehicle.year'), attr('vehicle.make'), attr('vehicle.model'), attr('vehicle.plate_number')].filter(Boolean).join(' ');
 }
 
 export function vehicleDisplayName(vehicle) {

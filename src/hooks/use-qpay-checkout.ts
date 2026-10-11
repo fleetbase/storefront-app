@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
+import { getCartOriginIds, getCartQuoteOrigin } from '../network/network-runtime';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
@@ -40,8 +41,19 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [checkoutToken, setCheckoutToken] = useState();
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
+    // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
+    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
+    // The payment, once the customer goes to pay:
+    // idle → awaiting (paying in a bank app) → verifying (back, checking) → paid (QPay
+    // confirmed; the order is being placed) → the order screen. Also: not_received (back,
+    // no payment yet), failed (the payment didn't go through), slow (paid, order taking long).
+    const [paymentStage, setPaymentStage] = useState('idle');
+    const [paymentInfo, setPaymentInfo] = useState(null);
+    const [paymentError, setPaymentError] = useState(null);
+    const paymentStarted = useRef(false);
+    const leftForPayment = useRef(false);
     const [error, setError] = useState(false);
     // Order notes
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
@@ -63,12 +75,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
-    
+
     // Minimum checkout validation
     const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
-    
+
     const isReady = serviceQuote && !isLoading && !isBelowMinimum;
     const isNotReady = !isReady;
 
@@ -126,14 +138,12 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable, unavailableItems]);
 
     // Memoize store location and food truck IDs based on cart contents
-    const storeLocationId = useMemo(() => {
-        if (!cart?.contents || typeof cart.contents !== 'function') return null;
-        const storeLocationIds = cart.contents().map((item) => item.store_location_id);
-        return [...new Set(storeLocationIds)][0] || null;
-    }, [cartContentsString]);
+    const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
+    const storeLocationId = storeLocationIds[0] || null;
+    const quoteOrigin = useMemo(() => getCartQuoteOrigin(cart), [cartContentsString]);
 
     const foodTruckId = useMemo(() => {
         if (!cart?.contents || typeof cart.contents !== 'function') return null;
@@ -203,18 +213,21 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setIsCapturingOrder(true);
 
             try {
-                const emptiedCart = await cart.empty();
-                updateCart(emptiedCart);
-
                 // Push order into local history cache immediately
                 if (customer?.id) {
                     addOrderToHistoryCache(customer.id, orderInstance);
                 }
 
-                // Ensure callback fires only once using a ref
+                // Show the order straight away (fires once, guarded by the ref above)
                 if (typeof onOrderComplete === 'function') {
                     onOrderComplete(orderInstance);
                 }
+
+                // The cart was checked out with the order: pick up the device's open cart in
+                // the background rather than making the customer wait for it.
+                cart.empty()
+                    .then(updateCart)
+                    .catch((cartError) => console.warn('Unable to refresh the cart after the order:', cartError));
             } catch (error) {
                 console.error('Error processing order completion:', error);
                 toast.error(error.message);
@@ -228,46 +241,89 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     // Handle payment errors (avoid showing errors for not found payment)
     const handlePaymentError = useCallback(({ error, message }) => {
-        if (error === 'PAYMENT_NOTFOUND') return;
-        if (message) {
-            toast.error(message);
-        }
+        if (error === 'PAYMENT_NOTFOUND' || error === 'PAYMENT_NOT_PAID') return;
+        setPaymentError(message ?? null);
+        setPaymentStage('failed');
     }, []);
 
-    // Check order status using new endpoint
-    const checkOrderStatus = useCallback(async () => {
-        if (!checkoutId || !checkoutToken || !adapter) return;
-        
-        // Prevent simultaneous requests (throttling)
-        if (isCheckingStatus.current) {
-            console.log('[checkOrderStatus] Request already in progress, skipping');
-            return;
-        }
-        
-        isCheckingStatus.current = true;
-        
-        try {
-            const response = await adapter.get('checkouts/status', {
-                checkout: checkoutId,
-                token: checkoutToken,
-            });
-            console.log('[checkOrderStatus #response]', response);
-            
-            const { order, error } = response;
-            
-            if (error) {
-                handlePaymentError(error);
+    // QPay confirmed the payment (live update or status check): show it at once.
+    const markPaid = useCallback((payment) => {
+        if (payment) setPaymentInfo(payment);
+        setPaymentStage((stage) => (stage === 'slow' ? stage : 'paid'));
+    }, []);
+
+    // Check the checkout's status. The server answers from the checkout (fast, no QPay call);
+    // `verify` additionally asks QPay, used once when the customer comes back from paying.
+    const checkOrderStatus = useCallback(
+        async ({ verify = false } = {}) => {
+            if (!checkoutId || !checkoutToken || !adapter || hasOrderCompleted.current) return;
+
+            // One quick check at a time; a verify always goes ahead.
+            if (!verify && isCheckingStatus.current) return;
+            if (!verify) isCheckingStatus.current = true;
+
+            try {
+                const response = await adapter.get('checkouts/status', {
+                    checkout: checkoutId,
+                    token: checkoutToken,
+                    verify: verify ? 1 : 0,
+                });
+
+                const { order, error, status, payment } = response;
+
+                if (order) {
+                    handleOrderCompletion(order);
+                    return;
+                }
+                if (error) {
+                    handlePaymentError(error);
+                }
+                if (status === 'paid') {
+                    markPaid(payment);
+                }
+            } catch (err) {
+                // iOS cuts requests off while the app is in the background (e.g. in a bank app),
+                // which surfaces as a network error: expected, so it isn't logged as an error, and
+                // the status is checked again shortly once the app is back in the foreground.
+                if (err?.code === 'NETWORK_ERROR') {
+                    console.warn('Order status check interrupted; retrying');
+                    setTimeout(() => {
+                        if (AppState.currentState === 'active' && !hasOrderCompleted.current) checkOrderStatusRef.current?.({ verify });
+                    }, 1000);
+                } else {
+                    console.error('Error checking order status:', err);
+                }
+            } finally {
+                if (!verify) isCheckingStatus.current = false;
             }
-            
-            if (order) {
-                handleOrderCompletion(order);
-            }
-        } catch (err) {
-            console.error('Error checking order status:', err);
-        } finally {
-            isCheckingStatus.current = false;
-        }
-    }, [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion]);
+        },
+        [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion, markPaid]
+    );
+
+    // The customer chose to pay (opened the bank list): leaving the app now means paying.
+    const startPayment = useCallback(() => {
+        paymentStarted.current = true;
+        setPaymentError(null);
+        setPaymentStage((stage) => (stage === 'verifying' || stage === 'not_received' || stage === 'failed' ? 'idle' : stage));
+    }, []);
+
+    // "Check again": ask QPay once more.
+    const verifyPayment = useCallback(() => {
+        setPaymentStage('verifying');
+        checkOrderStatus({ verify: true });
+    }, [checkOrderStatus]);
+
+    // Back to the checkout from a not-received or failed payment.
+    const dismissPaymentStatus = useCallback(() => {
+        paymentStarted.current = false;
+        setPaymentError(null);
+        setPaymentStage('idle');
+    }, []);
+
+    const checkOrderStatusRef = useRef(null);
+    useEffect(() => {
+        checkOrderStatusRef.current = checkOrderStatus;
+    }, [checkOrderStatus]);
 
     // Setup gateway on mount or when dependencies change
     useEffect(() => {
@@ -281,20 +337,27 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     // Fetch service quote when cart or delivery location changes
     useEffect(() => {
-        if (!cart) return;
+        // No address yet: nothing to quote until one is chosen.
+        if (!cart || !deliveryLocation) return;
 
         let isMounted = true;
-        const origin = foodTruckId ?? storeLocationId;
+        const origin = quoteOrigin ?? foodTruckId ?? storeLocationId;
         const destination = deliveryLocation.isSaved ? deliveryLocation : getCoordinates(deliveryLocation);
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
+            // A new address or cart gets a fresh try; an earlier failure shouldn't stick.
+            setIsServiceQuoteUnavailable(false);
+            setUnavailableItems(null);
             try {
                 const quote = await getServiceQuote(origin, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                setIsServiceQuoteUnavailable(true);
+                if (isMounted) {
+                    setIsServiceQuoteUnavailable(true);
+                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                }
                 console.warn('Error fetching service quote:', error);
             }
         };
@@ -304,7 +367,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, storeLocationId]);
+    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, quoteOrigin, storeLocationId]);
 
     // Listen to order updates via socket (if not already listening)
     useEffect(() => {
@@ -314,12 +377,17 @@ export default function useQPayCheckout({ onOrderComplete }) {
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
-                const { order, error } = event;
+                const { order, error, status, payment } = event;
+                if (order) {
+                    handleOrderCompletion(order);
+                    return;
+                }
                 if (error) {
                     handlePaymentError(error);
                 }
-                if (order) {
-                    handleOrderCompletion(order);
+                // The server says so the moment QPay confirms the payment, then again with the order.
+                if (status === 'paid') {
+                    markPaid(payment);
                 }
             });
             if (listener) {
@@ -336,7 +404,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
                 listenerRef.current = null;
             }
         };
-    }, [listen, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError]);
+    }, [listen, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError, markPaid]);
 
     // Run order status check when the screen gains focus
     useFocusEffect(
@@ -345,18 +413,53 @@ export default function useQPayCheckout({ onOrderComplete }) {
         }, [checkOrderStatus])
     );
 
-    // Also run order status check when the app returns from the background.
+    // Leaving the app after choosing to pay means paying in a bank app; coming back, check
+    // at once (verify) and show that the payment is being checked.
     useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextAppState) => {
+            if (nextAppState === 'background' && paymentStarted.current && checkoutId && !hasOrderCompleted.current) {
+                leftForPayment.current = true;
+                setPaymentStage((stage) => (stage === 'idle' || stage === 'not_received' ? 'awaiting' : stage));
+            }
             if (nextAppState === 'active') {
-                // When the app becomes active again, re-check order status.
-                checkOrderStatus();
+                if (leftForPayment.current && !hasOrderCompleted.current) {
+                    leftForPayment.current = false;
+                    setPaymentStage((stage) => (stage === 'awaiting' ? 'verifying' : stage));
+                    checkOrderStatus({ verify: true });
+                } else {
+                    checkOrderStatus();
+                }
             }
         });
         return () => {
             subscription.remove();
         };
-    }, [checkOrderStatus]);
+    }, [checkOrderStatus, checkoutId]);
+
+    // While a payment is under way and the app is in front, ask the server often: it answers
+    // from the checkout without calling QPay, so a lost live update costs at most a second.
+    useEffect(() => {
+        if (!checkoutId || !['awaiting', 'verifying', 'paid', 'slow', 'not_received'].includes(paymentStage)) return;
+        const every = paymentStage === 'verifying' || paymentStage === 'paid' ? 1000 : 2500;
+        const timer = setInterval(() => {
+            if (AppState.currentState === 'active' && !hasOrderCompleted.current) checkOrderStatus();
+        }, every);
+        return () => clearInterval(timer);
+    }, [paymentStage, checkoutId, checkOrderStatus]);
+
+    // Verifying with no payment after a few seconds: not received (the customer can check
+    // again or go back to the bank app). Paid with no order after a while: say so.
+    useEffect(() => {
+        if (paymentStage !== 'verifying' && paymentStage !== 'paid') return;
+        const timer = setTimeout(
+            () => {
+                if (hasOrderCompleted.current) return;
+                setPaymentStage((stage) => (stage === 'verifying' ? 'not_received' : stage === 'paid' ? 'slow' : stage));
+            },
+            paymentStage === 'verifying' ? 6000 : 25000
+        );
+        return () => clearTimeout(timer);
+    }, [paymentStage]);
 
     // Memoize the return value to provide stable references
     const checkout = useMemo(
@@ -389,11 +492,19 @@ export default function useQPayCheckout({ onOrderComplete }) {
             orderNotes,
             setOrderNotes,
             storeLocationId,
-            originLocationId: foodTruckId ?? storeLocationId,
+            originLocationId: quoteOrigin ?? foodTruckId ?? storeLocationId,
+            storeLocationIds,
             listener: listenerRef.current,
             hasOrderCompleted: hasOrderCompleted.current,
             isCapturingOrder,
+            paymentStage,
+            paymentInfo,
+            paymentError,
+            startPayment,
+            verifyPayment,
+            dismissPaymentStatus,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
@@ -421,9 +532,18 @@ export default function useQPayCheckout({ onOrderComplete }) {
             error,
             orderNotes,
             storeLocationId,
+            storeLocationIds,
+            quoteOrigin,
             hasOrderCompleted.current,
             isCapturingOrder,
+            paymentStage,
+            paymentInfo,
+            paymentError,
+            startPayment,
+            verifyPayment,
+            dismissPaymentStatus,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { Pressable, StyleSheet, Linking } from 'react-native';
+import { Pressable, StyleSheet, Linking, Platform } from 'react-native';
 import { Image, Text, YStack, XStack, Separator, useTheme, Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -189,8 +189,8 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                 </YStack>
                                 {banks.length === 0 && invoice?.error && (
                                     <YStack alignItems='center' justifyContent='center' py='$4' height={150}>
-                                        <Text color='$color'>{invoice.error}</Text>
-                                        {invoice.message && <Text color='$textSecondary'>{invoice.message}</Text>}
+                                        <Text color='$color'>{errorText(invoice.error)}</Text>
+                                        {!!invoice.message && <Text color='$textSecondary'>{errorText(invoice.message)}</Text>}
                                     </YStack>
                                 )}
                                 {banks.length > 0 && (
@@ -236,3 +236,19 @@ const styles = StyleSheet.create({
 });
 
 export default QPayPaymentSheet;
+
+/**
+ * QPay sends some errors as objects (e.g. validation messages keyed by field, `{ email: … }`);
+ * flatten them to text instead of rendering the object.
+ */
+function errorText(value: unknown): string {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.map(errorText).filter(Boolean).join(' ');
+    if (typeof value === 'object')
+        return Object.values(value as Record<string, unknown>)
+            .map(errorText)
+            .filter(Boolean)
+            .join(' ');
+    return String(value);
+}

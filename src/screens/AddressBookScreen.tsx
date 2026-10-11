@@ -1,134 +1,136 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Animated, Pressable, FlatList, LayoutAnimation, UIManager, Platform } from 'react-native';
-import { Spinner, Avatar, Text, YStack, XStack, Separator, useTheme } from 'tamagui';
+import React, { useState } from 'react';
+import { FlatList } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight, faPencilAlt, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
-import { useNavigation } from '@react-navigation/native';
-import { formattedAddressFromPlace } from '../utils/location';
+import { faBuilding, faBuildingUser, faChevronLeft, faHospital, faHotel, faHouse, faLocationDot, faPlus, faSchool } from '@fortawesome/free-solid-svg-icons';
+import { XStack, YStack, useTheme } from 'tamagui';
+import { useLanguage } from '../contexts/LanguageContext';
+import { handleNavigateNewLocation } from '../utils';
 import { toast } from '../utils/toast';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { placeFields, placeKey, placeLines, sortPlaces } from '../commerce/places';
 import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
-import usePromiseWithLoading from '../hooks/use-promise-with-loading';
-import Spacer from '../components/Spacer';
-import ScreenWrapper from '../components/ScreenWrapper';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Button, Card, EmptyState, IconButton, Skeleton, UIText, elevation, radius, space } from '../ui';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+const TYPE_ICONS = { apartment: faBuildingUser, house: faHouse, office: faBuilding, hotel: faHotel, hospital: faHospital, school: faSchool };
 
+/** The customer's saved places, the default first and marked, each with Edit and "Set as default". */
 const AddressBookScreen = () => {
-    const theme = useTheme();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
-    const { runWithLoading, isLoading } = usePromiseWithLoading();
-    const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
-    const { savedLocations, deleteLocation } = useSavedLocations();
+    const theme = useTheme();
     const { t } = useLanguage();
-    const rowRefs = useRef({});
+    const { currentLocation, updateDefaultLocationPromise } = useCurrentLocation();
+    const { savedLocations, isLoadingSavedLocations } = useSavedLocations();
+    const [defaulting, setDefaulting] = useState<string | null>(null);
+    const defaultKey = placeKey(currentLocation);
+    const places = sortPlaces(Array.from(savedLocations || []) as any[], currentLocation);
 
-    const handleEdit = (place) => {
-        navigation.navigate('EditLocation', { place: place.serialize(), redirectTo: 'AddressBook' });
-    };
-
-    const handleDelete = async (place) => {
-        // In case deleting place is current location get the next place and make it the default location using `handleMakeDefaultLocation`
-        const isCurrentLocation = currentLocation?.id === place.id;
-        const nextPlace = savedLocations.find((loc) => loc.id !== place.id);
-        const placeName = place.getAttribute('name');
-
+    const makeDefault = async (place: any) => {
+        setDefaulting(placeKey(place));
         try {
-            await runWithLoading(deleteLocation(place), 'deleting');
-
-            // If the deleted place was the current location and there’s another saved location, make it the default
-            if (isCurrentLocation && nextPlace) {
-                handleMakeDefaultLocation(nextPlace);
-            }
-
-            toast.success(`${placeName} was deleted.`);
-        } catch (error) {
-            console.error('Error deleting saved place: ', error);
-            toast.error(error.message);
+            await updateDefaultLocationPromise(place);
+            toast.success(t('Places.defaultUpdated', { name: placeLines(place).title }));
+        } catch {
+            toast.error(t('Places.saveFailed'));
+        } finally {
+            setDefaulting(null);
         }
     };
 
-    const handleMakeDefaultLocation = async (place) => {
-        try {
-            await runWithLoading(updateDefaultLocationPromise(place), 'defaulting');
-            toast.success(`${place.getAttribute('name')} is now your default location.`);
-        } catch (error) {
-            console.warn('Error making address default location:', error);
-            toast.error(error.message);
-        }
-    };
-
-    const renderRightActions = (place) => (
-        <XStack height='100%' width={200} minHeight={100} maxHeight={125}>
-            <Pressable style={{ flex: 1 }} onPress={() => handleDelete(place)}>
-                <YStack flex={1} width='100%' height='100%' bg='$error' justifyContent='center' alignItems='center' borderRadius={0}>
-                    {isLoading('deleting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faTrash} size={20} color='white' />}
-                </YStack>
-            </Pressable>
-            <Pressable style={{ flex: 1 }} onPress={() => handleEdit(place)}>
-                <YStack flex={1} width='100%' height='100%' bg='$warning' justifyContent='center' alignItems='center' borderRadius={0}>
-                    <FontAwesomeIcon icon={faPencilAlt} size={20} color='white' />
-                </YStack>
-            </Pressable>
-            <Pressable style={{ flex: 1 }} onPress={() => handleMakeDefaultLocation(place)} opacity={currentLocation.id === place.id ? 0.5 : 1} disabled={currentLocation.id === place.id}>
-                <YStack flex={1} width='100%' height='100%' bg='$primary' justifyContent='center' alignItems='center' borderRadius={0}>
-                    {isLoading('defaulting') ? <Spinner size={40} color='white' /> : <FontAwesomeIcon icon={faStar} size={20} color='white' />}
-                </YStack>
-            </Pressable>
-        </XStack>
-    );
-
-    const renderItem = ({ item: place, index }) => {
-        const opacity = new Animated.Value(1);
-        const translateX = new Animated.Value(0);
-        rowRefs.current[place.id || index] = { opacity, translateX };
-
+    const renderPlace = ({ item: place }: { item: any }) => {
+        const { title, address } = placeLines(place);
+        const { instructions, type } = placeFields(place);
+        const isDefault = placeKey(place) === defaultKey;
         return (
-            <Animated.View
-                style={[
-                    {
-                        borderBottomWidth: 1,
-                        borderColor: theme.borderColor.val,
-                        backgroundColor: theme.background.val,
-                        opacity,
-                        transform: [{ translateX }],
-                    },
-                ]}
-            >
-                <Swipeable renderRightActions={() => renderRightActions(place)}>
-                    <Pressable onPress={() => handleEdit(place)} style={{ flex: 1 }}>
-                        <YStack flex={1} padding='$4' bg={place.id === currentLocation?.id ? '$primary' : '$background'} minHeight={100} maxHeight={125}>
-                            <Text color={place.id === currentLocation?.id ? 'white' : '$textPrimary'} fontWeight='bold' mb='$1'>
-                                {place.getAttribute('name')}
-                            </Text>
-                            <Text color={place.id === currentLocation?.id ? 'white' : '$textSecondary'}>{formattedAddressFromPlace(place)}</Text>
+            <Card padding={14} gap={10} borderWidth={2} borderColor={isDefault ? '$primary' : 'transparent'} style={elevation.card}>
+                <XStack gap={12} alignItems='flex-start'>
+                    <YStack width={40} height={40} borderRadius={radius.tile} backgroundColor={isDefault ? '$primarySoft' : '$surface'} alignItems='center' justifyContent='center'>
+                        <FontAwesomeIcon
+                            icon={TYPE_ICONS[type as keyof typeof TYPE_ICONS] ?? faLocationDot}
+                            size={17}
+                            color={isDefault ? theme.primaryForeground.val : theme.textSecondary.val}
+                        />
+                    </YStack>
+                    <YStack flex={1} gap={3}>
+                        <XStack alignItems='center' gap={8}>
+                            <UIText variant='subheading' numberOfLines={1} flexShrink={1}>
+                                {title}
+                            </UIText>
+                            {isDefault && (
+                                <YStack paddingHorizontal={8} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$primarySoft'>
+                                    <UIText variant='captionStrong' tone='brand' style={{ fontSize: 11 }}>
+                                        {t('Places.default')}
+                                    </UIText>
+                                </YStack>
+                            )}
+                        </XStack>
+                        {address ? (
+                            <UIText variant='caption' tone='secondary'>
+                                {address}
+                            </UIText>
+                        ) : null}
+                        {instructions ? (
+                            <UIText variant='caption' tone='secondary' numberOfLines={2}>
+                                “{instructions}”
+                            </UIText>
+                        ) : null}
+                    </YStack>
+                </XStack>
+                <XStack gap={8} paddingTop={10} borderTopWidth={1} borderColor='$borderColor'>
+                    <YStack flex={1}>
+                        <Button variant='outline' size='sm' fullWidth onPress={() => navigation.navigate('EditLocation', { place: place.serialize() })}>
+                            {t('Places.edit')}
+                        </Button>
+                    </YStack>
+                    {!isDefault && (
+                        <YStack flex={1}>
+                            <Button variant='soft' size='sm' fullWidth loading={defaulting === placeKey(place)} disabled={defaulting !== null} onPress={() => makeDefault(place)}>
+                                {t('Places.setDefault')}
+                            </Button>
                         </YStack>
-                    </Pressable>
-                </Swipeable>
-            </Animated.View>
+                    )}
+                </XStack>
+            </Card>
         );
     };
 
     return (
-        <ScreenWrapper>
-            <YStack flex={1} bg='$background'>
-                <Animated.FlatList
-                    data={savedLocations}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => item.id || index}
-                    contentContainerStyle={{ paddingBottom: 16 }}
-                    ItemSeparatorComponent={() => <Separator borderBottomWidth={1} borderColor='$borderColorWithShadow' />}
-                    ListHeaderComponent={<Spacer height={Platform.select({ ios: insets.top + 5, android: insets.top + 25 })} />}
-                    ListFooterComponent={<Spacer height={100} />}
-                />
+        <YStack flex={1} backgroundColor='$surface'>
+            <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingTop={insets.top + 4} paddingBottom={12}>
+                <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
+                <UIText variant='heading' accessibilityRole='header'>
+                    {t('Places.bookTitle')}
+                </UIText>
+            </XStack>
+
+            <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                data={places}
+                keyExtractor={(place, index) => placeKey(place) ?? String(index)}
+                renderItem={renderPlace}
+                contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 24, gap: 10, flexGrow: 1 }}
+                ListEmptyComponent={
+                    isLoadingSavedLocations ? (
+                        <YStack gap={10}>
+                            {[0, 1].map((index) => (
+                                <Skeleton key={index} height={132} radius={radius.card} />
+                            ))}
+                        </YStack>
+                    ) : (
+                        <EmptyState icon={faLocationDot} title={t('Places.emptyTitle')} description={t('Places.emptyBody')} />
+                    )
+                }
+            />
+
+            <YStack paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor'>
+                <Button fullWidth size='lg' icon={faPlus} onPress={() => handleNavigateNewLocation(navigation, {})}>
+                    {t('Places.add')}
+                </Button>
             </YStack>
-        </ScreenWrapper>
+        </YStack>
     );
 };
 

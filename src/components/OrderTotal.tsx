@@ -75,6 +75,8 @@ const OrderTotal = ({ order }) => {
     return (
         <YStack bg='$surface' borderWidth={1} borderColor='$borderColorWithShadow' borderRadius='$4' space='$2'>
             <FlatList
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
                 data={lineItems}
                 scrollEnabled={false}
                 keyExtractor={(item, index) => index}

@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import Fleetbase from '@fleetbase/sdk';
-import Config from 'react-native-config';
+import Config from '../env';
 import { getString } from './use-storage';
 import { useLanguage } from '../contexts/LanguageContext';
+import { withHeaders } from '../commerce/http';
 
 const { FLEETBASE_KEY, FLEETBASE_HOST } = Config;
 export let instance = new Fleetbase(FLEETBASE_KEY, { host: FLEETBASE_HOST });
@@ -23,17 +24,17 @@ const useFleetbase = () => {
 
     useEffect(() => {
         const authToken = getString('_customer_token');
-        
+
         // Build headers object with locale and auth
         const headers: Record<string, string> = {
             'Accept-Language': locale || 'en',
         };
-        
+
         if (authToken) {
             headers['Customer-Token'] = authToken;
         }
-        
-        const configuredAdapter = adapter.setHeaders(headers);
+
+        const configuredAdapter = withHeaders(adapter, headers);
         instance.setAdapter(configuredAdapter);
 
         try {

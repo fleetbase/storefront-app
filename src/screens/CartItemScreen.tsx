@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeTabBarHeight as useBottomTabBarHeight } from '../hooks/use-safe-tab-bar-height';
 import { restoreSdkInstance, isEmpty } from '../utils';
 import { formatCurrency } from '../utils/format';
-import { calculateProductSubtotal, getCartItem } from '../utils/cart';
+import { calculateProductSubtotal } from '../utils/cart';
 import { toast } from '../utils/toast';
 import { isProductReadyForCheckout, getSelectedVariants, getSelectedAddons, getAddonSelectionsFromCartItem, getVariantSelectionsFromCartItem } from '../utils/product';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -158,7 +158,7 @@ const CartItemScreen = ({ route = {} }) => {
                             )}
                         </XStack>
                         <XStack paddingHorizontal='$4' alignItems='center' justifyContent='space-between'>
-                            <Text fontSize='$6' fontWeight='bold' color='$green8'>
+                            <Text fontSize='$6' fontWeight='bold' color='$green-600'>
                                 {formatCurrency(product.getAttribute('price'), product.getAttribute('currency'))}
                             </Text>
                         </XStack>
@@ -184,7 +184,8 @@ const CartItemScreen = ({ route = {} }) => {
                 position='absolute'
                 px='$4'
                 py='$3'
-                bottom={Platform.select({ ios: isModal ? insets.bottom : 0, android: tabBarHeight })}
+                // On iOS this route is always a page sheet reaching the bottom edge, so clear the home indicator.
+                bottom={Platform.select({ ios: insets.bottom, android: tabBarHeight })}
                 left={0}
                 right={0}
                 alignItems='center'

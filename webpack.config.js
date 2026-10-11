@@ -1,3 +1,4 @@
+require('./scripts/link-brand').linkBrand(__dirname);
 require('dotenv').config();
 
 const path = require('path');
@@ -25,6 +26,8 @@ const generateConfig = () => {
         'DEFAULT_COORDINATES',
         'STORE_NAVIGATOR_TABS',
         'STORE_NAVIGATOR_DEFAULT_TAB',
+        'HOME_SCREEN',
+        'NETWORK_FOOD_TRUCKS_TAB',
         'STORE_FOOD_TRUCK_TAB_ICON',
         'DEFAULT_SERVICE_AREA',
         'BOOTSCREEN_BACKGROUND_COLOR',
@@ -43,12 +46,48 @@ const generateConfig = () => {
         'APPLE_LOGIN_ENABLED',
         'FACEBOOK_LOGIN_ENABLED',
         'GOOGLE_LOGIN_ENABLED',
+        'APP_THEME',
+        'CUSTOM_COLORS_LIGHT',
+        'CUSTOM_COLORS_DARK',
+        'CUSTOM_TAB_BAR_BG_COLOR',
+        'LOGIN_BG_IMAGE',
+        'BOOTSCREEN_BG_IMAGE',
+        'DISABLE_GEOCODING_SCREEN',
+        'GOOGLE_CLIENT_ID',
+        'FACEBOOK_APP_ID',
+        'FACEBOOK_CLIENT_TOKEN',
+        'STRIPE_PAYMENT_UI',
+        'STRIPE_ENABLE_APPLE_PAY',
+        'STRIPE_ENABLE_GOOGLE_PAY',
+        'SOCKETCLUSTER_PATH',
+        'STORE_HEADER_SHOW_GRADIENT',
+        'STORE_HEADER_SHOW_LOCATION_PICKER',
+        'STORE_HEADER_SHOW_TITLE',
+        'STORE_HEADER_SHOW_DESCRIPTION',
+        'STORE_HEADER_SHOW_LOGO',
+        'STORE_HEADER_LOGO_HEIGHT',
+        'STORE_HEADER_LOGO_WIDTH',
+        'STORE_HEADER_FLEX_DIRECTION',
+        'STORE_HEADER_ALIGN_ITEMS',
+        'STORE_HEADER_JUSTIFY_CONTENT',
+        'STORE_HEADER_SPACING',
+        'STORE_HEADER_PADDING_TOP',
+        'STORE_HEADER_PADDING_BOTTOM',
+        'STORE_HEADER_PADDING_LEFT',
+        'STORE_HEADER_PADDING_RIGHT',
     ];
 
     const config = STANDARD_KEYS.reduce((acc, key) => {
         acc[key] = process.env[key];
         return acc;
     }, {});
+
+    // Tab icon overrides (e.g. STORE_HOME_TAB_ICON) are read by route name.
+    Object.keys(process.env)
+        .filter((key) => /^STORE_[A-Z_]+_TAB_ICON$/.test(key))
+        .forEach((key) => {
+            config[key] = process.env[key];
+        });
 
     // Add locale-based keys.
     const AVAILABLE_LOCALES = (process.env.AVAILABLE_LOCALES || 'en').split(',');
@@ -65,9 +104,9 @@ const generateConfig = () => {
     return config;
 };
 
-module.exports = {
+module.exports = (env = {}, argv = {}) => ({
     target: 'web',
-    mode: 'development',
+    mode: argv.mode || 'development',
     devtool: 'source-map',
     entry: [path.resolve(__dirname, 'index.web.tsx')],
     devServer: {
@@ -82,12 +121,22 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.m?js$/,
+                resolve: {
+                    fullySpecified: false,
+                },
+            },
+            {
                 test: /\.(js|jsx|ts|tsx)$/,
                 include: [
                     path.resolve(__dirname, 'index.web.tsx'),
                     path.resolve(__dirname, 'App.tsx'),
                     path.resolve(__dirname, 'App.web.tsx'),
                     path.resolve(__dirname, 'tamagui.config.ts'),
+                    path.resolve(__dirname, 'storefront.extensions.ts'),
+                    path.resolve(__dirname, 'storefront.brand.ts'),
+                    path.resolve(__dirname, 'custom'),
+                    path.resolve(__dirname, 'brand'),
                     path.resolve(__dirname, 'src'),
                     path.resolve(__dirname, 'web'),
                 ],
@@ -97,7 +146,7 @@ module.exports = {
                         options: {
                             cacheDirectory: true,
                             presets: [
-                                ['@babel/preset-react', { plugins: ['@babel/plugin-proposal-class-properties'] }],
+                                ['@babel/preset-react', { plugins: ['@babel/plugin-transform-class-properties'] }],
                                 ['module:@react-native/babel-preset', { useTransformReactJSXExperimental: true }],
                                 '@babel/preset-typescript',
                             ],
@@ -114,24 +163,27 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(js|jsx)$/,
+                test: /\.(js|jsx|ts|tsx)$/,
                 include: [
                     path.resolve(__dirname, 'node_modules/react-native-linear-gradient'),
                     path.resolve(__dirname, 'node_modules/react-native-maps'),
+                    path.resolve(__dirname, 'node_modules/react-native-maps-directions'),
                     path.resolve(__dirname, 'node_modules/react-native-super-grid'),
                     path.resolve(__dirname, 'node_modules/react-native-community-blur'),
+                    path.resolve(__dirname, 'node_modules/react-native-image-picker'),
+                    path.resolve(__dirname, 'node_modules/react-native-qrcode-svg'),
                 ],
                 use: {
                     loader: 'babel-loader',
                     options: {
                         presets: [
-                            ['@babel/preset-react', { plugins: ['@babel/plugin-proposal-class-properties'] }],
+                            ['@babel/preset-react', { plugins: ['@babel/plugin-transform-class-properties'] }],
                             ['@babel/preset-env', { loose: true }],
                             'module:@react-native/babel-preset',
                             '@babel/preset-typescript',
                         ],
                         plugins: [
-                            ['@babel/plugin-proposal-class-properties', { loose: true }],
+                            ['@babel/plugin-transform-class-properties', { loose: true }],
                             ['@babel/plugin-transform-private-methods', { loose: true }],
                             ['@babel/plugin-transform-private-property-in-object', { loose: true }],
                             'react-native-web',
@@ -154,6 +206,11 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
+            },
+            {
+                // Brand fonts (brand/fonts), registered with @font-face at startup.
+                test: /\.(ttf|otf|woff2?)$/,
+                type: 'asset/resource',
             },
             {
                 test: /\.(gif|jpe?g|png|svg)$/,
@@ -182,8 +239,9 @@ module.exports = {
             'react-native-device-info': path.resolve(__dirname, 'web/react-native-device-info.web.js'),
             'react-native-fast-image': path.resolve(__dirname, 'web/react-native-fast-image.web.js'),
             '@react-native-community/blur': path.resolve(__dirname, 'web/react-native-community-blur.web.js'),
+            '@react-native-google-signin/google-signin': path.resolve(__dirname, 'web/react-native-google-signin.web.js'),
             '@fleetbase/storefront': path.resolve(__dirname, 'node_modules/@fleetbase/storefront/dist/esm/storefront.js'),
-            '@fleetbase/sdk': path.resolve(__dirname, 'node_modules/@fleetbase/sdk/dist/esm/fleetbase.js'),
+            '@fleetbase/sdk': path.resolve(__dirname, 'node_modules/@fleetbase/sdk/dist/index.js'),
         },
         extensions: ['.mjs', '.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts'],
     },
@@ -197,7 +255,7 @@ module.exports = {
             process: 'process/browser',
         }),
         new DefinePlugin({
-            __DEV__: JSON.stringify(true),
+            __DEV__: JSON.stringify(argv.mode !== 'production'),
             CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),
@@ -210,4 +268,4 @@ module.exports = {
             },
         },
     ],
-};
+});

@@ -37,6 +37,13 @@ export const SocketClusterProvider = ({ children }) => {
 
         const handleError = (err) => {
             setError(err);
+            // A dropped connection (e.g. a proxy or tunnel closing an idle socket) is
+            // routine: the client reconnects and resubscribes on its own.
+            const name = err?.error?.name ?? err?.name;
+            if (name === 'SocketProtocolError' || name === 'BadConnectionError') {
+                console.log('Socket connection dropped; reconnecting.', err?.error?.code ?? err?.code ?? '');
+                return;
+            }
             console.error('Socket encountered error:', err);
         };
 

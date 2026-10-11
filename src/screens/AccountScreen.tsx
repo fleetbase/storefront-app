@@ -262,15 +262,18 @@ const AccountScreen = () => {
             ),
             onPress: handleLanguageSelect,
         },
-        {
-            titleComponent: <FontAwesomeIcon icon={faPalette} size={22} color={theme.textSecondary.val} />,
-            rightComponent: (
-                <Text color='$textSecondary' opacity={0.5}>
-                    {titleize(userColorScheme)}
-                </Text>
-            ),
-            onPress: handleSelectScheme,
-        },
+        // Hidden when the brand fixes the color scheme (appearance.allowUserToggle: false).
+        schemes.length
+            ? {
+                  titleComponent: <FontAwesomeIcon icon={faPalette} size={22} color={theme.textSecondary.val} />,
+                  rightComponent: (
+                      <Text color='$textSecondary' opacity={0.5}>
+                          {titleize(userColorScheme)}
+                      </Text>
+                  ),
+                  onPress: handleSelectScheme,
+              }
+            : null,
         {
             title: t('AccountScreen.deleteAccount'),
             rightComponent: null,
@@ -299,7 +302,7 @@ const AccountScreen = () => {
 
     return (
         <ScreenWrapper>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <AbsoluteTabBarScreenWrapper>
                     <YStack flex={1} bg='$background' space='$8' pt='$3'>
                         <YStack space='$2'>
@@ -316,6 +319,8 @@ const AccountScreen = () => {
                                 </YStack>
                             </XStack>
                             <FlatList
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 data={accountMenu}
                                 keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}
@@ -330,6 +335,8 @@ const AccountScreen = () => {
                                 </Text>
                             </YStack>
                             <FlatList
+                                showsVerticalScrollIndicator={false}
+                                showsHorizontalScrollIndicator={false}
                                 data={dataProtectionMenu}
                                 keyExtractor={(item, index) => item.title ?? index}
                                 renderItem={renderMenuItem}

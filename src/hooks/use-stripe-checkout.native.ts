@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useStripe, initStripe } from '@stripe/stripe-react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
+import { getCartOriginIds, getCartQuoteOrigin } from '../network/network-runtime';
 import { numbersOnly } from '../utils/format';
 import { percentage, calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { captureErrorMessage, captureWithRetry, pendingCaptureFor, type PendingCapture } from '../commerce/checkout-capture';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -38,6 +40,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
     });
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
+    // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
+    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
@@ -56,12 +60,12 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return totalItem ? totalItem.value : 0;
     }, [checkoutOptions, subtotal, serviceQuote]);
     const isPickupEnabled = get(info, 'options.pickup_enabled') === true;
-    
+
     // Minimum checkout validation
     const isMinimumCheckoutEnabled = get(info, 'options.required_checkout_min') === true;
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
-    
+
     const isReady = Boolean(paymentMethod) && !isLoading && !stripeLoading && (checkoutOptions?.pickup || Boolean(serviceQuote)) && !isBelowMinimum;
 
     function computeLineItems() {
@@ -117,16 +121,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return baseItems;
     }
 
-    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable]);
+    const lineItems = useMemo(() => computeLineItems(), [checkoutOptions, subtotal, serviceQuote, isServiceQuoteUnavailable, unavailableItems]);
 
-    const storeLocationId = useMemo(() => {
-        if (!cart?.contents || typeof cart.contents !== 'function') return null;
-
-        const storeLocationIds = cart.contents().map((item) => item.store_location_id);
-        const uniqueStoreLocationIds = [...new Set(storeLocationIds)];
-
-        return uniqueStoreLocationIds[0] || null;
-    }, [cartContentsString]);
+    const storeLocationIds = useMemo(() => getCartOriginIds(cart), [cartContentsString]);
+    const storeLocationId = storeLocationIds[0] || null;
+    const quoteOrigin = useMemo(() => getCartQuoteOrigin(cart), [cartContentsString]);
 
     const foodTruckId = useMemo(() => {
         if (!cart?.contents || typeof cart.contents !== 'function') return null;
@@ -289,6 +288,65 @@ export default function useStripeCheckout({ onOrderComplete }) {
         [setupIntentClientSecret, confirmSetupIntent]
     );
 
+    // A paid checkout whose order isn't created yet, kept across restarts so the customer
+    // can finish placing it without paying again.
+    const [storedPendingCapture, setPendingCapture] = useStorage<PendingCapture | null>('_pending_checkout_capture', null);
+    const pendingCapture = pendingCaptureFor(storedPendingCapture, customer?.id);
+
+    // The payment went through: create the order. Capture is retried, and if it still
+    // fails the checkout stays pending instead of being lost.
+    const completePaidOrder = useCallback(
+        async (checkoutToken, callback, notes = orderNotes) => {
+            const pending = { token: checkoutToken, notes, customerId: customer?.id ?? null, paidAt: new Date().toISOString() };
+            setPendingCapture(pending);
+            let order;
+            try {
+                order = await captureWithRetry(() => storefront.checkout.captureOrder(checkoutToken, { notes }));
+            } catch (error) {
+                // Kept on screen (not a passing toast): what happened, why, and that retrying never charges again.
+                console.warn('Order capture failed after payment:', error);
+                setPendingCapture({ ...pending, lastError: captureErrorMessage(error), lastTriedAt: new Date().toISOString() });
+                return;
+            }
+            setPendingCapture(null);
+
+            try {
+                const emptiedCart = await cart.empty();
+                updateCart(emptiedCart);
+            } catch (error) {
+                console.warn('Could not empty the cart after the order:', error);
+            }
+
+            // Push order into local history cache immediately
+            if (customer?.id) {
+                addOrderToHistoryCache(customer.id, order);
+            }
+
+            if (!onOrderComplete && typeof callback === 'function') {
+                callback(order);
+            }
+
+            if (!callback && typeof onOrderComplete === 'function') {
+                onOrderComplete(order);
+            }
+        },
+        [cart, updateCart, storefront, customer, orderNotes, onOrderComplete, setPendingCapture, t]
+    );
+
+    // Finish a paid checkout whose order wasn't created; never charges again.
+    const finishPendingOrder = useCallback(
+        async (callback) => {
+            if (!pendingCapture) return;
+            setIsLoading(true);
+            try {
+                await completePaidOrder(pendingCapture.token, callback, pendingCapture.notes);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [pendingCapture, completePaidOrder]
+    );
+
     const handleCompleteOrderViaSheet = useCallback(
         async (callback) => {
             setIsLoading(true);
@@ -305,23 +363,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message);
                 } else {
-                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
-                    const emptiedCart = await cart.empty();
-                    updateCart(emptiedCart);
-
-                    // Push order into local history cache immediately
-                    if (customer?.id) {
-                        addOrderToHistoryCache(customer.id, order);
-                        // optionally: markOrderHistoryDirty(customer.id);
-                    }
-
-                    if (!onOrderComplete && typeof callback === 'function') {
-                        callback(order);
-                    }
-
-                    if (!callback && typeof onOrderComplete === 'function') {
-                        onOrderComplete(order);
-                    }
+                    await completePaidOrder(checkoutToken, callback);
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
@@ -330,7 +372,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setIsLoading(false);
             }
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, completePaidOrder]
     );
 
     const handleCompleteOrderViaField = useCallback(
@@ -352,17 +394,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
                     console.error('Error completing order:', paymentError);
                     toast.error(paymentError.message);
                 } else if (paymentIntent && paymentIntent.status === 'Succeeded') {
-                    const order = await storefront.checkout.captureOrder(checkoutToken, { notes: orderNotes });
-                    const emptiedCart = await cart.empty();
-                    updateCart(emptiedCart);
-
-                    if (!onOrderComplete && typeof callback === 'function') {
-                        callback(order);
-                    }
-
-                    if (!callback && typeof onOrderComplete === 'function') {
-                        onOrderComplete(order);
-                    }
+                    await completePaidOrder(checkoutToken, callback);
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
@@ -371,23 +403,28 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setIsLoading(false);
             }
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, completePaidOrder]
     );
 
     const handleCompleteOrder = useCallback(
         async (callback) => {
+            // Already paid: only the order remains to be created.
+            if (pendingCapture) {
+                return finishPendingOrder(callback);
+            }
             if (storefrontConfig('stripePaymentMethod') === 'field') {
                 return handleCompleteOrderViaField(callback);
             }
 
             return handleCompleteOrderViaSheet(callback);
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment]
+        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, pendingCapture, finishPendingOrder]
     );
 
     // Fetch service quote whenever location or cart contents change
     useEffect(() => {
-        if (!cart || checkoutOptions.pickup) {
+        // No address yet (e.g. just signed in from checkout): nothing to quote until one is chosen.
+        if (!cart || checkoutOptions.pickup || !deliveryLocation) {
             return;
         }
 
@@ -395,13 +432,19 @@ export default function useStripeCheckout({ onOrderComplete }) {
         let isMounted = true;
         const fetchServiceQuote = async () => {
             setServiceQuote(null);
+            // A new address or cart gets a fresh try; an earlier failure shouldn't stick.
+            setIsServiceQuoteUnavailable(false);
+            setUnavailableItems(null);
             try {
-                const quote = await getServiceQuote(currentStoreLocation, destination, cart);
+                const quote = await getServiceQuote(quoteOrigin ?? currentStoreLocation, destination, cart);
                 if (isMounted) {
                     setServiceQuote(quote);
                 }
             } catch (error) {
-                setIsServiceQuoteUnavailable(true);
+                if (isMounted) {
+                    setIsServiceQuoteUnavailable(true);
+                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                }
                 console.warn('Error fetching service quote:', error);
             }
         };
@@ -411,7 +454,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id]);
+    }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id, quoteOrigin]);
 
     useEffect(() => {
         if (stripeInitialized === false) {
@@ -454,6 +497,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             handleCompleteOrderViaField,
             handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            pendingCapture,
+            finishPendingOrder,
             setStripeLoading,
             setupIntentLoading,
             error,
@@ -462,9 +507,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
             setOrderNotes,
             foodTruckId,
             storeLocationId,
-            originLocationId: foodTruckId ?? storeLocationId,
+            originLocationId: quoteOrigin ?? foodTruckId ?? storeLocationId,
+            storeLocationIds,
             isNotReady: !isReady,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
@@ -497,6 +544,8 @@ export default function useStripeCheckout({ onOrderComplete }) {
             handleCompleteOrderViaField,
             handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            pendingCapture,
+            finishPendingOrder,
             setStripeLoading,
             setupIntentLoading,
             error,
@@ -505,7 +554,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
             setOrderNotes,
             foodTruckId,
             storeLocationId,
+            storeLocationIds,
+            quoteOrigin,
             isServiceQuoteUnavailable,
+            unavailableItems,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
