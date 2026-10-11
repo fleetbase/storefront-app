@@ -160,7 +160,7 @@ const VerifyCodeScreen = ({ route, purpose }: { route: any; purpose: VerifyPurpo
                         )}
                     </YStack>
 
-                    <Button size='lg' fullWidth variant={purpose === 'delete' ? 'destructive' : 'solid'} loading={verifying} disabled={code.length < 6} onPress={() => verify()}>
+                    <Button size='lg' fullWidth variant={purpose === 'delete' ? 'destructive' : 'solid'} loading={verifying} disabled={code.length < 6} onPress={() => verify()} testID='verify-code-submit'>
                         {cta}
                     </Button>
 

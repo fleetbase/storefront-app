@@ -5,14 +5,21 @@ appId: ${APP_ID}
 - runFlow: common/launch.yaml
 - extendedWaitUntil:
       visible:
+          id: store-search
+      timeout: 60000
+- extendedWaitUntil:
+      visible:
           id: product-item
       timeout: 60000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
 
+# The nearest product below the search field: the first one in the view tree can sit below
+# the screen edge, where a tap lands on the tab bar.
 - tapOn:
       id: product-item
-      index: 0
+      below:
+          id: store-search
 - extendedWaitUntil:
       visible:
           id: product-add-to-cart

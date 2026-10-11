@@ -12,9 +12,11 @@ appId: ${APP_ID}
 - inputText: ${CUSTOMER_PHONE}
 - tapOn:
       id: sign-in-send-code
+# The code field itself is a transparent input over the boxes, which Maestro reports as not
+# visible; the button below it marks the screen. The field has focus, so typing fills it.
 - extendedWaitUntil:
       visible:
-          id: code-input
+          id: verify-code-submit
       timeout: 30000
 - takeScreenshot: storefront-app-login-create-code${QUALIFIER}${SHOT_SUFFIX}
 - inputText: ${VERIFICATION_CODE}
