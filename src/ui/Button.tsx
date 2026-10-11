@@ -2,7 +2,9 @@ import React from 'react';
 import { ActivityIndicator, Pressable } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import LinearGradient from 'react-native-linear-gradient';
 import { XStack, useTheme } from 'tamagui';
+import { useBranding } from '../branding/BrandingProvider';
 import { UIText } from './Text';
 import { HIT_SIZE, radius } from './tokens';
 
@@ -45,6 +47,11 @@ export function Button({ children, onPress, variant = 'solid', size = 'md', icon
         destructive: { bg: theme.error.val, fg: '#ffffff', border: theme.error.val },
     }[variant];
     const colors = inactive && variant !== 'ghost' ? { bg: theme.surface2.val, fg: theme.textSecondary.val, border: theme.surface2.val } : palette;
+    // A brand may fill its main action with a gradient (colors.extra gradientStart → gradientEnd).
+    const { branding } = useBranding();
+    const gradientStart = (theme as any).gradientStart?.val;
+    const gradientEnd = (theme as any).gradientEnd?.val;
+    const gradient = variant === 'solid' && !inactive && branding.components.button.fill === 'gradient' && gradientStart && gradientEnd ? [gradientStart, gradientEnd] : null;
 
     return (
         <Pressable
@@ -61,13 +68,15 @@ export function Button({ children, onPress, variant = 'solid', size = 'md', icon
                 minWidth: HEIGHTS[size],
                 paddingHorizontal: size === 'sm' ? 14 : 18,
                 borderRadius: radius.button,
-                borderWidth: 1,
+                borderWidth: gradient ? 0 : 1,
                 borderColor: colors.border,
-                backgroundColor: colors.bg,
+                backgroundColor: gradient ? 'transparent' : colors.bg,
                 justifyContent: 'center',
+                overflow: gradient ? 'hidden' : undefined,
                 opacity: pressed && !inactive ? 0.85 : 1,
             })}
         >
+            {gradient && <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} pointerEvents='none' />}
             <XStack alignItems='center' justifyContent={trailing ? 'space-between' : 'center'} gap={8}>
                 <XStack alignItems='center' gap={8}>
                     {loading ? <ActivityIndicator size='small' color={colors.fg} /> : icon ? <FontAwesomeIcon icon={icon} size={size === 'sm' ? 14 : 16} color={colors.fg} /> : null}

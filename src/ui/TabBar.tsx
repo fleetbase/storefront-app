@@ -4,22 +4,25 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { UIText } from './Text';
+import { useBranding } from '../branding/BrandingProvider';
 
 /**
  * The bottom tab bar, drawn from theme roles so it follows the brand and dark mode.
  * Each tab's icon and label come from its `tabBarIcon` / `tabBarLabel` options; the
- * active tab uses the readable brand color.
+ * active tab uses the readable brand color, or the brand's `components.tabBar.activeColor`.
  */
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
+    const { branding } = useBranding();
+    const activeColor = (theme as any)[branding.components.tabBar.activeColor]?.val ?? theme.primaryForeground.val;
 
     return (
         <XStack accessibilityRole='tablist' backgroundColor='$background' borderTopWidth={1} borderColor='$borderColor' paddingBottom={Math.max(insets.bottom, 6)} paddingTop={6}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const focused = state.index === index;
-                const color = focused ? theme.primaryForeground.val : theme.textSecondary.val;
+                const color = focused ? activeColor : theme.textSecondary.val;
                 const label = options.tabBarLabel ?? options.title ?? route.name;
                 const accessibilityLabel = options.tabBarAccessibilityLabel ?? (typeof label === 'string' ? label : undefined);
 

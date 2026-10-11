@@ -86,6 +86,34 @@ export const ComponentsSchema = z
             .partial()
             .strict(),
         storeHeader: StoreHeaderSchema,
+        /** `gradient` fills solid buttons with colors.extra `gradientStart` → `gradientEnd`. */
+        button: z
+            .object({ fill: z.enum(['solid', 'gradient']), radius: z.number().int().min(0).max(32) })
+            .partial()
+            .strict(),
+        /** How a selected chip shows: `tinted` (soft brand tint) or `filled` (solid brand color). */
+        chip: z
+            .object({ selected: z.enum(['tinted', 'filled']) })
+            .partial()
+            .strict(),
+        tabBar: z
+            .object({
+                /** Theme key for the active tab's icon and label, e.g. `primary`. */
+                activeColor: ThemeKey,
+            })
+            .partial()
+            .strict(),
+    })
+    .partial()
+    .strict();
+
+/** Corner radii of the shared components (tiles, cards, sheets). */
+export const ShapeSchema = z
+    .object({
+        radius: z
+            .object({ tile: z.number().int().min(0).max(32), card: z.number().int().min(0).max(40), sheet: z.number().int().min(0).max(48) })
+            .partial()
+            .strict(),
     })
     .partial()
     .strict();
@@ -134,6 +162,8 @@ export const NavigationSchema = z
             })
             .partial()
             .strict(),
+        /** Show the language button in screen headers (only when more than one language is available). */
+        languageSwitcher: z.boolean(),
     })
     .partial()
     .strict();
@@ -172,6 +202,7 @@ export const BRANDING_SECTIONS = {
     typography: TypographySchema,
     appearance: AppearanceSchema,
     components: ComponentsSchema,
+    shape: ShapeSchema,
     assets: AssetsSchema,
     boot: BootSchema,
     navigation: NavigationSchema,
@@ -191,6 +222,7 @@ export const BrandingSchemaV1 = z
 export type BrandingColors = z.infer<typeof ColorsSchema>;
 export type BrandingAppearance = z.infer<typeof AppearanceSchema>;
 export type BrandingComponents = z.infer<typeof ComponentsSchema>;
+export type BrandingShape = z.infer<typeof ShapeSchema>;
 export type BrandingAssets = z.infer<typeof AssetsSchema>;
 export type BrandingBoot = z.infer<typeof BootSchema>;
 export type BrandingNavigation = z.infer<typeof NavigationSchema>;
@@ -207,6 +239,7 @@ export type BrandingConfig = {
     colors?: BrandingColors;
     appearance?: BrandingAppearance;
     components?: BrandingComponents;
+    shape?: BrandingShape;
     assets?: BrandingAssets;
     boot?: BrandingBoot;
     navigation?: BrandingNavigation;

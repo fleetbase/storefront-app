@@ -28,10 +28,14 @@ export type ResolvedBranding = {
         productCard: { variant: 'bordered' | 'outlined' | 'visio' };
         storeCategories: { display: 'grid' | 'pills' };
         storeHeader: Required<StoreHeaderOptions>;
+        button: { fill: 'solid' | 'gradient'; radius: number };
+        chip: { selected: 'tinted' | 'filled' };
+        tabBar: { activeColor: string };
     };
+    shape: { radius: { tile: number; card: number; sheet: number } };
     assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null };
     boot: { background: string[] };
-    navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } }; home: 'store' | 'foodTrucks'; network: { foodTrucks: boolean } };
+    navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } }; home: 'store' | 'foodTrucks'; network: { foodTrucks: boolean }; languageSwitcher: boolean };
     typography: { body?: FontFamily; heading?: FontFamily; scale: number };
     screens: BrandingScreens;
 };
@@ -202,6 +206,7 @@ export function resolveBranding(sources: BrandingSource[]): { branding: Resolved
         extraColors: { light: { ...extra.all, ...extra.light }, dark: { ...extra.all, ...extra.dark } },
         appearance: merged.appearance,
         components: merged.components,
+        shape: merged.shape,
         assets: merged.assets,
         boot: merged.boot,
         navigation: merged.navigation,

@@ -1,12 +1,17 @@
+import { getBuildBranding } from '../branding/build-branding';
+
+const brand = getBuildBranding().branding;
+
 /**
  * Shape and spacing shared by the redesigned screens. Colors always come from theme
- * roles ($primary, $surface, ...), never from here.
+ * roles ($primary, $surface, ...), never from here. Radii follow the brand's `shape`
+ * and `components.button` options.
  */
 export const radius = {
-    tile: 12,
-    button: 12,
-    card: 16,
-    sheet: 24,
+    tile: brand.shape.radius.tile,
+    button: brand.components.button.radius,
+    card: brand.shape.radius.card,
+    sheet: brand.shape.radius.sheet,
     pill: 999,
 } as const;
 
