@@ -298,6 +298,7 @@ const FoodTrucksScreen = () => {
                     <Pressable
                         key={place.key}
                         onPress={() => select(place)}
+                        testID={`nearby-${place.kind}`}
                         accessibilityRole='radio'
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={[place.name, kindLabel, place.meta].filter(Boolean).join(', ')}

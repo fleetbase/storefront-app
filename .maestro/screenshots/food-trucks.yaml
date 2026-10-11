@@ -2,14 +2,6 @@
 # a truck's menu and the trucks search. The same flow captures a Network's trucks (a network
 # key with HOME_SCREEN=foodTrucks) with QUALIFIER=-network and SEARCH_TAB=tab-network-search.
 appId: ${APP_ID}
-env:
-    APP_ID: com.storefront.app
-    SHOT_SUFFIX: ''
-    QUALIFIER: ''
-    SEARCH_TAB: tab-store-search
-    SEARCH_QUERY: tea
-    LATITUDE: '1.2834'
-    LONGITUDE: '103.8607'
 ---
 - runFlow: common/launch.yaml
 - extendedWaitUntil:

@@ -1,12 +1,6 @@
 # Single store edition: store home, category, product, search, map, cart, sign-in,
 # account, checkout and orders.
 appId: ${APP_ID}
-env:
-    APP_ID: com.storefront.app
-    SHOT_SUFFIX: ''
-    SEARCH_QUERY: tea
-    LATITUDE: '1.2834'
-    LONGITUDE: '103.8607'
 ---
 - runFlow: common/launch.yaml
 - extendedWaitUntil:
@@ -15,12 +9,6 @@ env:
       timeout: 60000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
-
-- tapOn:
-      id: store-category
-      index: 0
-- waitForAnimationToEnd
-- takeScreenshot: storefront-app-category-details${SHOT_SUFFIX}
 
 - tapOn:
       id: product-item
@@ -34,6 +22,17 @@ env:
 - tapOn:
       id: product-add-to-cart
 - waitForAnimationToEnd
+
+# Adding closes the product. Then a category: the jump scrolls the page to it.
+- extendedWaitUntil:
+      visible:
+          id: store-category
+      timeout: 30000
+- tapOn:
+      id: store-category
+      index: 0
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-category-details${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-search

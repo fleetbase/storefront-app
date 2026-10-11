@@ -1,8 +1,6 @@
 # Signs in the seeded review customer through the real flow. The server accepts
 # VERIFICATION_CODE only for numbers listed in STOREFRONT_REVIEW_ACCOUNTS.
 appId: ${APP_ID}
-env:
-    QUALIFIER: ''
 ---
 - extendedWaitUntil:
       visible:
@@ -12,7 +10,6 @@ env:
 - tapOn:
       id: phone-number
 - inputText: ${CUSTOMER_PHONE}
-- hideKeyboard
 - tapOn:
       id: sign-in-send-code
 - extendedWaitUntil:

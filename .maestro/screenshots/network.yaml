@@ -1,12 +1,6 @@
 # Network edition: marketplace home, a member store, a product, search, map, cart, then
 # signed in: account, orders, an order and checkout.
 appId: ${APP_ID}
-env:
-    APP_ID: com.storefront.app
-    SHOT_SUFFIX: ''
-    SEARCH_QUERY: tea
-    LATITUDE: '1.2834'
-    LONGITUDE: '103.8607'
 ---
 - runFlow: common/launch.yaml
 - extendedWaitUntil:
@@ -65,10 +59,7 @@ env:
 
 - tapOn:
       id: tab-network-profile
-- runFlow:
-      file: common/sign-in.yaml
-      env:
-          QUALIFIER: -network
+- runFlow: common/sign-in.yaml
 - extendedWaitUntil:
       visible:
           id: account-orders
