@@ -13,7 +13,7 @@ env:
           id: store-card
       timeout: 60000
 - waitForAnimationToEnd
-- takeScreenshot: network-home${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-network-details${SHOT_SUFFIX}
 
 - tapOn:
       id: store-card
@@ -23,7 +23,7 @@ env:
           id: product-item
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: network-store${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-store-details-network${SHOT_SUFFIX}
 
 - tapOn:
       id: product-item
@@ -33,7 +33,7 @@ env:
           id: product-add-to-cart
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: network-product${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-product-details-network${SHOT_SUFFIX}
 - tapOn:
       id: product-add-to-cart
 - waitForAnimationToEnd
@@ -46,13 +46,13 @@ env:
 - hideKeyboard
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: network-search${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-products-list-network${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-network-map
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: network-map${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-stores-map-network${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-network-cart
@@ -60,4 +60,4 @@ env:
       visible:
           id: cart-checkout
       timeout: 30000
-- takeScreenshot: network-cart${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-cart-details-network${SHOT_SUFFIX}

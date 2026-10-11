@@ -14,13 +14,13 @@ env:
           id: product-item
       timeout: 60000
 - waitForAnimationToEnd
-- takeScreenshot: store-home${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
 
 - tapOn:
       id: store-category
       index: 0
 - waitForAnimationToEnd
-- takeScreenshot: store-category${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-category-details${SHOT_SUFFIX}
 
 - tapOn:
       id: product-item
@@ -30,7 +30,7 @@ env:
           id: product-add-to-cart
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: product-detail${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-product-details${SHOT_SUFFIX}
 - tapOn:
       id: product-add-to-cart
 - waitForAnimationToEnd
@@ -45,14 +45,14 @@ env:
       visible:
           id: product-item
       timeout: 30000
-- takeScreenshot: store-search${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-products-list${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-map
       optional: true
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: store-map${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-store-map${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-cart
@@ -60,7 +60,7 @@ env:
       visible:
           id: cart-checkout
       timeout: 30000
-- takeScreenshot: cart${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-cart-details${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-profile
@@ -70,7 +70,7 @@ env:
           id: account-orders
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: account${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-account-details${SHOT_SUFFIX}
 
 - tapOn:
       id: account-orders
@@ -78,13 +78,13 @@ env:
       visible:
           id: order-row
       timeout: 30000
-- takeScreenshot: orders${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-orders-list${SHOT_SUFFIX}
 - tapOn:
       id: order-active
       optional: true
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: order-tracking${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-order-details${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-cart
@@ -92,4 +92,4 @@ env:
       id: cart-checkout
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: checkout${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-checkout-create${SHOT_SUFFIX}

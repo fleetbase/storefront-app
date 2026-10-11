@@ -18,7 +18,7 @@
 maestro test .maestro/screenshots/store.yaml -e CUSTOMER_PHONE=+6590000000 -e VERIFICATION_CODE=000000
 ```
 
-Screenshots are written to the working directory as `<shot>.png`; pass `-e SHOT_SUFFIX=-light` for the light appearance.
+Screenshots are written to the working directory as `<shot>.png`, named by showcase's rule (`<area>-<subject>-<view>[-qualifier]`, e.g. `storefront-app-product-details`); pass `-e SHOT_SUFFIX=-light` for the light appearance.
 
 ## Variables
 

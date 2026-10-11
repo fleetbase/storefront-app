@@ -6,7 +6,7 @@ appId: ${APP_ID}
       visible:
           id: phone-number
       timeout: 30000
-- takeScreenshot: sign-in${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-login-create${SHOT_SUFFIX}
 - tapOn:
       id: phone-number
 - inputText: ${CUSTOMER_PHONE}
@@ -17,5 +17,5 @@ appId: ${APP_ID}
       visible:
           id: code-input
       timeout: 30000
-- takeScreenshot: verify-code${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-login-create-code${SHOT_SUFFIX}
 - inputText: ${VERIFICATION_CODE}

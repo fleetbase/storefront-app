@@ -19,12 +19,12 @@ env:
       timeout: 60000
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: trucks-map${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-trucks-map${SHOT_SUFFIX}
 
 - tapOn:
       id: trucks-mode-list
 - waitForAnimationToEnd
-- takeScreenshot: trucks-list${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-trucks-list${SHOT_SUFFIX}
 
 - tapOn:
       id: nearby-truck
@@ -34,7 +34,7 @@ env:
           id: product-item
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: truck-menu${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-truck-details${SHOT_SUFFIX}
 
 - tapOn:
       id: tab-store-search
@@ -44,4 +44,4 @@ env:
 - hideKeyboard
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: trucks-search${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-products-list-food-trucks${SHOT_SUFFIX}
