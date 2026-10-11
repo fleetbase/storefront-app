@@ -1,0 +1,12 @@
+# A Network's trucks (a network key with HOME_SCREEN=foodTrucks): the same screens as
+# food-trucks.yaml, named with -network, with the Network's Search tab.
+appId: ${APP_ID}
+env:
+    APP_ID: com.storefront.app
+    SHOT_SUFFIX: ''
+---
+- runFlow:
+      file: food-trucks.yaml
+      env:
+          QUALIFIER: -network
+          SEARCH_TAB: tab-network-search

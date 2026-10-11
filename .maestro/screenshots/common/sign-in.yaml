@@ -1,12 +1,14 @@
 # Signs in the seeded review customer through the real flow. The server accepts
 # VERIFICATION_CODE only for numbers listed in STOREFRONT_REVIEW_ACCOUNTS.
 appId: ${APP_ID}
+env:
+    QUALIFIER: ''
 ---
 - extendedWaitUntil:
       visible:
           id: phone-number
       timeout: 30000
-- takeScreenshot: storefront-app-login-create${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-login-create${QUALIFIER}${SHOT_SUFFIX}
 - tapOn:
       id: phone-number
 - inputText: ${CUSTOMER_PHONE}
@@ -17,5 +19,5 @@ appId: ${APP_ID}
       visible:
           id: code-input
       timeout: 30000
-- takeScreenshot: storefront-app-login-create-code${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-login-create-code${QUALIFIER}${SHOT_SUFFIX}
 - inputText: ${VERIFICATION_CODE}

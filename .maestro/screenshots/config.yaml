@@ -5,3 +5,4 @@ flows:
     - store.yaml
     - network.yaml
     - food-trucks.yaml
+    - network-food-trucks.yaml

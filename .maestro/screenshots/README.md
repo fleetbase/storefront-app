@@ -5,8 +5,9 @@
 | Flow              | Build                                   | Screens                                                                                                          |
 | ----------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `store.yaml`      | a store key (`store_…`)                 | store home, category, product, search, map, cart, sign-in, code, account, orders, order tracking, checkout        |
-| `network.yaml`    | a network key (`network_…`)             | network home, store, product, search, map, cart                                                                  |
-| `food-trucks.yaml`| a store key with `HOME_SCREEN=foodTrucks` | trucks map, list, truck menu, trucks search                                                                      |
+| `network.yaml`    | a network key (`network_…`)             | network home, store, product, search, map, cart, sign-in, code, account, orders, order details, checkout          |
+| `food-trucks.yaml`| a store key with `HOME_SCREEN=foodTrucks` | trucks map, list, truck menu, trucks search |
+| `network-food-trucks.yaml` | a network key with `HOME_SCREEN=foodTrucks` | the same trucks screens for a Network's member stores, named `…-network` |
 
 ## Running locally
 
@@ -27,6 +28,8 @@ Screenshots are written to the working directory as `<shot>.png`, named by showc
 | `APP_ID`            | `com.storefront.app` | Bundle id / application id                                                                  |
 | `SHOT_SUFFIX`       | empty                | Appended to every file name, e.g. `-light`                                                  |
 | `SEARCH_QUERY`      | `tea`                | What the search screens search for                                                          |
+| `QUALIFIER`         | empty                | Inserted before the suffix to tell editions apart, e.g. `-network`                          |
+| `SEARCH_TAB`        | `tab-store-search`   | The Search tab's id (food-trucks flow; the Network wrapper sets it)                         |
 | `LATITUDE`, `LONGITUDE` | Singapore        | Where the customer is (the seeded stores and truck zone)                                    |
 | `CUSTOMER_PHONE`    | none                 | The seeded review customer (store flow)                                                      |
 | `VERIFICATION_CODE` | none                 | The server's `STOREFRONT_BYPASS_VERIFICATION_CODE`, honoured only for `STOREFRONT_REVIEW_ACCOUNTS` |

@@ -1,4 +1,5 @@
-# Network edition: marketplace home, a member store, a product, search and map.
+# Network edition: marketplace home, a member store, a product, search, map, cart, then
+# signed in: account, orders, an order and checkout.
 appId: ${APP_ID}
 env:
     APP_ID: com.storefront.app
@@ -61,3 +62,38 @@ env:
           id: cart-checkout
       timeout: 30000
 - takeScreenshot: storefront-app-cart-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-profile
+- runFlow:
+      file: common/sign-in.yaml
+      env:
+          QUALIFIER: -network
+- extendedWaitUntil:
+      visible:
+          id: account-orders
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-account-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: account-orders
+- extendedWaitUntil:
+      visible:
+          id: order-row
+      timeout: 30000
+- takeScreenshot: storefront-app-orders-list-network${SHOT_SUFFIX}
+- tapOn:
+      id: order-active
+      optional: true
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-order-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-cart
+- tapOn:
+      id: cart-checkout
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-checkout-create-network${SHOT_SUFFIX}

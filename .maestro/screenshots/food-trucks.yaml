@@ -1,9 +1,12 @@
 # Food trucks home (a build with HOME_SCREEN=foodTrucks): the live map, the list,
-# a truck's menu and the trucks search.
+# a truck's menu and the trucks search. The same flow captures a Network's trucks (a network
+# key with HOME_SCREEN=foodTrucks) with QUALIFIER=-network and SEARCH_TAB=tab-network-search.
 appId: ${APP_ID}
 env:
     APP_ID: com.storefront.app
     SHOT_SUFFIX: ''
+    QUALIFIER: ''
+    SEARCH_TAB: tab-store-search
     SEARCH_QUERY: tea
     LATITUDE: '1.2834'
     LONGITUDE: '103.8607'
@@ -19,12 +22,12 @@ env:
       timeout: 60000
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: storefront-app-food-trucks-map${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-trucks-map${QUALIFIER}${SHOT_SUFFIX}
 
 - tapOn:
       id: trucks-mode-list
 - waitForAnimationToEnd
-- takeScreenshot: storefront-app-food-trucks-list${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-trucks-list${QUALIFIER}${SHOT_SUFFIX}
 
 - tapOn:
       id: nearby-truck
@@ -34,14 +37,14 @@ env:
           id: product-item
       timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: storefront-app-food-truck-details${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-food-truck-details${QUALIFIER}${SHOT_SUFFIX}
 
 - tapOn:
-      id: tab-store-search
+      id: ${SEARCH_TAB}
 - tapOn:
       id: trucks-search-input
 - inputText: ${SEARCH_QUERY}
 - hideKeyboard
 - waitForAnimationToEnd:
       timeout: 8000
-- takeScreenshot: storefront-app-products-list-food-trucks${SHOT_SUFFIX}
+- takeScreenshot: storefront-app-products-list-food-trucks${QUALIFIER}${SHOT_SUFFIX}
