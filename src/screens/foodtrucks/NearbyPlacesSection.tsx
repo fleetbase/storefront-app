@@ -56,7 +56,7 @@ export function NearbyPlacesSection() {
                             opacity: pressed ? 0.85 : place.active ? 1 : 0.65,
                         })}
                     >
-                        <PlaceIcon kind={place.kind} active={place.active} size={44} />
+                        <PlaceIcon kind={place.kind} active={place.active} size={44} logoUrl={place.photoUrl} />
                         <YStack flex={1} minWidth={0} gap={2}>
                             <UIText variant='bodyStrong' numberOfLines={1}>
                                 {place.name}

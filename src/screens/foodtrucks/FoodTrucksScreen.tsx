@@ -313,7 +313,7 @@ const FoodTrucksScreen = () => {
                             opacity: place.active ? 1 : 0.65,
                         }}
                     >
-                        <PlaceIcon kind={place.kind} active={place.active} size={40} />
+                        <PlaceIcon kind={place.kind} active={place.active} size={40} logoUrl={place.photoUrl} />
                         <YStack flex={1} minWidth={0}>
                             <UIText variant='captionStrong' numberOfLines={1}>
                                 {place.name}
@@ -457,7 +457,7 @@ const FoodTrucksScreen = () => {
                             const place = places.find((item) => item.store?.key === store.key);
                             return (
                                 <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => (place ? select(place) : openStore(store))} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
-                                    <MapPin kind='store' active={store.open} selected={!!place && place.key === selectedKey} label={store.name} meta={store.statusText} />
+                                    <MapPin kind='store' active={store.open} selected={!!place && place.key === selectedKey} label={store.name} meta={store.statusText} logoUrl={store.store?.logo_url} />
                                 </Marker>
                             );
                         })}
@@ -688,10 +688,10 @@ const FoodTrucksScreen = () => {
 };
 
 /** A map marker: the truck or store icon with its name and a short line under it. */
-function MapPin({ kind, active, selected, label, meta }: { kind: 'truck' | 'store'; active: boolean; selected: boolean; label: string; meta: string | null }) {
+function MapPin({ kind, active, selected, label, meta, logoUrl }: { kind: 'truck' | 'store'; active: boolean; selected: boolean; label: string; meta: string | null; logoUrl?: string | null }) {
     return (
         <YStack alignItems='center' gap={3} opacity={active || selected ? 1 : 0.75}>
-            <PlaceIcon kind={kind} active={active} size={selected ? 48 : 40} selected={selected} floating />
+            <PlaceIcon kind={kind} active={active} size={selected ? 48 : 40} selected={selected} floating logoUrl={logoUrl} />
             <XStack paddingHorizontal={7} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$background' gap={4} style={elevation.card}>
                 <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 11, maxWidth: 110 }}>
                     {label}
