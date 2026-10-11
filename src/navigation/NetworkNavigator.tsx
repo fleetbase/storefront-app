@@ -75,9 +75,12 @@ const NetworkHomeStack = createNativeStackNavigator({
     },
 });
 
+// With the trucks map as home, Search is the trucks search (results name the truck or store).
 const NetworkSearchStack = createNativeStackNavigator({
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckSearch' : 'NetworkSearch',
     screens: {
-        NetworkSearch: { screen: screenSlot('network.search'), linking: { path: 'search' }, options: { headerShown: false } },
+        ...(FOOD_TRUCKS_HOME ? { FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), linking: { path: 'search' }, options: { headerShown: false } } } : {}),
+        NetworkSearch: { screen: screenSlot('network.search'), linking: FOOD_TRUCKS_HOME ? undefined : { path: 'search' }, options: { headerShown: false } },
         TruckMenu: { screen: screenSlot('foodTrucks.menu'), linking: undefined, options: { headerShown: false } },
         ...withCustomRoutes(createSharedNetworkScreens(false), customNavigation.routes, 'network'),
     },

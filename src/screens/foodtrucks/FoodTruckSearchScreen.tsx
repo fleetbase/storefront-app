@@ -162,6 +162,10 @@ const FoodTruckSearchScreen = () => {
         );
     };
 
+    // Opened from the trucks home it's pushed (Cancel goes back); as the Search tab it's the
+    // tab's first screen, with no Cancel and no keyboard until the field is tapped.
+    const pushed = navigation.canGoBack();
+
     return (
         <YStack flex={1} backgroundColor='$background'>
             <OfflineNotice />
@@ -172,7 +176,7 @@ const FoodTruckSearchScreen = () => {
                         <TextInput
                             value={query}
                             onChangeText={setQuery}
-                            autoFocus
+                            autoFocus={pushed}
                             returnKeyType='search'
                             placeholder={t('FoodTrucks.searchPlaceholder')}
                             placeholderTextColor={theme.textPlaceholder?.val ?? theme.textSecondary.val}
@@ -185,11 +189,13 @@ const FoodTruckSearchScreen = () => {
                             </Pressable>
                         )}
                     </XStack>
-                    <Pressable onPress={() => navigation.goBack()} accessibilityRole='button' style={{ minHeight: 44, justifyContent: 'center' }}>
-                        <UIText variant='bodyStrong' tone='brand'>
-                            {t('FoodTrucks.cancel')}
-                        </UIText>
-                    </Pressable>
+                    {pushed && (
+                        <Pressable onPress={() => navigation.goBack()} accessibilityRole='button' style={{ minHeight: 44, justifyContent: 'center' }}>
+                            <UIText variant='bodyStrong' tone='brand'>
+                                {t('FoodTrucks.cancel')}
+                            </UIText>
+                        </Pressable>
+                    )}
                 </XStack>
                 {!!trimmed && !firstSearch && (
                     <XStack gap={8} accessibilityRole='radiogroup' accessibilityLabel={t('FoodTrucks.showResultsFrom')}>
@@ -252,7 +258,7 @@ const FoodTruckSearchScreen = () => {
             ) : failed && visible.length === 0 ? (
                 <ErrorState onRetry={() => setRetry((value) => value + 1)} />
             ) : visible.length === 0 && !loading ? (
-                <EmptyState icon={faMagnifyingGlassMinus} title={t('FoodTrucks.noMatches', { query: trimmed })} description={t('FoodTrucks.noMatchesBody')} actionLabel={t('FoodTrucks.browseCategories')} onAction={() => navigation.goBack()} />
+                <EmptyState icon={faMagnifyingGlassMinus} title={t('FoodTrucks.noMatches', { query: trimmed })} description={t('FoodTrucks.noMatchesBody')} actionLabel={t('FoodTrucks.browseCategories')} onAction={() => (pushed ? navigation.goBack() : setQuery(''))} />
             ) : (
                 <FlatList
                     data={visible}

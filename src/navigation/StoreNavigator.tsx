@@ -293,10 +293,13 @@ export const StoreHomeTab = createNativeStackNavigator({
     ),
 });
 
+// With the trucks map as home, Search is the trucks search: each result says which truck
+// or store has it.
 export const StoreSearchTab = createNativeStackNavigator({
-    initialRouteName: 'StoreSearch',
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckSearch' : 'StoreSearch',
     screens: withCustomRoutes(
         {
+            ...(FOOD_TRUCKS_HOME ? { FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false } } } : {}),
             StoreSearch,
             // Trucks in the customer's area open from search.
             TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
