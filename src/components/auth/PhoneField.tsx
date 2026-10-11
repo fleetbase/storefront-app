@@ -89,6 +89,22 @@ export default function PhoneField({
                     testID='phone-number'
                     value={number}
                     onChangeText={(text) => {
+                        // A full international number (typed, pasted or autofilled, e.g.
+                        // "+65 9100 0201") picks its country instead of being read as local digits.
+                        // Until the dial code matches a country, the "+…" stays as typed.
+                        if (text.trim().startsWith('+')) {
+                            const international = text.replace(/[^\d+]/g, '');
+                            const match = [...COUNTRIES].sort((a, b) => b.dial.length - a.dial.length).find((entry) => international.slice(1).startsWith(entry.dial));
+                            if (!match) {
+                                setNumber(international.slice(0, 16));
+                                return;
+                            }
+                            const digits = international.slice(1 + match.dial.length).slice(0, 15);
+                            setCountry(match);
+                            setNumber(digits);
+                            report(match, digits);
+                            return;
+                        }
                         const digits = text.replace(/\D/g, '').slice(0, 15);
                         setNumber(digits);
                         report(country, digits);
