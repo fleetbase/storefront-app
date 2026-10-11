@@ -21,7 +21,7 @@ import { fetchOffers, type Offer } from '../../commerce/offers';
 import { initialRegion } from '../../network/map';
 import { handleNavigateNewLocation } from '../../utils';
 import { OfferRow } from '../../components/offers/OfferCard';
-import { Button, CartPill, ErrorState, LocationSheet, MediaImage, Skeleton, UIText, elevation, radius, space } from '../../ui';
+import { Button, CartPill, ErrorState, LanguageButton, LocationSheet, MediaImage, Skeleton, UIText, elevation, radius, space } from '../../ui';
 
 type Mode = 'map' | 'list';
 type Layer = 'all' | 'trucks' | 'stores';
@@ -469,7 +469,10 @@ const FoodTrucksScreen = () => {
             <YStack position='absolute' top={insets.top + 8} left={space.gutter} right={space.gutter} gap={10} zIndex={1100}>
                 <XStack justifyContent='space-between' alignItems='center' gap={8}>
                     {locationChip}
-                    {toggle}
+                    <XStack alignItems='center' gap={8}>
+                        {toggle}
+                        <LanguageButton floating />
+                    </XStack>
                 </XStack>
                 {searchBar}
                 <XStack gap={8} accessibilityRole='radiogroup' accessibilityLabel={t('FoodTrucks.showOnMap')}>
@@ -574,7 +577,10 @@ const FoodTrucksScreen = () => {
                             <FontAwesomeIcon icon={faChevronDown} size={11} color={theme.primaryForeground.val} />
                         </Pressable>
                     </YStack>
-                    {toggle}
+                    <XStack alignItems='center' gap={8}>
+                        {toggle}
+                        <LanguageButton />
+                    </XStack>
                 </XStack>
                 {searchBar}
             </YStack>

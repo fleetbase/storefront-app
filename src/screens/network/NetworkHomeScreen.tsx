@@ -26,6 +26,7 @@ import {
     MediaImage,
     SectionHeader,
     IconButton,
+    LanguageButton,
     LocationSheet,
     Skeleton,
     StoreCard,
@@ -242,13 +243,16 @@ const NetworkHomeScreen = () => {
                         </UIText>
                         <FontAwesomeIcon icon={faChevronDown} size={11} color='#14171c' />
                     </Pressable>
-                    <IconButton
-                        icon={faBell}
-                        variant='floating'
-                        badge={unread > 0 ? (unread > 9 ? '9+' : String(unread)) : undefined}
-                        accessibilityLabel={unread > 0 ? t('Notifications.bellUnread', { count: unread }) : t('Notifications.title')}
-                        onPress={() => navigation.navigate('Notifications')}
-                    />
+                    <XStack alignItems='center' gap={8}>
+                        <LanguageButton floating />
+                        <IconButton
+                            icon={faBell}
+                            variant='floating'
+                            badge={unread > 0 ? (unread > 9 ? '9+' : String(unread)) : undefined}
+                            accessibilityLabel={unread > 0 ? t('Notifications.bellUnread', { count: unread }) : t('Notifications.title')}
+                            onPress={() => navigation.navigate('Notifications')}
+                        />
+                    </XStack>
                 </XStack>
                 <XStack position='absolute' left={space.gutter} right={space.gutter} bottom={SEARCH_HEIGHT + SEARCH_INSET * 2} alignItems='flex-end' gap={12}>
                     <StoreLogo uri={usableImageUrl(ownerInfo?.logo_url)} name={networkName} size={56} />

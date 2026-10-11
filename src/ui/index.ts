@@ -22,6 +22,7 @@ export { TextField } from './TextField';
 export { CodeInput } from './CodeInput';
 export type { TextFieldProps } from './TextField';
 export { LocationSheet } from './LocationSheet';
+export { LanguageButton } from './LanguageButton';
 export { categoryIcon } from './category-icons';
 export * from './product-display';
 export { TabBar } from './TabBar';

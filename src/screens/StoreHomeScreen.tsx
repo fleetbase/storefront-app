@@ -11,6 +11,7 @@ import useStorefrontData from '../hooks/use-storefront-data';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import LocationPicker from '../components/LocationPicker';
 import CustomHeader from '../components/CustomHeader';
+import { LanguageButton } from '../ui';
 import Spacer from '../components/Spacer';
 import { storefrontConfig, handleNavigateNewLocation } from '../utils';
 
@@ -62,6 +63,7 @@ const StoreHomeScreen = () => {
                     headerStyle={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 99 }}
                     headerLeft={<LocationPicker onPressAddNewLocation={({ params }) => handleNavigateNewLocation(navigation, params)} />}
                     headerLeftStyle={{ justifyContent: 'flex-start' }}
+                    headerRight={<LanguageButton floating />}
                 />
                 <StoreHeader storeName={info.name} logoUrl={info.logo_url} backgroundUrl={info.backdrop_url} description={info.description} height={customHeaderHeight} showLocationPicker={mode === 'network' ? true : undefined} />
             </Animated.View>
