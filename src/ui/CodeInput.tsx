@@ -43,6 +43,7 @@ export function CodeInput({ value, onChange, onComplete, length = 6, invalid = f
             </XStack>
             <TextInput
                 ref={input}
+                testID='code-input'
                 value={value}
                 onChangeText={change}
                 keyboardType='number-pad'

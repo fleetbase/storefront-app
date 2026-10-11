@@ -182,6 +182,7 @@ const NetworkSearchScreen = () => {
                 >
                     <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                     <TextInput
+                        testID='network-search-input'
                         value={query}
                         onChangeText={setQuery}
                         onSubmitEditing={() => remember(trimmed)}

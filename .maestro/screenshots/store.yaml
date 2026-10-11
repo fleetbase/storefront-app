@@ -1,0 +1,95 @@
+# Single store edition: store home, category, product, search, map, cart, sign-in,
+# account, checkout and orders.
+appId: ${APP_ID}
+env:
+    APP_ID: com.storefront.app
+    SHOT_SUFFIX: ''
+    SEARCH_QUERY: tea
+    LATITUDE: '1.2834'
+    LONGITUDE: '103.8607'
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: store-home${SHOT_SUFFIX}
+
+- tapOn:
+      id: store-category
+      index: 0
+- waitForAnimationToEnd
+- takeScreenshot: store-category${SHOT_SUFFIX}
+
+- tapOn:
+      id: product-item
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: product-detail${SHOT_SUFFIX}
+- tapOn:
+      id: product-add-to-cart
+- waitForAnimationToEnd
+
+- tapOn:
+      id: tab-store-search
+- tapOn:
+      id: store-search-input
+- inputText: ${SEARCH_QUERY}
+- hideKeyboard
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 30000
+- takeScreenshot: store-search${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-map
+      optional: true
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: store-map${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-cart
+- extendedWaitUntil:
+      visible:
+          id: cart-checkout
+      timeout: 30000
+- takeScreenshot: cart${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-profile
+- runFlow: common/sign-in.yaml
+- extendedWaitUntil:
+      visible:
+          id: account-orders
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: account${SHOT_SUFFIX}
+
+- tapOn:
+      id: account-orders
+- extendedWaitUntil:
+      visible:
+          id: order-row
+      timeout: 30000
+- takeScreenshot: orders${SHOT_SUFFIX}
+- tapOn:
+      id: order-active
+      optional: true
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: order-tracking${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-cart
+- tapOn:
+      id: cart-checkout
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: checkout${SHOT_SUFFIX}

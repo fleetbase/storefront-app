@@ -54,7 +54,7 @@ function StatusLine({ store }: { store: StoreSummary }) {
 }
 
 /** A store in a list, rail or map carousel. Closed and offline stores are muted but stay tappable. */
-export function StoreCard({ store, onPress, variant = 'hero', width, selected = false, testID }: StoreCardProps) {
+export function StoreCard({ store, onPress, variant = 'hero', width, selected = false, testID = 'store-card' }: StoreCardProps) {
     const { t } = useLanguage();
     const theme = useTheme();
     const label = storeLabel(store, t);

@@ -283,7 +283,7 @@ const CartScreen = ({ route }: any) => {
                             </Button>
                         </YStack>
                     ) : (
-                        <Button size='lg' fullWidth onPress={checkout} trailing={money(total)}>
+                        <Button size='lg' fullWidth onPress={checkout} trailing={money(total)} testID='cart-checkout'>
                             {t('Cart.goToCheckout')}
                         </Button>
                     )}

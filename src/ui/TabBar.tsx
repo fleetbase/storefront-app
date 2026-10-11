@@ -6,6 +6,9 @@ import { XStack, YStack, useTheme } from 'tamagui';
 import { UIText } from './Text';
 import { useBranding } from '../branding/BrandingProvider';
 
+/** `StoreHomeTab` → `tab-store-home`: stable ids for UI automation (screenshots, E2E). */
+const tabTestID = (name: string) => `tab-${name.replace(/Tab$/, '').replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`;
+
 /**
  * The bottom tab bar, drawn from theme roles so it follows the brand and dark mode.
  * Each tab's icon and label come from its `tabBarIcon` / `tabBarLabel` options; the
@@ -41,7 +44,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                         accessibilityRole='tab'
                         accessibilityState={{ selected: focused }}
                         accessibilityLabel={accessibilityLabel}
-                        testID={options.tabBarButtonTestID}
+                        testID={options.tabBarButtonTestID ?? tabTestID(route.name)}
                         style={{ flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}
                     >
                         <YStack alignItems='center' gap={3}>

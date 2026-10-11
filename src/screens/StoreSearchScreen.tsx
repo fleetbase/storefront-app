@@ -114,6 +114,7 @@ const StoreSearchScreen = () => {
                 >
                     <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                     <TextInput
+                        testID='store-search-input'
                         value={query}
                         onChangeText={setQuery}
                         onSubmitEditing={() => trimmed && remember(trimmed)}

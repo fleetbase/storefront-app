@@ -291,6 +291,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                             disabled={!!blockedReason}
                             loading={adding}
                             onPress={add}
+                            testID='product-add-to-cart'
                             trailing={formatCurrency(isBooking ? unitPrice(base, groups, selection) : total, currency)}
                         >
                             {editingLineId ? t('Booking.saveChanges') : isBooking ? t('Booking.addToCart') : t('ProductDetail.addToCart')}

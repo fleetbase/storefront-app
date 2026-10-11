@@ -423,6 +423,7 @@ const NetworkStoreScreen = ({ route }: any) => {
                         {single && (
                             <Pressable
                                 onPress={() => navigation.navigate('StoreSearchTab')}
+                                testID='store-search'
                                 accessibilityRole='search'
                                 accessibilityLabel={t('StorePage.searchStore', { store: store.name })}
                                 style={{ height: 48, paddingHorizontal: 14, borderRadius: radius.button, backgroundColor: theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10 }}
@@ -450,6 +451,7 @@ const NetworkStoreScreen = ({ route }: any) => {
                                         <Pressable
                                             key={section.id}
                                             onPress={() => jumpTo(section.id)}
+                                            testID='store-category'
                                             accessibilityRole='button'
                                             style={{ width: '22%', flexGrow: 1, minHeight: 84, paddingVertical: 10, paddingHorizontal: 4, borderRadius: radius.tile, backgroundColor: theme.surface.val, alignItems: 'center', gap: 6 }}
                                         >

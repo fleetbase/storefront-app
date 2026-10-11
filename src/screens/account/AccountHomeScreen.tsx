@@ -49,6 +49,7 @@ function MenuGroup({ title, rows }: { title?: string; rows: Row[] }) {
                 {visible.map((row, index) => (
                     <Pressable
                         key={row.key}
+                        testID={`account-${row.key}`}
                         onPress={row.onPress}
                         accessibilityRole='button'
                         accessibilityLabel={[row.label, row.value, row.badge ? String(row.badge) : null].filter(Boolean).join(', ')}

@@ -65,7 +65,7 @@ function BookPill({ disabled }: { disabled: boolean }) {
 }
 
 /** A catalog row: name, description, price, image and an add affordance (or "Book" for services). */
-export function ProductRow({ product, onPress, storeClosed = false, testID }: ProductItemProps) {
+export function ProductRow({ product, onPress, storeClosed = false, testID = 'product-item' }: ProductItemProps) {
     const { t } = useLanguage();
     const { price, was } = usePrice(product);
     const soldOut = !product.available;
@@ -126,7 +126,7 @@ export function ProductTile({
     product,
     onPress,
     storeClosed = false,
-    testID,
+    testID = 'product-item',
     width = 168,
     variant = 'outlined',
 }: ProductItemProps & { width?: number; variant?: ProductTileVariant }) {

@@ -174,6 +174,7 @@ const FoodTruckSearchScreen = () => {
                     <XStack flex={1} height={48} paddingLeft={14} paddingRight={6} borderRadius={radius.button} borderWidth={2} borderColor='$primary' alignItems='center' gap={10}>
                         <FontAwesomeIcon icon={faMagnifyingGlass} size={16} color={theme.textSecondary.val} />
                         <TextInput
+                            testID='trucks-search-input'
                             value={query}
                             onChangeText={setQuery}
                             autoFocus={pushed}

@@ -1,0 +1,21 @@
+# Signs in the seeded review customer through the real flow. The server accepts
+# VERIFICATION_CODE only for numbers listed in STOREFRONT_REVIEW_ACCOUNTS.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+      visible:
+          id: phone-number
+      timeout: 30000
+- takeScreenshot: sign-in${SHOT_SUFFIX}
+- tapOn:
+      id: phone-number
+- inputText: ${CUSTOMER_PHONE}
+- hideKeyboard
+- tapOn:
+      id: sign-in-send-code
+- extendedWaitUntil:
+      visible:
+          id: code-input
+      timeout: 30000
+- takeScreenshot: verify-code${SHOT_SUFFIX}
+- inputText: ${VERIFICATION_CODE}

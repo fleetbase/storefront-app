@@ -1,0 +1,47 @@
+# Food trucks home (a build with HOME_SCREEN=foodTrucks): the live map, the list,
+# a truck's menu and the trucks search.
+appId: ${APP_ID}
+env:
+    APP_ID: com.storefront.app
+    SHOT_SUFFIX: ''
+    SEARCH_QUERY: tea
+    LATITUDE: '1.2834'
+    LONGITUDE: '103.8607'
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+      visible:
+          id: trucks-mode-map
+      timeout: 60000
+- extendedWaitUntil:
+      visible:
+          id: nearby-truck
+      timeout: 60000
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: trucks-map${SHOT_SUFFIX}
+
+- tapOn:
+      id: trucks-mode-list
+- waitForAnimationToEnd
+- takeScreenshot: trucks-list${SHOT_SUFFIX}
+
+- tapOn:
+      id: nearby-truck
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: truck-menu${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-search
+- tapOn:
+      id: trucks-search-input
+- inputText: ${SEARCH_QUERY}
+- hideKeyboard
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: trucks-search${SHOT_SUFFIX}

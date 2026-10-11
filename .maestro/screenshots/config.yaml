@@ -1,0 +1,7 @@
+# Screenshot flows. Run one edition at a time against a build pointed at seeded data:
+#   maestro test .maestro/screenshots/store.yaml -e SHOT_SUFFIX= -e CUSTOMER_PHONE=... -e VERIFICATION_CODE=...
+# See README.md in this folder.
+flows:
+    - store.yaml
+    - network.yaml
+    - food-trucks.yaml

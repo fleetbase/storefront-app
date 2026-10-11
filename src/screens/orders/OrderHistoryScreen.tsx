@@ -32,6 +32,7 @@ function ActiveOrderCard({ order, t, onPress }: { order: OrderSummary; t: Transl
         <Card appearance='outlined' padding={16} gap={12}>
             <Pressable
                 onPress={onPress}
+                testID='order-active'
                 accessibilityRole='button'
                 accessibilityLabel={t('Orders.activeLabel', { store: order.storeName, status: t(`Orders.status.${order.phase}`) })}
                 style={{ gap: 12 }}
@@ -64,6 +65,7 @@ function PastOrderRow({ order, t, onPress, onReceipt }: { order: OrderSummary; t
         <XStack alignItems='center' gap={12} paddingVertical={12} borderBottomWidth={1} borderColor='$borderColor'>
             <Pressable
                 onPress={onPress}
+                testID='order-row'
                 accessibilityRole='button'
                 accessibilityLabel={t('Orders.pastLabel', { store: order.storeName, status: t(`Orders.status.${order.phase}`) })}
                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 }}

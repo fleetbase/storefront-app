@@ -19,3 +19,23 @@ jobs:
                   prerelease: false
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Ask fleetbase/showcase to capture iOS and Android screenshots of this release.
+    # Skipped when the token isn't configured (forks, local tags).
+    showcase:
+        needs: create
+        runs-on: ubuntu-latest
+        steps:
+            - name: Dispatch storefront-app-release to showcase
+              env:
+                  TOKEN: ${{ secrets.SHOWCASE_DISPATCH_TOKEN }}
+              run: |
+                  if [ -z "$TOKEN" ]; then
+                      echo "SHOWCASE_DISPATCH_TOKEN is not set; skipping."
+                      exit 0
+                  fi
+                  curl -fsS -X POST \
+                      -H "Authorization: Bearer $TOKEN" \
+                      -H "Accept: application/vnd.github+json" \
+                      https://api.github.com/repos/fleetbase/showcase/dispatches \
+                      -d "{\"event_type\":\"storefront-app-release\",\"client_payload\":{\"tag\":\"${GITHUB_REF_NAME}\",\"sha\":\"${GITHUB_SHA}\",\"actor\":\"${GITHUB_ACTOR}\"}}"

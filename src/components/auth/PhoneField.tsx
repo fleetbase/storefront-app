@@ -66,6 +66,7 @@ export default function PhoneField({
             <XStack gap={8}>
                 <Pressable
                     onPress={() => setPicking(true)}
+                    testID='phone-country'
                     accessibilityRole='button'
                     accessibilityLabel={t('Auth.countryCode', { country: country.name, code: country.dial })}
                     style={{
@@ -85,6 +86,7 @@ export default function PhoneField({
                     <FontAwesomeIcon icon={faChevronDown} size={12} color={theme.textSecondary.val} />
                 </Pressable>
                 <TextInput
+                    testID='phone-number'
                     value={number}
                     onChangeText={(text) => {
                         const digits = text.replace(/\D/g, '').slice(0, 15);

@@ -139,7 +139,7 @@ const SignInScreen = ({ route, mode: forcedMode }: any) => {
                         )}
                     </YStack>
 
-                    <Button size='lg' fullWidth loading={sending} onPress={sendCode}>
+                    <Button size='lg' fullWidth loading={sending} onPress={sendCode} testID='sign-in-send-code'>
                         {t('Auth.sendCode')}
                     </Button>
 

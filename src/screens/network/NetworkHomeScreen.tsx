@@ -271,6 +271,7 @@ const NetworkHomeScreen = () => {
 
             <Pressable
                 onPress={() => navigation.navigate('NetworkSearchTab')}
+                testID='network-search-entry'
                 accessibilityRole='search'
                 accessibilityLabel={t('Network.searchEverything')}
                 style={{

@@ -19,6 +19,7 @@ export function CartPill({ count, total, storeName, onPress, bottom = 16 }: Cart
     return (
         <Pressable
             onPress={onPress}
+            testID='cart-pill'
             accessibilityRole='button'
             accessibilityLabel={[t('UI.viewCart'), storeName, items, total].filter(Boolean).join(', ')}
             style={({ pressed }) => ({ position: 'absolute', left: 16, right: 16, bottom, opacity: pressed ? 0.92 : 1 })}

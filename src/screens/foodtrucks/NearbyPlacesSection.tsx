@@ -44,6 +44,7 @@ export function NearbyPlacesSection() {
                     <Pressable
                         key={place.key}
                         onPress={() => open(place)}
+                        testID={`nearby-${place.kind}`}
                         accessibilityRole='button'
                         accessibilityLabel={[place.name, kindLabel, place.meta].filter(Boolean).join(', ')}
                         style={({ pressed }) => ({

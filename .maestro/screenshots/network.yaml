@@ -1,0 +1,63 @@
+# Network edition: marketplace home, a member store, a product, search and map.
+appId: ${APP_ID}
+env:
+    APP_ID: com.storefront.app
+    SHOT_SUFFIX: ''
+    SEARCH_QUERY: tea
+    LATITUDE: '1.2834'
+    LONGITUDE: '103.8607'
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+      visible:
+          id: store-card
+      timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: network-home${SHOT_SUFFIX}
+
+- tapOn:
+      id: store-card
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: network-store${SHOT_SUFFIX}
+
+- tapOn:
+      id: product-item
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: network-product${SHOT_SUFFIX}
+- tapOn:
+      id: product-add-to-cart
+- waitForAnimationToEnd
+
+- tapOn:
+      id: tab-network-search
+- tapOn:
+      id: network-search-input
+- inputText: ${SEARCH_QUERY}
+- hideKeyboard
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: network-search${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-map
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: network-map${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-cart
+- extendedWaitUntil:
+      visible:
+          id: cart-checkout
+      timeout: 30000
+- takeScreenshot: network-cart${SHOT_SUFFIX}

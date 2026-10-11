@@ -227,6 +227,7 @@ const FoodTrucksScreen = () => {
                     <Pressable
                         key={value}
                         onPress={() => setMode(value)}
+                        testID={`trucks-mode-${value}`}
                         accessibilityRole='radio'
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={value === 'map' ? t('FoodTrucks.map') : t('FoodTrucks.list')}
@@ -243,6 +244,7 @@ const FoodTrucksScreen = () => {
     const searchBar = (
         <Pressable
             onPress={() => navigation.navigate('FoodTruckSearch')}
+            testID='trucks-search-entry'
             accessibilityRole='search'
             accessibilityLabel={t('FoodTrucks.searchPlaceholder')}
             style={{ height: 48, paddingHorizontal: 14, borderRadius: radius.button, backgroundColor: mode === 'map' ? theme.background.val : theme.surface.val, flexDirection: 'row', alignItems: 'center', gap: 10, ...(mode === 'map' ? elevation.floating : {}) }}
