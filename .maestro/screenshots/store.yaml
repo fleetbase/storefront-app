@@ -14,12 +14,16 @@ appId: ${APP_ID}
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
 
-# The nearest product below the search field: the first one in the view tree can sit below
-# the screen edge, where a tap lands on the tab bar.
+# The first products start under the tab bar; bring one to the middle of the screen before
+# tapping, or the tap lands on the Search tab.
+- scrollUntilVisible:
+      element:
+          id: product-item
+      direction: DOWN
+      centerElement: true
 - tapOn:
       id: product-item
-      below:
-          id: store-search
+      index: 0
 - extendedWaitUntil:
       visible:
           id: product-add-to-cart
@@ -80,14 +84,14 @@ appId: ${APP_ID}
 
 - tapOn:
       id: account-orders
+# The review customer has an order in progress in both editions (past orders may not exist).
 - extendedWaitUntil:
       visible:
-          id: order-row
+          id: order-active
       timeout: 30000
 - takeScreenshot: storefront-app-orders-list${SHOT_SUFFIX}
 - tapOn:
       id: order-active
-      optional: true
 - waitForAnimationToEnd:
       timeout: 8000
 - takeScreenshot: storefront-app-order-details${SHOT_SUFFIX}

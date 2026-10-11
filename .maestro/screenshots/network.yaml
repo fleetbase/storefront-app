@@ -69,14 +69,14 @@ appId: ${APP_ID}
 
 - tapOn:
       id: account-orders
+# The review customer has an order in progress in both editions (past orders may not exist).
 - extendedWaitUntil:
       visible:
-          id: order-row
+          id: order-active
       timeout: 30000
 - takeScreenshot: storefront-app-orders-list-network${SHOT_SUFFIX}
 - tapOn:
       id: order-active
-      optional: true
 - waitForAnimationToEnd:
       timeout: 8000
 - takeScreenshot: storefront-app-order-details-network${SHOT_SUFFIX}

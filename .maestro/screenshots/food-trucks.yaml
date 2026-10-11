@@ -21,13 +21,21 @@ appId: ${APP_ID}
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-food-trucks-list${QUALIFIER}${SHOT_SUFFIX}
 
-- tapOn:
-      id: nearby-truck
-      index: 0
 - extendedWaitUntil:
       visible:
-          id: product-item
+          id: nearby-truck
       timeout: 30000
+# A tap while the list is still settling can be lost; try again if the menu doesn't open.
+- retry:
+      maxRetries: 2
+      commands:
+          - tapOn:
+                id: nearby-truck
+                index: 0
+          - extendedWaitUntil:
+                visible:
+                    id: product-item
+                timeout: 20000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-food-truck-details${QUALIFIER}${SHOT_SUFFIX}
 
