@@ -82,16 +82,20 @@ export function success(message, options = {}) {
     });
 }
 
+// The toast library has no `info` variant (only success, error and loading), so this is a
+// plain toast with the info styles.
 export function info(message, options = {}) {
-    reactNativeToast.info(message, {
+    reactNativeToast(message, {
         ...options,
         position: ToastPosition.BOTTOM,
         styles: getInfoStyle(),
     });
 }
 
+// The toast library has no `warning` variant (only success, error and loading), so this is a
+// plain toast with the warning styles.
 export function warning(message, options = {}) {
-    reactNativeToast.warning(message, {
+    reactNativeToast(message, {
         ...options,
         position: ToastPosition.BOTTOM,
         styles: getWarningStyle(),

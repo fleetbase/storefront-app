@@ -1,0 +1,22 @@
+# Signs in the seeded review customer through the real flow. The server accepts
+# VERIFICATION_CODE only for numbers listed in STOREFRONT_REVIEW_ACCOUNTS.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+      visible:
+          id: phone-number
+      timeout: 30000
+- takeScreenshot: storefront-app-login-create${QUALIFIER}${SHOT_SUFFIX}
+- tapOn:
+      id: phone-number
+- inputText: ${CUSTOMER_PHONE}
+- tapOn:
+      id: sign-in-send-code
+# The code field itself is a transparent input over the boxes, which Maestro reports as not
+# visible; the button below it marks the screen. The field has focus, so typing fills it.
+- extendedWaitUntil:
+      visible:
+          id: verify-code-submit
+      timeout: 30000
+- takeScreenshot: storefront-app-login-create-code${QUALIFIER}${SHOT_SUFFIX}
+- inputText: ${VERIFICATION_CODE}

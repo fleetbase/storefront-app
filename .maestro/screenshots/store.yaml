@@ -1,0 +1,105 @@
+# Single store edition: store home, category, product, search, map, cart, sign-in,
+# account, checkout and orders.
+appId: ${APP_ID}
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+      visible:
+          id: store-search
+      timeout: 60000
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
+
+# The first products start under the tab bar; bring one to the middle of the screen before
+# tapping, or the tap lands on the Search tab.
+- scrollUntilVisible:
+      element:
+          id: product-item
+      direction: DOWN
+      centerElement: true
+- tapOn:
+      id: product-item
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-product-details${SHOT_SUFFIX}
+- tapOn:
+      id: product-add-to-cart
+- waitForAnimationToEnd
+
+# Adding closes the product. Then a category: the jump scrolls the page to it.
+- extendedWaitUntil:
+      visible:
+          id: store-category
+      timeout: 30000
+- tapOn:
+      id: store-category
+      index: 0
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-category-details${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-search
+- tapOn:
+      id: store-search-input
+- inputText: ${SEARCH_QUERY}
+- hideKeyboard
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 30000
+- takeScreenshot: storefront-app-products-list${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-map
+      optional: true
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-store-map${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-cart
+- extendedWaitUntil:
+      visible:
+          id: cart-checkout
+      timeout: 30000
+- takeScreenshot: storefront-app-cart-details${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-profile
+- runFlow: common/sign-in.yaml
+- extendedWaitUntil:
+      visible:
+          id: account-orders
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-account-details${SHOT_SUFFIX}
+
+- tapOn:
+      id: account-orders
+# The review customer has an order in progress in both editions (past orders may not exist).
+- extendedWaitUntil:
+      visible:
+          id: order-active
+      timeout: 30000
+- takeScreenshot: storefront-app-orders-list${SHOT_SUFFIX}
+- tapOn:
+      id: order-active
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-order-details${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-store-cart
+- tapOn:
+      id: cart-checkout
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-checkout-create${SHOT_SUFFIX}

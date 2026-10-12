@@ -1,3 +1,4 @@
+import './src/env';
 import 'leaflet/dist/leaflet.css';
 import { AppRegistry } from 'react-native';
 import App from './App.web';

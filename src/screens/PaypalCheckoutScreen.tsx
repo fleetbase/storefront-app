@@ -25,7 +25,7 @@ const PaypalCheckoutScreen = () => {
 
     return (
         <YStack bg='$background'>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
                 <YStack flex={1} bg='$background' space='$2'>
                     <YStack height={300}>
                         <DeliveryRoutePreview />

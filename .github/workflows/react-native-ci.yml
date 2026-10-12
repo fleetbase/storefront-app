@@ -56,8 +56,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -68,9 +68,17 @@ jobs:
         id: cache-key
         run: echo "key=${{ runner.os }}-deps-${{ hashFiles('**/yarn.lock', '**/package.json') }}" >> $GITHUB_OUTPUT
 
-      # Optional: Run tests if you have them
-      # - name: Run tests
-      #   run: yarn test
+      - name: Lint Network edition runtime and UI
+        run: yarn lint:strict
+
+      - name: Type-check strict modules
+        run: yarn typecheck:strict
+
+      - name: Run behavior tests
+        run: yarn test:ci
+
+      - name: Build production web bundle
+        run: yarn web:build
 
   android_build:
     runs-on: ubuntu-latest
@@ -109,8 +117,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -228,7 +236,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
@@ -252,8 +259,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -274,7 +281,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
-          cd ios && pod install --repo-update
+          bash scripts/ci/install-cocoapods.sh
 
       - name: List available simulators
         run: xcrun simctl list devices available | grep iPhone
@@ -346,8 +353,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -401,7 +408,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
@@ -415,8 +421,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" > .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" > .env
+          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
+          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
           echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> .env
           echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> .env
@@ -435,7 +441,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
-          cd ios && pod install --repo-update
+          bash scripts/ci/install-cocoapods.sh
 
       - name: Build iOS Release Archive
         run: |

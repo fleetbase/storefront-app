@@ -11,6 +11,7 @@ import useCurrentLocation from '../hooks/use-current-location';
 import useSavedLocations from '../hooks/use-saved-locations';
 import PlaceMapView from './PlaceMapView';
 import { useLanguage } from '../contexts/LanguageContext';
+import { handleNavigateNewLocation } from '../utils';
 
 const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'Checkout', ...props }) => {
     const theme = useTheme();
@@ -47,7 +48,7 @@ const CustomerLocationSelect = ({ onChange, onSelectNewLocation, redirectTo = 'C
         if (typeof onSelectNewLocation === 'function') {
             onSelectNewLocation();
         } else {
-            navigation.navigate('LocationPicker', { redirectTo, makeDefault: true });
+            handleNavigateNewLocation(navigation, { makeDefault: true });
         }
     };
 

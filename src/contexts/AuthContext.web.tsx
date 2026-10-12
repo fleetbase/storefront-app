@@ -220,6 +220,39 @@ export const AuthProvider = ({ children }) => {
     );
 
     // Delete Account: Send verification code
+    // Adding or changing the phone of a signed-in customer: send a code, then verify it.
+    const requestPhoneVerification = useCallback(
+        async (phone) => {
+            dispatch({ type: 'LOGIN', phone, isSendingCode: true });
+            try {
+                await adapter.post('customers/request-phone-verification', { phone });
+                dispatch({ type: 'LOGIN', phone, isSendingCode: false });
+            } catch (error) {
+                console.error('[AuthContext] Phone verification request failed:', error);
+                dispatch({ type: 'LOGIN', phone, isSendingCode: false });
+                throw error;
+            }
+        },
+        [adapter]
+    );
+
+    const verifyPhoneNumber = useCallback(
+        async (code) => {
+            dispatch({ type: 'VERIFY', isVerifyingCode: true });
+            try {
+                const response = await adapter.post('customers/verify-phone-number', { code });
+                const customer = new Customer(response.customer || response, adapter);
+                setCustomer(customer);
+                dispatch({ type: 'VERIFY', customer, isVerifyingCode: false });
+            } catch (error) {
+                console.error('[AuthContext] Phone verification failed:', error);
+                dispatch({ type: 'VERIFY', isVerifyingCode: false });
+                throw error;
+            }
+        },
+        [adapter, setCustomer]
+    );
+
     const deleteAccount = useCallback(async () => {
         dispatch({ type: 'DELETING_ACCOUNT', isSendingCode: true });
         try {
@@ -338,8 +371,10 @@ export const AuthProvider = ({ children }) => {
             registerDevice,
             deleteAccount,
             verifyAccountDeletion,
+            requestPhoneVerification,
+            verifyPhoneNumber,
         }),
-        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer, deleteAccount, verifyAccountDeletion]
+        [state, verifyCode, logout, verifyCode, login, verifyAccountCreation, requestCreationCode, setCustomer, deleteAccount, verifyAccountDeletion, requestPhoneVerification, verifyPhoneNumber]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

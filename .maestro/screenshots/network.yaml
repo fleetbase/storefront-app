@@ -1,0 +1,90 @@
+# Network edition: marketplace home, a member store, a product, search, map, cart, then
+# signed in: account, orders, an order and checkout.
+appId: ${APP_ID}
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+      visible:
+          id: store-card
+      timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-network-details${SHOT_SUFFIX}
+
+- tapOn:
+      id: store-card
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-item
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-store-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: product-item
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-product-details-network${SHOT_SUFFIX}
+- tapOn:
+      id: product-add-to-cart
+- waitForAnimationToEnd
+
+- tapOn:
+      id: tab-network-search
+- tapOn:
+      id: network-search-input
+- inputText: ${SEARCH_QUERY}
+- hideKeyboard
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-products-list-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-map
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-stores-map-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-cart
+- extendedWaitUntil:
+      visible:
+          id: cart-checkout
+      timeout: 30000
+- takeScreenshot: storefront-app-cart-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-profile
+- runFlow: common/sign-in.yaml
+- extendedWaitUntil:
+      visible:
+          id: account-orders
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-account-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: account-orders
+# The review customer has an order in progress in both editions (past orders may not exist).
+- extendedWaitUntil:
+      visible:
+          id: order-active
+      timeout: 30000
+- takeScreenshot: storefront-app-orders-list-network${SHOT_SUFFIX}
+- tapOn:
+      id: order-active
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-order-details-network${SHOT_SUFFIX}
+
+- tapOn:
+      id: tab-network-cart
+- tapOn:
+      id: cart-checkout
+- waitForAnimationToEnd:
+      timeout: 8000
+- takeScreenshot: storefront-app-checkout-create-network${SHOT_SUFFIX}

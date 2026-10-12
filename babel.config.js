@@ -1,3 +1,7 @@
+// Every tool that compiles the app (Metro, webpack, Jest, the Tamagui compiler) loads this
+// file first, so the brand/ lookup is refreshed before any module resolves it.
+require('./scripts/link-brand').linkBrand(__dirname);
+
 module.exports = {
     presets: ['module:@react-native/babel-preset'],
     plugins: [

@@ -1,20 +1,20 @@
-import React, { createContext, useState, useContext, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { getLangNameFromCode } from 'language-name-map';
 import { storefrontConfig } from '../utils';
-import { getAvailableLocales } from '../utils/localize';
+import { ensureTranslationsLoaded } from '../utils/localize';
 import localeEmoji from 'locale-emoji';
 import useStorage from '../hooks/use-storage';
 import I18n from 'react-native-i18n';
 
-I18n.fallbacks = true;
-I18n.translations = {
-    ...getAvailableLocales(),
-};
+type LanguageInfo = { code: string; emoji?: string; name?: string; native?: string; [key: string]: unknown };
 
 interface LanguageContextProps {
     locale: string;
     setLocale: (locale: string) => void;
     t: (key: string, options?: Record<string, any>) => string;
+    current?: LanguageInfo;
+    language?: LanguageInfo;
+    languages?: LanguageInfo[];
 }
 
 const LanguageContext = createContext<LanguageContextProps>({
@@ -24,6 +24,7 @@ const LanguageContext = createContext<LanguageContextProps>({
 });
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+    ensureTranslationsLoaded();
     const [locale, setLocaleState] = useStorage<string>('_locale', storefrontConfig('defaultLocale', 'en'));
 
     const languages = Object.keys(I18n.translations).map((code) => {
@@ -41,9 +42,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         I18n.locale = locale;
-    }, []);
+    }, [locale]);
 
-    const t = (key: string, options?: Record<string, any>) => I18n.t(key, options);
+    // Stable per locale, so screens can depend on `t` in effects without refetching on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const t = useCallback((key: string, options?: Record<string, any>) => I18n.t(key, options), [locale]);
 
     return <LanguageContext.Provider value={{ locale, setLocale, t, current: language, language, languages }}>{children}</LanguageContext.Provider>;
 };

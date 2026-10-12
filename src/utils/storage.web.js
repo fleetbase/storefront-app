@@ -31,23 +31,23 @@ export function set(key, value) {
 }
 
 export function setString(key, value) {
-    return storage.setString(key);
+    return storage.setString(key, value);
 }
 
 export function setInt(key, value) {
-    return storage.setInt(key);
+    return storage.setInt(key, value);
 }
 
 export function setBool(key, value) {
-    return storage.setBool(key);
+    return storage.setBool(key, value);
 }
 
 export function setArray(key, value) {
-    return storage.setArray(key);
+    return storage.setArray(key, value);
 }
 
 export function setMap(key, value) {
-    return storage.setMap(key);
+    return storage.setMap(key, value);
 }
 
 export function remove(key) {

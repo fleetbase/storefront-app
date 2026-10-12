@@ -1,5 +1,5 @@
 import React from 'react';
-import Config from 'react-native-config';
+import Config from '../env';
 import { SafeAreaView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faExclamationTriangle, faExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -29,23 +29,23 @@ const SetupWarningScreen = ({ error }: { error?: Error }) => {
 
                 <YStack width='100%'>
                     {keyMissing('FLEETBASE_KEY') && (
-                        <XStack alignItems='center' bg='$red1' borderRadius='$2' px='$3' py='$2' mb='$2'>
+                        <XStack alignItems='center' bg='$red-100' borderRadius='$2' px='$3' py='$2' mb='$2'>
                             <FontAwesomeIcon icon={faExclamation} size={12} color='#7F1D1D' style={{ marginRight: 8 }} />
-                            <Text color='$red900' fontWeight='bold'>
+                            <Text color='$red-900' fontWeight='bold'>
                                 {t('common.fleetbase')} {t('common.apiKey')}
                             </Text>
-                            <Text color='$red900' fontWeight='500' ml='$1'>
+                            <Text color='$red-900' fontWeight='500' ml='$1'>
                                 {t('SetupWarningScreen.envMissing')}
                             </Text>
                         </XStack>
                     )}
                     {keyMissing('STOREFRONT_KEY') && (
-                        <XStack alignItems='center' bg='$red1' borderRadius='$2' px='$3' py='$2'>
+                        <XStack alignItems='center' bg='$red-100' borderRadius='$2' px='$3' py='$2'>
                             <FontAwesomeIcon icon={faExclamation} size={12} color='#7F1D1D' style={{ marginRight: 8 }} />
-                            <Text color='$red900' fontWeight='bold'>
+                            <Text color='$red-900' fontWeight='bold'>
                                 {t('common.storefront')} {t('common.apiKey')}
                             </Text>
-                            <Text color='$red900' fontWeight='500' ml='$1'>
+                            <Text color='$red-900' fontWeight='500' ml='$1'>
                                 {t('SetupWarningScreen.envMissing')}
                             </Text>
                         </XStack>

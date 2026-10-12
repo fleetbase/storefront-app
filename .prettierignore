@@ -2,3 +2,4 @@ node_modules/
 build/
 ios/
 android/
+src/generated/

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Extrapolate, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 
-const CircleExpandInterpolator = ({ current }) => {
+const CircleExpandInterpolator = ({ current, layouts: { screen: { width, height } } }) => {
     const animatedStyle = useAnimatedStyle(() => {
         const scale = interpolate(
             current.progress,

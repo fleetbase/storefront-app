@@ -28,7 +28,7 @@ const StoreRating = ({
     const setRating = (index) => {
         setValue(index);
 
-        if (typeof nRatingChange === 'function') {
+        if (typeof onRatingChange === 'function') {
             onRatingChange(index);
         }
     };

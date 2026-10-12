@@ -1,49 +1,35 @@
 import { createStaticNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Platform, View, Text } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faMagnifyingGlass, faMap, faShoppingCart, faUser, faTruck } from '@fortawesome/free-solid-svg-icons';
-import { useTheme } from 'tamagui';
-import { storefrontConfig, get, config, toArray, adjustOpacity } from '../utils';
+import { Text, XStack } from 'tamagui';
+import { storefrontConfig, get, config, toArray } from '../utils';
 import { configCase, uppercase } from '../utils/format';
 import { useIsNotAuthenticated, useIsAuthenticated } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreInfo } from './stacks/StoreStack';
+import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreCatalog, StoreInfo } from './stacks/StoreStack';
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
 import OrderStack, { OrderModal } from './stacks/OrderStack';
 import CartStack from './stacks/CartStack';
-import ProfileScreen from '../screens/ProfileScreen';
-import LoginScreen from '../screens/LoginScreen';
-import PhoneLoginScreen from '../screens/PhoneLoginScreen';
-import PhoneLoginVerifyScreen from '../screens/PhoneLoginVerifyScreen';
-import CreateAccountScreen from '../screens/CreateAccountScreen';
-import CreateAccountVerifyScreen from '../screens/CreateAccountVerifyScreen';
+import SignInScreen from '../screens/auth/SignInScreen';
+import { CreateAccountVerifyScreen, DeleteAccountVerifyScreen, PhoneVerifyScreen, SignInVerifyScreen } from '../screens/auth/VerifyCodeScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
-import DeleteAccountVerifyScreen from '../screens/DeleteAccountVerifyScreen';
-import AccountScreen from '../screens/AccountScreen';
-import AddPhoneScreen from '../screens/AddPhoneScreen';
-import VerifyPhoneScreen from '../screens/VerifyPhoneScreen';
+import AddPhoneScreen from '../screens/auth/AddPhoneScreen';
 import StripeCustomerScreen from '../screens/StripeCustomerScreen';
 import EditAccountPropertyScreen from '../screens/EditAccountPropertyScreen';
-import OrderScreen from '../screens/OrderScreen';
-import ProductScreen from '../screens/ProductScreen';
-import FoodTruckScreen from '../screens/FoodTruckScreen';
-import CatalogScreen from '../screens/CatalogScreen';
-import CatalogCategoryScreen from '../screens/CatalogCategoryScreen';
-import BackButton from '../components/BackButton';
 import CartButton from '../components/CartButton';
 import LocationPicker from '../components/LocationPicker';
 import useCart from '../hooks/use-cart';
-import useAppTheme from '../hooks/use-app-theme';
 import StoreLayout from '../layouts/StoreLayout';
-import { getTheme } from '../utils';
 import { translate } from '../utils/localize';
-
-const isAndroid = Platform.OS === 'android';
+import { screenSlot } from '../extensions';
+import { customNavigation } from '../extensions/build-navigation';
+import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel, withCustomRoutes } from '../extensions/navigation';
+import { TabBar } from '../ui';
+import { totalCartQuantity } from '../network/network-runtime';
 
 const importedIconsMap = {
     faHome,
@@ -64,15 +50,37 @@ function getTabConfig(name, key, defaultValue = null) {
     return defaultValue;
 }
 
+const FOOD_TRUCKS_HOME = storefrontConfig('homeScreen') === 'foodTrucks';
+
+const CUSTOM_TABS = tabsFor(customNavigation.tabs, 'store');
+
+// The configured tabs plus the build's custom tabs. When the food trucks map is the home
+// screen it takes over the Home tab (so every "go home" lands on it), and the separate
+// Trucks and Map tabs are dropped: the trucks map already shows the store and its trucks.
+function homeTabs(): string[] {
+    const tabs = orderTabs(toArray(storefrontConfig('storeNavigator.tabs')), CUSTOM_TABS, 'StoreCartTab');
+    if (!FOOD_TRUCKS_HOME) return tabs;
+    return ['StoreHomeTab', ...tabs.filter((tab) => !['StoreHomeTab', 'StoreFoodTruckTab', 'StoreMapTab'].includes(tab))];
+}
+
+function initialTab(): string | undefined {
+    const tabs = homeTabs();
+    if (FOOD_TRUCKS_HOME) return 'StoreHomeTab';
+    const custom = CUSTOM_TABS.find(([, tab]) => tab.initial);
+    if (custom) return custom[0];
+    const configured = toArray(storefrontConfig('storeNavigator.defaultTab'))[0];
+    return tabs.includes(configured) ? configured : tabs[0];
+}
+
 function createTabScreens(optionsCallbacks = {}) {
-    const tabs = toArray(storefrontConfig('storeNavigator.tabs'));
+    const tabs = homeTabs();
     const screens = {
         StoreHomeTab: {
             screen: StoreHomeTab,
             options: () => {
                 const { t, locale } = useLanguage();
                 return {
-                    tabBarLabel: config(`STORE_HOME_TAB_LABEL_${uppercase(locale)}`, t('tabs.Home')),
+                    tabBarLabel: FOOD_TRUCKS_HOME ? config(`STORE_FOOD_TRUCK_TAB_LABEL_${uppercase(locale)}`, t('tabs.Trucks')) : config(`STORE_HOME_TAB_LABEL_${uppercase(locale)}`, t('tabs.Home')),
                 };
             },
         },
@@ -98,15 +106,8 @@ function createTabScreens(optionsCallbacks = {}) {
             screen: StoreCartTab,
             options: () => {
                 const { t, locale } = useLanguage();
-                const [cart] = useCart();
-                const count = cart ? cart.contents().length : 0;
                 return {
                     tabBarLabel: config(`STORE_CART_TAB_LABEL_${uppercase(locale)}`, t('tabs.Cart')),
-                    tabBarBadge: count,
-                    tabBarBadgeStyle: {
-                        marginRight: -5,
-                        opacity: count ? 1 : 0.5,
-                    },
                 };
             },
         },
@@ -130,10 +131,23 @@ function createTabScreens(optionsCallbacks = {}) {
         },
     };
 
+    for (const [name, tab] of CUSTOM_TABS) {
+        screens[name] = {
+            screen: createCustomTabStack(name, tab, customNavigation.routes, 'store', {
+                Product: { screen: screenSlot('product.detail'), options: { presentation: 'modal', headerShown: false } },
+                Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+                ...LocationStack,
+                ...ModalScreens,
+            }),
+            options: () => ({ tabBarLabel: useCustomTabLabel(tab, name) }),
+        };
+    }
+
     const screenTabs = {};
     for (let i = 0; i < tabs.length; i++) {
         const tab = tabs[i];
-        if (tab) {
+        // A listed tab that isn't registered (e.g. a custom tab missing from the extensions) is skipped.
+        if (tab && screens[tab]) {
             screenTabs[tab] = screens[tab];
         }
     }
@@ -151,7 +165,7 @@ function getDefaultTabIcon(routeName) {
     let icon;
     switch (routeName) {
         case 'StoreHomeTab':
-            icon = faHome;
+            icon = FOOD_TRUCKS_HOME ? faTruck : faHome;
             break;
         case 'StoreSearchTab':
             icon = faMagnifyingGlass;
@@ -175,7 +189,7 @@ function getDefaultTabIcon(routeName) {
 
 export const ModalScreens = {
     ProductModal: {
-        screen: ProductScreen,
+        screen: screenSlot('product.detail'),
         options: {
             presentation: 'modal',
             headerShown: false,
@@ -186,90 +200,149 @@ export const ModalScreens = {
 
 export const StoreFoodTruckTab = createNativeStackNavigator({
     initialRouteName: 'FoodTruckHome',
-    screens: {
-        FoodTruckHome: {
-            screen: FoodTruckScreen,
-            options: {
-                headerShown: false,
+    screens: withCustomRoutes(
+        {
+            FoodTruckHome: {
+                screen: screenSlot('foodTrucks.home'),
+                options: {
+                    headerShown: false,
+                },
             },
-        },
-        Catalog: {
-            screen: CatalogScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
+            TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+            Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+            Offers: { screen: screenSlot('offers.list'), options: { headerShown: false } },
+            // The store page and what it links to, opened from the trucks map and search.
+            StoreHome,
+            StoreCategory,
+            StoreCatalog,
+            StoreInfo,
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+            Notifications: { screen: screenSlot('notifications.inbox'), options: { headerShown: false } },
+            NotificationSettings: { screen: screenSlot('notifications.settings'), options: { headerShown: false } },
+            Catalog: {
+                screen: screenSlot('catalog.index'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
-        },
-        Category: {
-            screen: CatalogCategoryScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            Category: {
+                screen: screenSlot('catalog.foodTruckCategory'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
-        },
-        Product: {
-            screen: ProductScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            ...CartStack,
+            ...CheckoutStack,
+            ...LocationStack,
+            ...OrderStack,
+            ...ModalScreens,
         },
-        ...CartStack,
-        ...CheckoutStack,
-        ...LocationStack,
-        ...OrderStack,
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store'
+    ),
 });
+
+// With the food trucks home, this tab opens on the trucks map and the store page is pushed from it.
+const foodTruckHomeScreens = FOOD_TRUCKS_HOME
+    ? {
+          FoodTruckHome: { screen: screenSlot('foodTrucks.home'), options: { headerShown: false } },
+          FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false, animation: 'fade' } },
+          TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+      }
+    : {};
 
 export const StoreHomeTab = createNativeStackNavigator({
-    initialRouteName: 'StoreHome',
-    screens: {
-        StoreHome,
-        StoreCategory,
-        Product: {
-            screen: ProductScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckHome' : 'StoreHome',
+    screens: withCustomRoutes(
+        {
+            ...foodTruckHomeScreens,
+            StoreHome,
+            StoreCategory,
+            StoreCatalog,
+            StoreInfo,
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+            Offers: { screen: screenSlot('offers.list'), options: { headerShown: false } },
+            Notifications: { screen: screenSlot('notifications.inbox'), options: { headerShown: false } },
+            NotificationSettings: { screen: screenSlot('notifications.settings'), options: { headerShown: false } },
+            Offer: { screen: screenSlot('offers.detail'), options: { headerShown: false } },
+            ...LocationStack,
+            ...ModalScreens,
         },
-        ...LocationStack,
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store',
+        { withLinking: true, tabs: customNavigation.tabs }
+    ),
 });
 
+// With the trucks map as home, Search is the trucks search: each result says which truck
+// or store has it.
 export const StoreSearchTab = createNativeStackNavigator({
-    initialRouteName: 'StoreSearch',
-    screens: {
-        StoreSearch,
-        Product: {
-            screen: ProductScreen,
-            options: {
-                presentation: 'modal',
-                headerShown: false,
+    initialRouteName: FOOD_TRUCKS_HOME ? 'FoodTruckSearch' : 'StoreSearch',
+    screens: withCustomRoutes(
+        {
+            ...(FOOD_TRUCKS_HOME ? { FoodTruckSearch: { screen: screenSlot('foodTrucks.search'), options: { headerShown: false } } } : {}),
+            StoreSearch,
+            // Trucks in the customer's area open from search.
+            TruckMenu: { screen: screenSlot('foodTrucks.menu'), options: { headerShown: false } },
+            Product: {
+                screen: screenSlot('product.detail'),
+                options: {
+                    presentation: 'modal',
+                    headerShown: false,
+                },
             },
+            ...ModalScreens,
         },
-        ...ModalScreens,
-    },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreMapTab = createNativeStackNavigator({
     initialRouteName: 'StoreMap',
-    screens: {
-        StoreMap,
-        StoreInfo,
-    },
+    screens: withCustomRoutes(
+        {
+            StoreMap,
+            StoreInfo,
+            StoreReviews: { screen: screenSlot('reviews.list'), options: { headerShown: false } },
+            WriteReview: { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } },
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreCartTab = createNativeStackNavigator({
     initialRouteName: 'Cart',
-    screens: {
-        ...CartStack,
-        ...OrderStack,
-        ...CheckoutStack,
-        ...ModalScreens,
-    },
+    screens: withCustomRoutes(
+        {
+            ...CartStack,
+            ...OrderStack,
+            ...CheckoutStack,
+            ...ModalScreens,
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
 export const StoreProfileTab = createNativeStackNavigator({
@@ -279,23 +352,14 @@ export const StoreProfileTab = createNativeStackNavigator({
             if: useIsAuthenticated,
             screens: {
                 Profile: {
-                    screen: ProfileScreen,
+                    screen: screenSlot('account.profile'),
                     options: {
                         headerShown: false,
                     },
                 },
                 Account: {
-                    screen: AccountScreen,
-                    options: ({ route, navigation }) => {
-                        return {
-                            title: '',
-                            headerTransparent: true,
-                            headerShadowVisible: false,
-                            headerLeft: () => {
-                                return <BackButton onPress={() => navigation.goBack()} />;
-                            },
-                        };
-                    },
+                    screen: screenSlot('account.details'),
+                    options: { headerShown: false },
                 },
                 EditAccountProperty: {
                     screen: EditAccountPropertyScreen,
@@ -335,7 +399,7 @@ export const StoreProfileTab = createNativeStackNavigator({
                     },
                 },
                 VerifyPhone: {
-                    screen: VerifyPhoneScreen,
+                    screen: PhoneVerifyScreen,
                     options: {
                         headerShown: false,
                     },
@@ -347,27 +411,27 @@ export const StoreProfileTab = createNativeStackNavigator({
             if: useIsNotAuthenticated,
             screens: {
                 Login: {
-                    screen: LoginScreen,
+                    screen: screenSlot('auth.login'),
                     options: {
                         headerShown: false,
                     },
                 },
                 PhoneLogin: {
-                    screen: PhoneLoginScreen,
+                    screen: SignInScreen,
                     options: {
                         headerShown: false,
                         gestureEnabled: false,
                     },
                 },
                 PhoneLoginVerify: {
-                    screen: PhoneLoginVerifyScreen,
+                    screen: SignInVerifyScreen,
                     options: {
                         headerShown: false,
                         gestureEnabled: false,
                     },
                 },
                 CreateAccount: {
-                    screen: CreateAccountScreen,
+                    screen: screenSlot('auth.createAccount'),
                     options: {
                         headerShown: false,
                     },
@@ -381,65 +445,59 @@ export const StoreProfileTab = createNativeStackNavigator({
             },
         },
     },
-    screens: {
-        ...OrderStack,
-        ...LocationStack,
-        ...ModalScreens,
-    },
+    screens: withCustomRoutes(
+        {
+            ...OrderStack,
+            ...LocationStack,
+            ...ModalScreens,
+        },
+        customNavigation.routes,
+        'store'
+    ),
 });
 
+/** A tab's icon; the cart's carries a badge with the number of items in it. */
+const StoreTabIcon = ({ routeName, color, focused }: { routeName: string; color: string; focused?: boolean }) => {
+    const [cart] = useCart();
+    const custom = customNavigation.tabs[routeName];
+    if (custom) return <CustomTabIcon tab={custom} color={color} focused={focused} />;
+    const count = routeName === 'StoreCartTab' ? totalCartQuantity(cart?.contents?.().map((item: any) => item.serialize?.() || item) || []) : 0;
+    return (
+        <XStack position='relative'>
+            <FontAwesomeIcon icon={getDefaultTabIcon(routeName)} size={20} color={color} />
+            {count > 0 && (
+                <Text
+                    position='absolute'
+                    top={-10}
+                    right={-12}
+                    minWidth={18}
+                    height={18}
+                    paddingHorizontal={4}
+                    borderRadius={9}
+                    backgroundColor='$error'
+                    color='white'
+                    textAlign='center'
+                    fontSize={11}
+                    lineHeight={18}
+                    fontWeight='700'
+                >
+                    {count > 99 ? '99+' : count}
+                </Text>
+            )}
+        </XStack>
+    );
+};
+
+// The same tab bar as the Network edition: theme roles, brand color for the active tab.
+// Which tabs show, their order and labels stay configurable (storeNavigator.tabs, *_TAB_LABEL_*).
 const StoreNavigator = createBottomTabNavigator({
     layout: StoreLayout,
-    screenOptions: ({ route, navigation }) => {
-        const { isDarkMode } = useAppTheme();
-        const theme = useTheme();
-        const background = storefrontConfig('storeNavigator.tabBarBackgroundColor', 'blur');
-        const backgroundColor = config('CUSTOM_TAB_BAR_BG_COLOR', background === 'blur' ? (isAndroid ? theme['background'].val : 'transparent') : theme[background].val);
-        const borderColor = background === 'blur' ? (isAndroid ? theme['borderColor'].val : 'transparent') : theme[`${background}Border`].val;
-        const activeColor = background === 'blur' ? config('CUSTOM_TAB_BAR_ACTIVE_COLOR', theme.primary.val) : theme[`${background}Text`].val;
-        const inactiveColor = background === 'blur' ? config('CUSTOM_TAB_BAR_INACTIVE_COLOR', theme.secondary.val) : adjustOpacity(theme[`${background}Text`].val, isDarkMode ? 0.5 : 1);
-
-        const screenOptions = {
-            headerShown: false,
-            tabBarInactiveTintColor: inactiveColor,
-            tabBarActiveTintColor: activeColor,
-            tabBarStyle: {
-                position: 'absolute',
-                backgroundColor,
-                borderTopWidth: isAndroid ? 0 : 1,
-                borderTopColor: borderColor,
-                elevation: isAndroid ? 1 : 0,
-            },
-            tabBarIcon: ({ focused }) => {
-                const icon = getDefaultTabIcon(route.name);
-
-                return <FontAwesomeIcon icon={icon} size={20} color={focused ? activeColor : inactiveColor} />;
-            },
-            tabBarLabelStyle: ({ focused }) => {
-                return {
-                    marginTop: isAndroid ? 5 : 15,
-                    fontSize: 15,
-                    fontWeight: focued ? 600 : 300,
-                };
-            },
-        };
-
-        if (!isAndroid) {
-            screenOptions.tabBarBackground = () => {
-                if (background === 'blur') {
-                    return (
-                        <View style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'transparent' }}>
-                            <BlurView tint={isDarkMode ? 'dark' : 'xlight'} blurAmount={6} style={StyleSheet.absoluteFill} />
-                        </View>
-                    );
-                }
-
-                return <View style={[StyleSheet.absoluteFill, { width: '100%', height: '100%', backgroundColor, borderColor, borderTopWidth: isAndroid ? 0 : 1, borderWidth: 0 }]} />;
-            };
-        }
-
-        return screenOptions;
-    },
+    initialRouteName: initialTab(),
+    tabBar: (props: any) => <TabBar {...props} />,
+    screenOptions: ({ route }: any) => ({
+        headerShown: false,
+        tabBarIcon: ({ color, focused }: any) => <StoreTabIcon routeName={route.name} color={color} focused={focused} />,
+    }),
     screens: createTabScreens(),
 });
 

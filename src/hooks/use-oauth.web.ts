@@ -154,11 +154,13 @@ const useOAuth = () => {
 
     const loginSupported = (provider) => {
         if (provider === 'apple') {
-            return appleAuth.isSupported && toBoolean(config('APPLE_LOGIN_ENABLED')) === true;
+            // Apple Sign-In (@invertase/react-native-apple-authentication) is native-only
+            return false;
         }
 
         if (provider === 'google') {
-            return typeof config('GOOGLE_CLIENT_ID') === 'string' && toBoolean(config('GOOGLE_LOGIN_ENABLED')) === true;
+            // Google Sign-In (@react-native-google-signin/google-signin) is native-only
+            return false;
         }
 
         if (provider === 'facebook') {

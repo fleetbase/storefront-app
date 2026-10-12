@@ -1,9 +1,8 @@
 import React from 'react';
 import { LinearGradient } from 'react-native-linear-gradient';
-import { Square, Circle, View } from 'tamagui';
+import { Square, Circle, View, useTheme } from 'tamagui';
+import { mix } from '../branding/color';
 
-const gradientColors = ['#1d4ed8', '#3b82f6', '#60a5fa', '#60a5fa'];
-const tipColor = '#60a5fa';
 const sizeMap = {
     xxs: 0.25,
     xs: 0.5,
@@ -13,7 +12,12 @@ const sizeMap = {
     xl: 2,
 };
 
-const LocationMarker = ({ lifted = false, size }) => {
+/** The pin over a map: lifts and bounces while the map is being dragged, settles when it stops. Uses the brand colour. */
+const LocationMarker = ({ lifted = false, size, color }: { lifted?: boolean; size?: keyof typeof sizeMap; color?: string }) => {
+    const theme = useTheme();
+    const base = color ?? theme.primary?.val ?? '#2563eb';
+    const gradientColors = [mix(base, '#000000', 0.2), base, mix(base, '#ffffff', 0.25), mix(base, '#ffffff', 0.25)];
+    const tipColor = gradientColors[3];
     const scale = sizeMap[size] || sizeMap.md;
     const markerContainerWidth = 20 * scale;
     const markerContainerHeight = 5 * scale;

@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
-import useStorage, { clear, storage } from './use-storage';
+import useStorage, { clear, storage, get } from './use-storage';
+import { isResource } from '../utils';
 import useStorefront, { adapter } from './use-storefront';
 
 const { emit } = EventRegister;
