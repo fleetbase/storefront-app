@@ -376,6 +376,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Listen to order updates via socket (if not already listening)
     useEffect(() => {
         if (!checkoutId || !checkoutToken || listenerRef.current) return;
+        // Subscribing waits on socket authentication; if this effect is torn down meanwhile
+        // (dependencies changed, screen left), the late subscription must not outlive it.
+        let cancelled = false;
 
         const listenForOrderStatus = async () => {
             // Guests: authenticate with the checkout-scoped socket token before subscribing.
@@ -383,6 +386,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             if (isGuest && checkoutSocketTokenRef.current && typeof authenticateWithCheckoutToken === 'function') {
                 await authenticateWithCheckoutToken(checkoutSocketTokenRef.current);
             }
+            if (cancelled) return;
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
@@ -399,14 +403,20 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     markPaid(payment);
                 }
             });
-            if (listener) {
-                listenerRef.current = listener;
+            if (!listener) return;
+            if (cancelled) {
+                // Stopping closes the channel by name; leave it to a newer listener on the same
+                // checkout if there is one (a repeated event is harmless: completion is guarded).
+                if (!listenerRef.current) listener.stop();
+                return;
             }
+            listenerRef.current = listener;
         };
 
         listenForOrderStatus();
 
         return () => {
+            cancelled = true;
             if (listenerRef.current) {
                 console.log('[Checkout socket channel was stopped!]');
                 listenerRef.current.stop();
