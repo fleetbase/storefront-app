@@ -26,7 +26,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const { t } = useLanguage();
     const { customer, updateCustomerMeta } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
-    const { listen } = useSocketClusterClient();
+    const { listen, authenticateWithCheckoutToken } = useSocketClusterClient();
     const [cart, updateCart] = useCart();
     const isCheckingStatus = useRef(false);
     const [checkoutOptions, setCheckoutOptions] = useState({
@@ -39,6 +39,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [invoice, setInvoice] = useState();
     const [checkoutId, setCheckoutId] = useState();
     const [checkoutToken, setCheckoutToken] = useState();
+    // Checkout-scoped socket token (guests); kept in memory only.
+    const checkoutSocketTokenRef = useRef(null);
+    const isGuest = !customer;
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
@@ -188,7 +191,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
         setIsLoading(true);
         try {
-            const { token, checkout, invoice } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'qpay', checkoutOptions);
+            const { token, checkout, invoice, socket_token } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'qpay', checkoutOptions);
+            checkoutSocketTokenRef.current = socket_token ?? null;
             setInvoice(invoice);
             setCheckoutId(checkout);
             setCheckoutToken(token);
@@ -372,8 +376,17 @@ export default function useQPayCheckout({ onOrderComplete }) {
     // Listen to order updates via socket (if not already listening)
     useEffect(() => {
         if (!checkoutId || !checkoutToken || listenerRef.current) return;
+        // Subscribing waits on socket authentication; if this effect is torn down meanwhile
+        // (dependencies changed, screen left), the late subscription must not outlive it.
+        let cancelled = false;
 
         const listenForOrderStatus = async () => {
+            // Guests: authenticate with the checkout-scoped socket token before subscribing.
+            // Logged-in customers' own socket tokens already cover their checkouts.
+            if (isGuest && checkoutSocketTokenRef.current && typeof authenticateWithCheckoutToken === 'function') {
+                await authenticateWithCheckoutToken(checkoutSocketTokenRef.current);
+            }
+            if (cancelled) return;
             console.log(`[Listener created for socket channel: checkout.${checkoutId}]`);
             const listener = await listen(`checkout.${checkoutId}`, (event) => {
                 console.log(`[checkout channel ${checkoutId} event]`, event);
@@ -390,21 +403,27 @@ export default function useQPayCheckout({ onOrderComplete }) {
                     markPaid(payment);
                 }
             });
-            if (listener) {
-                listenerRef.current = listener;
+            if (!listener) return;
+            if (cancelled) {
+                // Stopping closes the channel by name; leave it to a newer listener on the same
+                // checkout if there is one (a repeated event is harmless: completion is guarded).
+                if (!listenerRef.current) listener.stop();
+                return;
             }
+            listenerRef.current = listener;
         };
 
         listenForOrderStatus();
 
         return () => {
+            cancelled = true;
             if (listenerRef.current) {
                 console.log('[Checkout socket channel was stopped!]');
                 listenerRef.current.stop();
                 listenerRef.current = null;
             }
         };
-    }, [listen, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError, markPaid]);
+    }, [listen, authenticateWithCheckoutToken, isGuest, checkoutId, checkoutToken, handleOrderCompletion, handlePaymentError, markPaid]);
 
     // Run order status check when the screen gains focus
     useFocusEffect(
