@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
@@ -71,6 +71,8 @@ const VerifyCodeScreen = ({ route, purpose }: { route: any; purpose: VerifyPurpo
     };
 
     const finish = () => {
+        // The code field had focus; on Android the keyboard otherwise stays up over the next screen.
+        Keyboard.dismiss();
         if (purpose === 'phone') {
             toast.success(t('Auth.phoneSaved'));
             navigation.navigate(params.returnTo ?? 'Profile');

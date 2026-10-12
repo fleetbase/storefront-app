@@ -7,10 +7,6 @@ appId: ${APP_ID}
       visible:
           id: store-search
       timeout: 60000
-- extendedWaitUntil:
-      visible:
-          id: product-item
-      timeout: 60000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-store-details${SHOT_SUFFIX}
 
@@ -30,9 +26,18 @@ appId: ${APP_ID}
       timeout: 30000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-product-details${SHOT_SUFFIX}
+# A product with a required option (e.g. a size) can't be added until one is chosen.
+- tapOn:
+      id: product-option-required
+      index: 0
+      optional: true
 - tapOn:
       id: product-add-to-cart
 - waitForAnimationToEnd
+# Adding closes the product; if it didn't (e.g. a second required group), close it.
+- tapOn:
+      id: product-close
+      optional: true
 
 # Adding closes the product. Then a category: the jump scrolls the page to it.
 - extendedWaitUntil:

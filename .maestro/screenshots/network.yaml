@@ -29,9 +29,18 @@ appId: ${APP_ID}
       timeout: 30000
 - waitForAnimationToEnd
 - takeScreenshot: storefront-app-product-details-network${SHOT_SUFFIX}
+# A product with a required option (e.g. a size) can't be added until one is chosen.
+- tapOn:
+      id: product-option-required
+      index: 0
+      optional: true
 - tapOn:
       id: product-add-to-cart
 - waitForAnimationToEnd
+# Adding closes the product; if it didn't (e.g. a second required group), close it.
+- tapOn:
+      id: product-close
+      optional: true
 
 - tapOn:
       id: tab-network-search

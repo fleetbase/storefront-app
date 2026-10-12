@@ -253,7 +253,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
             </ScrollView>
 
             <YStack position='absolute' top={top + 10} left={space.gutter}>
-                <IconButton icon={faXmark} variant='floating' accessibilityLabel={t('UI.close')} onPress={() => navigation.goBack()} />
+                <IconButton icon={faXmark} variant='floating' accessibilityLabel={t('UI.close')} onPress={() => navigation.goBack()} testID='product-close' />
             </YStack>
 
             <YStack
@@ -345,6 +345,7 @@ function OptionGroupView({ group, selection, currency, onToggle }: { group: Opti
                         <Pressable
                             key={option.id}
                             onPress={() => enabled && onToggle(option.id)}
+                            testID={group.required ? 'product-option-required' : 'product-option'}
                             accessibilityRole={group.multiple ? 'checkbox' : 'radio'}
                             accessibilityState={{ checked: selected, disabled: !enabled }}
                             style={{
