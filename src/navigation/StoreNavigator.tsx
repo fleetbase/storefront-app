@@ -27,7 +27,7 @@ import StoreLayout from '../layouts/StoreLayout';
 import { translate } from '../utils/localize';
 import { screenSlot } from '../extensions';
 import { customNavigation } from '../extensions/build-navigation';
-import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel, withCustomRoutes } from '../extensions/navigation';
+import { CustomTabIcon, CustomTabLabel, createCustomTabStack, orderTabs, tabsFor, withCustomRoutes } from '../extensions/navigation';
 import { TabBar } from '../ui';
 import { totalCartQuantity } from '../network/network-runtime';
 
@@ -139,7 +139,7 @@ function createTabScreens(optionsCallbacks = {}) {
                 ...LocationStack,
                 ...ModalScreens,
             }),
-            options: () => ({ tabBarLabel: useCustomTabLabel(tab, name) }),
+            options: { tabBarLabel: ({ color, focused }: any) => <CustomTabLabel tab={tab} fallback={name} color={color} focused={focused} /> },
         };
     }
 

@@ -177,6 +177,16 @@ export function useCustomTabLabel(tab: CustomTab, fallback: string): string {
     return fallback;
 }
 
+/** A custom tab's label in the tab bar. A component, so the language hook runs during render. */
+export function CustomTabLabel({ tab, fallback, color, focused = false }: { tab: CustomTab; fallback: string; color: string; focused?: boolean }) {
+    const label = useCustomTabLabel(tab, fallback);
+    return (
+        <Text color={color as any} fontSize={11} lineHeight={14} fontWeight={focused ? '700' : '600'}>
+            {label}
+        </Text>
+    );
+}
+
 /** A custom tab's icon. */
 export function CustomTabIcon({ tab, color, focused = false, size = 20 }: { tab: CustomTab; color: string; focused?: boolean; size?: number }) {
     if (typeof tab.icon === 'function') return <>{tab.icon({ color, size, focused })}</>;

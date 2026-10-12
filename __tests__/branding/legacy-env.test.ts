@@ -90,7 +90,7 @@ describe('legacy env branding', () => {
     });
 
     test('drops invalid legacy values but keeps the rest', () => {
-        const { branding, issues } = resolveEnv({ APP_THEME: 'purple-haze', CUSTOM_COLORS: 'primary:not-a-color,custom:#345A73', PRODUCT_CARD_STYLE: 'fancy', STORE_NAVIGATOR_TABS: 'StoreHomeTab,UnknownTab' });
+        const { branding, issues } = resolveEnv({ APP_THEME: 'purple-haze', CUSTOM_COLORS: 'primary:not-a-color,custom:#345A73', PRODUCT_CARD_STYLE: 'fancy', STORE_NAVIGATOR_TABS: 'StoreHomeTab,not a tab' });
         expect(branding.preset).toBe('blue');
         expect(branding.colors.light.primary).toBe('#2563eb');
         expect(branding.extraColors.light).toEqual({ custom: '#345A73' });

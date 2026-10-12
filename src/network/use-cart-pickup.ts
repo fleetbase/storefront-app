@@ -11,7 +11,9 @@ const pickupByStore = new Map<string, boolean>();
  */
 export default function useCartPickup(storeIds: string[]): boolean | null {
     const { adapter } = useStorefront();
-    const ids = useMemo(() => [...new Set(storeIds.filter(Boolean))], [storeIds.join('|')]);
+    // Keyed by the ids' content, so a new array with the same stores doesn't refetch.
+    const idsKey = storeIds.filter(Boolean).join('|');
+    const ids = useMemo(() => (idsKey ? [...new Set(idsKey.split('|'))] : []), [idsKey]);
     const known = (id: string) => (pickupByStore.has(id) ? (pickupByStore.get(id) as boolean) : null);
     const [, setVersion] = useState(0);
 

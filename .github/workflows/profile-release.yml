@@ -44,6 +44,10 @@ on:
                 required: false
                 type: string
 
+# The GITHUB_TOKEN only needs read here.
+permissions:
+    contents: read
+
 env:
     S3_BUCKET: flb-storefront-app-profiles
     NODE_VERSION: '18'

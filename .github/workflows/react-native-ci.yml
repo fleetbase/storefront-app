@@ -7,6 +7,10 @@ on:
     branches: [main]
     tags: ["v*"]
 
+# The GITHUB_TOKEN only needs read here.
+permissions:
+  contents: read
+
 env:
   YARN_ENABLE_INLINE_BUILDS: 1
   FLEETBASE_KEY: ${{ secrets.FLEETBASE_KEY }}

@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { compactUtc, eventEnd, type CalendarEvent, type CalendarResult } from './calendar-event';
 
 export type { CalendarEvent, CalendarResult };
@@ -5,6 +6,13 @@ export type { CalendarEvent, CalendarResult };
 /** iCalendar text values escape backslashes, semicolons, commas and newlines. */
 function icsText(value: string): string {
     return value.replace(/\\/g, '\\\\').replace(/;/g, '\x5c;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+
+/** A random id for the event's UID, from the browser's cryptographic generator. */
+function randomId(): string {
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 export function icsFor(event: CalendarEvent, uid: string): string {
@@ -29,7 +37,7 @@ export function icsFor(event: CalendarEvent, uid: string): string {
 /** On the web the event downloads as an .ics file, which the computer's calendar opens. */
 export async function addToCalendar(event: CalendarEvent): Promise<CalendarResult> {
     if (typeof document === 'undefined') return 'unavailable';
-    const blob = new Blob([icsFor(event, `${event.start.getTime()}-${Math.random().toString(36).slice(2)}@storefront`)], { type: 'text/calendar;charset=utf-8' });
+    const blob = new Blob([icsFor(event, `${event.start.getTime()}-${randomId()}@storefront`)], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;

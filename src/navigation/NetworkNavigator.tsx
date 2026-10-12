@@ -12,7 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { totalCartQuantity } from '../network/network-runtime';
 import { screenSlot } from '../extensions';
 import { customNavigation } from '../extensions/build-navigation';
-import { CustomTabIcon, createCustomTabStack, orderTabs, tabsFor, useCustomTabLabel, withCustomRoutes } from '../extensions/navigation';
+import { CustomTabIcon, CustomTabLabel, createCustomTabStack, orderTabs, tabsFor, withCustomRoutes } from '../extensions/navigation';
 import { TabBar, UIText } from '../ui';
 import { storefrontConfig } from '../utils';
 
@@ -164,7 +164,7 @@ const CUSTOM_TAB_SCREENS: Record<string, any> = Object.fromEntries(
         name,
         {
             screen: createCustomTabStack(name, tab, customNavigation.routes, 'network', createSharedNetworkScreens(false)),
-            options: () => ({ tabBarLabel: useCustomTabLabel(tab, name) }),
+            options: { tabBarLabel: ({ color, focused }: any) => <CustomTabLabel tab={tab} fallback={name} color={color} focused={focused} /> },
         },
     ])
 );

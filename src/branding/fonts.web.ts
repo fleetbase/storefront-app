@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { brandFontFiles } from '../generated/brand-fonts';
 import { regularFace } from './typography';
 import type { FontSpec, TypographyInput } from './typography';
