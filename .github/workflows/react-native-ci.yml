@@ -77,6 +77,14 @@ jobs:
       - name: Run behavior tests
         run: yarn test:ci
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          disable_search: true
+          fail_ci_if_error: false
+
       - name: Build production web bundle
         run: yarn web:build
 
