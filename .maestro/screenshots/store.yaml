@@ -40,9 +40,13 @@ appId: ${APP_ID}
       optional: true
 
 # Adding closes the product. Then a category: the jump scrolls the page to it.
-- extendedWaitUntil:
-      visible:
+# Bring a category tile to the middle first: near the top it sits under the floating
+# delivery-location button, and a tap there opens the address sheet instead.
+- scrollUntilVisible:
+      element:
           id: store-category
+      direction: UP
+      centerElement: true
       timeout: 30000
 - tapOn:
       id: store-category
