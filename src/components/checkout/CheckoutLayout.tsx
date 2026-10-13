@@ -33,6 +33,7 @@ import {
 import TipSelector from './TipSelector';
 import { RoutePreview, type RouteStore } from './RoutePreview';
 import { parseScheduledAt } from '../../commerce/booking';
+import { unavailableItemsText, type UnavailableItem } from '../../commerce/checkout-capture';
 
 /** The fields every gateway's checkout hook provides (Stripe, QPay). */
 export type CheckoutState = {
@@ -47,7 +48,7 @@ export type CheckoutState = {
     deliveryLocation: any;
     isServiceQuoteUnavailable: boolean;
     /** Cart lines the server says can no longer be ordered, when that is why there is no quote. */
-    unavailableItems?: Array<{ id?: string; name?: string }> | null;
+    unavailableItems?: UnavailableItem[] | null;
     isPickup: boolean;
     isPickupEnabled: boolean;
     setPickup: (pickup: number | boolean) => void;
@@ -165,15 +166,17 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
         ? null
         : !isPickup && !location
           ? t('Checkout.blockedAddress')
-          : quoteState === 'unavailable'
-            ? t('Checkout.blockedDelivery')
-            : checkout.isBelowMinimum
-              ? t('Checkout.blockedMinimum', { amount: money(checkout.minimumCheckoutAmount) })
-              : !paymentReady
-                ? t('Checkout.blockedPayment')
-                : checkout.isNotReady && !checkout.isLoading
-                  ? t('Checkout.preparing')
-                  : null;
+          : checkout.unavailableItems
+            ? t('Checkout.blockedItems')
+            : quoteState === 'unavailable'
+              ? t('Checkout.blockedDelivery')
+              : checkout.isBelowMinimum
+                ? t('Checkout.blockedMinimum', { amount: money(checkout.minimumCheckoutAmount) })
+                : !paymentReady
+                  ? t('Checkout.blockedPayment')
+                  : checkout.isNotReady && !checkout.isLoading
+                    ? t('Checkout.preparing')
+                    : null;
 
     // Sign in on the account tab, then come straight back to this checkout.
     const signIn = () => {
@@ -182,6 +185,24 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
         const redirect = tab ? { route: tab, params: { screen: route.name, params: route.params } } : null;
         navigation.navigate(mode === 'network' ? 'NetworkProfileTab' : 'StoreProfileTab', { screen: 'Login', params: { redirectTo: 'checkout', redirect } });
     };
+
+    // Items the store can't supply (deleted, truck gone, or out of stock when checkout tried
+    // to reserve them): named, with any stock left, and a way back to the cart.
+    const unavailableNames = unavailableItemsText(checkout.unavailableItems, (count) => t('Checkout.itemsLeft', { count }));
+    const itemsNotice = checkout.unavailableItems ? (
+        <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
+            <XStack gap={10}>
+                <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
+                <UIText flex={1} variant='caption'>
+                    <UIText variant='captionStrong'>{t('Checkout.itemsUnavailableTitle')} </UIText>
+                    {unavailableNames ? t('Checkout.itemsUnavailableBodyNamed', { items: unavailableNames }) : t('Checkout.itemsUnavailableBody')}
+                </UIText>
+            </XStack>
+            <Button variant='outline' size='sm' fullWidth onPress={() => navigation.navigate('Cart')}>
+                {t('Checkout.reviewCart')}
+            </Button>
+        </YStack>
+    ) : null;
 
     const summaryRows = checkout.lineItems.filter((item) => item.name !== t('lineItems.total'));
 
@@ -262,28 +283,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                         <UIText variant='bodyStrong'>{promo.promotions.discountDelivery > 0 ? t('Checkout.free') : money(quoteAmount ?? 0)}</UIText>
                                     </XStack>
                                 )}
-                                {quoteState === 'unavailable' && checkout.unavailableItems && (
-                                    // Items gone from the store (deleted product, removed truck): not an address problem.
-                                    <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
-                                        <XStack gap={10}>
-                                            <FontAwesomeIcon icon={faCircleExclamation} size={18} color={theme.errorForeground.val} />
-                                            <UIText flex={1} variant='caption'>
-                                                <UIText variant='captionStrong'>{t('Checkout.itemsUnavailableTitle')} </UIText>
-                                                {checkout.unavailableItems.some((item) => item.name)
-                                                    ? t('Checkout.itemsUnavailableBodyNamed', {
-                                                          items: checkout.unavailableItems
-                                                              .map((item) => item.name)
-                                                              .filter(Boolean)
-                                                              .join(', '),
-                                                      })
-                                                    : t('Checkout.itemsUnavailableBody')}
-                                            </UIText>
-                                        </XStack>
-                                        <Button variant='outline' size='sm' fullWidth onPress={() => navigation.navigate('Cart')}>
-                                            {t('Checkout.reviewCart')}
-                                        </Button>
-                                    </YStack>
-                                )}
+                                {quoteState === 'unavailable' && !!checkout.unavailableItems && itemsNotice}
                                 {quoteState === 'unavailable' && !checkout.unavailableItems && (
                                     <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$errorSoft' accessibilityRole='alert'>
                                         <XStack gap={10}>
@@ -335,6 +335,9 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                 </UIText>
                             </Card>
                         )}
+
+                        {/* Pickup, or delivery whose quote went through: checkout itself found them unavailable. */}
+                        {(isPickup || quoteState !== 'unavailable') && itemsNotice}
 
                         {bookings.map(({ line, group, at }) => (
                             <Card key={line.id} padding={14} gap={10} accessibilityLabel={t('Checkout.yourBooking')}>

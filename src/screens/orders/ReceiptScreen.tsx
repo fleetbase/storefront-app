@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, Share } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,8 @@ import useStorefront from '../../hooks/use-storefront';
 import useStorage from '../../hooks/use-storage';
 import { adapter as fleetbaseAdapter } from '../../hooks/use-fleetbase';
 import { paymentKey, receiptText, summarizeOrder } from '../../commerce/order-summary';
+import { receiptFingerprint } from '../../commerce/order-payment';
+import PaymentStatus, { PaymentBadge } from '../../components/orders/PaymentStatus';
 import { formatCurrency } from '../../utils/format';
 import { Badge, Button, Card, EmptyState, ErrorState, IconButton, Skeleton, StoreLogo, UIText, radius, space } from '../../ui';
 import useScreenTopInset from '../../hooks/use-screen-top-inset';
@@ -54,8 +56,13 @@ function TaxReceipt({ order }: { order: any }) {
     const [fetched, setFetched] = useState<any>(null);
     const [failed, setFailed] = useState(false);
     const [cachedQr, setCachedQr] = useStorage<string | null>(`receipt_qr_${order?.id}`, null);
+    // What the cached QR was issued for (the order total and payments). An edit, refund or
+    // extra charge changes it, and the old QR no longer matches the order.
+    const fingerprint = receiptFingerprint(order);
+    const [cachedFor, setCachedFor] = useStorage<string | null>(`receipt_qr_${order?.id}_for`, null);
+    const cacheStale = !!cachedQr && cachedFor !== fingerprint;
     const data = fetched ?? recorded;
-    const qr = data?.ebarimt_qr_data ?? order?.meta?.ebarimt_qr_data ?? cachedQr;
+    const qr = data?.ebarimt_qr_data ?? order?.meta?.ebarimt_qr_data ?? (cacheStale ? null : cachedQr);
 
     const request = useCallback(async () => {
         if (!adapter || !order?.id) return;
@@ -68,13 +75,25 @@ function TaxReceipt({ order }: { order: any }) {
         }
     }, [adapter, customer, order?.id]);
 
+    // Requested on open, and again when the order's total or payments change.
+    const requestedFor = useRef<string | null>(null);
     useEffect(() => {
-        if (!recorded) request();
-    }, [recorded, request]);
+        if (recorded || requestedFor.current === fingerprint) return;
+        if (requestedFor.current !== null) setFetched(null);
+        requestedFor.current = fingerprint;
+        request();
+    }, [fingerprint, recorded, request]);
 
     useEffect(() => {
-        if (qr && qr !== cachedQr) setCachedQr(qr);
-    }, [qr, cachedQr, setCachedQr]);
+        if (cacheStale && !qr) setCachedQr(null);
+    }, [cacheStale, qr, setCachedQr]);
+
+    useEffect(() => {
+        if (qr && (qr !== cachedQr || cachedFor !== fingerprint)) {
+            setCachedQr(qr);
+            setCachedFor(fingerprint);
+        }
+    }, [qr, cachedQr, cachedFor, fingerprint, setCachedQr, setCachedFor]);
 
     const tugrik = (value: unknown) => formatCurrency(Number(value) || 0, 'MNT');
     const na = t('ReceiptScreen.not_available');
@@ -145,25 +164,33 @@ const ReceiptScreen = ({ route }: any) => {
     const [state, setState] = useState<'ready' | 'loading' | 'refreshing' | 'error'>(initial?.meta ? 'ready' : 'loading');
 
     const reload = useCallback(
-        async (kind: 'loading' | 'refreshing') => {
+        async (kind: 'loading' | 'refreshing' | 'background') => {
             if (!initial?.id) return setState('error');
-            setState(kind);
+            // In the background the receipt passed in stays on screen while the latest loads.
+            if (kind !== 'background') setState(kind);
             try {
                 const order = await new Order({ id: initial.id }, fleetbaseAdapter).reload();
                 setReloaded(order.serialize());
                 setState('ready');
             } catch {
-                setState(kind === 'refreshing' && json?.meta ? 'ready' : 'error');
+                setState(kind !== 'loading' && json?.meta ? 'ready' : 'error');
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [initial?.id]
     );
 
+    // Always reloaded on open: the order passed in may be from before an edit, refund or
+    // cancellation. What was passed in shows meanwhile.
     useEffect(() => {
-        if (initial?.meta) setState('ready');
-        else reload('loading');
-    }, [initial?.meta, reload]);
+        if (initial?.meta) {
+            setState('ready');
+            reload('background');
+        } else {
+            reload('loading');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initial?.id, reload]);
 
     const summary = useMemo(() => (json?.meta ? summarizeOrder(json) : null), [json]);
     const money = (value: number) => formatCurrency(value, summary?.currency ?? undefined);
@@ -252,10 +279,22 @@ const ReceiptScreen = ({ route }: any) => {
                                 {line.quantity}×
                             </UIText>
                             <YStack flex={1} gap={2}>
-                                <UIText>{line.name}</UIText>
+                                <UIText tone={line.unavailable ? 'secondary' : 'primary'} style={line.unavailable ? { textDecorationLine: 'line-through' } : undefined}>
+                                    {line.name}
+                                </UIText>
                                 {!!line.options.length && (
                                     <UIText variant='caption' tone='secondary'>
                                         {line.options.join(' · ')}
+                                    </UIText>
+                                )}
+                                {line.unavailable && (
+                                    <UIText variant='caption' tone='error'>
+                                        {t('Receipt.unavailable')}
+                                    </UIText>
+                                )}
+                                {!!line.note && (
+                                    <UIText variant='caption' tone='secondary'>
+                                        {line.note}
                                     </UIText>
                                 )}
                                 {!!line.scheduledAt && (
@@ -282,9 +321,13 @@ const ReceiptScreen = ({ route }: any) => {
                     <YStack paddingTop={10} borderTopWidth={1} borderColor='$borderColor'>
                         <Row label={t('Receipt.total')} value={money(summary.total)} strong />
                     </YStack>
-                    <UIText variant='caption' tone='secondary'>
-                        {summary.canceled ? t('Receipt.canceledNote') : paidWith}
-                    </UIText>
+                    <PaymentStatus payment={summary.payment} money={money} showBadge={false} />
+                    <XStack alignItems='center' justifyContent='space-between' gap={8}>
+                        <UIText variant='caption' tone='secondary' flexShrink={1}>
+                            {summary.canceled ? t('Receipt.canceledNote') : paidWith}
+                        </UIText>
+                        {summary.payment?.reported && <PaymentBadge payment={summary.payment} />}
+                    </XStack>
                 </Section>
 
                 {(!!summary.address || !!summary.notes) && (

@@ -45,10 +45,20 @@ export function notificationKind(type: string, data: Record<string, any>): Notif
     return 'other';
 }
 
-/** The screen a notification opens, from its type and the ids in its data. */
+const webLink = (value: unknown): string | null => (typeof value === 'string' && /^https?:\/\//.test(value) ? value : null);
+
+/**
+ * The screen a notification opens, from its type and the ids in its data. An order update
+ * can carry a link to act on (`action: "url"` with `action_url`, or a `payment_link` for a
+ * balance to pay); it opens that link, and the order otherwise.
+ */
 export function notificationTarget(kind: NotificationKind, data: Record<string, any>): NotificationTarget {
-    if (kind === 'chat' && data.order_id) return { route: 'OrderChat', params: { orderId: data.order_id } };
-    if (kind === 'order' && data.order_id) return { route: 'Order', params: { orderId: data.order_id } };
+    if (kind === 'chat' && data.order_id) return { route: 'OrderChat', params: { orderId: data.order_id, ...(data.chat_kind === 'customer' || data.kind === 'customer' ? { kind: 'customer' } : {}) } };
+    if (kind === 'order') {
+        const link = (data.action === 'url' || data.action === 'pay' ? webLink(data.action_url) : null) ?? webLink(data.payment_link);
+        if (link) return { url: link };
+        if (data.order_id) return { route: 'Order', params: { orderId: data.order_id } };
+    }
     if (kind === 'offer') {
         const id = data.action_id;
         switch (data.action) {
@@ -61,7 +71,7 @@ export function notificationTarget(kind: NotificationKind, data: Record<string, 
             case 'category':
                 return id ? { route: 'NetworkCategory', params: { categoryId: id } } : null;
             case 'url':
-                return typeof data.action_url === 'string' && /^https?:\/\//.test(data.action_url) ? { url: data.action_url } : null;
+                return webLink(data.action_url) ? { url: data.action_url } : null;
         }
         if (data.promotion_id) return { route: 'Offer', params: { offerId: data.promotion_id } };
         if (data.store_id) return { route: 'NetworkStore', params: { storeId: data.store_id } };

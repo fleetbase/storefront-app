@@ -609,6 +609,10 @@
         "starsCount": {
             "one": "1 од",
             "other": "{{count}} од"
+        },
+        "onlyLeft": {
+            "one": "Ганцхан үлдсэн",
+            "other": "Ердөө {{count}} үлдсэн"
         }
     },
     "StoreSwitch": {
@@ -765,7 +769,12 @@
         "itemsUnavailableTitle": "Зарим бараа боломжгүй болсон байна.",
         "itemsUnavailableBody": "Үргэлжлүүлэхийн тулд сагснаасаа хасна уу.",
         "itemsUnavailableBodyNamed": "Үргэлжлүүлэхийн тулд {{items}}-ийг сагснаасаа хасна уу.",
-        "reviewCart": "Сагс харах"
+        "reviewCart": "Сагс харах",
+        "blockedItems": "Үргэлжлүүлэхийн тулд боломжгүй бүтээгдэхүүнүүдийг хасна уу.",
+        "itemsLeft": {
+            "one": "1 үлдсэн",
+            "other": "{{count}} үлдсэн"
+        }
     },
     "Tracking": {
         "qrTitle": "Таны захиалгын код",
@@ -879,7 +888,26 @@
         "bookingConfirmedBody": "{{store}} таны айлчлалыг баталгаажууллаа.",
         "bookingRequestedBody": "{{store}} удахгүй цагийг баталгаажуулна.",
         "callStore": "{{store}} руу залгах",
-        "loadFailed": "Энэ захиалгыг ачаалж чадсангүй"
+        "loadFailed": "Энэ захиалгыг ачаалж чадсангүй",
+        "orderUpdated": "Захиалга шинэчлэгдсэн",
+        "orderUpdatedBy": "{{name}} захиалгыг шинэчилсэн",
+        "orderUpdatedBody": "Дэлгүүр таны захиалгад өөрчлөлт оруулсан.",
+        "dismissUpdate": "Мэдэгдлийг хаах",
+        "wrongAddress": "Хаяг буруу юу?",
+        "wrongAddressTitle": "Хаяг буруу юу?",
+        "wrongAddressBody": "Хадгалсан хаягуудаасаа сонгох эсвэл хаана хүргэхийг {{store}}-д бичээрэй. Тэд захиалгыг шинэчлээд танд мэдэгдэнэ.",
+        "savedPlaces": "Хадгалсан хаягууд",
+        "addressMessagePlaceholder": "Ж: А байр биш, Б байр",
+        "sendToStore": "{{store}} руу илгээх",
+        "addressRequestPlace": "{{place}} хаягаар хүргэнэ үү.",
+        "addressRequestSent": "{{store}} руу илгээлээ",
+        "addressRequestFailed": "Хүсэлтийг илгээж чадсангүй. Дахин оролдох эсвэл дэлгүүрт бичнэ үү.",
+        "addressRequestPending": "Хаяг солих хүсэлт илгээсэн",
+        "addressRequestPendingBody": "{{store}} хаягийг шинэчлэхийг хүлээж байна: “{{message}}”",
+        "itemUnavailable": "Боломжгүй",
+        "substitute": "Орлуулсан",
+        "substituteFor": "{{name}}-г орлуулсан",
+        "storeNote": "Дэлгүүрийн тэмдэглэл: {{note}}"
     },
     "Booking": {
         "howItWorks": "Захиалга хэрхэн ажилладаг вэ",
@@ -911,7 +939,11 @@
         "addToCart": "Захиалгыг сагсанд нэмэх",
         "saveChanges": "Захиалгыг хадгалах",
         "added": "{{name}} захиалагдлаа. Таны сагсанд байна.",
-        "updated": "Захиалга шинэчлэгдлээ."
+        "updated": "Захиалга шинэчлэгдлээ.",
+        "depositNote": "Төлбөр тооцоонд {{percent}}% урьдчилгаа төлнө; үлдсэнийг үйлчилгээний дараа төлнө.",
+        "fullyBooked": "бүрэн захиалагдсан",
+        "fullyBookedOn": "{{day}} бүрэн захиалагдсан",
+        "loadingTimes": "Боломжит цагуудыг ачаалж байна"
     },
     "Reviews": {
         "title": "Сэтгэгдэл",
@@ -1108,7 +1140,10 @@
             "comingDown": "Одоо буулаа",
             "leaveAtDoor": "Хаалганы өмнө үлдээнэ үү",
             "callOnArrival": "Ирэхдээ залгаарай",
-            "whereAreYou": "Та одоо хаана байна?"
+            "whereAreYou": "Та одоо хаана байна?",
+            "changeAddress": "Хаягаа сольж болох уу?",
+            "whereIsOrder": "Миний захиалга хаана явна?",
+            "pleaseCall": "Над руу залгана уу"
         },
         "sendPhoto": "Зураг илгээх",
         "attachedPhotos": "Илгээх зургууд",
@@ -1124,7 +1159,13 @@
         "closedTitle": "Захиалга дууссан тул чат хаагдсан",
         "closedBody": "Захиалгын талаар тусламж хэрэгтэй юу? Захиалгын хуудаснаас {{store}}-тэй холбогдоно уу.",
         "closedNote": "Захиалга дууссан тул жолоочтой хийсэн чат хаагдсан.",
-        "viewMessages": "Мессежүүдийг харах"
+        "viewMessages": "Мессежүүдийг харах",
+        "closedBodyStore": "Захиалгын талаар тусламж хэрэгтэй юу? Захиалгын хуудаснаас {{store}} руу залгана уу.",
+        "closedTitleStore": "Захиалга дууссан тул чат хаагдсан",
+        "messageStore": "{{store}}-д бичих",
+        "signInBodyStore": "Дэлгүүрт бичихийн тулд нэвтэрнэ үү.",
+        "storeIntro": "Энэ захиалгын талаар {{store}}-с асуугаарай. Ихэвчлэн хэдхэн минутын дотор хариулдаг.",
+        "theStore": "Дэлгүүр"
     },
     "Auth": {
         "signInTitle": "Нэвтрэх",
@@ -1272,7 +1313,12 @@
         "notes": "Тэмдэглэл: {{notes}}",
         "taxReceipt": "И-баримт",
         "taxReceiptId": "Баримтын дугаар",
-        "loadFailed": "Баримтыг ачаалж чадсангүй."
+        "loadFailed": "Баримтыг ачаалж чадсангүй.",
+        "unavailable": "Боломжгүй",
+        "refunded": "Буцаан олгосон",
+        "credited": "Дэлгүүрийн кредит",
+        "balanceDue": "Төлөх үлдэгдэл",
+        "cashDue": "Хүргэлтээр төлөх"
     },
     "Places": {
         "allowTitle": "Танд хүргэлт хийх дэлгүүрүүдийг хараарай",
@@ -1575,5 +1621,25 @@
         "noPromotions": "Одоогоор урамшуулал алга.",
         "inYourArea": "Таны бүсэд",
         "inYourAreaNamed": "Таны бүсэд · {{zone}}"
+    },
+    "Payment": {
+        "title": "Төлбөр",
+        "state": {
+            "paid": "Төлөгдсөн",
+            "payOnDelivery": "Хүргэлтээр төлөх",
+            "refunded": "Буцаан олгосон",
+            "partlyRefunded": "Хэсэгчлэн буцаасан",
+            "balanceDue": "Төлөх үлдэгдэлтэй",
+            "unpaid": "Төлөгдөөгүй"
+        },
+        "balanceDueTitle": "{{amount}} төлөх үлдэгдэлтэй",
+        "balanceDueBody": "Таны захиалга өөрчлөгдөж үнэ нэмэгдсэн. Захиалгаа үргэлжлүүлэхийн тулд зөрүүг төлнө үү.",
+        "balanceDueNoLink": "Таны захиалга өөрчлөгдөж үнэ нэмэгдсэн. Зөрүүг хэрхэн төлөхийг дэлгүүр танд мэдэгдэнэ.",
+        "payNow": "Одоо төлөх",
+        "linkFailed": "Төлбөрийн хуудсыг нээж чадсангүй",
+        "storeCreditTitle": "Дэлгүүрийн кредит",
+        "storeCreditCode": "Дэлгүүрийн кредит код {{code}}",
+        "storeCreditBody": "Дараагийн захиалгынхаа төлбөр тооцоонд энэ кодыг ашиглаарай.",
+        "shareCode": "Хуваалцах"
     }
 }

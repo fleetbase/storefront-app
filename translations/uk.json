@@ -609,6 +609,10 @@
         "starsCount": {
             "one": "1 зірка",
             "other": "{{count}} зірок"
+        },
+        "onlyLeft": {
+            "one": "Залишився 1",
+            "other": "Залишилося {{count}}"
         }
     },
     "StoreSwitch": {
@@ -765,7 +769,12 @@
         "itemsUnavailableTitle": "Деякі товари більше недоступні.",
         "itemsUnavailableBody": "Видаліть їх із кошика, щоб продовжити.",
         "itemsUnavailableBodyNamed": "Видаліть із кошика: {{items}}, щоб продовжити.",
-        "reviewCart": "Переглянути кошик"
+        "reviewCart": "Переглянути кошик",
+        "blockedItems": "Видаліть недоступні товари, щоб продовжити.",
+        "itemsLeft": {
+            "one": "залишився 1",
+            "other": "залишилося {{count}}"
+        }
     },
     "Tracking": {
         "qrTitle": "Код вашого замовлення",
@@ -879,7 +888,26 @@
         "bookingConfirmedBody": "{{store}} підтвердив ваш візит.",
         "bookingRequestedBody": "{{store}} скоро підтвердить час.",
         "callStore": "Зателефонувати: {{store}}",
-        "loadFailed": "Не вдалося завантажити замовлення"
+        "loadFailed": "Не вдалося завантажити замовлення",
+        "orderUpdated": "Замовлення оновлено",
+        "orderUpdatedBy": "{{name}} оновив(-ла) замовлення",
+        "orderUpdatedBody": "Магазин змінив ваше замовлення.",
+        "dismissUpdate": "Закрити сповіщення",
+        "wrongAddress": "Неправильна адреса?",
+        "wrongAddressTitle": "Неправильна адреса?",
+        "wrongAddressBody": "Виберіть одну зі збережених адрес або напишіть {{store}}, куди доставити. Вони оновлять замовлення й повідомлять вас.",
+        "savedPlaces": "Збережені адреси",
+        "addressMessagePlaceholder": "Напр.: корпус Б, а не А",
+        "sendToStore": "Надіслати {{store}}",
+        "addressRequestPlace": "Доставте, будь ласка, на {{place}}.",
+        "addressRequestSent": "Надіслано {{store}}",
+        "addressRequestFailed": "Не вдалося надіслати запит. Спробуйте ще раз або напишіть магазину.",
+        "addressRequestPending": "Запит на зміну адреси надіслано",
+        "addressRequestPendingBody": "Очікуємо, поки {{store}} оновить адресу: «{{message}}»",
+        "itemUnavailable": "Недоступно",
+        "substitute": "Заміна",
+        "substituteFor": "Замість {{name}}",
+        "storeNote": "Примітка магазину: {{note}}"
     },
     "Booking": {
         "howItWorks": "Як працює бронювання",
@@ -911,7 +939,11 @@
         "addToCart": "Додати бронювання до кошика",
         "saveChanges": "Зберегти бронювання",
         "added": "{{name}} заброньовано. Бронювання в кошику.",
-        "updated": "Бронювання оновлено."
+        "updated": "Бронювання оновлено.",
+        "depositNote": "Під час оформлення сплачується завдаток {{percent}}%, решта — після візиту.",
+        "fullyBooked": "усе зайнято",
+        "fullyBookedOn": "На {{day}} усе зайнято",
+        "loadingTimes": "Завантаження вільного часу"
     },
     "Reviews": {
         "title": "Відгуки",
@@ -1108,7 +1140,10 @@
             "comingDown": "Вже спускаюся",
             "leaveAtDoor": "Залиште, будь ласка, біля дверей",
             "callOnArrival": "Зателефонуйте, коли приїдете",
-            "whereAreYou": "Де ви зараз?"
+            "whereAreYou": "Де ви зараз?",
+            "changeAddress": "Чи можу я змінити адресу?",
+            "whereIsOrder": "Де моє замовлення?",
+            "pleaseCall": "Зателефонуйте мені, будь ласка"
         },
         "sendPhoto": "Надіслати фото",
         "attachedPhotos": "Фото для надсилання",
@@ -1124,7 +1159,13 @@
         "closedTitle": "Чат закрито, бо замовлення завершено",
         "closedBody": "Потрібна допомога із замовленням? Зв’яжіться з {{store}} на сторінці замовлення.",
         "closedNote": "Чат із водієм закрито після завершення замовлення.",
-        "viewMessages": "Переглянути повідомлення"
+        "viewMessages": "Переглянути повідомлення",
+        "closedBodyStore": "Потрібна допомога із замовленням? Зателефонуйте {{store}} зі сторінки замовлення.",
+        "closedTitleStore": "Чат закрито, бо замовлення завершено",
+        "messageStore": "Написати {{store}}",
+        "signInBodyStore": "Увійдіть, щоб написати магазину.",
+        "storeIntro": "Запитайте {{store}} про це замовлення. Зазвичай відповідають за кілька хвилин.",
+        "theStore": "Магазин"
     },
     "Auth": {
         "signInTitle": "Увійти",
@@ -1272,7 +1313,12 @@
         "notes": "Примітки: {{notes}}",
         "taxReceipt": "Податковий чек (e-barimt)",
         "taxReceiptId": "Номер чека",
-        "loadFailed": "Не вдалося завантажити чек."
+        "loadFailed": "Не вдалося завантажити чек.",
+        "unavailable": "Недоступно",
+        "refunded": "Повернено",
+        "credited": "Кредит магазину",
+        "balanceDue": "До доплати",
+        "cashDue": "Оплата під час доставки"
     },
     "Places": {
         "allowTitle": "Дізнайтеся, що вам доставлять",
@@ -1575,5 +1621,25 @@
         "noPromotions": "Зараз акцій немає.",
         "inYourArea": "У вашому районі",
         "inYourAreaNamed": "У вашому районі · {{zone}}"
+    },
+    "Payment": {
+        "title": "Оплата",
+        "state": {
+            "paid": "Оплачено",
+            "payOnDelivery": "Оплата під час доставки",
+            "refunded": "Повернено",
+            "partlyRefunded": "Частково повернено",
+            "balanceDue": "Потрібна доплата",
+            "unpaid": "Не оплачено"
+        },
+        "balanceDueTitle": "Залишилося сплатити {{amount}}",
+        "balanceDueBody": "Ваше замовлення змінилося й тепер коштує більше. Сплатіть різницю, щоб продовжити.",
+        "balanceDueNoLink": "Ваше замовлення змінилося й тепер коштує більше. Магазин підкаже, як сплатити різницю.",
+        "payNow": "Сплатити зараз",
+        "linkFailed": "Не вдалося відкрити сторінку оплати",
+        "storeCreditTitle": "Кредит магазину",
+        "storeCreditCode": "Код кредиту магазину {{code}}",
+        "storeCreditBody": "Використайте цей код під час оформлення наступного замовлення.",
+        "shareCode": "Поділитися"
     }
 }

@@ -58,3 +58,37 @@ export function pendingCaptureFor(pending: PendingCapture | null | undefined, cu
     if (!pending?.token) return null;
     return (pending.customerId ?? null) === (customerId ?? null) ? pending : null;
 }
+
+/** A cart line the store can't supply (deleted, its truck gone, or not enough stock). */
+export type UnavailableItem = { id?: string; product_id?: string; name?: string; available?: number | null };
+
+/**
+ * The lines named by a `cart_items_unavailable` refusal (from the delivery quote, or from
+ * checkout when stock ran out while reserving it), or null for any other error. The body is
+ * `{ code, items: [{ id, product_id, name, available? }] }`; the SDK keeps it as `response`.
+ */
+export function unavailableItemsFromError(error: unknown): UnavailableItem[] | null {
+    const failure = error as any;
+    if (failure?.code !== 'cart_items_unavailable' && failure?.response?.code !== 'cart_items_unavailable') return null;
+    const items = failure?.response?.items ?? failure?.items;
+    if (!Array.isArray(items)) return [];
+    return items
+        .filter((item: any) => item && typeof item === 'object')
+        .map((item: any) => {
+            const available = Number(item.available);
+            return {
+                id: typeof item.id === 'string' ? item.id : undefined,
+                product_id: typeof item.product_id === 'string' ? item.product_id : undefined,
+                name: typeof item.name === 'string' && item.name.trim() ? item.name.trim() : undefined,
+                available: item.available !== undefined && item.available !== null && Number.isFinite(available) ? Math.max(0, Math.floor(available)) : null,
+            };
+        });
+}
+
+/** "Iced Latte (2 left), Croissant" — the unavailable lines by name, with any stock left. */
+export function unavailableItemsText(items: UnavailableItem[] | null | undefined, left: (count: number) => string): string {
+    return (items ?? [])
+        .filter((item) => item.name)
+        .map((item) => (item.available ? `${item.name} (${left(item.available)})` : (item.name as string)))
+        .join(', ');
+}

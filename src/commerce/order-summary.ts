@@ -1,12 +1,16 @@
 import { joinStoreNames } from './order-stores';
 import { orderProgress, type OrderPhase } from './order-progress';
+import { parseOrderPayment, type OrderPayment } from './order-payment';
 
 /**
  * Plain summaries of a storefront order (the Fleetbase order resource) for the order
  * history and the receipt. Checkout records what the customer saw in `meta`:
  * `storefront`, `storefront_id`, `subtotal`, `delivery_fee`, `tip`, `delivery_tip`,
  * `discount`, `promotions`, `total`, `currency`, `gateway` and `is_pickup`. Each line
- * is a payload entity whose `meta` holds `quantity`, `subtotal`, `variants` and `addons`.
+ * is a payload entity whose `meta` holds `quantity`, `subtotal`, `variants` and `addons`,
+ * and, once the store has worked on it, `note`, `unavailable` and `substitute_for` (the
+ * entity it replaces). After an edit the server records tips as amounts (`tip_amount`,
+ * `delivery_tip_amount`) and keeps the payment summary in `meta.payment`.
  */
 
 export type OrderLine = {
@@ -18,6 +22,12 @@ export type OrderLine = {
     /** Chosen variant options and add-ons, e.g. ["Large", "Extra shot"]. */
     options: string[];
     scheduledAt: string | null;
+    /** The store's note on this item ("No oat milk, made with soy"). */
+    note: string | null;
+    /** The store couldn't supply it. */
+    unavailable: boolean;
+    /** The id of the item this one was substituted for. */
+    substituteFor: string | null;
 };
 
 export type OrderSummary = {
@@ -44,6 +54,7 @@ export type OrderSummary = {
     gateway: string | null;
     address: string | null;
     notes: string | null;
+    payment: OrderPayment | null;
 };
 
 const amount = (value: unknown): number => {
@@ -58,12 +69,27 @@ const text = (value: unknown): string | null => (typeof value === 'string' && va
  * which would otherwise read as 10 or not at all.
  */
 export function tipAmount(value: unknown, subtotal: unknown): number {
+    if (value === null || value === undefined || value === '') return 0;
     if (typeof value === 'string' && value.trim().endsWith('%')) {
         const percent = Number(value.trim().slice(0, -1));
         return Number.isFinite(percent) ? Math.round((amount(subtotal) * percent) / 100) : 0;
     }
     return amount(value);
 }
+
+/**
+ * The order's tip (`tip`) or driver tip (`delivery_tip`) as an amount. The amount the server
+ * recorded (`tip_amount`, `delivery_tip_amount`) wins: a percentage tip is fixed when the
+ * order is placed, and recomputing it from a subtotal changed by an edit would show a
+ * different tip than the one charged.
+ */
+export function orderTip(meta: any, key: 'tip' | 'delivery_tip'): number {
+    const recorded = meta?.[`${key}_amount`];
+    if (recorded !== null && recorded !== undefined && recorded !== '' && Number.isFinite(amount(recorded))) return amount(recorded);
+    return tipAmount(meta?.[key], meta?.subtotal);
+}
+
+const flag = (value: unknown): boolean => value === true || value === 1 || value === '1' || value === 'true';
 
 function optionNames(meta: any): string[] {
     const names: string[] = [];
@@ -89,6 +115,9 @@ export function parseOrderLine(entity: any, index = 0): OrderLine {
         imageUrl: text(entity?.photo_url) ?? text(meta.image_url),
         options: optionNames(meta),
         scheduledAt: text(meta.scheduled_at),
+        note: text(meta.note),
+        unavailable: flag(meta.unavailable),
+        substituteFor: text(meta.substitute_for),
     };
 }
 
@@ -125,8 +154,8 @@ export function summarizeOrder(json: any): OrderSummary {
         itemCount: lines.reduce((sum: number, line: OrderLine) => sum + line.quantity, 0),
         subtotal: amount(meta.subtotal),
         deliveryFee: isPickup ? 0 : amount(meta.delivery_fee),
-        tip: tipAmount(meta.tip, meta.subtotal),
-        deliveryTip: tipAmount(meta.delivery_tip, meta.subtotal),
+        tip: orderTip(meta, 'tip'),
+        deliveryTip: orderTip(meta, 'delivery_tip'),
         discount: amount(meta.discount),
         promotions: (Array.isArray(meta.promotions) ? meta.promotions : [])
             .map((promotion: any) => ({
@@ -139,7 +168,19 @@ export function summarizeOrder(json: any): OrderSummary {
         gateway: text(meta.gateway) ?? text(payload.payment_method),
         address: placeLine(isPickup ? payload.pickup : payload.dropoff),
         notes: text(json?.notes),
+        payment: parseOrderPayment(json),
     };
+}
+
+/** Refunds, store credit and any balance still to pay, for the receipt and order screen. */
+export function paymentLines(payment: OrderPayment | null | undefined): { key: 'refunded' | 'credited' | 'balanceDue' | 'cashDue'; amount: number }[] {
+    if (!payment) return [];
+    const lines: { key: 'refunded' | 'credited' | 'balanceDue' | 'cashDue'; amount: number }[] = [];
+    if (payment.amountRefunded > 0) lines.push({ key: 'refunded', amount: payment.amountRefunded });
+    if (payment.amountCredited > 0) lines.push({ key: 'credited', amount: payment.amountCredited });
+    if (payment.balanceDue > 0) lines.push({ key: 'balanceDue', amount: payment.balanceDue });
+    if (payment.state === 'to_collect' && payment.codAmount > 0) lines.push({ key: 'cashDue', amount: payment.codAmount });
+    return lines;
 }
 
 /** "Latte, Croissant and 2 more" style preview of what was ordered. */
@@ -183,7 +224,9 @@ export function receiptText(
         t('Receipt.orderNumber', { number: summary.reference }),
         date,
         '',
-        ...summary.lines.map((line) => `${line.quantity} × ${line.name}${line.options.length ? ` (${line.options.join(', ')})` : ''}  ${money(line.subtotal)}`),
+        ...summary.lines.map(
+            (line) => `${line.quantity} × ${line.name}${line.options.length ? ` (${line.options.join(', ')})` : ''}${line.unavailable ? ` [${t('Receipt.unavailable')}]` : ''}  ${money(line.subtotal)}`
+        ),
         '',
         `${t('Receipt.subtotal')}: ${money(summary.subtotal)}`,
         summary.deliveryFee ? `${t('Receipt.deliveryFee')}: ${money(summary.deliveryFee)}` : null,
@@ -191,6 +234,7 @@ export function receiptText(
         summary.deliveryTip ? `${t('Receipt.driverTip')}: ${money(summary.deliveryTip)}` : null,
         summary.discount ? `${t('Receipt.discount')}: −${money(summary.discount)}` : null,
         `${t('Receipt.total')}: ${money(summary.total)}`,
+        ...paymentLines(summary.payment).map((line) => `${t(`Receipt.${line.key}`)}: ${line.key === 'refunded' || line.key === 'credited' ? '−' : ''}${money(line.amount)}`),
     ];
     return lines.filter((line) => line !== null).join('\n');
 }

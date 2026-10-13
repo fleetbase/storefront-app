@@ -1,4 +1,4 @@
-import { bookingDays, bookingWindows, dateKey, nextOpenDay, parseScheduledAt, serviceDuration, startTimes, toLocalIso, weekdayOf } from '../../src/commerce/booking';
+import { bookingDays, bookingWindows, dateKey, depositPercent, fetchSlots, nextOpenDay, orderBooking, parseScheduledAt, parseSlots, serviceDuration, startTimes, toLocalIso, weekdayOf } from '../../src/commerce/booking';
 
 // Tuesday 6 October 2026, 1:20 pm local time.
 const now = new Date(2026, 9, 6, 13, 20);
@@ -63,5 +63,53 @@ describe('booking', () => {
         expect(serviceDuration({ getAttribute: () => ({ duration_minutes: 90 }) })).toBe(90);
         expect(serviceDuration({ meta: { duration: 0 } })).toBeNull();
         expect(serviceDuration(null)).toBeNull();
+    });
+
+    test('reads service settings', () => {
+        expect(serviceDuration({ meta: { service: { duration_minutes: 45 }, duration: 90 } })).toBe(45);
+        expect(depositPercent({ meta: { service: { deposit_percent: 30 } } })).toBe(30);
+        expect(depositPercent({ getAttribute: () => ({ service: { deposit_percent: '100' } }) })).toBeNull();
+        expect(depositPercent({ meta: {} })).toBeNull();
+    });
+
+    test('uses the server slots, marking taken and past ones', () => {
+        const at = (hour: number) => toLocalIso(new Date(2026, 9, 6, hour, 0));
+        const times = parseSlots(
+            [
+                { start: at(15), end: at(16), available: true, providers: 2 },
+                { start: at(9), end: at(10), available: true, providers: 1 },
+                { start: at(14), end: at(15), available: false, providers: 0 },
+                { start: at(14), end: at(15), available: true },
+                { start: toLocalIso(new Date(2026, 9, 7, 9, 0)), available: true },
+                { start: 'nope' },
+            ],
+            '2026-10-06',
+            { now }
+        );
+        expect(times.map((time) => [time.minutes, time.endMinutes, time.past, time.full, time.period])).toEqual([
+            [540, 600, true, false, 'morning'],
+            [840, 900, true, true, 'afternoon'],
+            [900, 960, false, false, 'afternoon'],
+        ]);
+        expect(parseSlots({ slots: [{ start: at(18), providers: 0 }] }, '2026-10-06', { now })[0]).toMatchObject({ full: true, past: true, period: 'evening' });
+        expect(parseSlots(null, '2026-10-06', { now })).toEqual([]);
+    });
+
+    test('fetches slots and falls back when the server has none', async () => {
+        const request = jest.fn().mockResolvedValueOnce([{ start: toLocalIso(new Date(2026, 9, 7, 9, 0)), available: true }]);
+        expect(await fetchSlots(request, 'product 1', '2026-10-07', { now, location: 'store_location_1' })).toHaveLength(1);
+        expect(request).toHaveBeenCalledWith('products/product%201/slots', { query: { date: '2026-10-07', location: 'store_location_1' } });
+        request.mockRejectedValueOnce(Object.assign(new Error('Not found'), { status: 404 }));
+        expect(await fetchSlots(request, 'product_1', '2026-10-07', { now })).toBeNull();
+        expect(request).toHaveBeenLastCalledWith('products/product_1/slots', { query: { date: '2026-10-07' } });
+    });
+
+    test('reads a booking order appointment', () => {
+        const booking = orderBooking({ booking: { start: '2026-10-07T09:00:00', duration_minutes: 90, provider: 'driver_1' } });
+        expect(booking?.start?.getHours()).toBe(9);
+        expect(booking?.end?.getHours()).toBe(10);
+        expect(booking).toMatchObject({ durationMinutes: 90, provider: 'driver_1' });
+        expect(orderBooking({ booking: { start: '2026-10-07T09:00:00', end: '2026-10-07T11:00:00' } })?.durationMinutes).toBe(120);
+        expect(orderBooking({})).toBeNull();
     });
 });

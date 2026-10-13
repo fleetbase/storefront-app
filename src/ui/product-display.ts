@@ -10,7 +10,12 @@ export type ProductSummary = {
     salePrice: number | null;
     onSale: boolean;
     currency: string | null;
+    /** Can be ordered: the store offers it and, when it tracks stock, has some left. */
     available: boolean;
+    /** The store tracks stock and has none left (`in_stock` false). */
+    outOfStock: boolean;
+    /** How many are left when the store marks the stock as low, else null. */
+    lowStock: number | null;
     isService: boolean;
     isBookable: boolean;
     /** Visit length for bookable services (`meta.duration`, minutes), when the store sets it. */
@@ -26,7 +31,7 @@ const money = (value: unknown): number | null => {
 };
 
 const duration = (meta: any): number | null => {
-    const minutes = money(meta?.duration_minutes ?? meta?.duration);
+    const minutes = money(meta?.service?.duration_minutes ?? meta?.duration_minutes ?? meta?.duration);
     return minutes !== null && minutes > 0 ? Math.round(minutes) : null;
 };
 
@@ -38,6 +43,32 @@ export function formatDuration(minutes: number | null | undefined): string | nul
     return `${Number.isInteger(hours) ? hours : hours.toFixed(1).replace(/\.0$/, '')} hr`;
 }
 
+export type StockLevel = { tracked: boolean; inStock: boolean; low: boolean; available: number | null };
+
+/**
+ * A product's stock as the server reports it: `in_stock`, and for stores that track stock
+ * `inventory: { tracked, available_total, locations: [{ location, available, low }] }`.
+ * With a store location the level there counts; otherwise the total, low when every
+ * location with stock is low. Products whose store doesn't track stock are always in stock.
+ */
+export function stockLevel(product: unknown, locationId?: string | null): StockLevel {
+    const inventory = attr<any>(product, 'inventory', null);
+    const tracked = inventory?.tracked === true;
+    const inStockFlag = attr<unknown>(product, 'in_stock', null);
+    if (!tracked) return { tracked: false, inStock: inStockFlag !== false, low: false, available: null };
+    const locations: any[] = Array.isArray(inventory?.locations) ? inventory.locations : [];
+    const here = locationId ? locations.find((entry) => entry?.location === locationId || entry?.location?.id === locationId) : null;
+    if (here) {
+        const available = Math.max(0, money(here.available) ?? 0);
+        return { tracked, inStock: available > 0 && inStockFlag !== false, low: here.low === true && available > 0, available };
+    }
+    const total = money(inventory?.available_total);
+    const available = total === null ? null : Math.max(0, total);
+    const stocked = locations.filter((entry) => (money(entry?.available) ?? 0) > 0);
+    const inStock = inStockFlag === false ? false : available === null ? true : available > 0;
+    return { tracked, inStock, low: inStock && stocked.length > 0 && stocked.every((entry) => entry?.low === true), available };
+}
+
 /** Everything a product row or tile shows, from an SDK product or plain JSON. */
 export function productSummary(product: unknown): ProductSummary {
     const images = attr<unknown[]>(product, 'images', []);
@@ -46,6 +77,8 @@ export function productSummary(product: unknown): ProductSummary {
     const salePrice = money(attr(product, 'sale_price'));
     const onSale = attr<boolean>(product, 'is_on_sale', false) === true && salePrice !== null && salePrice < price;
     const store = attr<any>(product, 'store', null);
+    const stock = stockLevel(product);
+    const offered = attr<boolean>(product, 'is_available', true) !== false;
 
     return {
         id: attr<string | null>(product, 'id', null),
@@ -56,7 +89,9 @@ export function productSummary(product: unknown): ProductSummary {
         salePrice: onSale ? salePrice : null,
         onSale,
         currency: attr<string | null>(product, 'currency', null),
-        available: attr<boolean>(product, 'is_available', true) !== false,
+        available: offered && stock.inStock,
+        outOfStock: offered && !stock.inStock,
+        lowStock: stock.low ? stock.available : null,
         isService: attr<boolean>(product, 'is_service', false) === true,
         isBookable: attr<boolean>(product, 'is_bookable', false) === true,
         durationMinutes: duration(attr<any>(product, 'meta', null)),

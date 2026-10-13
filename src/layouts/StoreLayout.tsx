@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { View, Platform, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { isOrderNotification } from '../utils/notifications';
-import { loadPersistedResource } from '../utils';
+import { remove as removeStored } from '../utils/storage';
+import { markOrderHistoryDirty } from '../utils/order-history-cache';
 import { useNotification } from '../contexts/NotificationContext';
+import { useAuth } from '../contexts/AuthContext';
 import useFleetbase from '../hooks/use-fleetbase';
 import Spacer from '../components/Spacer';
 import { targetFromPush } from '../commerce/notifications';
@@ -16,6 +18,8 @@ const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }
     const navigation = useNavigation<any>();
     const { fleetbase } = useFleetbase();
     const { addNotificationListener, removeNotificationListener } = useNotification();
+    const { customer } = useAuth() as any;
+    const customerId = customer?.id ?? null;
     const openNotification = useOpenNotification();
     const { refresh: refreshUnread } = useUnreadNotifications();
     // A saved session the server no longer accepts signs out once, instead of failing every request.
@@ -27,19 +31,27 @@ const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }
         }
 
         const handleOrderNotification = async (notification, action) => {
-            // Every push may add to the inbox.
+            // Every push may add to the inbox, and an order push means the order list is out of date.
             refreshUnread();
+            if (isOrderNotification(notification)) markOrderHistoryDirty(customerId);
             if (!action) return;
 
             if (isOrderNotification(notification)) {
-                const orderId = notification.payload.id;
-                try {
-                    const order = await loadPersistedResource((fleetbase) => fleetbase.orders.findRecord(orderId), { type: 'order', persistKey: `${orderId}_order`, client: fleetbase });
-                    navigation.navigate('OrderModal', { order: order.serialize() });
-                } catch (err) {
-                    console.error(`Failed to load order (${orderId}) from push notification context:`, err);
-                    navigation.navigate('OrderModal', { orderId });
+                // An order update that points somewhere to act (a payment link for a balance due).
+                const target = targetFromPush(notification?.payload);
+                if (target && 'url' in target) {
+                    openNotification(target);
+                    return;
                 }
+                const orderId = notification.payload.id;
+                // The order screen shows its own cached copy at once and always loads the latest;
+                // a copy persisted here from an earlier push would only be out of date.
+                try {
+                    removeStored(`${orderId}_order`);
+                } catch {
+                    // Nothing persisted.
+                }
+                navigation.navigate('OrderModal', { orderId });
                 return;
             }
 
@@ -52,7 +64,7 @@ const StoreLayout = ({ children, state, descriptors, navigation: tabNavigation }
         return () => {
             removeNotificationListener(handleOrderNotification);
         };
-    }, [addNotificationListener, removeNotificationListener, fleetbase, navigation, openNotification, refreshUnread]);
+    }, [addNotificationListener, removeNotificationListener, customerId, fleetbase, navigation, openNotification, refreshUnread]);
 
     if (Platform.OS === 'web') {
         return (

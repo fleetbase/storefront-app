@@ -1,4 +1,4 @@
-import { captureWithRetry, pendingCaptureFor } from '../../src/commerce/checkout-capture';
+import { captureWithRetry, pendingCaptureFor, unavailableItemsFromError, unavailableItemsText } from '../../src/commerce/checkout-capture';
 
 describe('captureWithRetry', () => {
     it('returns the first successful capture, waiting between failed attempts', async () => {
@@ -38,5 +38,28 @@ describe('pendingCaptureFor', () => {
         expect(pendingCaptureFor({ ...pending, customerId: null }, undefined)).toEqual({ ...pending, customerId: null });
         expect(pendingCaptureFor({ ...pending, token: '' }, 'customer_1')).toBeNull();
         expect(pendingCaptureFor(null, 'customer_1')).toBeNull();
+    });
+});
+
+describe('unavailable items', () => {
+    it('reads cart_items_unavailable refusals from the quote and from checkout', () => {
+        const error = Object.assign(new Error('Some items in your cart are no longer available.'), {
+            code: 'cart_items_unavailable',
+            response: { items: [{ id: 'line_1', product_id: 'product_1', name: ' Iced Latte ', available: 2 }, { id: 'line_2', name: '' }, null] },
+        });
+        expect(unavailableItemsFromError(error)).toEqual([
+            { id: 'line_1', product_id: 'product_1', name: 'Iced Latte', available: 2 },
+            { id: 'line_2', product_id: undefined, name: undefined, available: null },
+        ]);
+        expect(unavailableItemsFromError({ response: { code: 'cart_items_unavailable' } })).toEqual([]);
+        expect(unavailableItemsFromError(new Error('network'))).toBeNull();
+        expect(unavailableItemsFromError(null)).toBeNull();
+    });
+
+    it('names the items with any stock left', () => {
+        expect(unavailableItemsText([{ name: 'Iced Latte', available: 2 }, { name: 'Croissant', available: 0 }, { id: 'x' }], (count) => `${count} left`)).toBe(
+            'Iced Latte (2 left), Croissant'
+        );
+        expect(unavailableItemsText(null, () => '')).toBe('');
     });
 });

@@ -96,7 +96,11 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
 
     // Coordinates (safe)
     const origin = useMemo(() => toCoords(start), [start]);
-    const destination = useMemo(() => toCoords(restoredDropoff), [restoredDropoff]);
+    // Kept by value: every reload brings a new dropoff object, but only a moved drop-off
+    // (the store edited the address) should re-route and re-fit the map.
+    const destinationRaw = toCoords(restoredDropoff);
+    const destinationKey = destinationRaw ? `${destinationRaw.latitude},${destinationRaw.longitude}` : null;
+    const destination = useMemo(() => destinationRaw, [destinationKey]); // eslint-disable-line react-hooks/exhaustive-deps
     const initialDeltas = useMemo(() => calculateDeltas(zoom), [zoom]);
 
     // Initial region: origin -> destination -> default
@@ -155,14 +159,31 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
     }, []);
 
     /* ---------- Fit route (only when not following) ---------- */
-    const fitToRoute = useCallback(({ coordinates }) => {
-        if (!coordinates || coordinates.length < 2) return;
+    const fitToRoute = useCallback(
+        ({ coordinates }) => {
+            if (!coordinates || coordinates.length < 2) return;
 
-        mapRef.current?.fitToCoordinates?.(coordinates, {
-            edgePadding: { top: 50, right: 50, bottom: 50 + bottomInset, left: 50 },
-            animated: true,
-        });
-    }, []);
+            mapRef.current?.fitToCoordinates?.(coordinates, {
+                edgePadding: { top: 50, right: 50, bottom: 50 + bottomInset, left: 50 },
+                animated: true,
+            });
+        },
+        [bottomInset]
+    );
+
+    // The drop-off moved (an edited address): show the new route, origin and drop-off both.
+    const previousDestinationKey = useRef(destinationKey);
+    useEffect(() => {
+        if (previousDestinationKey.current === destinationKey) return;
+        previousDestinationKey.current = destinationKey;
+        if (!destination) return;
+        const points = origin ? [origin, destination] : [destination];
+        if (points.length > 1) {
+            mapRef.current?.fitToCoordinates?.(points, { edgePadding: { top: 60, right: 60, bottom: 60 + bottomInset, left: 60 }, animated: true });
+        } else {
+            mapRef.current?.animateToRegion?.({ ...destination, latitudeDelta: initialDeltas, longitudeDelta: initialDeltas }, 300);
+        }
+    }, [bottomInset, destination, destinationKey, initialDeltas, origin]);
 
     /* ---------- Follow moving marker ---------- */
     const focusMoving = useCallback(
@@ -338,7 +359,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                         {origin && !shouldFollowMoving && <StoreMapMarker coordinate={origin} name={start?.getAttribute?.('name')} />}
 
                         {/* DESTINATION: where the order goes */}
-                        {destination && <PlaceMapMarker coordinate={destination} title={restoredDropoff?.getAttribute?.('name') || undefined} />}
+                        {destination && <PlaceMapMarker key={destinationKey ?? 'destination'} coordinate={destination} title={restoredDropoff?.getAttribute?.('name') || undefined} />}
 
                         {/* ROUTE */}
                         {origin &&

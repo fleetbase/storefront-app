@@ -3,12 +3,18 @@ import { Animated, AppState, Image, Linking, Pressable, RefreshControl } from 'r
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCalendarPlus, faCheck, faComment, faPhone, faReceipt, faStar, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { parseScheduledAt } from '../commerce/booking';
+import { faCalendarPlus, faCheck, faComment, faLocationDot, faPhone, faReceipt, faRotate, faStar, faStore, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { orderBooking, parseScheduledAt } from '../commerce/booking';
 import { addToCalendar } from '../commerce/calendar';
 import { toast } from '../utils/toast';
 import { fetchEligibility, type Eligibility } from '../commerce/reviews';
-import { fetchChat, type OrderChat } from '../commerce/order-chat';
+import { fetchChat, requestAddressChange, type OrderChat } from '../commerce/order-chat';
+import { canRequestAddressChange, parseOrderChanged, placeMoved, pushedOrderId, type OrderChange } from '../commerce/order-changes';
+import { keepRefreshing, parseOrderPayment } from '../commerce/order-payment';
+import PaymentStatus, { PaymentBadge } from '../components/orders/PaymentStatus';
+import { useNotification } from '../contexts/NotificationContext';
+import useSavedLocations from '../hooks/use-saved-locations';
+import { markOrderHistoryDirty } from '../utils/order-history-cache';
 import useChatRequest from '../hooks/use-chat-request';
 import useReviewRequest from '../hooks/use-review-request';
 import { XStack, YStack, useTheme } from 'tamagui';
@@ -28,11 +34,11 @@ import * as storage from '../utils/storage';
 import { orderProgress, shortName, type OrderPhase } from '../commerce/order-progress';
 import { currentStep, fetchOrderFlow, usesCustomFlow, type OrderFlow } from '../commerce/order-flow';
 import { fetchOrderStores, joinStoreNames, type OrderStoreSection } from '../commerce/order-stores';
-import { tipAmount } from '../commerce/order-summary';
+import { orderTip } from '../commerce/order-summary';
 import { formattedAddressFromPlace, restoreFleetbasePlace } from '../utils/location';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, ErrorState, IconButton, OfflineNotice, Sheet, Skeleton, StarInput, StoreLogo, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import { Button, ErrorState, IconButton, OfflineNotice, Sheet, Skeleton, StarInput, StoreLogo, TextField, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
 import useScreenTopInset from '../hooks/use-screen-top-inset';
 
 const MAP_HEIGHT = 380;
@@ -100,6 +106,20 @@ const OrderScreen = ({ route }: any) => {
     const reviewRequest = useReviewRequest();
     const chatRequest = useChatRequest();
     const [chat, setChat] = useState<OrderChat | null>(null);
+    // The thread with the store: open from the moment the order is placed.
+    const [storeChat, setStoreChat] = useState<OrderChat | null>(null);
+    // The last change the store made to the order while it was open here ("Order updated").
+    const [changeNotice, setChangeNotice] = useState<OrderChange | null>(null);
+    const { addNotificationListener, removeNotificationListener } = useNotification() as any;
+    const { savedLocations: savedPlaces } = useSavedLocations();
+    const savedLocations: any[] = Array.isArray(savedPlaces) ? savedPlaces.filter((place: any) => typeof place?.id === 'string' && place.id.startsWith('place_')) : [];
+    // "Wrong address?": the sheet, what is being sent, and a request already sent (kept until
+    // the drop-off changes, so it shows as pending across visits).
+    const [addressSheet, setAddressSheet] = useState(false);
+    const [addressMessage, setAddressMessage] = useState('');
+    const [addressPlace, setAddressPlace] = useState<string | null>(null);
+    const [sendingAddress, setSendingAddress] = useState(false);
+    const [addressRequest, setAddressRequest] = useStorage<{ at: string; message: string; dropoff: any } | null>(`address_request_${orderId}`, null);
     const [flow, setFlow] = useState<OrderFlow | null>(null);
     // A multi-store order: the stores it brings together, each with its own progress and items.
     const [orderStores, setOrderStores] = useState<OrderStoreSection[]>([]);
@@ -122,7 +142,7 @@ const OrderScreen = ({ route }: any) => {
     const isPickup = !!order.getAttribute('meta.is_pickup');
     // A service booking: its own flow, a provider rather than a driver, and any products come
     // with the earliest appointment.
-    const isBooking = !!order.getAttribute('meta.is_booking');
+    const isBooking = !!order.getAttribute('meta.is_booking') || !!order.getAttribute('meta.booking');
     // A multi-store order: one delivery bringing together the orders each store prepares.
     const isMultiStore = !!order.getAttribute('meta.is_master_order') && (order.getAttribute('meta.related_orders')?.length ?? 0) > 0;
     const status = order.getAttribute('status');
@@ -151,6 +171,7 @@ const OrderScreen = ({ route }: any) => {
         if (options.refresh) setRefreshing(true);
         try {
             const reloaded = await orderRef.current.reload();
+            if (placeMoved(orderRef.current.getAttribute('payload.dropoff'), reloaded.getAttribute('payload.dropoff'))) markOrderHistoryDirty(customer?.id);
             setOrder(reloaded);
             cacheOrder(reloaded);
             statusRef.current = reloaded.getAttribute('status');
@@ -160,7 +181,7 @@ const OrderScreen = ({ route }: any) => {
         } finally {
             setRefreshing(false);
         }
-    }, []);
+    }, [customer?.id]);
 
     useEffect(() => {
         orderRef.current
@@ -241,7 +262,15 @@ const OrderScreen = ({ route }: any) => {
     useEffect(() => {
         if (listenerRef.current) return;
         let stopped = false;
-        listen(`order.${order.id}`, () => scheduleReload())
+        listen(`order.${order.id}`, (event: any) => {
+            // A store edit: say what changed, and the order list is out of date too.
+            const change = parseOrderChanged(event);
+            if (change) {
+                setChangeNotice(change);
+                markOrderHistoryDirty(customer?.id);
+            }
+            scheduleReload();
+        })
             .then((listener: any) => {
                 if (!stopped && listener) listenerRef.current = listener;
             })
@@ -251,13 +280,34 @@ const OrderScreen = ({ route }: any) => {
             listenerRef.current?.stop?.();
             listenerRef.current = null;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [listen, order.id, scheduleReload]);
 
-    // Sockets can lag (or drop) behind the server, so while the order is under way it is
-    // also refreshed periodically and whenever the app comes back to the foreground.
-    const settled = finished || canceled;
+    // A push about this order while it is open here (the socket may have missed the change).
     useEffect(() => {
-        if (!loaded || settled) return;
+        const onPush = (notification: any, action?: any) => {
+            if (action) return;
+            const payload = notification?.payload ?? notification ?? {};
+            if (pushedOrderId(payload) !== order.id) return;
+            if (payload.type === 'order_updated') {
+                const summary = notification?.body ?? payload.body ?? payload.message ?? null;
+                setChangeNotice((current) => current ?? { orderId: order.id, changes: [], summary: typeof summary === 'string' ? summary : null, dropoffChanged: false, total: null, currency: null, changedBy: null, changedAt: null });
+            }
+            scheduleReload();
+        };
+        addNotificationListener(onPush);
+        return () => removeNotificationListener(onPush);
+    }, [addNotificationListener, removeNotificationListener, order.id, scheduleReload]);
+
+    // Sockets can lag (or drop) behind the server, so while the order is under way it is
+    // also refreshed periodically and whenever the app comes back to the foreground (from a
+    // payment page, too). A finished order with a balance still due keeps refreshing until
+    // it is paid.
+    const settled = finished || canceled;
+    const payment = useMemo(() => parseOrderPayment(order), [order]);
+    const live = keepRefreshing({ settled, payment });
+    useEffect(() => {
+        if (!loaded || !live) return;
         const timer = setInterval(() => {
             if (AppState.currentState === 'active') reloadOrder();
         }, LIVE_REFRESH_MS);
@@ -268,7 +318,7 @@ const OrderScreen = ({ route }: any) => {
             clearInterval(timer);
             subscription.remove();
         };
-    }, [loaded, settled, reloadOrder, scheduleReload]);
+    }, [loaded, live, reloadOrder, scheduleReload]);
 
     useEffect(() => {
         orderRef.current = order;
@@ -288,6 +338,22 @@ const OrderScreen = ({ route }: any) => {
         };
     }, [customer, finished, order.id, reviewRequest, storeId, reviewsEnabled, isMultiStore]);
 
+    // Chats are re-read (for their unread counts) when the order moves on, when a chat
+    // message is pushed and when coming back to this screen from a chat.
+    const [chatTick, setChatTick] = useState(0);
+    useEffect(() => {
+        const onPush = (notification: any, action?: any) => {
+            const payload = notification?.payload ?? {};
+            if (!action && payload.type === 'order_chat_message' && (payload.order_id ?? payload.id) === order.id) setChatTick((tick) => tick + 1);
+        };
+        addNotificationListener(onPush);
+        const unsubscribe = navigation.addListener?.('focus', () => setChatTick((tick) => tick + 1));
+        return () => {
+            removeNotificationListener(onPush);
+            unsubscribe?.();
+        };
+    }, [addNotificationListener, navigation, order.id, removeNotificationListener]);
+
     // The driver chat: its unread count while the order is active, its history after.
     const hasDriver = !!order.getAttribute('driver_assigned') || !!order.getAttribute('driver_assigned_uuid');
     useEffect(() => {
@@ -299,7 +365,20 @@ const OrderScreen = ({ route }: any) => {
         return () => {
             active = false;
         };
-    }, [chatRequest, customer, finished, hasDriver, isPickup, loaded, order.id, status]);
+    }, [chatRequest, customer, finished, hasDriver, isPickup, loaded, order.id, status, chatTick]);
+
+    // The store thread: available before a driver is assigned, for pickups too. Only shown
+    // when the server has it (an older server would answer with the driver's thread).
+    useEffect(() => {
+        if (!customer || !loaded || isMultiStore) return;
+        let active = true;
+        fetchChat(chatRequest, order.id, 'customer')
+            .then((result) => active && setStoreChat(result))
+            .catch(() => active && setStoreChat(null));
+        return () => {
+            active = false;
+        };
+    }, [chatRequest, customer, isMultiStore, loaded, order.id, status, chatTick]);
 
     // A multi-store order's breakdown by store, refreshed whenever the order is (each store
     // moves on at its own pace).
@@ -325,6 +404,45 @@ const OrderScreen = ({ route }: any) => {
             active = false;
         };
     }, [chatRequest, customer, loaded, order.id, status]);
+
+    const openStoreChat = () =>
+        navigation.navigate('OrderChat', {
+            orderId: order.id,
+            kind: 'customer',
+            orderReference: order.getAttribute('tracking_number.tracking_number') ?? order.id,
+            storeName: store?.name ?? undefined,
+            storeLogo: store?.logo_url ?? undefined,
+            storePhone: store?.phone ?? undefined,
+        });
+
+    // "Wrong address?": a saved place or a message to the store, which sees it in the order
+    // chat and as an alert on the order.
+    const canFixAddress = loaded && !!customer && canRequestAddressChange({ status, phase: progress.phase, isPickup, finished, canceled });
+    const addressPending = !!addressRequest && !settled && !placeMoved(addressRequest.dropoff, order.getAttribute('payload.dropoff'));
+    useEffect(() => {
+        // The drop-off changed since the request (or the order ended): it was dealt with.
+        if (addressRequest && !addressPending) setAddressRequest(null);
+    }, [addressPending, addressRequest, setAddressRequest]);
+    const sendAddressRequest = async () => {
+        const place = addressPlace ? savedLocations.find((entry: any) => entry?.id === addressPlace) : null;
+        const placeText = place ? [place.getAttribute?.('name'), place.getAttribute?.('street1') ?? place.getAttribute?.('address')].filter(Boolean).join(', ') : '';
+        const message = addressMessage.trim() || (placeText ? t('Tracking.addressRequestPlace', { place: placeText }) : '');
+        if (!message || sendingAddress) return;
+        setSendingAddress(true);
+        try {
+            await requestAddressChange(chatRequest, order.id, { message, place: addressPlace });
+            setAddressRequest({ at: new Date().toISOString(), message, dropoff: order.getAttribute('payload.dropoff') ?? null });
+            setAddressSheet(false);
+            setAddressMessage('');
+            setAddressPlace(null);
+            setChatTick((tick) => tick + 1);
+            toast.success(t('Tracking.addressRequestSent', { store: storeName || t('StoreSwitch.thisStore') }));
+        } catch {
+            toast.error(t('Tracking.addressRequestFailed'));
+        } finally {
+            setSendingAddress(false);
+        }
+    };
 
     const openChat = () =>
         navigation.navigate('OrderChat', {
@@ -355,17 +473,21 @@ const OrderScreen = ({ route }: any) => {
     const pickup = order.getAttribute('payload.pickup');
     const entities: any[] = order.getAttribute('payload.entities') ?? [];
     const qrCode = order.getAttribute('tracking_number.qr_code');
-    const bookings = entities
+    // A booking order's appointment (meta.booking) when the server set one; else each item's time.
+    const appointment = orderBooking(order.getAttribute('meta'));
+    const scheduledBookings = entities
         .map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at) }))
         .filter((booking) => booking.at)
         .sort((a: any, b: any) => a.at.at.getTime() - b.at.at.getTime());
+    const bookings =
+        scheduledBookings.length || !appointment?.start || !entities.length ? scheduledBookings : [{ entity: entities[0], at: parseScheduledAt(appointment.start) }].filter((booking) => booking.at);
     const bookingConfirmed = isBooking ? !['created', 'pending'].includes(String(status)) && !canceled : progress.phase !== 'placed' && !progress.canceled;
     // Products in a booking come with the earliest appointment.
     const bookingHasItems = isBooking && entities.some((entity: any) => !parseScheduledAt(entity?.meta?.scheduled_at));
     const appointmentPlace = isPickup ? pickup : dropoff;
 
     const addBookingToCalendar = async (entity: any, at: Date) => {
-        const duration = Number(entity?.meta?.duration_minutes ?? entity?.meta?.duration);
+        const duration = Number(entity?.meta?.duration_minutes ?? entity?.meta?.duration ?? appointment?.durationMinutes);
         try {
             const result = await addToCalendar({
                 title: storeName ? `${entity.name} · ${storeName}` : entity.name,
@@ -393,17 +515,15 @@ const OrderScreen = ({ route }: any) => {
     const totals = [
         { label: t('Tracking.subtotal'), value: order.getAttribute('meta.subtotal') },
         !isPickup && { label: t(isBooking ? 'Tracking.visitFee' : 'Tracking.deliveryFee'), value: order.getAttribute('meta.delivery_fee') },
-        tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')) > 0 && {
-            label: t('Tracking.tip'),
-            value: tipAmount(order.getAttribute('meta.tip'), order.getAttribute('meta.subtotal')),
-        },
-        tipAmount(order.getAttribute('meta.delivery_tip'), order.getAttribute('meta.subtotal')) > 0 && {
-            label: t('Tracking.driverTip'),
-            value: tipAmount(order.getAttribute('meta.delivery_tip'), order.getAttribute('meta.subtotal')),
-        },
+        // Tips as charged: the recorded amount, not a percentage of a subtotal an edit changed.
+        orderTip(order.getAttribute('meta'), 'tip') > 0 && { label: t('Tracking.tip'), value: orderTip(order.getAttribute('meta'), 'tip') },
+        orderTip(order.getAttribute('meta'), 'delivery_tip') > 0 && { label: t('Tracking.driverTip'), value: orderTip(order.getAttribute('meta'), 'delivery_tip') },
     ].filter(Boolean) as { label: string; value: unknown }[];
     const discount = Number(order.getAttribute('meta.discount')) || 0;
-    const cashDue = Number(order.getAttribute('payload.cod_amount')) || 0;
+    // The promotions applied (each code and what it took off), else the discount as one line.
+    const promotions: { name: string; amount: number }[] = (order.getAttribute('meta.promotions') ?? [])
+        .map((promotion: any) => ({ name: String(promotion?.code ?? promotion?.name ?? ''), amount: (Number(promotion?.amount) || 0) + (Number(promotion?.delivery_amount) || 0) }))
+        .filter((promotion: { name: string }) => promotion.name);
     const pickupName = (foodTruck ? foodTruckDisplayName(foodTruck) : null) ?? pickup?.name ?? null;
     const fullAddress = (place: any) => (place ? formattedAddressFromPlace(restoreFleetbasePlace(place)) : '');
     const timeline = customFlow
@@ -492,6 +612,47 @@ const OrderScreen = ({ route }: any) => {
                             </UIText>
                         )}
                     </YStack>
+
+                    {!!changeNotice && (
+                        <XStack gap={10} padding={12} borderRadius={radius.card} backgroundColor='$primarySoft' accessibilityRole='alert' testID='order-changed-notice'>
+                            <FontAwesomeIcon icon={faRotate} size={16} color={theme.primaryForeground.val} style={{ marginTop: 2 }} />
+                            <YStack flex={1} gap={2}>
+                                <UIText variant='bodyStrong' style={{ fontSize: 14 }}>
+                                    {changeNotice.changedBy ? t('Tracking.orderUpdatedBy', { name: changeNotice.changedBy }) : t('Tracking.orderUpdated')}
+                                </UIText>
+                                <UIText variant='caption' tone='secondary'>
+                                    {changeNotice.summary ?? t('Tracking.orderUpdatedBody')}
+                                </UIText>
+                            </YStack>
+                            <IconButton icon={faXmark} variant='plain' size={32} accessibilityLabel={t('Tracking.dismissUpdate')} onPress={() => setChangeNotice(null)} />
+                        </XStack>
+                    )}
+
+                    {addressPending ? (
+                        <XStack gap={10} padding={12} borderRadius={radius.card} backgroundColor='$warningSoft' accessibilityRole='summary'>
+                            <FontAwesomeIcon icon={faLocationDot} size={16} color={theme.warningForeground.val} style={{ marginTop: 2 }} />
+                            <YStack flex={1} gap={2}>
+                                <UIText variant='bodyStrong' style={{ fontSize: 14 }}>
+                                    {t('Tracking.addressRequestPending')}
+                                </UIText>
+                                <UIText variant='caption' tone='secondary' numberOfLines={3}>
+                                    {t('Tracking.addressRequestPendingBody', { store: storeName || t('StoreSwitch.thisStore'), message: addressRequest?.message ?? '' })}
+                                </UIText>
+                            </YStack>
+                        </XStack>
+                    ) : (
+                        canFixAddress && (
+                            <XStack alignItems='center' gap={10} padding={12} borderRadius={radius.card} borderWidth={1} borderColor='$borderColor'>
+                                <FontAwesomeIcon icon={faLocationDot} size={16} color={theme.textSecondary.val} />
+                                <UIText flex={1} variant='caption' tone='secondary' numberOfLines={2}>
+                                    {t('Tracking.deliveringTo', { place: [dropoff?.name, fullAddress(dropoff)].filter(Boolean).join(', ') })}
+                                </UIText>
+                                <Button variant='ghost' size='sm' onPress={() => setAddressSheet(true)} testID='order-wrong-address'>
+                                    {t('Tracking.wrongAddress')}
+                                </Button>
+                            </XStack>
+                        )
+                    )}
 
                     {!!driverName && !isPickup && !finished && !canceled && (
                         <XStack alignItems='center' gap={12} padding={12} borderRadius={radius.card} backgroundColor='$surface'>
@@ -660,6 +821,7 @@ const OrderScreen = ({ route }: any) => {
                                 </UIText>
                                 <UIText variant='bodyStrong'>
                                     {entity.name} · {formatClock(at.minutes, hour12)}
+                                    {appointment?.end && appointment.start?.getTime() === at.at.getTime() ? ` – ${formatClock(appointment.end.getHours() * 60 + appointment.end.getMinutes(), hour12)}` : ''}
                                 </UIText>
                                 <UIText variant='caption' tone='secondary'>
                                     {bookingConfirmed ? t('Tracking.bookingConfirmedBody', { store: storeName }) : t('Tracking.bookingRequestedBody', { store: storeName })}
@@ -773,6 +935,17 @@ const OrderScreen = ({ route }: any) => {
                             {!!store?.phone && (
                                 <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />
                             )}
+                            {!!storeChat && (!(finished || canceled) || storeChat.messages.length > 0) && (
+                                <IconButton
+                                    icon={faStore}
+                                    variant={storeChat.unread ? 'solid' : 'surface'}
+                                    size={44}
+                                    badge={storeChat.unread ? storeChat.unread : undefined}
+                                    accessibilityLabel={t('Chat.messageStore', { store: storeName || t('StoreSwitch.thisStore') })}
+                                    onPress={openStoreChat}
+                                    testID='order-message-store'
+                                />
+                            )}
                         </XStack>
                     )}
 
@@ -789,13 +962,17 @@ const OrderScreen = ({ route }: any) => {
                         </UIText>
                         {!isMultiStore && entities.map((entity: any, index: number) => {
                             const options = [...(entity.meta?.variants ?? []), ...(entity.meta?.addons ?? [])].map((option: any) => option?.name).filter(Boolean);
+                            // The store's word on the item: unavailable, substituted, or a note.
+                            const unavailable = [true, 1, '1', 'true'].includes(entity.meta?.unavailable);
+                            const replaces = entity.meta?.substitute_for ? entities.find((other: any) => other?.id === entity.meta.substitute_for) : null;
+                            const note = typeof entity.meta?.note === 'string' && entity.meta.note.trim() ? entity.meta.note.trim() : null;
                             return (
                                 <XStack key={entity.id ?? index} alignItems='center' gap={10}>
                                     {usableImageUrl(entity.photo_url) ? (
                                         <Image source={{ uri: entity.photo_url }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
                                     ) : null}
                                     <YStack flex={1} gap={2}>
-                                        <UIText tone='secondary'>
+                                        <UIText tone='secondary' style={unavailable ? { textDecorationLine: 'line-through' } : undefined}>
                                             {entity.meta?.quantity ?? 1} × {entity.name}
                                         </UIText>
                                         {options.length > 0 && (
@@ -803,8 +980,23 @@ const OrderScreen = ({ route }: any) => {
                                                 {options.join(', ')}
                                             </UIText>
                                         )}
+                                        {unavailable && (
+                                            <UIText variant='captionStrong' tone='error'>
+                                                {t('Tracking.itemUnavailable')}
+                                            </UIText>
+                                        )}
+                                        {!!entity.meta?.substitute_for && (
+                                            <UIText variant='captionStrong' tone='brand'>
+                                                {replaces?.name ? t('Tracking.substituteFor', { name: replaces.name }) : t('Tracking.substitute')}
+                                            </UIText>
+                                        )}
+                                        {!!note && (
+                                            <UIText variant='caption' tone='secondary'>
+                                                {t('Tracking.storeNote', { note })}
+                                            </UIText>
+                                        )}
                                     </YStack>
-                                    <UIText>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
+                                    <UIText tone={unavailable ? 'secondary' : 'primary'}>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
                                 </XStack>
                             );
                         })}
@@ -814,21 +1006,28 @@ const OrderScreen = ({ route }: any) => {
                                 <UIText>{money(row.value)}</UIText>
                             </XStack>
                         ))}
-                        {discount > 0 && (
-                            <XStack justifyContent='space-between'>
-                                <UIText tone='success'>{t('Tracking.discount')}</UIText>
-                                <UIText tone='success'>−{money(discount)}</UIText>
+                        {promotions.length > 0
+                            ? promotions.map((promotion) => (
+                                  <XStack key={promotion.name} justifyContent='space-between'>
+                                      <UIText tone='success'>{promotion.name}</UIText>
+                                      {promotion.amount > 0 && <UIText tone='success'>−{money(promotion.amount)}</UIText>}
+                                  </XStack>
+                              ))
+                            : discount > 0 && (
+                                  <XStack justifyContent='space-between'>
+                                      <UIText tone='success'>{t('Tracking.discount')}</UIText>
+                                      <UIText tone='success'>−{money(discount)}</UIText>
+                                  </XStack>
+                              )}
+                        <XStack justifyContent='space-between' alignItems='center' paddingTop={8} borderTopWidth={1} borderColor='$borderColor'>
+                            <XStack alignItems='center' gap={8} flexShrink={1}>
+                                <UIText variant='bodyStrong'>{t('Tracking.total')}</UIText>
+                                <PaymentBadge payment={payment} />
                             </XStack>
-                        )}
-                        <XStack justifyContent='space-between' paddingTop={8} borderTopWidth={1} borderColor='$borderColor'>
-                            <UIText variant='bodyStrong'>{t('Tracking.total')}</UIText>
                             <UIText variant='bodyStrong'>{money(order.getAttribute('meta.total'))}</UIText>
                         </XStack>
-                        {cashDue > 0 && (
-                            <UIText variant='captionStrong' tone='warning'>
-                                {t('Tracking.cashOnDelivery', { amount: money(cashDue) })}
-                            </UIText>
-                        )}
+                        {/* Refunds, store credit, cash to collect, any balance due and how to pay it. */}
+                        <PaymentStatus payment={payment} money={(value) => money(value)} showBadge={false} />
                         <UIText variant='caption' tone='secondary'>
                             {isPickup
                                 ? t('Tracking.pickupAt', { place: [pickup?.name, fullAddress(pickup)].filter(Boolean).join(', ') })
@@ -857,6 +1056,77 @@ const OrderScreen = ({ route }: any) => {
             </YStack>
             {/* Opened from a notification this is a modal above the app layout, so it has its own notice. */}
             <OfflineNotice top={top + 62} />
+
+            <Sheet
+                open={addressSheet}
+                onClose={() => setAddressSheet(false)}
+                title={t('Tracking.wrongAddressTitle')}
+                footer={
+                    <YStack gap={8}>
+                        <Button size='lg' fullWidth loading={sendingAddress} disabled={!addressMessage.trim() && !addressPlace} onPress={sendAddressRequest} testID='order-address-request-send'>
+                            {t('Tracking.sendToStore', { store: storeName || t('StoreSwitch.thisStore') })}
+                        </Button>
+                        <Button variant='ghost' size='lg' fullWidth onPress={() => setAddressSheet(false)}>
+                            {t('common.cancel')}
+                        </Button>
+                    </YStack>
+                }
+            >
+                <YStack gap={12}>
+                    <UIText tone='secondary'>{t('Tracking.wrongAddressBody', { store: storeName || t('StoreSwitch.thisStore') })}</UIText>
+                    {savedLocations.length > 0 && (
+                        <YStack gap={8} accessibilityRole='radiogroup' accessibilityLabel={t('Tracking.savedPlaces')}>
+                            <UIText variant='label' tone='secondary'>
+                                {t('Tracking.savedPlaces')}
+                            </UIText>
+                            {savedLocations.map((place: any) => {
+                                const id = place?.id;
+                                if (!id) return null;
+                                const selected = addressPlace === id;
+                                const name = place.getAttribute?.('name') || place.getAttribute?.('street1') || '';
+                                return (
+                                    <Pressable
+                                        key={id}
+                                        onPress={() => setAddressPlace(selected ? null : id)}
+                                        accessibilityRole='radio'
+                                        accessibilityState={{ checked: selected }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            gap: 10,
+                                            padding: 12,
+                                            borderRadius: radius.button,
+                                            borderWidth: 1,
+                                            borderColor: selected ? theme.primary.val : theme.borderColor.val,
+                                            backgroundColor: selected ? theme.primarySoft.val : theme.background.val,
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={selected ? faCheck : faLocationDot} size={14} color={selected ? theme.primaryForeground.val : theme.textSecondary.val} />
+                                        <YStack flex={1}>
+                                            <UIText variant='bodyStrong' style={{ fontSize: 14 }} numberOfLines={1}>
+                                                {name}
+                                            </UIText>
+                                            <UIText variant='caption' tone='secondary' numberOfLines={1}>
+                                                {formattedAddressFromPlace(place)}
+                                            </UIText>
+                                        </YStack>
+                                    </Pressable>
+                                );
+                            })}
+                        </YStack>
+                    )}
+                    <TextField
+                        value={addressMessage}
+                        onChangeText={setAddressMessage}
+                        placeholder={t('Tracking.addressMessagePlaceholder')}
+                        accessibilityLabel={t('Tracking.addressMessagePlaceholder')}
+                        multiline
+                        height={88}
+                        maxLength={1000}
+                        style={{ textAlignVertical: 'top', paddingTop: 12 }}
+                    />
+                </YStack>
+            </Sheet>
 
             <Sheet
                 open={pickupSheet}

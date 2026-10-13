@@ -30,6 +30,15 @@ describe('notifications', () => {
         expect(notificationTarget('chat', {})).toBeNull();
     });
 
+    test('lets order updates carry a link to act on', () => {
+        expect(notificationTarget('order', { order_id: 'order_1', action: 'url', action_url: 'https://pay.test/balance' })).toEqual({ url: 'https://pay.test/balance' });
+        expect(notificationTarget('order', { order_id: 'order_1', payment_link: 'https://pay.test/qpay' })).toEqual({ url: 'https://pay.test/qpay' });
+        expect(notificationTarget('order', { order_id: 'order_1', action: 'url', action_url: 'javascript:alert(1)' })).toEqual({ route: 'Order', params: { orderId: 'order_1' } });
+        expect(notificationTarget('order', { action_url: 'https://pay.test/x' })).toBeNull();
+        expect(targetFromPush({ type: 'order_updated', id: 'order_5' })).toEqual({ route: 'Order', params: { orderId: 'order_5' } });
+        expect(notificationTarget('chat', { order_id: 'order_1', chat_kind: 'customer' })).toEqual({ route: 'OrderChat', params: { orderId: 'order_1', kind: 'customer' } });
+    });
+
     test('reads push payloads', () => {
         expect(targetFromPush({ type: 'order_dispatched', id: 'order_9', order: 'uuid' })).toEqual({ route: 'Order', params: { orderId: 'order_9' } });
         expect(targetFromPush({ type: 'campaign', promotion_id: 'promo_1', action: 'promotion' })).toEqual({ route: 'Offer', params: { offerId: 'promo_1' } });

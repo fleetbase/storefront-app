@@ -9,7 +9,7 @@ import { getCoordinates } from '../utils/location';
 import { config, storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
-import { captureErrorMessage, captureWithRetry, pendingCaptureFor, type PendingCapture } from '../commerce/checkout-capture';
+import { captureErrorMessage, captureWithRetry, pendingCaptureFor, unavailableItemsFromError, type PendingCapture, type UnavailableItem } from '../commerce/checkout-capture';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -49,7 +49,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
-    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
+    const [unavailableItems, setUnavailableItems] = useState<UnavailableItem[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
@@ -61,6 +61,11 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const [error, setError] = useState(null);
     const cartContentsString = JSON.stringify(cart.contents() || []);
+
+    // A changed cart gets a fresh check: items named unavailable before may be gone now.
+    useEffect(() => {
+        setUnavailableItems(null);
+    }, [cartContentsString]);
     const subtotal = cart.subtotal();
     const totalAmount = useMemo(() => {
         const lineItems = computeLineItems();
@@ -202,6 +207,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (error) {
                 console.error('Error creating payment sheet:', error);
+                // Stock ran out (or an item went) while checkout reserved it: name what to remove.
+                const unavailable = unavailableItemsFromError(error);
+                if (unavailable) setUnavailableItems(unavailable);
                 setError(error.message);
                 toast.error(error.message);
             } finally {
@@ -375,6 +383,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
+                // Stock ran out (or an item went) while checkout reserved it: name what to remove.
+                const unavailable = unavailableItemsFromError(error);
+                if (unavailable) setUnavailableItems(unavailable);
                 toast.error(error.message);
             } finally {
                 setIsLoading(false);
@@ -406,6 +417,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 }
             } catch (error) {
                 console.error('Error capturing order:', error);
+                // Stock ran out (or an item went) while checkout reserved it: name what to remove.
+                const unavailable = unavailableItemsFromError(error);
+                if (unavailable) setUnavailableItems(unavailable);
                 toast.error(error.message);
             } finally {
                 setIsLoading(false);
@@ -451,7 +465,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
             } catch (error) {
                 if (isMounted) {
                     setIsServiceQuoteUnavailable(true);
-                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                    setUnavailableItems(unavailableItemsFromError(error));
                 }
                 console.warn('Error fetching service quote:', error);
             }
