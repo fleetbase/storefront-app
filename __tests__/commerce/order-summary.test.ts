@@ -1,4 +1,4 @@
-import { groupOrders, itemsPreview, parseOrderLine, paymentKey, placeLine, receiptText, summarizeOrder, tipAmount } from '../../src/commerce/order-summary';
+import { groupOrders, itemsPreview, orderTip, parseOrderLine, paymentKey, paymentLines, placeLine, receiptText, summarizeOrder, tipAmount } from '../../src/commerce/order-summary';
 
 const order = (overrides: any = {}) => ({
     id: 'order_1',
@@ -72,6 +72,9 @@ describe('summarizeOrder', () => {
             imageUrl: 'https://img/laksa.jpg',
             options: ['Large', 'Extra prawns'],
             scheduledAt: null,
+            note: null,
+            unavailable: false,
+            substituteFor: null,
         });
         expect(summary.lines[1]).toMatchObject({ quantity: 2, subtotal: 800, imageUrl: null, options: [] });
     });
@@ -119,6 +122,9 @@ describe('order lines', () => {
             imageUrl: 'https://img/tea.jpg',
             options: ['Hot'],
             scheduledAt: '2026-10-02 09:00',
+            note: null,
+            unavailable: false,
+            substituteFor: null,
         });
         expect(parseOrderLine(null).name).toBe('');
     });
@@ -205,5 +211,39 @@ describe('tipAmount', () => {
         expect(tipAmount(' 15% ', '3220')).toBe(483);
         expect(tipAmount('abc%', 3220)).toBe(0);
         expect(tipAmount(null, 3220)).toBe(0);
+    });
+});
+
+describe('order edits', () => {
+    it('prefers the tip amount the server recorded over a percentage of the current subtotal', () => {
+        expect(orderTip({ tip: '10%', subtotal: 2000 }, 'tip')).toBe(200);
+        expect(orderTip({ tip: '10%', tip_amount: 300, subtotal: 2000 }, 'tip')).toBe(300);
+        expect(orderTip({ delivery_tip: '5%', delivery_tip_amount: '150', subtotal: 1000 }, 'delivery_tip')).toBe(150);
+        expect(orderTip({ tip: 250, tip_amount: null, subtotal: 1000 }, 'tip')).toBe(250);
+        expect(orderTip(null, 'tip')).toBe(0);
+        expect(summarizeOrder(order({ meta: { ...order().meta, tip: '10%', tip_amount: 300 } })).tip).toBe(300);
+    });
+
+    it("reads the store's notes, unavailable items and substitutes", () => {
+        expect(parseOrderLine({ id: 'entity_3', name: 'Oat latte', meta: { note: ' Made with soy ', unavailable: true, substitute_for: 'entity_2' } })).toMatchObject({
+            note: 'Made with soy',
+            unavailable: true,
+            substituteFor: 'entity_2',
+        });
+        expect(parseOrderLine({ meta: { unavailable: '1' } }).unavailable).toBe(true);
+    });
+
+    it('lists refunds, credit and what is still due', () => {
+        const summary = summarizeOrder(order({ meta: { ...order().meta, payment: { state: 'balance_due', amount_refunded: 200, amount_credited: 100, balance_due: 500 } } }));
+        expect(paymentLines(summary.payment)).toEqual([
+            { key: 'refunded', amount: 200 },
+            { key: 'credited', amount: 100 },
+            { key: 'balanceDue', amount: 500 },
+        ]);
+        expect(paymentLines(summarizeOrder(order({ meta: { ...order().meta, gateway: 'cash' } })).payment)).toEqual([{ key: 'cashDue', amount: 2799 }]);
+        expect(paymentLines(null)).toEqual([]);
+        const text = receiptText(summary, { t: (key) => key, money: (value) => `$${value}`, date: null });
+        expect(text).toContain('Receipt.refunded: −$200');
+        expect(text).toContain('Receipt.balanceDue: $500');
     });
 });

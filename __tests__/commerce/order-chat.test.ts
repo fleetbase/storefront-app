@@ -1,5 +1,5 @@
 import { ApiError, apiRequest } from '../../src/commerce/http';
-import { chatDriver, fetchChat, fetchOlderMessages, markChatRead, mergeMessages, parseChat, parseChatMessage, sendChatMessage } from '../../src/commerce/order-chat';
+import { chatDriver, chatStore, fetchChat, fetchOlderMessages, markChatRead, mergeMessages, parseChat, parseChatMessage, quickReplies, requestAddressChange, sendChatMessage, senderLabel } from '../../src/commerce/order-chat';
 
 const message = (id: string, createdAt: string | null, extra: Record<string, any> = {}) => ({ id, content: `m-${id}`, is_mine: false, sender: { name: 'Ravi K.' }, attachments: [], read: false, created_at: createdAt, ...extra });
 
@@ -29,6 +29,9 @@ describe('order chat', () => {
             content: '',
             mine: true,
             senderName: null,
+            senderRole: null,
+            system: false,
+            systemKind: null,
             attachments: [
                 { id: 'f1', url: 'https://cdn.test/p.jpg', type: 'image/jpeg' },
                 { id: 'https://cdn.test/q.jpg', url: 'https://cdn.test/q.jpg', type: null },
@@ -69,6 +72,82 @@ describe('order chat', () => {
             ['orders/order_1/chat/messages', { method: 'POST', body: { content: 'Tower B', files: [1, 2, 3, 4].map((n) => ({ data: `d${n}`, type: 'image/jpeg' })) } }],
             ['orders/order_1/chat/messages', { method: 'POST', body: {} }],
             ['orders/order_1/chat/read', { method: 'POST' }],
+        ]);
+    });
+});
+
+describe('store chat', () => {
+    const storeJson = {
+        id: 'chat_2',
+        channel: 'chat.chat_2',
+        order: 'order_1',
+        kind: 'customer',
+        status: 'open',
+        participants: [
+            { id: 'p1', role: 'customer', name: 'Ada B.' },
+            { id: 'p3', role: 'store', name: 'Jon' },
+        ],
+        messages: [
+            message('s1', '2026-10-07T06:00:00Z', { sender: { name: 'Jon', role: 'store' } }),
+            message('s2', '2026-10-07T06:01:00Z', { sender: { name: 'System', role: 'system' }, meta: { system: true, kind: 'order_updated' }, content: 'Order updated' }),
+            message('s3', '2026-10-07T06:02:00Z', { is_mine: true, sender: { name: 'Ada B.', role: 'customer' } }),
+        ],
+        unread_count: 1,
+    };
+
+    test('reads roles and system notices', () => {
+        const chat = parseChat(storeJson, 'customer');
+        expect(chat.kind).toBe('customer');
+        expect(chatStore(chat)).toMatchObject({ id: 'p3', role: 'store' });
+        expect(chatDriver(chat)).toBeNull();
+        expect(chat.messages.map((entry) => [entry.senderRole, entry.system, entry.systemKind, entry.mine])).toEqual([
+            ['store', false, null, false],
+            ['system', true, 'order_updated', false],
+            ['customer', false, null, true],
+        ]);
+        expect(parseChat({ kind: 'group' }).kind).toBe('driver');
+        expect(parseChat({}, 'customer').kind).toBe('customer');
+        expect(parseChatMessage({ id: 'x', is_mine: true, meta: { system: '1' } })).toMatchObject({ system: true, mine: false, senderRole: 'system' });
+    });
+
+    test('labels messages with the store name and keeps quick replies per thread', () => {
+        const [fromStore, notice, mine] = parseChat(storeJson, 'customer').messages;
+        expect(senderLabel(fromStore, { storeName: 'Rochor Noodle House', driverName: 'Ravi' })).toBe('Rochor Noodle House');
+        expect(senderLabel(fromStore, { storeName: null, driverName: null })).toBe('Jon');
+        expect(senderLabel(notice, { storeName: 'Rochor', driverName: null })).toBeNull();
+        expect(senderLabel(mine, { storeName: 'Rochor', driverName: null })).toBeNull();
+        expect(senderLabel(parseChatMessage({ id: 'd', sender: { name: 'Ravi K.', role: 'driver' } }), { storeName: 'Rochor', driverName: 'Ravi' })).toBe('Ravi');
+        expect(quickReplies('customer')).toEqual(['changeAddress', 'whereIsOrder', 'pleaseCall']);
+        expect(quickReplies('driver')).toContain('whereAreYou');
+    });
+
+    test('asks for the store thread by kind and refuses a driver thread in its place', async () => {
+        const request = jest.fn();
+        request.mockResolvedValueOnce(storeJson);
+        expect((await fetchChat(request, 'order_1', 'customer')).id).toBe('chat_2');
+        request.mockResolvedValueOnce(chatJson);
+        await expect(fetchChat(request, 'order_1', 'customer')).rejects.toMatchObject({ reason: 'store_chat_unavailable' });
+        request.mockResolvedValueOnce({ ...chatJson, kind: 'driver' });
+        await expect(fetchChat(request, 'order_1', 'customer')).rejects.toMatchObject({ reason: 'store_chat_unavailable' });
+        request.mockResolvedValueOnce({ messages: [] });
+        await fetchOlderMessages(request, 'order_1', 's1', 30, 'customer');
+        request.mockResolvedValueOnce({ message: message('s4', null, { is_mine: true }) });
+        await sendChatMessage(request, 'order_1', { content: 'Where is my order?', kind: 'customer' });
+        request.mockResolvedValueOnce({});
+        await markChatRead(request, 'order_1', 'customer');
+        request.mockResolvedValueOnce({ ok: true });
+        await requestAddressChange(request, 'order_1', { message: '  Tower B please ', place: 'place_9' });
+        request.mockResolvedValueOnce({ ok: true });
+        await requestAddressChange(request, 'order_1', { message: 'Tower B' });
+        expect(request.mock.calls).toEqual([
+            ['orders/order_1/chat', { query: { kind: 'customer' } }],
+            ['orders/order_1/chat', { query: { kind: 'customer' } }],
+            ['orders/order_1/chat', { query: { kind: 'customer' } }],
+            ['orders/order_1/chat/messages', { query: { before: 's1', limit: 30, kind: 'customer' } }],
+            ['orders/order_1/chat/messages', { method: 'POST', query: { kind: 'customer' }, body: { kind: 'customer', content: 'Where is my order?' } }],
+            ['orders/order_1/chat/read', { method: 'POST', query: { kind: 'customer' }, body: { kind: 'customer' } }],
+            ['orders/order_1/address-change-request', { method: 'POST', body: { message: 'Tower B please', place: 'place_9' } }],
+            ['orders/order_1/address-change-request', { method: 'POST', body: { message: 'Tower B' } }],
         ]);
     });
 });

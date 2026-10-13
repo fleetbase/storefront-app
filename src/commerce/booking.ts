@@ -1,16 +1,32 @@
 /**
  * Booking times for bookable products (`is_bookable`). The backend stores the chosen
- * start as the cart item's `scheduled_at` and carries it onto the order; it has no
- * availability API, so start times come from the product's booking hours (or the
- * store's hours when the product has none). A product may set `meta.duration` (minutes)
- * so the visit's end time and the last start time can be shown.
+ * start as the cart item's `scheduled_at` and carries it onto the order.
+ *
+ * Start times come from the server's slots (GET products/{id}/slots?date&location →
+ * `[{ start, end, available, providers }]`, which subtracts existing bookings) when it has
+ * them; servers without that endpoint answer 404, and the times are then worked out here
+ * from the product's booking hours (or the store's hours when the product has none). A
+ * service may set `meta.service.duration_minutes` (or `meta.duration`) so the visit's end
+ * time and the last start time can be shown, and `meta.service.deposit_percent` when only
+ * a deposit is paid at checkout.
  */
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 export type BookingHour = { day?: unknown; day_of_week?: unknown; start?: unknown; end?: unknown };
 export type BookingDay = { date: string; weekday: number; open: boolean };
-export type StartTime = { at: string; minutes: number; endMinutes: number | null; period: 'morning' | 'afternoon' | 'evening'; past: boolean };
+export type StartTime = {
+    at: string;
+    minutes: number;
+    endMinutes: number | null;
+    period: 'morning' | 'afternoon' | 'evening';
+    /** Can't be booked: already passed (or too soon), or, from the server's slots, taken. */
+    past: boolean;
+    /** Every provider is booked at this time (server slots only). */
+    full?: boolean;
+};
+
+const periodOf = (minutes: number): StartTime['period'] => (minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening');
 
 function clock(value: unknown): number | null {
     if (typeof value !== 'string') return null;
@@ -45,10 +61,18 @@ export function bookingWindows(hours: BookingHour[] | null | undefined): Map<num
     return windows;
 }
 
+const productMeta = (product: any): any => (typeof product?.getAttribute === 'function' ? product.getAttribute('meta') : product?.meta) ?? {};
+
 export function serviceDuration(product: any): number | null {
-    const meta = (typeof product?.getAttribute === 'function' ? product.getAttribute('meta') : product?.meta) ?? {};
-    const minutes = Number(meta.duration_minutes ?? meta.duration);
+    const meta = productMeta(product);
+    const minutes = Number(meta.service?.duration_minutes ?? meta.duration_minutes ?? meta.duration);
     return Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes) : null;
+}
+
+/** The share of the price paid as a deposit at checkout (1–99), or null when paid in full. */
+export function depositPercent(product: any): number | null {
+    const percent = Number(productMeta(product).service?.deposit_percent);
+    return Number.isFinite(percent) && percent > 0 && percent < 100 ? percent : null;
 }
 
 function pad(value: number): string {
@@ -115,12 +139,71 @@ export function startTimes(date: string, hours: BookingHour[] | null | undefined
                 at: toLocalIso(at),
                 minutes,
                 endMinutes: duration ? minutes + duration : null,
-                period: minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening',
+                period: periodOf(minutes),
                 past: isToday && minutes < cutoff,
             });
         }
     }
     return times.sort((a, b) => a.minutes - b.minutes);
+}
+
+/**
+ * The server's slots for `date` as start times. Slots that are taken (`available` false or
+ * no providers left) are kept, marked `full`, so the grid shows them crossed out; slots
+ * already passed (or within `leadMinutes`) are marked past as with local times.
+ */
+export function parseSlots(json: any, date: string, { now, leadMinutes = 30 }: { now: Date; leadMinutes?: number }): StartTime[] {
+    const list = Array.isArray(json) ? json : Array.isArray(json?.slots) ? json.slots : Array.isArray(json?.data) ? json.data : [];
+    const cutoff = now.getTime() + leadMinutes * 60000;
+    const times: StartTime[] = [];
+    for (const slot of list) {
+        const start = parseScheduledAt(slot?.start);
+        if (!start || start.date !== date || times.some((time) => time.minutes === start.minutes)) continue;
+        const end = parseScheduledAt(slot?.end);
+        const providers = Number(slot?.providers);
+        const full = slot?.available === false || (slot?.providers !== undefined && slot?.providers !== null && Number.isFinite(providers) && providers <= 0);
+        times.push({
+            at: typeof slot.start === 'string' ? slot.start : toLocalIso(start.at),
+            minutes: start.minutes,
+            endMinutes: end && end.date === date ? end.minutes : null,
+            period: periodOf(start.minutes),
+            past: full || start.at.getTime() < cutoff,
+            full,
+        });
+    }
+    return times.sort((a, b) => a.minutes - b.minutes);
+}
+
+export type SlotRequest = (path: string, options?: { query?: Record<string, any> }) => Promise<any>;
+
+/**
+ * Start times on `date` from the server, or null when it has no slots endpoint (404) or
+ * can't be reached, in which case the caller works them out from the booking hours.
+ */
+export async function fetchSlots(request: SlotRequest, productId: string, date: string, { now, location = null }: { now: Date; location?: string | null }): Promise<StartTime[] | null> {
+    try {
+        const json = await request(`products/${encodeURIComponent(productId)}/slots`, { query: { date, ...(location ? { location } : {}) } });
+        return parseSlots(json, date, { now });
+    } catch {
+        return null;
+    }
+}
+
+export type OrderBooking = { start: Date | null; end: Date | null; durationMinutes: number | null; provider: string | null };
+
+/** A booking order's appointment (`meta.booking`), or null for other orders. */
+export function orderBooking(meta: any): OrderBooking | null {
+    const booking = meta?.booking;
+    if (!booking || typeof booking !== 'object') return null;
+    const start = parseScheduledAt(booking.start)?.at ?? null;
+    const end = parseScheduledAt(booking.end)?.at ?? null;
+    const duration = Number(booking.duration_minutes);
+    return {
+        start,
+        end: end ?? (start && Number.isFinite(duration) && duration > 0 ? new Date(start.getTime() + duration * 60000) : null),
+        durationMinutes: Number.isFinite(duration) && duration > 0 ? Math.round(duration) : start && end ? Math.round((end.getTime() - start.getTime()) / 60000) : null,
+        provider: typeof booking.provider === 'string' && booking.provider ? booking.provider : null,
+    };
 }
 
 /** Splits `scheduled_at` into its local date key and minutes, or null when unparseable. */
