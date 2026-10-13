@@ -1,32 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable } from 'react-native';
 import { useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBranding } from '../branding/BrandingProvider';
+import { ChoiceSheet } from './ChoiceSheet';
 import { UIText } from './Text';
 import { HIT_SIZE, elevation, radius } from './tokens';
 
 /**
  * The current language as a short code (MN, EN) in a pill for screen headers. Tapping it
- * switches to the next available language. Hidden when only one language is available or
+ * opens the same language choice as the Account screen. Hidden when only one language is available or
  * the brand turns it off (`navigation.languageSwitcher`).
  */
 export function LanguageButton({ floating = false }: { floating?: boolean }) {
     const theme = useTheme();
     const { locale, setLocale, languages = [], t } = useLanguage();
     const { branding } = useBranding();
+    const [choosing, setChoosing] = useState(false);
     if (!branding.navigation.languageSwitcher || languages.length < 2) return null;
 
-    const index = languages.findIndex((language) => language.code === locale);
-    const current = languages[index] ?? languages[0];
-    const next = languages[(index + 1) % languages.length];
+    const current = languages.find((language) => language.code === locale) ?? languages[0];
 
     return (
+        <>
         <Pressable
-            onPress={() => setLocale(next.code)}
+            onPress={() => setChoosing(true)}
             accessibilityRole='button'
             accessibilityLabel={`${t('AccountScreen.language')}: ${current.native ?? current.name ?? current.code}`}
-            accessibilityHint={next.native ?? next.name ?? next.code}
             hitSlop={(HIT_SIZE - 36) / 2}
             style={({ pressed }) => ({
                 height: 36,
@@ -46,5 +46,14 @@ export function LanguageButton({ floating = false }: { floating?: boolean }) {
                 {current.code.slice(0, 2).toUpperCase()}
             </UIText>
         </Pressable>
+        <ChoiceSheet
+            open={choosing}
+            title={t('Account.language')}
+            options={languages.map((language: any) => ({ key: language.code, label: [language.emoji, language.native ?? language.name ?? language.code].filter(Boolean).join('  ') }))}
+            selected={locale}
+            onSelect={setLocale}
+            onClose={() => setChoosing(false)}
+        />
+        </>
     );
 }

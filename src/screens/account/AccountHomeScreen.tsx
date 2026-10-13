@@ -28,7 +28,7 @@ import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import useFooterOffset from '../../hooks/use-footer-offset';
 import { ORDER_PAGE_SIZE, summarizeOrder } from '../../commerce/order-summary';
 import { storefrontConfig } from '../../utils';
-import { Badge, Button, Card, MediaImage, Sheet, UIText, elevation, initials, radius, space, tintFor } from '../../ui';
+import { Badge, Button, Card, ChoiceSheet, MediaImage, UIText, elevation, initials, radius, space, tintFor } from '../../ui';
 
 type Row = { key: string; icon: IconDefinition; label: string; value?: string | null; badge?: number; onPress: () => void; hidden?: boolean };
 
@@ -79,48 +79,6 @@ function MenuGroup({ title, rows }: { title?: string; rows: Row[] }) {
                 ))}
             </Card>
         </YStack>
-    );
-}
-
-/** Choose one option from a short list, e.g. the language or appearance. */
-function ChoiceSheet({
-    open,
-    title,
-    options,
-    selected,
-    onSelect,
-    onClose,
-}: {
-    open: boolean;
-    title: string;
-    options: { key: string; label: string }[];
-    selected: string;
-    onSelect: (key: string) => void;
-    onClose: () => void;
-}) {
-    const theme = useTheme();
-    return (
-        <Sheet open={open} onClose={onClose} title={title}>
-            <YStack>
-                {options.map((option) => (
-                    <Pressable
-                        key={option.key}
-                        onPress={() => {
-                            onSelect(option.key);
-                            onClose();
-                        }}
-                        accessibilityRole='radio'
-                        accessibilityState={{ checked: option.key === selected }}
-                        style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: theme.borderColor.val }}
-                    >
-                        <UIText flex={1} variant={option.key === selected ? 'bodyStrong' : 'body'}>
-                            {option.label}
-                        </UIText>
-                        <YStack width={22} height={22} borderRadius={11} borderWidth={option.key === selected ? 7 : 2} borderColor={option.key === selected ? '$primary' : '$borderColor'} />
-                    </Pressable>
-                ))}
-            </YStack>
-        </Sheet>
     );
 }
 

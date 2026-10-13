@@ -448,7 +448,7 @@ const FoodTrucksScreen = () => {
                                     <Marker
                                         key={`truck-${truck.id}`}
                                         coordinate={truck.coordinate as any}
-                                        onPress={() => (place ? select(place) : openTruck(truck))}
+                                        onPress={() => openTruck(truck)}
                                         accessibilityLabel={[truck.name, truck.live ? t('FoodTrucks.live') : t('FoodTrucks.offline'), truck.distance].filter(Boolean).join(', ')}
                                     >
                                         <MapPin kind='truck' active={truck.live} selected={!!place && place.key === selectedKey} label={truck.name} meta={truck.live ? truck.distance : t('FoodTrucks.offline')} />
@@ -459,7 +459,7 @@ const FoodTrucksScreen = () => {
                         stores.map((store) => {
                             const place = places.find((item) => item.store?.key === store.key);
                             return (
-                                <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => (place ? select(place) : openStore(store))} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
+                                <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => openStore(store)} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
                                     <MapPin kind='store' active={store.open} selected={!!place && place.key === selectedKey} label={store.name} meta={store.statusText} logoUrl={store.store?.logo_url} />
                                 </Marker>
                             );

@@ -18,6 +18,7 @@ export { StoreCard } from './StoreCard';
 export { CartPill } from './CartPill';
 export { Stepper, SegmentedControl } from './Controls';
 export { Sheet } from './Sheet';
+export { ChoiceSheet } from './ChoiceSheet';
 export { TextField } from './TextField';
 export { CodeInput } from './CodeInput';
 export type { TextFieldProps } from './TextField';
