@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarXmark } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { bookingDays, nextOpenDay, parseScheduledAt, startTimes, type BookingHour, type StartTime } from '../../commerce/booking';
-import { Button, UIText, formatClock, formatDuration, radius, space, usesTwelveHourClock } from '../../ui';
+import { Button, Skeleton, UIText, formatClock, formatDuration, radius, space, usesTwelveHourClock } from '../../ui';
 
 const PERIODS: StartTime['period'][] = ['morning', 'afternoon', 'evening'];
 
@@ -16,7 +16,9 @@ function dayDate(key: string): Date {
 
 /**
  * Date rail and start-time grid for a bookable service. Days without booking hours are
- * shown but marked closed; picking one explains it and offers the next open day.
+ * shown but marked closed; picking one explains it and offers the next open day. With
+ * `loadSlots`, each day's times come from the server (which leaves out taken times); a
+ * day it can't answer for (no slots endpoint, offline) uses the booking hours instead.
  */
 export default function BookingPicker({
     hours,
@@ -24,12 +26,15 @@ export default function BookingPicker({
     value,
     onChange,
     providerName,
+    loadSlots,
 }: {
     hours: BookingHour[];
     duration: number | null;
     value: string | null;
     onChange: (scheduledAt: string | null) => void;
     providerName: string;
+    /** The server's start times for a day, or null to work them out from `hours`. */
+    loadSlots?: (date: string, now: Date) => Promise<StartTime[] | null>;
 }) {
     const theme = useTheme();
     const { t, locale } = useLanguage();
@@ -42,7 +47,21 @@ export default function BookingPicker({
         () => chosen?.date ?? days.find((entry) => entry.open && startTimes(entry.date, hours, { now, duration }).some((time) => !time.past))?.date ?? days[0].date
     );
     const day = days.find((entry) => entry.date === selectedDate) ?? days[0];
-    const times = useMemo(() => (day.open ? startTimes(day.date, hours, { now, duration }) : []), [day, duration, hours, now]);
+    // The server's times per day: undefined while loading, null when it has none to offer.
+    const [serverTimes, setServerTimes] = useState<Record<string, StartTime[] | null>>({});
+    useEffect(() => {
+        if (!loadSlots || selectedDate in serverTimes) return;
+        let active = true;
+        loadSlots(selectedDate, now)
+            .catch(() => null)
+            .then((result) => active && setServerTimes((current) => ({ ...current, [selectedDate]: result })));
+        return () => {
+            active = false;
+        };
+    }, [loadSlots, now, selectedDate, serverTimes]);
+    const fromServer = serverTimes[selectedDate];
+    const loadingTimes = !!loadSlots && fromServer === undefined;
+    const times = useMemo(() => (fromServer ? fromServer : day.open ? startTimes(day.date, hours, { now, duration }) : []), [day, duration, fromServer, hours, now]);
     const available = times.filter((time) => !time.past);
     const next = nextOpenDay(days, day.date);
     const weekday = (key: string, style: 'short' | 'long') => dayDate(key).toLocaleDateString(locale, { weekday: style });
@@ -124,7 +143,12 @@ export default function BookingPicker({
                         </UIText>
                     )}
                 </XStack>
-                {available.length > 0 ? (
+                {loadingTimes ? (
+                    <YStack gap={8} accessibilityLabel={t('Booking.loadingTimes')}>
+                        <Skeleton height={44} radius={radius.button} />
+                        <Skeleton height={44} radius={radius.button} />
+                    </YStack>
+                ) : available.length > 0 ? (
                     <>
                         {PERIODS.map((period) => {
                             const slots = times.filter((time) => time.period === period);
@@ -144,7 +168,7 @@ export default function BookingPicker({
                                                     onPress={() => onChange(time.at)}
                                                     accessibilityRole='radio'
                                                     accessibilityState={{ checked: selected, disabled: time.past }}
-                                                    accessibilityLabel={`${timeLabel(time)}${time.past ? `, ${t('Booking.unavailable')}` : ''}`}
+                                                    accessibilityLabel={`${timeLabel(time)}${time.full ? `, ${t('Booking.fullyBooked')}` : time.past ? `, ${t('Booking.unavailable')}` : ''}`}
                                                     style={{
                                                         width: '31.5%',
                                                         height: 44,
@@ -178,9 +202,13 @@ export default function BookingPicker({
                     <YStack alignItems='center' gap={8} padding={20} borderRadius={radius.card} backgroundColor='$surface' accessibilityRole='summary'>
                         <FontAwesomeIcon icon={faCalendarXmark} size={26} color={theme.textSecondary.val} />
                         <UIText variant='bodyStrong' textAlign='center'>
-                            {day.open ? t('Booking.fullyPast', { day: weekday(day.date, 'long') }) : t('Booking.noBookingsOn', { day: weekday(day.date, 'long') })}
+                            {times.some((time) => time.full)
+                                ? t('Booking.fullyBookedOn', { day: weekday(day.date, 'long') })
+                                : day.open || fromServer
+                                  ? t('Booking.fullyPast', { day: weekday(day.date, 'long') })
+                                  : t('Booking.noBookingsOn', { day: weekday(day.date, 'long') })}
                         </UIText>
-                        {!day.open && (
+                        {!day.open && !fromServer && (
                             <UIText variant='caption' tone='secondary' textAlign='center'>
                                 {t('Booking.noBookingsBody', { store: providerName })}
                             </UIText>

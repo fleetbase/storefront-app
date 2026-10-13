@@ -10,6 +10,7 @@ import { getCoordinates } from '../utils/location';
 import { get, storefrontConfig, debounce, isBlank } from '../utils';
 import { toast } from '../utils/toast';
 import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { unavailableItemsFromError, type UnavailableItem } from '../commerce/checkout-capture';
 import { Order } from '@fleetbase/sdk';
 import useStorefront from '../hooks/use-storefront';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -45,7 +46,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const [serviceQuote, setServiceQuote] = useState(null);
     const [isServiceQuoteUnavailable, setIsServiceQuoteUnavailable] = useState(false);
     // Cart lines the server says can no longer be ordered (product or food truck gone), or null.
-    const [unavailableItems, setUnavailableItems] = useState<Array<{ id?: string; name?: string }> | null>(null);
+    const [unavailableItems, setUnavailableItems] = useState<UnavailableItem[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isCapturingOrder, setIsCapturingOrder] = useState(false);
     // The payment, once the customer goes to pay:
@@ -71,6 +72,11 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const listenerRef = useRef();
     const hasOrderCompleted = useRef(false);
     const cartContentsString = JSON.stringify(cart.contents() || []);
+
+    // A changed cart gets a fresh check: items named unavailable before may be gone now.
+    useEffect(() => {
+        setUnavailableItems(null);
+    }, [cartContentsString]);
     const subtotal = cart.subtotal();
     const totalAmount = useMemo(() => {
         const lineItems = computeLineItems();
@@ -198,6 +204,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setCheckoutToken(token);
         } catch (err) {
             console.error('Unable to initialize payment gateway:', err);
+            // Stock ran out (or an item went) while checkout reserved it: name what to remove.
+            const unavailable = unavailableItemsFromError(err);
+            if (unavailable) setUnavailableItems(unavailable);
         } finally {
             setIsLoading(false);
         }
@@ -360,7 +369,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
             } catch (error) {
                 if (isMounted) {
                     setIsServiceQuoteUnavailable(true);
-                    setUnavailableItems((error as any)?.code === 'cart_items_unavailable' ? ((error as any)?.response?.items ?? []) : null);
+                    setUnavailableItems(unavailableItemsFromError(error));
                 }
                 console.warn('Error fetching service quote:', error);
             }

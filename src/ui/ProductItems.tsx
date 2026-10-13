@@ -101,6 +101,11 @@ export function ProductRow({ product, onPress, storeClosed = false, testID = 'pr
                         {product.isBookable && !soldOut && <BookPill disabled={storeClosed} />}
                     </XStack>
                     {soldOut && <Badge size='sm' label={t('UI.outOfStock')} />}
+                    {!soldOut && product.lowStock !== null && (
+                        <XStack>
+                            <Badge size='sm' tone='warning' label={t('UI.onlyLeft', { count: product.lowStock })} />
+                        </XStack>
+                    )}
                 </YStack>
                 <YStack>
                     <MediaImage uri={product.imageUrl} seed={product.name} width={96} height={96} radius={radius.tile} />
@@ -193,6 +198,17 @@ export function ProductTile({
                                 </UIText>
                             )}
                         </XStack>
+                        {soldOut ? (
+                            <UIText variant='caption' tone='secondary'>
+                                {t('UI.outOfStock')}
+                            </UIText>
+                        ) : (
+                            product.lowStock !== null && (
+                                <UIText variant='caption' tone='warning'>
+                                    {t('UI.onlyLeft', { count: product.lowStock })}
+                                </UIText>
+                            )
+                        )}
                     </>
                 )}
             </YStack>

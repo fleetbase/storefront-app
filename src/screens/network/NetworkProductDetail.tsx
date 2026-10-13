@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import StoreSwitchHost from '../../components/StoreSwitchHost';
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { Product, Store } from '@fleetbase/storefront';
@@ -14,7 +14,8 @@ import useStorefront from '../../hooks/use-storefront';
 import useCurrentLocation from '../../hooks/use-current-location';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import BookingPicker from '../../components/booking/BookingPicker';
-import { parseScheduledAt, serviceDuration } from '../../commerce/booking';
+import { depositPercent, fetchSlots, parseScheduledAt, serviceDuration } from '../../commerce/booking';
+import { adapterTarget, apiRequest } from '../../commerce/http';
 import { toast } from '../../utils/toast';
 import { formatCurrency } from '../../utils/format';
 import useScreenTopInset from '../../hooks/use-screen-top-inset';
@@ -37,6 +38,7 @@ import {
     radius,
     selectionFromCartItem,
     space,
+    stockLevel,
     storeHours,
     storeSummary,
     toggleOption,
@@ -70,6 +72,9 @@ export default function NetworkProductDetail({ params }: { params: any }) {
     const product = useMemo(() => new Product(params.product, adapter), [adapter, params.product]);
     const merchant = useMemo(() => (params.store ? new Store(params.store, adapter) : null), [adapter, params.store]);
     const summary = useMemo(() => productSummary(product), [product]);
+    // Stock at the location the product is ordered from, when the store tracks it.
+    const stock = useMemo(() => stockLevel(product, params.storeLocationId ?? null), [params.storeLocationId, product]);
+    const maxQuantity = stock.tracked && stock.available !== null ? Math.max(1, Math.min(99, stock.available)) : 99;
     const store = useMemo(() => (params.store ? storeSummary(params.store, { t }) : null), [params.store, t]);
     const groups = useMemo<OptionGroup[]>(() => optionGroups(product.getAttribute('variants'), product.getAttribute('addon_categories')), [product]);
     const [selection, setSelection] = useState<OptionSelection>(() => (params.cartItem ? selectionFromCartItem(groups, params.cartItem) : {}));
@@ -95,6 +100,15 @@ export default function NetworkProductDetail({ params }: { params: any }) {
         const own = product.getAttribute('hours');
         return Array.isArray(own) && own.length > 0 ? own : storeHours(params.store);
     }, [params.store, product]);
+    const deposit = useMemo(() => (isBooking ? depositPercent(product) : null), [isBooking, product]);
+    // Start times from the server's slots (taken ones excluded); null falls back to the hours.
+    const loadSlots = useCallback(
+        (date: string, now: Date) =>
+            summary.id
+                ? fetchSlots((path, options) => apiRequest(adapterTarget(adapter), path, options), summary.id, date, { now, location: params.storeLocationId ?? null })
+                : Promise.resolve(null),
+        [adapter, params.storeLocationId, summary.id]
+    );
     const hour12 = usesTwelveHourClock(locale);
     const scheduled = parseScheduledAt(scheduledAt);
     const scheduledText = scheduled
@@ -102,7 +116,9 @@ export default function NetworkProductDetail({ params }: { params: any }) {
         : null;
     const placeAttr = (key: string) => (typeof currentLocation?.getAttribute === 'function' ? currentLocation.getAttribute(key) : currentLocation?.[key]);
 
-    const blockedReason = !summary.available
+    const blockedReason = summary.outOfStock || !stock.inStock
+        ? t('UI.outOfStock')
+        : !summary.available
         ? t('ProductDetail.unavailable')
         : store?.status.state === 'offline'
           ? t('ProductDetail.storeClosed')
@@ -124,7 +140,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                 updateCart(await cart.update(editingLineId, quantity, { variants, addons, ...booking }));
                 toast.success(t('Booking.updated'));
             } else {
-                await addProduct(product, isBooking ? 1 : quantity, { variants, addons, store_location: params.storeLocationId ?? null, ...booking }, merchant);
+                await addProduct(product, isBooking ? 1 : Math.min(quantity, maxQuantity), { variants, addons, store_location: params.storeLocationId ?? null, ...booking }, merchant);
                 toast.success(isBooking ? t('Booking.added', { name: summary.name }) : t('ProductScreen.productAddedToCart', { productName: summary.name }));
             }
             navigation.goBack();
@@ -181,6 +197,16 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                             </UIText>
                         )}
                     </XStack>
+                    {stock.inStock && stock.low && stock.available !== null && (
+                        <XStack>
+                            <Badge tone='warning' label={t('UI.onlyLeft', { count: stock.available })} />
+                        </XStack>
+                    )}
+                    {!!deposit && (
+                        <UIText variant='caption' tone='secondary'>
+                            {t('Booking.depositNote', { percent: deposit })}
+                        </UIText>
+                    )}
                     {!!summary.description && <UIText tone='secondary'>{summary.description}</UIText>}
                     {/* "Sold by" only in a Network; a single store's app is that store. */}
                     {store && mode === 'network' && (
@@ -222,7 +248,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
 
                 {isBooking && (
                     <YStack marginTop={24} gap={22}>
-                        <BookingPicker hours={bookingHours} duration={duration} value={scheduledAt} onChange={setScheduledAt} providerName={store?.name ?? ''} />
+                        <BookingPicker hours={bookingHours} duration={duration} value={scheduledAt} onChange={setScheduledAt} providerName={store?.name ?? ''} loadSlots={loadSlots} />
                         <XStack
                             marginHorizontal={space.gutter}
                             alignItems='center'
@@ -283,7 +309,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                     </XStack>
                 )}
                 <XStack gap={12} alignItems='center'>
-                    {!isBooking && !editingLineId && <Stepper value={quantity} onChange={setQuantity} min={1} max={99} itemName={summary.name} />}
+                    {!isBooking && !editingLineId && <Stepper value={Math.min(quantity, maxQuantity)} onChange={setQuantity} min={1} max={maxQuantity} itemName={summary.name} />}
                     <YStack flex={1}>
                         <Button
                             size='lg'

@@ -1,4 +1,4 @@
-import { formatDuration, productSummary } from '../../src/ui/product-display';
+import { formatDuration, productSummary, stockLevel } from '../../src/ui/product-display';
 
 describe('product display', () => {
     test('summarises a product with its store', () => {
@@ -28,6 +28,8 @@ describe('product display', () => {
             onSale: true,
             currency: 'SGD',
             available: true,
+            outOfStock: false,
+            lowStock: null,
             isService: false,
             isBookable: false,
             durationMinutes: null,
@@ -58,5 +60,18 @@ describe('product display', () => {
         expect(formatDuration(90)).toBe('1.5 hr');
         expect(formatDuration(100)).toBe('1.7 hr');
         expect(formatDuration(null)).toBeNull();
+    });
+
+    test('reads stock for stores that track it', () => {
+        const inventory = { tracked: true, available_total: 5, locations: [{ location: 'store_location_1', available: 2, low: true }, { location: 'store_location_2', available: 3, low: true }] };
+        expect(productSummary({ name: 'Latte', in_stock: false, inventory: { tracked: true, available_total: 0, locations: [] } })).toMatchObject({ available: false, outOfStock: true, lowStock: null });
+        expect(productSummary({ name: 'Latte', in_stock: true, inventory })).toMatchObject({ available: true, outOfStock: false, lowStock: 5 });
+        expect(productSummary({ name: 'Latte', is_available: false, in_stock: false })).toMatchObject({ available: false, outOfStock: false });
+        expect(stockLevel({ in_stock: true, inventory }, 'store_location_1')).toEqual({ tracked: true, inStock: true, low: true, available: 2 });
+        expect(stockLevel({ inventory: { ...inventory, locations: [{ location: { id: 'store_location_3' }, available: 0, low: false }] } }, 'store_location_3')).toMatchObject({ inStock: false, low: false, available: 0 });
+        expect(stockLevel({ inventory: { tracked: true, available_total: 9, locations: [{ location: 'a', available: 2, low: true }, { location: 'b', available: 7, low: false }] } })).toMatchObject({ inStock: true, low: false, available: 9 });
+        expect(stockLevel({ name: 'Untracked' })).toEqual({ tracked: false, inStock: true, low: false, available: null });
+        expect(stockLevel({ in_stock: false })).toMatchObject({ tracked: false, inStock: false });
+        expect(productSummary({ name: 'Clean', meta: { service: { duration_minutes: 45 } } }).durationMinutes).toBe(45);
     });
 });
