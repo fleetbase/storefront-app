@@ -13,27 +13,31 @@ import useSocketClusterClient from '../../hooks/use-socket-cluster-client';
 import { ApiError } from '../../commerce/http';
 import {
     MAX_CHAT_PHOTOS,
-    QUICK_REPLIES,
     chatDriver,
     fetchChat,
     fetchOlderMessages,
     markChatRead,
     mergeMessages,
+    quickReplies,
     sendChatMessage,
+    senderLabel,
+    type ChatKind,
     type ChatMessage,
     type OrderChat,
 } from '../../commerce/order-chat';
 import { shortName } from '../../commerce/order-progress';
-import { Button, EmptyState, ErrorState, IconButton, Skeleton, UIText, formatClock, initials, radius, space, usesTwelveHourClock } from '../../ui';
+import { Button, EmptyState, ErrorState, IconButton, Skeleton, StoreLogo, UIText, formatClock, initials, radius, space, usesTwelveHourClock } from '../../ui';
 
 type Photo = { data: string; type: string; uri: string };
 type Row = ChatMessage & { photos?: Photo[] };
 
 /**
- * Real-time chat with the driver delivering an order. Messages load from the chat API,
- * new ones arrive on the chat's socket channel, and sending is optimistic: a message shows
- * straight away and can be retried if it fails. The chat becomes read-only once the order
- * is finished.
+ * Real-time chat about an order: with the driver delivering it (the default), or with the
+ * store (`kind: 'customer'`), which is open from the moment the order is placed. Messages
+ * load from the chat API, new ones arrive on the chat's socket channel, and sending is
+ * optimistic: a message shows straight away and can be retried if it fails. Notices from
+ * the order itself (an update, an address change request) show centred. The chat becomes
+ * read-only once the order is finished.
  */
 const OrderChatScreen = ({ route }: any) => {
     const navigation = useNavigation<any>();
@@ -44,7 +48,10 @@ const OrderChatScreen = ({ route }: any) => {
     const request = useChatRequest();
     const { listen, isConnected } = useSocketClusterClient();
     const hour12 = usesTwelveHourClock(locale);
-    const { orderId, orderReference, storeName, driverPhone } = route.params ?? {};
+    const { orderId, orderReference, storeName, driverPhone, storePhone, storeLogo } = route.params ?? {};
+    const kind: ChatKind = route.params?.kind === 'customer' ? 'customer' : 'driver';
+    const withStore = kind === 'customer';
+    const storeLabel: string = storeName ?? t('StoreSwitch.thisStore');
     const [chat, setChat] = useState<OrderChat | null>(null);
     const [messages, setMessages] = useState<Row[]>([]);
     const [error, setError] = useState<'no_driver' | 'failed' | null>(null);
@@ -60,15 +67,15 @@ const OrderChatScreen = ({ route }: any) => {
     const refresh = useCallback(async () => {
         if (!orderId) return;
         try {
-            const next = await fetchChat(request, orderId);
+            const next = await fetchChat(request, orderId, kind);
             setChat(next);
             setMessages((current) => mergeMessages(current, next.messages));
             setError(null);
-            if (next.unread > 0) markChatRead(request, orderId).catch(() => {});
+            if (next.unread > 0) markChatRead(request, orderId, kind).catch(() => {});
         } catch (failure) {
-            setError(failure instanceof ApiError && failure.reason === 'driver_not_assigned' ? 'no_driver' : 'failed');
+            setError(!withStore && failure instanceof ApiError && failure.reason === 'driver_not_assigned' ? 'no_driver' : 'failed');
         }
-    }, [orderId, request]);
+    }, [kind, orderId, request, withStore]);
 
     useEffect(() => {
         refresh();
@@ -96,7 +103,7 @@ const OrderChatScreen = ({ route }: any) => {
         if (!orderId || !oldest || loadingOlder || noMoreOlder) return;
         setLoadingOlder(true);
         try {
-            const older = await fetchOlderMessages(request, orderId, oldest.id);
+            const older = await fetchOlderMessages(request, orderId, oldest.id, 30, kind);
             setMessages((current) => mergeMessages(current, older));
             setNoMoreOlder(older.length === 0);
         } catch {
@@ -114,6 +121,9 @@ const OrderChatScreen = ({ route }: any) => {
             content: content.trim(),
             mine: true,
             senderName: null,
+            senderRole: 'customer',
+            system: false,
+            systemKind: null,
             attachments: photos.map((photo, index) => ({ id: `${localId}-${index}`, url: photo.uri, type: photo.type })),
             read: false,
             createdAt: null,
@@ -122,7 +132,7 @@ const OrderChatScreen = ({ route }: any) => {
         };
         setMessages((current) => [...current.filter((message) => message.id !== localId), local]);
         try {
-            const sent = await sendChatMessage(request, orderId, { content, photos: photos.map(({ data, type }) => ({ data, type })) });
+            const sent = await sendChatMessage(request, orderId, { content, photos: photos.map(({ data, type }) => ({ data, type })), kind });
             setMessages((current) =>
                 mergeMessages(
                     current.filter((message) => message.id !== localId),
@@ -160,6 +170,19 @@ const OrderChatScreen = ({ route }: any) => {
 
     const driver = chatDriver(chat);
     const driverName = driver?.name ? shortName(driver.name) : (route.params?.driverName ?? t('Tracking.yourDriver'));
+    // Who the customer is talking to: the store (its name, never a staff member's) or the driver.
+    const counterpart = withStore ? storeLabel : driverName;
+    const phone = withStore ? storePhone : driverPhone;
+    const replies = quickReplies(kind);
+    // Store messages carry the store's name (in either thread), and anyone else's message in the
+    // store thread its sender's; the driver's own messages in their thread need none. Only the
+    // first of a run from the same sender is labelled.
+    const labelFor = (message: ChatMessage, previous: ChatMessage | undefined) => {
+        if (message.mine || message.system) return null;
+        if (!withStore && message.senderRole === 'driver') return null;
+        if (previous && !previous.mine && !previous.system && previous.senderRole === message.senderRole && previous.senderName === message.senderName) return null;
+        return senderLabel(message, { storeName: storeLabel, driverName });
+    };
     const closed = chat?.status === 'closed' || closedNow;
     const data = useMemo(() => [...messages].reverse(), [messages]);
     const time = (value: string | null) => {
@@ -180,40 +203,53 @@ const OrderChatScreen = ({ route }: any) => {
             backgroundColor='$background'
         >
             <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('Chat.backToOrder')} onPress={() => navigation.goBack()} />
-            <YStack width={40} height={40} borderRadius={20} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
-                {driver?.avatarUrl ? (
-                    <Image source={{ uri: driver.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-                ) : (
-                    <UIText variant='captionStrong' tone='brand'>
-                        {initials(driverName)}
-                    </UIText>
-                )}
-                {!!chat && (
-                    <YStack
-                        position='absolute'
-                        right={-1}
-                        bottom={-1}
-                        width={12}
-                        height={12}
-                        borderRadius={6}
-                        borderWidth={2}
-                        borderColor='$background'
-                        backgroundColor={driver?.online && !closed ? '$success' : '$borderColorWithShadow'}
-                    />
-                )}
-            </YStack>
+            {withStore ? (
+                <StoreLogo uri={storeLogo ?? null} name={storeLabel} size={40} radius={20} />
+            ) : (
+                <YStack width={40} height={40} borderRadius={20} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                    {driver?.avatarUrl ? (
+                        <Image source={{ uri: driver.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+                    ) : (
+                        <UIText variant='captionStrong' tone='brand'>
+                            {initials(driverName)}
+                        </UIText>
+                    )}
+                    {!!chat && (
+                        <YStack
+                            position='absolute'
+                            right={-1}
+                            bottom={-1}
+                            width={12}
+                            height={12}
+                            borderRadius={6}
+                            borderWidth={2}
+                            borderColor='$background'
+                            backgroundColor={driver?.online && !closed ? '$success' : '$borderColorWithShadow'}
+                        />
+                    )}
+                </YStack>
+            )}
             <YStack flex={1}>
                 <UIText variant='bodyStrong' numberOfLines={1}>
-                    {driverName}
+                    {counterpart}
                 </UIText>
                 <UIText variant='caption' tone='secondary' numberOfLines={1} style={{ fontSize: 12 }}>
-                    {[t('Chat.yourDriver'), orderReference ? `#${orderReference}` : null, closed ? t('Chat.closedShort') : driver?.online ? t('Chat.online') : null]
+                    {[
+                        withStore ? t('Chat.theStore') : t('Chat.yourDriver'),
+                        orderReference ? `#${orderReference}` : null,
+                        closed ? t('Chat.closedShort') : !withStore && driver?.online ? t('Chat.online') : null,
+                    ]
                         .filter(Boolean)
                         .join(' · ')}
                 </UIText>
             </YStack>
-            {!!driverPhone && !closed && (
-                <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callDriver', { driver: driverName })} onPress={() => Linking.openURL(`tel:${driverPhone}`)} />
+            {!!phone && !closed && (
+                <IconButton
+                    icon={faPhone}
+                    size={44}
+                    accessibilityLabel={withStore ? t('Tracking.callStore', { store: storeLabel }) : t('Tracking.callDriver', { driver: driverName })}
+                    onPress={() => Linking.openURL(`tel:${phone}`)}
+                />
             )}
         </XStack>
     );
@@ -222,7 +258,7 @@ const OrderChatScreen = ({ route }: any) => {
         return (
             <YStack flex={1} backgroundColor='$background'>
                 {header}
-                <EmptyState icon={faComments} title={t('Notifications.signInTitle')} description={t('Chat.signInBody')} />
+                <EmptyState icon={faComments} title={t('Notifications.signInTitle')} description={withStore ? t('Chat.signInBodyStore') : t('Chat.signInBody')} />
             </YStack>
         );
     }
@@ -266,11 +302,17 @@ const OrderChatScreen = ({ route }: any) => {
                         ListFooterComponent={
                             <YStack alignSelf='center' maxWidth='85%' paddingHorizontal={12} paddingVertical={6} borderRadius={radius.pill} backgroundColor='$background' marginBottom={8}>
                                 <UIText variant='captionStrong' tone='secondary' textAlign='center' style={{ fontSize: 12 }}>
-                                    {t('Chat.intro', { driver: driverName, store: storeName ?? t('StoreSwitch.thisStore') })}
+                                    {withStore ? t('Chat.storeIntro', { store: storeLabel }) : t('Chat.intro', { driver: driverName, store: storeLabel })}
                                 </UIText>
                             </YStack>
                         }
-                        renderItem={({ item }) => <Bubble message={item} time={time(item.createdAt)} onRetry={() => send(item.content, item.photos ?? [], item.id)} />}
+                        renderItem={({ item, index }) =>
+                            item.system ? (
+                                <SystemNotice message={item} time={time(item.createdAt)} />
+                            ) : (
+                                <Bubble message={item} label={labelFor(item, data[index + 1])} time={time(item.createdAt)} onRetry={() => send(item.content, item.photos ?? [], item.id)} />
+                            )
+                        }
                     />
 
                     {closed ? (
@@ -285,10 +327,10 @@ const OrderChatScreen = ({ route }: any) => {
                             accessibilityRole='summary'
                         >
                             <UIText variant='bodyStrong' textAlign='center' style={{ fontSize: 14 }}>
-                                {t('Chat.closedTitle')}
+                                {withStore ? t('Chat.closedTitleStore') : t('Chat.closedTitle')}
                             </UIText>
                             <UIText variant='caption' tone='secondary' textAlign='center'>
-                                {t('Chat.closedBody', { store: storeName ?? t('StoreSwitch.thisStore') })}
+                                {withStore ? t('Chat.closedBodyStore', { store: storeLabel }) : t('Chat.closedBody', { store: storeLabel })}
                             </UIText>
                         </YStack>
                     ) : (
@@ -301,7 +343,7 @@ const OrderChatScreen = ({ route }: any) => {
                                 contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 8 }}
                                 accessibilityLabel={t('Chat.quickReplies')}
                             >
-                                {QUICK_REPLIES.map((key) => (
+                                {replies.map((key) => (
                                     <Pressable
                                         key={key}
                                         onPress={() => send(t(`Chat.quick.${key}`))}
@@ -362,9 +404,9 @@ const OrderChatScreen = ({ route }: any) => {
                                 <TextInput
                                     value={draft}
                                     onChangeText={setDraft}
-                                    placeholder={t('Chat.placeholder', { driver: driverName })}
+                                    placeholder={t('Chat.placeholder', { driver: counterpart })}
                                     placeholderTextColor={theme.textPlaceholder.val}
-                                    accessibilityLabel={t('Chat.placeholder', { driver: driverName })}
+                                    accessibilityLabel={t('Chat.placeholder', { driver: counterpart })}
                                     onSubmitEditing={submit}
                                     returnKeyType='send'
                                     maxLength={2000}
@@ -390,7 +432,23 @@ const OrderChatScreen = ({ route }: any) => {
     );
 };
 
-function Bubble({ message, time, onRetry }: { message: Row; time: string; onRetry: () => void }) {
+/** A notice from the order itself ("Order updated: …", "Address change requested"), centred. */
+function SystemNotice({ message, time }: { message: Row; time: string }) {
+    return (
+        <YStack alignSelf='center' maxWidth='88%' alignItems='center' gap={2} paddingHorizontal={12} paddingVertical={8} borderRadius={radius.card} backgroundColor='$background' accessibilityRole='text'>
+            <UIText variant='captionStrong' tone='secondary' textAlign='center' style={{ fontSize: 12 }}>
+                {message.content}
+            </UIText>
+            {!!time && (
+                <UIText variant='caption' tone='placeholder' style={{ fontSize: 11 }}>
+                    {time}
+                </UIText>
+            )}
+        </YStack>
+    );
+}
+
+function Bubble({ message, label, time, onRetry }: { message: Row; label: string | null; time: string; onRetry: () => void }) {
     const theme = useTheme();
     const { t } = useLanguage();
     const meta =
@@ -407,6 +465,11 @@ function Bubble({ message, time, onRetry }: { message: Row; time: string; onRetr
             gap={3}
             opacity={message.state === 'sending' ? 0.7 : 1}
         >
+            {!!label && (
+                <UIText variant='captionStrong' tone='secondary' style={{ fontSize: 11 }}>
+                    {label}
+                </UIText>
+            )}
             {message.attachments.map((attachment) => (
                 <Image key={attachment.id} source={{ uri: attachment.url }} style={{ width: 200, height: 140, borderRadius: 16 }} resizeMode='cover' accessibilityLabel={t('Chat.photo')} />
             ))}
