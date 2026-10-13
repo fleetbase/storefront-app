@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import useStorage from '../../hooks/use-storage';
 import useFooterOffset from '../../hooks/use-footer-offset';
 import { ORDER_PAGE_SIZE, groupOrders, itemsPreview, summarizeOrder, type OrderSummary } from '../../commerce/order-summary';
 import { formatCurrency } from '../../utils/format';
+import { PaymentBadge } from '../../components/orders/PaymentStatus';
 import { Badge, Button, Card, EmptyState, ErrorState, IconButton, Skeleton, StoreLogo, UIText, radius, space } from '../../ui';
 
 type Translate = (key: string, params?: Record<string, unknown>) => string;
@@ -45,7 +46,10 @@ function ActiveOrderCard({ order, t, onPress }: { order: OrderSummary; t: Transl
                         </UIText>
                         <OrderMeta order={order} t={t} />
                     </YStack>
-                    <Badge label={t(`Orders.status.${order.phase}`)} tone='brand' size='sm' />
+                    <YStack alignItems='flex-end' gap={4}>
+                        <Badge label={t(`Orders.status.${order.phase}`)} tone='brand' size='sm' />
+                        {order.payment?.reported && order.payment.state !== 'paid' && <PaymentBadge payment={order.payment} />}
+                    </YStack>
                 </XStack>
                 <UIText tone='secondary' numberOfLines={1}>
                     {itemsPreview(order.lines, (count) => t('Orders.andMore', { count }))}
@@ -77,6 +81,8 @@ function PastOrderRow({ order, t, onPress, onReceipt }: { order: OrderSummary; t
                             {order.storeName}
                         </UIText>
                         {order.canceled && <Badge label={t('Orders.status.canceled')} tone='error' size='sm' />}
+                        {/* Refunded, partly refunded or a balance still to pay. */}
+                        {!order.canceled && order.payment?.reported && order.payment.state !== 'paid' && <PaymentBadge payment={order.payment} />}
                     </XStack>
                     <UIText tone='secondary' numberOfLines={1}>
                         {itemsPreview(order.lines, (count) => t('Orders.andMore', { count }))}
@@ -131,17 +137,25 @@ const OrderHistoryScreen = () => {
     const byId = useMemo(() => new Map(raw.map((json: any) => [String(json?.id), json])), [raw]);
 
     const load = useCallback(
-        async (kind: 'loading' | 'refreshing' | 'more') => {
+        async (kind: 'loading' | 'refreshing' | 'more' | 'silent') => {
             if (!customer || busy.current) return;
             busy.current = true;
-            setState(kind);
+            // A silent refresh (coming back to the list) keeps showing what is there meanwhile.
+            if (kind !== 'silent') setState(kind);
             const offset = kind === 'more' ? (pages?.length ?? 0) : 0;
             try {
                 const result = await customer.getOrderHistory({ sort: '-created_at', limit: ORDER_PAGE_SIZE, offset });
                 const serialized = (Array.isArray(result) ? result : Array.from(result ?? [])).map((order: any) => (typeof order?.serialize === 'function' ? order.serialize() : order));
-                setExhausted(serialized.length < ORDER_PAGE_SIZE);
+                const deeper = kind === 'silent' && (pages?.length ?? 0) > serialized.length;
+                if (!deeper) setExhausted(serialized.length < ORDER_PAGE_SIZE);
                 if (kind === 'more') {
                     setPages((current) => [...(current ?? []), ...serialized]);
+                } else if (deeper) {
+                    // Pages loaded further down stay; the first page is replaced by the fresh one.
+                    const fresh = new Set(serialized.map((json: any) => String(json?.id)));
+                    setPages((current) => [...serialized, ...(current ?? []).slice(serialized.length).filter((json: any) => !fresh.has(String(json?.id)))]);
+                    setCached(serialized);
+                    setDirty(false);
                 } else {
                     setPages(serialized);
                     setCached(serialized);
@@ -149,7 +163,8 @@ const OrderHistoryScreen = () => {
                 }
                 setState('idle');
             } catch {
-                setState('error');
+                // A failed silent refresh leaves the list as it was.
+                setState(kind === 'silent' ? 'idle' : 'error');
             } finally {
                 busy.current = false;
             }
@@ -157,13 +172,19 @@ const OrderHistoryScreen = () => {
         [customer, pages, setCached, setDirty]
     );
 
-    // Fetch on first view, and again when a new order has been placed since.
+    // Fetch on first view and every time the list comes back into view: orders move on, get
+    // edited, refunded or canceled while the customer is elsewhere. A new order placed (or an
+    // order update pushed) since marks the list dirty, which refreshes it while in view too.
     useFocusEffect(
         useCallback(() => {
-            if (pages === null || dirty) load('loading');
+            load(pages === null && raw.length === 0 ? 'loading' : 'silent');
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [dirty])
+        }, [])
     );
+    useEffect(() => {
+        if (dirty && pages !== null) load('silent');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dirty]);
 
     const open = (summary: OrderSummary) => navigation.navigate('Order', { order: byId.get(summary.id) ?? { id: summary.id } });
     const receipt = (summary: OrderSummary) => navigation.navigate('Receipt', { order: byId.get(summary.id) ?? { id: summary.id } });

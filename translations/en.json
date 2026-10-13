@@ -609,6 +609,10 @@
         "starsCount": {
             "one": "1 star",
             "other": "{{count}} stars"
+        },
+        "onlyLeft": {
+            "one": "Only 1 left",
+            "other": "Only {{count}} left"
         }
     },
     "StoreSwitch": {
@@ -765,7 +769,12 @@
         "itemsUnavailableTitle": "Some items are no longer available.",
         "itemsUnavailableBody": "Remove them from your cart to continue.",
         "itemsUnavailableBodyNamed": "Remove {{items}} from your cart to continue.",
-        "reviewCart": "Review cart"
+        "reviewCart": "Review cart",
+        "blockedItems": "Remove the unavailable items to continue.",
+        "itemsLeft": {
+            "one": "1 left",
+            "other": "{{count}} left"
+        }
     },
     "Tracking": {
         "qrTitle": "Your order code",
@@ -879,7 +888,26 @@
         "bookingConfirmedBody": "{{store}} confirmed your visit.",
         "bookingRequestedBody": "{{store}} will confirm your time shortly.",
         "callStore": "Call {{store}}",
-        "loadFailed": "Couldn’t load this order"
+        "loadFailed": "Couldn’t load this order",
+        "orderUpdated": "Order updated",
+        "orderUpdatedBy": "Order updated by {{name}}",
+        "orderUpdatedBody": "The store made a change to your order.",
+        "dismissUpdate": "Dismiss update",
+        "wrongAddress": "Wrong address?",
+        "wrongAddressTitle": "Wrong address?",
+        "wrongAddressBody": "Pick one of your saved places or tell {{store}} where to deliver. They’ll update your order and let you know.",
+        "savedPlaces": "Your saved places",
+        "addressMessagePlaceholder": "E.g. Tower B, not Tower A",
+        "sendToStore": "Send to {{store}}",
+        "addressRequestPlace": "Please deliver to {{place}} instead.",
+        "addressRequestSent": "Sent to {{store}}",
+        "addressRequestFailed": "Couldn’t send your request. Try again, or message the store.",
+        "addressRequestPending": "Address change requested",
+        "addressRequestPendingBody": "Waiting for {{store}} to update the address: “{{message}}”",
+        "itemUnavailable": "Unavailable",
+        "substitute": "Substitute",
+        "substituteFor": "Replaces {{name}}",
+        "storeNote": "Store note: {{note}}"
     },
     "Booking": {
         "howItWorks": "How booking works",
@@ -911,7 +939,11 @@
         "addToCart": "Add booking to cart",
         "saveChanges": "Save booking",
         "added": "{{name}} booked. It’s in your cart.",
-        "updated": "Booking updated."
+        "updated": "Booking updated.",
+        "depositNote": "A {{percent}}% deposit is paid at checkout; the rest is due after your visit.",
+        "fullyBooked": "fully booked",
+        "fullyBookedOn": "{{day}} is fully booked",
+        "loadingTimes": "Loading available times"
     },
     "Reviews": {
         "title": "Reviews",
@@ -1108,7 +1140,10 @@
             "comingDown": "Coming down now",
             "leaveAtDoor": "Please leave it at the door",
             "callOnArrival": "Call me when you arrive",
-            "whereAreYou": "Where are you now?"
+            "whereAreYou": "Where are you now?",
+            "changeAddress": "Can I change my address?",
+            "whereIsOrder": "Where is my order?",
+            "pleaseCall": "Please call me"
         },
         "sendPhoto": "Add a photo",
         "attachedPhotos": "Photos to send",
@@ -1124,7 +1159,13 @@
         "closedTitle": "This chat closed when your order was finished",
         "closedBody": "Need help with the order? Contact {{store}} from the order page.",
         "closedNote": "Chat with your driver closed when the order was finished.",
-        "viewMessages": "View messages"
+        "viewMessages": "View messages",
+        "closedBodyStore": "Need more help with the order? Call {{store}} from the order page.",
+        "closedTitleStore": "This chat closed when your order was finished",
+        "messageStore": "Message {{store}}",
+        "signInBodyStore": "Sign in to message the store.",
+        "storeIntro": "Ask {{store}} anything about this order. They usually reply within a few minutes.",
+        "theStore": "The store"
     },
     "Auth": {
         "signInTitle": "Sign in",
@@ -1272,7 +1313,12 @@
         "notes": "Notes: {{notes}}",
         "taxReceipt": "Tax receipt (e-barimt)",
         "taxReceiptId": "Receipt ID",
-        "loadFailed": "We couldn't load this receipt."
+        "loadFailed": "We couldn't load this receipt.",
+        "unavailable": "Unavailable",
+        "refunded": "Refunded",
+        "credited": "Store credit",
+        "balanceDue": "Balance due",
+        "cashDue": "To pay on delivery"
     },
     "Places": {
         "allowTitle": "See what delivers to you",
@@ -1575,5 +1621,25 @@
         "noPromotions": "No promotions right now.",
         "inYourArea": "In your area",
         "inYourAreaNamed": "In your area · {{zone}}"
+    },
+    "Payment": {
+        "title": "Payment",
+        "state": {
+            "paid": "Paid",
+            "payOnDelivery": "To pay on delivery",
+            "refunded": "Refunded",
+            "partlyRefunded": "Partly refunded",
+            "balanceDue": "Balance due",
+            "unpaid": "Unpaid"
+        },
+        "balanceDueTitle": "{{amount}} still to pay",
+        "balanceDueBody": "Your order changed and costs more now. Pay the difference to keep it going.",
+        "balanceDueNoLink": "Your order changed and costs more now. The store will tell you how to pay the difference.",
+        "payNow": "Pay now",
+        "linkFailed": "Couldn’t open the payment page",
+        "storeCreditTitle": "Store credit",
+        "storeCreditCode": "Store credit code {{code}}",
+        "storeCreditBody": "Use this code at checkout on your next order.",
+        "shareCode": "Share"
     }
 }
