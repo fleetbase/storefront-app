@@ -148,6 +148,27 @@ const FoodTrucksScreen = () => {
     };
     const openCart = () => navigation.navigate(edition === 'network' ? 'NetworkCartTab' : 'StoreCartTab');
 
+    // Markers with custom views don't reliably fire their own onPress under the new architecture,
+    // so the map's onMarkerPress resolves the marker by identifier too. Whichever fires first opens
+    // the place; the other is ignored.
+    const lastMarkerOpen = useRef(0);
+    const openMarker = (identifier?: string) => {
+        if (!identifier || Date.now() - lastMarkerOpen.current < 800) return;
+        const [kind, ...rest] = identifier.split(':');
+        const id = rest.join(':');
+        if (kind === 'truck') {
+            const truck = (trucks ?? []).find((item) => String(item.id) === id);
+            if (!truck) return;
+            lastMarkerOpen.current = Date.now();
+            openTruck(truck);
+        } else if (kind === 'store') {
+            const store = stores.find((item) => item.key === id);
+            if (!store) return;
+            lastMarkerOpen.current = Date.now();
+            openStore(store);
+        }
+    };
+
     const focus = (coordinate: LatLng | null, delta = 0.02) => {
         if (!coordinate) return;
         mapRef.current?.animateToRegion?.({ ...coordinate, latitudeDelta: delta, longitudeDelta: delta }, 350);
@@ -426,7 +447,7 @@ const FoodTrucksScreen = () => {
     const mapMode = (
         <YStack flex={1} onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}>
             {region ? (
-                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('FoodTrucks.mapLabel')}>
+                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('FoodTrucks.mapLabel')} onMarkerPress={(event: any) => openMarker(event?.nativeEvent?.id)}>
                     {zones.map((item) =>
                         item.zoneBorder.map((ring, index) => (
                             <Polygon
@@ -447,8 +468,9 @@ const FoodTrucksScreen = () => {
                                 return (
                                     <Marker
                                         key={`truck-${truck.id}`}
+                                        identifier={`truck:${truck.id}`}
                                         coordinate={truck.coordinate as any}
-                                        onPress={() => openTruck(truck)}
+                                        onPress={() => openMarker(`truck:${truck.id}`)}
                                         accessibilityLabel={[truck.name, truck.live ? t('FoodTrucks.live') : t('FoodTrucks.offline'), truck.distance].filter(Boolean).join(', ')}
                                     >
                                         <MapPin kind='truck' active={truck.live} selected={!!place && place.key === selectedKey} label={truck.name} meta={truck.live ? truck.distance : t('FoodTrucks.offline')} />
@@ -459,7 +481,7 @@ const FoodTrucksScreen = () => {
                         stores.map((store) => {
                             const place = places.find((item) => item.store?.key === store.key);
                             return (
-                                <Marker key={`store-${store.key}`} coordinate={store.coordinate} onPress={() => openStore(store)} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
+                                <Marker key={`store-${store.key}`} identifier={`store:${store.key}`} coordinate={store.coordinate} onPress={() => openMarker(`store:${store.key}`)} accessibilityLabel={[store.name, store.statusText].filter(Boolean).join(', ')}>
                                     <MapPin kind='store' active={store.open} selected={!!place && place.key === selectedKey} label={store.name} meta={store.statusText} logoUrl={store.store?.logo_url} />
                                 </Marker>
                             );
@@ -699,7 +721,8 @@ const FoodTrucksScreen = () => {
 /** A map marker: the truck or store icon with its name and a short line under it. */
 function MapPin({ kind, active, selected, label, meta, logoUrl }: { kind: 'truck' | 'store'; active: boolean; selected: boolean; label: string; meta: string | null; logoUrl?: string | null }) {
     return (
-        <YStack alignItems='center' gap={3} opacity={active || selected ? 1 : 0.75}>
+        // pointerEvents none so the taps reach the marker instead of the text inside it.
+        <YStack alignItems='center' gap={3} opacity={active || selected ? 1 : 0.75} pointerEvents='none'>
             <PlaceIcon kind={kind} active={active} size={selected ? 48 : 40} selected={selected} floating logoUrl={logoUrl} />
             <XStack paddingHorizontal={7} paddingVertical={2} borderRadius={radius.pill} backgroundColor='$background' gap={4} style={elevation.card}>
                 <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 11, maxWidth: 110 }}>
