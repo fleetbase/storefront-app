@@ -1,4 +1,5 @@
 import { describeOpenStatus, formatDistance, openStatus, type OpenStatus, type OpeningHour, type Translate } from './format';
+import { parseUtcOffset } from './store-clock';
 
 /**
  * Generic images the API returns when a store or network has no logo or backdrop.
@@ -29,6 +30,14 @@ export function usableImageUrl(url: unknown): string | null {
     return PLACEHOLDER_IMAGES.some((placeholder) => url.includes(placeholder)) ? null : url;
 }
 
+/**
+ * The store's clock now in minutes east of UTC (`utc_offset`), which its hours and booked
+ * times are read on. Null when the server doesn't send it: the device clock is used then.
+ */
+export function storeOffset(store: unknown): number | null {
+    return parseUtcOffset(attr(store, 'utc_offset', null));
+}
+
 /** Weekly hours from a store's locations (the first location that has any). */
 export function storeHours(store: unknown): OpeningHour[] {
     const locations = attr<any[]>(store, 'locations', []);
@@ -50,6 +59,8 @@ export type StoreSummary = {
     distance: string | null;
     status: OpenStatus;
     statusText: string | null;
+    /** The store's offset from UTC in minutes, or null when unknown (see `storeOffset`). */
+    utcOffset: number | null;
     /** Closed, or not accepting orders: muted on cards but still browsable. */
     muted: boolean;
     bookable: boolean;
@@ -60,7 +71,8 @@ export type StoreSummary = {
 export function storeSummary(store: unknown, { now = new Date(), t, hour12 = true }: { now?: Date; t: Translate; hour12?: boolean }): StoreSummary {
     const rating = Number(attr(store, 'rating'));
     const tags = (attr<unknown[]>(store, 'tags', []) ?? []).filter((tag): tag is string => typeof tag === 'string');
-    const status = openStatus(storeHours(store), now, attr<boolean | null>(store, 'online', null));
+    const utcOffset = storeOffset(store);
+    const status = openStatus(storeHours(store), now, attr<boolean | null>(store, 'online', null), utcOffset);
     const category = attr<unknown>(store, 'category');
 
     return {
@@ -74,6 +86,7 @@ export function storeSummary(store: unknown, { now = new Date(), t, hour12 = tru
         distance: formatDistance(attr(store, 'distance')),
         status,
         statusText: describeOpenStatus(status, t, hour12),
+        utcOffset,
         muted: status.state === 'offline' || status.state === 'closed',
         bookable: tags.some((tag) => BOOKABLE_TAGS.includes(tag.toLowerCase())),
         tags,

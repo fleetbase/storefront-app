@@ -12,6 +12,7 @@ import useStorefrontInfo from '../../hooks/use-storefront-info';
 import useCartPickup from '../../network/use-cart-pickup';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useCartPromotions from '../../hooks/use-cart-promotions';
+import useStoreOffsets from '../../hooks/use-store-offsets';
 import { formatCurrency } from '../../utils/format';
 import {
     Button,
@@ -108,7 +109,11 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     }, [cartPickup, isPickup, mode]);
     const itemCount = groups.reduce((sum, group) => sum + group.itemCount, 0);
     const hour12 = usesTwelveHourClock(locale);
-    const bookings = groups.flatMap((group) => group.lines.filter((line) => line.scheduledAt).map((line) => ({ line, group, at: parseScheduledAt(line.scheduledAt) })));
+    // Booked times are shown on each store's clock.
+    const offsetOf = useStoreOffsets(groups.filter((group) => group.utcOffset === null && group.lines.some((line) => line.scheduledAt)).map((group) => group.storeId));
+    const bookings = groups.flatMap((group) =>
+        group.lines.filter((line) => line.scheduledAt).map((line) => ({ line, group, at: parseScheduledAt(line.scheduledAt, group.utcOffset ?? offsetOf(group.storeId)) }))
+    );
     // A store's products come with its earliest appointment: that booking says so.
     const carriesItems = new Set(
         groups
@@ -357,7 +362,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                     <XStack alignItems='center' gap={10} paddingHorizontal={12} paddingVertical={10} borderRadius={radius.button} backgroundColor='$primarySoft'>
                                         <FontAwesomeIcon icon={faCalendarDays} size={16} color={theme.primaryForeground.val} />
                                         <UIText variant='captionStrong' tone='brand' style={{ fontSize: 14 }}>
-                                            {at.at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })} · {formatClock(at.minutes, hour12)}
+                                            {at.wall.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })} · {formatClock(at.minutes, hour12)}
                                         </UIText>
                                     </XStack>
                                 )}

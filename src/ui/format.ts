@@ -3,6 +3,8 @@
  * to test and safe to call while rendering.
  */
 
+import { toStoreWall } from './store-clock';
+
 export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 
@@ -99,9 +101,11 @@ function windowsFor(hours: OpeningHour[]): Window[] {
  * - `open`: inside a window; `closesAt` is minutes since midnight today (or null when open all day).
  * - `closed`: `opensAt`/`opensOn`/`opensInDays` describe the next opening within a week.
  *
- * Windows that end at or before they start run past midnight.
+ * Windows that end at or before they start run past midnight. Hours are the store's wall
+ * clock, so `now` is read on the store's clock when its `utcOffset` (minutes east of UTC)
+ * is known, and on the device's otherwise.
  */
-export function openStatus(hours: OpeningHour[] | null | undefined, now: Date, online: boolean | null | undefined = true): OpenStatus {
+export function openStatus(hours: OpeningHour[] | null | undefined, now: Date, online: boolean | null | undefined = true, utcOffset: number | null = null): OpenStatus {
     if (online === false) {
         return { state: 'offline' };
     }
@@ -111,8 +115,9 @@ export function openStatus(hours: OpeningHour[] | null | undefined, now: Date, o
         return { state: 'unknown' };
     }
 
-    const today = now.getDay();
-    const minute = now.getHours() * 60 + now.getMinutes();
+    const clock = toStoreWall(now, utcOffset);
+    const today = clock.getDay();
+    const minute = clock.getHours() * 60 + clock.getMinutes();
 
     for (const window of windows) {
         // Today's window, or yesterday's window that runs past midnight.

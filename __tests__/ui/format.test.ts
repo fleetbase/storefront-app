@@ -89,6 +89,22 @@ describe('open status', () => {
         });
     });
 
+    test('reads the hours on the store clock, wherever the phone is', () => {
+        // Tuesday 6 October 2026, 23:30 UTC.
+        const now = new Date(Date.UTC(2026, 9, 6, 23, 30));
+        const hours = weekdays('09:00', '20:00');
+        // Wednesday 7:30 am at a store eight hours east of UTC.
+        expect(openStatus(hours, now, true, 480)).toEqual({ state: 'closed', opensAt: 540, opensInDays: 0, opensOn: 'Wednesday' });
+        // Tuesday 6:30 pm at a store five hours west.
+        expect(openStatus(hours, now, true, -300)).toEqual({ state: 'open', allDay: false, closesAt: 1200 });
+        // Tuesday 11:30 pm at UTC: opens tomorrow.
+        expect(openStatus(hours, now, true, 0)).toEqual({ state: 'closed', opensAt: 540, opensInDays: 1, opensOn: 'Wednesday' });
+        // A window past midnight at the store: Friday 1 am in Tokyo is inside Thursday's.
+        expect(openStatus([{ day: 'Thursday', start: '18:00', end: '02:00' }], new Date(Date.UTC(2026, 9, 8, 16, 0)), true, 540)).toEqual({ state: 'open', allDay: false, closesAt: 120 });
+        // Without an offset the device clock is used, as before.
+        expect(openStatus(hours, at(10), true, null)).toEqual(openStatus(hours, at(10)));
+    });
+
     test('describes every status in one line', () => {
         const hours = weekdays('09:00', '20:00');
         expect(describeOpenStatus(openStatus(hours, at(10)), t)).toBe('UI.openClosesAt{"time":"8 pm"}');

@@ -4,6 +4,7 @@ import { YStack, XStack, Text, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../contexts/LanguageContext';
+import { storeNow } from '../ui/store-clock';
 
 const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -21,14 +22,15 @@ export function scheduleByDay(storeLocation: any): Record<string, any[]> {
     return Object.fromEntries(weekdays.map((weekday) => [weekday, hours.filter((hour) => dayOf(hour) === weekday.toLowerCase())]));
 }
 
-const StoreLocationSchedule = ({ storeLocation, showToday = false }) => {
+/** `utcOffset`: the store's offset from UTC in minutes, so "today" is the store's day. */
+const StoreLocationSchedule = ({ storeLocation, showToday = false, utcOffset = null }: { storeLocation: any; showToday?: boolean; utcOffset?: number | null }) => {
     const theme = useTheme();
     const { t } = useLanguage();
     const schedule = scheduleByDay(storeLocation);
     const allHours = Object.values(schedule).flat();
     // No hours at all isn't "open 24 hours".
     const isAlwaysOpen = allHours.length > 0 && allHours.every((hour: any) => hour?.is24Hours);
-    const today = daysFromSunday[new Date().getDay()];
+    const today = daysFromSunday[storeNow(utcOffset).getDay()];
     const todayHours = schedule[today] ?? [];
 
     if (isAlwaysOpen) {

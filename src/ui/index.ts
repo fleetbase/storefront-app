@@ -1,6 +1,7 @@
 export * from './tokens';
 export * from './format';
 export * from './store-display';
+export * from './store-clock';
 export { UIText } from './Text';
 export type { UITextProps } from './Text';
 export { Button, IconButton } from './Button';

@@ -58,6 +58,79 @@ describe('booking', () => {
         expect(parseScheduledAt(42)).toBeNull();
     });
 
+    describe('on the store clock', () => {
+        // Tuesday 6 October 2026, 23:30 UTC: Wednesday 7:30 am at a store eight hours east,
+        // Tuesday 6:30 pm at one five hours west. None of this depends on the device's timezone.
+        const late = new Date(Date.UTC(2026, 9, 6, 23, 30));
+
+        test('starts the date rail on the store calendar', () => {
+            expect(bookingDays(weekdays, late, 2, 480).map((day) => `${day.date}:${day.weekday}`)).toEqual(['2026-10-07:3', '2026-10-08:4']);
+            expect(bookingDays(weekdays, late, 2, -300).map((day) => `${day.date}:${day.weekday}`)).toEqual(['2026-10-06:2', '2026-10-07:3']);
+        });
+
+        test('writes start times with the store offset and marks past ones on its clock', () => {
+            // 8:45 am at the store.
+            const morning = new Date(Date.UTC(2026, 9, 7, 0, 45));
+            const times = startTimes('2026-10-07', weekdays, { now: morning, utcOffset: 480 });
+            expect(times.filter((time) => time.past).map((time) => time.minutes / 60)).toEqual([8, 9]);
+            expect(times[2].at).toBe('2026-10-07T10:00:00+08:00');
+            expect(new Date(times[2].at).getTime()).toBe(Date.UTC(2026, 9, 7, 2, 0));
+            // Still Tuesday evening at a store five hours west: nothing on Wednesday has passed.
+            const west = startTimes('2026-10-07', weekdays, { now: morning, utcOffset: -300 });
+            expect(west.some((time) => time.past)).toBe(false);
+            expect(west[0].at).toBe('2026-10-07T08:00:00-05:00');
+        });
+
+        test('takes the server slots as the store gives them', () => {
+            // 4 am on Wednesday at the store.
+            const early = new Date(Date.UTC(2026, 9, 6, 20, 0));
+            const times = parseSlots(
+                [
+                    { start: '2026-10-07T10:00:00+08:00', end: '2026-10-07T11:00:00+08:00', time: '10:00', past: false, available: true, remaining: 2 },
+                    { start: '2026-10-07T09:00:00+08:00', end: '2026-10-07T10:00:00+08:00', time: '09:00', past: true, available: true, remaining: 1 },
+                    { start: '2026-10-07T11:00:00+08:00', time: '11:00', past: false, available: true, remaining: 0 },
+                    // Late at the store, though it is still the morning of the 7th in UTC.
+                    { start: '2026-10-07T23:00:00+08:00', time: '23:00', past: false, available: true },
+                    { start: '2026-10-08T09:00:00+08:00', time: '09:00', available: true },
+                ],
+                '2026-10-07',
+                { now: early, utcOffset: 480 }
+            );
+            expect(times.map((time) => [time.minutes, time.endMinutes, time.past, time.full])).toEqual([
+                [540, 600, true, false],
+                [600, 660, false, false],
+                [660, null, true, true],
+                [1380, null, false, false],
+            ]);
+            expect(times[1].at).toBe('2026-10-07T10:00:00+08:00');
+            expect(times[3].period).toBe('evening');
+        });
+
+        test('reads booked times on the store clock', () => {
+            const singapore = parseScheduledAt('2026-10-14T10:00:00+08:00', 480);
+            expect(singapore).toMatchObject({ date: '2026-10-14', minutes: 600 });
+            expect(singapore?.at.getTime()).toBe(Date.UTC(2026, 9, 14, 2, 0));
+            expect(singapore?.wall.getDate()).toBe(14);
+            expect(singapore?.wall.getDay()).toBe(3);
+            // The same instant at a store five hours west of UTC: 9 pm the evening before.
+            expect(parseScheduledAt('2026-10-14T10:00:00+08:00', -300)).toMatchObject({ date: '2026-10-13', minutes: 1260 });
+            expect(parseScheduledAt('2026-10-14T02:00:00Z', 480)).toMatchObject({ date: '2026-10-14', minutes: 600 });
+            // Without an offset the time is the store's wall clock.
+            const written = parseScheduledAt('2026-10-14 10:30:00', 480);
+            expect(written).toMatchObject({ date: '2026-10-14', minutes: 630 });
+            expect(written?.at.getTime()).toBe(Date.UTC(2026, 9, 14, 2, 30));
+            expect(parseScheduledAt('2026-10-14', 480)).toMatchObject({ date: '2026-10-14', minutes: 0 });
+            expect(parseScheduledAt(new Date(Date.UTC(2026, 9, 14, 2, 0)), 480)).toMatchObject({ date: '2026-10-14', minutes: 600 });
+            expect(parseScheduledAt('soon', 480)).toBeNull();
+        });
+
+        test('reads an order appointment written without an offset as the store time', () => {
+            const booking = orderBooking({ booking: { start: '2026-10-07T09:00:00', duration_minutes: 90 } }, 480);
+            expect(booking?.start?.getTime()).toBe(Date.UTC(2026, 9, 7, 1, 0));
+            expect(booking?.end?.getTime()).toBe(Date.UTC(2026, 9, 7, 2, 30));
+        });
+    });
+
     test('reads an optional duration from product meta', () => {
         expect(serviceDuration({ meta: { duration: '180' } })).toBe(180);
         expect(serviceDuration({ getAttribute: () => ({ duration_minutes: 90 }) })).toBe(90);

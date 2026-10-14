@@ -60,6 +60,14 @@ describe('cart display', () => {
         expect(cartGroups(null)).toEqual([]);
     });
 
+    test('carries each store clock for booked times', () => {
+        const groups = cartGroups(
+            [item(), item({ id: 'line_3', store_id: 'store_clean', store: { name: 'Sparkle', utc_offset: -300 } }), item({ id: 'line_5', store_id: 'store_new', store: { name: 'New' } })],
+            { store_bloom: { utcOffset: 480 } }
+        );
+        expect(groups.map((group) => group.utcOffset)).toEqual([480, -300, null]);
+    });
+
     test('lines without a store group together but do not count as a store', () => {
         const groups = cartGroups([item({ store_id: undefined, store: undefined })], { store: { open: false } });
         expect(groups[0]).toMatchObject({ storeId: 'store', name: null, open: false });
