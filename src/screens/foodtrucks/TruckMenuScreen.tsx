@@ -51,7 +51,13 @@ const TruckMenuScreen = () => {
         });
         return [...groups.values()];
     }, [t, truck]);
-    const recommended = useMemo(() => sections.flatMap((section) => section.products).filter((item) => item.summary.recommended), [sections]);
+    // A product can sit in more than one category; recommend it once.
+    const recommended = useMemo(() => {
+        const seen = new Set<string>();
+        return sections
+            .flatMap((section) => section.products)
+            .filter((item) => item.summary.recommended && !seen.has(item.summary.id) && !!seen.add(item.summary.id));
+    }, [sections]);
 
     const stickyTop = insets.top + STICKY_CLEARANCE;
     const heroHeight = HERO_HEIGHT + insets.top;
