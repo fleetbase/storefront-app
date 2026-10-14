@@ -10,6 +10,7 @@ import useCart from '../hooks/use-cart';
 import useStorefront from '../hooks/use-storefront';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useCartPromotions from '../hooks/use-cart-promotions';
+import { rememberStoreOffset } from '../hooks/use-store-offsets';
 import type { PromotionHint } from '../commerce/promotions';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
@@ -37,13 +38,14 @@ import {
     formatClock,
     radius,
     space,
+    storeOffset,
     type CartGroup,
     type CartLine,
     type CartStoreInfo,
     usesTwelveHourClock,
 } from '../ui';
 
-/** What the cart needs from a store record: name, logo and minimum order. */
+/** What the cart needs from a store record: name, logo, minimum order and clock. */
 function storeInfo(store: any): CartStoreInfo {
     const get = (key: string) => (typeof store?.getAttribute === 'function' ? store.getAttribute(key) : store?.[key]);
     const options = get('options') ?? {};
@@ -51,6 +53,7 @@ function storeInfo(store: any): CartStoreInfo {
         name: get('name') ?? null,
         logoUrl: get('logo_url') ?? null,
         minimum: options.required_checkout_min === true || Number(options.required_checkout_min_amount) > 0 ? Number(options.required_checkout_min_amount) || 0 : 0,
+        utcOffset: storeOffset(store),
     };
 }
 
@@ -106,6 +109,8 @@ const CartScreen = ({ route }: any) => {
                 return next;
             });
             rememberStores(results.map(([id, store]) => ({ id, name: storeInfo(store).name ?? '', logoUrl: storeInfo(store).logoUrl ?? null })));
+            // Checkout shows booked times on these stores' clocks without looking them up again.
+            results.forEach(([, store]) => rememberStoreOffset(store));
         });
         return () => {
             active = false;
@@ -334,8 +339,8 @@ function StoreGroup({
     const theme = useTheme();
     const hour12 = usesTwelveHourClock(locale);
     const bookingText = (value: string | null) => {
-        const parsed = parseScheduledAt(value);
-        return parsed ? `${parsed.at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}, ${formatClock(parsed.minutes, hour12)}` : null;
+        const parsed = parseScheduledAt(value, group.utcOffset);
+        return parsed ? `${parsed.wall.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}, ${formatClock(parsed.minutes, hour12)}` : null;
     };
     return (
         <Card accessibilityLabel={group.name ? t('Cart.itemsFrom', { store: group.name }) : undefined}>

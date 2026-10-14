@@ -40,6 +40,7 @@ import {
     space,
     stockLevel,
     storeHours,
+    storeOffset,
     storeSummary,
     toggleOption,
     unitPrice,
@@ -64,7 +65,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
     const { width } = useWindowDimensions();
     const { t, locale } = useLanguage();
     const { adapter } = useStorefront();
-    const { mode } = useStorefrontRuntime();
+    const { mode, ownerInfo } = useStorefrontRuntime();
     const [cart, updateCart, , addProduct] = useCart();
     const { currentLocation, updateCurrentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
@@ -101,18 +102,20 @@ export default function NetworkProductDetail({ params }: { params: any }) {
         return Array.isArray(own) && own.length > 0 ? own : storeHours(params.store);
     }, [params.store, product]);
     const deposit = useMemo(() => (isBooking ? depositPercent(product) : null), [isBooking, product]);
+    // Booking times are the store's: a single store's app is the store it sells for.
+    const utcOffset = store?.utcOffset ?? (mode !== 'network' ? storeOffset(ownerInfo) : null);
     // Start times from the server's slots (taken ones excluded); null falls back to the hours.
     const loadSlots = useCallback(
         (date: string, now: Date) =>
             summary.id
-                ? fetchSlots((path, options) => apiRequest(adapterTarget(adapter), path, options), summary.id, date, { now, location: params.storeLocationId ?? null })
+                ? fetchSlots((path, options) => apiRequest(adapterTarget(adapter), path, options), summary.id, date, { now, location: params.storeLocationId ?? null, utcOffset })
                 : Promise.resolve(null),
-        [adapter, params.storeLocationId, summary.id]
+        [adapter, params.storeLocationId, summary.id, utcOffset]
     );
     const hour12 = usesTwelveHourClock(locale);
-    const scheduled = parseScheduledAt(scheduledAt);
+    const scheduled = parseScheduledAt(scheduledAt, utcOffset);
     const scheduledText = scheduled
-        ? `${scheduled.at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })} · ${formatClock(scheduled.minutes, hour12)}${duration ? ` – ${formatClock(scheduled.minutes + duration, hour12)}` : ''}`
+        ? `${scheduled.wall.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })} · ${formatClock(scheduled.minutes, hour12)}${duration ? ` – ${formatClock(scheduled.minutes + duration, hour12)}` : ''}`
         : null;
     const placeAttr = (key: string) => (typeof currentLocation?.getAttribute === 'function' ? currentLocation.getAttribute(key) : currentLocation?.[key]);
 
@@ -248,7 +251,15 @@ export default function NetworkProductDetail({ params }: { params: any }) {
 
                 {isBooking && (
                     <YStack marginTop={24} gap={22}>
-                        <BookingPicker hours={bookingHours} duration={duration} value={scheduledAt} onChange={setScheduledAt} providerName={store?.name ?? ''} loadSlots={loadSlots} />
+                        <BookingPicker
+                            hours={bookingHours}
+                            duration={duration}
+                            value={scheduledAt}
+                            onChange={setScheduledAt}
+                            providerName={store?.name ?? ''}
+                            loadSlots={loadSlots}
+                            utcOffset={utcOffset}
+                        />
                         <XStack
                             marginHorizontal={space.gutter}
                             alignItems='center'

@@ -38,7 +38,26 @@ import { orderTip } from '../commerce/order-summary';
 import { formattedAddressFromPlace, restoreFleetbasePlace } from '../utils/location';
 import LiveOrderRoute from '../components/LiveOrderRoute';
 import LivePickupRoute from '../components/LivePickupRoute';
-import { Button, ErrorState, IconButton, OfflineNotice, Sheet, Skeleton, StarInput, StoreLogo, TextField, UIText, formatClock, initials, radius, space, usableImageUrl, usesTwelveHourClock } from '../ui';
+import {
+    Button,
+    ErrorState,
+    IconButton,
+    OfflineNotice,
+    Sheet,
+    Skeleton,
+    StarInput,
+    StoreLogo,
+    TextField,
+    UIText,
+    formatClock,
+    initials,
+    radius,
+    space,
+    storeMinutes,
+    storeOffset,
+    usableImageUrl,
+    usesTwelveHourClock,
+} from '../ui';
 import useScreenTopInset from '../hooks/use-screen-top-inset';
 
 const MAP_HEIGHT = 380;
@@ -473,14 +492,18 @@ const OrderScreen = ({ route }: any) => {
     const pickup = order.getAttribute('payload.pickup');
     const entities: any[] = order.getAttribute('payload.entities') ?? [];
     const qrCode = order.getAttribute('tracking_number.qr_code');
+    // Appointments are shown on the store's clock (the device's until the store has loaded).
+    const clockOffset = !storeId || store?.id === storeId ? storeOffset(store) : null;
     // A booking order's appointment (meta.booking) when the server set one; else each item's time.
-    const appointment = orderBooking(order.getAttribute('meta'));
+    const appointment = orderBooking(order.getAttribute('meta'), clockOffset);
     const scheduledBookings = entities
-        .map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at) }))
+        .map((entity: any) => ({ entity, at: parseScheduledAt(entity?.meta?.scheduled_at, clockOffset) }))
         .filter((booking) => booking.at)
         .sort((a: any, b: any) => a.at.at.getTime() - b.at.at.getTime());
     const bookings =
-        scheduledBookings.length || !appointment?.start || !entities.length ? scheduledBookings : [{ entity: entities[0], at: parseScheduledAt(appointment.start) }].filter((booking) => booking.at);
+        scheduledBookings.length || !appointment?.start || !entities.length
+            ? scheduledBookings
+            : [{ entity: entities[0], at: parseScheduledAt(appointment.start, clockOffset) }].filter((booking) => booking.at);
     const bookingConfirmed = isBooking ? !['created', 'pending'].includes(String(status)) && !canceled : progress.phase !== 'placed' && !progress.canceled;
     // Products in a booking come with the earliest appointment.
     const bookingHasItems = isBooking && entities.some((entity: any) => !parseScheduledAt(entity?.meta?.scheduled_at));
@@ -805,14 +828,14 @@ const OrderScreen = ({ route }: any) => {
                             borderRadius={radius.card}
                             borderWidth={1}
                             borderColor='$borderColor'
-                            accessibilityLabel={t('Tracking.bookingLabel', { name: entity.name, time: at.at.toLocaleString(locale) })}
+                            accessibilityLabel={t('Tracking.bookingLabel', { name: entity.name, time: at.wall.toLocaleString(locale) })}
                         >
                             <YStack width={52} paddingVertical={6} borderRadius={radius.tile} backgroundColor='$primarySoft' alignItems='center'>
                                 <UIText variant='captionStrong' tone='brand' style={{ fontSize: 11 }}>
-                                    {at.at.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase()}
+                                    {at.wall.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase()}
                                 </UIText>
                                 <UIText variant='heading' tone='brand'>
-                                    {at.at.getDate()}
+                                    {at.wall.getDate()}
                                 </UIText>
                             </YStack>
                             <YStack flex={1} gap={2}>
@@ -821,7 +844,7 @@ const OrderScreen = ({ route }: any) => {
                                 </UIText>
                                 <UIText variant='bodyStrong'>
                                     {entity.name} · {formatClock(at.minutes, hour12)}
-                                    {appointment?.end && appointment.start?.getTime() === at.at.getTime() ? ` – ${formatClock(appointment.end.getHours() * 60 + appointment.end.getMinutes(), hour12)}` : ''}
+                                    {appointment?.end && appointment.start?.getTime() === at.at.getTime() ? ` – ${formatClock(storeMinutes(appointment.end, clockOffset), hour12)}` : ''}
                                 </UIText>
                                 <UIText variant='caption' tone='secondary'>
                                     {bookingConfirmed ? t('Tracking.bookingConfirmedBody', { store: storeName }) : t('Tracking.bookingRequestedBody', { store: storeName })}

@@ -1,4 +1,4 @@
-import { usableImageUrl } from './store-display';
+import { storeOffset, usableImageUrl } from './store-display';
 
 /**
  * What the cart screen shows, derived from the server cart: lines grouped by the store
@@ -29,6 +29,8 @@ export type CartStoreInfo = {
     minimum?: number;
     /** False when the store isn't taking orders right now. */
     open?: boolean;
+    /** The store's offset from UTC in minutes: booked times are shown on its clock. */
+    utcOffset?: number | null;
 };
 
 export type CartGroup = {
@@ -47,6 +49,8 @@ export type CartGroup = {
     open: boolean;
     /** Some lines have no store location, so the store can't fulfil them. */
     missingLocation: boolean;
+    /** The store's offset from UTC in minutes, or null when unknown (the device clock is used). */
+    utcOffset: number | null;
 };
 
 export type CheckoutBlock = { reason: 'minimum' | 'closed' | 'location'; storeId: string; storeName: string | null; remaining?: number } | null;
@@ -116,6 +120,7 @@ export function cartGroups(items: any[] | null | undefined, stores: Record<strin
             belowMinimum: remaining > 0,
             open: info.open ?? item?.store?.online !== false,
             missingLocation: lines.some((line) => !line.storeLocationId),
+            utcOffset: info.utcOffset ?? storeOffset(item?.store),
         };
     });
 }

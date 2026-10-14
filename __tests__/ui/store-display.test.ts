@@ -57,10 +57,22 @@ describe('store display', () => {
             distance: '1.2 km',
             status: { state: 'open', allDay: false, closesAt: 1200 },
             statusText: 'UI.openClosesAt{"time":"8 pm"}',
+            utcOffset: null,
             muted: false,
             bookable: true,
             tags: ['Services'],
         });
+    });
+
+    test('reads the hours on the store clock when the store sends its offset', () => {
+        // Tuesday 6 October 2026, 23:30 UTC: Wednesday 7:30 am in Singapore, Tuesday 6:30 pm in New York.
+        const now = new Date(Date.UTC(2026, 9, 6, 23, 30));
+        const locations = [{ hours: ['Tuesday', 'Wednesday'].map((day) => ({ day, start: '09:00', end: '20:00' })) }];
+        const singapore = storeSummary({ utc_offset: 480, locations }, { now, t });
+        expect(singapore.utcOffset).toBe(480);
+        expect(singapore.status).toEqual({ state: 'closed', opensAt: 540, opensInDays: 0, opensOn: 'Wednesday' });
+        expect(storeSummary(resource({ utc_offset: '-240', locations }), { now, t }).status).toEqual({ state: 'open', allDay: false, closesAt: 1200 });
+        expect(storeSummary({ utc_offset: 'soon', locations }, { now, t }).utcOffset).toBeNull();
     });
 
     test('mutes offline stores and leaves unknown details empty', () => {

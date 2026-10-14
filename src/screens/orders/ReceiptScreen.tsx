@@ -11,8 +11,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import useStorefront from '../../hooks/use-storefront';
 import useStorage from '../../hooks/use-storage';
+import useStoreOffsets from '../../hooks/use-store-offsets';
 import { adapter as fleetbaseAdapter } from '../../hooks/use-fleetbase';
 import { paymentKey, receiptText, summarizeOrder } from '../../commerce/order-summary';
+import { parseScheduledAt } from '../../commerce/booking';
 import { receiptFingerprint } from '../../commerce/order-payment';
 import PaymentStatus, { PaymentBadge } from '../../components/orders/PaymentStatus';
 import { formatCurrency } from '../../utils/format';
@@ -193,6 +195,12 @@ const ReceiptScreen = ({ route }: any) => {
     }, [initial?.id, reload]);
 
     const summary = useMemo(() => (json?.meta ? summarizeOrder(json) : null), [json]);
+    // Booked times are the store's, shown on its clock.
+    const offsetOf = useStoreOffsets(summary?.lines.some((line) => line.scheduledAt) ? [summary.storeId] : []);
+    const bookedFor = (value: string) => {
+        const at = parseScheduledAt(value, offsetOf(summary?.storeId));
+        return at ? formatDate(at.wall, 'PPp') : value;
+    };
     const money = (value: number) => formatCurrency(value, summary?.currency ?? undefined);
     const canShare = Platform.OS !== 'web' || typeof (globalThis as any).navigator?.share === 'function';
 
@@ -299,7 +307,7 @@ const ReceiptScreen = ({ route }: any) => {
                                 )}
                                 {!!line.scheduledAt && (
                                     <UIText variant='caption' tone='secondary'>
-                                        {t('Receipt.bookedFor', { when: formatDate(new Date(line.scheduledAt.replace(' ', 'T')), 'PPp') })}
+                                        {t('Receipt.bookedFor', { when: bookedFor(line.scheduledAt) })}
                                     </UIText>
                                 )}
                             </YStack>

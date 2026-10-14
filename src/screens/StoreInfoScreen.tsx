@@ -11,7 +11,23 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { effectiveOptions } from '../hooks/use-storefront-info';
 import useStorefront from '../hooks/use-storefront';
-import { ErrorState, IconButton, MediaImage, OfflineNotice, RatingLine, Skeleton, StoreLogo, UIText, formatClock, radius, space, storeSummary, usesTwelveHourClock } from '../ui';
+import {
+    ErrorState,
+    IconButton,
+    MediaImage,
+    OfflineNotice,
+    RatingLine,
+    Skeleton,
+    StoreLogo,
+    UIText,
+    formatClock,
+    radius,
+    space,
+    storeNow,
+    storeOffset,
+    storeSummary,
+    usesTwelveHourClock,
+} from '../ui';
 
 const WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -88,7 +104,8 @@ const StoreInfoScreen = ({ route }: any) => {
     const options = effectiveOptions(mode, ownerInfo?.options, single ? null : attr(storeData, 'options'));
     const reviewsEnabled = single ? options.reviews_enabled !== false : options.reviews_enabled === true;
     const summary = useMemo(() => (storeData ? storeSummary({ ...storeData, locations: (locations ?? []).map((location) => ({ hours: attr(location, 'hours') ?? [] })) }, { t, hour12 }) : null), [hour12, locations, storeData, t]);
-    const today = WEEK[(new Date().getDay() + 6) % 7];
+    // Today at the store, which hours are given in.
+    const today = WEEK[(storeNow(storeOffset(storeData)).getDay() + 6) % 7];
     const media: string[] = (Array.isArray(attr(storeData, 'media')) ? attr(storeData, 'media') : []).map((item: any) => item?.url).filter((url: unknown) => typeof url === 'string');
 
     const openSocial = async (appUrl: string, webUrl: string) => {

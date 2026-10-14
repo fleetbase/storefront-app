@@ -19,6 +19,8 @@ function dayDate(key: string): Date {
  * shown but marked closed; picking one explains it and offers the next open day. With
  * `loadSlots`, each day's times come from the server (which leaves out taken times); a
  * day it can't answer for (no slots endpoint, offline) uses the booking hours instead.
+ * Days and times are the store's: "today" and what has passed are read on its clock
+ * (`utcOffset`, minutes east of UTC), and the device's when that is unknown.
  */
 export default function BookingPicker({
     hours,
@@ -27,6 +29,7 @@ export default function BookingPicker({
     onChange,
     providerName,
     loadSlots,
+    utcOffset = null,
 }: {
     hours: BookingHour[];
     duration: number | null;
@@ -35,16 +38,18 @@ export default function BookingPicker({
     providerName: string;
     /** The server's start times for a day, or null to work them out from `hours`. */
     loadSlots?: (date: string, now: Date) => Promise<StartTime[] | null>;
+    /** The store's offset from UTC in minutes, or null to use the device clock. */
+    utcOffset?: number | null;
 }) {
     const theme = useTheme();
     const { t, locale } = useLanguage();
     const hour12 = usesTwelveHourClock(locale);
     const now = useMemo(() => new Date(), []);
-    const days = useMemo(() => bookingDays(hours, now, 14), [hours, now]);
-    const chosen = parseScheduledAt(value);
+    const days = useMemo(() => bookingDays(hours, now, 14, utcOffset), [hours, now, utcOffset]);
+    const chosen = parseScheduledAt(value, utcOffset);
     // Start on the chosen day, else the first day that still has a time to book.
     const [selectedDate, setSelectedDate] = useState<string>(
-        () => chosen?.date ?? days.find((entry) => entry.open && startTimes(entry.date, hours, { now, duration }).some((time) => !time.past))?.date ?? days[0].date
+        () => chosen?.date ?? days.find((entry) => entry.open && startTimes(entry.date, hours, { now, duration, utcOffset }).some((time) => !time.past))?.date ?? days[0].date
     );
     const day = days.find((entry) => entry.date === selectedDate) ?? days[0];
     // The server's times per day: undefined while loading, null when it has none to offer.
@@ -61,7 +66,7 @@ export default function BookingPicker({
     }, [loadSlots, now, selectedDate, serverTimes]);
     const fromServer = serverTimes[selectedDate];
     const loadingTimes = !!loadSlots && fromServer === undefined;
-    const times = useMemo(() => (fromServer ? fromServer : day.open ? startTimes(day.date, hours, { now, duration }) : []), [day, duration, fromServer, hours, now]);
+    const times = useMemo(() => (fromServer ? fromServer : day.open ? startTimes(day.date, hours, { now, duration, utcOffset }) : []), [day, duration, fromServer, hours, now, utcOffset]);
     const available = times.filter((time) => !time.past);
     const next = nextOpenDay(days, day.date);
     const weekday = (key: string, style: 'short' | 'long') => dayDate(key).toLocaleDateString(locale, { weekday: style });
@@ -160,7 +165,8 @@ export default function BookingPicker({
                                     </UIText>
                                     <XStack flexWrap='wrap' gap={8} accessibilityRole='radiogroup' accessibilityLabel={t(`Booking.${period}`)}>
                                         {slots.map((time) => {
-                                            const selected = chosen?.date === day.date && chosen.minutes === time.minutes;
+                                            // The exact time chosen, else the same store time (a value from before an edit).
+                                            const selected = times.some((entry) => entry.at === value) ? time.at === value : chosen?.date === day.date && chosen.minutes === time.minutes;
                                             return (
                                                 <Pressable
                                                     key={time.at}

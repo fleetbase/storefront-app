@@ -9,7 +9,14 @@
  * service may set `meta.service.duration_minutes` (or `meta.duration`) so the visit's end
  * time and the last start time can be shown, and `meta.service.deposit_percent` when only
  * a deposit is paid at checkout.
+ *
+ * Booking hours, slots and booked times are the store's wall-clock times. Each helper takes
+ * the store's `utc_offset` (minutes east of UTC) to read "today" and "now" on the store's
+ * clock and to write times with the store's offset; with no offset (an older server) the
+ * device clock is used, as before.
  */
+
+import { storeClockIso, toStoreWall } from '../ui/store-clock';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -25,6 +32,10 @@ export type StartTime = {
     /** Every provider is booked at this time (server slots only). */
     full?: boolean;
 };
+
+/** Ends with a UTC offset ("Z", "+08:00", "-0500"). */
+const HAS_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/i;
+const WALL_CLOCK = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?)?$/;
 
 const periodOf = (minutes: number): StartTime['period'] => (minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening');
 
@@ -90,15 +101,17 @@ function fromKey(key: string): Date {
 }
 
 /**
- * The next `count` days from `now`, each marked open when there are booking hours that
- * weekday. With no usable hours at all, every day is open (times are then unrestricted).
+ * The next `count` days from today on the store's calendar, each marked open when there are
+ * booking hours that weekday. With no usable hours at all, every day is open (times are
+ * then unrestricted).
  */
-export function bookingDays(hours: BookingHour[] | null | undefined, now: Date, count = 14): BookingDay[] {
+export function bookingDays(hours: BookingHour[] | null | undefined, now: Date, count = 14, utcOffset: number | null = null): BookingDay[] {
     const windows = bookingWindows(hours);
     const anyHours = windows.size > 0;
+    const today = toStoreWall(now, utcOffset);
     const days: BookingDay[] = [];
     for (let offset = 0; offset < count; offset++) {
-        const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
         days.push({ date: dateKey(date), weekday: date.getDay(), open: anyHours ? windows.has(date.getDay()) : true });
     }
     return days;
@@ -110,7 +123,10 @@ export function nextOpenDay(days: BookingDay[], from?: string | null): BookingDa
     return days.slice(index + 1).find((day) => day.open) ?? null;
 }
 
-/** Local ISO 8601 with the device's UTC offset, e.g. "2026-10-10T10:00:00+08:00". */
+/**
+ * Local ISO 8601 with the device's UTC offset, e.g. "2026-10-10T10:00:00+08:00". Booking
+ * times use `storeClockIso`, which writes the store's offset.
+ */
 export function toLocalIso(date: Date): string {
     const offset = -date.getTimezoneOffset();
     const sign = offset >= 0 ? '+' : '-';
@@ -119,24 +135,29 @@ export function toLocalIso(date: Date): string {
 }
 
 /**
- * Start times on `date` every `step` minutes inside its booking windows, leaving room to
- * finish when the duration is known. Times already passed (or within `leadMinutes` of
- * now) are kept but marked `past` so the grid stays stable.
+ * Start times on `date` (a store calendar day) every `step` minutes inside its booking
+ * windows, leaving room to finish when the duration is known. Times already passed (or
+ * within `leadMinutes` of now on the store's clock) are kept but marked `past` so the grid
+ * stays stable. Each `at` carries the store's offset, so the server books the store's time.
  */
-export function startTimes(date: string, hours: BookingHour[] | null | undefined, { now, step = 60, duration = null, leadMinutes = 30 }: { now: Date; step?: number; duration?: number | null; leadMinutes?: number }): StartTime[] {
+export function startTimes(
+    date: string,
+    hours: BookingHour[] | null | undefined,
+    { now, step = 60, duration = null, leadMinutes = 30, utcOffset = null }: { now: Date; step?: number; duration?: number | null; leadMinutes?: number; utcOffset?: number | null }
+): StartTime[] {
     const day = fromKey(date);
     const windows = bookingWindows(hours);
     const dayWindows = windows.size > 0 ? (windows.get(day.getDay()) ?? []) : [{ start: 8 * 60, end: 20 * 60 }];
-    const isToday = dateKey(now) === date;
-    const cutoff = now.getHours() * 60 + now.getMinutes() + leadMinutes;
+    const clockNow = toStoreWall(now, utcOffset);
+    const isToday = dateKey(clockNow) === date;
+    const cutoff = clockNow.getHours() * 60 + clockNow.getMinutes() + leadMinutes;
     const times: StartTime[] = [];
     for (const window of dayWindows) {
         const latest = window.end - (duration ?? step);
         for (let minutes = Math.ceil(window.start / step) * step; minutes <= latest; minutes += step) {
             if (times.some((time) => time.minutes === minutes)) continue;
-            const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(minutes / 60), minutes % 60);
             times.push({
-                at: toLocalIso(at),
+                at: storeClockIso(date, minutes, utcOffset),
                 minutes,
                 endMinutes: duration ? minutes + duration : null,
                 period: periodOf(minutes),
@@ -147,27 +168,48 @@ export function startTimes(date: string, hours: BookingHour[] | null | undefined
     return times.sort((a, b) => a.minutes - b.minutes);
 }
 
+const noneLeft = (value: unknown): boolean => value !== undefined && value !== null && Number.isFinite(Number(value)) && Number(value) <= 0;
+
 /**
- * The server's slots for `date` as start times. Slots that are taken (`available` false or
- * no providers left) are kept, marked `full`, so the grid shows them crossed out; slots
- * already passed (or within `leadMinutes`) are marked past as with local times.
+ * The store's date and time written in an ISO string that carries an offset: the server
+ * writes slots with the store's offset, so "2026-10-14T10:00:00+08:00" is 10 am on the
+ * 14th at the store, wherever the phone is.
  */
-export function parseSlots(json: any, date: string, { now, leadMinutes = 30 }: { now: Date; leadMinutes?: number }): StartTime[] {
+function writtenWallClock(value: unknown): { date: string; minutes: number } | null {
+    if (typeof value !== 'string' || !HAS_OFFSET.test(value.trim())) return null;
+    const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/.exec(value.trim());
+    return match ? { date: match[1], minutes: Number(match[2]) * 60 + Number(match[3]) } : null;
+}
+
+/**
+ * The server's slots for `date` (a store calendar day) as start times. The server answers
+ * on the store's clock: `start`/`end` carry the store's offset, `time` is the store's
+ * "HH:mm" and `past` says whether it has gone, so those are used as they are. Slots that
+ * are taken (`available` false, or no providers or places left) are kept, marked `full`,
+ * so the grid shows them crossed out; slots already passed (or within `leadMinutes`) are
+ * marked past as with local times.
+ */
+export function parseSlots(json: any, date: string, { now, leadMinutes = 30, utcOffset = null }: { now: Date; leadMinutes?: number; utcOffset?: number | null }): StartTime[] {
     const list = Array.isArray(json) ? json : Array.isArray(json?.slots) ? json.slots : Array.isArray(json?.data) ? json.data : [];
     const cutoff = now.getTime() + leadMinutes * 60000;
     const times: StartTime[] = [];
     for (const slot of list) {
-        const start = parseScheduledAt(slot?.start);
-        if (!start || start.date !== date || times.some((time) => time.minutes === start.minutes)) continue;
-        const end = parseScheduledAt(slot?.end);
-        const providers = Number(slot?.providers);
-        const full = slot?.available === false || (slot?.providers !== undefined && slot?.providers !== null && Number.isFinite(providers) && providers <= 0);
+        const start = parseScheduledAt(slot?.start, utcOffset);
+        if (!start) continue;
+        const written = writtenWallClock(slot.start);
+        const slotDate = written?.date ?? start.date;
+        const minutes = clock(slot?.time) ?? written?.minutes ?? start.minutes;
+        if (slotDate !== date || times.some((time) => time.minutes === minutes)) continue;
+        const end = parseScheduledAt(slot?.end, utcOffset);
+        const endWritten = writtenWallClock(slot?.end);
+        const endDate = endWritten?.date ?? end?.date;
+        const full = slot?.available === false || noneLeft(slot?.providers) || noneLeft(slot?.remaining);
         times.push({
-            at: typeof slot.start === 'string' ? slot.start : toLocalIso(start.at),
-            minutes: start.minutes,
-            endMinutes: end && end.date === date ? end.minutes : null,
-            period: periodOf(start.minutes),
-            past: full || start.at.getTime() < cutoff,
+            at: typeof slot.start === 'string' ? slot.start : storeClockIso(slotDate, minutes, utcOffset),
+            minutes,
+            endMinutes: end && endDate === date ? (endWritten?.minutes ?? end.minutes) : null,
+            period: periodOf(minutes),
+            past: full || slot?.past === true || start.at.getTime() < cutoff,
             full,
         });
     }
@@ -180,10 +222,15 @@ export type SlotRequest = (path: string, options?: { query?: Record<string, any>
  * Start times on `date` from the server, or null when it has no slots endpoint (404) or
  * can't be reached, in which case the caller works them out from the booking hours.
  */
-export async function fetchSlots(request: SlotRequest, productId: string, date: string, { now, location = null }: { now: Date; location?: string | null }): Promise<StartTime[] | null> {
+export async function fetchSlots(
+    request: SlotRequest,
+    productId: string,
+    date: string,
+    { now, location = null, utcOffset = null }: { now: Date; location?: string | null; utcOffset?: number | null }
+): Promise<StartTime[] | null> {
     try {
         const json = await request(`products/${encodeURIComponent(productId)}/slots`, { query: { date, ...(location ? { location } : {}) } });
-        return parseSlots(json, date, { now });
+        return parseSlots(json, date, { now, utcOffset });
     } catch {
         return null;
     }
@@ -191,12 +238,12 @@ export async function fetchSlots(request: SlotRequest, productId: string, date: 
 
 export type OrderBooking = { start: Date | null; end: Date | null; durationMinutes: number | null; provider: string | null };
 
-/** A booking order's appointment (`meta.booking`), or null for other orders. */
-export function orderBooking(meta: any): OrderBooking | null {
+/** A booking order's appointment (`meta.booking`), or null for other orders. Times without an offset are the store's (`utcOffset`). */
+export function orderBooking(meta: any, utcOffset: number | null = null): OrderBooking | null {
     const booking = meta?.booking;
     if (!booking || typeof booking !== 'object') return null;
-    const start = parseScheduledAt(booking.start)?.at ?? null;
-    const end = parseScheduledAt(booking.end)?.at ?? null;
+    const start = parseScheduledAt(booking.start, utcOffset)?.at ?? null;
+    const end = parseScheduledAt(booking.end, utcOffset)?.at ?? null;
     const duration = Number(booking.duration_minutes);
     return {
         start,
@@ -206,10 +253,35 @@ export function orderBooking(meta: any): OrderBooking | null {
     };
 }
 
-/** Splits `scheduled_at` into its local date key and minutes, or null when unparseable. */
-export function parseScheduledAt(value: unknown): { date: string; minutes: number; at: Date } | null {
+export type ScheduledAt = {
+    /** The day on the store's calendar, "2026-10-10". */
+    date: string;
+    /** Minutes since midnight on the store's clock. */
+    minutes: number;
+    /** The instant: for comparing, sorting and calendars. */
+    at: Date;
+    /** `at` on the store's clock, for showing the weekday and date (see `toStoreWall`). */
+    wall: Date;
+};
+
+/**
+ * Splits `scheduled_at` into its store date key and minutes, or null when unparseable. A
+ * time with an offset is an instant, read on the store's clock; one without is the store's
+ * wall-clock time. With no `utcOffset` both are read on the device clock, as before.
+ */
+export function parseScheduledAt(value: unknown, utcOffset: number | null = null): ScheduledAt | null {
     if (typeof value !== 'string' && !(value instanceof Date)) return null;
-    const at = value instanceof Date ? value : new Date(value.includes('T') || value.includes('Z') ? value : value.replace(' ', 'T'));
+    const known = utcOffset !== null && Number.isFinite(utcOffset);
+    const text = typeof value === 'string' ? value.trim() : '';
+    const written = known && typeof value === 'string' && !HAS_OFFSET.test(text) ? WALL_CLOCK.exec(text) : null;
+    let at: Date;
+    if (written) {
+        const [, year, month, day, hours = '0', minutes = '0', seconds = '0'] = written;
+        at = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes), Number(seconds)) - (utcOffset as number) * 60000);
+    } else {
+        at = value instanceof Date ? value : new Date(text.includes('T') || text.includes('Z') ? text : text.replace(' ', 'T'));
+    }
     if (Number.isNaN(at.getTime())) return null;
-    return { date: dateKey(at), minutes: at.getHours() * 60 + at.getMinutes(), at };
+    const wall = toStoreWall(at, known ? utcOffset : null);
+    return { date: dateKey(wall), minutes: wall.getHours() * 60 + wall.getMinutes(), at, wall };
 }
