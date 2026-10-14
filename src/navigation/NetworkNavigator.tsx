@@ -7,6 +7,7 @@ import { Text, XStack } from 'tamagui';
 import BackButton from '../components/BackButton';
 import StoreLayout from '../layouts/StoreLayout';
 import { StoreCartTab, StoreProfileTab } from './StoreNavigator';
+import OrderStack, { OrderModal } from './stacks/OrderStack';
 import useCart from '../hooks/use-cart';
 import { useLanguage } from '../contexts/LanguageContext';
 import { totalCartQuantity } from '../network/network-runtime';
@@ -58,6 +59,13 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
     NotificationSettings: { screen: screenSlot('notifications.settings'), linking: undefined, options: { headerShown: false } },
     Offers: { screen: screenSlot('offers.list'), linking: withLinking ? { path: 'offers' } : undefined, options: { headerShown: false } },
     Offer: { screen: screenSlot('offers.detail'), linking: withLinking ? { path: 'offers/:offerId' } : undefined, options: { headerShown: false } },
+    // An order can open in any tab (after checkout, from the trucks map), so each stack has the
+    // order screen and what it links to. Not deep-linkable here; orders link through the cart tab.
+    ...Object.fromEntries(
+        Object.entries({ ...OrderStack, OrderModal })
+            .filter(([name]) => name !== 'StoreReviews' && name !== 'WriteReview')
+            .map(([name, route]) => [name, { ...route, linking: undefined }])
+    ),
 });
 
 const NetworkHomeStack = createNativeStackNavigator({

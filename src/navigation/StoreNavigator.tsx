@@ -12,7 +12,7 @@ import { StoreHome, StoreSearch, StoreMap, StoreCategory, StoreCatalog, StoreInf
 import { PortalHost } from '@gorhom/portal';
 import LocationStack from './stacks/LocationStack';
 import CheckoutStack from './stacks/CheckoutStack';
-import OrderStack, { OrderChat, OrderModal, Receipt } from './stacks/OrderStack';
+import OrderStack, { OrderModal } from './stacks/OrderStack';
 import CartStack from './stacks/CartStack';
 import SignInScreen from '../screens/auth/SignInScreen';
 import { CreateAccountVerifyScreen, DeleteAccountVerifyScreen, PhoneVerifyScreen, SignInVerifyScreen } from '../screens/auth/VerifyCodeScreen';
@@ -195,10 +195,10 @@ export const ModalScreens = {
             headerShown: false,
         },
     },
-    // The order screen links to its chat and receipt wherever it opens.
+    // An order can open in any tab (after checkout, from the trucks map, from a notification),
+    // so every tab has the order screen and what it links to: chat, receipt and reviews.
+    ...OrderStack,
     OrderModal,
-    OrderChat,
-    Receipt,
 };
 
 export const StoreFoodTruckTab = createNativeStackNavigator({
