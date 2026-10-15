@@ -14,6 +14,7 @@ import { getScopedStorageKey } from '../network/network-runtime';
 import { addRecentSearch, removeRecentSearch } from '../network/recent-searches';
 import NearbyPlacesSection from './foodtrucks/NearbyPlacesSection';
 import { Chip, EmptyState, ErrorState, IconButton, ProductRow, Skeleton, UIText, productSummary, radius, space } from '../ui';
+import { categoryTree } from '../commerce/categories';
 
 const SEARCH_DELAY_MS = 300;
 
@@ -47,7 +48,10 @@ const StoreSearchScreen = () => {
             .findAll()
             .then((result: any) => {
                 if (!active) return;
-                const list = (Array.from(result || []) as any[]).map((category) => ({ id: category.id, name: category.getAttribute('name') })).filter((category) => category.name);
+                // Top-level categories only: a subcategory opens from its category.
+                const list = categoryTree(Array.from(result || []) as any[])
+                    .map((node) => ({ id: node.id, name: node.name }))
+                    .filter((category) => category.name);
                 setCategories(list.slice(0, 8));
             })
             .catch(() => {});

@@ -19,7 +19,8 @@ const HERO_HEIGHT = 200;
 /** Room under the floating back button for the fixed category bar. */
 const STICKY_CLEARANCE = 54;
 
-type Section = { key: string; id: string | null; name: string; products: Array<{ product: any; summary: ReturnType<typeof productSummary> }> };
+/** A top-level menu category, with every category under it: each product keeps its place there ("Tacos › Vegetarian"). */
+type Section = { key: string; id: string | null; name: string; ids: Set<string>; products: Array<{ product: any; summary: ReturnType<typeof productSummary>; subPath: string }> };
 
 /**
  * One truck's products, laid out like a store page: a backdrop that stretches when pulled
@@ -44,12 +45,15 @@ const TruckMenuScreen = () => {
     const truck = useMemo(() => trucks?.find((item) => item.id === params.foodTruckId) ?? (params.truck ? summarizeTruck(params.truck) : null), [params.foodTruckId, params.truck, trucks]);
     const sections = useMemo<Section[]>(() => {
         const groups = new Map<string, Section>();
-        (truck ? truckProducts(truck) : []).forEach(({ product, categoryId, categoryName }) => {
-            const key = String(categoryId ?? categoryName);
-            if (!groups.has(key)) groups.set(key, { key, id: categoryId, name: categoryName || t('FoodTrucks.menu'), products: [] });
-            groups.get(key)!.products.push({ product, summary: productSummary(product) });
+        (truck ? truckProducts(truck) : []).forEach(({ product, categoryId, topCategoryId, topCategoryName, subPath }) => {
+            const key = String(topCategoryId ?? topCategoryName);
+            if (!groups.has(key)) groups.set(key, { key, id: topCategoryId, name: topCategoryName || t('FoodTrucks.menu'), ids: new Set([key]), products: [] });
+            const section = groups.get(key)!;
+            if (categoryId) section.ids.add(String(categoryId));
+            section.products.push({ product, summary: productSummary(product), subPath });
         });
-        return [...groups.values()];
+        // Within a category, its own products first, then each subcategory's together.
+        return [...groups.values()].map((section) => ({ ...section, products: [...section.products].sort((a, b) => (a.subPath === b.subPath ? 0 : !a.subPath ? -1 : !b.subPath ? 1 : 0)) }));
     }, [t, truck]);
     // A product can sit in more than one category; recommend it once.
     const recommended = useMemo(() => {
@@ -79,9 +83,11 @@ const TruckMenuScreen = () => {
     const handledJump = useRef<string | null>(null);
     useEffect(() => {
         const request = params.categoryId ? String(params.categoryId) : null;
-        if (!request || handledJump.current === request || !sections.some((section) => section.key === request)) return;
+        // A subcategory opens the section of the category it is under.
+        const section = sections.find((candidate) => candidate.key === request) ?? sections.find((candidate) => candidate.ids.has(request));
+        if (!request || handledJump.current === request || !section) return;
         handledJump.current = request;
-        const timer = setTimeout(() => jumpTo(request), 250);
+        const timer = setTimeout(() => jumpTo(section.key), 250);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.categoryId, sections]);
@@ -307,8 +313,15 @@ const TruckMenuScreen = () => {
                                     <UIText variant='heading' accessibilityRole='header' style={{ marginBottom: 4 }}>
                                         {section.name}
                                     </UIText>
-                                    {section.products.map((item) => (
-                                        <ProductRow key={item.summary.id} product={item.summary} storeClosed={!ordering} onPress={() => openProduct(item.product)} />
+                                    {section.products.map((item, index) => (
+                                        <React.Fragment key={`${item.subPath}-${item.summary.id}`}>
+                                            {!!item.subPath && item.subPath !== section.products[index - 1]?.subPath && (
+                                                <UIText variant='subheading' accessibilityRole='header' style={{ marginTop: 16, marginBottom: 2 }}>
+                                                    {item.subPath}
+                                                </UIText>
+                                            )}
+                                            <ProductRow product={item.summary} storeClosed={!ordering} onPress={() => openProduct(item.product)} />
+                                        </React.Fragment>
                                     ))}
                                 </YStack>
                             ))}

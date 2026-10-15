@@ -9,23 +9,27 @@ import { useLanguage } from '../contexts/LanguageContext';
 import useStorefront from '../hooks/use-storefront';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import { EmptyState, ErrorState, IconButton, MediaImage, Skeleton, UIText, radius, space } from '../ui';
+import { categoryTree, type CategoryNode } from '../commerce/categories';
 
 type CategoryRow = { id: string; name: string; iconUrl: string | null; subcategories: Array<{ id: string; name: string }> };
 
-function toRow(category: any): CategoryRow {
+/** A top-level category and the categories directly under it (from the tree, or listed with it by an older API). */
+export function toRow(node: CategoryNode): CategoryRow {
+    const category = node.raw;
     const attr = (key: string) => (typeof category?.getAttribute === 'function' ? category.getAttribute(key) : category?.[key]);
-    const subs = Array.isArray(attr('subcategories')) ? attr('subcategories') : [];
+    const listed = Array.isArray(attr('subcategories')) ? attr('subcategories') : [];
+    const subs = node.children.length ? node.children.map((child) => ({ id: child.id, name: child.name })) : listed.map((sub: any) => ({ id: String(sub?.id ?? sub?.public_id ?? ''), name: String(sub?.name ?? '') }));
     return {
-        id: String(category?.id ?? attr('id') ?? ''),
-        name: String(attr('name') ?? ''),
-        iconUrl: attr('icon_url') ?? null,
-        subcategories: subs.map((sub: any) => ({ id: String(sub?.id ?? sub?.public_id ?? ''), name: String(sub?.name ?? '') })).filter((sub: any) => sub.name),
+        id: node.id,
+        name: node.name,
+        iconUrl: node.iconUrl,
+        subcategories: subs.filter((sub: any) => sub.name),
     };
 }
 
 /**
- * Every category of the store, for large menus: each opens its section on the store page
- * (subcategories open their parent's section).
+ * Every category of the store, for large menus: each top-level category opens its section on
+ * the store page, and each subcategory its own heading in that section.
  */
 const StoreCatalogScreen = () => {
     const navigation = useNavigation<any>();
@@ -44,7 +48,7 @@ const StoreCatalogScreen = () => {
         setFailed(false);
         storefront.categories
             .findAll()
-            .then((result: any) => active && setCategories((Array.from(result || []) as any[]).map(toRow).filter((row) => row.name)))
+            .then((result: any) => active && setCategories(categoryTree(Array.from(result || []) as any[]).map(toRow).filter((row) => row.name)))
             .catch(() => active && setFailed(true));
         return () => {
             active = false;
@@ -138,7 +142,7 @@ const StoreCatalogScreen = () => {
                                     {item.subcategories.map((sub) => (
                                         <Pressable
                                             key={sub.id || sub.name}
-                                            onPress={() => open(item.id)}
+                                            onPress={() => open(sub.id || item.id)}
                                             accessibilityRole='link'
                                             style={{ height: 34, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: theme.surface.val, justifyContent: 'center' }}
                                         >
