@@ -16,6 +16,8 @@ import { customNavigation } from '../extensions/build-navigation';
 import { CustomTabIcon, CustomTabLabel, createCustomTabStack, orderTabs, tabsFor, withCustomRoutes } from '../extensions/navigation';
 import { TabBar, UIText } from '../ui';
 import { storefrontConfig } from '../utils';
+import { getBuildBranding } from '../branding/build-branding';
+import { TAB_ICON_MAP } from './tab-icons';
 
 // With the food trucks home, the Home tab opens on the trucks map and the Map tab is
 // dropped. Otherwise the Trucks tab can be added on its own.
@@ -121,16 +123,20 @@ const icons: Record<string, any> = {
     NetworkProfileTab: faUser,
 };
 
+// The brand file's per tab icon and label (`navigation.tabs`), over the defaults.
+const TAB_OVERRIDES = getBuildBranding().branding.navigation.tabs ?? {};
+
 const NetworkTabLabel = ({ labelKey, color, focused }: { labelKey: string; color: string; focused?: boolean }) => {
     const { t } = useLanguage();
-    return <UIText style={{ color, fontSize: 11, lineHeight: 14, fontWeight: focused ? '700' : '600' }}>{t(labelKey)}</UIText>;
+    return <UIText style={{ color, fontSize: 11, lineHeight: 14, fontWeight: focused ? '700' : '600' }}>{t(labelKey, { defaultValue: labelKey })}</UIText>;
 };
 
 const NetworkTabIcon = ({ routeName, color, focused }: { routeName: string; color: string; focused?: boolean }) => {
     const [cart] = useCart();
     const custom = customNavigation.tabs[routeName];
     if (custom) return <CustomTabIcon tab={custom} color={color} focused={focused} />;
-    const icon = routeName === 'NetworkHomeTab' && FOOD_TRUCKS_HOME ? faTruck : icons[routeName];
+    const brandIcon = TAB_OVERRIDES[routeName]?.icon;
+    const icon = brandIcon && TAB_ICON_MAP[brandIcon] ? TAB_ICON_MAP[brandIcon] : routeName === 'NetworkHomeTab' && FOOD_TRUCKS_HOME ? faTruck : icons[routeName];
     const count = totalCartQuantity(cart?.contents?.().map((item: any) => item.serialize?.() || item) || []);
 
     return (
@@ -149,20 +155,23 @@ function foodTruckTab() {
     return {
         NetworkFoodTruckTab: {
             screen: NetworkFoodTruckStack,
-            options: { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey='Network.tabs.trucks' color={color} focused={focused} /> },
+            options: label('NetworkFoodTruckTab', 'Network.tabs.trucks'),
         },
     };
 }
 
-const label = (labelKey: string) => ({ tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey={labelKey} color={color} focused={focused} /> });
+function label(tab: string, labelKey: string) {
+    const key = TAB_OVERRIDES[tab]?.label ?? labelKey;
+    return { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey={key} color={color} focused={focused} /> };
+}
 
 const CORE_TABS: Record<string, any> = {
-    NetworkHomeTab: { screen: NetworkHomeStack, options: label(FOOD_TRUCKS_HOME ? 'Network.tabs.trucks' : 'Network.tabs.discover') },
+    NetworkHomeTab: { screen: NetworkHomeStack, options: label('NetworkHomeTab', FOOD_TRUCKS_HOME ? 'Network.tabs.trucks' : 'Network.tabs.discover') },
     ...(FOOD_TRUCKS_TAB ? foodTruckTab() : {}),
-    NetworkSearchTab: { screen: NetworkSearchStack, options: label('Network.tabs.search') },
-    ...(FOOD_TRUCKS_HOME ? {} : { NetworkMapTab: { screen: NetworkMapStack, options: label('Network.tabs.map') } }),
-    NetworkCartTab: { screen: StoreCartTab, options: label('Network.tabs.cart') },
-    NetworkProfileTab: { screen: StoreProfileTab, options: label('Network.tabs.profile') },
+    NetworkSearchTab: { screen: NetworkSearchStack, options: label('NetworkSearchTab', 'Network.tabs.search') },
+    ...(FOOD_TRUCKS_HOME ? {} : { NetworkMapTab: { screen: NetworkMapStack, options: label('NetworkMapTab', 'Network.tabs.map') } }),
+    NetworkCartTab: { screen: StoreCartTab, options: label('NetworkCartTab', 'Network.tabs.cart') },
+    NetworkProfileTab: { screen: StoreProfileTab, options: label('NetworkProfileTab', 'Network.tabs.profile') },
 };
 
 // The build's own tabs (brand/storefront.extensions.ts), each with the shared Network screens.
