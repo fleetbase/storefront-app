@@ -25,6 +25,8 @@ export const DefaultConfig = {
     defaultMapType: config('DEFAULT_MAP_TYPE', 'standard'),
     defaultServiceArea: config('DEFAULT_SERVICE_AREA'),
     defaultLocale: config('DEFAULT_LOCALE', 'en'),
+    // ISO country code the phone field starts on (e.g. `MN` for +976); otherwise the device's region.
+    defaultCountry: config('DEFAULT_COUNTRY'),
     availableLocales: toArray(config('AVAILABLE_LOCALES', 'en,mn,uk')),
     paymentGateway: config('PAYMENT_GATEWAY', 'stripe'),
     incrementTipBy: config('TIP_INCREMENT', 50),

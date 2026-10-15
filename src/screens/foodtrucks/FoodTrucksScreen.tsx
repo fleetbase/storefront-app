@@ -11,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useStorefront from '../../hooks/use-storefront';
 import useStorage from '../../hooks/use-storage';
+import { useBranding } from '../../branding/BrandingProvider';
 import useCartSummary from '../../hooks/use-cart-summary';
 import useCurrentLocation from '../../hooks/use-current-location';
 import useSavedLocations from '../../hooks/use-saved-locations';
@@ -19,7 +20,7 @@ import PlaceIcon from './PlaceIcon';
 import { truckCategories, type LatLng, type TruckCategory } from '../../commerce/food-trucks';
 import { fetchOffers, type Offer } from '../../commerce/offers';
 import { initialRegion } from '../../network/map';
-import { handleNavigateNewLocation } from '../../utils';
+import { handleNavigateNewLocation, storefrontConfig } from '../../utils';
 import { OfferRow } from '../../components/offers/OfferCard';
 import { Button, CartPill, ErrorState, LanguageButton, LocationSheet, MediaImage, Skeleton, UIText, elevation, radius, space } from '../../ui';
 
@@ -95,7 +96,9 @@ const FoodTrucksScreen = () => {
     const { currentLocation, updateCurrentLocation } = useCurrentLocation();
     const { savedLocations } = useSavedLocations();
     const { trucks, stores, customer, zone, loading, error, reload } = useFoodTrucks();
-    const [mode, setMode] = useStorage<Mode>(MODE_KEY, 'map');
+    // Opens as the brand file says (navigation.foodTrucksView) until the customer picks a view.
+    const { branding } = useBranding();
+    const [mode, setMode] = useStorage<Mode>(MODE_KEY, branding.navigation.foodTrucksView ?? 'map');
     const [layer, setLayer] = useState<Layer>('all');
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [locationSheet, setLocationSheet] = useState(false);
@@ -447,7 +450,7 @@ const FoodTrucksScreen = () => {
     const mapMode = (
         <YStack flex={1} onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}>
             {region ? (
-                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('FoodTrucks.mapLabel')} onMarkerPress={(event: any) => openMarker(event?.nativeEvent?.id)}>
+                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} mapType={storefrontConfig('defaultMapType', 'standard')} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('FoodTrucks.mapLabel')} onMarkerPress={(event: any) => openMarker(event?.nativeEvent?.id)}>
                     {zones.map((item) =>
                         item.zoneBorder.map((ring, index) => (
                             <Polygon

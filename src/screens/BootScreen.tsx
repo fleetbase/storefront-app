@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform, ImageBackground, StyleSheet } from 'react-native';
 import { check, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { splashLogo } from '../generated/brand-assets';
 import { Image, Spinner, XStack, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
 import { toArray, isArray, storefrontConfig } from '../utils';
@@ -119,7 +120,7 @@ const BootScreen = () => {
                     />
                 )}
                 <YStack alignItems='center' justifyContent='center'>
-                    <Image source={require('../../assets/splash-screen.png')} width={100} height={100} borderRadius='$4' mb='$1' />
+                    <Image source={splashLogo} width={100} height={100} borderRadius='$4' mb='$1' />
                     <XStack mt='$2' alignItems='center' justifyContent='center' space='$3'>
                         <Spinner size='small' color='$textPrimary' />
                     </XStack>

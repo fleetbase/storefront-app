@@ -3,7 +3,7 @@ import { FlatList, Platform, StyleSheet, View, useWindowDimensions } from 'react
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { handleNavigateNewLocation } from '../../utils';
+import { handleNavigateNewLocation, storefrontConfig } from '../../utils';
 import { faList, faLocationArrow, faLocationDot, faStore } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -146,7 +146,7 @@ const NetworkMapScreen = () => {
     return (
         <YStack flex={1} backgroundColor='$background'>
             {region ? (
-                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('Network.map.label')}>
+                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} mapType={storefrontConfig('defaultMapType', 'standard')} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={t('Network.map.label')}>
                     {stores.map((store, index) => (
                         <Marker
                             key={store.key}

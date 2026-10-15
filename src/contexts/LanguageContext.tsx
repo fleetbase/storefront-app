@@ -27,9 +27,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     ensureTranslationsLoaded();
     const [locale, setLocaleState] = useStorage<string>('_locale', storefrontConfig('defaultLocale', 'en'));
 
-    const languages = Object.keys(I18n.translations).map((code) => {
-        return { code, ...getLangNameFromCode(code), emoji: localeEmoji(code) };
-    });
+    // The languages the build offers (AVAILABLE_LOCALES), of those the app has translations for.
+    const offered = (storefrontConfig('availableLocales') ?? []) as string[];
+    const languages = Object.keys(I18n.translations)
+        .filter((code) => !offered.length || offered.includes(code))
+        .map((code) => {
+            return { code, ...getLangNameFromCode(code), emoji: localeEmoji(code) };
+        });
 
     const language = useMemo(() => {
         return { code: locale, ...getLangNameFromCode(locale), emoji: localeEmoji(locale) };

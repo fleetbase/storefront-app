@@ -191,7 +191,7 @@ const StoreMapScreen = () => {
     return (
         <YStack flex={1} backgroundColor='$background'>
             {region ? (
-                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={mode === 'trucks' ? t('StoreMap.trucksLabel') : t('StoreMap.locationsLabel')}>
+                <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={region} mapType={storefrontConfig('defaultMapType', 'standard')} showsUserLocation={Platform.OS !== 'web'} accessibilityLabel={mode === 'trucks' ? t('StoreMap.trucksLabel') : t('StoreMap.locationsLabel')}>
                     {sortedPins.map((pin, index) => (
                         <Marker
                             key={pin.key}

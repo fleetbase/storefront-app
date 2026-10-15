@@ -89,6 +89,14 @@ function linkBrand(root = path.resolve(__dirname, '..')) {
         `${HEADER}${fontImports}${fontImports ? '\n\n' : ''}/** Font files bundled from brand/fonts, by PostScript name, with their URLs on the web. */\nexport const brandFontFiles: Record<string, string | null> = {\n${fontNames.map((name, index) => `    ${JSON.stringify(name)}: f${index} as unknown as string,`).join('\n')}${fontNames.length ? '\n' : ''}};\n`
     );
 
+    // The logo on the in-app boot screen: brand/splash-screen.png, the same artwork as the
+    // native launch screen, so the two match. Falls back to the template in assets/.
+    const splashLogo = ['brand/splash-screen.png', 'assets/splash-screen.png'].find((file) => exists(path.join(root, file)));
+    writeIfChanged(
+        path.join(outDir, 'brand-assets.ts'),
+        `${HEADER}/** The boot screen logo (brand/splash-screen.png, or the template). */\nexport const splashLogo = require('${rel(splashLogo)}');\n`
+    );
+
     // Development env overrides: env.dev.json (git-ignored) at the repository root.
     const envOverrides = exists(path.join(root, 'env.dev.json'));
     writeIfChanged(

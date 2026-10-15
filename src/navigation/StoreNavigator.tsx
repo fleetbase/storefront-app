@@ -30,6 +30,11 @@ import { customNavigation } from '../extensions/build-navigation';
 import { CustomTabIcon, CustomTabLabel, createCustomTabStack, orderTabs, tabsFor, withCustomRoutes } from '../extensions/navigation';
 import { TabBar } from '../ui';
 import { totalCartQuantity } from '../network/network-runtime';
+import { getBuildBranding } from '../branding/build-branding';
+import { TAB_ICON_MAP } from './tab-icons';
+
+// The brand file's per tab icon and label (`navigation.tabs`), over the env keys and defaults.
+const TAB_OVERRIDES = getBuildBranding().branding.navigation.tabs ?? {};
 
 const importedIconsMap = {
     faHome,
@@ -148,7 +153,16 @@ function createTabScreens(optionsCallbacks = {}) {
         const tab = tabs[i];
         // A listed tab that isn't registered (e.g. a custom tab missing from the extensions) is skipped.
         if (tab && screens[tab]) {
-            screenTabs[tab] = screens[tab];
+            const label = TAB_OVERRIDES[tab]?.label;
+            screenTabs[tab] = label
+                ? {
+                      ...screens[tab],
+                      options: () => {
+                          const { t } = useLanguage();
+                          return { tabBarLabel: t(label, { defaultValue: label }) };
+                      },
+                  }
+                : screens[tab];
         }
     }
 
@@ -156,6 +170,9 @@ function createTabScreens(optionsCallbacks = {}) {
 }
 
 function getDefaultTabIcon(routeName) {
+    const brandIcon = TAB_OVERRIDES[routeName]?.icon;
+    if (brandIcon && TAB_ICON_MAP[brandIcon]) return TAB_ICON_MAP[brandIcon];
+
     // Check if able to load from config/env setting first
     const routeIconConfig = config(`${configCase(routeName)}_ICON`);
     if (routeIconConfig && importedIconsMap[routeIconConfig]) {

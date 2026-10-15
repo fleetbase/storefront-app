@@ -143,6 +143,7 @@ The app reads its settings from `.env` at build time.
 | `STRIPE_ENABLE_APPLE_PAY`, `STRIPE_ENABLE_GOOGLE_PAY` | `false` | Wallet buttons in the Stripe sheet |
 | `HOME_SCREEN` | `store` | `foodTrucks` opens the app on the trucks map |
 | `DEFAULT_LOCALE`, `AVAILABLE_LOCALES` | `en`, `en,mn,uk` | Languages offered |
+| `DEFAULT_COUNTRY` | device region | Country the phone field starts on, e.g. `MN` for +976 |
 | `DEFAULT_COORDINATES` | | `lat,lng` used before the customer's location is known |
 | `SOCKETCLUSTER_HOST`, `SOCKETCLUSTER_PORT`, `SOCKETCLUSTER_SECURE` | Fleetbase cloud | Your realtime server |
 | `TIP_INCREMENT` | `50` | Tip step, in the currency's smallest unit |

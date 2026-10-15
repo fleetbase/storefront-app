@@ -140,6 +140,9 @@ export const BootSchema = z
 /** A core store tab, or a custom tab registered in the build's extensions (e.g. `RewardsTab`). */
 const StoreTabName = z.union([z.enum(STORE_TABS), z.string().regex(/^[A-Z][A-Za-z0-9]{0,44}Tab$/, 'Expected a store tab or a custom tab name ending in "Tab"')]);
 
+/** Icons a tab can use instead of its default (`navigation.tabs.<Tab>.icon`). */
+export const TAB_ICONS = ['home', 'store', 'shop', 'bag', 'truck', 'utensils', 'map', 'compass', 'search', 'cart', 'user'] as const;
+
 export const NavigationSchema = z
     .object({
         store: z
@@ -164,6 +167,13 @@ export const NavigationSchema = z
             .strict(),
         /** Show the language button in screen headers (only when more than one language is available). */
         languageSwitcher: z.boolean(),
+        /** How the food trucks screen opens: the map, or the list of trucks and categories. */
+        foodTrucksView: z.enum(['map', 'list']),
+        /**
+         * Per tab overrides, e.g. `{ StoreHomeTab: { icon: 'shop', label: 'tabs.Shop' } }`. The
+         * label is a translation key (so it follows the language) or plain text.
+         */
+        tabs: z.record(z.string().regex(/^[A-Z][A-Za-z0-9]{0,44}Tab$/), z.object({ icon: z.enum(TAB_ICONS), label: z.string().min(1).max(60) }).partial().strict()),
     })
     .partial()
     .strict();
