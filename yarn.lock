@@ -2550,7 +2550,6 @@ __metadata:
     react-native-device-info: ^14.1.1
     react-native-event-listeners: ^1.0.7
     react-native-fast-image: ^8.6.3
-    react-native-fbsdk-next: ^13.4.0
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.32.0
     react-native-get-random-values: ^1.11.0
@@ -14686,19 +14685,6 @@ __metadata:
     react: ^17 || ^18
     react-native: ">=0.60.0"
   checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
-  languageName: node
-  linkType: hard
-
-"react-native-fbsdk-next@npm:^13.4.0":
-  version: 13.4.1
-  resolution: "react-native-fbsdk-next@npm:13.4.1"
-  peerDependencies:
-    expo: ">=47.0.0"
-    react-native: ">=0.63.3"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-  checksum: e8f0f470009485c48e17279b1dfe8e6f94303de52394ce579fb888518a694b79f741a060d957b097534003abb07827e03955203b55101c333ba07bf8f5d307b1
   languageName: node
   linkType: hard
 

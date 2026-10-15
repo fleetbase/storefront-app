@@ -371,7 +371,6 @@
     "Buttons": {
         "continueWithPhone": "Continue with Phone",
         "continueWithApple": "Continue with Apple",
-        "continueWithFacebook": "Continue with Facebook",
         "continueWithInstagram": "Continue with Instagram",
         "continueWithGoogle": "Continue with Google"
     },
@@ -1189,8 +1188,7 @@
         "or": "or",
         "continueWith": {
             "apple": "Continue with Apple",
-            "google": "Continue with Google",
-            "facebook": "Continue with Facebook"
+            "google": "Continue with Google"
         },
         "socialFailed": "Signing in with {{provider}} didn't work. Try again or use your phone.",
         "newHere": "New here? Create an account",

@@ -2,12 +2,11 @@ import React, { createContext, useContext, useReducer, useMemo, useEffect, useCa
 import { Platform } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
 import { Customer } from '@fleetbase/storefront';
-import { later, isArray, storefrontConfig, config, toBoolean } from '../utils';
+import { later, isArray, storefrontConfig } from '../utils';
 import useStorage, { storage } from '../hooks/use-storage';
 import useStorefront, { adapter } from '../hooks/use-storefront';
 import { useLanguage } from './LanguageContext';
 import { useNotification } from './NotificationContext';
-import { LoginManager as FacebookLoginManager } from 'react-native-fbsdk-next';
 
 const AuthContext = createContext();
 
@@ -278,16 +277,6 @@ export const AuthProvider = ({ children }) => {
         storage.removeItem('_current_location');
         storage.removeItem('_local_locations');
         storage.removeItem('_customer_token');
-
-        // If logged in with Facebook. Facebook login is optional: without FACEBOOK_APP_ID the SDK
-        // is never initialised, and touching it then throws (on Android it crashed every sign-in).
-        if (config('FACEBOOK_APP_ID') && toBoolean(config('FACEBOOK_LOGIN_ENABLED'))) {
-            try {
-                FacebookLoginManager.logOut();
-            } catch (error) {
-                console.warn('[AuthContext] Facebook sign-out failed:', error);
-            }
-        }
     };
 
     // Verify code

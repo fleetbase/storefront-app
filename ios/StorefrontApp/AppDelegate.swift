@@ -2,30 +2,15 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import UIKit
-import FBSDKCoreKit
 import GoogleSignIn
 
 class AppDelegate: RCTAppDelegate {
-    // Facebook login is optional: without FACEBOOK_APP_ID in .env the SDK is never started.
-    static let facebookEnabled: Bool = {
-        let appId = Bundle.main.object(forInfoDictionaryKey: "FacebookAppID") as? String ?? ""
-        return !appId.isEmpty && !appId.hasPrefix("$(")
-    }()
-
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
          // Initialize ReactNativeNotifications
         RNNotifications.startMonitorNotifications()
-
-        // Initialize the Facebook SDK, only when the build has a Facebook app ID
-        if AppDelegate.facebookEnabled {
-            ApplicationDelegate.shared.application(
-                application,
-                didFinishLaunchingWithOptions: launchOptions
-            )
-        }
 
         moduleName = "StorefrontApp"
         dependencyProvider = RCTAppDependencyProvider()
@@ -42,16 +27,6 @@ class AppDelegate: RCTAppDelegate {
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        // Let the Facebook SDK handle the URL
-        if AppDelegate.facebookEnabled, ApplicationDelegate.shared.application(
-            application,
-            open: url,
-            sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
-            annotation: options[UIApplication.OpenURLOptionsKey.annotation]
-        ) {
-            return true
-        }
-
          // Let Google Sign-In handle the URL
         if GIDSignIn.sharedInstance.handle(url) {
             return true

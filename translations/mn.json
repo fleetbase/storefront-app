@@ -371,7 +371,6 @@
     "Buttons": {
         "continueWithPhone": "Утас дугаараар нэвтрэх",
         "continueWithApple": "Apple ашиглан нэвтрэх",
-        "continueWithFacebook": "Facebook ашиглан нэвтрэх",
         "continueWithInstagram": "Instagram ашиглан нэвтрэх",
         "continueWithGoogle": "Google ашиглан нэвтрэх"
     },
@@ -1189,8 +1188,7 @@
         "or": "эсвэл",
         "continueWith": {
             "apple": "Apple-р үргэлжлүүлэх",
-            "google": "Google-р үргэлжлүүлэх",
-            "facebook": "Facebook-р үргэлжлүүлэх"
+            "google": "Google-р үргэлжлүүлэх"
         },
         "socialFailed": "{{provider}}-р нэвтэрч чадсангүй. Дахин оролдох эсвэл утсаараа нэвтэрнэ үү.",
         "newHere": "Шинэ хэрэглэгч үү? Бүртгэл үүсгэх",

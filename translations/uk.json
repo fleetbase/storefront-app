@@ -371,7 +371,6 @@
     "Buttons": {
         "continueWithPhone": "Продовжити за номером телефону",
         "continueWithApple": "Продовжити з Apple",
-        "continueWithFacebook": "Продовжити з Facebook",
         "continueWithInstagram": "Продовжити з Instagram",
         "continueWithGoogle": "Продовжити з Google"
     },
@@ -1189,8 +1188,7 @@
         "or": "або",
         "continueWith": {
             "apple": "Продовжити з Apple",
-            "google": "Продовжити з Google",
-            "facebook": "Продовжити з Facebook"
+            "google": "Продовжити з Google"
         },
         "socialFailed": "Не вдалося увійти через {{provider}}. Спробуйте ще раз або використайте телефон.",
         "newHere": "Вперше тут? Створіть обліковий запис",

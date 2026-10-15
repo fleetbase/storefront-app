@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Linking, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { faApple, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faApple, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack } from 'tamagui';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,7 +17,6 @@ import { Button, IconButton, TextField, UIText, space } from '../../ui';
 const PROVIDERS = [
     { key: 'apple', icon: faApple, variant: 'inverse' },
     { key: 'google', icon: faGoogle, variant: 'outline' },
-    { key: 'facebook', icon: faFacebook, variant: 'outline' },
 ] as const;
 
 /**
