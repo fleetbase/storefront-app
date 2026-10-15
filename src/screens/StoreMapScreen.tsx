@@ -109,7 +109,8 @@ const StoreMapScreen = () => {
                 .map((truck: any): Pin | null => {
                     const coordinate = pointOf(truck.vehicle);
                     if (!coordinate) return null;
-                    const live = truck.vehicle?.online === true || truck.vehicle?.online === 1;
+                    // Whether the truck takes orders comes from the truck, not its vehicle's connectivity.
+                    const live = truck.online === true || truck.online === 1;
                     return {
                         key: truck.id,
                         kind: 'truck',
