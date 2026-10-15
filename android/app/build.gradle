@@ -99,7 +99,11 @@ android {
         missingDimensionStrategy 'react-native-camera', 'general' 
         manifestPlaceholders = [
             appAuthRedirectScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp",
-            appLinkScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp"
+            appLinkScheme: project.env.get("APP_LINK_PREFIX") ?: "storefrontapp",
+            // Facebook login is optional: without FACEBOOK_APP_ID the SDK doesn't start.
+            facebookAppId: project.env.get("FACEBOOK_APP_ID") ?: "",
+            facebookClientToken: project.env.get("FACEBOOK_CLIENT_TOKEN") ?: "",
+            facebookAutoInit: project.env.get("FACEBOOK_APP_ID") ? "true" : "false"
         ]
         resValue "string", "build_config_package", "com.storefront.app"
     }

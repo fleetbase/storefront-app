@@ -195,7 +195,7 @@ brand/
 - [Extending](docs/extensibility.md): every replaceable screen id, custom routes and tabs, platform-specific screens.
 - [Client builds](docs/client-builds.md): the fork layout, what client code may import, and upgrading.
 
-Generate the app icon and launch screen from `assets/app-icon.png` (1024×1024) and `assets/splash-screen.png`:
+Generate the app icon and launch screen from `brand/app-icon.png` (1024×1024) and `brand/splash-screen.png`, or the templates in `assets/` when a build has none. The launch screen background is the brand file's `boot.background`, or pass `--background=#hex`:
 
 ```bash
 yarn generate:app-icon
