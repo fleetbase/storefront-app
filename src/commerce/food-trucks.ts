@@ -2,9 +2,10 @@
  * Food trucks, as the Trucks screens use them: where each truck is, whether it is live,
  * which zone it serves, the store it belongs to (in a Network) and what it sells.
  *
- * A truck comes from `storefront/v1/food-trucks` as plain JSON: `vehicle` (name, plate,
- * photo, `location` GeoJSON point, `online`), `zone` and `service_area` (`border` GeoJSON
- * polygon), `catalogs` → `categories` → `products`, and `store` in a Network.
+ * A truck comes from `storefront/v1/food-trucks` as plain JSON: `online` (whether it takes
+ * orders: the truck's Storefront status is active), `vehicle` (name, plate, photo, `location`
+ * GeoJSON point), `zone` and `service_area` (`border` GeoJSON polygon), `catalogs` →
+ * `categories` → `products`, and `store` in a Network.
  */
 
 export type LatLng = { latitude: number; longitude: number };
@@ -74,7 +75,9 @@ export function truckName(truck: any): string {
 }
 
 export function summarizeTruck(truck: any): TruckSummary {
-    const online = get(truck, 'online') ?? get(truck, 'vehicle.online');
+    // The truck's own `online` (its Storefront status), never its vehicle's: a driver's app or a
+    // telematics device going offline does not take a truck off sale.
+    const online = get(truck, 'online');
     return {
         id: String(get(truck, 'id') ?? ''),
         name: truckName(truck),
