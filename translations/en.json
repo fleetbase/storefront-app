@@ -1342,6 +1342,8 @@
         "noResultsBody": "Check the spelling, try a postal code, or drop a pin on the map instead.",
         "searchFailed": "We couldn't search addresses right now. Check your connection and try again.",
         "setOnMap": "Can't find it? Set it on the map",
+        "chooseOnMap": "Choose on the map",
+        "chooseOnMapLine": "Move the pin to your exact spot",
         "pinMapLabel": "Map. Move the map to place the pin on your entrance.",
         "pinHint": "Move the map so the pin sits on your entrance.",
         "pinBubble": "Your order will be delivered here",

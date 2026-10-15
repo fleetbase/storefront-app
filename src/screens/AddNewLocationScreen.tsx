@@ -113,11 +113,14 @@ const AddNewLocationScreen = ({ route }) => {
     };
 
     const typing = query.trim().length > 0;
+    const openMap = () => navigation.navigate('LocationPicker', { makeDefault, initialLocation: here?.serialize?.() });
     const hereLine = locating ? t('Places.locating') : here ? formattedAddressFromPlace(here) : t('Places.locationUnavailable');
 
     const header = (
         <YStack>
             <Row icon={faLocationArrow} brand title={t('Places.useCurrentLocation')} line={hereLine} onPress={useHere} disabled={locating} />
+            {/* Always offered: where address search is weak, moving a pin is the reliable way in. */}
+            <Row icon={faMapLocationDot} brand title={t('Places.chooseOnMap')} line={t('Places.chooseOnMapLine')} onPress={openMap} />
             {!typing && (
                 <>
                     <UIText variant='label' tone='secondary' marginTop={16} marginBottom={4} marginHorizontal={space.gutter}>
@@ -198,19 +201,9 @@ const AddNewLocationScreen = ({ route }) => {
                         <EmptyState icon={faMagnifyingGlass} title={t('Places.noResultsTitle', { query: query.trim() })} description={t('Places.noResultsBody')} />
                     ) : null
                 }
-                contentContainerStyle={{ paddingBottom: 24 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
             />
 
-            <YStack paddingHorizontal={space.gutter} paddingTop={12} paddingBottom={insets.bottom + 12} borderTopWidth={1} borderColor='$borderColor'>
-                <Pressable
-                    onPress={() => navigation.navigate('LocationPicker', { makeDefault, initialLocation: here?.serialize?.() })}
-                    accessibilityRole='button'
-                    style={{ height: 50, borderRadius: radius.button, backgroundColor: theme.surface2.val, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
-                >
-                    <FontAwesomeIcon icon={faMapLocationDot} size={17} color={theme.textPrimary.val} />
-                    <UIText variant='bodyStrong'>{t('Places.setOnMap')}</UIText>
-                </Pressable>
-            </YStack>
         </YStack>
     );
 };
