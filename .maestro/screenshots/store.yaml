@@ -105,8 +105,20 @@ appId: ${APP_ID}
       timeout: 8000
 - takeScreenshot: storefront-app-order-details${SHOT_SUFFIX}
 
+# The order screen can sit over the tab bar on Android; step back to a tab first.
+- runFlow:
+      when:
+          platform: Android
+          notVisible:
+              id: tab-store-cart
+      commands:
+          - back
 - tapOn:
       id: tab-store-cart
+- extendedWaitUntil:
+      visible:
+          id: cart-checkout
+      timeout: 30000
 - tapOn:
       id: cart-checkout
 - waitForAnimationToEnd:

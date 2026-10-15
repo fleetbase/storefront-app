@@ -1,6 +1,6 @@
 # Screenshot flows
 
-[Maestro](https://maestro.mobile.dev) flows that capture the app's screens on the iOS Simulator and the Android Emulator. The [showcase](https://github.com/fleetbase/showcase) pipeline runs them on every release against seeded demo data and opens a PR on fleetbase.io with the images that changed. They live here so they change together with the screens they walk through.
+[Maestro](https://maestro.mobile.dev) flows that capture the app's screens on the iOS Simulator and the Android Emulator. Fleetbase's screenshot pipeline runs them on every release against seeded demo data and publishes the images that changed to fleetbase.io. They live here so they change together with the screens they walk through.
 
 | Flow              | Build                                   | Screens                                                                                                          |
 | ----------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |

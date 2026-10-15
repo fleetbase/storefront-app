@@ -218,7 +218,7 @@ CI (`.github/workflows/react-native-ci.yml`) lints, type-checks, runs the tests 
 
 ## Releases and screenshots
 
-Pushing a `v*` tag publishes a GitHub release and asks [fleetbase/showcase](https://github.com/fleetbase/showcase) to capture that release. Showcase starts a Fleetbase stack with demo data, builds the app for each edition, and runs the [Maestro](https://maestro.mobile.dev) flows in [`.maestro/screenshots`](.maestro/screenshots) on the iOS Simulator and the Android Emulator, in dark and light. Changed screenshots are proposed to fleetbase.io in a pull request, and the images in this README update with it. Every run also produces a review gallery of all screens.
+Pushing a `v*` tag publishes a GitHub release and asks Fleetbase's screenshot pipeline to capture that release. It starts a Fleetbase stack with demo data, builds the app for each edition, and runs the [Maestro](https://maestro.mobile.dev) flows in [`.maestro/screenshots`](.maestro/screenshots) on the iOS Simulator and the Android Emulator, in dark and light. Changed screenshots are published to fleetbase.io, and the images in this README update with them.
 
 The flows select elements by `testID`. When you change a screen, keep its ids or update its flow in the same pull request.
 
