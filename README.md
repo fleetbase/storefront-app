@@ -109,7 +109,7 @@ The key you build with decides what the app is:
 
 ## Screenshots
 
-Captured on the iOS Simulator and the Android Emulator against demo data, in dark and light.
+Every screen is designed to feel native on iOS and Android, in light and dark. Customers find what they want in a couple of taps, check out in seconds and watch their order arrive live, with your brand on every screen.
 
 **A single store**
 
