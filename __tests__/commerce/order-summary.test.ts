@@ -66,6 +66,7 @@ describe('summarizeOrder', () => {
         expect(summary.promotions).toEqual([{ name: 'Welcome', code: 'HELLO', amount: 300 }]);
         expect(summary.lines[0]).toEqual({
             id: 'entity_1',
+            productId: null,
             name: 'Laksa',
             quantity: 2,
             subtotal: 1600,

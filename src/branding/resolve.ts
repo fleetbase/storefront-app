@@ -5,7 +5,7 @@ import { DEFAULT_BRANDING } from './defaults';
 import { PRESET_COLORS } from './presets';
 import type { ColorPreset, ColorScheme, SemanticColorKey, SemanticColors } from './presets';
 import { BRANDING_SCHEMA_VERSION, BRANDING_SECTIONS } from './schema';
-import type { AssetReference, BrandingConfig, BrandingScreens, BrandingSection, FontFamily, StoreHeaderOptions } from './schema';
+import type { AssetReference, BrandingConfig, BrandingScreens, BrandingSection, FontFamily, StoreHeaderOptions, TAB_ICONS } from './schema';
 
 export type BrandingSource = {
     /** Label used in issues, e.g. `defaults`, `legacy-env`, `storefront.brand.ts`, `remote`. */
@@ -35,7 +35,14 @@ export type ResolvedBranding = {
     shape: { radius: { tile: number; card: number; sheet: number } };
     assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null };
     boot: { background: string[] };
-    navigation: { store: { tabs: string[]; defaultTab: string; tabBar: { background: string } }; home: 'store' | 'foodTrucks'; network: { foodTrucks: boolean }; languageSwitcher: boolean };
+    navigation: {
+        store: { tabs: string[]; defaultTab: string; tabBar: { background: string } };
+        home: 'store' | 'foodTrucks';
+        network: { foodTrucks: boolean; tabs: string[]; mainStoreTag?: string };
+        languageSwitcher: boolean;
+        foodTrucksView: 'map' | 'list';
+        tabs: Record<string, { icon?: (typeof TAB_ICONS)[number]; label?: string }>;
+    };
     typography: { body?: FontFamily; heading?: FontFamily; scale: number };
     screens: BrandingScreens;
 };
