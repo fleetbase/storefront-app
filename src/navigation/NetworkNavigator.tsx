@@ -48,6 +48,12 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }),
     },
+    // Every category of the main store as a grid (shop home).
+    ShopCategories: {
+        screen: screenSlot('network.shopCategories'),
+        linking: withLinking ? { path: 'shop/categories' } : undefined,
+        options: { headerShown: false },
+    },
     // A category of the main store, on its own: its products and subcategories (shop home).
     ShopCategory: {
         screen: screenSlot('network.shopCategory'),

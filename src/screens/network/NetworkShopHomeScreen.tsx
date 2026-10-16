@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faChevronDown, faChevronRight, faMagnifyingGlass, faPlus, faReceipt, faTableCellsLarge, faTruckFast } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faChevronDown, faMagnifyingGlass, faPlus, faTableCellsLarge, faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -20,9 +20,9 @@ import { categoryTree, descendantIds, type CategoryNode } from '../../commerce/c
 import { fetchOffers, offerTargets, type Offer } from '../../commerce/offers';
 import { summarizeOrder, type OrderSummary } from '../../commerce/order-summary';
 import { OfferBanner, useOfferBadge } from '../../components/offers/OfferCard';
+import ShopCategoryTile from '../../components/shop/ShopCategoryTile';
 import { formatCurrency } from '../../utils/format';
 import {
-    Badge,
     CartPill,
     IconButton,
     LanguageButton,
@@ -32,13 +32,10 @@ import {
     Skeleton,
     StoreCard,
     UIText,
-    categoryIcon,
-    elevation,
     productSummary,
     radius,
     space,
     storeSummary,
-    usableImageUrl,
     usesTwelveHourClock,
     type ProductSummary,
     type StoreSummary,
@@ -172,7 +169,7 @@ const NetworkShopHomeScreen = () => {
         }, [customer?.id, attempt])
     );
 
-    const activeOrders = useMemo(() => orders.filter((order) => order.active).slice(0, 2), [orders]);
+    const activeOrders = useMemo(() => orders.filter((order) => order.active), [orders]);
 
     // Products the customer orders most, most recent first among equals.
     const usual = useMemo<Usual[]>(() => {
@@ -203,6 +200,8 @@ const NetworkShopHomeScreen = () => {
     const tops = categories ?? [];
     const shownCategories = tops.length > GRID_MAX ? tops.slice(0, GRID_MAX - 1) : tops;
     const tileWidth = Math.floor((width - space.gutter * 2 - 10 * (GRID_COLUMNS - 1)) / GRID_COLUMNS);
+    // Two order cards fit side by side; more scroll.
+    const orderCardWidth = Math.floor((width - space.gutter * 2 - 10) / 2);
     const categoryDeal = (node: CategoryNode) => {
         const offer = offers.find((candidate) => offerTargets(candidate, { categoryIds: descendantIds(node) }));
         return offer ? offerBadge(offer) : null;
@@ -212,7 +211,7 @@ const NetworkShopHomeScreen = () => {
     const placeName = currentLocation?.getAttribute?.('name') || currentLocation?.getAttribute?.('street1') || null;
 
     const openCategory = (node: CategoryNode) => navigation.navigate('ShopCategory', { categoryId: node.id, storeId: mainId ?? undefined, name: node.name });
-    const openAllCategories = () => (mainId ? navigation.navigate('NetworkStore', { storeId: mainId }) : navigation.navigate('NetworkCategory'));
+    const openAllCategories = () => navigation.navigate('ShopCategories', { storeId: mainId ?? undefined });
     const openUsual = (item: Usual) => navigation.navigate('Product', { productId: item.productId, storeId: mainId ?? undefined, storeLocationId: main.locationId });
     const openService = (item: Service) =>
         navigation.navigate('Product', { product: item.resource.serialize(), productId: item.summary.id, storeId: item.store.id, store: item.storeData?.serialize?.(), storeLocationId: item.locationId });
@@ -276,45 +275,42 @@ const NetworkShopHomeScreen = () => {
                 contentContainerStyle={{ paddingTop: 16, paddingBottom: cart.count > 0 ? 110 : 32, gap: 24 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
             >
-                {/* An order on its way comes first, with the way to every past order. */}
+                {/* Orders on their way come first: compact cards side by side, with a quiet link to every past order. */}
                 {activeOrders.length > 0 && (
-                    <YStack gap={10} paddingHorizontal={space.gutter}>
-                        {activeOrders.map((order) => (
-                            <Pressable
-                                key={order.id}
-                                onPress={() => navigation.navigate('Order', { orderId: order.id })}
-                                accessibilityRole='button'
-                                accessibilityLabel={t('Account.activeOrderLabel', { id: order.reference })}
-                                style={{ padding: 14, borderRadius: radius.card, borderWidth: 1, borderColor: theme.primary.val, backgroundColor: theme.primarySoft.val, flexDirection: 'row', alignItems: 'center', gap: 12, ...elevation.card }}
-                            >
-                                <YStack width={44} height={44} borderRadius={22} backgroundColor='$primary' alignItems='center' justifyContent='center'>
-                                    <FontAwesomeIcon icon={faTruckFast} size={18} color={theme.primaryText.val} />
-                                </YStack>
-                                <YStack flex={1} gap={2}>
-                                    <UIText variant='captionStrong' tone='brand'>
-                                        {t('Account.activeOrder')}
-                                    </UIText>
-                                    <UIText variant='bodyStrong' numberOfLines={1}>
+                    <YStack gap={8}>
+                        <XStack paddingHorizontal={space.gutter} alignItems='center' justifyContent='space-between'>
+                            <UIText variant='captionStrong' tone='secondary'>
+                                {t('Shop.activeOrders')}
+                            </UIText>
+                            <Pressable onPress={() => navigation.navigate('OrderHistory')} accessibilityRole='link' hitSlop={10} style={{ minHeight: 28, justifyContent: 'center' }}>
+                                <UIText variant='caption' tone='secondary' style={{ textDecorationLine: 'underline' }}>
+                                    {t('Shop.orderHistory')}
+                                </UIText>
+                            </Pressable>
+                        </XStack>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 10 }}>
+                            {activeOrders.map((order) => (
+                                <Pressable
+                                    key={order.id}
+                                    onPress={() => navigation.navigate('Order', { orderId: order.id })}
+                                    accessibilityRole='button'
+                                    accessibilityLabel={t('Account.activeOrderLabel', { id: order.reference })}
+                                    style={{ width: orderCardWidth, padding: 10, borderRadius: radius.card, borderWidth: 1, borderColor: theme.primary.val, backgroundColor: theme.primarySoft.val, gap: 6 }}
+                                >
+                                    <XStack alignItems='center' gap={8}>
+                                        <YStack width={28} height={28} borderRadius={14} backgroundColor='$primary' alignItems='center' justifyContent='center'>
+                                            <FontAwesomeIcon icon={faTruckFast} size={12} color={theme.primaryText.val} />
+                                        </YStack>
+                                        <UIText variant='caption' tone='secondary' numberOfLines={1} style={{ flex: 1 }}>
+                                            {order.reference}
+                                        </UIText>
+                                    </XStack>
+                                    <UIText variant='captionStrong' numberOfLines={2} style={{ fontSize: 14, lineHeight: 18 }}>
                                         {t(`Tracking.phase.${order.phase}.title`, { store: order.storeName, driver: t('Tracking.yourDriver') })}
                                     </UIText>
-                                    <UIText variant='caption' tone='secondary' numberOfLines={1}>
-                                        {[order.storeName, order.reference].filter(Boolean).join(' · ')}
-                                    </UIText>
-                                </YStack>
-                                <YStack paddingHorizontal={12} paddingVertical={6} borderRadius={radius.pill} backgroundColor='$primary'>
-                                    <UIText variant='captionStrong' tone='onPrimary'>
-                                        {t('Account.track')}
-                                    </UIText>
-                                </YStack>
-                            </Pressable>
-                        ))}
-                        <Pressable onPress={() => navigation.navigate('OrderHistory')} accessibilityRole='link' style={{ minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <FontAwesomeIcon icon={faReceipt} size={14} color={theme.textSecondary.val} />
-                            <UIText variant='captionStrong' tone='secondary' style={{ flex: 1 }}>
-                                {t('Shop.orderHistory')}
-                            </UIText>
-                            <FontAwesomeIcon icon={faChevronRight} size={12} color={theme.textSecondary.val} />
-                        </Pressable>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
                     </YStack>
                 )}
 
@@ -339,28 +335,9 @@ const NetworkShopHomeScreen = () => {
                         </XStack>
                     ) : (
                         <XStack flexWrap='wrap' gap={10} rowGap={14} paddingHorizontal={space.gutter}>
-                            {shownCategories.map((node) => {
-                                const deal = categoryDeal(node);
-                                return (
-                                    <Pressable key={node.id} onPress={() => openCategory(node)} accessibilityRole='button' accessibilityLabel={deal ? `${node.name}, ${deal}` : node.name} testID='shop-category' style={{ width: tileWidth, alignItems: 'center', gap: 6 }}>
-                                        <YStack width={tileWidth} height={tileWidth} borderRadius={radius.tile} backgroundColor='$surface' alignItems='center' justifyContent='center' overflow='visible'>
-                                            {usableImageUrl(node.iconUrl) ? (
-                                                <Image source={{ uri: usableImageUrl(node.iconUrl) as string }} style={{ width: tileWidth * 0.8, height: tileWidth * 0.8, borderRadius: radius.tile }} resizeMode='contain' />
-                                            ) : (
-                                                <FontAwesomeIcon icon={categoryIcon(node.name)} size={26} color={theme.textPrimary.val} />
-                                            )}
-                                            {!!deal && (
-                                                <YStack position='absolute' top={-6} right={-6}>
-                                                    <Badge tone='error' size='sm' label={deal} />
-                                                </YStack>
-                                            )}
-                                        </YStack>
-                                        <UIText variant='caption' textAlign='center' numberOfLines={2} style={{ fontWeight: '600' }}>
-                                            {node.name}
-                                        </UIText>
-                                    </Pressable>
-                                );
-                            })}
+                            {shownCategories.map((node) => (
+                                <ShopCategoryTile key={node.id} node={node} width={tileWidth} deal={categoryDeal(node)} onPress={() => openCategory(node)} />
+                            ))}
                             {tops.length > GRID_MAX && (
                                 <Pressable onPress={openAllCategories} accessibilityRole='button' accessibilityLabel={t('Shop.allCategories')} style={{ width: tileWidth, alignItems: 'center', gap: 6 }}>
                                     <YStack width={tileWidth} height={tileWidth} borderRadius={radius.tile} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>

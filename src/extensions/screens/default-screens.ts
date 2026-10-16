@@ -41,6 +41,7 @@ export const defaultScreens: ScreenRegistryDefinition = {
         variants: { shop: () => import('../../screens/network/NetworkShopHomeScreen') },
     },
     'network.shopCategory': { load: () => import('../../screens/network/ShopCategoryScreen') },
+    'network.shopCategories': { load: () => import('../../screens/network/ShopCategoriesScreen') },
     'network.directory': { load: () => import('../../screens/network/NetworkDirectoryScreen') },
     'network.search': { load: () => import('../../screens/network/NetworkSearchScreen') },
     'network.map': { load: () => import('../../screens/network/NetworkMapScreen') },

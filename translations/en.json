@@ -1663,6 +1663,8 @@
         "partners": "Partner shops",
         "allShops": "All shops",
         "noProducts": "Nothing here yet",
-        "noProductsBody": "Products in {{name}} will show here."
+        "noProductsBody": "Products in {{name}} will show here.",
+        "activeOrders": "Active orders",
+        "noCategories": "No categories yet"
     }
 }

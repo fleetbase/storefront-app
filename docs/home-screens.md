@@ -35,9 +35,9 @@ Tabs: `navigation.network.tabs`, in order. The default is `['NetworkHomeTab', 'N
 For a Network built around one main store, such as a business selling its own range from a central warehouse, with partner shops alongside it. From the top:
 
 1. **Header.** A greeting with the customer's first name, "Deliver to" and the delivery address (tap to change it), the notifications button with the unread count, the language button and search.
-2. **Active orders.** While an order is in progress: its live status, a Track button, and a link to the order history.
+2. **Active orders.** While orders are in progress: compact cards side by side (two fit across, more scroll) with each order's live status, and a quiet link to the order history.
 3. **Offers.** Every live offer, as swipeable cards. Tapping one opens it.
-4. **Shop by category.** The main store's top-level categories as a grid, with their icons. A category with an offer aimed at it, or at a category under it, carries the offer's badge ("10%", "2+1"). With more than eight, the last tile opens the whole catalog.
+4. **Shop by category.** The main store's top-level categories as a grid, with their icons. A category with an offer aimed at it, or at a category under it, carries the offer's badge ("10%", "2+1"). With more than eight, the last tile and the section's All link open every category as a grid (`network.shopCategories`).
 5. **Your usual.** The products the signed-in customer orders most, from their recent orders, with a link to the order history.
 6. **Services.** Bookable services from partner shops, each opening its booking screen.
 7. **Partner shops.** Every other member store, nearest first.

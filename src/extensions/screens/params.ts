@@ -36,6 +36,7 @@ export type ScreenParamMap = {
     'network.store': { storeId: string; store?: Serialized };
     'network.product': { storeId?: string; productId: string; product?: Serialized; store?: Serialized };
     'network.shopCategory': { categoryId: string; storeId?: string; name?: string };
+    'network.shopCategories': { storeId?: string } | undefined;
     'reviews.list': { storeId: string; storeName?: string; storeLogo?: string | null };
     'order.chat': { orderId: string; orderReference?: string; storeName?: string; driverName?: string; driverPhone?: string };
     'notifications.inbox': undefined;

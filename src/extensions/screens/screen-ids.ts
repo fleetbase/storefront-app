@@ -36,6 +36,7 @@ export const SCREEN_IDS = [
     'network.store',
     'network.product',
     'network.shopCategory',
+    'network.shopCategories',
     'reviews.list',
     'reviews.write',
     'offers.list',

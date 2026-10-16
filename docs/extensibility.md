@@ -146,6 +146,7 @@ Screens get `route` and `navigation` like any React Navigation screen. Build the
 | `network.store`             | `NetworkStoreScreen`    | `storeId`                              |
 | `network.product`           | `NetworkProductScreen`  | `productId`, `storeId?`                |
 | `network.shopCategory`      | `ShopCategoryScreen`    | `categoryId`, `storeId?`, `name?`      |
+| `network.shopCategories`    | `ShopCategoriesScreen`  | `storeId?`                             |
 
 Full param types are in `src/extensions/screens/params.ts`. Inside a Network, `network.store` renders the `store.home` screen and `network.product` renders `product.detail`, so overrides of those screens apply in both editions.
 
