@@ -35,7 +35,12 @@ export const defaultScreens: ScreenRegistryDefinition = {
     'account.details': { load: () => import('../../screens/account/EditProfileScreen') },
     'auth.login': { load: () => import('../../screens/auth/SignInScreen') },
     'auth.createAccount': { load: () => import('../../screens/auth/CreateAccountScreen') },
-    'network.home': { load: () => import('../../screens/network/NetworkHomeScreen') },
+    'network.home': {
+        load: () => import('../../screens/network/NetworkHomeScreen'),
+        // `shop`: the main store's categories first, offers, the customer's orders, services and partner shops.
+        variants: { shop: () => import('../../screens/network/NetworkShopHomeScreen') },
+    },
+    'network.shopCategory': { load: () => import('../../screens/network/ShopCategoryScreen') },
     'network.directory': { load: () => import('../../screens/network/NetworkDirectoryScreen') },
     'network.search': { load: () => import('../../screens/network/NetworkSearchScreen') },
     'network.map': { load: () => import('../../screens/network/NetworkMapScreen') },

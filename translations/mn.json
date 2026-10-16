@@ -449,6 +449,7 @@
     "Network": {
         "tabs": {
             "discover": "Нээж үзэх",
+            "offers": "Урамшуулал",
             "search": "Хайх",
             "map": "Газрын зураг",
             "cart": "Сагс",
@@ -1642,5 +1643,26 @@
         "storeCreditCode": "Дэлгүүрийн кредит код {{code}}",
         "storeCreditBody": "Дараагийн захиалгынхаа төлбөр тооцоонд энэ кодыг ашиглаарай.",
         "shareCode": "Хуваалцах"
+    },
+    "Shop": {
+        "greeting": "Тавтай морил",
+        "greetingNamed": "Сайн уу, {{name}}",
+        "deliverTo": "Хүргэх хаяг",
+        "searchPlaceholder": "Бараа, дэлгүүр хайх",
+        "search": "Хайх",
+        "categories": "Ангиллаар дэлгүүр хэсэх",
+        "all": "Бүгд",
+        "allCategories": "Бүх ангилал",
+        "subcategories": "{{name}}-ийн дэд ангилал",
+        "usual": "Таны байнга авдаг",
+        "usualSubtitle": "Сүүлийн захиалгуудаас",
+        "orderAgain": "{{name}}-ийг дахин захиалах",
+        "orderHistory": "Захиалгын түүх",
+        "services": "Үйлчилгээ",
+        "bookATime": "Цаг захиалах",
+        "partners": "Хамтрагч дэлгүүрүүд",
+        "allShops": "Бүх дэлгүүр",
+        "noProducts": "Одоогоор бараа алга",
+        "noProductsBody": "{{name}} ангиллын бараа энд харагдана."
     }
 }

@@ -174,3 +174,20 @@ export async function fetchOffers(get: Get, { storeId, includeScheduled = true }
 export async function fetchOffer(get: Get, id: string): Promise<Offer> {
     return parseOffer(await get(`promotions/${encodeURIComponent(id)}`));
 }
+
+/**
+ * Whether an offer is aimed at some of these categories or products (its own list of
+ * products or categories, minus its exclusions). Offers on a whole store or the whole
+ * network aim at nothing in particular and don't match: they're shown where offers are.
+ */
+export function offerTargets(offer: Offer, { categoryIds = [], productIds = [] }: { categoryIds?: string[]; productIds?: string[] }): boolean {
+    const { products, categories, excludeProducts, excludeCategories } = offer.appliesTo;
+    if (categoryIds.length > 0 && categoryIds.every((id) => excludeCategories.includes(id))) return false;
+    if (products.length > 0 && productIds.some((id) => products.includes(id) && !excludeProducts.includes(id))) return true;
+    return categories.length > 0 && categoryIds.some((id) => categories.includes(id) && !excludeCategories.includes(id));
+}
+
+/** The live offers aimed at a product: by the product itself, or by its category or one above it. */
+export function offersForProduct(offers: Offer[], productId: string | null | undefined, categoryIds: string[] = []): Offer[] {
+    return offers.filter((offer) => offer.availability === 'live' && !(productId && offer.appliesTo.excludeProducts.includes(productId)) && offerTargets(offer, { productIds: productId ? [productId] : [], categoryIds }));
+}

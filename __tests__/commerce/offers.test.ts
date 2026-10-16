@@ -1,4 +1,4 @@
-import { describeSchedule, featuredOffer, fetchOffer, fetchOffers, groupOffers, offerBadge, offerStoreId, parseOffer } from '../../src/commerce/offers';
+import { describeSchedule, featuredOffer, fetchOffer, fetchOffers, groupOffers, offerBadge, offersForProduct, offerStoreId, offerTargets, parseOffer } from '../../src/commerce/offers';
 
 const money = (amount: number) => `$${(amount / 100).toFixed(2)}`;
 const now = new Date('2026-10-07T10:00:00Z');
@@ -121,5 +121,20 @@ describe('offers', () => {
             ['promotions', {}],
             ['promotions/promo%201'],
         ]);
+    });
+
+    test('matches offers to the categories and products they are aimed at', () => {
+        const byCategory = parseOffer(base);
+        const byProduct = parseOffer({ ...base, id: 'promo_2', applies_to: { products: ['product_rose'] } });
+        const storeWide = parseOffer({ ...base, id: 'promo_3', applies_to: {} });
+        const scheduled = parseOffer({ ...base, id: 'promo_4', availability: 'scheduled' });
+
+        expect(offerTargets(byCategory, { categoryIds: ['category_flowers'] })).toBe(true);
+        expect(offerTargets(byCategory, { categoryIds: ['category_vases'] })).toBe(false);
+        expect(offerTargets(byProduct, { productIds: ['product_rose'] })).toBe(true);
+        expect(offerTargets(storeWide, { categoryIds: ['category_flowers'], productIds: ['product_rose'] })).toBe(false);
+        expect(offersForProduct([byCategory, byProduct, storeWide, scheduled], 'product_rose', ['category_flowers']).map((offer) => offer.id)).toEqual(['promo_1', 'promo_2']);
+        // The category offer excludes the hamper.
+        expect(offersForProduct([byCategory], 'product_hamper', ['category_flowers'])).toEqual([]);
     });
 });

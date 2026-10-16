@@ -134,7 +134,8 @@ export function ProductTile({
     testID = 'product-item',
     width = 168,
     variant = 'outlined',
-}: ProductItemProps & { width?: number; variant?: ProductTileVariant }) {
+    offerLabel = null,
+}: ProductItemProps & { width?: number; variant?: ProductTileVariant; /** An offer covering the product, e.g. "10%" or "2+1"; shown when it isn't on sale. */ offerLabel?: string | null }) {
     const { t } = useLanguage();
     const { price, was } = usePrice(product);
     const soldOut = !product.available;
@@ -143,10 +144,16 @@ export function ProductTile({
 
     const badges = (
         <>
-            {product.onSale && (
+            {product.onSale ? (
                 <YStack position='absolute' left={8} top={8}>
                     <Badge tone='error' size='sm' label={t('UI.sale')} />
                 </YStack>
+            ) : (
+                !!offerLabel && (
+                    <YStack position='absolute' left={8} top={8}>
+                        <Badge tone='warning' size='sm' label={offerLabel} />
+                    </YStack>
+                )
             )}
             {!soldOut && !product.isBookable && (
                 <YStack position='absolute' right={8} top={visio ? 8 : undefined} bottom={visio ? undefined : 8}>

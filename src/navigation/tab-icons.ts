@@ -1,4 +1,4 @@
-import { faBagShopping, faCompass, faHome, faMagnifyingGlass, faMap, faShop, faShoppingCart, faStore, faTruck, faUser, faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { faBagShopping, faCompass, faHome, faMagnifyingGlass, faMap, faShop, faShoppingCart, faStore, faTag, faTruck, faUser, faUtensils } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import type { TAB_ICONS } from '../branding/schema';
 
@@ -15,4 +15,5 @@ export const TAB_ICON_MAP: Record<(typeof TAB_ICONS)[number], IconDefinition> = 
     search: faMagnifyingGlass,
     cart: faShoppingCart,
     user: faUser,
+    tag: faTag,
 };

@@ -17,6 +17,7 @@ export const BRANDING_SCHEMA_VERSION = 1 as const;
 
 export const HOME_SCREENS = ['store', 'foodTrucks'] as const;
 export const STORE_TABS = ['StoreHomeTab', 'StoreSearchTab', 'StoreMapTab', 'StoreCartTab', 'StoreProfileTab', 'StoreFoodTruckTab'] as const;
+export const NETWORK_TABS = ['NetworkHomeTab', 'NetworkOffersTab', 'NetworkSearchTab', 'NetworkMapTab', 'NetworkFoodTruckTab', 'NetworkCartTab', 'NetworkProfileTab'] as const;
 
 export const ColorValue = z.string().max(40).refine(isColor, { message: 'Expected a hex, rgb()/rgba() or named (white, black, transparent) color' });
 
@@ -139,9 +140,10 @@ export const BootSchema = z
 
 /** A core store tab, or a custom tab registered in the build's extensions (e.g. `RewardsTab`). */
 const StoreTabName = z.union([z.enum(STORE_TABS), z.string().regex(/^[A-Z][A-Za-z0-9]{0,44}Tab$/, 'Expected a store tab or a custom tab name ending in "Tab"')]);
+const NetworkTabName = z.union([z.enum(NETWORK_TABS), z.string().regex(/^[A-Z][A-Za-z0-9]{0,44}Tab$/, 'Expected a Network tab or a custom tab name ending in "Tab"')]);
 
 /** Icons a tab can use instead of its default (`navigation.tabs.<Tab>.icon`). */
-export const TAB_ICONS = ['home', 'store', 'shop', 'bag', 'truck', 'utensils', 'map', 'compass', 'search', 'cart', 'user'] as const;
+export const TAB_ICONS = ['home', 'store', 'shop', 'bag', 'truck', 'utensils', 'map', 'compass', 'search', 'cart', 'user', 'tag'] as const;
 
 export const NavigationSchema = z
     .object({
@@ -162,6 +164,18 @@ export const NavigationSchema = z
             .object({
                 /** Show the Trucks tab in a Network (always shown when it is the home screen). */
                 foodTrucks: z.boolean(),
+                /**
+                 * The tabs a Network shows, in order, e.g. `['NetworkHomeTab', 'NetworkOffersTab',
+                 * 'NetworkSearchTab', 'NetworkCartTab', 'NetworkProfileTab']`. Unset: Discover,
+                 * Search, Map, Cart and Profile.
+                 */
+                tabs: z.array(NetworkTabName).min(1).max(6),
+                /**
+                 * The tag that marks the Network's main store: the one whose categories the shop
+                 * home shows (`screens: { 'network.home': { variant: 'shop' } }`). The other
+                 * members are listed as partner shops.
+                 */
+                mainStoreTag: z.string().min(1).max(60),
             })
             .partial()
             .strict(),

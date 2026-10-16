@@ -42,7 +42,7 @@ export const DEFAULT_BRANDING: Required<Omit<BrandingConfig, 'name'>> = {
             tabBar: { background: 'blur' },
         },
         home: 'store',
-        network: { foodTrucks: false },
+        network: { foodTrucks: false, tabs: ['NetworkHomeTab', 'NetworkSearchTab', 'NetworkMapTab', 'NetworkCartTab', 'NetworkProfileTab'] },
         languageSwitcher: true,
         foodTrucksView: 'map',
         tabs: {},

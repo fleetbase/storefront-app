@@ -449,6 +449,7 @@
     "Network": {
         "tabs": {
             "discover": "Discover",
+            "offers": "Offers",
             "search": "Search",
             "map": "Map",
             "cart": "Cart",
@@ -1642,5 +1643,26 @@
         "storeCreditCode": "Store credit code {{code}}",
         "storeCreditBody": "Use this code at checkout on your next order.",
         "shareCode": "Share"
+    },
+    "Shop": {
+        "greeting": "Welcome",
+        "greetingNamed": "Hi, {{name}}",
+        "deliverTo": "Deliver to",
+        "searchPlaceholder": "Search products and shops",
+        "search": "Search",
+        "categories": "Shop by category",
+        "all": "All",
+        "allCategories": "All categories",
+        "subcategories": "Subcategories of {{name}}",
+        "usual": "Your usual",
+        "usualSubtitle": "From your recent orders",
+        "orderAgain": "Order {{name}} again",
+        "orderHistory": "Order history",
+        "services": "Services",
+        "bookATime": "Book a time",
+        "partners": "Partner shops",
+        "allShops": "All shops",
+        "noProducts": "Nothing here yet",
+        "noProductsBody": "Products in {{name}} will show here."
     }
 }

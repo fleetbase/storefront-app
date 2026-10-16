@@ -449,6 +449,7 @@
     "Network": {
         "tabs": {
             "discover": "Огляд",
+            "offers": "Пропозиції",
             "search": "Пошук",
             "map": "Карта",
             "cart": "Кошик",
@@ -1642,5 +1643,26 @@
         "storeCreditCode": "Код кредиту магазину {{code}}",
         "storeCreditBody": "Використайте цей код під час оформлення наступного замовлення.",
         "shareCode": "Поділитися"
+    },
+    "Shop": {
+        "greeting": "Ласкаво просимо",
+        "greetingNamed": "Привіт, {{name}}",
+        "deliverTo": "Доставити до",
+        "searchPlaceholder": "Пошук товарів і магазинів",
+        "search": "Пошук",
+        "categories": "Категорії",
+        "all": "Усі",
+        "allCategories": "Усі категорії",
+        "subcategories": "Підкатегорії {{name}}",
+        "usual": "Ваше звичне",
+        "usualSubtitle": "З ваших останніх замовлень",
+        "orderAgain": "Замовити {{name}} знову",
+        "orderHistory": "Історія замовлень",
+        "services": "Послуги",
+        "bookATime": "Записатися",
+        "partners": "Партнерські магазини",
+        "allShops": "Усі магазини",
+        "noProducts": "Тут поки нічого немає",
+        "noProductsBody": "Товари з {{name}} з’являться тут."
     }
 }

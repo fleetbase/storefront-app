@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCompass, faMagnifyingGlass, faMap, faShoppingCart, faTruck, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faMagnifyingGlass, faMap, faShoppingCart, faTag, faTruck, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Text, XStack } from 'tamagui';
 import BackButton from '../components/BackButton';
 import StoreLayout from '../layouts/StoreLayout';
@@ -47,6 +47,12 @@ const createSharedNetworkScreens = (withLinking: boolean) => ({
             title: route.params?.category?.name || '',
             headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }),
+    },
+    // A category of the main store, on its own: its products and subcategories (shop home).
+    ShopCategory: {
+        screen: screenSlot('network.shopCategory'),
+        linking: withLinking ? { path: 'shop/categories/:categoryId' } : undefined,
+        options: { headerShown: false },
     },
     Product: {
         screen: screenSlot('network.product'),
@@ -103,6 +109,14 @@ const NetworkMapStack = createNativeStackNavigator({
     },
 });
 
+// Every live offer as a tab of its own.
+const NetworkOffersStack = createNativeStackNavigator({
+    screens: {
+        OffersHome: { screen: screenSlot('offers.list'), linking: undefined, options: { headerShown: false } },
+        ...withCustomRoutes(createSharedNetworkScreens(false), customNavigation.routes, 'network'),
+    },
+});
+
 // The food trucks map: member stores' trucks alongside the stores themselves.
 const NetworkFoodTruckStack = createNativeStackNavigator({
     screens: {
@@ -117,6 +131,7 @@ const NetworkFoodTruckStack = createNativeStackNavigator({
 const icons: Record<string, any> = {
     NetworkFoodTruckTab: faTruck,
     NetworkHomeTab: faCompass,
+    NetworkOffersTab: faTag,
     NetworkSearchTab: faMagnifyingGlass,
     NetworkMapTab: faMap,
     NetworkCartTab: faShoppingCart,
@@ -165,14 +180,28 @@ function label(tab: string, labelKey: string) {
     return { tabBarLabel: ({ color, focused }: any) => <NetworkTabLabel labelKey={key} color={color} focused={focused} /> };
 }
 
-const CORE_TABS: Record<string, any> = {
+const AVAILABLE_TABS: Record<string, any> = {
     NetworkHomeTab: { screen: NetworkHomeStack, options: label('NetworkHomeTab', FOOD_TRUCKS_HOME ? 'Network.tabs.trucks' : 'Network.tabs.discover') },
-    ...(FOOD_TRUCKS_TAB ? foodTruckTab() : {}),
+    NetworkOffersTab: { screen: NetworkOffersStack, options: label('NetworkOffersTab', 'Network.tabs.offers') },
+    ...foodTruckTab(),
     NetworkSearchTab: { screen: NetworkSearchStack, options: label('NetworkSearchTab', 'Network.tabs.search') },
-    ...(FOOD_TRUCKS_HOME ? {} : { NetworkMapTab: { screen: NetworkMapStack, options: label('NetworkMapTab', 'Network.tabs.map') } }),
+    NetworkMapTab: { screen: NetworkMapStack, options: label('NetworkMapTab', 'Network.tabs.map') },
     NetworkCartTab: { screen: StoreCartTab, options: label('NetworkCartTab', 'Network.tabs.cart') },
     NetworkProfileTab: { screen: StoreProfileTab, options: label('NetworkProfileTab', 'Network.tabs.profile') },
 };
+
+// The configured tabs (navigation.network.tabs), in order. The trucks home replaces the Map
+// tab; the Trucks tab, when switched on and not placed, follows Home.
+function networkTabs(): string[] {
+    const configured: string[] = getBuildBranding().branding.navigation.network?.tabs ?? ['NetworkHomeTab', 'NetworkSearchTab', 'NetworkMapTab', 'NetworkCartTab', 'NetworkProfileTab'];
+    let tabs = configured.filter((tab) => !(FOOD_TRUCKS_HOME && (tab === 'NetworkMapTab' || tab === 'NetworkFoodTruckTab')));
+    if (!FOOD_TRUCKS_TAB) tabs = tabs.filter((tab) => tab !== 'NetworkFoodTruckTab');
+    else if (!tabs.includes('NetworkFoodTruckTab')) tabs.splice(tabs.indexOf('NetworkHomeTab') + 1, 0, 'NetworkFoodTruckTab');
+    if (!tabs.includes('NetworkHomeTab')) tabs.unshift('NetworkHomeTab');
+    return tabs.filter((tab, index) => tabs.indexOf(tab) === index);
+}
+
+const CORE_TABS: Record<string, any> = Object.fromEntries(networkTabs().filter((tab) => AVAILABLE_TABS[tab]).map((tab) => [tab, AVAILABLE_TABS[tab]]));
 
 // The build's own tabs (brand/storefront.extensions.ts), each with the shared Network screens.
 const CUSTOM_TABS = tabsFor(customNavigation.tabs, 'network');

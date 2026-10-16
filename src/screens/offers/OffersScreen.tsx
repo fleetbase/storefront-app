@@ -67,8 +67,9 @@ const OffersScreen = ({ route }: any) => {
 
     return (
         <YStack flex={1} backgroundColor='$background'>
-            <XStack alignItems='center' gap={8} paddingHorizontal={8} paddingTop={insets.top + 4} paddingBottom={8}>
-                <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />
+            {/* As its own tab (the Offers tab) it is the first screen and has nowhere to go back to. */}
+            <XStack alignItems='center' gap={8} paddingHorizontal={navigation.canGoBack() ? 8 : space.gutter} paddingTop={insets.top + 4} paddingBottom={8}>
+                {navigation.canGoBack() && <IconButton icon={faChevronLeft} variant='plain' size={44} accessibilityLabel={t('UI.back')} onPress={() => navigation.goBack()} />}
                 <YStack flex={1}>
                     <UIText variant='heading' accessibilityRole='header'>
                         {t('Offers.title')}

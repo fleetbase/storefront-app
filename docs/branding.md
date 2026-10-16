@@ -61,9 +61,29 @@ export default defineBranding({
 | `navigation`       | `home`                                   | `store` (default) or `foodTrucks`: open the app on the food trucks map (both editions). Env: `HOME_SCREEN`                                                                                                                                                                                                                                     |
 |                    | `network.foodTrucks`                     | `true` adds the Trucks tab to a Network. Env: `NETWORK_FOOD_TRUCKS_TAB`                                                                                                                                                                                                                                                                        |
 |                    | `languageSwitcher` | `true` (default) shows a language button in screen headers when more than one language is available |
+|                    | `network.tabs` | The Network's tabs, in order: `NetworkHomeTab`, `NetworkOffersTab`, `NetworkSearchTab`, `NetworkMapTab`, `NetworkFoodTruckTab`, `NetworkCartTab`, `NetworkProfileTab`, or a custom tab. Default: Home, Search, Map, Cart, Profile |
+|                    | `network.mainStoreTag` | The store tag that marks the Network's main store, for the shop home (below) |
+|                    | `foodTrucksView` | `map` (default) or `list`: how the food trucks screen opens |
+|                    | `tabs.<Tab>` | `{ icon, label }` for one tab: an icon name (`home`, `store`, `shop`, `bag`, `truck`, `utensils`, `map`, `compass`, `search`, `cart`, `user`, `tag`) and a translation key or plain text |
 | `typography`       | `body`, `heading`                        | `{ family, faces }`: the CSS family name and, per weight (`'100'`–`'900'`), the PostScript name of a font file in `brand/fonts`. `heading` defaults to `body`                                                                                                                                                                                  |
 |                    | `scale`                                  | `0.85`–`1.3` (default `1`) multiplies the text sizes of the shared text styles                                                                                                                                                                                                                                                                 |
 | `screens`          | `<screen id>.variant`                    | Selects a compiled-in variant registered in `storefront.extensions.ts`                                                                                                                                                                                                                                                                         |
+
+### The shop home (Network)
+
+A Network built around one main store, such as a business with its own warehouse and partner shops, can open on a shop home instead of the store directory. It shows the main store's categories in a grid (each opening that category's products and subcategories), live offers, the customer's active orders and the products they order most, bookable services from partner shops, and the partner shops:
+
+```ts
+screens: { 'network.home': { variant: 'shop' } },
+navigation: {
+    network: {
+        mainStoreTag: 'main-store',
+        tabs: ['NetworkHomeTab', 'NetworkOffersTab', 'NetworkSearchTab', 'NetworkCartTab', 'NetworkProfileTab'],
+    },
+},
+```
+
+Tag the main store with the same tag in the Console. Without a tagged member the shop home shows the Network's own categories, and every member is a partner shop.
 
 Colors accept hex (`#rgb`, `#rrggbb`, `#rrggbbaa`), `rgb()`/`rgba()`, `white`, `black` and `transparent`. Images must be bundled keys or `https` URLs.
 

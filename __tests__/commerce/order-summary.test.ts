@@ -114,8 +114,9 @@ describe('summarizeOrder', () => {
 
 describe('order lines', () => {
     it('defaults the quantity and uses the price when there is no subtotal', () => {
-        expect(parseOrderLine({ name: 'Tea', price: 300, meta: { image_url: 'https://img/tea.jpg', scheduled_at: '2026-10-02 09:00', variants: [{ label: 'Hot' }] } }, 3)).toEqual({
+        expect(parseOrderLine({ name: 'Tea', price: 300, meta: { product_id: 'product_tea', image_url: 'https://img/tea.jpg', scheduled_at: '2026-10-02 09:00', variants: [{ label: 'Hot' }] } }, 3)).toEqual({
             id: '3',
+            productId: 'product_tea',
             name: 'Tea',
             quantity: 1,
             subtotal: 300,

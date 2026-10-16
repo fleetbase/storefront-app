@@ -30,7 +30,8 @@ export function useOfferMeta() {
     };
 }
 
-function useBadge() {
+/** The short badge text of an offer ("10%", "2+1", "FREE") in the offer's currency. */
+export function useOfferBadge() {
     const { t } = useLanguage();
     return (offer: Offer) => offerBadge(offer, (amount) => formatCurrency(amount, offer.currency ?? 'USD'), t('Offers.freeBadge'));
 }
@@ -42,7 +43,7 @@ export const OFFER_BANNER_HEIGHT = 156;
 
 export function OfferBanner({ offer, onPress, primary = false, width }: { offer: Offer; onPress: () => void; primary?: boolean; width?: number }) {
     const { t } = useLanguage();
-    const badge = useBadge();
+    const badge = useOfferBadge();
     const fg = primary ? 'onPrimary' : 'primary';
     return (
         <Pressable
@@ -102,7 +103,7 @@ export function OfferBanner({ offer, onPress, primary = false, width }: { offer:
 /** A row in the offers list. */
 export function OfferRow({ offer, now, onPress }: { offer: Offer; now: Date; onPress: () => void }) {
     const theme = useTheme();
-    const badge = useBadge();
+    const badge = useOfferBadge();
     const meta = useOfferMeta()(offer, now);
     return (
         <Pressable onPress={onPress} accessibilityRole='button' accessibilityLabel={[offer.name, offer.owner?.name, meta.text].filter(Boolean).join(', ')}>

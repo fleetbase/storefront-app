@@ -15,6 +15,8 @@ import { parseOrderPayment, type OrderPayment } from './order-payment';
 
 export type OrderLine = {
     id: string;
+    /** The product ordered (its public id), when the line came from one. */
+    productId: string | null;
     name: string;
     quantity: number;
     subtotal: number;
@@ -109,6 +111,7 @@ export function parseOrderLine(entity: any, index = 0): OrderLine {
     const quantity = Math.max(1, Math.round(amount(meta.quantity)) || 1);
     return {
         id: String(entity?.id ?? entity?.public_id ?? index),
+        productId: text(meta.product_id),
         name: text(entity?.name) ?? '',
         quantity,
         subtotal: meta.subtotal != null ? amount(meta.subtotal) : amount(entity?.price) * quantity,
