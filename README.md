@@ -31,6 +31,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Run it on Fleetbase Cloud](#run-it-on-fleetbase-cloud)
 - [Quick start](#quick-start)
 - [Configuration](#configuration)
@@ -105,6 +106,40 @@ The key you build with decides what the app is:
 - iOS, Android and the web from one codebase.
 - Light and dark appearance, text that follows the system font size, and screen reader labels.
 - English, Mongolian and Ukrainian included, with a language switcher.
+
+## Screenshots
+
+Captured on the iOS Simulator and the Android Emulator against demo data, in dark and light.
+
+**A single store**
+
+| Store | Category | Product | Cart | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details.webp" width="160" alt="Store page" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-category-details.webp" width="160" alt="A category with its products" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-product-details.webp" width="160" alt="Product" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-cart-details.webp" width="160" alt="Cart" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-order-details.webp" width="160" alt="An order in progress" /> |
+
+**A Network (marketplace)**
+
+| Marketplace | Member store | Search | Stores map | Account |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details.webp" width="160" alt="Marketplace home" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details-network.webp" width="160" alt="Member store" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-products-list-network.webp" width="160" alt="Search results across stores" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-stores-map-network.webp" width="160" alt="Stores map" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-account-details-network.webp" width="160" alt="Account" /> |
+
+**Trucks**
+
+| Trucks map | Trucks list | Truck menu | Search | Light appearance |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map.webp" width="160" alt="Trucks map" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-list.webp" width="160" alt="Trucks list" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-truck-details.webp" width="160" alt="A truck's menu" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-products-list-food-trucks.webp" width="160" alt="Search showing which truck has each product" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map-light.webp" width="160" alt="Trucks map in the light appearance" /> |
+
+**On Android**
+
+| Store | Product | Marketplace | Trucks map | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-store-details.webp" width="160" alt="Store page on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-product-details.webp" width="160" alt="Product on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-network-details.webp" width="160" alt="Marketplace home on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-food-trucks-map.webp" width="160" alt="Trucks map on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-order-details.webp" width="160" alt="An order in progress on Android" /> |
+
+**Light appearance**
+
+| Store | Marketplace | Product | Cart | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details-light.webp" width="160" alt="Store page in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details-light.webp" width="160" alt="Marketplace home in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-product-details-light.webp" width="160" alt="Product in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-cart-details-light.webp" width="160" alt="Cart in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-order-details-light.webp" width="160" alt="An order in progress in the light appearance" /> |
 
 ## Run it on Fleetbase Cloud
 
