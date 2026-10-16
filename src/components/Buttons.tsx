@@ -2,7 +2,7 @@ import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Button } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faFacebook, faInstagram, faGoogle, faApple } from '@fortawesome/free-brands-svg-icons';
+import { faInstagram, faGoogle, faApple } from '@fortawesome/free-brands-svg-icons';
 import { faPhone } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from 'tamagui';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -31,20 +31,6 @@ export const AppleLoginButton = ({ onPress }) => {
                 <FontAwesomeIcon icon={faApple} color={theme['$gray-900'].val} />
             </Button.Icon>
             <Button.Text color='$gray-900'>{t('Buttons.continueWithApple')}</Button.Text>
-        </Button>
-    );
-};
-
-export const FacebookLoginButton = ({ onPress }) => {
-    const theme = useTheme();
-    const { t } = useLanguage();
-
-    return (
-        <Button onPress={onPress} bg='$blue-600' borderWidth={1} borderColor='$blue-800' width='100%' rounded='true'>
-            <Button.Icon>
-                <FontAwesomeIcon icon={faFacebook} color={theme['$blue-100'].val} />
-            </Button.Icon>
-            <Button.Text color='$blue-100'>{t('Buttons.continueWithFacebook')}</Button.Text>
         </Button>
     );
 };

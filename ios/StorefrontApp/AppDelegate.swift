@@ -2,7 +2,6 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import UIKit
-import FBSDKCoreKit
 import GoogleSignIn
 
 class AppDelegate: RCTAppDelegate {
@@ -12,12 +11,6 @@ class AppDelegate: RCTAppDelegate {
     ) -> Bool {
          // Initialize ReactNativeNotifications
         RNNotifications.startMonitorNotifications()
-
-        // Initialize the Facebook SDK
-        ApplicationDelegate.shared.application(
-            application,
-            didFinishLaunchingWithOptions: launchOptions
-        )
 
         moduleName = "StorefrontApp"
         dependencyProvider = RCTAppDependencyProvider()
@@ -34,16 +27,6 @@ class AppDelegate: RCTAppDelegate {
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        // Let the Facebook SDK handle the URL
-        if ApplicationDelegate.shared.application(
-            application,
-            open: url,
-            sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
-            annotation: options[UIApplication.OpenURLOptionsKey.annotation]
-        ) {
-            return true
-        }
-
          // Let Google Sign-In handle the URL
         if GIDSignIn.sharedInstance.handle(url) {
             return true

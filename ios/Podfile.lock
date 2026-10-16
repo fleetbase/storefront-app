@@ -11,21 +11,7 @@ PODS:
     - PromisesObjC (~> 2.4)
   - BVLinearGradient (2.8.3):
     - React-Core
-  - FBAEMKit (18.0.2):
-    - FBSDKCoreKit_Basics (= 18.0.2)
   - FBLazyVector (0.86.0)
-  - FBSDKCoreKit (18.0.2):
-    - FBAEMKit (= 18.0.2)
-    - FBSDKCoreKit_Basics (= 18.0.2)
-  - FBSDKCoreKit_Basics (18.0.2)
-  - FBSDKGamingServicesKit (18.0.2):
-    - FBSDKCoreKit (= 18.0.2)
-    - FBSDKCoreKit_Basics (= 18.0.2)
-    - FBSDKShareKit (= 18.0.2)
-  - FBSDKLoginKit (18.0.2):
-    - FBSDKCoreKit (= 18.0.2)
-  - FBSDKShareKit (18.0.2):
-    - FBSDKCoreKit (= 18.0.2)
   - GoogleSignIn (9.0.0):
     - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
@@ -1535,21 +1521,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-fbsdk-next (13.4.1):
-    - React-Core
-    - react-native-fbsdk-next/Core (= 13.4.1)
-    - react-native-fbsdk-next/Login (= 13.4.1)
-    - react-native-fbsdk-next/Share (= 13.4.1)
-  - react-native-fbsdk-next/Core (13.4.1):
-    - FBSDKCoreKit (~> 18.0)
-    - React-Core
-  - react-native-fbsdk-next/Login (13.4.1):
-    - FBSDKLoginKit (~> 18.0)
-    - React-Core
-  - react-native-fbsdk-next/Share (13.4.1):
-    - FBSDKGamingServicesKit (~> 18.0)
-    - FBSDKShareKit (~> 18.0)
-    - React-Core
   - react-native-geolocation (3.4.0):
     - hermes-engine
     - RCTRequired
@@ -2212,7 +2183,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.8.4)
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.29.1):
+  - RNGestureHandler (2.32.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2726,7 +2697,6 @@ DEPENDENCIES:
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-config (from `../node_modules/react-native-config`)
-  - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
@@ -2794,12 +2764,6 @@ SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - AppAuth
     - AppCheckCore
-    - FBAEMKit
-    - FBSDKCoreKit
-    - FBSDKCoreKit_Basics
-    - FBSDKGamingServicesKit
-    - FBSDKLoginKit
-    - FBSDKShareKit
     - GoogleSignIn
     - GoogleUtilities
     - GTMAppAuth
@@ -2908,8 +2872,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/blur"
   react-native-config:
     :path: "../node_modules/react-native-config"
-  react-native-fbsdk-next:
-    :path: "../node_modules/react-native-fbsdk-next"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-get-random-values:
@@ -3039,13 +3001,7 @@ SPEC CHECKSUMS:
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
-  FBAEMKit: 56a4f5a9607957b547b6458b17a98c5bb2736367
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
-  FBSDKCoreKit: 54f1240567e16862ab71c53c33dc347db5c524c5
-  FBSDKCoreKit_Basics: eb530cd6a79030dbb11df460aafb2767bcad9028
-  FBSDKGamingServicesKit: a967e47b5cbf759fb3e42a87f11a999aa7c36b24
-  FBSDKLoginKit: 6a70798793e499335a98fab1a758d7da34af196e
-  FBSDKShareKit: e52c6b1584c77c708bcb4001c9a48223c115cbd9
   GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
@@ -3095,7 +3051,6 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: 2e568e13c98bd185fe83266795233fa7ad2cbc19
   react-native-blur: baf5874b4abf3bb8b2012172a3d0905653a1a2b5
   react-native-config: 93721be89c97d983d5a90e2f3e692c8ff1d95720
-  react-native-fbsdk-next: 1baeeacf0ecdeb839cca16ca75cb16a9bbbf8e03
   react-native-geolocation: b8c4336f4e2d7ec1ffcc924df6a4195a490ef87a
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: 2146157d5d37a34c2063d1d2ed01081b56d0b87b
@@ -3146,7 +3101,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 8b6fa8379062949dd79a009cf3d6b02a9c03ca59
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: 695c661ac41594942e846f2eb4f666ce20adf036
+  RNGestureHandler: a21ad1bb32b203570440c29b7e406a342a690842
   RNGoogleSignin: a590871cef396da4b683af9eb1cf17ce1750cfde
   RNI18n: e2f7e76389fcc6e84f2c8733ea89b92502351fd8
   RNKeychain: 1b055a0ec36d058cb0a075e965d8c9d335e0c828

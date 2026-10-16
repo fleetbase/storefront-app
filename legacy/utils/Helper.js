@@ -143,7 +143,14 @@ export default class HelperUtil {
      */
     static stripHtml(html = '') {
         if (typeof html === 'string') {
-            return html.replace(/<[^>]*>?/gm, '');
+            // Repeat until nothing changes: one pass over "<scr<script>ipt>" leaves "<script>".
+            let previous;
+            let text = html;
+            do {
+                previous = text;
+                text = text.replace(/<[^>]*>?/gm, '');
+            } while (text !== previous);
+            return text.replace(/</g, '');
         }
 
         return html;

@@ -32,8 +32,6 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/FACEBOOK_APP_ID"/>
-    <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/FACEBOOK_CLIENT_TOKEN"/>
     <meta-data android:name="com.google.android.geo.API_KEY" android:value="@string/GOOGLE_MAPS_API_KEY" />
   </application>
 </manifest>

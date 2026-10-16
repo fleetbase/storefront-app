@@ -1,24 +1,10 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import useAppTheme from '../hooks/use-app-theme';
+import { BrandingProvider, useBranding } from '../branding/BrandingProvider';
 
-type ThemeContextType = {
-    appTheme: string;
-    changeScheme: (newScheme: string) => void;
-    schemes: string[];
-};
+/** @deprecated Use `BrandingProvider` from src/branding/BrandingProvider. */
+export const ThemeProvider = BrandingProvider;
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-    const { appTheme, changeScheme, schemes } = useAppTheme();
-
-    return <ThemeContext.Provider value={{ appTheme, changeScheme, schemes }}>{children}</ThemeContext.Provider>;
-};
-
-export const useThemeContext = (): ThemeContextType => {
-    const context = useContext(ThemeContext);
-    if (!context) {
-        throw new Error('useThemeContext must be used within a ThemeProvider');
-    }
-    return context;
+/** @deprecated Use `useBranding()`; `appTheme` is `themeName`. */
+export const useThemeContext = () => {
+    const { themeName, setPreference, schemePreferences } = useBranding();
+    return { appTheme: themeName, changeScheme: setPreference, schemes: schemePreferences };
 };

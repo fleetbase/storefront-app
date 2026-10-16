@@ -1,96 +1,41 @@
-import OrderScreen from '../../screens/OrderScreen';
-import ReceiptScreen from '../../screens/ReceiptScreen';
-import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
-import BackButton from '../../components/BackButton';
-import HeaderButton from '../../components/HeaderButton';
-import { PortalHost } from '@gorhom/portal';
-import { getTheme } from '../../utils';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { translate as t } from '../../utils/localize';
+import { screenSlot } from '../../extensions';
 
 export const Order = {
-    screen: OrderScreen,
-    options: ({ navigation, route }) => {
-        const params = route.params ?? {};
-        return {
-            title: params.order.id,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} />;
-            },
-        };
-    },
+    screen: screenSlot('order.detail'),
+    // The tracking screen draws its own close button over the map.
+    options: { headerShown: false },
 };
 
+// Reviews can be written from a delivered order and read from there.
+export const StoreReviews = { screen: screenSlot('reviews.list'), options: { headerShown: false } };
+export const WriteReview = { screen: screenSlot('reviews.write'), options: { presentation: 'modal', headerShown: false } };
+
+export const OrderChat = { screen: screenSlot('order.chat'), options: { headerShown: false } };
+
 export const Receipt = {
-    screen: ReceiptScreen,
-    options: ({ navigation, route }) => {
-        const params = route.params ?? {};
-        return {
-            presentation: 'modal',
-            title: params.order.id,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} />;
-            },
-        };
-    },
+    screen: screenSlot('order.receipt'),
+    // The receipt draws its own header with back and share.
+    options: { presentation: 'modal', headerShown: false },
 };
 
 export const OrderModal = {
-    screen: OrderScreen,
-    options: ({ navigation, route }) => {
-        const params = route.params ?? {};
-        return {
-            presentation: 'modal',
-            title: params.order.id,
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerStyle: {
-                backgroundColor: getTheme('background'),
-            },
-            headerTransparent: false,
-            headerShadowVisible: false,
-            headerRight: () => {
-                return <HeaderButton icon={faTimes} size={30} onPress={() => navigation.goBack()} />;
-            },
-        };
-    },
+    screen: screenSlot('order.detail'),
+    // Opened from a push notification; the tracking screen draws its own close button.
+    options: { presentation: 'modal', headerShown: false },
 };
 
 export const OrderHistory = {
-    screen: OrderHistoryScreen,
-    options: ({ navigation }) => {
-        return {
-            title: t('OrderHistoryScreen.orderHistory'),
-            headerTitleStyle: {
-                color: getTheme('textPrimary'),
-            },
-            headerTransparent: true,
-            headerShadowVisible: false,
-            headerLeft: () => {
-                return <BackButton onPress={() => navigation.goBack()} mr='$3' />;
-            },
-            headerRight: () => {
-                return <PortalHost name='LoadingIndicatorPortal' />;
-            },
-        };
-    },
+    screen: screenSlot('order.history'),
+    options: { headerShown: false },
 };
 
 const OrderStack = {
     Order,
     Receipt,
     OrderHistory,
+    StoreReviews,
+    WriteReview,
+    OrderChat,
 };
 
 export default OrderStack;

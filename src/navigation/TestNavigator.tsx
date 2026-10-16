@@ -133,7 +133,7 @@ export const TestTabNavigatorStack = createBottomTabNavigator({
                 return {
                     marginTop: isAndroid ? 5 : 15,
                     fontSize: 15,
-                    fontWeight: focued ? 600 : 300,
+                    fontWeight: focused ? 600 : 300,
                 };
             },
         };

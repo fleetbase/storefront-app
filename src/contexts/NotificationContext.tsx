@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { Notifications } from 'react-native-notifications';
 import { Platform, PermissionsAndroid } from 'react-native';
 import useStorage from '../hooks/use-storage';
@@ -12,15 +12,16 @@ export const NotificationProvider = ({ children }) => {
     const [permissionGranted, setPermissionGranted] = useState(false);
     const notificationListeners = useRef([]);
 
-    // Function to add a listener
-    const addNotificationListener = (callback) => {
+    // Listeners get every push: received in the foreground (no action) or opened (with the
+    // action). Stable functions, so screens can subscribe in an effect without resubscribing
+    // on every render.
+    const addNotificationListener = useCallback((callback) => {
         notificationListeners.current.push(callback);
-    };
+    }, []);
 
-    // Function to remove a listener
-    const removeNotificationListener = (callback) => {
+    const removeNotificationListener = useCallback((callback) => {
         notificationListeners.current = notificationListeners.current.filter((listener) => listener !== callback);
-    };
+    }, []);
 
     // Request notification permission for Android 13+
     const requestNotificationPermission = async () => {

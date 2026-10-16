@@ -1,523 +1,331 @@
 <p align="center">
-  <img src="https://flb-assets.s3.ap-southeast-1.amazonaws.com/static/storefront-logo.svg" width="380" height="100" />
-</p>
-<p align="center">
-Open source ecommerce mobile app for on-demand orders. Setup ecommerce marketplace or shop.
+  <img src="https://flb-assets.s3.ap-southeast-1.amazonaws.com/static/storefront-logo.svg" width="380" height="100" alt="Fleetbase Storefront" />
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@fleetbase/storefront">
-    <img src="https://img.shields.io/npm/v/@fleetbase/storefront" alt="Version" />
-  </a>
-  <a href="https://www.npmjs.com/package/@fleetbase/storefront">
-    <img src="https://img.shields.io/npm/dw/@fleetbase/storefront" alt="Downloads/week" />
-  </a>
-  <a href="https://bundlephobia.com/package/@fleetbase/storefront@1.0.3">
-    <img src="https://img.shields.io/bundlephobia/min/@fleetbase/storefront" alt="Bundle Size" />
-  </a>
-
-  <a href="https://github.com/fleetbase/storefront-app/actions/workflows/react-native-ci.yml">
-    <img src="https://github.com/fleetbase/storefront-app/actions/workflows/react-native-ci.yml/badge.svg" alt="CI" />
-  </a>
-  <a href="https://github.com/fleetbase/storefront-js/blob/master/LICENSE.md">
-    <img src="https://img.shields.io/github/license/fleetbase/storefront-js" alt="License" />
-  </a>
-  <br>
-  <a href="https://fleetbase.io">fleetbase.io</a> | <a href="https://twitter.com/fleetbase_io">@fleetbase_io</a> | <a href="https://discord.gg/fjP4sReEvH">Discord</a>
+  The customer app for ordering, booking and delivery on <a href="https://fleetbase.io">Fleetbase</a>.<br>
+  One store, a marketplace of many, or a fleet of mobile trucks, on iOS, Android and the web.
 </p>
 
 <p align="center">
-	<img src="https://user-images.githubusercontent.com/816371/131815361-ba85b208-e92b-4470-bba3-f87dde747a40.png" width="220" height="416" />
-	<img src="https://user-images.githubusercontent.com/816371/131815221-b704d013-cc5d-41c3-9fde-36ca7af21a57.png" width="220" height="416" />
-	<img src="https://user-images.githubusercontent.com/816371/131815186-b641a613-4aba-4064-ba28-4e610aba56b4.png" width="220" height="416" />
+  <a href="https://github.com/fleetbase/storefront-app/actions/workflows/react-native-ci.yml"><img src="https://github.com/fleetbase/storefront-app/actions/workflows/react-native-ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://codecov.io/gh/fleetbase/storefront-app"><img src="https://codecov.io/gh/fleetbase/storefront-app/branch/main/graph/badge.svg" alt="Coverage" /></a>
+  <a href="https://github.com/fleetbase/storefront-app/releases"><img src="https://img.shields.io/github/v/release/fleetbase/storefront-app?sort=semver" alt="Latest release" /></a>
+  <img src="https://img.shields.io/badge/React%20Native-0.86-61dafb?logo=react&logoColor=white" alt="React Native 0.86" />
+  <img src="https://img.shields.io/badge/platforms-iOS%20%7C%20Android%20%7C%20Web-4b5563" alt="Platforms: iOS, Android, Web" />
+  <a href="LICENSE.md"><img src="https://img.shields.io/github/license/fleetbase/storefront-app" alt="License: AGPL-3.0" /></a>
+  <a href="https://discord.gg/V7RVWRQ2Wm"><img src="https://img.shields.io/discord/699834923032248430?logo=discord&logoColor=white&label=discord" alt="Discord" /></a>
 </p>
 
-## Table of Contents
+<p align="center">
+  <a href="https://fleetbase.io/platform/storefront">Storefront</a> · <a href="https://fleetbase.io/docs/storefront/app/overview">Docs</a> · <a href="https://console.fleetbase.io">Console</a> · <a href="https://fleetbase.io/pricing">Pricing</a> · <a href="https://discord.gg/V7RVWRQ2Wm">Discord</a>
+</p>
 
-- [About](#about)
-    - [Use cases](#use-cases)
+<p align="center">
+  <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details.webp" width="240" alt="A store's home page: categories, recommended products and the store's open hours" />
+  <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details.webp" width="240" alt="A marketplace home: featured stores, categories and stores near the customer" />
+  <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map.webp" width="240" alt="The trucks home: live trucks on a map with the trucks serving the customer's zone" />
+</p>
+
+## Contents
+
+- [Overview](#overview)
+- [Features](#features)
 - [Screenshots](#screenshots)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-    - [Configure Environment](#configure-environment)
-- [Running in Simulator](#running-in-simulator)
-    - [Run the app in iOS Simulator](#run-the-app-in-ios-simulator)
-    - [Run the app in Android Simulator](#run-the-app-in-android-simulator)
-- [Push Notifications](#push-notifications)
-    - [APNS Push Notifications](#apns-push-notifications)
-    - [FCM Push Notifications](#fcm-push-notifications)
-- [Generate Assets](#generate-assets)
+- [Run it on Fleetbase Cloud](#run-it-on-fleetbase-cloud)
+- [Quick start](#quick-start)
 - [Configuration](#configuration)
-    - [Application Configuration](#appconfig)
-    - [Interface Configuration](#uiconfig)
-- [Internationalization and Translations](#internationalization-and-translations)
-    - [Internationalization](#internationalization)
-    - [Translations](#translations)
-- [Payment Gateways](#payment-gateways)
-    - [Stripe](#stripe)
-- [Store Locations](#store-locations)
-    - [Store Hours](#store-hours)
-- [Multi-Vendor](#multi-vendor)
-    - [Creating a network](#creating-a-network)
-    - [Inviting to network](#inviting-to-network)
-    - [Configuring network](#configuring-network)
-    - [Launch network on app](#launch-network-on-app)
-- [Cart](#cart)
-- [Customer Authentication](#customer-authentication)
-    - [Creating a customer account](#creating-a-customer-account)
-    - [Logging in a customer](#logging-in-a-customer)
-- [Delivery/ Service Rates](#delivery-service-rates)
-    - [Location based quote](#location-based-quote)
-- [Checkout](#checkout)
-    - [Creating a checkout token](#creating-a-checkout-token)
-    - [Capture checkout](#capture-checkout)
-- [Driver/Agent App](#driver-agent-app)
-    - [Proof of delivery](#proof-of-delivery)
-- [Orders](#orders)
-    - [Auto-accept orders](#auto-accept-orders)
-    - [Manually accept orders](#manually-accept-orders)
-    - [Auto-assign orders](#auto-assign-orders)
-    - [Manually assign orders](#manually-assign-orders)
-- [Documentation](#documentation)
-- [Roadmap](#roadmap)
+- [Payments](#payments)
+- [Sign-in](#sign-in)
+- [Push notifications](#push-notifications)
+- [Languages](#languages)
+- [Branding and customization](#branding-and-customization)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
-### About
+## Overview
 
-Storefront is a headless e-commerce service which functions as an extension within [Fleetbase](https://fleetbase.io). Similarly to how [Fleetbase is a headless logistics service](https://fleetbase.io/developers). [Fleetbase Storefront](https://fleetbase.io/products/storefront) provides several API-first approaches to products, carts, categories, customers, and checkout flow giving developers more control over the shopping experience. This project is to provide an open-sourced hyperlocal shopping app which can be fully customised and adapted to personal and commercial projects. This Storefront app is built with [React Native](https://reactnative.dev/) to provide react native developers a head start building with Fleetbase and Storefront.
+Storefront is the commerce side of [Fleetbase](https://fleetbase.io): catalogs, customers, checkout and orders, with delivery run by Fleetbase's dispatch and driver apps. This is the app your customers use. They browse and search, order products, book services, pay, chat with you and their driver, and follow the delivery live. You run the stores, orders, drivers and promotions from the Fleetbase Console.
 
-_Notice: Network/ Multi-vendor functionality is still a work in progress._
+The key you build with decides what the app is:
 
-#### Use Cases
+| Build with | The app becomes |
+| --- | --- |
+| A store key (`store_…`) | One business's own branded app. Home is the store page. |
+| A network key (`network_…`) | A marketplace of member stores, with discovery, search across stores, a stores map and carts that span stores. |
+| Either key, with the trucks home | A mobile commerce app: home is a live map and list of the trucks serving the customer's zone, alongside your fixed stores. |
 
-- Food delivery app
-- Services booking app
-- Hyperlocal shopping app
-- Hyperlocal marketplace app
-- Alcohol delivery app
-- Cannabis delivery app
-- Lawn care booking app
-- Transportation booking app
-- and much more...
+## Features
 
-### Screenshots
+**Shopping**
+- Store and marketplace home pages with categories, recommended products and featured stores.
+- Search with recent searches, popular categories and filters, scoped to a store or across a marketplace.
+- Product variants and add-ons with required and optional choices, sale prices and live stock levels.
 
-| [Products Page](https://user-images.githubusercontent.com/816371/131815346-1bb2e157-ce13-45b5-b12c-f8c7c2311036.png)<br>[Search Products](https://user-images.githubusercontent.com/816371/131815361-ba85b208-e92b-4470-bba3-f87dde747a40.png)<br>[Product](https://user-images.githubusercontent.com/816371/131815370-a1fbde68-4ecd-4d06-a097-5ad20fb45933.png) | [Cart](https://user-images.githubusercontent.com/816371/131815309-9eafb08f-6bd8-4e6e-91a0-2fd949e15ed9.png)<br>[Add Payment Method](https://user-images.githubusercontent.com/816371/131815232-d3a91394-0cce-4e1e-af0b-a0552eb44acb.png)<br>[Checkout](https://user-images.githubusercontent.com/816371/131815221-b704d013-cc5d-41c3-9fde-36ca7af21a57.png) | [Order Placed](https://user-images.githubusercontent.com/816371/131815192-fa46545a-1ae1-4eb5-af81-6309e6ffc580.png)<br>[Order Preparing](https://user-images.githubusercontent.com/816371/131815197-cbd36d7a-3237-4a73-aba0-e949c551010a.png)<br>[Order Driver Assigned](https://user-images.githubusercontent.com/816371/131815168-52341b30-750b-459b-ad7d-4801a151b3b7.png)<br>[Order Driver Enroute](https://user-images.githubusercontent.com/816371/131815186-b641a613-4aba-4064-ba28-4e610aba56b4.png) | [Add Address](https://user-images.githubusercontent.com/816371/131815273-7fe80511-7ce5-43e4-88c2-3a1cbe8c7d61.png)<br>[Add Address 2](https://user-images.githubusercontent.com/816371/131815288-26c3a3a0-13c6-4f4c-b5d9-f46ee7448fbd.png)<br>[Saved Address](https://user-images.githubusercontent.com/816371/131815292-30904979-fc66-4dbd-95e2-ac247d0ceaac.png) |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+**Service bookings**
+- Bookable services alongside products: customers pick a day and a start time from the slots you have open.
+- Deposits taken at booking, with the balance settled later.
+- Booked appointments can be added to the customer's calendar.
 
-### Prerequisites
+**Marketplace**
+- One app for many independent stores, each with its own catalog, hours and locations.
+- Discovery by category, tag and distance, and a map of every member store.
+- One cart and one checkout across stores.
 
-- [Yarn](https://yarnpkg.com/) or [NPM](https://nodejs.org/en/)
-- [React Native CLI](https://reactnative.dev/docs/environment-setup)
-- Xcode 12+
-- Android Studio
+**Trucks**
+- Mobile stores on a live map, each truck with its own catalog and service zone.
+- Trucks shown alongside fixed store locations, as a map or a list.
+- Customers order from the trucks serving their location.
 
-### Installation
+**Ordering and checkout**
+- Delivery or pickup, scheduled orders and tips.
+- Saved addresses, with a map pin for places address search can't find.
+- Two payment gateways: Stripe (cards, saved cards, Apple Pay, Google Pay) and QPay (Mongolian bank apps and QR).
+- Unavailable items are flagged before payment, not after.
 
-Installation and setup is fairly quick, all you need is your Storefront and Fleetbase API Key, and a few commands and your app will be up and running in minutes. Follow the directions below to get started.
+**After the order**
+- Live tracking with the driver's position on the map and the order's progress in real time.
+- Live chat with the store and with the driver, from the order screen.
+- Order changes made by the store show up live, with any balance to pay; customers can report a wrong address.
+- Receipts and order history, with active orders first.
 
-📺 If you like videos better, [here is a walkthrough video](https://youtu.be/ERsO0lNufRI).
+**Offers and promotions**
+- An Offers tab with every live deal, filtered by kind (percent off, money off, free delivery, buy one get one) and grouped into ending soon, ongoing and coming up.
+- Each offer explains itself: what it applies to, when it runs, minimum spend, first order only or per-customer limits, and whether it needs a code or applies automatically.
+- Promo codes copied or applied to the cart in one tap, or entered in the cart and at checkout.
+- Offers shown where they apply: badges on categories and products, banners in a category, and offer cards on the home screen.
 
-_Notice: Ideally you should fork this project so it's easier to merge updates in the future, but you can also clone this project - whichever method works best for you._
+**Reviews**
+- Star ratings and written reviews of stores, with up to four photos, marked "Verified purchase" because they come from a completed order.
+- A rating summary on the store page, and every review sorted by newest, highest, lowest or oldest.
+- Customers are invited to rate an order once it is delivered, can see and delete their own review, and review again after their next order.
 
-Run the commands below; first clone the project, use npm or yarn to install the dependencies, then run `npx pod-install` to install the iOS dependencies. Lastly, create a `.env` file to configure the app.
+**Notifications**
+- Push notifications for order and booking updates, messages from the store or driver, and offers. Tapping one opens the order, the chat or the offer.
+- An inbox behind the bell on the home screen, with an unread count, filters for orders and offers, mark all read, and swipe to delete.
+- Notification settings per kind (order updates, offers and news), and a reminder with a link to phone settings when push is switched off.
 
-```
-git clone git@github.com:fleetbase/storefront-app.git
-cd storefront-app
-corepack enable
-corepack prepare yarn@3.6.4 --activate
-yarn
-bundle install
-cd ios
-bundle exec pod install
-touch .env
-```
+**Accounts**
+- Sign in with a phone number and a texted code, or with Apple and Google.
+- Profile, saved payment methods and address book.
+- Account deletion from inside the app, as the app stores require.
 
-### Configure Environment
+**Your brand**
+- Colors for light and dark, fonts, buttons, chips, corner radii, tab bar, which tabs show and their icons and labels, all from one brand file.
+- App icon and launch screen generated from your artwork.
+- Replace any screen or add your own screens and tabs without forking the app's code.
 
-Below is the steps needed to configure the environment. The first part covers collecting your required API keys.
+**Built for everyone**
+- iOS, Android and the web from one codebase.
+- Light and dark appearance, text that follows the system font size, and screen reader labels.
+- English, Mongolian and Ukrainian included, with a language switcher.
 
-1.  Get your API Keys;
-2.  **If you don't have a Fleetbase account already** proceed to the [Fleetbase Console](https://console.fleetbase.io/) and click "Create an account", complete the registration form and you will be taken to the console.
-3.  Once you're in the Fleetbase console select the "Developers" button in the top navigation. Next, select API Keys from the menu in the Developers section, and create a new API key. Copy your secret key generated, you'll need it later.
-4.  Now, proceed to Storefront by clicking the "Storefront" button in the top navigation. If you don't have a Store setup already you will be prompted to create one. Once you have your store created proceed to Settings where you will find an "API" tab with your "Store key", copy this you'll need it next. (It's not necessary to put much thought into your first store, you'll be able to create as many as you need later).
-5.  Once you have both required API keys open your `.env` file.
+## Screenshots
 
-In your `.env` file supply your Storefront store key, your Fleetbase API secret key, and additionally you will need a Google Maps API Key. Currently the Storefront app can only use the Stripe payment gateway, to use the Stripe gateway you will also need to plug in your Stripe API Key. Lastly, you'll also need to supply your app/bundle identifier, and an `APP_NAME` key.
+Every screen is designed to feel native on iOS and Android, in light and dark. Customers find what they want in a couple of taps, check out in seconds and watch their order arrive live, with your brand on every screen.
 
-Your `.env` file should look something like this once you're done.
+**A single store**
 
-```
-# .env
-APP_NAME=
-APP_IDENTIFIER=
-FLEETBASE_HOST=
-STOREFRONT_KEY=
-FLEETBASE_KEY=
-GOOGLE_MAPS_KEY=
-STRIPE_KEY=
-```
+| Store | Category | Product | Cart | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details.webp" width="160" alt="Store page" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-category-details.webp" width="160" alt="A category with its products" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-product-details.webp" width="160" alt="Product" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-cart-details.webp" width="160" alt="Cart" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-order-details.webp" width="160" alt="An order in progress" /> |
 
-### Running in Simulator
+**A Network (marketplace)**
 
-Once you have completed the installation and environment configuration, you're all set to give your app a test-drive in the simulator so you can play around.
+| Marketplace | Member store | Search | Stores map | Account |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details.webp" width="160" alt="Marketplace home" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details-network.webp" width="160" alt="Member store" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-products-list-network.webp" width="160" alt="Search results across stores" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-stores-map-network.webp" width="160" alt="Stores map" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-account-details-network.webp" width="160" alt="Account" /> |
 
-#### Run the App in iOS Simulator
+**Trucks**
 
-```
-npx react-native run-ios
-```
+| Trucks map | Trucks list | Truck menu | Search | Light appearance |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map.webp" width="160" alt="Trucks map" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-list.webp" width="160" alt="Trucks list" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-truck-details.webp" width="160" alt="A truck's menu" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-products-list-food-trucks.webp" width="160" alt="Search showing which truck has each product" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map-light.webp" width="160" alt="Trucks map in the light appearance" /> |
 
-#### Run the App in Android Simulator
+**On Android**
 
-```
-npx react-native run-android
-```
+| Store | Product | Marketplace | Trucks map | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-store-details.webp" width="160" alt="Store page on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-product-details.webp" width="160" alt="Product on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-network-details.webp" width="160" alt="Marketplace home on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-food-trucks-map.webp" width="160" alt="Trucks map on Android" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/android/storefront-app-order-details.webp" width="160" alt="An order in progress on Android" /> |
 
-### Push Notifications
+**Light appearance**
 
-Push Notifications are essential to providing your customer with updates about their orders. Fleetbase has configurable order flows, but includes default but customisable order flows which include push notifications to customers throughout their order lifecycle. Below we will walk through configuring Push Notifications for your app. By default Fleetbase uses APNS and FCM push notification channels. If you'd like to have a 3rd party channel introduced feel free to submit the request in Issues.
+| Store | Marketplace | Product | Cart | Order |
+| :-: | :-: | :-: | :-: | :-: |
+| <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details-light.webp" width="160" alt="Store page in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details-light.webp" width="160" alt="Marketplace home in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-product-details-light.webp" width="160" alt="Product in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-cart-details-light.webp" width="160" alt="Cart in the light appearance" /> | <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-order-details-light.webp" width="160" alt="An order in progress in the light appearance" /> |
 
-#### APNS Push Notifications
+## Run it on Fleetbase Cloud
 
-To setup APNS you'll need to enable push notifications from Xcode from the "Signing & Capabilities" tab, more information about [setting up push notifications can be found from the Apple documentation here](https://developer.apple.com/documentation/usernotifications/registering_your_app_with_apns). Once you're setup, you'll need to login to the [Fleetbase Console](https://console.fleetbase.io) and proceed to Storefront and in your settings click the "Notifications" tab. Follow the steps below to complete APNS setup.
+The app needs a Fleetbase backend with the Storefront extension. [Fleetbase Cloud](https://console.fleetbase.io) is the quickest way to get one: sign up, create a store, add products, and you have the keys to build the app the same day. Everything the app shows is managed from the Console:
 
-1.  **From the "Notifications" tab in Storefront settings;** click the "New Channel" button.
-2.  A dialog will appear, and prompt you to select a channel from the dropdown. Select "Apple push notification service (apn)" a configuration form will appear.
-3.  In the form you will need to provide the following: **Key id**, **Team id**, **App bundle id**, **Private key content** and there will be the option to toggle Production or not. 4. **Key id** is generated when you create your APN key from your apple developer account, this can also be found in this section. 5. **Team id** can be found in your apple developer account under the "Membership" section. 6. **App bundle id** is your app bundle identifier, you can find this in Xcode, but it should also be the same as the `APP_BUNDLE_IDENTIFIER` set in your `.env` file. 7. **Private key content** Once you've downloaded your APNS cert file you can open this in any text editor and copy the contents.
-4.  Click "Create Notification Channel"
-5.  That's it, you're all set. Now when orders go through Fleetbase will be able to send push notifications to your iOS app.
+- Stores, locations, opening hours and catalogs, including bookable services.
+- Networks for a marketplace, and trucks with their zones.
+- Payment gateways, notification channels, promotions and promo codes.
+- Orders, dispatch and drivers, with the [Navigator](https://github.com/fleetbase/navigator-app) driver app.
 
-#### FCM Push Notifications
+See [pricing](https://fleetbase.io/pricing), or [talk to us](https://fleetbase.io/contact/sales) about a managed launch. Fleetbase is also available to [self-host](https://github.com/fleetbase/fleetbase).
 
-FCM Push Notifications or "Firebase Cloud Messaging" notifications are simple to setup and configure. Proceed to [Firebase console](https://console.firebase.google.com/) and create a project for your app. Once you have a project setup click into "Project settings" next to "Project Overview" from the navigation. in the "Your apps" section click "Add app", and add an android app. Once done, everything you need to plug into Fleetbase can be found here, follow the steps below to complete FCM setup.
+## Quick start
 
-1.  **From the "Notifications" tab in Storefront settings;** click the "New Channel" button.
-2.  A dialog will appear, and prompt you to select a channel from the dropdown. Select "Firebase cloud messaging (fcm)" a configuration form will appear.
-3.  In the form you will need to provide the following: **Firebase credentials json**, **Firebase database url**, and **Firebase project name**. 4. **Firebase credentials json** Download google-services.json and copy the json contents into this box. 5. **Firebase database url** This will most likely be `https://<your-project>.firebaseio.com` - replace `<your-project>` with your firebase project id. 6. **Firebase project name** This is just your firebase project name, it should be dasherized.
-4.  Click "Create Notification Channel"
-5.  That's it, you're all set. Now when orders go through Fleetbase will be able to send push notifications to your android app.
-
-### Generate Assets
-
-We've tried to make it as easy as possible to generate your app assets such as the launch screen and the app icon, to make it one less tedious task. In order to use the app icon and launch screen asset generators follow the steps below.
-
-1. First you'll need to add your app icon to the `/assets/` directory with the filename `app-icon.png`. (The best size for the app icon is 1024x1024)
-2. Next for your launch screen you'll need to add your launch screen file to the `/assets/` directory using the filename `splash-screen.png`
-
-Once those two steps are done, you can then generate your app icon and launch screen automatically for both iOS and Android.
+You need:
+- Node 20 (see `.nvmrc`) and Yarn 3 through Corepack.
+- Xcode with CocoaPods for iOS, and Android Studio with JDK 21 for Android.
+- A Fleetbase account with the Storefront extension, on [Fleetbase Cloud](https://console.fleetbase.io) or [self-hosted](https://github.com/fleetbase/fleetbase).
 
 ```bash
-# Generate App Icon
-yarn generate-app-icon
-
-# Generate Launch Screen Assets:
-yarn generate-launch-screen
+git clone https://github.com/fleetbase/storefront-app.git
+cd storefront-app
+corepack enable
+yarn install
+cp .env.example .env
 ```
 
-### Configuration
+Set your keys in `.env` (see [Configuration](#configuration)). Then run on iOS:
 
-StorefrontApp features config files which will allow you to change the behaviour and look of your app. It will also allow you to setup [linking prefixes](https://reactnative.dev/docs/linking), which will be documented more in the future.
-
-#### Application Configuration
-
-Application configuration includes behaviour configuration, linking prefixes, translations, and the enabling or disabling of widgets.
-
-| Prop                | Type    | Default | Description                                                                                                                                                             |
-| ------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| linkingPrefixes     | Array   | []      | Define app linking prefixes, they will automatically be loaded into the navigation router.                                                                              |
-| enableTranslations  | Boolean | false   | Enable or disable the translations toggle, this allows users to select a language.                                                                                      |
-| enabledTranslations | Array   | ['en']  | Select which translations to enable by supplying the translation iso2 country or language code, the language or iso2 code must exists in the `/translations` directory. |
-| storeScreenOptions  | Object  | {...}   | Define options for store screens, see below.                                                                                                                            |
-
-**storeScreenOptions**
-| Prop | Type | Default | Description |
-|----------------------|---------|---------|--------------------------------------------------------------------------------------|
-| actionBarEnabled | Boolean | true | Enable or disable the action buttons on the store screen |
-| photosEnabled | Boolean | true | Enable or disable the button to open store photos on the store screen |
-| reviewsEnabled | Boolean | true | Enable or disable review button and features on the store screen |
-| mapEnabled | Boolean | true | Enable or disable the button to open the map/directions screen from the store screen |
-| websiteLinkEnabled | Boolean | true | Enable or disable the button to open a link to the stores website |
-| contactEnabled | Boolean | true | Enable or disable the button to prompt contact options for the store |
-| shareEnabled | Boolean | true | Enable or disable the button to prompt to share the store |
-| searchEnabled | Boolean | true | Enable or disable the button to open the store search dialog |
-| browseEnabled | Boolean | true | Enable or disable the button to open the dialog of store categories |
-| mapWidgetEnabled | Boolean | true | Enable or disable the mini map widget on the store screen |
-| infoWidgetEnabled | Boolean | true | Enable or disable the store info widget on the store screen |
-| relatedWidgetEnabled | Boolean | true | Enable or disable the "related stores" widget on the store screen |
-| photosWidgetEnabled | Boolean | true | Enable or disable the photos widget on the store screen |
-| reviewsWidgetEnabled | Boolean | true | Enable or disable the reviews widget on the store screen |
-
-#### Interface Configuration
-
-These options can be used to customize the design and look of your StorefrontApp. From adding background images, changing colors, positioning inputs and views. You can do a lot of customizing from the config alone.
-
-For interface config please reference the file `/config/defaults.js` to view options.
-
-### Internationalization and Translations
-
-Baked in by default StorefrontApp support internationalization and app translations. Internationalization starts from when you configure your store or network from within the Storefront extension in the [Fleetbase Console](https://console.fleetbase.io/). Read below for getting started with internationalization and translations.
-
-#### Internationalization
-
-Internationalization starts with your store or network configuration from the Storefront extension. When creating a store or network you must select the default currency, this will default the currency throughout the app. Next when adding store locations Storefront will then use the country settings from here for localization.
-
-#### Translations
-
-When translations are enabled via the StorefrontApp config, users are able to select which language they want to view the app in. To enable app translations, the translation file must exist within the `/translations/`directory. By default StorefrontApp is translated from english to Mongolian, and Arabic. You can add custom translations by adding your own translation json file to the `/translations` directory.
-
-If you add a translation file for a new language, please feel free to make a pull request so we can add the translation to the app as a default language.
-
-### Payment Gateways
-
-Payment gateways are required for accepting payments through your app, depending on your payment gateway can determine which types of payment methods your customers can use at checkout. Currently Fleetbase Storefront is only setup to work with [Stripe](https://stripe.com/), but we are working on including more payment gateways in the near future.
-
-### Stripe
-
-Setting up Stripe is fairly simple, all you need is your Stripe public key from your Stripe accounts dashboard. You'll need to provide this public key in your `.env` file as `STRIPE_KEY` (This is subject to be changed once we implement a payment gateway resolver, which will rely on the API).
-
-Next you will need to proceed to the "Gateways" tab within the Storefront settings. Click "Create new gateway" and select "Stripe" from the dropdown. You will be promoted for your Stripe public and secret key. There is additional options such as enabling sandbox mode, and a few other options regarding payments. Click "Save Gateway", and you're all done Fleetbase can now process your payments (Fleetbase will not take any fee or percent from your payments).
-
-### Store Locations
-
-It is possible for a single store to have multiple locations, but by default each store must have at least one location. To add your stores location, proceed to Storefront settings and click the "Locations" tab. Click "Create new location" a dialog will appear prompting you for the location address details. Give your location a name, and use the autocomplete on "Street 1" to complete your address details. Click "Add new location" when you're done. Once added your location will appear on screen and you'll be able to input the locations operating hours.
-
-#### Store Hours
-
-You can set the store hours from within your store location panel. Each day of the week will be listed in which you can "Add Hours".
-
-### Multi-Vendor
-
-Fleetbase Storefront intends to support marketplaces natively though a concept called "Networks". From Storefront you can create as many "Networks" as you want, and from the Network settings you can invite other stores from Fleetbase to join your network. If they do not have an account they will be able to create an account and manage their own stores and networks as well. The networks operate on an invitation based system, the network owner will be able to invite as many stores to join and will have complete overview of the stores in their network. The network owner is not able to manage the stores or view the stores private resources such as customers, but the network owner will have overview of orders that are created through the network.
-
-#### Creating a network
-
-1.  Click "Networks" from the side navigation within Fleetbase Storefront.
-2.  Next, click the "New" button in the top right header, a dialog will appear.
-3.  In the dialog you are able to give your network a name, description and set the currency of your network. Similarly to creating a store from within Storefront.
-4.  Click "Confirm" when done, and Boom! Your new network will appear.
-
-#### Inviting to network
-
-1.  Click the cog icon button under your network and select "Send Invites"
-2.  A dialog will appear in which you can enter emails of those you wish to invite to your network, or you can enable a shareable link which will allow anyone with the link to join your network.
-
-#### Configuring network
-
-Coming soon...
-
-#### Launch network on app
-
-Launching a network app is much like launching a singular StorefrontApp, but instead of providing a "store key", you must provide a "network key" which can be found in the Storefront extension in the network dialog for the network you are building.
-
-### Cart
-
-Fleetbase Storefront SDK provides a functional cart that can be used with a few simple methods. This will serve as a quick overview of how the cart operates. More documentation can be found at the [Fleetbase API Reference](https://fleetbase.io/docs/api#cart).
-
-**Initializing or retrieving a cart**.
-
-```js
-// You can initialize or retrieve a cart using the retrieve() method.
-// To initialize you can provide a unique identifier
-// To retrieve you can use either the cart id, or the initial unique identifier.
-import { getUniqueId } from 'react-native-device-info';
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-// For React Native, we use the 'react-native-device-info' package to get the device id.
-const uniqueId = getUniqueId();
-
-// You will get back a Storefront Cart resource.
-storefront.cart.retrieve(uniqueId).then((cart) => console.log(cart));
+```bash
+yarn pod:install
 ```
 
-**Adding a product/item to cart**
-
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-storefront.cart.retrieve('<cart id>').then((cart) => {
-    cart.add('<product id>');
-});
+```bash
+yarn ios
 ```
 
-**Removing a product/item from cart**
+Or on Android, or in a browser:
 
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-storefront.cart.retrieve('<cart id>').then((cart) => {
-    cart.remove('<cart item id>');
-});
+```bash
+yarn android
 ```
 
-**Updating an item from cart**
-
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-storefront.cart.retrieve('<cart id>').then((cart) => {
-    cart.update('<cart item id>', '<quantity>', { addons, variants });
-});
+```bash
+yarn web
 ```
 
-### Customer Authentication
+The [Storefront app quickstart](https://fleetbase.io/docs/storefront/app/quickstart) walks through creating the store and its keys in the Console. To ship a branded app for a client, see [Branding and customization](#branding-and-customization) and [Build and release](https://fleetbase.io/docs/storefront/app/build-and-release).
 
-Customer authentication is design to be simple, it includes 2FA authentication by default. Authentication of customer is responsible for logging in customers, and creating customer accounts. We attempted to design this into our API and SDK to make it painless as possible when onboarding customers from your app.
+## Configuration
 
-#### Creating a customer account
+The app reads `.env` at build time, so a change needs a rebuild. The full list is in the [configuration docs](https://fleetbase.io/docs/storefront/app/configuration).
 
-Creating a customer account is a two step process. The first step is to request a creation code, the creation code is a code which will be sent to your customer for them to verify. There is two methods of sending a creation code. Creation code can be sent via sms or email. Below we show an example of requesting a creation code in Storefront.
+**Required**
 
-```js
-import Storefront from '@fleetbase/storefront';
+| Key | What it is |
+| --- | --- |
+| `STOREFRONT_KEY` | Your store key (`store_…`) or network key (`network_…`), from Storefront → Settings → API in the Console. |
+| `FLEETBASE_KEY` | A Fleetbase API key, from Developers → API Keys in the Console. |
+| `FLEETBASE_HOST` | Your Fleetbase API: `https://api.fleetbase.io` on Fleetbase Cloud, or your own server. |
+| `GOOGLE_MAPS_API_KEY` | Google Maps on Android, and address search. |
+| `APP_NAME`, `APP_IDENTIFIER` | The app's display name and its bundle id / application id. |
 
-const storefront = new Storefront('<your store or network key>');
+**Common options**
 
-// When requesting creation code you may specify sms or email in the mode param
-// The first parameter is identity which is either the customers email or phone
-// If providing a phone number, it must include the country code
-storefront.customers.requestCreationCode('<identity>', '<mode>');
+| Key | Default | What it does |
+| --- | --- | --- |
+| `PAYMENT_GATEWAY` | `stripe` | `stripe` or `qpay` |
+| `STRIPE_KEY` | | Stripe publishable key, when using Stripe |
+| `STRIPE_ENABLE_APPLE_PAY`, `STRIPE_ENABLE_GOOGLE_PAY` | `false` | Wallet buttons in the Stripe payment sheet |
+| `TIP_INCREMENT` | `50` | Tip step, in the currency's smallest unit |
+| `PRIORITIZE_PICKUP` | `false` | Start checkout on pickup instead of delivery |
+| `DEFAULT_LOCALE`, `AVAILABLE_LOCALES` | `en`, `en,mn,uk` | The starting language and the languages offered |
+| `DEFAULT_COUNTRY` | device region | Country the phone field starts on, e.g. `MN` for +976 |
+| `DEFAULT_COORDINATES` | | `lat,lng` used until the customer's location is known |
+| `DEFAULT_MAP_TYPE` | `standard` | `standard`, `satellite`, `hybrid` or `terrain`, on every map |
+| `DISABLE_GEOCODING_SCREEN` | `false` | Add addresses with the map pin only, for regions where address search is weak |
+| `APPLE_LOGIN_ENABLED`, `GOOGLE_LOGIN_ENABLED` | `false` | Sign-in options; see [Sign-in](#sign-in) |
+| `TOS_URL`, `PRIVACY_URL` | | Linked from the account screen |
+| `APP_LINK_PREFIX` | | URL scheme for deep links, e.g. `myshop` |
+| `SOCKETCLUSTER_HOST`, `SOCKETCLUSTER_PORT`, `SOCKETCLUSTER_SECURE`, `SOCKETCLUSTER_PATH` | Fleetbase Cloud | Your realtime server, when self-hosting |
+
+The look of the app, which tabs show and whether home is the store or the trucks are set in the brand file, not in `.env`. See [Branding and customization](#branding-and-customization).
+
+In development you can switch keys without rebuilding: put overrides in a git-ignored `env.dev.json` at the repository root, for example `{ "STOREFRONT_KEY": "network_…" }`, and restart Metro. Release builds ignore it.
+
+## Payments
+
+Set the gateway with `PAYMENT_GATEWAY`, and its credentials in the Console under Storefront → Settings → Payment gateways. See [payment gateways](https://fleetbase.io/docs/storefront/orders/payment-gateways).
+
+- **Stripe:** cards and saved cards through Stripe's payment sheet, with Apple Pay and Google Pay. Set `STRIPE_KEY` to your publishable key.
+- **QPay:** the customer picks their bank app or scans a QR code; the app confirms the payment when they return, and lets them retry or pay another way if it doesn't go through.
+
+## Sign-in
+
+Customers sign in with a phone number and a code sent by text. Apple and Google can be added:
+
+- **Apple:** `APPLE_LOGIN_ENABLED=true`, with the Sign in with Apple capability in Xcode. Shown on iOS.
+- **Google:** `GOOGLE_LOGIN_ENABLED=true`, `GOOGLE_CLIENT_ID` (the web client) and `GOOGLE_IOS_CLIENT_ID` (the iOS client), both without the `.apps.googleusercontent.com` ending. Android also needs an Android OAuth client for your package name and signing key. Shown on iOS and Android.
+
+See [customer authentication](https://fleetbase.io/docs/storefront/customers/authentication).
+
+## Push notifications
+
+Add a notification channel in the Console under Storefront → Settings → Notifications. See [notification settings](https://fleetbase.io/docs/storefront/settings/notifications).
+
+- **iOS (APNs):** enable Push Notifications under Signing & Capabilities in Xcode, create an APNs key in your Apple developer account, and enter its key id, your team id, the bundle id and the key in the channel.
+- **Android (FCM):** add an Android app to a Firebase project, place its `google-services.json` in `android/app/`, and add the service account to the channel.
+
+## Languages
+
+English, Mongolian and Ukrainian are included in `translations/`. Customers switch language from the account screen or the language button in the header. To add a language, add `translations/<code>.json` with the same keys and list it in `AVAILABLE_LOCALES`. Translation pull requests are welcome.
+
+## Branding and customization
+
+Everything a branded build changes lives in `brand/`, which this repository never ships, so a client build takes each new release as a plain merge.
+
+```
+brand/
+  storefront.brand.ts         colors, fonts, buttons, tabs, home screen
+  storefront.extensions.ts    replaced screens, added screens and tabs
+  screens/                    your own screens
+  translations/<locale>.json  your copy over the app's strings
+  fonts/                      font files, named by PostScript name
+  app-icon.png                1024×1024, for the app icon
+  splash-screen.png           the logo on the launch screen
 ```
 
-Once the creation code is requested, your customer will either receive an email or sms with a verification code. Next you must verify the code with customer details in order to create their account. See the example below.
+A few things the brand file sets:
 
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-// Next supply the verification code from your customer along with their identity
-// and any additional customer details such as name, phone, email etc
-// more details can be found https://fleetbase.io/docs/api#contact_object
-storefront.customers.create('<identity>', '<code>', { name, phone }).then((customer) => console.log(customer));
+```ts
+navigation: {
+    home: 'foodTrucks',          // open on the trucks home ('store' by default)
+    foodTrucksView: 'list',      // the trucks home opens as a list, with the map as a toggle
+    tabs: { StoreHomeTab: { icon: 'shop', label: 'tabs.Shop' } },
+},
 ```
 
-#### Logging in a customer
+Generate the app icon and launch screen from your artwork. The launch screen uses the brand file's boot background unless you pass `--background=#hex`:
 
-Logging in a customer takes a similar approach to creating a new customer. Logging in can be done via 2FA sms, or the traditional email and password method. In this Storefront app we use the SMS method. Find the example below.
-
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-// Login using phone number
-storefront.customers.login('<phone>');
-
-// The customer will receive a verification code via SMS
-// Verify the code to authenticate the user
-storefront.customers.verifyCode('<phone>', '<code>').then((customer) => console.log(customer));
+```bash
+yarn generate:app-icon
 ```
 
-### Delivery/ Service Rates
-
-Fleetbase allows you to define custom service rates with granular control and time based rules. In order for this Storefront app to provide your customers with delivery quotes, you will need to create a service rate from within the Fleetbase console. _The service rate must be under the type Storefront._
-
-There is several ways to define a service rate, it just depends on how you would like to price your delivery rates. The quotes are then sent to the customer at checkout.
-
-#### Location based quote
-
-To provide a location based quote Fleetbase Storefront needs to know from which store location, the customers location, and the cart. Querying for a quote will look something like this.
-
-```js
-import Storefront, { DeliveryServiceQuote } from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-const adapter = storefront.getAdapter();
-
-// Create a quote resource and provide it the storefront instance adapter
-const quote = new DeliveryServiceQuote(adapter);
-
-// For the customers location it can be a Fleetbase place id,
-// a spatial point, or coordinates
-quote.fromCart('<store location id>', '<customer location id>', '<cart id>').then((serviceQuote) => {
-    console.log(serviceQuote);
-    // Get the service quote amount in cents
-    const amount = serviceQuote.getAttribute('amount');
-});
+```bash
+yarn generate:launch-screen
 ```
 
-### Checkout
+- [Branding](docs/branding.md): every brand file option, for light and dark.
+- [Extending](docs/extensibility.md): replaceable screen ids, custom routes and tabs, platform-specific screens.
+- [Client builds](docs/client-builds.md): the private fork layout, what client code may import, and upgrading.
+- [Home screens and tabs](docs/home-screens.md): the home each edition can open on (including the shop home for a Network built around one main store), tabs, and offers shown next to the products they apply to. Also what belongs in this repository and what belongs in a client's `brand/`.
+- [Theming](https://fleetbase.io/docs/storefront/app/theming) and [integrations](https://fleetbase.io/docs/storefront/app/integrations) on fleetbase.io.
 
-The checkout process is designed to be done within two API request which involve first creating a checkout token, then capturing the checkout token which will result in an order being created within Fleetbase.
+## Development
 
-#### Creating a checkout token
+| Command | What it does |
+| --- | --- |
+| `yarn start` | Metro |
+| `yarn ios`, `yarn android`, `yarn web` | Run the app |
+| `yarn test` | Jest |
+| `yarn lint:strict`, `yarn typecheck:strict` | The lint and type checks CI runs |
+| `yarn web:build` | Production web bundle |
+| `yarn pod:install`, `yarn pod:reset` | iOS dependencies |
+| `yarn brand:link` | Re-link `brand/` after adding or removing a file in it |
 
-Creating a checkout token is dependent upon the cart and the gateway being used for the checkout. In this example we will show you how a checkout token is created using Stripe.
+CI lints, type-checks, runs the tests with coverage, builds the web bundle, and builds iOS and Android on every pull request.
 
-```js
-import Storefront from '@fleetbase/storefront';
+## Contributing
 
-const storefront = new Storefront('<your store or network key>');
+Bug reports, translations and pull requests are welcome. For larger changes, open an issue or ask on [Discord](https://discord.gg/V7RVWRQ2Wm) first. Run `yarn lint:strict`, `yarn typecheck:strict` and `yarn test` before opening a pull request. The screenshot flows in `.maestro/screenshots` select elements by `testID`, so keep a screen's ids or update its flow in the same pull request.
 
-// Note: The gateway code is user defined when you first create your gateway from
-// the Gateways tab in Storefront settings.
-const { paymentIntent, ephemeralKey, customerId, token } = await storefront.checkout.initialize('<customer id>', '<cart id>', '<service quote id>', '<gateway code>');
-```
+## License
 
-#### Capture checkout
-
-Once you have a checkout token, you're ready to capture it and create an order. See the example below.
-
-```js
-import Storefront from '@fleetbase/storefront';
-
-const storefront = new Storefront('<your store or network key>');
-
-storefront.checkout.captureOrder(checkoutToken).then((order) => console.log(order));
-```
-
-### Driver/Agent App
-
-The delivery or agent app as of now is the [Navigator app by Fleetbase](https://fleetbase.io/products/navigator), available in the Apple and Play Store. This app will allow drivers to receive and complete incoming orders. Whether the order is manually assigned or the order is pinged to drivers nearby.
-
-We are currently in the process of creating an open source version of navigator app so that users will have complete control and customization over the app their drivers or agents use. Until then the [Fleetbase Navigator](https://fleetbase.io/products/navigator) app must be used.
-
-The app is free and available on the [App Store](https://apps.apple.com/us/app/fleetbase/id1554208255) and [Play Store](https://play.google.com/store/apps/details?id=com.fleetbase.navigator).
-
-#### Proof of delivery
-
-Fleetbase enables proof of delivery via the Navigator app by default. From the Storefront settings select the Proof of Delivery method you'd like and Navigator handles the rest. You can select from "QR Code" or "Signature", we're soon to add a Photo verification method.
-
-### Orders
-
-Orders in Fleetbase include details about the pickup, dropoff, customer, and facilitator if the order job is being subcontracted. Yes, Fleetbase handles subcontracting jobs by default. Once an order is created from a Storefront checkout the Storefront dashboard will receive an immediate ping with the order details. The store owner will have an opportunity to accept or decline the order, unless auto accept is enabled. From there the Store owner can then assign to a driver, or if they have ad-hoc enabled the order will ping to nearby drivers once the order is ready.
-
-#### Auto-accept orders
-
-With auto accept enabled, the stores will still be pinged about the incoming order but the order is accepted by default.
-
-#### Manually accept orders
-
-If auto-accept is not enabled, the store owner must accept or decline the order when it is created.
-
-#### Auto-assign orders
-
-Auto-assigned orders will automatically ping nearby drivers about the order until the order is accepted, if the order is not accepted by any drivers after x amount of tries the order will be canceled.
-x = will soon be an option in Storefront settings.
-
-#### Manually assign orders
-
-If auto-assigned orders is not enabled, once the store owner accepts the order they will then be responsible for assigning the order to a driver themselves.
-
-### Documentation
-
-See the [documentation webpage](https://docs.fleetbase.dev/).
-
-If you would like to make contributions to the Fleetbase Javascript SDK documentation source, here is a [guide](https://github.com/fleetbase/fleetbase-js/blob/master/CONTRIBUTING.md) in doing so.
-
-### Roadmap
-
-- Global state management with redux
-- Write proper react hooks for sdks
-- Add debounce on products search
-- Add network/marketplace views
-- Shopify & Woocommerce adapters
+Released under the [GNU Affero General Public License v3.0](LICENSE.md). If you modify the app and make it available to others, those modifications must be released under the same license. The [Fleetbase Commercial License](https://fleetbase.io/licensing/commercial) removes that obligation for proprietary and white-label builds. See the [licensing overview](https://fleetbase.io/licensing), or write to hello@fleetbase.io.

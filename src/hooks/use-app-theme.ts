@@ -1,60 +1,35 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { useColorScheme, Appearance } from 'react-native';
-import useStorage, { getString, setString } from './use-storage';
-import { storefrontConfig, getTheme } from '../utils';
-import { capitalize } from '../utils/format';
+import { useMemo } from 'react';
+import { useBranding } from '../branding/BrandingProvider';
 
+/** @deprecated Pre-branding storage key for the user's light/dark choice (migrated on first launch). */
 export const USER_COLOR_SCHEME_KEY = 'user_color_scheme';
+/** @deprecated The active theme is no longer persisted; use `useBranding().themeName`. */
 export const APP_THEME_KEY = 'app_theme';
-export const schemes = ['light', 'dark'] as const;
+export const schemes = ['system', 'light', 'dark'] as const;
 
+/**
+ * Compatibility wrapper around `useBranding()` for existing components.
+ * Every caller now reads the same state, so a scheme change updates the whole app.
+ */
 export default function useAppTheme() {
-    const baseTheme = capitalize(storefrontConfig('theme')); // e.g., 'Indigo'
-    const systemColorScheme = useColorScheme() ?? 'light'; // 'light' or 'dark';
-    const [userColorScheme, setUserColorScheme] = useStorage<string>(USER_COLOR_SCHEME_KEY, systemColorScheme || 'light');
-    const [appTheme, setAppTheme] = useStorage<string>(APP_THEME_KEY, `${userColorScheme}${baseTheme}`);
-    const initializedRef = useRef(false);
+    const { themeName, scheme, preference, setPreference, schemePreferences, theme } = useBranding();
 
-    const isDarkMode = userColorScheme === 'dark';
-    const isLightMode = userColorScheme === 'light';
-
-    useEffect(() => {
-        if (initializedRef.current) return;
-        initializedRef.current = true;
-
-        // Synchronously check persistent storage.
-        const storedTheme = getString(APP_THEME_KEY);
-        if (!storedTheme) {
-            // Compute the default theme
-            const computedTheme = `${userColorScheme}${baseTheme}`;
-            // Force write the default value to storage directly,
-            // then update state so that both are in sync.
-            setString(APP_THEME_KEY, computedTheme);
-            setAppTheme(computedTheme);
-        }
-    }, [userColorScheme, baseTheme, setAppTheme]);
-
-    const changeScheme = (newScheme: string) => {
-        const newTheme = `${newScheme}${baseTheme}`;
-        setUserColorScheme(newScheme);
-        setAppTheme(newTheme);
-    };
-
-    const themeContext = useMemo(
+    return useMemo(
         () => ({
-            appTheme,
-            userColorScheme,
-            changeScheme,
-            schemes,
-            isDarkMode,
-            isLightMode,
-            textPrimary: getTheme('textPrimary'),
-            textSecondary: getTheme('textSecondary'),
-            primary: getTheme('primary'),
-            secondary: getTheme('secondary'),
+            appTheme: themeName,
+            /** The user's choice: `system`, `light` or `dark`. */
+            userColorScheme: preference,
+            /** The scheme being rendered: `light` or `dark`. */
+            colorScheme: scheme,
+            changeScheme: setPreference,
+            schemes: schemePreferences,
+            isDarkMode: scheme === 'dark',
+            isLightMode: scheme === 'light',
+            textPrimary: theme.textPrimary,
+            textSecondary: theme.textSecondary,
+            primary: theme.primary,
+            secondary: theme.secondary,
         }),
-        [appTheme, userColorScheme, changeScheme, isDarkMode, isLightMode]
+        [themeName, scheme, preference, setPreference, schemePreferences, theme]
     );
-
-    return themeContext;
 }

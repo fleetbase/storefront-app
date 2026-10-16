@@ -91,8 +91,11 @@ android/app/google-services.json
 # Storefront assets/configurations
 #
 storefront.config.js
+src/generated/
+env.dev.json
 .tamagui
 vendor
 
 # Web Build Stuff
 public/tamagui.css
+dist/

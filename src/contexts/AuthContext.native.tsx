@@ -7,7 +7,6 @@ import useStorage, { storage } from '../hooks/use-storage';
 import useStorefront, { adapter } from '../hooks/use-storefront';
 import { useLanguage } from './LanguageContext';
 import { useNotification } from './NotificationContext';
-import { LoginManager as FacebookLoginManager } from 'react-native-fbsdk-next';
 
 const AuthContext = createContext();
 
@@ -54,6 +53,28 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'RESTORE_SESSION', customer: null });
         }
     }, [storedCustomer]);
+
+    // Keep the push token registered for the signed-in customer. The token can arrive after
+    // login (e.g. once the Android 13+ notification permission is granted) or rotate at any
+    // time, so register whenever either the customer or the token changes.
+    const syncedDeviceRef = useRef(null);
+    useEffect(() => {
+        const customer = state.customer;
+        if (!deviceToken || !customer?.token) {
+            return;
+        }
+
+        const syncKey = `${customer.id}:${deviceToken}`;
+        if (syncedDeviceRef.current === syncKey) {
+            return;
+        }
+
+        syncedDeviceRef.current = syncKey;
+        Promise.resolve(customer.syncDevice(deviceToken, Platform.OS)).catch((err) => {
+            syncedDeviceRef.current = null;
+            console.warn('[AuthContext] Failed to register device for push notifications:', err);
+        });
+    }, [deviceToken, state.customer]);
 
     const setCustomer = useCallback(
         (newCustomer) => {
@@ -256,9 +277,6 @@ export const AuthProvider = ({ children }) => {
         storage.removeItem('_current_location');
         storage.removeItem('_local_locations');
         storage.removeItem('_customer_token');
-
-        // If logged in with facebook
-        FacebookLoginManager.logOut();
     };
 
     // Verify code
@@ -293,6 +311,7 @@ export const AuthProvider = ({ children }) => {
 
         // Sync the customer device
         if (deviceToken) {
+            syncedDeviceRef.current = `${instance.id}:${deviceToken}`;
             syncDevice(instance, deviceToken);
         }
 
@@ -335,6 +354,15 @@ export const AuthProvider = ({ children }) => {
 
     // Logout: Clear session
     const logout = useCallback(() => {
+        // Stop sending this customer's notifications to the device once they sign out.
+        const signedOutToken = state.customer?.token;
+        if (signedOutToken && deviceToken) {
+            adapter.post('customers/unregister-device', { token: deviceToken }, { headers: { 'Customer-Token': signedOutToken } }).catch((err) => {
+                console.warn('[AuthContext] Failed to unregister device:', err);
+            });
+        }
+        syncedDeviceRef.current = null;
+
         setCustomer(null);
         dispatch({ type: 'LOGOUT', isSigningOut: true });
 
@@ -347,7 +375,7 @@ export const AuthProvider = ({ children }) => {
         later(() => {
             dispatch({ type: 'LOGOUT', isSigningOut: false });
         });
-    }, [setCustomer]);
+    }, [setCustomer, state.customer, deviceToken, adapter]);
 
     // Memoize useful props and methods
     const value = useMemo(

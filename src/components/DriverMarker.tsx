@@ -4,13 +4,12 @@ import TrackingMarker from './TrackingMarker';
 import useSocketClusterClient from '../hooks/use-socket-cluster-client';
 import useEventBuffer from '../hooks/use-event-buffer';
 import { makeCoordinatesFloat } from '../utils/location';
+import { haversine } from '../utils/math';
 
 const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, ...props }) => {
     const markerRef = useRef();
     const listenerRef = useRef();
     const lastCoordinatesRef = useRef(null);
-    const addEventRef = useRef(addEvent);
-    const clearEventsRef = useRef(clearEvents);
 
     const handleEvent = useCallback(
         (data) => {
@@ -77,6 +76,9 @@ const DriverMarker = ({ driver, onPositionChange, onHeadingChange, onMovement, .
 
     const { listen } = useSocketClusterClient();
     const { addEvent, clearEvents } = useEventBuffer(handleEvent);
+
+    const addEventRef = useRef(addEvent);
+    const clearEventsRef = useRef(clearEvents);
 
     useFocusEffect(
         useCallback(() => {

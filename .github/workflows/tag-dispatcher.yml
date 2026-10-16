@@ -5,6 +5,10 @@ on:
         tags:
             - 'v*'
 
+# Merges each release tag into the app/<profile> branches and pushes them.
+permissions:
+    contents: write
+
 env:
     S3_BUCKET: flb-storefront-app-profiles
 

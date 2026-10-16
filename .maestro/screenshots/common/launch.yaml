@@ -1,0 +1,11 @@
+# Fresh start: no saved state, permissions granted (location, notifications), customer
+# placed at the seeded location so nearby stores and truck zones resolve.
+appId: ${APP_ID}
+---
+- launchApp:
+      clearState: true
+      permissions:
+          all: allow
+- setLocation:
+      latitude: ${LATITUDE}
+      longitude: ${LONGITUDE}

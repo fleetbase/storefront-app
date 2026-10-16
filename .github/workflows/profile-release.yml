@@ -44,6 +44,10 @@ on:
                 required: false
                 type: string
 
+# The GITHUB_TOKEN only needs read here.
+permissions:
+    contents: read
+
 env:
     S3_BUCKET: flb-storefront-app-profiles
     NODE_VERSION: '18'
@@ -175,7 +179,6 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
-                  cache: 'yarn'
 
             - name: Enable Corepack and install dependencies
               run: |
@@ -310,7 +313,6 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
-                  cache: 'yarn'
 
             - name: Enable Corepack and install dependencies
               run: |
@@ -571,7 +573,6 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
-                  cache: 'yarn'
 
             - name: Enable Corepack and install dependencies
               run: |
@@ -703,7 +704,7 @@ jobs:
             - name: Install iOS dependencies
               run: |
                   echo "📦 Installing iOS dependencies"
-                  cd ios && pod install --repo-update
+                  bash scripts/ci/install-cocoapods.sh
 
             - name: Create Gemfile and install Fastlane + plugins
               run: |

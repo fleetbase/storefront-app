@@ -1,15 +1,14 @@
-import CartScreen from '../../screens/CartScreen';
-import CartItemScreen from '../../screens/CartItemScreen';
+import { screenSlot } from '../../extensions';
 
 export const Cart = {
-    screen: CartScreen,
+    screen: screenSlot('cart'),
     options: {
         headerShown: false,
     },
 };
 
 export const CartModal = {
-    screen: CartScreen,
+    screen: screenSlot('cart'),
     options: {
         presentation: 'modal',
         headerShown: false,
@@ -17,7 +16,7 @@ export const CartModal = {
 };
 
 export const CartItem = {
-    screen: CartItemScreen,
+    screen: screenSlot('cart.item'),
     options: {
         presentation: 'modal',
         headerShown: false,
