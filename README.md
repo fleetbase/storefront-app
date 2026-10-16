@@ -62,7 +62,6 @@ The key you build with decides what the app is:
 - Store and marketplace home pages with categories, recommended products and featured stores.
 - Search with recent searches, popular categories and filters, scoped to a store or across a marketplace.
 - Product variants and add-ons with required and optional choices, sale prices and live stock levels.
-- Offers and promo codes, applied at checkout.
 
 **Service bookings**
 - Bookable services alongside products: customers pick a day and a start time from the slots you have open.
@@ -89,8 +88,23 @@ The key you build with decides what the app is:
 - Live tracking with the driver's position on the map and the order's progress in real time.
 - Live chat with the store and with the driver, from the order screen.
 - Order changes made by the store show up live, with any balance to pay; customers can report a wrong address.
-- Receipts, order history and reviews of the stores they ordered from.
-- Push notifications for order updates, chat messages and offers, plus an in-app inbox.
+- Receipts and order history, with active orders first.
+
+**Offers and promotions**
+- An Offers tab with every live deal, filtered by kind (percent off, money off, free delivery, buy one get one) and grouped into ending soon, ongoing and coming up.
+- Each offer explains itself: what it applies to, when it runs, minimum spend, first order only or per-customer limits, and whether it needs a code or applies automatically.
+- Promo codes copied or applied to the cart in one tap, or entered in the cart and at checkout.
+- Offers shown where they apply: badges on categories and products, banners in a category, and offer cards on the home screen.
+
+**Reviews**
+- Star ratings and written reviews of stores, with up to four photos, marked "Verified purchase" because they come from a completed order.
+- A rating summary on the store page, and every review sorted by newest, highest, lowest or oldest.
+- Customers are invited to rate an order once it is delivered, can see and delete their own review, and review again after their next order.
+
+**Notifications**
+- Push notifications for order and booking updates, messages from the store or driver, and offers. Tapping one opens the order, the chat or the offer.
+- An inbox behind the bell on the home screen, with an unread count, filters for orders and offers, mark all read, and swipe to delete.
+- Notification settings per kind (order updates, offers and news), and a reminder with a link to phone settings when push is switched off.
 
 **Accounts**
 - Sign in with a phone number and a texted code, or with Apple and Google.
