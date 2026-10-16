@@ -33,7 +33,7 @@ const NetworkProductScreen = ({ route }: any) => {
         let active = true;
         if (resolvedParams || !storefront || !productId || !storeId) return;
 
-        Promise.all([storefront.products.find(productId), storefront.lookup(storeId)])
+        Promise.all([storefront.products.findRecord(productId), storefront.lookup(storeId)])
             .then(([productResult, storeResult]: any[]) => {
                 if (!active) return;
                 const product = productResult instanceof Product ? productResult : new Product(serializeSdkResource(productResult), adapter);
