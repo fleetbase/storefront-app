@@ -6,7 +6,7 @@ import { itemsPreview, type OrderSummary } from '../../commerce/order-summary';
 import { formatCurrency } from '../../utils/format';
 import { Badge, MediaImage, UIText, formatClock, radius, usesTwelveHourClock } from '../../ui';
 
-const THUMBS = 4;
+const THUMBS = 3;
 
 /** "14:32" today, "Mon 14:32" this week, "12 Oct 14:32" before that. */
 function orderedAt(iso: string | null, hour12: boolean, locale: string): string | null {
@@ -45,7 +45,7 @@ export default function ActiveOrderPreview({ order, width, onPress }: { order: O
             accessibilityRole='button'
             accessibilityLabel={t('Account.activeOrderLabel', { id: order.reference })}
             testID='shop-active-order'
-            style={({ pressed }) => ({ width, padding: 14, gap: 12, borderRadius: radius.card, borderWidth: 1, borderColor: theme.primary.val, backgroundColor: theme.primarySoft.val, opacity: pressed ? 0.9 : 1 })}
+            style={({ pressed }) => ({ width, padding: 12, gap: 8, borderRadius: radius.card, borderWidth: 1, borderColor: theme.primary.val, backgroundColor: theme.primarySoft.val, opacity: pressed ? 0.9 : 1 })}
         >
             <XStack alignItems='center' justifyContent='space-between' gap={8}>
                 <Badge label={t(`Orders.status.${order.phase}`)} tone='brand' size='sm' />
@@ -54,54 +54,45 @@ export default function ActiveOrderPreview({ order, width, onPress }: { order: O
                 </UIText>
             </XStack>
 
-            <UIText variant='bodyStrong' numberOfLines={2}>
+            <UIText variant='captionStrong' numberOfLines={1} style={{ fontSize: 15 }}>
                 {t(`Tracking.phase.${order.phase}.title`, { store: order.storeName, driver: t('Tracking.yourDriver') })}
             </UIText>
 
             {/* The steps as dots on a line: filled once done, ringed while current. */}
             {order.steps.length > 0 && (
-                <YStack gap={6} accessibilityRole='progressbar' accessibilityLabel={current ? t(`Tracking.step.${flow}.${current.key}`) : undefined}>
-                    <XStack alignItems='center'>
-                        {order.steps.map((step, index) => (
-                            <React.Fragment key={step.key}>
-                                {index > 0 && <YStack flex={1} height={2} backgroundColor={step.state === 'todo' ? '$borderColor' : '$primary'} />}
-                                <YStack
-                                    width={step.state === 'current' ? 14 : 10}
-                                    height={step.state === 'current' ? 14 : 10}
-                                    borderRadius={7}
-                                    backgroundColor={step.state === 'done' ? '$primary' : '$background'}
-                                    borderWidth={step.state === 'todo' ? 2 : 3}
-                                    borderColor={step.state === 'todo' ? '$borderColor' : '$primary'}
-                                />
-                            </React.Fragment>
-                        ))}
-                    </XStack>
-                    {current && (
-                        <UIText variant='caption' tone='secondary' numberOfLines={1}>
-                            {[t(`Tracking.step.${flow}.${current.key}`), current.at ? orderedAt(current.at, hour12, locale) : null].filter(Boolean).join(' · ')}
-                        </UIText>
-                    )}
-                </YStack>
+                <XStack alignItems='center' paddingVertical={2} accessibilityRole='progressbar' accessibilityLabel={current ? [t(`Tracking.step.${flow}.${current.key}`), current.at ? orderedAt(current.at, hour12, locale) : null].filter(Boolean).join(', ') : undefined}>
+                    {order.steps.map((step, index) => (
+                        <React.Fragment key={step.key}>
+                            {index > 0 && <YStack flex={1} height={2} backgroundColor={step.state === 'todo' ? '$borderColor' : '$primary'} />}
+                            <YStack
+                                width={step.state === 'current' ? 12 : 8}
+                                height={step.state === 'current' ? 12 : 8}
+                                borderRadius={6}
+                                backgroundColor={step.state === 'done' ? '$primary' : '$background'}
+                                borderWidth={2}
+                                borderColor={step.state === 'todo' ? '$borderColor' : '$primary'}
+                            />
+                        </React.Fragment>
+                    ))}
+                </XStack>
             )}
 
             {order.lines.length > 0 && (
-                <YStack gap={8}>
-                    <XStack gap={6} alignItems='center'>
-                        {thumbs.map((line) => (
-                            <MediaImage key={line.id} uri={line.imageUrl} seed={line.name} width={40} height={40} radius={radius.tile} />
-                        ))}
-                        {extra > 0 && (
-                            <YStack width={40} height={40} borderRadius={radius.tile} backgroundColor='$background' alignItems='center' justifyContent='center'>
-                                <UIText variant='captionStrong' tone='secondary'>
-                                    +{extra}
-                                </UIText>
-                            </YStack>
-                        )}
-                    </XStack>
-                    <UIText variant='caption' tone='secondary' numberOfLines={1}>
-                        {[itemsPreview(order.lines, (count) => t('Orders.andMore', { count })), order.total > 0 ? formatCurrency(order.total, order.currency ?? undefined) : null].filter(Boolean).join(' · ')}
+                <XStack gap={6} alignItems='center'>
+                    {thumbs.map((line) => (
+                        <MediaImage key={line.id} uri={line.imageUrl} seed={line.name} width={32} height={32} radius={8} />
+                    ))}
+                    {extra > 0 && (
+                        <YStack width={32} height={32} borderRadius={8} backgroundColor='$background' alignItems='center' justifyContent='center'>
+                            <UIText variant='caption' tone='secondary' style={{ fontWeight: '700' }}>
+                                +{extra}
+                            </UIText>
+                        </YStack>
+                    )}
+                    <UIText variant='caption' tone='secondary' numberOfLines={2} style={{ flex: 1, marginLeft: 4 }}>
+                        {[itemsPreview(order.lines, (count) => t('Orders.andMore', { count }), 1), order.total > 0 ? formatCurrency(order.total, order.currency ?? undefined) : null].filter(Boolean).join(' · ')}
                     </UIText>
-                </YStack>
+                </XStack>
             )}
         </Pressable>
     );
