@@ -171,7 +171,7 @@ const NetworkShopHomeScreen = () => {
     useFocusEffect(
         useCallback(() => {
             loadOrders();
-        }, [loadOrders, attempt])
+        }, [loadOrders])
     );
 
     const activeOrders = useMemo(() => orders.filter((order) => order.active), [orders]);
@@ -257,6 +257,7 @@ const NetworkShopHomeScreen = () => {
     const refresh = () => {
         setRefreshing(true);
         main.reload();
+        loadOrders();
         setAttempt((value) => value + 1);
         setTimeout(() => setRefreshing(false), 800);
     };
