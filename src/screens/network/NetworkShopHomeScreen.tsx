@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState, Pressable, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -14,6 +14,7 @@ import useCurrentLocation from '../../hooks/use-current-location';
 import useCustomerCoordinates from '../../hooks/use-customer-coordinates';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useUnreadNotifications from '../../hooks/use-unread-notifications';
+import useSocketClusterClient from '../../hooks/use-socket-cluster-client';
 import useMainStore from '../../network/use-main-store';
 import { rememberStores } from '../../network/store-names';
 import { categoryTree, descendantIds, type CategoryNode } from '../../commerce/categories';
@@ -70,6 +71,7 @@ const NetworkShopHomeScreen = () => {
     const { savedLocations } = useSavedLocations();
     const { coordinates } = useCustomerCoordinates();
     const { count: unread } = useUnreadNotifications();
+    const { listen } = useSocketClusterClient();
     const cart = useCartSummary();
     const offerBadge = useOfferBadge();
     const hour12 = usesTwelveHourClock(locale);
@@ -147,30 +149,65 @@ const NetworkShopHomeScreen = () => {
         };
     }, [partners, storefront]);
 
-    // The customer's recent orders: the active one and what they buy again.
+    // The customer's recent orders: the active ones and what they buy again.
+    const ordersRequest = useRef(0);
+    const loadOrders = useCallback(() => {
+        if (!customer?.getOrderHistory) {
+            setOrders([]);
+            return;
+        }
+        const request = ++ordersRequest.current;
+        customer
+            .getOrderHistory({ sort: '-created_at', limit: 15 })
+            .then((result: any) => {
+                if (request !== ordersRequest.current) return;
+                const list = (Array.isArray(result) ? result : Array.from(result ?? [])).map((order: any) => (typeof order?.serialize === 'function' ? order.serialize() : order));
+                setOrders(list.map(summarizeOrder).filter((order: OrderSummary) => order.id));
+            })
+            .catch(() => {});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [customer?.id]);
+
     useFocusEffect(
         useCallback(() => {
-            if (!customer?.getOrderHistory) {
-                setOrders([]);
-                return;
-            }
-            let live = true;
-            customer
-                .getOrderHistory({ sort: '-created_at', limit: 15 })
-                .then((result: any) => {
-                    if (!live) return;
-                    const list = (Array.isArray(result) ? result : Array.from(result ?? [])).map((order: any) => (typeof order?.serialize === 'function' ? order.serialize() : order));
-                    setOrders(list.map(summarizeOrder).filter((order: OrderSummary) => order.id));
-                })
-                .catch(() => {});
-            return () => {
-                live = false;
-            };
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [customer?.id, attempt])
+            loadOrders();
+        }, [loadOrders, attempt])
     );
 
     const activeOrders = useMemo(() => orders.filter((order) => order.active), [orders]);
+
+    // Active orders follow their progress live: any change on an order's channel reloads the
+    // orders (a finished one leaves the row), as does coming back to the app. A slow poll
+    // covers a missed event.
+    const activeIds = activeOrders.map((order) => order.id).join(',');
+    useEffect(() => {
+        if (!activeIds) return;
+        let live = true;
+        let timer: ReturnType<typeof setTimeout> | null = null;
+        const listeners: any[] = [];
+        const reload = () => {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(loadOrders, 700);
+        };
+        activeIds.split(',').forEach((id) => {
+            Promise.resolve(listen(`order.${id}`, reload))
+                .then((listener: any) => {
+                    if (!listener) return;
+                    if (live) listeners.push(listener);
+                    else listener.stop?.();
+                })
+                .catch(() => {});
+        });
+        const poll = setInterval(loadOrders, 45000);
+        const appState = AppState.addEventListener('change', (state) => state === 'active' && loadOrders());
+        return () => {
+            live = false;
+            if (timer) clearTimeout(timer);
+            clearInterval(poll);
+            appState.remove();
+            listeners.forEach((listener) => listener.stop?.());
+        };
+    }, [activeIds, listen, loadOrders]);
 
     // Products the customer orders most, most recent first among equals.
     const usual = useMemo<Usual[]>(() => {

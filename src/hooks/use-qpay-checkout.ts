@@ -313,12 +313,35 @@ export default function useQPayCheckout({ onOrderComplete }) {
         [checkoutId, checkoutToken, adapter, handlePaymentError, handleOrderCompletion, markPaid]
     );
 
+    // The customer's note goes to the checkout on the server: QPay orders are created by QPay's
+    // callback, which carries no note, so the order takes it from there. Sent shortly after
+    // typing, for each new checkout, and again as the customer goes to pay.
+    const sentNotes = useRef<{ token: string; notes: string } | null>(null);
+    const saveNotes = useCallback(async () => {
+        if (!adapter || !checkoutToken) return;
+        const notes = String(orderNotes ?? '').trim();
+        const sent = sentNotes.current;
+        if (sent ? sent.token === checkoutToken && sent.notes === notes : notes === '') return;
+        try {
+            await adapter.put('checkouts/notes', { token: checkoutToken, notes: notes || null });
+            sentNotes.current = { token: checkoutToken, notes };
+        } catch {
+            // Kept on the device; the next change or the payment tries again.
+        }
+    }, [adapter, checkoutToken, orderNotes]);
+
+    useEffect(() => {
+        const timer = setTimeout(saveNotes, 600);
+        return () => clearTimeout(timer);
+    }, [saveNotes]);
+
     // The customer chose to pay (opened the bank list): leaving the app now means paying.
     const startPayment = useCallback(() => {
+        saveNotes();
         paymentStarted.current = true;
         setPaymentError(null);
         setPaymentStage((stage) => (stage === 'verifying' || stage === 'not_received' || stage === 'failed' ? 'idle' : stage));
-    }, []);
+    }, [saveNotes]);
 
     // "Check again": ask QPay once more.
     const verifyPayment = useCallback(() => {
