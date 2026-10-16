@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, useWindowDimensions } from 'reac
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faChevronDown, faMagnifyingGlass, faPlus, faTableCellsLarge, faTruckFast } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faChevronDown, faMagnifyingGlass, faPlus, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,6 +21,7 @@ import { fetchOffers, offerTargets, type Offer } from '../../commerce/offers';
 import { summarizeOrder, type OrderSummary } from '../../commerce/order-summary';
 import { OfferBanner, useOfferBadge } from '../../components/offers/OfferCard';
 import ShopCategoryTile from '../../components/shop/ShopCategoryTile';
+import ActiveOrderPreview from '../../components/orders/ActiveOrderPreview';
 import { formatCurrency } from '../../utils/format';
 import {
     CartPill,
@@ -200,8 +201,8 @@ const NetworkShopHomeScreen = () => {
     const tops = categories ?? [];
     const shownCategories = tops.length > GRID_MAX ? tops.slice(0, GRID_MAX - 1) : tops;
     const tileWidth = Math.floor((width - space.gutter * 2 - 10 * (GRID_COLUMNS - 1)) / GRID_COLUMNS);
-    // Two order cards fit side by side; more scroll.
-    const orderCardWidth = Math.floor((width - space.gutter * 2 - 10) / 2);
+    // One order fills the row; with more, each is most of it and the next peeks in.
+    const orderCardWidth = activeOrders.length > 1 ? Math.floor((width - space.gutter * 2) * 0.82) : width - space.gutter * 2;
     const categoryDeal = (node: CategoryNode) => {
         const offer = offers.find((candidate) => offerTargets(candidate, { categoryIds: descendantIds(node) }));
         return offer ? offerBadge(offer) : null;
@@ -275,7 +276,7 @@ const NetworkShopHomeScreen = () => {
                 contentContainerStyle={{ paddingTop: 16, paddingBottom: cart.count > 0 ? 110 : 32, gap: 24 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
             >
-                {/* Orders on their way come first: compact cards side by side, with a quiet link to every past order. */}
+                {/* Orders on their way come first, side by side, with a quiet link to every past order. */}
                 {activeOrders.length > 0 && (
                     <YStack gap={8}>
                         <XStack paddingHorizontal={space.gutter} alignItems='center' justifyContent='space-between'>
@@ -290,25 +291,7 @@ const NetworkShopHomeScreen = () => {
                         </XStack>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, gap: 10 }}>
                             {activeOrders.map((order) => (
-                                <Pressable
-                                    key={order.id}
-                                    onPress={() => navigation.navigate('Order', { orderId: order.id })}
-                                    accessibilityRole='button'
-                                    accessibilityLabel={t('Account.activeOrderLabel', { id: order.reference })}
-                                    style={{ width: orderCardWidth, padding: 10, borderRadius: radius.card, borderWidth: 1, borderColor: theme.primary.val, backgroundColor: theme.primarySoft.val, gap: 6 }}
-                                >
-                                    <XStack alignItems='center' gap={8}>
-                                        <YStack width={28} height={28} borderRadius={14} backgroundColor='$primary' alignItems='center' justifyContent='center'>
-                                            <FontAwesomeIcon icon={faTruckFast} size={12} color={theme.primaryText.val} />
-                                        </YStack>
-                                        <UIText variant='caption' tone='secondary' numberOfLines={1} style={{ flex: 1 }}>
-                                            {order.reference}
-                                        </UIText>
-                                    </XStack>
-                                    <UIText variant='captionStrong' numberOfLines={2} style={{ fontSize: 14, lineHeight: 18 }}>
-                                        {t(`Tracking.phase.${order.phase}.title`, { store: order.storeName, driver: t('Tracking.yourDriver') })}
-                                    </UIText>
-                                </Pressable>
+                                <ActiveOrderPreview key={order.id} order={order} width={orderCardWidth} onPress={() => navigation.navigate('Order', { orderId: order.id })} />
                             ))}
                         </ScrollView>
                     </YStack>

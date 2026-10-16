@@ -1,5 +1,5 @@
 import { joinStoreNames } from './order-stores';
-import { orderProgress, type OrderPhase } from './order-progress';
+import { orderProgress, type OrderPhase, type ProgressStep } from './order-progress';
 import { parseOrderPayment, type OrderPayment } from './order-payment';
 
 /**
@@ -40,6 +40,8 @@ export type OrderSummary = {
     createdAt: string | null;
     status: string;
     phase: OrderPhase;
+    /** The order's progress steps (placed, preparing, ...), each done, current or still to come. */
+    steps: ProgressStep[];
     active: boolean;
     canceled: boolean;
     isPickup: boolean;
@@ -149,6 +151,7 @@ export function summarizeOrder(json: any): OrderSummary {
         createdAt: text(json?.created_at),
         status,
         phase: progress.phase,
+        steps: progress.steps,
         active: !progress.finished && !progress.canceled,
         canceled: progress.canceled,
         isPickup,
