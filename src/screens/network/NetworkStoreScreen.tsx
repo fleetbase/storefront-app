@@ -16,9 +16,11 @@ import useCurrentLocation from '../../hooks/use-current-location';
 import useSavedLocations from '../../hooks/use-saved-locations';
 import useUnreadNotifications from '../../hooks/use-unread-notifications';
 import { storefrontConfig } from '../../utils';
+import { ancestorAt, categoryIndex, categoryTree, groupByCategory, type CategoryGroup, type CategoryNode } from '../../commerce/categories';
 import {
     Button,
     CartPill,
+    Chip,
     ErrorState,
     IconButton,
     LocationSheet,
@@ -42,7 +44,9 @@ import {
 const HERO_HEIGHT = 230;
 /** Room above the sticky catalog bar for the floating back and search buttons. */
 const STICKY_CLEARANCE = 54;
-type Section = { id: string; name: string; iconUrl: string | null; products: Array<{ summary: ProductSummary; resource: any }> };
+type SectionProduct = { summary: ProductSummary; resource: any };
+/** A top-level category: its products, and the same products in headings by subcategory. */
+type Section = { id: string; name: string; iconUrl: string | null; products: SectionProduct[]; groups: CategoryGroup<SectionProduct>[] };
 
 /** Categories beyond which the sticky bar also offers the full category list. */
 const CATALOG_LINK_AFTER = 5;
@@ -93,6 +97,9 @@ const NetworkStoreScreen = ({ route }: any) => {
     const scrollRef = useRef<ScrollView>(null);
     const scrollY = useRef(new Animated.Value(0)).current;
     const offsets = useRef<Record<string, number>>({});
+    // Where each subcategory heading sits inside its section, for the subcategory chips and links.
+    const groupOffsets = useRef<Record<string, number>>({});
+    const tree = useRef<Map<string, CategoryNode>>(new Map());
     const catalogTop = useRef(0);
     const barTop = useRef(0);
     const barHeight = useRef(0);
@@ -161,14 +168,20 @@ const NetworkStoreScreen = ({ route }: any) => {
         (async () => {
             try {
                 const categories = Array.from((await (single ? storefront.categories.findAll() : storefront.categories.query({ store: currentStore.id }))) || []) as any[];
-                const loaded = await Promise.all(
-                    categories.map(async (category) => {
-                        const products = Array.from((await storefront.products.query(single ? { category: category.id } : { category: category.id, store: currentStore.id })) || []) as any[];
+                // Top-level categories are the sections; a section's query brings the products of
+                // every category under it too, and they are shown in headings by subcategory.
+                const tops = categoryTree(categories);
+                tree.current = categoryIndex(tops);
+                const loaded: Section[] = await Promise.all(
+                    tops.map(async (top) => {
+                        const products = Array.from((await storefront.products.query(single ? { category: top.id } : { category: top.id, store: currentStore.id })) || []) as any[];
+                        const items = products.map((resource) => ({ summary: productSummary(resource), resource }));
                         return {
-                            id: category.id,
-                            name: category.getAttribute('name'),
-                            iconUrl: category.getAttribute('icon_url') ?? null,
-                            products: products.map((resource) => ({ summary: productSummary(resource), resource })),
+                            id: top.id,
+                            name: top.name,
+                            iconUrl: top.iconUrl,
+                            products: items,
+                            groups: groupByCategory(top, items, (item) => item.resource?.getAttribute?.('category') ?? item.resource?.category ?? null),
                         };
                     })
                 );
@@ -241,19 +254,34 @@ const NetworkStoreScreen = ({ route }: any) => {
         if (current !== activeTab) setActiveTab(current);
     };
 
-    const jumpTo = (id: string) => {
+    const jumpTo = (id: string, groupId?: string | null) => {
         setActiveTab(id);
-        scrollRef.current?.scrollTo({ y: catalogTop.current + (offsets.current[id] ?? 0) - stickyTop - barHeight.current, animated: true });
+        const within = groupId && groupId !== id ? (groupOffsets.current[groupId] ?? 0) : 0;
+        scrollRef.current?.scrollTo({ y: catalogTop.current + (offsets.current[id] ?? 0) + within - stickyTop - barHeight.current, animated: true });
     };
+
+    /** A category at any level: its top-level section, then its heading in it (or its nearest heading above). */
+    const jumpToCategory = (categoryId: string) => {
+        const top = ancestorAt(tree.current, categoryId, 1);
+        const section = sections.find((candidate) => candidate.id === (top?.id ?? categoryId));
+        if (!section) return false;
+        const heading = [3, 2].map((level) => ancestorAt(tree.current, categoryId, level)?.id).find((id) => id && section.groups.some((group) => group.id === id && group.level > 0));
+        jumpTo(section.id, heading ?? null);
+        return true;
+    };
+
+    const activeSection = sections.find((section) => section.id === activeTab) ?? null;
+    const subcategories = activeSection?.groups.filter((group) => group.level === 1) ?? [];
 
     // Opened for a category (from the category list, search or a link): jump to its section
     // once the catalog has laid out.
     const handledJump = useRef<string | null>(null);
     useEffect(() => {
         if (!jumpRequest || catalogLoading || handledJump.current === jumpRequest) return;
-        if (!sections.some((section) => section.id === jumpRequest)) return;
+        const top = ancestorAt(tree.current, jumpRequest, 1);
+        if (!sections.some((section) => section.id === (top?.id ?? jumpRequest))) return;
         handledJump.current = jumpRequest;
-        const timer = setTimeout(() => jumpTo(jumpRequest), 250);
+        const timer = setTimeout(() => jumpToCategory(jumpRequest), 250);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [catalogLoading, jumpRequest, sections]);
@@ -298,6 +326,14 @@ const NetworkStoreScreen = ({ route }: any) => {
                     </Pressable>
                 )}
             </ScrollView>
+            {!catalogLoading && subcategories.length > 0 && (
+                // The open section's subcategories: Coffee, Tea under Drinks.
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 10, gap: 8 }} testID='store-subcategories'>
+                    {subcategories.map((group) => (
+                        <Chip key={group.id} label={group.name} onPress={() => activeSection && jumpTo(activeSection.id, group.id)} testID='store-subcategory' />
+                    ))}
+                </ScrollView>
+            )}
         </YStack>
     );
 
@@ -542,8 +578,27 @@ const NetworkStoreScreen = ({ route }: any) => {
                                     <UIText variant='heading' accessibilityRole='header' style={{ marginBottom: 4 }}>
                                         {section.name}
                                     </UIText>
-                                    {section.products.map((product) => (
-                                        <ProductRow key={product.summary.id} product={product.summary} storeClosed={closed} onPress={() => openProduct(product)} />
+                                    {section.groups.map((group) => (
+                                        <YStack
+                                            key={group.id}
+                                            onLayout={(event: LayoutChangeEvent) => {
+                                                groupOffsets.current[group.id] = event.nativeEvent.layout.y;
+                                            }}
+                                        >
+                                            {group.level > 0 && (
+                                                <UIText
+                                                    variant={group.level === 1 ? 'subheading' : 'captionStrong'}
+                                                    tone={group.level === 1 ? 'primary' : 'secondary'}
+                                                    accessibilityRole='header'
+                                                    style={{ marginTop: 16, marginBottom: 2 }}
+                                                >
+                                                    {group.level === 1 ? group.name : group.path.split(' › ').slice(1).join(' › ')}
+                                                </UIText>
+                                            )}
+                                            {group.items.map((product) => (
+                                                <ProductRow key={product.summary.id} product={product.summary} storeClosed={closed} onPress={() => openProduct(product)} />
+                                            ))}
+                                        </YStack>
                                     ))}
                                 </YStack>
                             ))}

@@ -8,6 +8,8 @@
  * `categories` → `products`, and `store` in a Network.
  */
 
+import { ancestorAt, categoryIndex, categoryTree } from './categories';
+
 export type LatLng = { latitude: number; longitude: number };
 
 export type TruckCategory = { key: string; id: string | null; name: string; iconUrl: string | null; truckId: string };
@@ -102,12 +104,15 @@ export function customerZone(trucks: TruckSummary[], customer: LatLng | null): {
     return match ? { id: match.zoneId, name: match.zoneName } : null;
 }
 
-/** Every category the given trucks sell, once each by name, keeping which truck sells it. */
+/** Every top-level category the given trucks sell, once each by name, keeping which truck sells it. */
 export function truckCategories(trucks: TruckSummary[]): TruckCategory[] {
     const seen = new Map<string, TruckCategory>();
     for (const truck of trucks) {
         for (const catalog of truck.catalogs) {
+            // A menu's subcategories (Lunch › Tacos) show under their category, not as categories of their own.
+            const tops = new Set(categoryTree(Array.isArray(catalog?.categories) ? catalog.categories : []).map((node) => node.id));
             for (const category of Array.isArray(catalog?.categories) ? catalog.categories : []) {
+                if (category?.id && !tops.has(String(category.id))) continue;
                 const name = String(category?.name ?? '').trim();
                 if (!name || seen.has(name.toLowerCase())) continue;
                 seen.set(name.toLowerCase(), { key: name.toLowerCase(), id: category?.id ?? null, name, iconUrl: category?.icon_url ?? null, truckId: truck.id });
@@ -117,13 +122,37 @@ export function truckCategories(trucks: TruckSummary[]): TruckCategory[] {
     return [...seen.values()];
 }
 
-/** Products across a truck's catalogs, each with the category it is in. */
-export function truckProducts(truck: TruckSummary): Array<{ product: any; categoryId: string | null; categoryName: string; catalogName: string }> {
-    const items: Array<{ product: any; categoryId: string | null; categoryName: string; catalogName: string }> = [];
+export type TruckProduct = {
+    product: any;
+    categoryId: string | null;
+    categoryName: string;
+    catalogName: string;
+    /** The menu's top-level category the product is under (its own category at the top). */
+    topCategoryId: string | null;
+    topCategoryName: string;
+    /** Where it sits under that category: "Tacos › Vegetarian", or empty at the top. */
+    subPath: string;
+};
+
+/** Products across a truck's catalogs, each with the category it is in and its place in the menu's tree. */
+export function truckProducts(truck: TruckSummary): TruckProduct[] {
+    const items: TruckProduct[] = [];
     for (const catalog of truck.catalogs) {
-        for (const category of Array.isArray(catalog?.categories) ? catalog.categories : []) {
+        const categories = Array.isArray(catalog?.categories) ? catalog.categories : [];
+        const index = categoryIndex(categoryTree(categories));
+        for (const category of categories) {
+            const node = category?.id ? index.get(String(category.id)) : undefined;
+            const top = node ? ancestorAt(index, node.id, 1) : undefined;
             for (const product of Array.isArray(category?.products) ? category.products : []) {
-                items.push({ product, categoryId: category?.id ?? null, categoryName: String(category?.name ?? ''), catalogName: String(catalog?.name ?? '') });
+                items.push({
+                    product,
+                    categoryId: category?.id ?? null,
+                    categoryName: String(category?.name ?? ''),
+                    catalogName: String(catalog?.name ?? ''),
+                    topCategoryId: top?.id ?? category?.id ?? null,
+                    topCategoryName: top?.name ?? String(category?.name ?? ''),
+                    subPath: node && top && node.id !== top.id ? node.path.split(' › ').slice(1).join(' › ') : '',
+                });
             }
         }
     }

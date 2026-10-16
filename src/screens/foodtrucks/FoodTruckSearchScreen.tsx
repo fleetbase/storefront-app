@@ -50,7 +50,7 @@ const FoodTruckSearchScreen = () => {
         const needle = trimmed.toLowerCase();
         return trucks.flatMap((truck) =>
             truckProducts(truck)
-                .filter(({ product, categoryName }) => [product?.name, product?.description, categoryName, truck.name].some((text) => String(text ?? '').toLowerCase().includes(needle)))
+                .filter(({ product, categoryName, topCategoryName }) => [product?.name, product?.description, categoryName, topCategoryName, truck.name].some((text) => String(text ?? '').toLowerCase().includes(needle)))
                 .map(({ product }) => {
                     const orderable = truck.live && truck.inZone;
                     const where = !truck.live ? t('FoodTrucks.offline') : !truck.inZone ? t('FoodTrucks.notHere', { zone: truck.zoneName ?? '' }) : truck.distance;
