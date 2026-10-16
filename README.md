@@ -291,6 +291,7 @@ yarn generate:launch-screen
 - [Branding](docs/branding.md): every brand file option, for light and dark.
 - [Extending](docs/extensibility.md): replaceable screen ids, custom routes and tabs, platform-specific screens.
 - [Client builds](docs/client-builds.md): the private fork layout, what client code may import, and upgrading.
+- [Home screens and tabs](docs/home-screens.md): the home each edition can open on (including the shop home for a Network built around one main store), tabs, and offers shown next to the products they apply to. Also what belongs in this repository and what belongs in a client's `brand/`.
 - [Theming](https://fleetbase.io/docs/storefront/app/theming) and [integrations](https://fleetbase.io/docs/storefront/app/integrations) on fleetbase.io.
 
 ## Development

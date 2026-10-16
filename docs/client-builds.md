@@ -45,6 +45,7 @@ After adding or removing a file in `brand/` (not after editing one), restart Met
 | Fonts and type scale                                     | `typography` and `brand/fonts`                                     | [Branding](branding.md#fonts)                         |
 | Card styles, store header, category display              | `components`                                                       | [Branding](branding.md)                               |
 | Tabs shown, their order, the first tab, food trucks home | `navigation`                                                       | [Branding](branding.md)                               |
+| Home screen (directory, food trucks or shop home)        | `navigation`, `screens`                                            | [Home screens and tabs](home-screens.md)              |
 | Replace a screen                                         | `brand/storefront.extensions.ts` → `screens`                       | [Extending](extensibility.md)                         |
 | Add screens and tabs                                     | `routes`, `tabs`                                                   | [Extending](extensibility.md#adding-screens-and-tabs) |
 | Change or add copy                                       | `brand/translations/<locale>.json`                                 | [Extending](extensibility.md#copy)                    |

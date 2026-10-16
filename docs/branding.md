@@ -83,7 +83,7 @@ navigation: {
 },
 ```
 
-Tag the main store with the same tag in the Console. Without a tagged member the shop home shows the Network's own categories, and every member is a partner shop.
+Tag the main store with the same tag in the Console. Without a tagged member the shop home shows the Network's own categories, and every member is a partner shop. See [Home screens and tabs](home-screens.md) for what each section shows.
 
 Colors accept hex (`#rgb`, `#rrggbb`, `#rrggbbaa`), `rgb()`/`rgba()`, `white`, `black` and `transparent`. Images must be bundled keys or `https` URLs.
 
