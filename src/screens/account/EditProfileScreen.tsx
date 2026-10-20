@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, Pressable, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,16 +8,12 @@ import { faChevronLeft, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { isValidPhoneNumber, showActionSheet } from '../../utils';
-import PhoneField from '../../components/auth/PhoneField';
+import { showActionSheet } from '../../utils';
+import PhoneVerifySheet from '../../components/account/PhoneVerifySheet';
 import { toast } from '../../utils/toast';
-import { Button, CodeInput, IconButton, Sheet, TextField, UIText, initials, radius, space, usableImageUrl } from '../../ui';
+import { Button, IconButton, Sheet, TextField, UIText, initials, radius, space, usableImageUrl } from '../../ui';
 
 type Field = 'name' | 'email';
-type PhoneStep = 'number' | 'code';
-
-const RESEND_SECONDS = 30;
-
 /**
  * Editing the person behind the account: photo, name, email and phone. Language,
  * appearance, payment methods and sign out live on the Account page, so they are not
@@ -28,16 +24,9 @@ const EditProfileScreen = () => {
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const { t } = useLanguage();
-    const { customer, updateCustomer, deleteAccount, requestPhoneVerification, verifyPhoneNumber } = useAuth() as any;
+    const { customer, updateCustomer, deleteAccount } = useAuth() as any;
     // Adding or changing the phone: number, then the code we text to it.
-    const [phoneStep, setPhoneStep] = useState<PhoneStep | null>(null);
-    const [newPhone, setNewPhone] = useState('');
-    const [code, setCode] = useState('');
-    const [phoneError, setPhoneError] = useState<string | null>(null);
-    const [phoneBusy, setPhoneBusy] = useState(false);
-    const [wait, setWait] = useState(0);
-    const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-    useEffect(() => () => timer.current && clearInterval(timer.current), []);
+    const [phoneSheet, setPhoneSheet] = useState(false);
     const [editing, setEditing] = useState<Field | null>(null);
     const [draft, setDraft] = useState('');
     const [saving, setSaving] = useState(false);
@@ -107,70 +96,6 @@ const EditProfileScreen = () => {
             },
         });
 
-    const startTimer = () => {
-        setWait(RESEND_SECONDS);
-        if (timer.current) clearInterval(timer.current);
-        timer.current = setInterval(() => setWait((value) => (value <= 1 ? (clearInterval(timer.current!), 0) : value - 1)), 1000);
-    };
-
-    const openPhone = () => {
-        setNewPhone(phone || '');
-        setCode('');
-        setPhoneError(null);
-        setPhoneStep('number');
-    };
-
-    const closePhone = () => {
-        setPhoneStep(null);
-        if (timer.current) clearInterval(timer.current);
-    };
-
-    const sendPhoneCode = async () => {
-        if (!isValidPhoneNumber(newPhone)) {
-            setPhoneError(t('Auth.invalidPhone'));
-            return;
-        }
-        setPhoneBusy(true);
-        setPhoneError(null);
-        try {
-            await requestPhoneVerification(newPhone);
-            setCode('');
-            setPhoneStep('code');
-            startTimer();
-        } catch (failure: any) {
-            setPhoneError(failure?.message || t('Auth.sendFailed'));
-        } finally {
-            setPhoneBusy(false);
-        }
-    };
-
-    const resendPhoneCode = async () => {
-        if (wait > 0) return;
-        try {
-            await requestPhoneVerification(newPhone);
-            startTimer();
-            toast.success(t('Auth.codeResent'));
-        } catch (failure: any) {
-            toast.error(failure?.message || t('Auth.sendFailed'));
-        }
-    };
-
-    const verifyPhone = async (value = code) => {
-        if (phoneBusy || value.length < 6) return;
-        setPhoneBusy(true);
-        setPhoneError(null);
-        try {
-            await verifyPhoneNumber(value);
-            toast.success(t('Auth.phoneSaved'));
-            closePhone();
-        } catch {
-            setPhoneError(t('Auth.codeMismatch'));
-            setCode('');
-        } finally {
-            setPhoneBusy(false);
-        }
-    };
-
     const requestDeletion = async () => {
         setRequestingDelete(true);
         try {
@@ -222,7 +147,11 @@ const EditProfileScreen = () => {
                 </UIText>
             </XStack>
 
-            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: insets.bottom + 40, gap: 16 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: insets.bottom + 40, gap: 16 }}
+            >
                 <YStack alignItems='center' gap={10} paddingVertical={6}>
                     {photo ? (
                         <Image source={{ uri: photo }} style={{ width: 96, height: 96, borderRadius: 48 }} accessibilityLabel={t('EditProfile.photo')} />
@@ -259,7 +188,7 @@ const EditProfileScreen = () => {
                             <UIText tone='secondary'>{t('EditProfile.phoneMissing')}</UIText>
                         ),
                         phone ? t('EditProfile.change') : t('EditProfile.add'),
-                        openPhone,
+                        () => setPhoneSheet(true),
                         true
                     )}
                 </YStack>
@@ -306,88 +235,7 @@ const EditProfileScreen = () => {
                 </YStack>
             </Sheet>
 
-            <Sheet
-                open={phoneStep !== null}
-                onClose={closePhone}
-                title={phoneStep === 'code' ? t('EditProfile.codeTitle') : phone ? t('EditProfile.changePhoneTitle') : t('EditProfile.addPhoneTitle')}
-                footer={
-                    phoneStep === 'code' ? (
-                        <Button size='lg' fullWidth loading={phoneBusy} disabled={code.length < 6} onPress={() => verifyPhone()}>
-                            {t('EditProfile.verify')}
-                        </Button>
-                    ) : (
-                        <Button size='lg' fullWidth loading={phoneBusy} disabled={!newPhone} onPress={sendPhoneCode}>
-                            {t('EditProfile.sendCode')}
-                        </Button>
-                    )
-                }
-            >
-                <YStack gap={12}>
-                    <YStack gap={4}>
-                        <UIText variant='captionStrong' tone='brand'>
-                            {t('EditProfile.stepOf', { step: phoneStep === 'code' ? 2 : 1 })}
-                        </UIText>
-                        <UIText tone='secondary'>{phoneStep === 'code' ? t('EditProfile.codeBody', { phone: newPhone }) : t('EditProfile.phoneBody')}</UIText>
-                    </YStack>
-                    {phoneStep === 'code' ? (
-                        <YStack gap={10}>
-                            <CodeInput
-                                value={code}
-                                onChange={(next: string) => {
-                                    setCode(next);
-                                    if (phoneError) setPhoneError(null);
-                                }}
-                                onComplete={verifyPhone}
-                                invalid={!!phoneError}
-                                label={t('EditProfile.codeLabel')}
-                            />
-                            {!!phoneError && (
-                                <UIText variant='captionStrong' tone='error' accessibilityRole='alert'>
-                                    {phoneError}
-                                </UIText>
-                            )}
-                            <XStack justifyContent='space-between' alignItems='center'>
-                                {wait > 0 ? (
-                                    <UIText variant='caption' tone='secondary'>
-                                        {t('EditProfile.resendIn', { seconds: wait })}
-                                    </UIText>
-                                ) : (
-                                    <Pressable onPress={resendPhoneCode} accessibilityRole='button' style={{ minHeight: 40, justifyContent: 'center' }}>
-                                        <UIText variant='captionStrong' tone='brand'>
-                                            {t('EditProfile.resend')}
-                                        </UIText>
-                                    </Pressable>
-                                )}
-                                <Pressable
-                                    onPress={() => {
-                                        setPhoneError(null);
-                                        setPhoneStep('number');
-                                    }}
-                                    accessibilityRole='button'
-                                    style={{ minHeight: 40, justifyContent: 'center' }}
-                                >
-                                    <UIText variant='captionStrong' tone='brand'>
-                                        {t('EditProfile.changeNumber')}
-                                    </UIText>
-                                </Pressable>
-                            </XStack>
-                        </YStack>
-                    ) : (
-                        <YStack gap={6}>
-                            <PhoneField value={newPhone} onChange={setNewPhone} onSubmit={sendPhoneCode} invalid={!!phoneError} autoFocus />
-                            {phoneError ? (
-                                <UIText variant='captionStrong' tone='error' accessibilityRole='alert'>
-                                    {phoneError}
-                                </UIText>
-                            ) : (
-                                <UIText variant='caption' tone='secondary'>
-                                    {t('EditProfile.smsNote')}
-                                </UIText>
-                            )}
-                        </YStack>
-                    )}
-                </YStack>
-            </Sheet>
+            <PhoneVerifySheet open={phoneSheet} onClose={() => setPhoneSheet(false)} />
 
             <Sheet
                 open={deleteSheet}
