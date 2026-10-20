@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-notifications/lib/android/app/build.gradle b/node_modules/react-native-notifications/lib/android/app/build.gradle
-index 30bb01c..473d9ed 100644
+index 5ea984c..3cf9ffc 100644
 --- a/node_modules/react-native-notifications/lib/android/app/build.gradle
 +++ b/node_modules/react-native-notifications/lib/android/app/build.gradle
-@@ -62,9 +62,6 @@ android {
+@@ -80,9 +80,6 @@ android {
          targetCompatibility JavaVersion.VERSION_1_8
      }
  
@@ -12,3 +12,35 @@ index 30bb01c..473d9ed 100644
      buildTypes {
          release {
              minifyEnabled false
+diff --git a/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java b/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+index fb1aba4..91cea7f 100644
+--- a/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
++++ b/node_modules/react-native-notifications/lib/android/app/src/main/java/com/wix/reactnativenotifications/fcm/FcmToken.java
+@@ -88,12 +88,22 @@ public class FcmToken implements IFcmToken {
+     }
+ 
+     protected void sendTokenToJS() {
+-        final ReactInstanceManager instanceManager = ((ReactApplication) mAppContext).getReactNativeHost().getReactInstanceManager();
+-        ReactContext reactContext = instanceManager.getCurrentReactContext();
+-
++        // New architecture (bridgeless): the ReactHost holds the context. Asking the legacy
++        // ReactNativeHost for its ReactInstanceManager throws UnsupportedOperationException and
++        // crashed the app as soon as FCM delivered a token.
++        ReactContext reactContext = null;
++        try {
++            if (((ReactApplication) mAppContext).getReactHost() != null) {
++                reactContext = ((ReactApplication) mAppContext).getReactHost().getCurrentReactContext();
++            }
++        } catch (Throwable ignored) {
++        }
+         if (reactContext == null) {
+-            // If the react context is not available, try to get the current context from the react host (RN0.76).
+-            reactContext = ((ReactApplication) mAppContext).getReactHost().getCurrentReactContext();
++            try {
++                final ReactInstanceManager instanceManager = ((ReactApplication) mAppContext).getReactNativeHost().getReactInstanceManager();
++                reactContext = instanceManager.getCurrentReactContext();
++            } catch (Throwable ignored) {
++            }
+         }
+         // Note: Cannot assume react-context exists cause this is an async dispatched service.
+         if (reactContext != null && reactContext.hasActiveReactInstance()) {
