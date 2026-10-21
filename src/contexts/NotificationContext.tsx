@@ -79,6 +79,17 @@ export const NotificationProvider = ({ children }) => {
                 // Notify all listeners
                 notificationListeners.current.forEach((listener) => listener(notification));
 
+                // iOS shows it through completion(); on Android the library hands a push that
+                // arrives while the app is open to JS only, so show it in the tray ourselves.
+                // Data-only pushes (no title or body) are skipped by the library.
+                if (Platform.OS === 'android') {
+                    try {
+                        Notifications.postLocalNotification(notification.payload);
+                    } catch (error) {
+                        console.warn('Unable to show notification:', error);
+                    }
+                }
+
                 completion({ alert: true, sound: true, badge: false });
             });
 
