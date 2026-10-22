@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider, Theme } from 'tamagui';
 import { Toasts } from '@backpackapp-io/react-native-toast';
@@ -22,11 +22,13 @@ import config from './tamagui.config';
 
 const DEBUG_APP = false;
 function AppContent(): React.JSX.Element {
-    const { themeName: appTheme } = useBranding();
+    const { themeName: appTheme, scheme } = useBranding();
 
     return (
         <TamaguiProvider config={config} theme={appTheme}>
             <Theme name={appTheme}>
+                {/* The app's scheme, not the device's, sets the status bar text color. */}
+                <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <SafeAreaProvider>
                         <BottomSheetModalProvider>

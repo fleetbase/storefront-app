@@ -4,7 +4,9 @@ import TestRenderer, { act } from 'react-test-renderer';
 const mockStore = new Map<string, any>();
 let mockSystemScheme: 'light' | 'dark' = 'light';
 
-jest.mock('react-native', () => ({ useColorScheme: () => mockSystemScheme, Platform: { OS: 'ios' } }));
+const mockSetColorScheme = jest.fn();
+
+jest.mock('react-native', () => ({ useColorScheme: () => mockSystemScheme, Platform: { OS: 'ios' }, Appearance: { setColorScheme: (scheme: string) => mockSetColorScheme(scheme) } }));
 jest.mock(
     '../../src/hooks/use-storage',
     () => {
@@ -53,6 +55,7 @@ describe('BrandingProvider', () => {
     beforeEach(() => {
         mockStore.clear();
         mockSystemScheme = 'light';
+        mockSetColorScheme.mockClear();
     });
 
     test('follows the system scheme by default', () => {
@@ -87,6 +90,40 @@ describe('BrandingProvider', () => {
         expect(ref.current!.themeName).toBe('lightBlue');
         act(() => ref.current!.setPreference('dark'));
         expect(ref.current!.themeName).toBe('lightBlue');
+    });
+
+    test.each([
+        ['dark', 'light'],
+        ['light', 'dark'],
+    ] as const)('renders a forced %s scheme on a %s device, native system UI included', (forced, device) => {
+        mockSystemScheme = device;
+        mockStore.set('storefront:appearance', device);
+        const resolved = resolveBranding([{ name: 'brand', config: { schemaVersion: 1, appearance: { defaultScheme: forced, allowUserToggle: false } } }]);
+        const ref = renderWithBranding(resolved);
+        expect(ref.current!.scheme).toBe(forced);
+        expect(ref.current!.themeName).toBe(`${forced}Blue`);
+        expect(getActiveTheme()?.name).toBe(`${forced}Blue`);
+        expect(mockSetColorScheme).toHaveBeenLastCalledWith(forced);
+    });
+
+    test('a forced scheme with brand colors renders the brand theme for that scheme', () => {
+        mockSystemScheme = 'light';
+        const resolved = resolveBranding([
+            { name: 'brand', config: { schemaVersion: 1, colors: { dark: { primary: '#9d174d' } }, appearance: { defaultScheme: 'dark', allowUserToggle: false } } },
+        ]);
+        const ref = renderWithBranding(resolved);
+        expect(ref.current!.themeName).toBe('darkBlueBrand');
+        expect(ref.current!.theme.background).toBe('#111827');
+        expect(mockSetColorScheme).toHaveBeenLastCalledWith('dark');
+    });
+
+    test('hands native system UI back to the device when following the system scheme', () => {
+        const ref = renderWithBranding();
+        expect(mockSetColorScheme).toHaveBeenLastCalledWith('unspecified');
+        act(() => ref.current!.setPreference('dark'));
+        expect(mockSetColorScheme).toHaveBeenLastCalledWith('dark');
+        act(() => ref.current!.setPreference('system'));
+        expect(mockSetColorScheme).toHaveBeenLastCalledWith('unspecified');
     });
 
     test('applies a dev-only local preview over the build branding', () => {
