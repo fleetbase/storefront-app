@@ -81,6 +81,7 @@ The key you build with decides what the app is:
 **Ordering and checkout**
 - Delivery or pickup, scheduled orders and tips.
 - Saved addresses, with a map pin for places address search can't find.
+- Every order needs a verified phone number on the customer's profile, and a delivery a saved address. Customers who signed in with Apple or Google, or haven't saved an address yet, add them right in checkout, once; they're used for later orders and can be changed in the account.
 - Two payment gateways: Stripe (cards, saved cards, Apple Pay, Google Pay) and QPay (Mongolian bank apps and QR).
 - Unavailable items are flagged before payment, not after.
 
@@ -249,7 +250,7 @@ Set the gateway with `PAYMENT_GATEWAY`, and its credentials in the Console under
 
 ## Sign-in
 
-Customers sign in with a phone number and a code sent by text. Apple and Google can be added:
+Customers sign in with a phone number and a code sent by text; signing up that way also confirms the number, so it isn't asked for again. Apple and Google can be added:
 
 - **Apple:** `APPLE_LOGIN_ENABLED=true`, with the Sign in with Apple capability in Xcode. Shown on iOS.
 - **Google:** `GOOGLE_LOGIN_ENABLED=true`, `GOOGLE_CLIENT_ID` (the web client) and `GOOGLE_IOS_CLIENT_ID` (the iOS client), both without the `.apps.googleusercontent.com` ending. Android also needs an Android OAuth client for your package name and signing key. Shown on iOS and Android.

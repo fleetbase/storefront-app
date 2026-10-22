@@ -90,7 +90,9 @@ export default function useQPayCheckout({ onOrderComplete }) {
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
 
-    const isReady = serviceQuote && !isLoading && !isBelowMinimum;
+    // Pickup has no delivery to quote; delivery needs its quote first (as with Stripe).
+    const hasQuote = !!checkoutOptions.pickup || !!serviceQuote;
+    const isReady = hasQuote && !isLoading && !isBelowMinimum;
     const isNotReady = !isReady;
 
     // Calculate line items
@@ -193,7 +195,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     // Initialize the payment gateway and get checkout details
     const setupGateway = useCallback(async () => {
-        if (!storefront || !customer || !cart || !serviceQuote) return;
+        if (!storefront || !customer || !cart || (!checkoutOptions.pickup && !serviceQuote)) return;
 
         setIsLoading(true);
         try {
@@ -373,8 +375,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
 
     // Fetch service quote when cart or delivery location changes
     useEffect(() => {
-        // No address yet: nothing to quote until one is chosen.
-        if (!cart || !deliveryLocation) return;
+        // Pickup has nothing to quote; with no address yet, nothing until one is chosen.
+        if (!cart || checkoutOptions.pickup || !deliveryLocation) return;
 
         let isMounted = true;
         const origin = quoteOrigin ?? foodTruckId ?? storeLocationId;
@@ -403,7 +405,7 @@ export default function useQPayCheckout({ onOrderComplete }) {
         return () => {
             isMounted = false;
         };
-    }, [cartContentsString, cart, deliveryLocation?.id, foodTruckId, quoteOrigin, storeLocationId]);
+    }, [cartContentsString, cart, checkoutOptions.pickup, deliveryLocation?.id, foodTruckId, quoteOrigin, storeLocationId]);
 
     // Listen to order updates via socket (if not already listening)
     useEffect(() => {
@@ -534,8 +536,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
             setPickup,
             isPickup: !!checkoutOptions.pickup,
             error,
-            isReady: serviceQuote && !isLoading && !isBelowMinimum,
-            isNotReady: !(serviceQuote && !isLoading && !isBelowMinimum),
+            isReady,
+            isNotReady,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,
@@ -595,6 +597,8 @@ export default function useQPayCheckout({ onOrderComplete }) {
             dismissPaymentStatus,
             isServiceQuoteUnavailable,
             unavailableItems,
+            isReady,
+            isNotReady,
             isBelowMinimum,
             minimumCheckoutAmount,
             isMinimumCheckoutEnabled,

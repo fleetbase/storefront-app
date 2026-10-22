@@ -10,7 +10,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../../contexts/StorefrontRuntimeContext';
 import useOAuth from '../../hooks/use-oauth';
 import { isValidPhoneNumber, storefrontConfig } from '../../utils';
-import { setAuthRedirect } from '../../navigation/auth-redirect';
+import { setAuthRedirect, takeAuthRedirect } from '../../navigation/auth-redirect';
 import PhoneField from '../../components/auth/PhoneField';
 import { Button, IconButton, TextField, UIText, space } from '../../ui';
 
@@ -71,6 +71,9 @@ const SignInScreen = ({ route, mode: forcedMode }: any) => {
     const social = async (provider: string) => {
         try {
             await oauth.login(provider);
+            // Signed in: like the texted code, continue where the customer was going (e.g. checkout).
+            const redirect = takeAuthRedirect();
+            if (redirect) navigation.navigate(redirect.route, redirect.params);
         } catch {
             setError(t('Auth.socialFailed', { provider: provider[0].toUpperCase() + provider.slice(1) }));
         }
@@ -189,6 +192,7 @@ const SignInScreen = ({ route, mode: forcedMode }: any) => {
                                     {t('Auth.privacy')}
                                 </UIText>
                             )}
+                            {t('Auth.agreeEnd')}
                         </UIText>
                     )}
                 </ScrollView>

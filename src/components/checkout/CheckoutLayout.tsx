@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCalendarDays, faChevronLeft, faCircleExclamation, faLocationDot, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faChevronLeft, faCircleExclamation, faLocationDot, faLock, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { XStack, YStack, useTheme } from 'tamagui';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,9 +32,11 @@ import {
     usesTwelveHourClock,
 } from '../../ui';
 import TipSelector from './TipSelector';
+import PhoneVerifySheet from '../account/PhoneVerifySheet';
 import { RoutePreview, type RouteStore } from './RoutePreview';
 import { parseScheduledAt } from '../../commerce/booking';
 import { unavailableItemsText, type UnavailableItem } from '../../commerce/checkout-capture';
+import { checkoutRequirements } from '../../commerce/checkout-requirements';
 
 /** The fields every gateway's checkout hook provides (Stripe, QPay). */
 export type CheckoutState = {
@@ -88,11 +90,12 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const { t, locale } = useLanguage();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, customer } = useAuth() as any;
     const { info, enabled, ownerInfo } = useStorefrontInfo();
     const { mode, getSelectedStoreLocation } = useStorefrontRuntime();
     const { savedLocations } = useSavedLocations();
     const [addressSheet, setAddressSheet] = useState(false);
+    const [phoneSheet, setPhoneSheet] = useState(false);
     const { cart, isPickup } = checkout;
     const currency = cart?.getAttribute?.('currency') ?? info?.currency ?? 'USD';
     const money = (amount: number) => formatCurrency(amount, currency);
@@ -167,21 +170,27 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
         .join(', ');
     const driverTipsEnabled = enabled('delivery_tips') && !isPickup;
 
+    // Every order needs the customer's phone; a delivery also a saved address (both kept on the profile).
+    const { needsPhone, needsAddress } = checkoutRequirements({ customer: customer ?? checkout.customer, location, isPickup });
     const blockedReason = !isAuthenticated
         ? null
-        : !isPickup && !location
-          ? t('Checkout.blockedAddress')
-          : checkout.unavailableItems
-            ? t('Checkout.blockedItems')
-            : quoteState === 'unavailable'
-              ? t('Checkout.blockedDelivery')
-              : checkout.isBelowMinimum
-                ? t('Checkout.blockedMinimum', { amount: money(checkout.minimumCheckoutAmount) })
-                : !paymentReady
-                  ? t('Checkout.blockedPayment')
-                  : checkout.isNotReady && !checkout.isLoading
-                    ? t('Checkout.preparing')
-                    : null;
+        : needsPhone
+          ? t('Checkout.blockedPhone')
+          : !isPickup && !location
+            ? t('Checkout.blockedAddress')
+            : needsAddress
+              ? t('Checkout.blockedSavedAddress')
+              : checkout.unavailableItems
+                ? t('Checkout.blockedItems')
+                : quoteState === 'unavailable'
+                  ? t('Checkout.blockedDelivery')
+                  : checkout.isBelowMinimum
+                    ? t('Checkout.blockedMinimum', { amount: money(checkout.minimumCheckoutAmount) })
+                    : !paymentReady
+                      ? t('Checkout.blockedPayment')
+                      : checkout.isNotReady && !checkout.isLoading
+                        ? t('Checkout.preparing')
+                        : null;
 
     // Sign in on the account tab, then come straight back to this checkout.
     const signIn = () => {
@@ -232,6 +241,25 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                     </XStack>
 
                     <YStack gap={12} paddingHorizontal={space.gutter}>
+                        {isAuthenticated && needsPhone && (
+                            <Card padding={14} gap={12} accessibilityLabel={t('Checkout.phoneTitle')}>
+                                <XStack gap={12} alignItems='flex-start'>
+                                    <YStack width={40} height={40} borderRadius={radius.pill} backgroundColor='$primarySoft' alignItems='center' justifyContent='center'>
+                                        <FontAwesomeIcon icon={faPhone} size={16} color={theme.primaryForeground.val} />
+                                    </YStack>
+                                    <YStack flex={1} gap={2}>
+                                        <UIText variant='bodyStrong'>{t('Checkout.phoneTitle')}</UIText>
+                                        <UIText variant='caption' tone='secondary'>
+                                            {t('Checkout.phoneBody')}
+                                        </UIText>
+                                    </YStack>
+                                </XStack>
+                                <Button variant='inverse' size='sm' fullWidth onPress={() => setPhoneSheet(true)}>
+                                    {t('Checkout.addPhone')}
+                                </Button>
+                            </Card>
+                        )}
+
                         {pickupAvailable && (
                             <SegmentedControl
                                 accessibilityLabel={t('Checkout.fulfilment')}
@@ -269,6 +297,20 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                                         {location ? t('Checkout.change') : t('Checkout.addAddress')}
                                     </Button>
                                 </XStack>
+                                {isAuthenticated && !!location && needsAddress && (
+                                    // Where the device is isn't an address yet: save it (with the details a driver needs) first.
+                                    <YStack gap={10} padding={12} borderRadius={radius.button} backgroundColor='$warningSoft' accessibilityRole='alert'>
+                                        <UIText variant='caption'>{t('Checkout.saveAddressBody')}</UIText>
+                                        <Button
+                                            variant='inverse'
+                                            size='sm'
+                                            fullWidth
+                                            onPress={() => navigation.navigate('EditLocation', { place: location.serialize?.() ?? location, makeDefault: true })}
+                                        >
+                                            {t('Checkout.saveAddress')}
+                                        </Button>
+                                    </YStack>
+                                )}
                                 {quoteState === 'loading' && (
                                     <XStack justifyContent='space-between' alignItems='center' paddingTop={12} borderTopWidth={1} borderColor='$borderColor'>
                                         <UIText variant='bodyStrong'>{t('Checkout.deliveryFee')}</UIText>
@@ -547,6 +589,7 @@ export default function CheckoutLayout({ checkout, payment, extra, paymentReady,
                 }}
                 note={t('Places.quoteNote')}
             />
+            <PhoneVerifySheet open={phoneSheet} onClose={() => setPhoneSheet(false)} />
         </YStack>
     );
 }

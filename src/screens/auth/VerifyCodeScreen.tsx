@@ -58,7 +58,7 @@ const VerifyCodeScreen = ({ route, purpose }: { route: any; purpose: VerifyPurpo
         setError(null);
         try {
             if (purpose === 'signIn') await auth.verifyCode(value);
-            else if (purpose === 'create') await auth.verifyAccountCreation(phone, value, { name: params.name });
+            else if (purpose === 'create') await auth.verifyAccountCreation(phone, value, { name: params.name, phone });
             else if (purpose === 'phone') await auth.verifyPhoneNumber(value);
             else await auth.verifyAccountDeletion(value);
             finish();

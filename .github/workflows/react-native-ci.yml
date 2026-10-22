@@ -68,7 +68,9 @@ jobs:
 
       - name: Generate cache key
         id: cache-key
-        run: echo "key=${{ runner.os }}-deps-${{ hashFiles('**/yarn.lock', '**/package.json') }}" >> $GITHUB_OUTPUT
+        # node_modules is cached with patch-package's changes already applied, so a changed
+        # patch needs a fresh node_modules: the patches are part of the key.
+        run: echo "key=${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-${{ hashFiles('**/yarn.lock', '**/package.json') }}" >> $GITHUB_OUTPUT
 
       - name: Lint Network edition runtime and UI
         run: yarn lint:strict
@@ -119,7 +121,7 @@ jobs:
             **/node_modules
           key: ${{ needs.install_and_test.outputs.cache-key }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-
 
       - name: Install dependencies
         run: yarn install
@@ -259,7 +261,7 @@ jobs:
             **/node_modules
           key: ${{ needs.install_and_test.outputs.cache-key }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-
 
       - name: Install dependencies
         run: yarn install
