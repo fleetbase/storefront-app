@@ -1,18 +1,14 @@
-> v0.1.1 ~ "One phone check at sign-up; phone and address before the first order"
+> v0.1.2 ~ "Order screen and QPay bank list fixes"
 
 ---
 ## Fixes
-- **Sign-up asks for the phone once.** Signing up with a phone number and texted code now saves that number to the new account, so the Profile no longer asks to verify it a second time. With Storefront v0.4.29 or later the server also marks it verified and saves it for any client.
-- **Phone and address before ordering.** Checkout needs a phone number on the customer's profile for every order, and a saved delivery address for deliveries (pickup needs only the phone). Customers who signed in with Apple or Google, or who are on their device's location, add or save them right in checkout; both stay on the profile for later orders and can be changed from the account.
-- **Apple and Google sign-in from checkout** return to checkout, like the texted code.
-- **QPay pickup** no longer waits for a delivery quote, so it works without an address.
-- **Mongolian sign-in terms line** reads as a full sentence: "Үргэлжлүүлснээр та {name}-ийн Үйлчилгээний нөхцөл болон Нууцлалын бодлогыг зөвшөөрсөнд тооцогдоно." A new `Auth.agreeEnd` key ends the sentence after the links in any language.
+- **Order screen no longer crashes on Android.** The live map could receive its bottom padding before Google Maps had loaded, and `react-native-maps` then called into a map that didn't exist yet. A patch keeps the padding until the map is ready and applies it then.
+- **Order screen scrolls on Android.** The sheet over the map lets touches through to the map on iOS; on Android that kept the sheet from scrolling at all. On Android the sheet now takes the drag, so the strip of map above it scrolls the sheet rather than panning the map.
+- **Every bank in the QPay sheet can be reached.** The bank list grew past the sheet and was cut off at the bottom on iOS and Android. It is now the sheet's own scrolling list, with the QR code and title as its header.
 
 ---
 ## Upgrading
-- Storefront v0.4.29 or later on the server is recommended. On earlier versions phone sign-up still works with this app, but the number isn't marked verified.
-- Client builds with their own `Auth.*` translations can set `Auth.agreeEnd` (it is `.` in English and Ukrainian).
-- Edit profile's phone sheet is now `src/components/account/PhoneVerifySheet.tsx`, shared with checkout.
+- Run `yarn install` after merging: a new patch for `react-native-maps` is applied on install.
 
 ---
 ## Need help?
