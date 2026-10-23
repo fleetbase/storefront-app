@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Appearance, Platform, useColorScheme } from 'react-native';
 import useStorage, { getString } from '../hooks/use-storage';
 import { themes as compiledThemes } from '../../tamagui.config';
@@ -81,8 +81,7 @@ type Props = {
  */
 export const BrandingProvider = ({ children, resolved }: Props) => {
     // Branding posted by a hosted preview's host page, applied over the build branding as it changes.
-    const [hostBranding, setHostBranding] = 
-          <unknown>(null);
+    const [hostBranding, setHostBranding] = useState<unknown>(null);
     useEffect(() => subscribeToHostBranding(setHostBranding), []);
     const initial = useMemo(
         () => resolved ?? (hostBranding ? resolveBranding([...getBuildBrandingSources(), { name: 'hosted-preview', config: hostBranding, enforceContrast: true }]) : resolveInitialBranding()),
