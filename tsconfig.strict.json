@@ -24,7 +24,11 @@
         "__tests__/commerce/**/*.ts",
         "src/ui/**/*.ts",
         "src/ui/**/*.tsx",
-        "__tests__/ui/**/*.ts"
+        "__tests__/ui/**/*.ts",
+        "src/utils/google-maps.ts",
+        "src/components/map/RouteDirections.tsx",
+        "__tests__/maps/**/*.ts",
+        "__tests__/maps/**/*.tsx"
     ],
     "exclude": [
         "src/extensions/app-screen-registry.tsx",

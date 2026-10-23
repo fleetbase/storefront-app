@@ -4,7 +4,7 @@ import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat } from '../utils/location';
 import { config, storefrontConfig } from '../utils';
 import MapView from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
+import RouteDirections from './map/RouteDirections';
 import { PlaceMapMarker, StoreMapMarker } from './map/RouteMarkers';
 import LoadingOverlay from './LoadingOverlay';
 import useCurrentLocation from '../hooks/use-current-location';
@@ -111,7 +111,7 @@ const LivePickupRoute = ({ children, order, zoom = 1, width = '100%', height = '
 
                 {/* Route Directions */}
                 {origin && destination && (
-                    <MapViewDirections
+                    <RouteDirections
                         origin={origin}
                         destination={destination}
                         apikey={config('GOOGLE_MAPS_API_KEY')}

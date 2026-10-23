@@ -164,7 +164,6 @@ module.exports = (env = {}, argv = {}) => ({
                 include: [
                     path.resolve(__dirname, 'node_modules/react-native-linear-gradient'),
                     path.resolve(__dirname, 'node_modules/react-native-maps'),
-                    path.resolve(__dirname, 'node_modules/react-native-maps-directions'),
                     path.resolve(__dirname, 'node_modules/react-native-super-grid'),
                     path.resolve(__dirname, 'node_modules/react-native-community-blur'),
                     path.resolve(__dirname, 'node_modules/react-native-image-picker'),
