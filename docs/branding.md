@@ -10,6 +10,7 @@ Branding is resolved from these sources, lowest priority first:
 2. **Legacy environment keys**: `APP_THEME`, `CUSTOM_COLORS*`, `STORE_HEADER_*`, `PRODUCT_CARD_STYLE`, `STORE_CATEGORIES_DISPLAY`, `STORE_NAVIGATOR_TABS`/`_DEFAULT_TAB`/`_TAB_BAR_BG`, `LOGIN_BG_IMAGE`, `BOOTSCREEN_BG_IMAGE` and `BOOTSCREEN_BACKGROUND_COLOR`. Existing `.env` profiles keep working unchanged.
 3. **`brand/storefront.brand.ts`** in a client build, or the empty template `storefront.brand.ts` at the repository root when there is no `brand/` folder (see [Client builds](client-builds.md)).
 4. **Local preview** (development builds only, see below).
+5. **Hosted preview** (web builds made for it, see below): the host page's starting branding, then the branding it posts while the app runs.
 
 Remote, published configuration will be layered on top in a later release.
 
@@ -124,6 +125,36 @@ If colors resolved at runtime differ from the compiled theme (local preview now,
 ## Color scheme
 
 `BrandingProvider` owns the color scheme. Users choose `system`, `light` or `dark` in Account, stored under `storefront:appearance`. An existing light/dark choice is migrated from the previous storage key. With `system`, the app follows the device setting as it changes.
+
+## Hosted preview (web)
+
+A web build can run inside another site's iframe, such as a brand editor, and take its store and branding from that page. It is off unless the bundle is built with `STOREFRONT_PREVIEW_ORIGIN`, the origins (comma separated) allowed to drive it:
+
+```sh
+STOREFRONT_PREVIEW_ORIGIN=https://editor.example.com yarn web:build
+```
+
+Native builds and web builds without the flag behave exactly as before. One preview bundle serves every store: the host page provides the store's keys and starting branding before the bundle loads, and posts changes while it runs.
+
+```html
+<script>
+    window.__STOREFRONT_PREVIEW__ = {
+        env: { FLEETBASE_HOST: 'https://api.example.com', FLEETBASE_KEY: 'flb_…', STOREFRONT_KEY: 'store_…' },
+        branding: { schemaVersion: 1, colors: { light: { primary: '#0f766e' } } },
+    };
+</script>
+<script src="/bundle.web.js"></script>
+```
+
+```js
+// In the host page, once the app has posted { type: 'storefront:preview-ready' }:
+frame.contentWindow.postMessage({ type: 'storefront:branding', branding: { schemaVersion: 1, colors: { light: { primary: '#be185d' } } } }, 'https://preview.example.com');
+```
+
+- Only string `env` values are used, and only the public keys an app ships with belong there.
+- Posted branding goes through the same validation and contrast checks as the other sources, and applies without a reload for colors and appearance. Settings read at startup (navigation and tabs, card styles, store header, typography) need the host to reload the frame with new starting branding.
+- Messages from any other origin are ignored.
+- The page that serves the bundle should set `<base href="/">` (or build with an absolute public path) so deep links load their assets, and answer `HEAD /` with 200, which the app uses to check that it is online.
 
 ## Previewing a theme (development builds)
 
