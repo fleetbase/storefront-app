@@ -215,7 +215,7 @@ The app reads `.env` at build time, so a change needs a rebuild. The full list i
 | `STOREFRONT_KEY` | Your store key (`store_…`) or network key (`network_…`), from Storefront → Settings → API in the Console. |
 | `FLEETBASE_KEY` | A Fleetbase API key, from Developers → API Keys in the Console. |
 | `FLEETBASE_HOST` | Your Fleetbase API: `https://api.fleetbase.io` on Fleetbase Cloud, or your own server. |
-| `GOOGLE_MAPS_API_KEY` | Google Maps on Android, and address search. |
+| `GOOGLE_MAPS_API_KEY` | Google Maps on Android, address search and route lines. In Google Cloud, turn on Maps SDK for Android, Geocoding API, Places API (New) and Routes API. The phone calls Google's web services directly, so set Application restrictions to None and API restrictions to those four APIs. |
 | `APP_NAME`, `APP_IDENTIFIER` | The app's display name and its bundle id / application id. |
 
 **Common options**

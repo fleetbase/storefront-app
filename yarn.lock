@@ -2559,7 +2559,6 @@ __metadata:
     react-native-linear-gradient: ^2.8.3
     react-native-localize: ^3.3.0
     react-native-maps: ^1.26.19
-    react-native-maps-directions: ^1.9.0
     react-native-mmkv-storage: ^12.0.0
     react-native-notifications: ^5.1.0
     react-native-otp-entry: ^1.7.3
@@ -12543,13 +12542,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.isequal@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.isequal@npm:4.5.0"
-  checksum: da27515dc5230eb1140ba65ff8de3613649620e8656b19a6270afe4866b7bd461d9ba2ac8a48dcc57f7adac4ee80e1de9f965d89d4d81a0ad52bb3eec2609644
-  languageName: node
-  linkType: hard
-
 "lodash.isinteger@npm:^4.0.4":
   version: 4.0.4
   resolution: "lodash.isinteger@npm:4.0.4"
@@ -14351,7 +14343,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.0, prop-types@npm:^15.5.7, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.0, prop-types@npm:^15.5.7, prop-types@npm:^15.6.1, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -14790,20 +14782,6 @@ __metadata:
     react-native-macos:
       optional: true
   checksum: 4d3da51c8ed69d067c1dc512597fa622d4d59c33d3f5627ab228693ec49e8536a57e634357fe0d26e1658d447bc91d854fcc4eeb69fd69b3aad7f8d9aa1b5e67
-  languageName: node
-  linkType: hard
-
-"react-native-maps-directions@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "react-native-maps-directions@npm:1.9.0"
-  dependencies:
-    lodash.isequal: ^4.5.0
-    prop-types: ^15.6.0
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-maps: ">=1.0.0"
-  checksum: 2d7e4a88374b60f255b054766feb8cb86bb431e3737fc62908417c8232900da50618fd1a5a37dd42641f8bd8c737643da26496113a4c89727f26cdf1106aedf0
   languageName: node
   linkType: hard
 
