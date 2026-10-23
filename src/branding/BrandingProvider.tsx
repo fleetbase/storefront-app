@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
+import { Appearance, Platform, useColorScheme } from 'react-native';
 import useStorage, { getString } from '../hooks/use-storage';
 import { themes as compiledThemes } from '../../tamagui.config';
 import { getBuildBranding, getBuildBrandingSources } from './build-branding';
@@ -81,7 +81,8 @@ type Props = {
  */
 export const BrandingProvider = ({ children, resolved }: Props) => {
     // Branding posted by a hosted preview's host page, applied over the build branding as it changes.
-    const [hostBranding, setHostBranding] = useState<unknown>(null);
+    const [hostBranding, setHostBranding] = 
+          <unknown>(null);
     useEffect(() => subscribeToHostBranding(setHostBranding), []);
     const initial = useMemo(
         () => resolved ?? (hostBranding ? resolveBranding([...getBuildBrandingSources(), { name: 'hosted-preview', config: hostBranding, enforceContrast: true }]) : resolveInitialBranding()),
@@ -107,6 +108,13 @@ export const BrandingProvider = ({ children, resolved }: Props) => {
 
     // Keep non-React readers (getTheme) in step with what renders.
     setActiveTheme(active);
+
+    // Native system UI (status bar, keyboard, alerts, pickers) follows the device
+    // scheme unless overridden, so a forced or chosen scheme is passed on to it.
+    const nativeScheme = preference === 'system' ? 'unspecified' : scheme;
+    useEffect(() => {
+        if (Platform.OS !== 'web') Appearance.setColorScheme?.(nativeScheme);
+    }, [nativeScheme]);
 
     useEffect(() => {
         if (!issuesReported && issues.length && typeof __DEV__ !== 'undefined' && __DEV__) {
