@@ -72,7 +72,7 @@ describe('address search', () => {
 
     it('looks the place up through the Geocoding API when place details fail', async () => {
         const geocoded = { formatted_address: '1 Main St', place_id: 'g1', geometry: { location: { lat: 1, lng: 2 } }, address_components: [] };
-        mockGet.mockImplementation((url: string) => (url.includes('places.googleapis.com') ? Promise.reject(new Error('403')) : Promise.resolve({ data: { results: [geocoded] } })));
+        mockGet.mockImplementation((url: string) => (new URL(url).hostname === 'places.googleapis.com' ? Promise.reject(new Error('403')) : Promise.resolve({ data: { results: [geocoded] } })));
 
         expect(await getPlaceDetails('g1')).toEqual(geocoded);
         expect(mockGet.mock.calls[1][1].params).toEqual({ place_id: 'g1', key: 'test-key' });
