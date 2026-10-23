@@ -164,7 +164,6 @@ module.exports = (env = {}, argv = {}) => ({
                 include: [
                     path.resolve(__dirname, 'node_modules/react-native-linear-gradient'),
                     path.resolve(__dirname, 'node_modules/react-native-maps'),
-                    path.resolve(__dirname, 'node_modules/react-native-maps-directions'),
                     path.resolve(__dirname, 'node_modules/react-native-super-grid'),
                     path.resolve(__dirname, 'node_modules/react-native-community-blur'),
                     path.resolve(__dirname, 'node_modules/react-native-image-picker'),
@@ -253,6 +252,8 @@ module.exports = (env = {}, argv = {}) => ({
         }),
         new DefinePlugin({
             __DEV__: JSON.stringify(argv.mode !== 'production'),
+            // Only set for hosted preview builds; see src/preview/host.ts.
+            __PREVIEW_ORIGIN__: JSON.stringify(process.env.STOREFRONT_PREVIEW_ORIGIN ?? ''),
             CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),

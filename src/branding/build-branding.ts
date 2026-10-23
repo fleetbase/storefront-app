@@ -2,6 +2,7 @@ import buildBrand from '../generated/brand-config';
 import { config as readEnv } from '../utils/tamagui';
 import { brandingFromLegacyEnv } from './legacy-env';
 import { resolveBranding } from './resolve';
+import { initialHostedPreview } from '../preview/host';
 import type { BrandingIssue, BrandingSource, ResolvedBranding } from './resolve';
 
 /**
@@ -12,6 +13,8 @@ export function getBuildBrandingSources(): BrandingSource[] {
     return [
         { name: 'legacy-env', config: brandingFromLegacyEnv((key) => readEnv(key, undefined)) },
         { name: 'storefront.brand.ts', config: buildBrand },
+        // A hosted preview's starting branding, so settings read at startup use it too.
+        ...(initialHostedPreview?.branding ? [{ name: 'hosted-preview', config: initialHostedPreview.branding, enforceContrast: true }] : []),
     ];
 }
 

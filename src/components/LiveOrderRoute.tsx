@@ -6,7 +6,7 @@ import { FoodTruck } from '@fleetbase/storefront';
 import { restoreFleetbasePlace, getCoordinates, makeCoordinatesFloat, createFauxPlace } from '../utils/location';
 import { config, storefrontConfig, getFoodTruckById, isArray, isObject } from '../utils';
 import MapView, { PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
+import RouteDirections from './map/RouteDirections';
 import { PlaceMapMarker, StoreMapMarker } from './map/RouteMarkers';
 import DriverMarker from './DriverMarker';
 import VehicleMarker from './VehicleMarker';
@@ -368,7 +368,7 @@ const LiveOrderRoute = ({ children, order, zoom = 1, width = '100%', height = '1
                             Number.isFinite(origin.longitude) &&
                             Number.isFinite(destination.latitude) &&
                             Number.isFinite(destination.longitude) && (
-                                <MapViewDirections
+                                <RouteDirections
                                     origin={origin}
                                     destination={destination}
                                     apikey={config('GOOGLE_MAPS_API_KEY')}

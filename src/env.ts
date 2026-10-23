@@ -1,5 +1,6 @@
 import RNConfig from 'react-native-config';
 import envOverrides from './generated/env-overrides';
+import { initialHostedPreview } from './preview/host';
 
 const useOverrides = typeof __DEV__ !== 'undefined' && __DEV__ && !!envOverrides && Object.keys(envOverrides).length > 0;
 
@@ -10,7 +11,9 @@ const useOverrides = typeof __DEV__ !== 'undefined' && __DEV__ && !!envOverrides
  * storefronts with a Metro restart instead of a native rebuild. Release builds ignore it.
  * App code reads configuration from this module, not from react-native-config.
  */
-const Config: Record<string, any> = useOverrides ? { ...(RNConfig ?? {}), ...envOverrides } : (RNConfig ?? {});
+const baseConfig: Record<string, any> = useOverrides ? { ...(RNConfig ?? {}), ...envOverrides } : (RNConfig ?? {});
+// A hosted preview build (see src/preview/host.ts) takes the store to show from the host page.
+const Config: Record<string, any> = initialHostedPreview?.env ? { ...baseConfig, ...initialHostedPreview.env } : baseConfig;
 
 if (useOverrides) {
     console.info(`[env] Using env.dev.json for ${Object.keys(envOverrides).join(', ')}`);

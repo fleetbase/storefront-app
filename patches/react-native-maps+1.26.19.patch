@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native-maps/android/src/main/java/com/rnmaps/maps/MapView.java b/node_modules/react-native-maps/android/src/main/java/com/rnmaps/maps/MapView.java
+index ebf8780..dc07db1 100644
+--- a/node_modules/react-native-maps/android/src/main/java/com/rnmaps/maps/MapView.java
++++ b/node_modules/react-native-maps/android/src/main/java/com/rnmaps/maps/MapView.java
+@@ -1492,7 +1492,9 @@ public class MapView extends com.google.android.gms.maps.MapView implements Goog
+     int edgeBottomPadding;
+ 
+     public void applyBaseMapPadding(int left, int top, int right, int bottom) {
+-        if (super.getHeight() <= 0 || super.getWidth() <= 0) {
++        // Not laid out yet, or the GoogleMap isn't ready (padding can arrive first, e.g. from
++        // React props): keep it and apply it in onMapReady instead of calling into a null map.
++        if (map == null || super.getHeight() <= 0 || super.getWidth() <= 0) {
+             // the map is not laid out yet and calling setPadding() now has no effect
+             baseLeftMapPadding = left;
+             baseRightMapPadding = right;

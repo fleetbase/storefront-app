@@ -6,11 +6,11 @@ import { faChevronRight, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { toast } from '../utils/toast';
 import { useNavigation } from '@react-navigation/native';
 import { useLanguage } from '../contexts/LanguageContext';
-import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import { Portal } from '@gorhom/portal';
 import { isArray, later } from '../utils';
-import Spacer from './Spacer';
 
 export interface Bank {
     name: string;
@@ -41,6 +41,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
     ({ invoice, title, wrapperStyle, onBankSelect, onBottomSheetPositionChanged, onBottomSheetOpened, onBottomSheetClosed, portalHost = 'MainPortal' }, ref) => {
         const { t } = useLanguage();
         const theme = useTheme();
+        const insets = useSafeAreaInsets();
         const navigation = useNavigation();
         const bottomSheetRef = useRef<BottomSheet>(null);
         const snapPoints = useMemo(() => ['90%'], []);
@@ -159,8 +160,17 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                         backgroundStyle={{ backgroundColor: theme.surface.val, borderWidth: 1, borderColor: theme.borderColorWithShadow.val }}
                         handleIndicatorStyle={{ backgroundColor: theme.secondary.val }}
                     >
-                        <BottomSheetView style={{ ...styles.bottomSheetView, backgroundColor: theme.surface.val }}>
-                            <YStack>
+                        {/* The list is the sheet's own scroll view (header included), so every bank
+                            can be reached; inside a plain view it grew past the sheet and was clipped. */}
+                        <BottomSheetFlatList
+                            data={banks}
+                            keyExtractor={keyExtractor}
+                            renderItem={renderItem}
+                            style={{ backgroundColor: theme.surface.val }}
+                            contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            ListHeaderComponent={
                                 <YStack>
                                     {typeof invoice?.qr_image === 'string' && (
                                         <XStack alignItems='center' justifyContent='center' mb='$4'>
@@ -187,26 +197,16 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                         </Button>
                                     </XStack>
                                 </YStack>
-                                {banks.length === 0 && invoice?.error && (
+                            }
+                            ListEmptyComponent={
+                                invoice?.error ? (
                                     <YStack alignItems='center' justifyContent='center' py='$4' height={150}>
                                         <Text color='$color'>{errorText(invoice.error)}</Text>
                                         {!!invoice.message && <Text color='$textSecondary'>{errorText(invoice.message)}</Text>}
                                     </YStack>
-                                )}
-                                {banks.length > 0 && (
-                                    <BottomSheetFlatList
-                                        data={banks}
-                                        keyExtractor={keyExtractor}
-                                        renderItem={renderItem}
-                                        contentContainerStyle={styles.listContent}
-                                        showsVerticalScrollIndicator={false}
-                                        showsHorizontalScrollIndicator={false}
-                                        ListFooterComponent={<Spacer height={100} />}
-                                    />
-                                )}
-                                <Spacer height={200} />
-                            </YStack>
-                        </BottomSheetView>
+                                ) : null
+                            }
+                        />
                     </BottomSheet>
                 </Portal>
             </YStack>
@@ -220,18 +220,12 @@ const styles = StyleSheet.create({
         width: '100%',
         zIndex: 999,
     },
-    bottomSheetView: {
-        flex: 1,
-    },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     logoContainer: {
         marginRight: 16,
-    },
-    listContent: {
-        paddingBottom: 100,
     },
 });
 
