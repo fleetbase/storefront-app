@@ -7,6 +7,7 @@ import { resolveBranding } from './resolve';
 import { presetThemeName } from './presets';
 import type { ColorScheme } from './presets';
 import { ensureBrandTheme, setActiveTheme } from './runtime-theme';
+import { subscribeToHostBranding } from '../preview/host';
 import type { ThemeColors } from './build-themes';
 import type { BrandingIssue, BrandingSource, ResolvedBranding } from './resolve';
 
@@ -79,7 +80,14 @@ type Props = {
  * shares them through one context so every consumer stays in sync.
  */
 export const BrandingProvider = ({ children, resolved }: Props) => {
-    const initial = useMemo(() => resolved ?? resolveInitialBranding(), [resolved]);
+    // Branding posted by a hosted preview's host page, applied over the build branding as it changes.
+    const [hostBranding, setHostBranding] = 
+          <unknown>(null);
+    useEffect(() => subscribeToHostBranding(setHostBranding), []);
+    const initial = useMemo(
+        () => resolved ?? (hostBranding ? resolveBranding([...getBuildBrandingSources(), { name: 'hosted-preview', config: hostBranding, enforceContrast: true }]) : resolveInitialBranding()),
+        [resolved, hostBranding]
+    );
     const { branding, issues } = initial;
     const systemScheme: ColorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
     const [storedPreference, setStoredPreference] = useStorage<SchemePreference | null>(APPEARANCE_STORAGE_KEY, initialPreference());

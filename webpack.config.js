@@ -253,6 +253,8 @@ module.exports = (env = {}, argv = {}) => ({
         }),
         new DefinePlugin({
             __DEV__: JSON.stringify(argv.mode !== 'production'),
+            // Only set for hosted preview builds; see src/preview/host.ts.
+            __PREVIEW_ORIGIN__: JSON.stringify(process.env.STOREFRONT_PREVIEW_ORIGIN ?? ''),
             CONFIG: JSON.stringify(generateConfig()),
         }),
         new HtmlWebpackPlugin({ title: process.env.APP_NAME, template: path.resolve(__dirname, 'public/index.html') }),
