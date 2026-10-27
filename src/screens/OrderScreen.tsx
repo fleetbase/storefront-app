@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, AppState, Image, Linking, Pressable, RefreshControl } from 'react-native';
+import { Animated, AppState, Image, Linking, Platform, Pressable, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -186,21 +186,24 @@ const OrderScreen = ({ route }: any) => {
         return !!pickup && !!dropoff;
     }, [foodTruck, foodTruckId, isPickup, order]);
 
-    const reloadOrder = useCallback(async (options: { refresh?: boolean } = {}) => {
-        if (options.refresh) setRefreshing(true);
-        try {
-            const reloaded = await orderRef.current.reload();
-            if (placeMoved(orderRef.current.getAttribute('payload.dropoff'), reloaded.getAttribute('payload.dropoff'))) markOrderHistoryDirty(customer?.id);
-            setOrder(reloaded);
-            cacheOrder(reloaded);
-            statusRef.current = reloaded.getAttribute('status');
-            distanceLoadedRef.current = false;
-        } catch (err) {
-            console.error('Error reloading order:', err);
-        } finally {
-            setRefreshing(false);
-        }
-    }, [customer?.id]);
+    const reloadOrder = useCallback(
+        async (options: { refresh?: boolean } = {}) => {
+            if (options.refresh) setRefreshing(true);
+            try {
+                const reloaded = await orderRef.current.reload();
+                if (placeMoved(orderRef.current.getAttribute('payload.dropoff'), reloaded.getAttribute('payload.dropoff'))) markOrderHistoryDirty(customer?.id);
+                setOrder(reloaded);
+                cacheOrder(reloaded);
+                statusRef.current = reloaded.getAttribute('status');
+                distanceLoadedRef.current = false;
+            } catch (err) {
+                console.error('Error reloading order:', err);
+            } finally {
+                setRefreshing(false);
+            }
+        },
+        [customer?.id]
+    );
 
     useEffect(() => {
         orderRef.current
@@ -310,7 +313,19 @@ const OrderScreen = ({ route }: any) => {
             if (pushedOrderId(payload) !== order.id) return;
             if (payload.type === 'order_updated') {
                 const summary = notification?.body ?? payload.body ?? payload.message ?? null;
-                setChangeNotice((current) => current ?? { orderId: order.id, changes: [], summary: typeof summary === 'string' ? summary : null, dropoffChanged: false, total: null, currency: null, changedBy: null, changedAt: null });
+                setChangeNotice(
+                    (current) =>
+                        current ?? {
+                            orderId: order.id,
+                            changes: [],
+                            summary: typeof summary === 'string' ? summary : null,
+                            dropoffChanged: false,
+                            total: null,
+                            currency: null,
+                            changedBy: null,
+                            changedAt: null,
+                        }
+                );
             }
             scheduleReload();
         };
@@ -597,12 +612,12 @@ const OrderScreen = ({ route }: any) => {
                 style={{ flex: 1, zIndex: 1, marginTop: insets.top }}
                 scrollEventThrottle={16}
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
-                pointerEvents='box-none'
+                // iOS lets touches above the sheet through to the map and still scrolls. On Android a
+                // box-none scroll view never gets the drag, so the sheet couldn't scroll at all.
+                pointerEvents={Platform.OS === 'ios' ? 'box-none' : 'auto'}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} tintColor={theme.primary.val} colors={[theme.primary.val]} />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => reloadOrder({ refresh: true })} tintColor={theme.primary.val} colors={[theme.primary.val]} />}
                 contentContainerStyle={{ flexGrow: 1 }}
             >
                 {/* Over the map: touches pass through to it, so it can still be panned and zoomed. */}
@@ -916,7 +931,11 @@ const OrderScreen = ({ route }: any) => {
                                         return (
                                             <XStack key={item.id} alignItems='center' gap={10}>
                                                 {usableImageUrl(item.imageUrl) ? (
-                                                    <Image source={{ uri: item.imageUrl as string }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
+                                                    <Image
+                                                        source={{ uri: item.imageUrl as string }}
+                                                        style={{ width: 40, height: 40, borderRadius: radius.tile }}
+                                                        accessibilityIgnoresInvertColors
+                                                    />
                                                 ) : null}
                                                 <YStack flex={1} gap={2}>
                                                     <UIText tone='secondary'>
@@ -956,7 +975,12 @@ const OrderScreen = ({ route }: any) => {
                                 )}
                             </YStack>
                             {!!store?.phone && (
-                                <IconButton icon={faPhone} size={44} accessibilityLabel={t('Tracking.callStore', { store: storeName })} onPress={() => Linking.openURL(`tel:${store.phone}`)} />
+                                <IconButton
+                                    icon={faPhone}
+                                    size={44}
+                                    accessibilityLabel={t('Tracking.callStore', { store: storeName })}
+                                    onPress={() => Linking.openURL(`tel:${store.phone}`)}
+                                />
                             )}
                             {!!storeChat && (!(finished || canceled) || storeChat.messages.length > 0) && (
                                 <IconButton
@@ -983,46 +1007,47 @@ const OrderScreen = ({ route }: any) => {
                             {formatDate(new Date(order.getAttribute('created_at') ?? Date.now()), 'PPp')}
                             {reference !== order.id ? ` · ${t('Tracking.orderId', { id: order.id })}` : ''}
                         </UIText>
-                        {!isMultiStore && entities.map((entity: any, index: number) => {
-                            const options = [...(entity.meta?.variants ?? []), ...(entity.meta?.addons ?? [])].map((option: any) => option?.name).filter(Boolean);
-                            // The store's word on the item: unavailable, substituted, or a note.
-                            const unavailable = [true, 1, '1', 'true'].includes(entity.meta?.unavailable);
-                            const replaces = entity.meta?.substitute_for ? entities.find((other: any) => other?.id === entity.meta.substitute_for) : null;
-                            const note = typeof entity.meta?.note === 'string' && entity.meta.note.trim() ? entity.meta.note.trim() : null;
-                            return (
-                                <XStack key={entity.id ?? index} alignItems='center' gap={10}>
-                                    {usableImageUrl(entity.photo_url) ? (
-                                        <Image source={{ uri: entity.photo_url }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
-                                    ) : null}
-                                    <YStack flex={1} gap={2}>
-                                        <UIText tone='secondary' style={unavailable ? { textDecorationLine: 'line-through' } : undefined}>
-                                            {entity.meta?.quantity ?? 1} × {entity.name}
-                                        </UIText>
-                                        {options.length > 0 && (
-                                            <UIText variant='caption' tone='secondary'>
-                                                {options.join(', ')}
+                        {!isMultiStore &&
+                            entities.map((entity: any, index: number) => {
+                                const options = [...(entity.meta?.variants ?? []), ...(entity.meta?.addons ?? [])].map((option: any) => option?.name).filter(Boolean);
+                                // The store's word on the item: unavailable, substituted, or a note.
+                                const unavailable = [true, 1, '1', 'true'].includes(entity.meta?.unavailable);
+                                const replaces = entity.meta?.substitute_for ? entities.find((other: any) => other?.id === entity.meta.substitute_for) : null;
+                                const note = typeof entity.meta?.note === 'string' && entity.meta.note.trim() ? entity.meta.note.trim() : null;
+                                return (
+                                    <XStack key={entity.id ?? index} alignItems='center' gap={10}>
+                                        {usableImageUrl(entity.photo_url) ? (
+                                            <Image source={{ uri: entity.photo_url }} style={{ width: 40, height: 40, borderRadius: radius.tile }} accessibilityIgnoresInvertColors />
+                                        ) : null}
+                                        <YStack flex={1} gap={2}>
+                                            <UIText tone='secondary' style={unavailable ? { textDecorationLine: 'line-through' } : undefined}>
+                                                {entity.meta?.quantity ?? 1} × {entity.name}
                                             </UIText>
-                                        )}
-                                        {unavailable && (
-                                            <UIText variant='captionStrong' tone='error'>
-                                                {t('Tracking.itemUnavailable')}
-                                            </UIText>
-                                        )}
-                                        {!!entity.meta?.substitute_for && (
-                                            <UIText variant='captionStrong' tone='brand'>
-                                                {replaces?.name ? t('Tracking.substituteFor', { name: replaces.name }) : t('Tracking.substitute')}
-                                            </UIText>
-                                        )}
-                                        {!!note && (
-                                            <UIText variant='caption' tone='secondary'>
-                                                {t('Tracking.storeNote', { note })}
-                                            </UIText>
-                                        )}
-                                    </YStack>
-                                    <UIText tone={unavailable ? 'secondary' : 'primary'}>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
-                                </XStack>
-                            );
-                        })}
+                                            {options.length > 0 && (
+                                                <UIText variant='caption' tone='secondary'>
+                                                    {options.join(', ')}
+                                                </UIText>
+                                            )}
+                                            {unavailable && (
+                                                <UIText variant='captionStrong' tone='error'>
+                                                    {t('Tracking.itemUnavailable')}
+                                                </UIText>
+                                            )}
+                                            {!!entity.meta?.substitute_for && (
+                                                <UIText variant='captionStrong' tone='brand'>
+                                                    {replaces?.name ? t('Tracking.substituteFor', { name: replaces.name }) : t('Tracking.substitute')}
+                                                </UIText>
+                                            )}
+                                            {!!note && (
+                                                <UIText variant='caption' tone='secondary'>
+                                                    {t('Tracking.storeNote', { note })}
+                                                </UIText>
+                                            )}
+                                        </YStack>
+                                        <UIText tone={unavailable ? 'secondary' : 'primary'}>{money(entity.meta?.subtotal ?? entity.price)}</UIText>
+                                    </XStack>
+                                );
+                            })}
                         {totals.map((row) => (
                             <XStack key={row.label} justifyContent='space-between'>
                                 <UIText tone='secondary'>{row.label}</UIText>
@@ -1086,7 +1111,14 @@ const OrderScreen = ({ route }: any) => {
                 title={t('Tracking.wrongAddressTitle')}
                 footer={
                     <YStack gap={8}>
-                        <Button size='lg' fullWidth loading={sendingAddress} disabled={!addressMessage.trim() && !addressPlace} onPress={sendAddressRequest} testID='order-address-request-send'>
+                        <Button
+                            size='lg'
+                            fullWidth
+                            loading={sendingAddress}
+                            disabled={!addressMessage.trim() && !addressPlace}
+                            onPress={sendAddressRequest}
+                            testID='order-address-request-send'
+                        >
                             {t('Tracking.sendToStore', { store: storeName || t('StoreSwitch.thisStore') })}
                         </Button>
                         <Button variant='ghost' size='lg' fullWidth onPress={() => setAddressSheet(false)}>

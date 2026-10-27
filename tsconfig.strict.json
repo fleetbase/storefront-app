@@ -16,13 +16,19 @@
         "__tests__/extensions/**/*.tsx",
         "src/network/**/*.ts",
         "src/branding/**/*.ts",
+        "src/preview/**/*.ts",
+        "__tests__/preview/**/*.ts",
         "__tests__/branding/**/*.ts",
         "__tests__/network/**/*.ts",
         "src/commerce/**/*.ts",
         "__tests__/commerce/**/*.ts",
         "src/ui/**/*.ts",
         "src/ui/**/*.tsx",
-        "__tests__/ui/**/*.ts"
+        "__tests__/ui/**/*.ts",
+        "src/utils/google-maps.ts",
+        "src/components/map/RouteDirections.tsx",
+        "__tests__/maps/**/*.ts",
+        "__tests__/maps/**/*.tsx"
     ],
     "exclude": [
         "src/extensions/app-screen-registry.tsx",

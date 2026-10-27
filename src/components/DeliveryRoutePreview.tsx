@@ -4,7 +4,7 @@ import { Text, YStack, XStack, useTheme } from 'tamagui';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faStore, faPerson } from '@fortawesome/free-solid-svg-icons';
 import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
+import RouteDirections from './map/RouteDirections';
 import { Vehicle } from '@fleetbase/sdk';
 import { FoodTruck } from '@fleetbase/storefront';
 import { restoreFleetbasePlace, getCoordinatesObject, createFauxPlace, formattedAddressFromPlace, makeCoordinatesFloat } from '../utils/location';
@@ -448,7 +448,7 @@ const DeliveryRoutePreview = ({ children, zoom = 1, width = '100%', height = '10
                     Number.isFinite(destination.latitude) &&
                     Number.isFinite(destination.longitude) &&
                     !findingOrigin && (
-                        <MapViewDirections
+                        <RouteDirections
                             origin={makeCoordinatesFloat(origin)}
                             destination={makeCoordinatesFloat(destination)}
                             apikey={config('GOOGLE_MAPS_API_KEY')}
