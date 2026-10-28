@@ -44,6 +44,7 @@ const BootScreen = () => {
     const [error, setError] = useState<Error | null>(null);
     const backgroundColor = toArray(storefrontConfig('bootBackgroundColors', ['$background']));
     const backgroundImage = storefrontConfig('backgroundImages.BootScreen');
+    const logo = storefrontConfig('bootLogo') ?? splashLogo;
     const isGradientBackground = isArray(backgroundColor) && backgroundColor.length > 1;
     const hasBgImage = !!backgroundImage;
 
@@ -129,7 +130,7 @@ const BootScreen = () => {
                     />
                 )}
                 <YStack alignItems='center' justifyContent='center'>
-                    <Image source={splashLogo} width={100} height={100} borderRadius='$4' mb='$1' />
+                    <Image source={logo} width={100} height={100} borderRadius='$4' mb='$1' />
                     <XStack mt='$2' alignItems='center' justifyContent='center' space='$3'>
                         <Spinner size='small' color='$textPrimary' />
                     </XStack>

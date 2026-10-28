@@ -33,7 +33,7 @@ export const DEFAULT_BRANDING: Required<Omit<BrandingConfig, 'name'>> = {
         tabBar: { activeColor: 'primaryForeground' },
     },
     shape: { radius: { tile: 12, card: 16, sheet: 24 } },
-    assets: { loginBackground: { bundled: 'storefront_photo_1' }, bootBackground: null },
+    assets: { loginBackground: { bundled: 'storefront_photo_1' }, bootBackground: null, bootLogo: null },
     boot: { background: ['$background'] },
     navigation: {
         store: {

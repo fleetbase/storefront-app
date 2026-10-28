@@ -33,7 +33,7 @@ export type ResolvedBranding = {
         tabBar: { activeColor: string };
     };
     shape: { radius: { tile: number; card: number; sheet: number } };
-    assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null };
+    assets: { loginBackground: AssetReference | null; bootBackground: AssetReference | null; bootLogo: AssetReference | null };
     boot: { background: string[] };
     navigation: {
         store: { tabs: string[]; defaultTab: string; tabBar: { background: string } };

@@ -38,11 +38,19 @@ describe('resolveBranding', () => {
         expect(issues).toHaveLength(2);
     });
 
+    test('takes a boot logo from an https URL only', () => {
+        const ok = resolveBranding([{ name: 'preview', config: { schemaVersion: 1, assets: { bootLogo: { url: 'https://preview.example.com/p/t/brand/launch' } } } }]);
+        expect(ok.branding.assets.bootLogo).toEqual({ url: 'https://preview.example.com/p/t/brand/launch' });
+        const bad = resolveBranding([{ name: 'preview', config: { schemaVersion: 1, assets: { bootLogo: { url: 'http://preview.example.com/logo.png' } } } }]);
+        expect(bad.branding.assets.bootLogo).toBeNull();
+    });
+
     test('accepts https assets and screen variant selections', () => {
         const { branding, issues } = resolveBranding([
             { name: 'brand', config: { schemaVersion: 1, assets: { loginBackground: { url: 'https://cdn.example.com/login.jpg' } }, screens: { 'store.home': { variant: 'editorial' }, 'nope.screen': { variant: 'x' } } } },
         ]);
         expect(branding.assets.loginBackground).toEqual({ url: 'https://cdn.example.com/login.jpg' });
+        expect(branding.assets.bootLogo).toBeNull();
         expect(branding.screens).toEqual({ 'store.home': { variant: 'editorial' } });
         expect(issues.map((issue) => issue.path)).toEqual(['screens.nope.screen']);
     });

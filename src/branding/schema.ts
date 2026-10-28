@@ -126,6 +126,8 @@ export const AssetsSchema = z
     .object({
         loginBackground: AssetRef.nullable(),
         bootBackground: AssetRef.nullable(),
+        /** The logo on the boot screen, in place of the bundled brand/splash-screen.png. */
+        bootLogo: AssetRef.nullable(),
     })
     .partial()
     .strict();
