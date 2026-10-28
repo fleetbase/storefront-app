@@ -7,7 +7,9 @@ import { splashLogo } from '../generated/brand-assets';
 import { Image, Spinner, XStack, YStack, useTheme } from 'tamagui';
 import { LinearGradient } from 'react-native-linear-gradient';
 import { toArray, isArray, storefrontConfig } from '../utils';
-import { getCurrentLocationFromStorage, requestWebGeolocationPermission } from '../utils/location';
+import { getCurrentLocationFromStorage, requestWebGeolocationPermission, setCurrentLocationToStore } from '../utils/location';
+import { isHostedPreview } from '../preview/host';
+import { Store } from '@fleetbase/storefront';
 import BootSplash from 'react-native-bootsplash';
 import SetupWarningScreen from './SetupWarningScreen';
 import useStorefront from '../hooks/use-storefront';
@@ -53,6 +55,13 @@ const BootScreen = () => {
         };
 
         const checkStoreLocationPermission = async (info: any) => {
+            // A hosted preview can't ask for location or search addresses, so it starts at the store.
+            if (isHostedPreview) {
+                if (!currentLocation) await setCurrentLocationToStore(new Store(info, storefront.getAdapter()));
+                if (cancelled) return;
+                return enterStorefront('StoreNavigator', info);
+            }
+
             if (Platform.OS === 'web') {
                 const granted = await requestWebGeolocationPermission();
                 if (granted || currentLocation) return enterStorefront('StoreNavigator', info);

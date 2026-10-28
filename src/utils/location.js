@@ -1119,6 +1119,29 @@ export function getCurrentLocationFromStorage() {
     return currentLocation ? restoreFleetbasePlace(currentLocation) : null;
 }
 
+/**
+ * Saves the store's first location as the customer's current location, for a hosted preview: it
+ * runs inside another site's frame, where it can't ask for the device's location and has no maps
+ * key to search addresses with. Returns the place, or null when the store has no location.
+ */
+export async function setCurrentLocationToStore(store) {
+    try {
+        const [first] = Array.from((await store?.getLocations?.()) || []);
+        const place = first?.getAttribute?.('place') ?? first?.place;
+        const attributes = isResource(place) ? place.attributes : place;
+        const [longitude, latitude] = (attributes?.location?.coordinates ?? []).map(Number);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+        // An address to show, not one of the customer's saved places.
+        const { id, uuid, public_id, ...address } = attributes;
+        const current = new Place({ ...address, location: new Point(latitude, longitude) }, adapter);
+        storage.setMap('_current_location', current.serialize());
+        return current;
+    } catch (error) {
+        console.warn('[preview] Could not start at the store location', error);
+        return null;
+    }
+}
+
 export function getLiveLocationLocationFromStorage() {
     const liveLocation = storage.getMap('_live_location');
     return liveLocation ? restoreFleetbasePlace(liveLocation) : null;
