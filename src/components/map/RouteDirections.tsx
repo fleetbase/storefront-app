@@ -7,6 +7,7 @@ import {
     ROUTES_FIELD_MASK,
     computeRoutesRequestBody,
     googleHeaders,
+    googleUrl,
     isRoutePoint,
     routeFromComputeRoutes,
     type LatLng,
@@ -55,7 +56,7 @@ const RouteDirections = ({ origin, destination, waypoints = [], apikey, mode = '
         callbacks.current.onStart?.(stops);
 
         axios
-            .post(COMPUTE_ROUTES_URL, computeRoutesRequestBody(stops.origin, stops.destination, { waypoints: stops.waypoints, mode }), {
+            .post(googleUrl(COMPUTE_ROUTES_URL, config('GOOGLE_MAPS_PROXY')), computeRoutesRequestBody(stops.origin, stops.destination, { waypoints: stops.waypoints, mode }), {
                 headers: googleHeaders(key, ROUTES_FIELD_MASK),
                 signal: controller?.signal,
             })

@@ -1,14 +1,15 @@
-> v0.1.2 ~ "Order screen and QPay bank list fixes"
+> v0.1.3 ~ "Hosted preview starts at the store"
 
 ---
 ## Fixes
-- **Order screen no longer crashes on Android.** The live map could receive its bottom padding before Google Maps had loaded, and `react-native-maps` then called into a map that didn't exist yet. A patch keeps the padding until the map is ready and applies it then.
-- **Order screen scrolls on Android.** The sheet over the map lets touches through to the map on iOS; on Android that kept the sheet from scrolling at all. On Android the sheet now takes the drag, so the strip of map above it scrolls the sheet rather than panning the map.
-- **Every bank in the QPay sheet can be reached.** The bank list grew past the sheet and was cut off at the bottom on iOS and Android. It is now the sheet's own scrolling list, with the QR code and title as its header.
+- **A hosted preview no longer stops at "Allow location".** A store app asked for the customer's location before showing the store. Inside another site's frame the browser can't share a location, and a preview build has no maps key to search addresses with, so the preview could go no further. A hosted preview now starts at the store's own address and opens the store. Other builds are unchanged.
+
+## New
+- **Google Maps through a proxy.** A host page can set `GOOGLE_MAPS_PROXY` so address search, place details and route lines go to its server, which adds its own key, instead of to Google with a key in the page. Without it, requests go to Google as before. See "Hosted preview" in `docs/branding.md`.
 
 ---
 ## Upgrading
-- Run `yarn install` after merging: a new patch for `react-native-maps` is applied on install.
+- No changes needed.
 
 ---
 ## Need help?
