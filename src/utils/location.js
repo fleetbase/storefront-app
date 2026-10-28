@@ -16,6 +16,7 @@ import {
     autocompleteRequestBody,
     createSessionToken,
     googleHeaders,
+    googleUrl,
     placeDetailsFromPlace,
     placeDetailsUrl,
     predictionsFromAutocomplete,
@@ -51,7 +52,7 @@ export async function geocode(latitude, longitude, options = {}) {
     }
 
     try {
-        const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+        const response = await axios.get(googleUrl('https://maps.googleapis.com/maps/api/geocode/json', config('GOOGLE_MAPS_PROXY')), {
             params: {
                 latlng: `${latitude},${longitude}`,
                 sensor: false,
@@ -87,7 +88,7 @@ export async function geocodeAutocomplete(input, coordinates = null) {
 
     try {
         placesSessionToken = placesSessionToken ?? createSessionToken();
-        const response = await axios.post(PLACES_AUTOCOMPLETE_URL, autocompleteRequestBody(input, { languageCode: language, coordinates, sessionToken: placesSessionToken }), {
+        const response = await axios.post(googleUrl(PLACES_AUTOCOMPLETE_URL, config('GOOGLE_MAPS_PROXY')), autocompleteRequestBody(input, { languageCode: language, coordinates, sessionToken: placesSessionToken }), {
             headers: googleHeaders(config('GOOGLE_MAPS_API_KEY'), AUTOCOMPLETE_FIELD_MASK),
         });
 
@@ -110,7 +111,7 @@ async function geocodeAddressSearch(input, language, coordinates = null) {
             const [latitude, longitude] = coordinates;
             params.bounds = `${latitude - 0.1},${longitude - 0.1}|${latitude + 0.1},${longitude + 0.1}`;
         }
-        const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', { params });
+        const response = await axios.get(googleUrl('https://maps.googleapis.com/maps/api/geocode/json', config('GOOGLE_MAPS_PROXY')), { params });
         return (response.data.results ?? []).map((result) => ({
             description: result.formatted_address,
             place_id: result.place_id,
@@ -127,7 +128,7 @@ export async function getPlaceDetails(placeId) {
     placesSessionToken = null;
 
     try {
-        const response = await axios.get(placeDetailsUrl(placeId), {
+        const response = await axios.get(googleUrl(placeDetailsUrl(placeId), config('GOOGLE_MAPS_PROXY')), {
             params: { languageCode: getLocale(), ...(sessionToken ? { sessionToken } : {}) },
             headers: googleHeaders(config('GOOGLE_MAPS_API_KEY'), PLACE_DETAILS_FIELD_MASK),
         });
@@ -141,7 +142,7 @@ export async function getPlaceDetails(placeId) {
         // Places API (New) not enabled for the key, or blocked: the Geocoding API has the same address parts for a place id.
         console.warn(`Error fetching place details for ID: ${placeId}`, error?.response?.data?.error?.message ?? error?.message ?? error);
         try {
-            const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', { params: { place_id: placeId, key: config('GOOGLE_MAPS_API_KEY') } });
+            const response = await axios.get(googleUrl('https://maps.googleapis.com/maps/api/geocode/json', config('GOOGLE_MAPS_PROXY')), { params: { place_id: placeId, key: config('GOOGLE_MAPS_API_KEY') } });
             return response.data.results?.[0] ?? null;
         } catch {
             return null;

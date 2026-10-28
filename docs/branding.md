@@ -154,6 +154,8 @@ frame.contentWindow.postMessage({ type: 'storefront:branding', branding: { schem
 - Only string `env` values are used, and only the public keys an app ships with belong there.
 - Posted branding goes through the same validation and contrast checks as the other sources, and applies without a reload for colors and appearance. Settings read at startup (navigation and tabs, card styles, store header, typography) need the host to reload the frame with new starting branding.
 - Messages from any other origin are ignored.
+- A store app starts at the store's own address instead of asking for location: the frame usually can't share the browser's location. The host can let it by allowing `geolocation` for the preview's origin and adding `allow="geolocation"` to the frame.
+- To keep a Google Maps key out of the page, set `env.GOOGLE_MAPS_PROXY` to a URL on a server that adds the key and forwards to Google. Address search, place details and route lines then go to `<proxy>/maps/…`, `<proxy>/places/…` and `<proxy>/routes/…`, with the rest of Google's path and query unchanged (for example `<proxy>/places/v1/places:autocomplete`).
 - The page that serves the bundle should set `<base href="/">` (or build with an absolute public path) so deep links load their assets, and answer `HEAD /` with 200, which the app uses to check that it is online.
 
 ## Previewing a theme (development builds)

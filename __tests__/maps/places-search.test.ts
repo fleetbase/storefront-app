@@ -1,5 +1,6 @@
 const mockGet = jest.fn();
 const mockPost = jest.fn();
+let mockProxy: string | undefined;
 
 jest.mock('axios', () => ({ __esModule: true, default: { get: (...args: any[]) => mockGet(...args), post: (...args: any[]) => mockPost(...args) } }));
 jest.mock('react-native', () => ({ Platform: { OS: 'android' } }));
@@ -13,7 +14,7 @@ jest.mock('../../src/hooks/use-fleetbase', () => ({ adapter: {} }));
 jest.mock('../../src/utils/localize', () => ({ getLocale: () => 'en' }));
 jest.mock('../../src/utils/storage', () => ({ __esModule: true, default: {} }), { virtual: true });
 jest.mock('../../src/utils', () => ({
-    config: (key: string) => (key === 'GOOGLE_MAPS_API_KEY' ? 'test-key' : undefined),
+    config: (key: string) => (key === 'GOOGLE_MAPS_API_KEY' ? 'test-key' : key === 'GOOGLE_MAPS_PROXY' ? mockProxy : undefined),
     isArray: Array.isArray,
     isObject: (value: unknown) => value !== null && typeof value === 'object' && !Array.isArray(value),
     isEmpty: (value: unknown) => value == null || (Array.isArray(value) && value.length === 0),
@@ -26,6 +27,7 @@ jest.mock('../../src/utils', () => ({
 import { geocodeAutocomplete, getPlaceDetails } from '../../src/utils/location';
 
 beforeEach(() => {
+    mockProxy = undefined;
     mockGet.mockReset();
     mockPost.mockReset();
     jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -60,6 +62,24 @@ describe('address search', () => {
         expect(mockPost.mock.calls[1][1].sessionToken).not.toBe(body.sessionToken);
     });
 
+    it('sends every search through the proxy when one is set, as a hosted preview does', async () => {
+        mockProxy = 'https://preview.example.com/p/tok/google';
+        mockPost.mockRejectedValue(new Error('403'));
+        mockGet
+            .mockResolvedValueOnce({ data: { results: [] } })
+            .mockRejectedValueOnce(new Error('403'))
+            .mockResolvedValueOnce({ data: { results: [] } });
+
+        await geocodeAutocomplete('1 Main');
+        await getPlaceDetails('p1');
+        expect(mockPost.mock.calls[0][0]).toBe('https://preview.example.com/p/tok/google/places/v1/places:autocomplete');
+        expect(mockGet.mock.calls.map(([url]) => url)).toEqual([
+            'https://preview.example.com/p/tok/google/maps/maps/api/geocode/json',
+            'https://preview.example.com/p/tok/google/places/v1/places/p1',
+            'https://preview.example.com/p/tok/google/maps/maps/api/geocode/json',
+        ]);
+    });
+
     it('falls back to the Geocoding API on the phone when Places API (New) fails', async () => {
         mockPost.mockRejectedValue(new Error('403'));
         mockGet.mockResolvedValue({ data: { results: [{ formatted_address: '1 Main St, Boston, MA 02108, USA', place_id: 'g1' }] } });
@@ -72,7 +92,9 @@ describe('address search', () => {
 
     it('looks the place up through the Geocoding API when place details fail', async () => {
         const geocoded = { formatted_address: '1 Main St', place_id: 'g1', geometry: { location: { lat: 1, lng: 2 } }, address_components: [] };
-        mockGet.mockImplementation((url: string) => (new URL(url).hostname === 'places.googleapis.com' ? Promise.reject(new Error('403')) : Promise.resolve({ data: { results: [geocoded] } })));
+        mockGet.mockImplementation((url: string) =>
+            new URL(url).hostname === 'places.googleapis.com' ? Promise.reject(new Error('403')) : Promise.resolve({ data: { results: [geocoded] } })
+        );
 
         expect(await getPlaceDetails('g1')).toEqual(geocoded);
         expect(mockGet.mock.calls[1][1].params).toEqual({ place_id: 'g1', key: 'test-key' });

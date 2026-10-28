@@ -48,6 +48,16 @@ const TRAVEL_MODES: Record<TravelMode, string> = {
     TRANSIT: 'TRANSIT',
 };
 
+/**
+ * Where a Google Maps web service request goes. A hosted preview sets GOOGLE_MAPS_PROXY to a server
+ * that adds its own key, so the page carries none: `https://places.googleapis.com/v1/…` is sent to
+ * `<proxy>/places/v1/…`. Without a proxy the URL is unchanged.
+ */
+export function googleUrl(url: string, proxy?: string | null): string {
+    const match = proxy ? /^https:\/\/(maps|places|routes)\.googleapis\.com\//.exec(url) : null;
+    return match ? `${proxy!.replace(/\/+$/, '')}/${match[1]}/${url.slice(match[0].length)}` : url;
+}
+
 export function placeDetailsUrl(placeId: string): string {
     return `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`;
 }

@@ -3,6 +3,7 @@ import {
     computeRoutesRequestBody,
     decodePolyline,
     googleHeaders,
+    googleUrl,
     isRoutePoint,
     placeDetailsFromPlace,
     placeDetailsUrl,
@@ -120,5 +121,25 @@ describe('Routes API', () => {
         expect(isRoutePoint({ latitude: Number.NaN, longitude: 1 })).toBe(false);
         expect(isRoutePoint(' ')).toBe(false);
         expect(isRoutePoint(undefined)).toBe(false);
+    });
+});
+
+describe('googleUrl', () => {
+    it('leaves Google URLs alone without a proxy', () => {
+        expect(googleUrl('https://places.googleapis.com/v1/places:autocomplete')).toBe('https://places.googleapis.com/v1/places:autocomplete');
+        expect(googleUrl('https://places.googleapis.com/v1/places:autocomplete', '')).toBe('https://places.googleapis.com/v1/places:autocomplete');
+    });
+
+    it('sends each Google service to its own path under the proxy', () => {
+        const proxy = 'https://preview.example.com/p/tok/google/';
+        expect(googleUrl('https://maps.googleapis.com/maps/api/geocode/json', proxy)).toBe('https://preview.example.com/p/tok/google/maps/maps/api/geocode/json');
+        expect(googleUrl('https://places.googleapis.com/v1/places:autocomplete', proxy)).toBe('https://preview.example.com/p/tok/google/places/v1/places:autocomplete');
+        expect(googleUrl(placeDetailsUrl('ChIJ abc'), proxy)).toBe('https://preview.example.com/p/tok/google/places/v1/places/ChIJ%20abc');
+        expect(googleUrl('https://routes.googleapis.com/directions/v2:computeRoutes', proxy)).toBe('https://preview.example.com/p/tok/google/routes/directions/v2:computeRoutes');
+    });
+
+    it('never proxies anything but those Google services', () => {
+        expect(googleUrl('https://example.com/maps/api', 'https://proxy.test')).toBe('https://example.com/maps/api');
+        expect(googleUrl('https://evil.googleapis.com/x', 'https://proxy.test')).toBe('https://evil.googleapis.com/x');
     });
 });
