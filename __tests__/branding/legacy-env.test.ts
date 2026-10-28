@@ -59,7 +59,7 @@ describe('legacy env branding', () => {
         expect(branding.navigation.store.tabBar.background).toBe('custom');
         expect(branding.components.storeCategories.display).toBe('pills');
         expect(branding.components.productCard.variant).toBe('outlined');
-        expect(branding.assets).toEqual({ loginBackground: { bundled: 'storefront_photo_2' }, bootBackground: { bundled: 'storefront_photo_2' } });
+        expect(branding.assets).toEqual({ loginBackground: { bundled: 'storefront_photo_2' }, bootBackground: { bundled: 'storefront_photo_2' }, bootLogo: null });
         expect(branding.boot.background).toEqual(['#345A73']);
         expect(branding.components.storeHeader).toMatchObject({
             showGradient: false,

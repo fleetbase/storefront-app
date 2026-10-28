@@ -45,6 +45,7 @@ export const DefaultConfig = {
         BootScreen: resolveAssetSource(branding.assets.bootBackground),
     },
     bootBackgroundColors: branding.boot.background,
+    bootLogo: resolveAssetSource(branding.assets.bootLogo),
     storeHeader: {
         showGradient: storeHeader.showGradient,
         showLocationPicker: storeHeader.showLocationPicker,
