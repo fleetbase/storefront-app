@@ -79,11 +79,13 @@ appId: ${APP_ID}
 - tapOn:
       id: booking-day
       index: 1
-# Scroll only until a time shows, so the service's photo and name stay in the frame.
-- scrollUntilVisible:
-      element:
-          id: booking-time
-      direction: DOWN
+# Lift the times above the sticky "Add booking" bar, keeping the service's name in the frame.
+# A fixed, slow swipe: scrollUntilVisible counts times under the bar as visible and stops short.
+- swipe:
+      start: 50%, 75%
+      end: 50%, 47%
+      duration: 1200
+- waitForAnimationToEnd
 - tapOn:
       id: booking-time
       index: 1
