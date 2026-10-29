@@ -58,7 +58,7 @@ appId: ${APP_ID}
       id: network-search-input
 - eraseText
 - inputText: ${SERVICE_QUERY}
-- hideKeyboard
+# No hideKeyboard: on iOS it taps the screen, which can open the first result early.
 - extendedWaitUntil:
       visible:
           id: search-result-service
