@@ -79,11 +79,11 @@ appId: ${APP_ID}
 - tapOn:
       id: booking-day
       index: 1
+# Scroll only until a time shows, so the service's photo and name stay in the frame.
 - scrollUntilVisible:
       element:
           id: booking-time
       direction: DOWN
-      centerElement: true
 - tapOn:
       id: booking-time
       index: 1
