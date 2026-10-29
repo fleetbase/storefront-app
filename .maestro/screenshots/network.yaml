@@ -1,5 +1,5 @@
-# Network edition: marketplace home, a member store, a product, search, map, cart, then
-# signed in: account, orders, an order and checkout.
+# Network edition: marketplace home, a member store, a product, search, a bookable service and
+# its booking, map, cart, then signed in: account, orders, an order and checkout.
 appId: ${APP_ID}
 ---
 - runFlow: common/launch.yaml
@@ -51,6 +51,46 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
       timeout: 8000
 - takeScreenshot: storefront-app-products-list-network${SHOT_SUFFIX}
+
+# A bookable service: its page, then a day and a time picked. The second open day is always
+# ahead of now, so it has times left whatever the hour of the run.
+- tapOn:
+      id: network-search-input
+- eraseText
+- inputText: ${SERVICE_QUERY}
+- hideKeyboard
+- extendedWaitUntil:
+      visible:
+          id: search-result-service
+      timeout: 30000
+- tapOn:
+      id: search-result-service
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-service-details-network${SHOT_SUFFIX}
+- scrollUntilVisible:
+      element:
+          id: booking-day
+      direction: DOWN
+- tapOn:
+      id: booking-day
+      index: 1
+- scrollUntilVisible:
+      element:
+          id: booking-time
+      direction: DOWN
+      centerElement: true
+- tapOn:
+      id: booking-time
+      index: 1
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-booking-create-network${SHOT_SUFFIX}
+- tapOn:
+      id: product-close
 
 - tapOn:
       id: tab-network-map

@@ -1,8 +1,9 @@
-> v0.1.4 ~ "Boot logo in branding"
+> v0.1.5 ~ "Booking screenshots"
 
 ---
 ## New
-- **A boot logo from branding.** `assets.bootLogo` (`{ url: 'https://…' }`) replaces the bundled `brand/splash-screen.png` on the boot screen. A hosted preview uses it to show the launch logo a customer uploaded, which the real build bundles. Without it, the boot screen is unchanged.
+- **Booking in the screenshot flows.** The network flow opens a bookable service, picks a day and a time, and captures `storefront-app-service-details-network` and `storefront-app-booking-create-network`. It searches for `SERVICE_QUERY` (pass `-e SERVICE_QUERY=massage`), so the Network needs a bookable service that matches.
+- **Test ids for Maestro.** Search results carry `search-result-service` or `search-result-product`; the booking picker's open days carry `booking-day` and its bookable times `booking-time`. Nothing changes on screen.
 
 ---
 ## Upgrading
