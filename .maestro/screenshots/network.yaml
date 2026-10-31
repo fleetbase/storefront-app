@@ -1,5 +1,5 @@
-# Network edition: marketplace home, a member store, a product, search, map, cart, then
-# signed in: account, orders, an order and checkout.
+# Network edition: marketplace home, a member store, a product, search, a bookable service and
+# its booking, map, cart, then signed in: account, orders, an order and checkout.
 appId: ${APP_ID}
 ---
 - runFlow: common/launch.yaml
@@ -51,6 +51,50 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
       timeout: 8000
 - takeScreenshot: storefront-app-products-list-network${SHOT_SUFFIX}
+
+# A bookable service: its page, then a day and a time picked. The second open day is always
+# ahead of now, so it has times left whatever the hour of the run.
+- tapOn:
+      id: network-search-input
+- eraseText
+- inputText: ${SERVICE_QUERY}
+# Submit to close the keyboard: hideKeyboard on iOS taps the screen, which can open the first result early,
+# and a keyboard left open covers the tab bar once the service sheet closes.
+- pressKey: Enter
+- extendedWaitUntil:
+      visible:
+          id: search-result-service
+      timeout: 30000
+- tapOn:
+      id: search-result-service
+      index: 0
+- extendedWaitUntil:
+      visible:
+          id: product-add-to-cart
+      timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-service-details-network${SHOT_SUFFIX}
+- scrollUntilVisible:
+      element:
+          id: booking-day
+      direction: DOWN
+- tapOn:
+      id: booking-day
+      index: 1
+# Lift the times above the sticky "Add booking" bar, keeping the service's name in the frame.
+# A fixed, slow swipe: scrollUntilVisible counts times under the bar as visible and stops short.
+- swipe:
+      start: 50%, 75%
+      end: 50%, 47%
+      duration: 1200
+- waitForAnimationToEnd
+- tapOn:
+      id: booking-time
+      index: 1
+- waitForAnimationToEnd
+- takeScreenshot: storefront-app-booking-create-network${SHOT_SUFFIX}
+- tapOn:
+      id: product-close
 
 - tapOn:
       id: tab-network-map

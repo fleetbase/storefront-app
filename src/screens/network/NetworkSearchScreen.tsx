@@ -356,6 +356,7 @@ function ProductResultRow({ product, onPress }: { product: ProductSummary; onPre
         <Pressable
             onPress={onPress}
             accessibilityRole='button'
+            testID={product.isService ? 'search-result-service' : 'search-result-product'}
             accessibilityLabel={[
                 product.name,
                 product.isService ? t('Network.bookableService') : null,
