@@ -58,7 +58,9 @@ appId: ${APP_ID}
       id: network-search-input
 - eraseText
 - inputText: ${SERVICE_QUERY}
-# No hideKeyboard: on iOS it taps the screen, which can open the first result early.
+# Submit to close the keyboard: hideKeyboard on iOS taps the screen, which can open the first result early,
+# and a keyboard left open covers the tab bar once the service sheet closes.
+- pressKey: Enter
 - extendedWaitUntil:
       visible:
           id: search-result-service
