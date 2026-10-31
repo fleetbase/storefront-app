@@ -8,7 +8,6 @@ import NetworkNavigator from './NetworkNavigator';
 
 const RootStack = createNativeStackNavigator({
     initialRouteName: 'Boot',
-    linking: { enabled: 'auto' },
     screens: {
         Boot,
         // The address flow, reachable from either edition.
@@ -37,5 +36,6 @@ const RootStack = createNativeStackNavigator({
     },
 });
 
+// The web build passes `linking` (see web-linking.ts); native builds have no URLs.
 const AppNavigator = createStaticNavigation(RootStack);
 export default AppNavigator;

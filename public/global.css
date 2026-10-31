@@ -6,3 +6,20 @@ body,
     margin: 0;
     padding: 0;
 }
+
+/* On wide screens the app is a phone-width column in the middle of the page. Keep the width in
+   step with WEB_COLUMN_WIDTH in src/utils/web-column.ts. The page around it takes the app's
+   background (set at runtime as --app-page-background). */
+@media (min-width: 600px) {
+    body {
+        background-color: var(--app-page-background, #f4f4f5);
+    }
+
+    #root {
+        position: relative;
+        max-width: 480px;
+        margin: 0 auto;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(127, 127, 127, 0.18), 0 8px 40px rgba(0, 0, 0, 0.12);
+    }
+}

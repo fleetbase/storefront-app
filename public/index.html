@@ -1,12 +1,16 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
+        <!-- Files load from the site's root at any address (/products/…). A host serving the app
+             under a prefix puts its own <base href="/prefix/"> first, which wins. -->
+        <base href="/" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <title><%= htmlWebpackPlugin.options.title %></title>
         <link rel="stylesheet" href="global.css" />
         <link rel="stylesheet" href="tamagui.css" />
     </head>
     <body>
-        <div id="root" />
+        <div id="root"></div>
     </body>
 </html>
