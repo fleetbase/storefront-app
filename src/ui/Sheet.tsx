@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { IconButton } from './Button';
 import { UIText } from './Text';
 import { elevation, radius } from './tokens';
+import { columnMaxWidth } from '../utils/web-column';
 
 export type SheetProps = {
     open: boolean;
@@ -66,7 +67,8 @@ export function Sheet({ open, onClose, title, children, footer, dismissible = tr
     return (
         <Modal visible={visible} transparent animationType='none' onRequestClose={dismissible ? onClose : () => {}} statusBarTranslucent>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-                <YStack flex={1} justifyContent='flex-end'>
+                {/* On a wide web page the sheet rises within the app's column. */}
+                <YStack flex={1} justifyContent='flex-end' width='100%' maxWidth={columnMaxWidth()} alignSelf='center'>
                     <Animated.View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: progress }}>
                         <Pressable
                             accessibilityRole='button'

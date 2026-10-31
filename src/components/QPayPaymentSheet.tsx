@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import { Portal } from '@gorhom/portal';
 import { isArray, later } from '../utils';
+import { isDesktopBrowser } from '../utils/web-device';
 
 export interface Bank {
     name: string;
@@ -45,7 +46,10 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
         const navigation = useNavigation();
         const bottomSheetRef = useRef<BottomSheet>(null);
         const snapPoints = useMemo(() => ['90%'], []);
-        const banks = invoice && isArray(invoice.urls) ? invoice.urls : [];
+        // A desktop browser can't open a bank's app: it shows the code to scan with a phone instead.
+        const desktop = useMemo(() => isDesktopBrowser(), []);
+        const banks = !desktop && invoice && isArray(invoice.urls) ? invoice.urls : [];
+        const qrSize = desktop ? 220 : 100;
 
         // Expose open and close methods to parent via ref
         useImperativeHandle(ref, () => ({
@@ -175,8 +179,8 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                     {typeof invoice?.qr_image === 'string' && (
                                         <XStack alignItems='center' justifyContent='center' mb='$4'>
                                             <Image
-                                                width={100}
-                                                height={100}
+                                                width={qrSize}
+                                                height={qrSize}
                                                 bg='white'
                                                 padding='$1'
                                                 borderRadius='$4'
@@ -188,7 +192,7 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                     )}
                                     <XStack alignItems='center' justifyContent='space-between' px='$5' mb='$2'>
                                         <Text fontSize='$7' color='$textPrimary' fontWeight='bold'>
-                                            {t('QPayPaymentSheet.selectBank')}
+                                            {desktop ? t('QPayPaymentSheet.scanToPay') : t('QPayPaymentSheet.selectBank')}
                                         </Text>
                                         <Button size='$2' onPress={() => bottomSheetRef.current?.close()} bg='$secondary' circular>
                                             <Button.Icon>
@@ -196,6 +200,11 @@ const QPayPaymentSheet = forwardRef<QPayPaymentSheetRef, QPayPaymentSheetProps>(
                                             </Button.Icon>
                                         </Button>
                                     </XStack>
+                                    {desktop && typeof invoice?.qr_image === 'string' && (
+                                        <Text px='$5' color='$textSecondary' fontSize='$4'>
+                                            {t('QPayPaymentSheet.scanWithBankApp')}
+                                        </Text>
+                                    )}
                                 </YStack>
                             }
                             ListEmptyComponent={

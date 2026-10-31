@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-// import { useStripe, initStripe } from '@stripe/stripe-react-native';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import type { PaymentIntent, Stripe, StripeElements, StripePaymentElementChangeEvent } from '@stripe/stripe-js';
 import { useAuth } from '../contexts/AuthContext';
 import { getServiceQuote } from '../utils/checkout';
 import { getCartOriginIds, getCartQuoteOrigin } from '../network/network-runtime';
 import { numbersOnly } from '../utils/format';
-import { percentage, calculateTip } from '../utils/math';
+import { calculateTip } from '../utils/math';
 import { getCoordinates } from '../utils/location';
-import { config, storefrontConfig, get } from '../utils';
+import { storefrontConfig, get } from '../utils';
 import { toast } from '../utils/toast';
-import { addOrderToHistoryCache, markOrderHistoryDirty } from '../utils/order-history-cache';
+import { addOrderToHistoryCache } from '../utils/order-history-cache';
 import { captureErrorMessage, captureWithRetry, pendingCaptureFor, unavailableItemsFromError, type PendingCapture, type UnavailableItem } from '../commerce/checkout-capture';
 import useStorefront from '../hooks/use-storefront';
 import useCart from '../hooks/use-cart';
@@ -17,28 +17,30 @@ import useStoreLocations from '../hooks/use-store-locations';
 import useStorefrontInfo from '../hooks/use-storefront-info';
 import useStorage from '../hooks/use-storage';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getStripe, stripeReturnUrl } from '../utils/stripe-web';
 
-const APP_IDENTIFIER = config('APP_IDENTIFIER');
-const APP_LINK_PREFIX = config('APP_LINK_PREFIX');
-const STRIPE_KEY = config('STRIPE_KEY');
+/**
+ * The payment of a web checkout: Stripe's PaymentIntent and the Fleetbase checkout made with it,
+ * kept until the order is created so a declined card is retried on the same intent and a
+ * bank's check (3-D Secure) that leaves the page can finish when the customer comes back.
+ */
+type WebIntent = { paymentIntent: string; clientSecret: string; token: string; customerId: string | null };
 
-// @stripe/stripe-react-native is native-only; on web these resolve with an error so callers fail gracefully
-const stripeUnavailable = async (..._args: any[]): Promise<any> => ({ error: { message: 'Stripe payments are not supported on web.' } });
-const initPaymentSheet = stripeUnavailable;
-const presentPaymentSheet = stripeUnavailable;
-const confirmSetupIntent = stripeUnavailable;
-const confirmPaymentSheetPayment = stripeUnavailable;
-const confirmPayment = stripeUnavailable;
-
+/**
+ * Stripe checkout on the web, with the Payment Element (StripePaymentElement.web.tsx). The
+ * card form is shown without a PaymentIntent; the intent is made when the customer places the
+ * order (checkout initialize), then confirmed in the browser, and the order is captured.
+ * Shares everything else (line items, quotes, capture) with the native hook.
+ */
 export default function useStripeCheckout({ onOrderComplete }) {
     const { storefront } = useStorefront();
     const { info } = useStorefrontInfo();
     const { t } = useLanguage();
     const [cart, updateCart] = useCart();
-    const { customer, updateCustomerMeta } = useAuth();
+    const { customer } = useAuth();
     const { currentLocation: deliveryLocation, updateDefaultLocation } = useCurrentLocation();
     const { currentStoreLocation } = useStoreLocations();
-    // const { confirmPayment, confirmSetupIntent, initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
+    const stripeRef = useRef<{ stripe: Stripe | null; elements: StripeElements | null }>({ stripe: null, elements: null });
     const [checkoutOptions, setCheckoutOptions] = useState({
         leavingTip: false,
         tip: 0,
@@ -53,11 +55,10 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState(null);
     const [stripeLoading, setStripeLoading] = useState(false);
-    const [stripeInitialized, setStripeInitialized] = useState(false);
-    const [setupIntentLoading, setSetupIntentLoading] = useState(false);
-    const [paymentIntentId, setPaymentIntentId] = useState(null);
+    const [setupIntentLoading] = useState(false);
     const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
-    const [setupIntentClientSecret, setSetupIntentClientSecret] = useState(null);
+    const [storedIntent, setWebIntent] = useStorage<WebIntent | null>('_stripe_web_checkout_intent', null);
+    const webIntent = storedIntent && storedIntent.customerId === (customer?.id ?? null) ? storedIntent : null;
     const [orderNotes, setOrderNotes] = useStorage(`${customer?.id ?? 'anon'}_order_notes`, '');
     const [error, setError] = useState(null);
     const cartContentsString = JSON.stringify(cart.contents() || []);
@@ -79,7 +80,7 @@ export default function useStripeCheckout({ onOrderComplete }) {
     const minimumCheckoutAmount = get(info, 'options.required_checkout_min_amount', 0);
     const isBelowMinimum = isMinimumCheckoutEnabled && subtotal < minimumCheckoutAmount;
 
-    const isReady = serviceQuote && paymentMethod && !isLoading && !stripeLoading && !isBelowMinimum;
+    const isReady = Boolean(paymentMethod) && !isLoading && !stripeLoading && (checkoutOptions?.pickup || Boolean(serviceQuote)) && !isBelowMinimum;
 
     function computeLineItems() {
         const baseItems = [
@@ -168,141 +169,20 @@ export default function useStripeCheckout({ onOrderComplete }) {
         setPaymentMethod(method);
     }, []);
 
-    const createPaymentSheet = useCallback(
-        async (onPaymentSheetReady) => {
-            if (!customer || !storefront) {
-                return;
-            }
+    // The Payment Element, once it's on screen.
+    const attachStripe = useCallback((stripe: Stripe | null, elements: StripeElements | null) => {
+        stripeRef.current = { stripe, elements };
+        setPaymentSheetEnabled(Boolean(stripe && elements));
+    }, []);
 
-            setStripeLoading(true);
+    // A complete card (or other method) in the form is the payment method.
+    const handlePaymentElementChange = useCallback((event: StripePaymentElementChangeEvent) => {
+        setPaymentMethod(event.complete ? { type: event.value?.type ?? 'card' } : null);
+    }, []);
 
-            try {
-                const { paymentIntent, clientSecret, ephemeralKey, customerId, token } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'stripe', checkoutOptions);
-                const { error, paymentOption } = await initPaymentSheet({
-                    customerId,
-                    customerEphemeralKeySecret: ephemeralKey,
-                    paymentIntentClientSecret: clientSecret,
-                    customFlow: true,
-                    ...storefrontConfig('stripePaymentSheetOptions'),
-                    testEnv: typeof STRIPE_KEY === 'string' && STRIPE_KEY.startsWith('pk_test'),
-                    merchantCountryCode: info.country ?? 'US',
-                    style: 'alwaysLight',
-                    merchantDisplayName: info.name,
-                    returnURL: `${APP_LINK_PREFIX}://stripe-redirect`,
-                });
-
-                if (error) {
-                    setError(error.message);
-                    return;
-                }
-
-                setPaymentIntentId(paymentIntent);
-                setPaymentSheetEnabled(true);
-                // Set the payment method
-                if (paymentOption) {
-                    setPaymentMethod(paymentOption);
-                }
-                if (typeof onPaymentSheetReady === 'function') {
-                    onPaymentSheetReady(paymentOption);
-                }
-            } catch (error) {
-                console.error('Error creating payment sheet:', error);
-                // Stock ran out (or an item went) while checkout reserved it: name what to remove.
-                const unavailable = unavailableItemsFromError(error);
-                if (unavailable) setUnavailableItems(unavailable);
-                setError(error.message);
-                toast.error(error.message);
-            } finally {
-                setStripeLoading(false);
-            }
-        },
-        [customer, cart, storefront, serviceQuote, checkoutOptions, checkoutOptions.pickup]
-    );
-
-    const createSetupIntent = useCallback(async () => {
-        if (!customer || !storefront) {
-            return null;
-        }
-
-        setSetupIntentLoading(true);
-
-        try {
-            const { clientSecret, defaultPaymentMethod } = await storefront.checkout.createStripeSetupIntent(customer);
-            setSetupIntentClientSecret(clientSecret);
-            if (defaultPaymentMethod) {
-                setPaymentMethod(defaultPaymentMethod);
-            }
-            return clientSecret;
-        } catch (err) {
-            console.error('Error creating setup payment intent:', err);
-            setError('Failed to initialize checkout.');
-            throw err;
-        } finally {
-            setSetupIntentLoading(false);
-        }
-    }, [storefront, customer]);
-
-    const createPaymentMethodObjectFromPaymentIntent = (paymentIntent) => {
-        const {
-            paymentMethod: { Card },
-            paymentMethodId,
-        } = paymentIntent;
-        return { ...Card, label: Card.last4, paymentMethodId };
-    };
-
-    const handleAddPaymentMethodViaSheet = useCallback(async () => {
-        try {
-            const { error, paymentOption } = await presentPaymentSheet({
-                confirmPayment: false,
-            });
-
-            if (error) {
-                console.error('Error loading stripe payment sheet:', error);
-            } else if (paymentOption) {
-                setPaymentMethod(paymentOption);
-            } else {
-                setPaymentMethod(null);
-            }
-        } catch (err) {
-            console.error('Error saving payment method:', err);
-            toast.error('Failed to save payment method.');
-        }
-    }, [presentPaymentSheet, setPaymentMethod]);
-
-    const handleAddPaymentMethod = useCallback(
-        async (callback) => {
-            if (!setupIntentClientSecret) {
-                toast.error('No setup intent available. Please try again.');
-                return;
-            }
-
-            setStripeLoading(true);
-            try {
-                const { setupIntent, error } = await confirmSetupIntent(setupIntentClientSecret, {
-                    paymentMethodType: 'Card',
-                });
-
-                if (error) {
-                    console.error('Error confirming setup intent:', error);
-                    toast.error(error.message);
-                } else if (setupIntent && setupIntent.paymentMethodId) {
-                    await updateCustomerMeta({ stripe_payment_method_id: setupIntent.paymentMethodId });
-
-                    const paymentMethod = createPaymentMethodObjectFromPaymentIntent(setupIntent);
-                    setPaymentMethod(paymentMethod);
-                    if (typeof callback === 'function') {
-                        callback(paymentMethod);
-                    }
-                }
-            } catch (err) {
-                console.error('Error saving payment method:', err);
-                toast.error('Failed to save payment method.');
-            } finally {
-                setStripeLoading(false);
-            }
-        },
-        [setupIntentClientSecret, confirmSetupIntent]
-    );
+    // The card form's amount and currency; Stripe shows the methods that fit them.
+    const currency = String(cart?.getAttribute?.('currency') ?? info?.currency ?? 'USD').toLowerCase();
+    const elementsOptions = useMemo(() => ({ mode: 'payment' as const, amount: Math.max(1, Math.round(numbersOnly(totalAmount) || 0)), currency }), [totalAmount, currency]);
 
     // A paid checkout whose order isn't created yet, kept across restarts so the customer
     // can finish placing it without paying again.
@@ -363,60 +243,83 @@ export default function useStripeCheckout({ onOrderComplete }) {
         [pendingCapture, completePaidOrder]
     );
 
-    const handleCompleteOrderViaSheet = useCallback(
-        async (callback) => {
-            setIsLoading(true);
-
-            try {
-                const { clientSecret, token: checkoutToken } = await storefront.checkout.updateStripePaymentIntent(paymentIntentId, customer, cart, serviceQuote, checkoutOptions);
-                const paymentMethodData = {};
-                if (paymentMethod && typeof paymentMethod.id === 'string') {
-                    paymentMethodData.paymentMethodId = paymentMethod.id;
-                }
-                const { error: paymentError } = await confirmPaymentSheetPayment();
-
-                if (paymentError) {
-                    console.error('Error completing order:', paymentError);
-                    toast.error(paymentError.message);
-                } else {
-                    await completePaidOrder(checkoutToken, callback);
-                }
-            } catch (error) {
-                console.error('Error capturing order:', error);
-                // Stock ran out (or an item went) while checkout reserved it: name what to remove.
-                const unavailable = unavailableItemsFromError(error);
-                if (unavailable) setUnavailableItems(unavailable);
-                toast.error(error.message);
-            } finally {
-                setIsLoading(false);
+    // The order is created once Stripe says the payment succeeded; the intent is done with then.
+    const finishConfirmedPayment = useCallback(
+        async (paymentIntent: PaymentIntent | undefined, intent: WebIntent, callback) => {
+            if (paymentIntent?.status === 'succeeded') {
+                setWebIntent(null);
+                await completePaidOrder(intent.token, callback);
+                return;
             }
+            if (paymentIntent?.status === 'processing') {
+                toast.info(t('StripePaymentElement.processing'));
+                return;
+            }
+            toast.error(t('StripePaymentElement.paymentFailed'));
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, completePaidOrder]
+        [completePaidOrder, setWebIntent, t]
     );
 
-    const handleCompleteOrderViaField = useCallback(
-        async (callback) => {
-            setIsLoading(true);
-
-            try {
-                const { clientSecret, token: checkoutToken } = await storefront.checkout.initialize(customer, cart, serviceQuote, 'stripe', checkoutOptions);
-                const paymentMethodData = {};
-                if (paymentMethod && typeof paymentMethod.id === 'string') {
-                    paymentMethodData.paymentMethodId = paymentMethod.id;
+    // The checkout's PaymentIntent: the one already made for this checkout (a declined card
+    // tries again on it, at the current amount), or a new one. Null when it was paid already.
+    const prepareIntent = useCallback(
+        async (stripe: Stripe, callback): Promise<WebIntent | null> => {
+            if (webIntent) {
+                const { paymentIntent: existing } = await stripe.retrievePaymentIntent(webIntent.clientSecret);
+                if (existing?.status === 'succeeded') {
+                    await finishConfirmedPayment(existing, webIntent, callback);
+                    return null;
                 }
-                const { paymentIntent, error: paymentError } = await confirmPayment(clientSecret, {
-                    paymentMethodType: 'Card',
-                    paymentMethodData,
+                if (existing && existing.status !== 'canceled') {
+                    const { paymentIntent, clientSecret, token }: any = await storefront.checkout.updateStripePaymentIntent(webIntent.paymentIntent, customer, cart as any, serviceQuote, checkoutOptions);
+                    const next = { ...webIntent, paymentIntent: paymentIntent ?? webIntent.paymentIntent, clientSecret: clientSecret ?? webIntent.clientSecret, token: token ?? webIntent.token };
+                    setWebIntent(next);
+                    return next;
+                }
+            }
+            const { paymentIntent, clientSecret, token }: any = await storefront.checkout.initialize(customer, cart as any, serviceQuote, 'stripe', checkoutOptions);
+            const next = { paymentIntent, clientSecret, token, customerId: customer?.id ?? null };
+            setWebIntent(next);
+            return next;
+        },
+        [webIntent, storefront, customer, cart, serviceQuote, checkoutOptions, finishConfirmedPayment, setWebIntent]
+    );
+
+    const handleCompleteOrderWithElement = useCallback(
+        async (callback) => {
+            const { stripe, elements } = stripeRef.current;
+            if (!stripe || !elements) {
+                toast.error(t('StripePaymentElement.notReady'));
+                return;
+            }
+
+            setIsLoading(true);
+            try {
+                // Checks the form first; its errors show under the fields.
+                const { error: formError } = await elements.submit();
+                if (formError) return;
+
+                const intent = await prepareIntent(stripe, callback);
+                if (!intent) return;
+
+                const { error: paymentError, paymentIntent } = await stripe.confirmPayment({
+                    elements,
+                    clientSecret: intent.clientSecret,
+                    confirmParams: { return_url: stripeReturnUrl() },
+                    // Cards stay on the page; a bank's check or a redirect method leaves and comes back.
+                    redirect: 'if_required',
                 });
 
                 if (paymentError) {
-                    console.error('Error completing order:', paymentError);
-                    toast.error(paymentError.message);
-                } else if (paymentIntent && paymentIntent.status === 'Succeeded') {
-                    await completePaidOrder(checkoutToken, callback);
+                    // The intent is kept: trying again (another card) uses it.
+                    console.warn('Stripe payment failed:', paymentError);
+                    toast.error(paymentError.message ?? t('StripePaymentElement.paymentFailed'));
+                    return;
                 }
+
+                await finishConfirmedPayment(paymentIntent, intent, callback);
             } catch (error) {
-                console.error('Error capturing order:', error);
+                console.error('Error completing order:', error);
                 // Stock ran out (or an item went) while checkout reserved it: name what to remove.
                 const unavailable = unavailableItemsFromError(error);
                 if (unavailable) setUnavailableItems(unavailable);
@@ -425,7 +328,31 @@ export default function useStripeCheckout({ onOrderComplete }) {
                 setIsLoading(false);
             }
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, completePaidOrder]
+        [prepareIntent, finishConfirmedPayment, t]
+    );
+
+    /**
+     * Back from Stripe (the address has `payment_intent` and `payment_intent_client_secret`):
+     * create the order if the payment went through. Only for this checkout's own intent.
+     */
+    const handleRedirectReturn = useCallback(
+        async ({ paymentIntent: paymentIntentId, clientSecret }: { paymentIntent: string; clientSecret: string }, callback) => {
+            if (!webIntent || webIntent.paymentIntent !== paymentIntentId) return;
+            const stripe = await getStripe();
+            if (!stripe) return;
+            setIsLoading(true);
+            try {
+                const { paymentIntent, error } = await stripe.retrievePaymentIntent(clientSecret);
+                if (error) {
+                    toast.error(error.message ?? t('StripePaymentElement.paymentFailed'));
+                    return;
+                }
+                await finishConfirmedPayment(paymentIntent, webIntent, callback);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [webIntent, finishConfirmedPayment, t]
     );
 
     const handleCompleteOrder = useCallback(
@@ -434,13 +361,9 @@ export default function useStripeCheckout({ onOrderComplete }) {
             if (pendingCapture) {
                 return finishPendingOrder(callback);
             }
-            if (storefrontConfig('stripePaymentMethod') === 'field') {
-                return handleCompleteOrderViaField(callback);
-            }
-
-            return handleCompleteOrderViaSheet(callback);
+            return handleCompleteOrderWithElement(callback);
         },
-        [customer, cart, updateCart, storefront, serviceQuote, paymentMethod, checkoutOptions, confirmPayment, confirmPaymentSheetPayment, pendingCapture, finishPendingOrder]
+        [pendingCapture, finishPendingOrder, handleCompleteOrderWithElement]
     );
 
     // Fetch service quote whenever location or cart contents change
@@ -478,17 +401,6 @@ export default function useStripeCheckout({ onOrderComplete }) {
         };
     }, [cartContentsString, checkoutOptions?.pickup, deliveryLocation?.id, quoteOrigin]);
 
-    // useEffect(() => {
-    //     if (stripeInitialized === false) {
-    //         initStripe({
-    //             publishableKey: STRIPE_KEY,
-    //             merchantIdentifier: APP_IDENTIFIER,
-    //             setReturnUrlSchemeOnAndroid: true,
-    //         });
-    //         setStripeInitialized(true);
-    //     }
-    // }, [stripeInitialized]);
-
     // Memoize the return value to provide stable references
     const checkout = useMemo(
         () => ({
@@ -509,16 +421,13 @@ export default function useStripeCheckout({ onOrderComplete }) {
             isPickupEnabled,
             setPickup,
             isPickup: !!checkoutOptions.pickup,
-            setupIntentClientSecret,
-            createSetupIntent,
-            createPaymentSheet,
             paymentSheetEnabled,
-            handleAddPaymentMethod,
-            handleAddPaymentMethodViaSheet,
+            attachStripe,
+            elementsOptions,
+            handlePaymentElementChange,
             handlePaymentMethodChange,
-            handleCompleteOrderViaField,
-            handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            handleRedirectReturn,
             pendingCapture,
             finishPendingOrder,
             setStripeLoading,
@@ -556,16 +465,13 @@ export default function useStripeCheckout({ onOrderComplete }) {
             isPickupEnabled,
             setPickup,
             checkoutOptions.pickup,
-            setupIntentClientSecret,
-            createSetupIntent,
-            createPaymentSheet,
             paymentSheetEnabled,
-            handleAddPaymentMethod,
-            handleAddPaymentMethodViaSheet,
+            attachStripe,
+            elementsOptions,
+            handlePaymentElementChange,
             handlePaymentMethodChange,
-            handleCompleteOrderViaField,
-            handleCompleteOrderViaSheet,
             handleCompleteOrder,
+            handleRedirectReturn,
             pendingCapture,
             finishPendingOrder,
             setStripeLoading,
