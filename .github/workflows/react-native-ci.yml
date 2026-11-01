@@ -5,7 +5,6 @@ on:
     branches: [main]
   push:
     branches: [main]
-    tags: ["v*"]
 
 # The GITHUB_TOKEN only needs read here.
 permissions:
@@ -16,7 +15,6 @@ env:
   FLEETBASE_KEY: ${{ secrets.FLEETBASE_KEY }}
   STOREFRONT_KEY: ${{ secrets.STOREFRONT_KEY }}
   GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-  ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
 
 jobs:
   install_and_test:
@@ -331,135 +329,3 @@ jobs:
           name: ios-debug-build
           path: ios/build/Build/Products/Debug-iphonesimulator/
           retention-days: 30
-
-  # Release builds for tagged versions
-  android_release:
-    runs-on: ubuntu-latest
-    needs: install_and_test
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate Yarn 3.6.4
-        run: corepack prepare yarn@3.6.4 --activate
-
-      - name: Verify Yarn version
-        run: yarn --version
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Create .env file
-        run: |
-          echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-          echo "GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}" >> .env
-
-      - name: Generate google-services.json
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: |
-          echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-
-      - name: Cache Gradle Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      - name: Build Android Release APK
-        run: |
-          cd android
-          ./gradlew clean assembleRelease --no-daemon --stacktrace
-
-      - name: Upload Android Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          retention-days: 90
-
-  ios_release:
-    runs-on: macos-latest
-    needs: install_and_test
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate Yarn 3.6.4
-        run: corepack prepare yarn@3.6.4 --activate
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Create .env file
-        run: |
-          echo "APP_LINK_PREFIX=${{ secrets.APP_LINK_PREFIX }}" > .env
-          echo "FLEETBASE_KEY=${{ secrets.FLEETBASE_KEY }}" >> .env
-          echo "STOREFRONT_KEY=${{ secrets.STOREFRONT_KEY }}" >> .env
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-          echo "GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}" >> .env
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-
-      - name: Install CocoaPods
-        run: |
-          sudo gem install cocoapods
-          bash scripts/ci/install-cocoapods.sh
-
-      - name: Build iOS Release Archive
-        run: |
-          cd ios
-          xcodebuild -workspace StorefrontApp.xcworkspace \
-            -scheme StorefrontApp \
-            -configuration Release \
-            -archivePath build/StorefrontApp.xcarchive \
-            -allowProvisioningUpdates \
-            archive
-
-      - name: Upload iOS Release Archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-release-archive
-          path: ios/build/StorefrontApp.xcarchive
-          retention-days: 90
