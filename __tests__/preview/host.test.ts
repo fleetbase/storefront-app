@@ -77,4 +77,26 @@ describe('createHostedPreview', () => {
         unsubscribe();
         expect(target.listeners.size).toBe(0);
     });
+
+    test('is a preview, not a live store, without HOSTED_MODE', () => {
+        const hosted = createHostedPreview({ origins: ['https://host.example'], target: fakeWindow({ env: { STOREFRONT_KEY: 'store_x' } }) });
+        expect(hosted.enabled).toBe(true);
+        expect(hosted.live).toBe(false);
+    });
+
+    test('a published store (HOSTED_MODE=live) takes the env and branding but is not a preview', () => {
+        const branding = { schemaVersion: 1 };
+        const target = fakeWindow({ env: { STOREFRONT_KEY: 'store_x', HOSTED_MODE: 'live' }, branding });
+        const hosted = createHostedPreview({ origins: ['https://host.example'], target });
+        expect(hosted.live).toBe(true);
+        expect(hosted.enabled).toBe(false);
+        expect(hosted.initial).toEqual({ env: { STOREFRONT_KEY: 'store_x', HOSTED_MODE: 'live' }, branding });
+
+        // No host frame re-themes a published store.
+        const onBranding = jest.fn();
+        hosted.subscribe(onBranding);
+        target.dispatch('https://host.example', { type: BRANDING_MESSAGE, branding });
+        expect(onBranding).not.toHaveBeenCalled();
+        expect(target.parent.postMessage).not.toHaveBeenCalled();
+    });
 });

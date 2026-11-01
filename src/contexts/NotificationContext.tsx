@@ -59,6 +59,10 @@ export const NotificationProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // react-native-notifications is native only: the web build has no push (order updates
+        // arrive over the socket while the page is open).
+        if (Platform.OS === 'web') return;
+
         // Request permission first, then register for notifications
         const initializeNotifications = async () => {
             const hasPermission = await requestNotificationPermission();
