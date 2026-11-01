@@ -105,6 +105,7 @@ export default function BookingPicker({
                                 key={entry.date}
                                 onPress={() => pickDay(entry.date)}
                                 accessibilityRole='radio'
+                                testID={entry.open ? 'booking-day' : undefined}
                                 accessibilityState={{ checked: selected }}
                                 accessibilityLabel={label}
                                 style={{
@@ -173,6 +174,7 @@ export default function BookingPicker({
                                                     disabled={time.past}
                                                     onPress={() => onChange(time.at)}
                                                     accessibilityRole='radio'
+                                                    testID={time.past ? undefined : 'booking-time'}
                                                     accessibilityState={{ checked: selected, disabled: time.past }}
                                                     accessibilityLabel={`${timeLabel(time)}${time.full ? `, ${t('Booking.fullyBooked')}` : time.past ? `, ${t('Booking.unavailable')}` : ''}`}
                                                     style={{

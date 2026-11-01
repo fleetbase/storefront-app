@@ -1,140 +1,117 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Animated } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Button, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
+import { XStack, YStack, useTheme } from 'tamagui';
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useAuth } from '../contexts/AuthContext';
-// import { CustomerSheet, CustomerSheetError, initStripe } from '@stripe/stripe-react-native';
-import { Portal } from '@gorhom/portal';
-import { config } from '../utils';
 import { useLanguage } from '../contexts/LanguageContext';
-import useAppTheme from '../hooks/use-app-theme';
+import { useBranding } from '../branding/BrandingProvider';
+import useStorefront from '../hooks/use-storefront';
+import CardBrandLogo from '../components/CardBrandLogo';
+import { getStripe, stripeAppearance, stripeReturnUrl } from '../utils/stripe-web';
+import { toast } from '../utils/toast';
+import { Button, Sheet, Skeleton, UIText, radius } from '../ui';
 
-const APP_IDENTIFIER = config('APP_IDENTIFIER');
-const STRIPE_KEY = config('STRIPE_KEY');
+type SavedCard = { brand?: string; label?: string; last4?: string } | null;
 
-const StripeCustomerScreen = () => {
-    const theme = useTheme();
-    const navigation = useNavigation();
-    const { isDarkMode } = useAppTheme();
+/** A new card for the customer's account: confirms the SetupIntent and makes it the saved card. */
+const NewCardForm = ({ onSaved }: { onSaved: () => void }) => {
+    const stripe = useStripe();
+    const elements = useElements();
     const { t } = useLanguage();
-    const { customer, updateCustomerMeta } = useAuth();
-    const [customerSheetReady, setCustomerSheetReady] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const { updateCustomerMeta } = useAuth();
+    const [ready, setReady] = useState(false);
+    const [complete, setComplete] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    // Animated value for sliding the panel
-    const slideAnim = useRef(new Animated.Value(300)).current;
-
-    // useEffect(() => {
-    //     if (!customer || customerSheetReady) {
-    //         return;
-    //     }
-
-    //     // Initialize the customer sheet
-    //     const initializeCustomerSheet = async () => {
-    //         try {
-    //             const { setupIntent, customerId } = await customer.getStripeSetupIntent();
-    //             const { ephemeralKey } = await customer.getStripeEphemeralKey();
-    //             const { error } = await CustomerSheet.initialize({
-    //                 setupIntentClientSecret: setupIntent,
-    //                 customerEphemeralKeySecret: ephemeralKey,
-    //                 customerId,
-    //                 headerTextForSelectionScreen: t('StripeCustomerScreen.manageYourPaymentMethod'),
-    //                 returnURL: `${APP_IDENTIFIER}://stripe-customer`,
-    //                 style: isDarkMode ? 'alwaysDark' : 'alwaysLight',
-    //             });
-
-    //             if (error) {
-    //                 console.error('Error initializing stripe customer sheet:', error);
-    //                 return navigation.goBack();
-    //             }
-
-    //             setCustomerSheetReady(true);
-    //             setIsLoading(false);
-    //         } catch (err) {
-    //             console.error('Error initializing stripe customer sheet:', err);
-    //             return navigation.goBack();
-    //         }
-    //     };
-
-    //     // Start loading indicator
-    //     setIsLoading(true);
-
-    //     // Initialize Stripe
-    //     initStripe({
-    //         publishableKey: STRIPE_KEY,
-    //         merchantIdentifier: APP_IDENTIFIER,
-    //         setReturnUrlSchemeOnAndroid: true,
-    //     });
-
-    //     // Initialize customer sheet
-    //     initializeCustomerSheet();
-    // }, [customer]);
-
-    // CustomerSheet is native-only (@stripe/stripe-react-native); nothing to present on web.
-    useEffect(() => {
-        if (customerSheetReady) {
-            console.warn('Stripe CustomerSheet is not supported on web.');
+    const save = async () => {
+        if (!stripe || !elements) return;
+        setSaving(true);
+        try {
+            const { error, setupIntent } = await stripe.confirmSetup({ elements, confirmParams: { return_url: stripeReturnUrl('account') }, redirect: 'if_required' });
+            if (error) {
+                toast.error(error.message ?? t('StripePaymentElement.paymentFailed'));
+                return;
+            }
+            const paymentMethod = typeof setupIntent?.payment_method === 'string' ? setupIntent.payment_method : setupIntent?.payment_method?.id;
+            if (paymentMethod) await updateCustomerMeta({ stripe_payment_method_id: paymentMethod });
+            toast.success(t('StripePaymentElement.cardSaved'));
+            onSaved();
+        } catch (error: any) {
+            toast.error(error?.message ?? t('StripePaymentElement.paymentFailed'));
+        } finally {
+            setSaving(false);
         }
-    }, [customerSheetReady]);
-
-    // Animate panel into view
-    useEffect(() => {
-        if (isLoading) {
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 700,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [isLoading]);
+    };
 
     return (
-        <Portal hostName='MainPortal'>
-            {isLoading && (
-                <YStack position='absolute' zIndex={1} flex={1} bg='rgba(0, 0, 0, .20)' width='100%' height='100%'>
-                    <Animated.View
-                        style={{
-                            transform: [{ translateY: slideAnim }],
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            zIndex: 2,
-                        }}
-                    >
-                        <YStack
-                            height={230}
-                            width='100%'
-                            position='absolute'
-                            bottom={0}
-                            left={0}
-                            right={0}
-                            bg='$background'
-                            alignItems='center'
-                            justifyContent='center'
-                            padding='$4'
-                            borderWidth={1}
-                            borderBottomWidth={0}
-                            borderColor='$borderColorWithShadow'
-                            borderTopRightRadius={20}
-                            borderTopLeftRadius={20}
-                            shadowColor='$shadowColor'
-                            shadowOffset={{ width: 0, height: 1 }}
-                            shadowRadius={3}
-                            shadowOpacity={0.1}
-                            opacity={isLoading ? 1 : 0}
-                        >
-                            <XStack space='$3'>
-                                <Spinner size='small' />
-                                <Text fontSize='$4' color='$textPrimary'>
-                                    {t('StripeCustomerScreen.loadingAccountInfo')}
-                                </Text>
-                            </XStack>
-                        </YStack>
-                    </Animated.View>
-                </YStack>
-            )}
-        </Portal>
+        <YStack gap={16}>
+            {!ready && <Skeleton height={140} radius={radius.button} />}
+            <div style={ready ? undefined : { height: 0, overflow: 'hidden' }}>
+                <PaymentElement options={{ layout: 'tabs', paymentMethodOrder: ['card'], wallets: { applePay: 'never', googlePay: 'never' } }} onReady={() => setReady(true)} onChange={(event) => setComplete(event.complete)} />
+            </div>
+            <Button size='lg' fullWidth disabled={!complete} loading={saving} onPress={save}>
+                {t('StripeCardFieldSheet.savePaymentMethod')}
+            </Button>
+        </YStack>
+    );
+};
+
+/**
+ * The customer's saved card on the web (the native app uses Stripe's CustomerSheet): shows
+ * it and replaces it with a new one through a SetupIntent and the Payment Element.
+ */
+const StripeCustomerScreen = () => {
+    const navigation = useNavigation<any>();
+    const theme = useTheme();
+    const { t } = useLanguage();
+    const { scheme } = useBranding();
+    const { customer } = useAuth();
+    const { storefront } = useStorefront();
+    const stripePromise = getStripe();
+    const [setup, setSetup] = useState<{ clientSecret: string; defaultPaymentMethod: SavedCard } | null>(null);
+    const [failed, setFailed] = useState(false);
+    const appearance = useMemo(() => stripeAppearance(theme, scheme, radius.button), [theme, scheme]);
+
+    useEffect(() => {
+        if (!customer || !storefront || !stripePromise) return;
+        let active = true;
+        storefront.checkout
+            .createStripeSetupIntent(customer)
+            .then((response: any) => active && setSetup({ clientSecret: response.clientSecret, defaultPaymentMethod: response.defaultPaymentMethod ?? null }))
+            .catch((error: any) => {
+                console.warn('Could not load the saved card:', error);
+                if (active) setFailed(true);
+            });
+        return () => {
+            active = false;
+        };
+    }, [customer, storefront, stripePromise]);
+
+    const close = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Profile'));
+    const saved = setup?.defaultPaymentMethod;
+
+    return (
+        <Sheet open onClose={close} title={t('StripeCustomerScreen.manageYourPaymentMethod')}>
+            <YStack gap={16} paddingBottom={8}>
+                {saved && (
+                    <XStack alignItems='center' gap={12}>
+                        <CardBrandLogo brand={saved.brand} width={44} height={28} />
+                        <UIText variant='bodyStrong'>{t('StripeCardFieldSheet.cardEndingIn', { label: saved.label ?? saved.last4 })}</UIText>
+                    </XStack>
+                )}
+                {!stripePromise ? (
+                    <UIText tone='error'>{t('StripePaymentElement.notConfigured')}</UIText>
+                ) : failed ? (
+                    <UIText tone='error'>{t('StripePaymentElement.loadFailed')}</UIText>
+                ) : !setup ? (
+                    <Skeleton height={140} radius={radius.button} />
+                ) : (
+                    <Elements stripe={stripePromise} options={{ clientSecret: setup.clientSecret, appearance, loader: 'never' }}>
+                        <NewCardForm onSaved={close} />
+                    </Elements>
+                )}
+            </YStack>
+        </Sheet>
     );
 };
 

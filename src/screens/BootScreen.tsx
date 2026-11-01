@@ -17,6 +17,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useStorefrontRuntime } from '../contexts/StorefrontRuntimeContext';
 import { getStorefrontMode, getStorefrontRoute } from '../network/network-runtime';
 import { preloadInitialScreens } from '../extensions/app-screen-registry';
+import { withInitialLink } from '../navigation/web-linking';
+
+// The first screen of the home tab, under a page opened from a link.
+const HOME_ROUTES = { StoreNavigator: 'StoreHome', NetworkNavigator: 'NetworkHome' };
 
 const BootScreenWrapper = ({ children, backgroundImage, backgroundColor, theme }) => {
     const bg = (isArray(backgroundColor) ? backgroundColor[0] : backgroundColor) ?? theme.background.val;
@@ -52,11 +56,15 @@ const BootScreen = () => {
         let cancelled = false;
 
         const enterStorefront = (routeName: string, info: any) => {
-            navigation.reset({ index: 0, routes: [{ name: routeName, params: { ownerId: info.id } }] });
+            const route = { name: routeName, params: { ownerId: info.id } };
+            // On the web the address can name a page in the store (a product, an order): open it.
+            const homeRoute = storefrontConfig('homeScreen') === 'foodTrucks' ? 'FoodTruckHome' : HOME_ROUTES[routeName];
+            navigation.reset({ index: 0, routes: [(Platform.OS === 'web' ? withInitialLink(route, homeRoute) : route) as any] });
         };
 
         const checkStoreLocationPermission = async (info: any) => {
             // A hosted preview can't ask for location or search addresses, so it starts at the store.
+            // A published web store (isLivePublished) is not a preview and asks like any web build.
             if (isHostedPreview) {
                 if (!currentLocation) await setCurrentLocationToStore(new Store(info, storefront.getAdapter()));
                 if (cancelled) return;

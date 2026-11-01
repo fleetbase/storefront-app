@@ -1,6 +1,7 @@
 require('./scripts/link-brand').linkBrand(__dirname);
 require('dotenv').config();
 
+const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -101,19 +102,26 @@ const generateConfig = () => {
     return config;
 };
 
+// Stylesheets index.html links to, next to the bundle in dist/.
+const PUBLIC_STYLESHEETS = ['global.css', 'tamagui.css'];
+
 module.exports = (env = {}, argv = {}) => ({
     target: 'web',
     mode: argv.mode || 'development',
-    devtool: 'source-map',
+    // No source maps in production builds: they would publish the source with every store.
+    devtool: argv.mode === 'production' ? false : 'source-map',
     entry: [path.resolve(__dirname, 'index.web.tsx')],
     devServer: {
         static: {
             directory: path.resolve(__dirname, 'public'),
         },
     },
+    // Content-hashed names, so a host can cache the files forever and a release replaces them.
     output: {
-        filename: 'bundle.web.js',
+        filename: argv.mode === 'production' ? 'bundle.[contenthash:8].js' : 'bundle.web.js',
+        chunkFilename: argv.mode === 'production' ? '[name].[contenthash:8].js' : '[name].js',
         path: path.resolve(__dirname, 'dist'),
+        clean: argv.mode === 'production',
     },
     module: {
         rules: [
@@ -262,6 +270,12 @@ module.exports = (env = {}, argv = {}) => ({
                 compiler.hooks.afterEmit.tapPromise('PostcssTamaguiFix', async (compilation) => {
                     const { execa } = await import('execa');
                     await execa('postcss', ['public/tamagui.css', '-o', 'public/tamagui.css']);
+                    // The dev server serves public/; a build copies the stylesheets next to index.html.
+                    if (compiler.options.mode === 'production') {
+                        for (const file of PUBLIC_STYLESHEETS) {
+                            fs.copyFileSync(path.resolve(__dirname, 'public', file), path.join(compiler.options.output.path, file));
+                        }
+                    }
                 });
             },
         },

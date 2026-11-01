@@ -47,6 +47,12 @@ const NetworkProductScreen = ({ route }: any) => {
         };
     }, [adapter, initialParams, productId, resolvedParams, storeId, storefront]);
 
+    // The page title on the web (the store's name follows it).
+    const productName = resolvedParams?.product?.name;
+    useEffect(() => {
+        if (productName) navigation.setOptions({ title: productName });
+    }, [navigation, productName]);
+
     if (error || (!resolvedParams && (!productId || !storeId))) {
         return (
             <YStack flex={1} justifyContent='center' backgroundColor='$background'>

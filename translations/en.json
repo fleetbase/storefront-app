@@ -440,7 +440,9 @@
     },
     "QPayPaymentSheet": {
         "unableToOpenBank": "Unable to open bank app.",
-        "selectBank": "Select Bank"
+        "selectBank": "Select Bank",
+        "scanToPay": "Scan to pay",
+        "scanWithBankApp": "Open your bank's app on your phone and scan this code to pay."
     },
     "TextAreaSheet": {},
     "ScreenSlot": {
@@ -1674,5 +1676,13 @@
         "noProductsBody": "Products in {{name}} will show here.",
         "activeOrders": "Active orders",
         "noCategories": "No categories yet"
+    },
+    "StripePaymentElement": {
+        "processing": "Your payment is processing. We will create your order as soon as it goes through.",
+        "paymentFailed": "The payment did not go through. Try again or use another card.",
+        "notReady": "The card form is still loading. Try again in a moment.",
+        "notConfigured": "Card payments are not set up for this store.",
+        "cardSaved": "Card saved",
+        "loadFailed": "Could not load your payment details. Try again later."
     }
 }

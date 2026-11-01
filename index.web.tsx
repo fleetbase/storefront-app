@@ -1,4 +1,5 @@
 import './src/env';
+import './src/utils/web-column-setup';
 import 'leaflet/dist/leaflet.css';
 import { AppRegistry } from 'react-native';
 import App from './App.web';

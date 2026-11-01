@@ -12,6 +12,10 @@
  * - When it can take messages, the app posts `{ type: 'storefront:preview-ready' }`
  *   to the host.
  *
+ * A published web store runs the same bundle with `HOSTED_MODE=live` in `env`. It is a real
+ * store, not a preview: the customer picks their location and address as usual, and the
+ * host can't re-theme it with messages (there is no host frame).
+ *
  * Native builds and web builds without the flag behave exactly as before.
  */
 declare const __PREVIEW_ORIGIN__: string | undefined;
@@ -45,11 +49,16 @@ function readInitial(raw: unknown): HostedPreview | null {
 }
 
 export function createHostedPreview({ origins, target }: { origins: string[]; target?: PreviewWindow }) {
-    const enabled = origins.length > 0 && !!target;
+    const hosted = origins.length > 0 && !!target;
+    const initial = hosted ? readInitial(target!.__STOREFRONT_PREVIEW__) : null;
+    const live = hosted && initial?.env?.HOSTED_MODE === 'live';
+    // The read-only brand preview; a published store (live) is hosted but not a preview.
+    const enabled = hosted && !live;
 
     return {
         enabled,
-        initial: enabled ? readInitial(target!.__STOREFRONT_PREVIEW__) : null,
+        live,
+        initial,
         /** Calls `onBranding` for each branding message from an allowed origin. Returns an unsubscribe function. */
         subscribe(onBranding: (branding: unknown) => void): () => void {
             if (!enabled) return () => {};
@@ -69,6 +78,9 @@ const hosted = createHostedPreview({
     target: typeof window !== 'undefined' ? (window as unknown as PreviewWindow) : undefined,
 });
 
+/** The read-only brand preview: starts at the store, re-themes from host messages. */
 export const isHostedPreview = hosted.enabled;
+/** A published web store (`HOSTED_MODE=live`): the host's env and branding, the normal store flow. */
+export const isLivePublished = hosted.live;
 export const initialHostedPreview = hosted.initial;
 export const subscribeToHostBranding = hosted.subscribe;

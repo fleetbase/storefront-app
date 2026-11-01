@@ -5,7 +5,7 @@
 | Flow              | Build                                   | Screens                                                                                                          |
 | ----------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `store.yaml`      | a store key (`store_…`)                 | store home, category, product, search, map, cart, sign-in, code, account, orders, order tracking, checkout        |
-| `network.yaml`    | a network key (`network_…`)             | network home, store, product, search, map, cart, sign-in, code, account, orders, order details, checkout          |
+| `network.yaml`    | a network key (`network_…`)             | network home, store, product, search, service, booking, map, cart, sign-in, code, account, orders, order details, checkout |
 | `food-trucks.yaml`| a store or network key with `HOME_SCREEN=foodTrucks` | trucks map, list, truck menu, trucks search; for a Network pass `QUALIFIER=-network` and `SEARCH_TAB=tab-network-search` |
 
 ## Running locally
@@ -31,6 +31,7 @@ Pass every one with `-e`. The flows declare no defaults, because a flow's own `e
 | `APP_ID`            | `com.storefront.app` | Bundle id / application id                                                                  |
 | `SHOT_SUFFIX`       | empty                | Appended to every file name, e.g. `-light`                                                  |
 | `SEARCH_QUERY`      | `tea`                | What the search screens search for                                                          |
+| `SERVICE_QUERY`     | `massage`            | A search that finds a bookable service (network flow); the seed needs one                   |
 | `QUALIFIER`         | empty                | `-network` for a Network build: names the sign-in and trucks screenshots                    |
 | `SEARCH_TAB`        | `tab-store-search`   | The Search tab's id (food-trucks flow): `tab-network-search` in a Network                   |
 | `LATITUDE`, `LONGITUDE` | Singapore        | Where the customer is (the seeded stores and truck zone)                                    |

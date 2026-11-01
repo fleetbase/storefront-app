@@ -26,6 +26,12 @@
         "src/ui/**/*.tsx",
         "__tests__/ui/**/*.ts",
         "src/utils/google-maps.ts",
+        "src/utils/web-column.ts",
+        "src/utils/web-device.ts",
+        "src/utils/stripe-web.ts",
+        "src/navigation/web-linking.ts",
+        "__tests__/navigation/web-linking.test.ts",
+        "__tests__/web/**/*.ts",
         "src/components/map/RouteDirections.tsx",
         "__tests__/maps/**/*.ts",
         "__tests__/maps/**/*.tsx"

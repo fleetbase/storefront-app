@@ -2507,6 +2507,8 @@ __metadata:
     "@react-navigation/elements": ^2.2.5
     "@react-navigation/native": ^7.0.14
     "@react-navigation/native-stack": ^7.2.0
+    "@stripe/react-stripe-js": 7.0.0
+    "@stripe/stripe-js": 10.1.0
     "@stripe/stripe-react-native": ^0.57.0
     "@tamagui/babel-plugin": 1.125.20
     "@tamagui/config": 1.125.20
@@ -4130,6 +4132,26 @@ __metadata:
   dependencies:
     "@sinonjs/commons": ^3.0.0
   checksum: 614d30cb4d5201550c940945d44c9e0b6d64a888ff2cd5b357f95ad6721070d6b8839cd10e15b76bf5e14af0bcc1d8f9ec00d49a46318f1f669a4bec1d7f3148
+  languageName: node
+  linkType: hard
+
+"@stripe/react-stripe-js@npm:7.0.0":
+  version: 7.0.0
+  resolution: "@stripe/react-stripe-js@npm:7.0.0"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    "@stripe/stripe-js": ">=10.0.0 <11.0.0"
+    react: ">=16.8.0 <20.0.0"
+    react-dom: ">=16.8.0 <20.0.0"
+  checksum: 38a267df297e45eaff466a0d8339ac5cc503a4024139870511138c61c6dccf042006210e68ee9ed6ed6e6aea1dfa73f1f647664369cc6f063edb899c5c71514e
+  languageName: node
+  linkType: hard
+
+"@stripe/stripe-js@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@stripe/stripe-js@npm:10.1.0"
+  checksum: 486d9657ead8373c2a5ec661abfd088463991f7ba012d288743912ee503cef964a784f7dc0a0a45307b9a0c9c0caf36dd73311a83175fcb0458dfcc088c3bd23
   languageName: node
   linkType: hard
 
