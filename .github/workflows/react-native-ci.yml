@@ -6,9 +6,15 @@ on:
   push:
     branches: [main]
 
-# The GITHUB_TOKEN only needs read here.
+# The GITHUB_TOKEN only needs read here (pull requests: for the changed-files check).
 permissions:
   contents: read
+  pull-requests: read
+
+# A new push to a pull request cancels its previous run; main keeps every run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   YARN_ENABLE_INLINE_BUILDS: 1
@@ -20,10 +26,29 @@ jobs:
   install_and_test:
     runs-on: ubuntu-latest
     outputs:
-      cache-key: ${{ steps.cache-key.outputs.key }}
+      # The native builds are debug builds, which don't bundle the JavaScript: a pull request
+      # that changes nothing native can't break them, so they're skipped. main always builds.
+      native: ${{ github.event_name != 'pull_request' || steps.changes.outputs.native == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Detect native changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            native:
+              - 'android/**'
+              - 'ios/**'
+              - 'brand/**'
+              - 'patches/**'
+              - 'scripts/ci/**'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'react-native.config.js'
+              - '.github/workflows/react-native-ci.yml'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,12 +89,6 @@ jobs:
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}" >> .env
 
-      - name: Generate cache key
-        id: cache-key
-        # node_modules is cached with patch-package's changes already applied, so a changed
-        # patch needs a fresh node_modules: the patches are part of the key.
-        run: echo "key=${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-${{ hashFiles('**/yarn.lock', '**/package.json') }}" >> $GITHUB_OUTPUT
-
       - name: Lint Network edition runtime and UI
         run: yarn lint:strict
 
@@ -93,6 +112,7 @@ jobs:
   android_build:
     runs-on: ubuntu-latest
     needs: install_and_test
+    if: needs.install_and_test.outputs.native == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -111,15 +131,19 @@ jobs:
       - name: Verify Yarn version
         run: yarn --version
 
+      # Only Yarn's downloads are cached; node_modules is installed fresh, so patches always
+      # apply to a clean copy and native build output never ends up in the cache.
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
       - name: Cache yarn dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.yarn/cache
-            **/node_modules
-          key: ${{ needs.install_and_test.outputs.cache-key }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: yarn install
@@ -199,19 +223,10 @@ jobs:
           "$ANDROID_SDK_ROOT/cmake/3.22.1/bin/cmake" --version || true
           test -f "$ANDROID_SDK_ROOT/ndk/27.1.12297006/source.properties" && echo "✅ NDK 27.1.12297006 installed"
 
-      - name: Cache Gradle Wrapper
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle-wrapper.properties') }}
-
-      - name: Cache Gradle Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-caches-
+      # Caches the wrapper and dependencies, prunes stale entries, and only saves from main,
+      # so pull requests don't each add a multi-gigabyte cache.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradlew Executable
         run: cd android && chmod +x ./gradlew
@@ -219,7 +234,8 @@ jobs:
       - name: Build Android Debug APK
         run: |
           cd android
-          ./gradlew clean assembleDebug --no-daemon --stacktrace --info
+          # One ABI is enough to prove the native code builds; the default is all four.
+          ./gradlew assembleDebug --no-daemon --stacktrace -PreactNativeArchitectures=x86_64
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
@@ -231,6 +247,7 @@ jobs:
   ios_build:
     runs-on: macos-latest
     needs: install_and_test
+    if: needs.install_and_test.outputs.native == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -251,15 +268,19 @@ jobs:
       - name: Activate Yarn 3.6.4
         run: corepack prepare yarn@3.6.4 --activate
 
+      # Only Yarn's downloads are cached; node_modules is installed fresh, so patches always
+      # apply to a clean copy and native build output never ends up in the cache.
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
       - name: Cache yarn dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.yarn/cache
-            **/node_modules
-          key: ${{ needs.install_and_test.outputs.cache-key }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-deps-${{ hashFiles('patches/**') }}-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: yarn install
@@ -273,17 +294,8 @@ jobs:
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}" >> .env
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
+      # No CocoaPods cache: restoring it (about 2 GB) took 60 to 96 minutes on the macOS
+      # runners, while a fresh pod install takes 15 to 30.
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
