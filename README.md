@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://fleetbase.io/platform/storefront">Storefront</a> · <a href="https://fleetbase.io/docs/storefront/app/overview">Docs</a> · <a href="https://console.fleetbase.io">Console</a> · <a href="https://fleetbase.io/pricing">Pricing</a> · <a href="https://discord.gg/V7RVWRQ2Wm">Discord</a>
+  <a href="https://apphelm.fleetbase.io/storefront?utm_source=github&utm_medium=readme&utm_campaign=launch&utm_content=storefront-app"><b>Launch with AppHelm</b></a> · <a href="https://bayfront-pharmacy.apphelm.io"><b>See it in action</b></a> · <a href="https://fleetbase.io/platform/storefront">Storefront</a> · <a href="https://fleetbase.io/docs/storefront/app/overview">Docs</a> · <a href="https://console.fleetbase.io">Console</a> · <a href="https://fleetbase.io/pricing">Pricing</a> · <a href="https://discord.gg/V7RVWRQ2Wm">Discord</a>
 </p>
 
 <p align="center">
@@ -26,6 +26,33 @@
   <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-network-details.webp" width="240" alt="A marketplace home: featured stores, categories and stores near the customer" />
   <img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-food-trucks-map.webp" width="240" alt="The trucks home: live trucks on a map with the trucks serving the customer's zone" />
 </p>
+
+## Launch your own app, free on the web
+
+<table>
+  <tr>
+    <td width="34%" valign="top">
+      <a href="https://bayfront-pharmacy.apphelm.io"><img src="https://fleetbase.io/images/screenshots/storefront-app/ios/storefront-app-store-details-light.webp" alt="A store's home page in the light appearance: categories, recommended products and the store's open hours" width="100%" /></a>
+    </td>
+    <td valign="top">
+
+**The easiest way to launch this app is [Fleetbase AppHelm](https://apphelm.fleetbase.io/storefront?utm_source=github&utm_medium=readme&utm_campaign=launch&utm_content=storefront-app).** It takes your Fleetbase store and publishes it as your own branded app, with no code to write and no builds to run.
+
+<p>
+  <a href="https://apphelm.fleetbase.io/storefront?utm_source=github&utm_medium=readme&utm_campaign=launch&utm_content=storefront-app"><img src="https://img.shields.io/badge/Launch%20with%20AppHelm-1C6CC7?style=for-the-badge" alt="Launch with AppHelm" /></a>
+  <a href="https://bayfront-pharmacy.apphelm.io"><img src="https://img.shields.io/badge/See%20it%20in%20action-24292F?style=for-the-badge" alt="See it in action" /></a>
+</p>
+
+1. **Connect** your Fleetbase store, on Fleetbase Cloud or your own server.
+2. **Add your brand** and preview the app with your real products.
+3. **Publish it free on the web** at `yourstore.apphelm.io`, where customers can order and pay. Your own domain is an optional paid add-on.
+4. **Go on to the App Store and Google Play.** AppHelm walks you through each store's requirements and handles the builds and submission, from your own Apple and Google developer accounts.
+
+</td>
+  </tr>
+</table>
+
+**Prefer to build it yourself?** Clone this repository, set your keys and build with your own tools and accounts. Start with the [Quick start](#quick-start), then [Branding and customization](#branding-and-customization) and [Build and release](https://fleetbase.io/docs/storefront/app/build-and-release).
 
 ## Contents
 
@@ -168,6 +195,9 @@ The app needs a Fleetbase backend with the Storefront extension. [Fleetbase Clou
 See [pricing](https://fleetbase.io/pricing), or [talk to us](https://fleetbase.io/contact/sales) about a managed launch. Fleetbase is also available to [self-host](https://github.com/fleetbase/fleetbase).
 
 ## Quick start
+
+> [!TIP]
+> **Don't want to set up a build?** [Fleetbase AppHelm](https://apphelm.fleetbase.io/storefront?utm_source=github&utm_medium=readme&utm_campaign=launch&utm_content=storefront-app) publishes this app for you, free on the web and then in the App Store and Google Play, with no code to write. [See it in action](https://bayfront-pharmacy.apphelm.io).
 
 You need:
 - Node 20 (see `.nvmrc`) and Yarn 3 through Corepack.
