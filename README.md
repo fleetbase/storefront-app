@@ -30,6 +30,7 @@
 ## Contents
 
 - [Overview](#overview)
+- [Launch your own app](#launch-your-own-app)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [Run it on Fleetbase Cloud](#run-it-on-fleetbase-cloud)
@@ -55,6 +56,19 @@ The key you build with decides what the app is:
 | A store key (`store_…`) | One business's own branded app. Home is the store page. |
 | A network key (`network_…`) | A marketplace of member stores, with discovery, search across stores, a stores map and carts that span stores. |
 | Either key, with the trucks home | A mobile commerce app: home is a live map and list of the trucks serving the customer's zone, alongside your fixed stores. |
+
+## Launch your own app
+
+There are two ways to get this app to your customers.
+
+**With [AppHelm](https://apphelm.fleetbase.io/storefront?utm_source=github&utm_medium=readme&utm_campaign=launch&utm_content=storefront-app), the easiest route.** AppHelm is Fleetbase's service that takes a Fleetbase store and publishes it as your own branded app, with no code to write and no builds to run:
+
+1. Connect your Fleetbase store, on Fleetbase Cloud or your own server.
+2. Set your logo, colors and fonts, and preview the app with your real products.
+3. Publish it free on the web at your own `yourstore.apphelm.io` address, where customers can order and pay.
+4. When you want the App Store and Google Play, AppHelm walks you through each store's requirements and handles the builds and submission. The app is published from your own Apple and Google developer accounts.
+
+**Build it yourself.** Clone this repository, set your keys and build with your own tools and accounts. Start with the [Quick start](#quick-start), then [Branding and customization](#branding-and-customization) and [Build and release](https://fleetbase.io/docs/storefront/app/build-and-release).
 
 ## Features
 
