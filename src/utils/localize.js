@@ -2,6 +2,7 @@ import { getLangNameFromCode } from 'language-name-map';
 import { getString } from '../utils/storage';
 import { get, storefrontConfig } from '../utils';
 import en from '../../translations/en.json';
+import es from '../../translations/es.json';
 import mn from '../../translations/mn.json';
 import uk from '../../translations/uk.json';
 import brandTranslations from '../generated/brand-translations';
@@ -16,7 +17,7 @@ function mergeStrings(base, override) {
     return result;
 }
 
-const appTranslations = { en, mn, uk };
+const appTranslations = { en, es, mn, uk };
 
 // A client build's copy (brand/translations/<locale>.json) is merged over the app's:
 // it can change any string, add its own keys (e.g. for custom screens) or add a locale.
