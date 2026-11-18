@@ -147,7 +147,7 @@ The key you build with decides what the app is:
 **Built for everyone**
 - iOS, Android and the web from one codebase.
 - Light and dark appearance, text that follows the system font size, and screen reader labels.
-- English, Mongolian and Ukrainian included, with a language switcher.
+- English, Mongolian, Spanish and Ukrainian included, with a language switcher.
 
 ## Screenshots
 
@@ -257,7 +257,7 @@ The app reads `.env` at build time, so a change needs a rebuild. The full list i
 | `STRIPE_ENABLE_APPLE_PAY`, `STRIPE_ENABLE_GOOGLE_PAY` | `false` | Wallet buttons in the Stripe payment sheet |
 | `TIP_INCREMENT` | `50` | Tip step, in the currency's smallest unit |
 | `PRIORITIZE_PICKUP` | `false` | Start checkout on pickup instead of delivery |
-| `DEFAULT_LOCALE`, `AVAILABLE_LOCALES` | `en`, `en,mn,uk` | The starting language and the languages offered |
+| `DEFAULT_LOCALE`, `AVAILABLE_LOCALES` | `en`, `en,mn,uk,es` | The starting language and the languages offered |
 | `DEFAULT_COUNTRY` | device region | Country the phone field starts on, e.g. `MN` for +976 |
 | `DEFAULT_COORDINATES` | | `lat,lng` used until the customer's location is known |
 | `DEFAULT_MAP_TYPE` | `standard` | `standard`, `satellite`, `hybrid` or `terrain`, on every map |
@@ -296,7 +296,7 @@ Add a notification channel in the Console under Storefront → Settings → Noti
 
 ## Languages
 
-English, Mongolian and Ukrainian are included in `translations/`. Customers switch language from the account screen or the language button in the header. To add a language, add `translations/<code>.json` with the same keys and list it in `AVAILABLE_LOCALES`. Translation pull requests are welcome.
+English, Mongolian, Spanish and Ukrainian are included in `translations/`. Customers switch language from the account screen or the language button in the header. To add a language, add `translations/<code>.json` with the same keys and list it in `AVAILABLE_LOCALES`. Translation pull requests are welcome.
 
 ## Branding and customization
 
