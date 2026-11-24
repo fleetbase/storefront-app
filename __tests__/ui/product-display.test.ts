@@ -1,4 +1,4 @@
-import { formatDuration, productSummary, stockLevel } from '../../src/ui/product-display';
+import { formatDuration, productSummary, productVideos, stockLevel, youtubeVideoId } from '../../src/ui/product-display';
 
 describe('product display', () => {
     test('summarises a product with its store', () => {
@@ -73,5 +73,36 @@ describe('product display', () => {
         expect(stockLevel({ name: 'Untracked' })).toEqual({ tracked: false, inStock: true, low: false, available: null });
         expect(stockLevel({ in_stock: false })).toMatchObject({ tracked: false, inStock: false });
         expect(productSummary({ name: 'Clean', meta: { service: { duration_minutes: 45 } } }).durationMinutes).toBe(45);
+    });
+
+    test('reads the video id from every kind of YouTube link', () => {
+        expect(youtubeVideoId('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId('https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ&t=42s')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId('https://youtu.be/dQw4w9WgXcQ?si=abc')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId('https://m.youtube.com/shorts/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId('https://www.youtube.com/live/dQw4w9WgXcQ#chat')).toBe('dQw4w9WgXcQ');
+        expect(youtubeVideoId(' youtu.be/dQw4w9WgXcQ ')).toBe('dQw4w9WgXcQ');
+    });
+
+    test('rejects links that are not a YouTube video', () => {
+        expect(youtubeVideoId('')).toBeNull();
+        expect(youtubeVideoId(null)).toBeNull();
+        expect(youtubeVideoId('https://vimeo.com/123456789')).toBeNull();
+        expect(youtubeVideoId('https://www.youtube.com/@fleetbase')).toBeNull();
+        expect(youtubeVideoId('https://www.youtube.com/watch?v=short')).toBeNull();
+        expect(youtubeVideoId('https://evil.test/?u=https://youtu.be/dQw4w9WgXcQ')).toBeNull();
+        expect(youtubeVideoId('https://notyoutube.com/watch?v=dQw4w9WgXcQ')).toBeNull();
+    });
+
+    test('lists a product\'s videos once each, skipping broken links', () => {
+        const product = { youtube_urls: ['https://youtu.be/dQw4w9WgXcQ', '', null, 'not a link', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://youtube.com/shorts/aqz-KE-bpKQ'] };
+        expect(productVideos(product)).toEqual([
+            { id: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
+            { id: 'aqz-KE-bpKQ', url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', thumbnailUrl: 'https://img.youtube.com/vi/aqz-KE-bpKQ/hqdefault.jpg' },
+        ]);
+        expect(productVideos({ name: 'No videos' })).toEqual([]);
+        expect(productVideos({ youtube_urls: 'https://youtu.be/dQw4w9WgXcQ' })).toEqual([]);
+        expect(productVideos({ getAttribute: (key: string) => (key === 'youtube_urls' ? ['https://youtu.be/dQw4w9WgXcQ'] : null) })).toHaveLength(1);
     });
 });
