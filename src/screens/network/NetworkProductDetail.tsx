@@ -26,6 +26,7 @@ import {
     LocationSheet,
     MediaImage,
     OfflineNotice,
+    ProductVideos,
     Stepper,
     StoreLogo,
     UIText,
@@ -34,6 +35,7 @@ import {
     missingGroups,
     optionGroups,
     productSummary,
+    productVideos,
     formatClock,
     radius,
     selectionFromCartItem,
@@ -84,6 +86,7 @@ export default function NetworkProductDetail({ params }: { params: any }) {
     const [page, setPage] = useState(0);
     const [scheduledAt, setScheduledAt] = useState<string | null>(params.scheduledAt ?? null);
     const editingLineId: string | null = params.cartLineId ?? null;
+    const videos = useMemo(() => productVideos(product), [product]);
 
     const images: string[] = useMemo(() => {
         const list = (product.getAttribute('images') ?? []).filter((url: unknown): url is string => typeof url === 'string');
@@ -238,6 +241,8 @@ export default function NetworkProductDetail({ params }: { params: any }) {
                         </Pressable>
                     )}
                 </YStack>
+
+                <ProductVideos videos={videos} title={t('ProductDetail.videos')} labelFor={(index) => t('ProductDetail.playVideo', { number: index + 1 })} />
 
                 {groups.map((group) => (
                     <OptionGroupView

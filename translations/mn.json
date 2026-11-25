@@ -642,7 +642,9 @@
         "unavailable": "Энэ бараа дууссан.",
         "storeClosed": "Дэлгүүр нээгдтэл захиалга түр зогссон.",
         "chooseRequired": "Сагсанд нэмэхийн тулд {{groups}} сонгоно уу.",
-        "and": " болон "
+        "and": " болон ",
+        "videos": "Видео",
+        "playVideo": "{{number}}-р видеог YouTube дээр үзэх"
     },
     "Cart": {
         "title": "Сагс",

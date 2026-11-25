@@ -1,9 +1,8 @@
-> v0.1.5 ~ "Booking screenshots"
+> v0.1.6 ~ "Product videos"
 
 ---
 ## New
-- **Booking in the screenshot flows.** The network flow opens a bookable service, picks a day and a time, and captures `storefront-app-service-details-network` and `storefront-app-booking-create-network`. It searches for `SERVICE_QUERY` (pass `-e SERVICE_QUERY=massage`), so the Network needs a bookable service that matches.
-- **Test ids for Maestro.** Search results carry `search-result-service` or `search-result-product`; the booking picker's open days carry `booking-day` and its bookable times `booking-time`. Nothing changes on screen.
+- **YouTube videos on products.** A product with YouTube links (`youtube_urls`, set under Videos on the product in the Storefront console) shows them on its detail screen as thumbnails with a play button, between the description and the options. One video spans the screen; several scroll sideways. Tapping one plays it in the YouTube app when installed, otherwise in the browser. Watch, `youtu.be`, Shorts, embed and live links are all read; repeats and links that are not a YouTube video are skipped.
 
 ---
 ## Upgrading

@@ -100,3 +100,50 @@ export function productSummary(product: unknown): ProductSummary {
         storeName: attr<string | null>(store, 'name', null),
     };
 }
+
+export type ProductVideo = {
+    /** The YouTube video id. */
+    id: string;
+    /** Where the video plays: the YouTube app when installed, else the browser. */
+    url: string;
+    thumbnailUrl: string;
+};
+
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+const YOUTUBE_HOST = /^(?:https?:)?\/\/(?:www\.|m\.|music\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\/([^?#]*)(?:\?([^#]*))?/i;
+
+/**
+ * The video id in a YouTube link: watch, youtu.be, shorts, embed and live URLs, with or
+ * without a scheme. Null for anything that is not a YouTube video.
+ */
+export function youtubeVideoId(url: unknown): string | null {
+    if (typeof url !== 'string') return null;
+    const text = url.trim();
+    const match = (/^(?:https?:)?\/\//i.test(text) ? text : `https://${text}`).match(YOUTUBE_HOST);
+    if (!match) return null;
+    const [, host, path, query = ''] = match;
+    const segments = path.split('/').filter(Boolean);
+    let id: string | undefined;
+    if (host.toLowerCase() === 'youtu.be') {
+        id = segments[0];
+    } else if (segments[0] === 'watch') {
+        id = query
+            .split('&')
+            .map((pair) => pair.split('='))
+            .find(([key]) => key === 'v')?.[1];
+    } else if (['shorts', 'embed', 'live', 'v'].includes(segments[0])) {
+        id = segments[1];
+    }
+    return id && YOUTUBE_ID.test(id) ? id : null;
+}
+
+/** A product's YouTube videos (`youtube_urls`), in the store's order, without repeats or broken links. */
+export function productVideos(product: unknown): ProductVideo[] {
+    const urls = attr<unknown>(product, 'youtube_urls', []);
+    const ids = (Array.isArray(urls) ? urls : []).map(youtubeVideoId).filter((id): id is string => id !== null);
+    return [...new Set(ids)].map((id) => ({
+        id,
+        url: `https://www.youtube.com/watch?v=${id}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+    }));
+}

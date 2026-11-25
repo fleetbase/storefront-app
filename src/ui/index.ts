@@ -27,6 +27,8 @@ export { LocationSheet } from './LocationSheet';
 export { LanguageButton } from './LanguageButton';
 export { categoryIcon } from './category-icons';
 export * from './product-display';
+export { ProductVideos } from './ProductVideos';
+export type { ProductVideosProps } from './ProductVideos';
 export { TabBar } from './TabBar';
 export * from './product-options';
 export { ProductRow, ProductTile, type ProductTileVariant } from './ProductItems';

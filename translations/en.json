@@ -642,7 +642,9 @@
         "unavailable": "This item is out of stock.",
         "storeClosed": "Ordering is paused until the store opens.",
         "chooseRequired": "Choose a {{groups}} to add this to your cart.",
-        "and": " and "
+        "and": " and ",
+        "videos": "Videos",
+        "playVideo": "Play video {{number}} on YouTube"
     },
     "Cart": {
         "title": "Cart",
